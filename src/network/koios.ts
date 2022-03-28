@@ -18,7 +18,6 @@ class koiosNetwork {
         ).then(
 
             res => {
-                console.log(res)
                 return res.data[0]
             })
     }

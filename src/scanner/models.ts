@@ -25,6 +25,10 @@ export const getLastSavedBlock = (): Promise<Block> => {
     });
 }
 
+export const changeLastValidBlock = (height: number) => {
+    return true;
+}
+
 export const getBlockHash = async (height: number): Promise<string> => {
     //TODO:Mocked
     return new Promise((resolve, reject) => {
