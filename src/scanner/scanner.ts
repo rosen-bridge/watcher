@@ -1,8 +1,14 @@
-import koiosNetwork from "../network/koios";
+import { koiosNetwork } from "../network/koios";
 import { observationsAtHeight } from "./utils";
 import { changeLastValidBlock, getBlockAtHeight, getLastSavedBlock, saveObservation } from "./models";
+import config from "config";
 
+const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
+/**
+ * worker function that runs for syncing the database with the Cardano blockchain and checks if we have any fork
+ * scenario in the blockchain and invalidate the database till the database synced again.
+ */
 const scanner = async () => {
     const lastSavedBlock = await getLastSavedBlock();
     const lastSavedBlockFromNetwork = await koiosNetwork.getBlockAtHeight(lastSavedBlock.block_height);
@@ -29,6 +35,12 @@ const scanner = async () => {
         changeLastValidBlock(forkPointer.block_height);
     }
 }
+
+/**
+ * main function that runs every `SCANNER_INTERVAL` time that sets in the config
+ */
 export const main = () => {
-    setInterval(scanner, 2 * 1000);
+    console.log(INTERVAL)
+
+    setInterval(scanner, INTERVAL * 1000);
 }

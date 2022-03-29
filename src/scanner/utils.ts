@@ -1,4 +1,4 @@
-import koiosNetwork from "../network/koios";
+import { koiosNetwork } from "../network/koios";
 
 export interface TX {
     //TODO: should feel later with knowledge of cardano utxo
@@ -23,8 +23,7 @@ const txHashToData = (txHash: string): TX => {
     return {mock: ""}
 }
 
-
-export const observationsAtHeight = async (height: number): Promise<(Observation | undefined)[]> => {
+export const observationsAtHeight = async (height: number): Promise<Array<(Observation | undefined)>> => {
     const blockHash = (await koiosNetwork.getBlockAtHeight(height)).hash;
     const txs = await koiosNetwork.getBlockTxs(blockHash);
     return txs.map((txHash) => {
