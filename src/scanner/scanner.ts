@@ -33,12 +33,12 @@ export class Scanner {
                 return res[0].block_height
             });
             for (let height = lastSavedBlock.block_height + 1; height <= lastBlockHeight; height++) {
+                const block = await KoiosNetwork.getBlockAtHeight(height);
+                const observations = (await CardanoUtils.observationsAtHeight(block.hash))
+                    .filter((observation) => {
+                        return observation !== undefined
+                    });
                 if (!await this.isForkHappen()) {
-                    const block = await KoiosNetwork.getBlockAtHeight(height);
-                    const observations = (await CardanoUtils.observationsAtHeight(block.hash))
-                        .filter((observation) => {
-                            return observation !== undefined
-                        });
                     if (!this._dataBase.saveBlock(block.block_height, block.hash, observations)) {
                         break;
                     }
