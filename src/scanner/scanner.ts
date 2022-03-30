@@ -35,9 +35,10 @@ export class Scanner {
             for (let height = lastSavedBlock.block_height + 1; height <= lastBlockHeight; height++) {
                 if (!await this.isForkHappen()) {
                     const block = await KoiosNetwork.getBlockAtHeight(height);
-                    const observations = (await CardanoUtils.observationsAtHeight(block.hash)).filter((observation) => {
-                        return observation !== undefined
-                    });
+                    const observations = (await CardanoUtils.observationsAtHeight(block.hash))
+                        .filter((observation) => {
+                            return observation !== undefined
+                        });
                     if (!this._dataBase.saveBlock(block.block_height, block.hash, observations)) {
                         break;
                     }
@@ -64,6 +65,9 @@ export class Scanner {
 export const main = () => {
     const DB = new DataBase();
     const scanner = new Scanner(DB);
-    // setInterval(scanner.update, INTERVAL * 1000);
-    setInterval(scanner.update, 1000);
+    if (typeof INTERVAL === 'number') {
+        setInterval(scanner.update, INTERVAL * 1000);
+    } else {
+        console.log("scanner interval doesn't set in the config");
+    }
 }

@@ -4,10 +4,10 @@ import { KoiosNetwork } from "../../src/network/koios";
 describe("Koios Apis", () => {
     describe("getBlockAtHeight", () => {
         it("Should return a json with hash and block_height field", async () => {
-            const data = await KoiosNetwork.getBlockAtHeight(1000);
+            const data = await KoiosNetwork.getBlockAtHeight(3433333);
             expect(data).to.eql({
-                "hash": "fecb570ec0fa6201860796d8b1b0e9acb4650a1f72d26da749e2dd075461914f",
-                "block_height": 1000
+                "hash": "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
+                "block_height": 3433333
             });
         });
     });

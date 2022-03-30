@@ -24,14 +24,6 @@ export class CardanoUtils {
         return {mock: ""}
     }
 
-    // static observationsAtHeight = async (height: number): Promise<Array<(Observation | undefined)>> => {
-    //     const blockHash = (await KoiosNetwork.getBlockAtHeight(height)).hash;
-    //     const txs = await KoiosNetwork.getBlockTxs(blockHash);
-    //     return txs.map((txHash) => {
-    //         return this.checkTx(this.txHashToData(txHash))
-    //     })
-    // }
-
     static observationsAtHeight = async (blockHash: string): Promise<Array<(Observation | undefined)>> => {
         const txs = await KoiosNetwork.getBlockTxs(blockHash);
         return txs.map((txHash) => {

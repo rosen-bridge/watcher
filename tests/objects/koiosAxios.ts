@@ -2,13 +2,14 @@ import MockAdapter from "axios-mock-adapter";
 import { koios } from "../../src/network/koios";
 
 const mockedAxios = new MockAdapter(koios);
+
 mockedAxios.onGet(
     '/blocks',
-    {params: {block_height: `eq.1000`, select: 'hash,block_height'}}
+    {params: {block_height: `eq.3433333`, select: 'hash,block_height'}}
 ).reply(200, [
     {
-        "hash": "fecb570ec0fa6201860796d8b1b0e9acb4650a1f72d26da749e2dd075461914f",
-        "block_height": 1000
+        "hash": "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
+        "block_height": 3433333
     }
 ]);
 
@@ -29,6 +30,16 @@ mockedAxios.onGet(
     {
         "hash": "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
         "block_height": 3433333
+    }
+]);
+
+mockedAxios.onGet(
+    '/blocks',
+    {params: {block_height: `eq.3433330`, select: 'hash,block_height'}}
+).reply(200, [
+    {
+        "hash": "19b60182cba99d621b3d02457fefb4cda81f4fbde3ca719617cbed2e4cc5c0ce",
+        "block_height": 3433330
     }
 ]);
 
