@@ -1,4 +1,4 @@
-import { koiosNetwork } from "../network/koios";
+import { KoiosNetwork } from "../network/koios";
 
 export interface TX {
     //TODO: should feel later with knowledge of cardano utxo
@@ -10,24 +10,33 @@ export class Observation {
 
 }
 
-const checkTx = (tx: TX): Observation | undefined => {
-    if (Math.random() > .7) {
-        return new Observation();
-    } else {
-        return undefined;
+export class CardanoUtils {
+    static checkTx = (tx: TX): Observation | undefined => {
+        if (Math.random() > .7) {
+            return new Observation();
+        } else {
+            return undefined;
+        }
     }
-}
 
-const txHashToData = (txHash: string): TX => {
-    //TODO: mock function to convert txhash to datatype needed (TX)
-    return {mock: ""}
-}
+    static txHashToData = (txHash: string): TX => {
+        //TODO: mock function to convert txhash to datatype needed (TX)
+        return {mock: ""}
+    }
 
-export const observationsAtHeight = async (height: number): Promise<Array<(Observation | undefined)>> => {
-    const blockHash = (await koiosNetwork.getBlockAtHeight(height)).hash;
-    const txs = await koiosNetwork.getBlockTxs(blockHash);
-    return txs.map((txHash) => {
-        return checkTx(txHashToData(txHash))
-    })
+    // static observationsAtHeight = async (height: number): Promise<Array<(Observation | undefined)>> => {
+    //     const blockHash = (await KoiosNetwork.getBlockAtHeight(height)).hash;
+    //     const txs = await KoiosNetwork.getBlockTxs(blockHash);
+    //     return txs.map((txHash) => {
+    //         return this.checkTx(this.txHashToData(txHash))
+    //     })
+    // }
+
+    static observationsAtHeight = async (blockHash: string): Promise<Array<(Observation | undefined)>> => {
+        const txs = await KoiosNetwork.getBlockTxs(blockHash);
+        return txs.map((txHash) => {
+            return this.checkTx(this.txHashToData(txHash))
+        })
+    }
 }
 

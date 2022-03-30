@@ -9,7 +9,7 @@ export const koios = axios.create({
     headers: {"Content-Type": "application/json"}
 });
 
-export class koiosNetwork {
+export class KoiosNetwork {
     static getBlockAtHeight = (height: number): Promise<Block> => {
         return koios.get(
             '/blocks',

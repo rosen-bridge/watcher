@@ -28,6 +28,7 @@
     "@types/config": "^0.0.41",
     "axios": "^0.26.1",
     "axios-mock-adapter": "^1.20.0",
-    "config": "^3.3.7"
+    "config": "^3.3.7",
+    "ts-mockito": "^2.6.1"
   }
 }

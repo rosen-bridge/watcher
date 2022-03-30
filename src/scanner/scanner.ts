@@ -1,38 +1,60 @@
-import { koiosNetwork } from "../network/koios";
-import { observationsAtHeight } from "./utils";
-import { changeLastValidBlock, getBlockAtHeight, getLastSavedBlock, saveObservation } from "./models";
+import { KoiosNetwork } from "../network/koios";
+import { CardanoUtils } from "./utils";
 import config from "config";
+import DataBase from "./models";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
-/**
- * worker function that runs for syncing the database with the Cardano blockchain and checks if we have any fork
- * scenario in the blockchain and invalidate the database till the database synced again.
- */
-const scanner = async () => {
-    const lastSavedBlock = await getLastSavedBlock();
-    const lastSavedBlockFromNetwork = await koiosNetwork.getBlockAtHeight(lastSavedBlock.block_height);
-    if (lastSavedBlockFromNetwork.hash === lastSavedBlock.hash) {
-        const lastBlockHeight = await koiosNetwork.getBlock(0).then(res => {
-            return res[0].block_height
-        });
-        for (let height = lastSavedBlock.block_height + 1; height <= lastBlockHeight; height++) {
-            const observations = (await observationsAtHeight(height)).filter((observation) => {
-                return observation !== undefined
+export class Scanner {
+    private _dataBase: DataBase;
+
+    constructor(db: DataBase) {
+        this._dataBase = db;
+    }
+
+    /**
+     * function that checks if fork is happen in the blockchain or not
+     * @return Promise<Boolean>
+     */
+    isForkHappen = async (): Promise<Boolean> => {
+        const lastSavedBlock = await this._dataBase.getLastSavedBlock();
+        const lastSavedBlockFromNetwork = await KoiosNetwork.getBlockAtHeight(lastSavedBlock.block_height);
+        return lastSavedBlockFromNetwork.hash !== lastSavedBlock.hash;
+    }
+
+    /**
+     * worker function that runs for syncing the database with the Cardano blockchain and checks if we have any fork
+     * scenario in the blockchain and invalidate the database till the database synced again.
+     */
+    update = async () => {
+        const lastSavedBlock = await this._dataBase.getLastSavedBlock();
+        if (!await this.isForkHappen()) {
+            const lastBlockHeight = await KoiosNetwork.getBlock(0).then(res => {
+                return res[0].block_height
             });
-            if (!saveObservation(observations)) {
-                break;
+            for (let height = lastSavedBlock.block_height + 1; height <= lastBlockHeight; height++) {
+                if (!await this.isForkHappen()) {
+                    const block = await KoiosNetwork.getBlockAtHeight(height);
+                    const observations = (await CardanoUtils.observationsAtHeight(block.hash)).filter((observation) => {
+                        return observation !== undefined
+                    });
+                    if (!this._dataBase.saveBlock(block.block_height, block.hash, observations)) {
+                        break;
+                    }
+                } else {
+                    break;
+                }
             }
+        } else {
+            let forkPointer = lastSavedBlock;
+            let blockFromNetwork = await KoiosNetwork.getBlockAtHeight(forkPointer.block_height);
+            while (blockFromNetwork.hash !== forkPointer.hash) {
+                forkPointer = await this._dataBase.getBlockAtHeight(forkPointer.block_height - 1);
+                blockFromNetwork = await KoiosNetwork.getBlockAtHeight(blockFromNetwork.block_height - 1);
+            }
+            //TODO: should handle errors with respect to DataBase
+            this._dataBase.changeLastValidBlock(forkPointer.block_height);
         }
-    } else {
-        let forkPointer = lastSavedBlock;
-        let blockFromNetwork = lastSavedBlockFromNetwork;
-        while (blockFromNetwork.hash !== forkPointer.hash) {
-            forkPointer = await getBlockAtHeight(forkPointer.block_height - 1);
-            blockFromNetwork = await koiosNetwork.getBlockAtHeight(lastSavedBlock.block_height - 1);
-        }
-        //TODO: should handle errors with respect to DataBase
-        changeLastValidBlock(forkPointer.block_height);
     }
 }
 
@@ -40,7 +62,8 @@ const scanner = async () => {
  * main function that runs every `SCANNER_INTERVAL` time that sets in the config
  */
 export const main = () => {
-    console.log(INTERVAL)
-
-    setInterval(scanner, INTERVAL * 1000);
+    const DB = new DataBase();
+    const scanner = new Scanner(DB);
+    // setInterval(scanner.update, INTERVAL * 1000);
+    setInterval(scanner.update, 1000);
 }
