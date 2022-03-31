@@ -1,5 +1,6 @@
 import { Observation } from "./utils";
-import { Block } from "../models/apiModels";
+import { Block } from "../objects/apiModels";
+import { Entity } from "typeorm";
 
 class DataBase {
     constructor() {

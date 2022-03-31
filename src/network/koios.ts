@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from 'config';
-import { Block } from "../models/apiModels";
+import { Block } from "../objects/apiModels";
 
 const URL: string | undefined = config.get?.('node.URL');
 export const koios = axios.create({
