@@ -6,6 +6,9 @@ export class Block {
     @PrimaryColumn()
     height: number
 
-    @OneToMany(() => Observation, (hash) => hash.block)
+    @Column
     hash: string
+
+    @OneToMany(() => Observation, (observations) => observations.block)
+    observations: Observation[]
 }
