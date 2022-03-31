@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Block } from "./Block";
 
 @Entity
-export class observation {
+export class Observation {
     @PrimaryGeneratedColumn()
     id: number
 
@@ -38,4 +39,7 @@ export class observation {
 
     @Column
     requestId: string
+
+    @ManyToOne(() => Block, (block) => block.hash)
+    block: Block
 }
