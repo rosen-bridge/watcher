@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Block } from "./Block";
+import { BlockEntity } from "./BlockEntity";
 
-@Entity
+@Entity()
 export class Observation {
     @PrimaryGeneratedColumn()
     id: number
@@ -16,30 +16,30 @@ export class Observation {
     })
     toChain: string
 
-    @Column
+    @Column()
     toAddress: string
 
-    @Column
+    @Column()
     amount: string
 
-    @Column
+    @Column()
     fee: string
 
-    @Column
+    @Column()
     sourceChainTokenId: string
 
-    @Column
+    @Column()
     targetChainTokenId: string
 
-    @Column
+    @Column()
     sourceTxId: string
 
-    @Column
+    @Column()
     sourceBlockId: string
 
-    @Column
+    @Column()
     requestId: string
 
-    @ManyToOne(() => Block, (block) => block.hash)
-    block: Block
+    @ManyToOne(() => BlockEntity, (block) => block.hash)
+    block: BlockEntity
 }

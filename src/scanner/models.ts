@@ -1,9 +1,35 @@
 import { Observation } from "./utils";
+import { DataSource, Entity, Repository } from "typeorm";
+import { BlockEntity } from "../models/BlockEntity";
 import { Block } from "../objects/apiModels";
-import { Entity } from "typeorm";
 
 class DataBase {
-    constructor() {
+    //TODO: should be added
+    // 1- ConnectionManager
+    // 2- Error handling throw
+    // 3-
+    private dataSource: DataSource;
+    private blockRepository: Repository<BlockEntity>;
+
+    constructor(dataSource: DataSource) {
+        this.dataSource = dataSource;
+        this.blockRepository = this.dataSource.getRepository(BlockEntity);
+        // console.log(this.blockRepository)
+    }
+
+    initDB = () => {
+        this.dataSource.initialize()
+            .then(() => {
+            })
+            .catch((error) => console.log(error))
+    }
+
+    getBlockHashT = async (blockHeight: number) => {
+        const blockHash = await this.blockRepository.findBy({
+            height: blockHeight,
+        })
+        // console.log("block Hash", blockHash);
+        return blockHash;
     }
 
     saveBlock = (height: number, blockHash: String, observations: Array<(Observation | undefined)>): boolean => {

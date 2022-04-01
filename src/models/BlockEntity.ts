@@ -1,12 +1,14 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
-import { Observation } from "./observation";
+import { Observation } from "./Observation";
 
-@Entity
-export class Block {
+@Entity()
+export class BlockEntity {
     @PrimaryColumn()
     height: number
 
-    @Column
+    @Column({
+        length: 64,
+    })
     hash: string
 
     @OneToMany(() => Observation, (observations) => observations.block)
