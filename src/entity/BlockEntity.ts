@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
-import { Observation } from "./Observation";
+import { ObservationEntity } from "./ObservationEntity";
 
 @Entity()
 export class BlockEntity {
@@ -11,6 +11,6 @@ export class BlockEntity {
     })
     hash: string
 
-    @OneToMany(() => Observation, (observations) => observations.block)
-    observations: Observation[]
+    @OneToMany(() => ObservationEntity, (observation) => observation.block)
+    observations: ObservationEntity[]
 }

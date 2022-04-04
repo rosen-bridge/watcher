@@ -1,41 +1,105 @@
 import { Observation } from "./utils";
-import { DataSource, Entity, Repository } from "typeorm";
-import { BlockEntity } from "../models/BlockEntity";
+import { DataSource, Entity, MoreThan, Repository } from "typeorm";
+import { BlockEntity } from "../entity/BlockEntity";
 import { Block } from "../objects/apiModels";
+import { WatcherDataSource } from "../models/WatcherDataSource";
+import { notEmpty } from "../utils/utils";
+import { ObservationEntity } from "../entity/ObservationEntity";
+import { CommitmentEntity } from "../entity/CommitmentEntity";
 
 class DataBase {
     //TODO: should be added
     // 1- ConnectionManager
     // 2- Error handling throw
-    // 3-
+    // 3- connection should go to the config or env
     private dataSource: DataSource;
     private blockRepository: Repository<BlockEntity>;
+    private commitmentRepository: Repository<CommitmentEntity>;
 
     constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
-        this.blockRepository = this.dataSource.getRepository(BlockEntity);
         // console.log(this.blockRepository)
+        this.blockRepository = this.dataSource.getRepository(BlockEntity);
+
     }
 
-    initDB = () => {
-        this.dataSource.initialize()
-            .then(() => {
-            })
-            .catch((error) => console.log(error))
+
+    getBlockHashT = async (blockHeight: number): Promise<string | undefined> => {
+        return this.dataSource.initialize().then(async () => {
+            const blockHash = await this.blockRepository.findOneBy({
+                height: blockHeight,
+            });
+            return blockHash?.hash;
+        });
     }
 
-    getBlockHashT = async (blockHeight: number) => {
-        const blockHash = await this.blockRepository.findBy({
-            height: blockHeight,
-        })
-        // console.log("block Hash", blockHash);
-        return blockHash;
+    getLastSavedBlock = (): Promise<Block | undefined> => {
+        return this.dataSource.initialize().then(async () => {
+            const lastBlock = await this.blockRepository.find({
+                order: {height: 'DESC'},
+                take: 1
+            });
+            if (lastBlock.length !== 0) {
+                const block: Block = {hash: lastBlock[0].hash, block_height: lastBlock[0].height};
+                return block;
+            } else {
+                return undefined;
+            }
+        });
+
+        // //TODO: this is mocked
+        // return new Promise((resolve, reject) => {
+        //     setTimeout(() => {
+        //         resolve({
+        //             block_height: 3408016,
+        //             hash: '5a1d652747fb39bff5f036f218e668ee6c403cc3ba609cc2d5b0d35f6599fd49'
+        //         });
+        //     }, 300);
+        // });
     }
 
-    saveBlock = (height: number, blockHash: String, observations: Array<(Observation | undefined)>): boolean => {
-        //TODO:Mocked
-        //TODO: input type should be fixed now removing undefined observation are happen in the scanner should be moved here
-        return true;
+    changeLastValidBlock = (height: number) => {
+        this.dataSource.initialize().then(async () => {
+            await this.blockRepository.delete({
+                height: MoreThan(height)
+            });
+        });
+    }
+
+    saveBlock = (height: number, blockHash: string, observations: Array<(Observation | undefined)>): Promise<boolean> => {
+        const observationsEntity = observations
+            .filter(
+                (block): block is Observation => block !== undefined).map((observation) => {
+                const observationEntity = new ObservationEntity();
+                observationEntity.fee = observation.fee;
+                observationEntity.sourceBlockId = observation.sourceBlockId;
+                observationEntity.amount = observation.amount;
+                observationEntity.fromChain = observation.fromChain;
+                observationEntity.toChain = observation.toChain;
+                observationEntity.requestId = observation.requestId;
+                observationEntity.sourceChainTokenId = observation.sourceChainTokenId;
+                observationEntity.sourceTxId = observation.sourceTxId;
+                observationEntity.toAddress = observation.toAddress;
+                observationEntity.targetChainTokenId = observation.targetChainTokenId;
+                return observationEntity;
+            });
+        return this.dataSource.initialize().then(async () => {
+            const block = new BlockEntity();
+            block.height = height;
+            block.hash = blockHash;
+            block.observations = observationsEntity;
+            await this.blockRepository.save(block);
+            return true;
+        }).catch(() => false);
+    }
+
+    getCommitments = (eventId: string): Promise<string[]> => {
+        return this.dataSource.initialize().then(async () => {
+            const commitments = await this.commitmentRepository.findBy({
+                eventId: eventId,
+            });
+            return commitments.map((commitment) => commitment.commitment);
+        });
     }
 
     getBlockAtHeight = (height: number): Promise<Block> => {
@@ -50,21 +114,6 @@ class DataBase {
         });
     }
 
-    getLastSavedBlock = (): Promise<Block> => {
-        //TODO: this is mocked
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve({
-                    block_height: 3408016,
-                    hash: '5a1d652747fb39bff5f036f218e668ee6c403cc3ba609cc2d5b0d35f6599fd49'
-                });
-            }, 300);
-        });
-    }
-
-    changeLastValidBlock = (height: number) => {
-        return true;
-    }
 
     getBlockHash = async (height: number): Promise<string> => {
         //TODO:Mocked

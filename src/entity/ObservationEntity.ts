@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BlockEntity } from "./BlockEntity";
 
 @Entity()
-export class Observation {
+export class ObservationEntity {
     @PrimaryGeneratedColumn()
     id: number
 
