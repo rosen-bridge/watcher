@@ -53,6 +53,7 @@ class DataBase {
      * @return Promise<DeleteResult>
      */
     changeLastValidBlock = async (height: number): Promise<DeleteResult> => {
+        console.log()
         return await this.blockRepository.delete({
             height: MoreThanOrEqual(height)
         });
@@ -66,6 +67,11 @@ class DataBase {
      * @return Promise<boolean>
      */
     saveBlock = async (height: number, blockHash: string, observations: Array<(Observation | undefined)>): Promise<boolean> => {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        const block = new BlockEntity();
+        block.height = height;
+        block.hash = blockHash;
         const observationsEntity = observations
             .filter(
                 (block): block is Observation => block !== undefined).map((observation) => {
@@ -80,17 +86,25 @@ class DataBase {
                 observationEntity.sourceTxId = observation.sourceTxId;
                 observationEntity.toAddress = observation.toAddress;
                 observationEntity.targetChainTokenId = observation.targetChainTokenId;
+                observationEntity.block = block;
                 return observationEntity;
             });
 
-        const block = new BlockEntity();
-        block.height = height;
-        block.hash = blockHash;
-        block.observations = observationsEntity;
-        const res = await this.blockRepository.save(block);
-        return "height" in res;
+        let error = true;
+        await queryRunner.startTransaction()
+        try {
+            await queryRunner.manager.save(block);
+            await queryRunner.manager.save(observationsEntity);
+            await queryRunner.commitTransaction();
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+            error = false;
+        } finally {
+            await queryRunner.release();
+        }
+        return error;
     }
-    
+
     /**
      * get block hash and height
      * @param height

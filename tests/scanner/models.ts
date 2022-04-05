@@ -9,7 +9,7 @@ import { expect } from "chai";
 describe("Database functions", async () => {
     const WatcherDataSource = new DataSource({
         type: "sqlite",
-        database: "./sqlite/watcher.sqlite",
+        database: "./sqlite/watcher-test.sqlite",
         entities: [ObservationEntity, BlockEntity, CommitmentEntity],
         synchronize: true,
         logging: false,

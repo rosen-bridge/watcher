@@ -40,6 +40,6 @@ export class ObservationEntity {
     @Column()
     requestId: string
 
-    @ManyToOne(() => BlockEntity, (block) => block.hash)
+    @ManyToOne(() => BlockEntity, (block) => block.height)
     block: BlockEntity
 }
