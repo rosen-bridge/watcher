@@ -12,11 +12,8 @@ export class CommitmentEntity {
     commitment: string
 
     @Column()
-    txId: string
+    UTP: string
 
     @Column()
-    tokenId: string
-
-    @Column()
-    boxId: string
+    commitmentBoxId: string
 }

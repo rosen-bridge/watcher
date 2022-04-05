@@ -33,7 +33,7 @@ describe("Scanner test", () => {
             );
             const DB=instance(mockDataBase);
             const scanner = new Scanner(DB);
-            expect(await scanner.isForkHappen()).to.equal(true);
+            expect(await scanner.isForkHappen()).to.be.true;
         });
     });
 });

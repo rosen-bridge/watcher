@@ -1,6 +1,6 @@
 import { KoiosNetwork } from "../network/koios";
 import { Column, ManyToOne } from "typeorm";
-import { BlockEntity } from "../entity/BlockEntity";
+import { BlockEntity } from "../entities/BlockEntity";
 
 export interface TX {
     //TODO: should feel later with knowledge of cardano utxo
@@ -8,13 +8,12 @@ export interface TX {
 }
 
 export interface Observation {
-    //TODO: should feel later
-    fromChain:string
-    toChain:string
-    toAddress:string
-    amount:string
-    fee:string
-    sourceChainTokenId:string
+    fromChain: string
+    toChain: string
+    toAddress: string
+    amount: string
+    fee: string
+    sourceChainTokenId: string
     targetChainTokenId: string
     sourceTxId: string
     sourceBlockId: string

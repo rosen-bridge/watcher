@@ -2,7 +2,7 @@ import { KoiosNetwork } from "../network/koios";
 import { CardanoUtils } from "./utils";
 import config from "config";
 import DataBase from "./models";
-import { WatcherDataSource } from "../models/WatcherDataSource";
+import { WatcherDataSource } from "../../config/watcher-data-source";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
@@ -54,7 +54,7 @@ export class Scanner {
                 let forkPointer = lastSavedBlock!;
                 let blockFromNetwork = await KoiosNetwork.getBlockAtHeight(forkPointer.block_height);
                 while (blockFromNetwork.hash !== forkPointer.hash) {
-                    forkPointer = await this._dataBase.getBlockAtHeight(forkPointer.block_height - 1);
+                    forkPointer = (await this._dataBase.getBlockAtHeight(forkPointer.block_height - 1))!;
                     blockFromNetwork = await KoiosNetwork.getBlockAtHeight(blockFromNetwork.block_height - 1);
                 }
                 //TODO: should handle errors with respect to DataBase
@@ -69,11 +69,16 @@ export class Scanner {
  * main function that runs every `SCANNER_INTERVAL` time that sets in the config
  */
 export const main = () => {
-    const DB = new DataBase(WatcherDataSource);
-    const scanner = new Scanner(DB);
-    if (typeof INTERVAL === 'number') {
-        setInterval(scanner.update, INTERVAL * 1000);
-    } else {
-        console.log("scanner interval doesn't set in the config");
-    }
+
+        const DB=new DataBase(WatcherDataSource);
+        DB.init().then(()=>{
+            const scanner = new Scanner(DB);
+            if (typeof INTERVAL === 'number') {
+                setInterval(scanner.update, INTERVAL * 1000);
+            } else {
+                console.log("scanner interval doesn't set in the config");
+            }
+        });
+
+
 }
