@@ -6,4 +6,3 @@ export default {
         interval: 10,
     }
 };
-

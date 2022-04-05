@@ -57,8 +57,7 @@ export class Scanner {
                     forkPointer = (await this._dataBase.getBlockAtHeight(forkPointer.block_height - 1))!;
                     blockFromNetwork = await KoiosNetwork.getBlockAtHeight(blockFromNetwork.block_height - 1);
                 }
-                //TODO: should handle errors with respect to DataBase
-                this._dataBase.changeLastValidBlock(forkPointer.block_height);
+                await this._dataBase.changeLastValidBlock(forkPointer.block_height);
             }
         }
     }

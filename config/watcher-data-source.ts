@@ -8,6 +8,5 @@ export const WatcherDataSource = new DataSource({
     database: "../sqlite/watcher.sqlite",
     entities: [ObservationEntity, BlockEntity, CommitmentEntity],
     synchronize: true,
-    logging: false,
+    logging: true,
 })
-
