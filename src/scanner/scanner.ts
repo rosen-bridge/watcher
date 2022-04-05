@@ -69,7 +69,6 @@ export class Scanner {
  * main function that runs every `SCANNER_INTERVAL` time that sets in the config
  */
 export const main = () => {
-
         const DB=new DataBase(WatcherDataSource);
         DB.init().then(()=>{
             const scanner = new Scanner(DB);
@@ -79,6 +78,4 @@ export const main = () => {
                 console.log("scanner interval doesn't set in the config");
             }
         });
-
-
 }

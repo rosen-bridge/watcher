@@ -1,5 +1,5 @@
 import { Observation } from "./utils";
-import { DataSource, DeleteResult, Entity, getRepository, MoreThan, MoreThanOrEqual, Repository } from "typeorm";
+import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
 import { BlockEntity } from "../entities/BlockEntity";
 import { Block } from "../objects/apiModels";
 import { ObservationEntity } from "../entities/ObservationEntity";
@@ -15,6 +15,10 @@ class DataBase {
         this.dataSource = dataSource;
     }
 
+    /**
+     * init database connection
+     * database should be init before any use
+     */
     init = async () => {
         await this.dataSource
             .initialize()
@@ -27,6 +31,10 @@ class DataBase {
             });
     }
 
+    /**
+     * get last saved block
+     * @return Promise<Block or undefined>
+     */
     getLastSavedBlock = async (): Promise<Block | undefined> => {
         const lastBlock = await this.blockRepository.find({
             order: {height: 'DESC'},
@@ -39,12 +47,24 @@ class DataBase {
         }
     }
 
+    /**
+     * it deletes every block that more than or equal height
+     * @param height
+     * @return Promise<DeleteResult>
+     */
     changeLastValidBlock = async (height: number): Promise<DeleteResult> => {
         return await this.blockRepository.delete({
             height: MoreThanOrEqual(height)
         });
     }
 
+    /**
+     * save blocks with observation of that block
+     * @param height
+     * @param blockHash
+     * @param observations
+     * @return Promise<boolean>
+     */
     saveBlock = async (height: number, blockHash: string, observations: Array<(Observation | undefined)>): Promise<boolean> => {
         const observationsEntity = observations
             .filter(
@@ -69,18 +89,13 @@ class DataBase {
         block.observations = observationsEntity;
         const res = await this.blockRepository.save(block);
         return "height" in res;
-
     }
-
-    getCommitments = (eventId: string): Promise<string[]> => {
-        return this.dataSource.initialize().then(async () => {
-            const commitments = await this.commitmentRepository.findBy({
-                eventId: eventId,
-            });
-            return commitments.map((commitment) => commitment.commitment);
-        });
-    }
-
+    
+    /**
+     * get block hash and height
+     * @param height
+     * @return Promise<Block|undefined>
+     */
     getBlockAtHeight = async (height: number): Promise<Block | undefined> => {
         const blockHash = await this.blockRepository.findOneBy({
             height: height,
@@ -92,8 +107,20 @@ class DataBase {
         }
     }
 
+    /**
+     * get commitments
+     * @param eventId
+     * @return Promise<string[]>
+     */
+    getCommitments = (eventId: string): Promise<string[]> => {
+        return this.dataSource.initialize().then(async () => {
+            const commitments = await this.commitmentRepository.findBy({
+                eventId: eventId,
+            });
+            return commitments.map((commitment) => commitment.commitment);
+        });
+    }
 
 }
 
 export default DataBase;
-

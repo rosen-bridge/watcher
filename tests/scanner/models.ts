@@ -16,6 +16,7 @@ describe("Database functions", async () => {
     });
     const DB = new DataBase(WatcherDataSource);
     await DB.init();
+
     const firstObservations: Array<Observation | undefined> = [{
         fromChain: "erg",
         toChain: "cardano",
