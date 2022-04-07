@@ -6,41 +6,48 @@ import { CommitmentEntity } from "../../src/entities/CommitmentEntity";
 import { Observation } from "../../src/scanner/utils";
 import { expect } from "chai";
 
-describe("Database functions", async () => {
+export const loadDataBase = async (name: string): Promise<DataBase> => {
     const WatcherDataSource = new DataSource({
         type: "sqlite",
-        database: "./sqlite/watcher-test.sqlite",
+        database: `./sqlite/watcher-test-+${name}.sqlite`,
         entities: [ObservationEntity, BlockEntity, CommitmentEntity],
         synchronize: true,
         logging: false,
     });
     const DB = new DataBase(WatcherDataSource);
     await DB.init();
+    return DB;
+}
 
-    const firstObservations: Array<Observation | undefined> = [{
-        fromChain: "erg",
-        toChain: "cardano",
-        toAddress: "cardanoAddress",
-        amount: "1000000000",
-        fee: "1000000",
-        sourceChainTokenId: "ergoTokenId",
-        targetChainTokenId: "cardanoTokenId",
-        sourceTxId: "ergoTxId",
-        sourceBlockId: "ergoBlockId",
-        requestId: "reqId",
-    }, undefined];
-    const secondObservations: Array<Observation | undefined> = [{
-        fromChain: "erg",
-        toChain: "cardano",
-        toAddress: "cardanoAddress",
-        amount: "1100000000",
-        fee: "1100000",
-        sourceChainTokenId: "ergoTokenId",
-        targetChainTokenId: "cardanoTokenId",
-        sourceTxId: "ergoTxId",
-        sourceBlockId: "ergoBlockId",
-        requestId: "reqId",
-    }, undefined, undefined];
+export const firstObservations: Array<Observation | undefined> = [{
+    fromChain: "erg",
+    toChain: "cardano",
+    toAddress: "cardanoAddress",
+    amount: "1000000000",
+    fee: "1000000",
+    sourceChainTokenId: "ergoTokenId",
+    targetChainTokenId: "cardanoTokenId",
+    sourceTxId: "ergoTxId",
+    sourceBlockId: "ergoBlockId",
+    requestId: "reqId",
+}, undefined];
+
+export const secondObservations: Array<Observation | undefined> = [{
+    fromChain: "erg",
+    toChain: "cardano",
+    toAddress: "cardanoAddress",
+    amount: "1100000000",
+    fee: "1100000",
+    sourceChainTokenId: "ergoTokenId",
+    targetChainTokenId: "cardanoTokenId",
+    sourceTxId: "ergoTxId",
+    sourceBlockId: "ergoBlockId",
+    requestId: "reqId",
+}, undefined, undefined];
+
+
+describe("Database functions", async () => {
+    const DB = await loadDataBase("dataBase");
 
     describe("saveBlock", () => {
         it("should return true", async () => {
@@ -86,4 +93,5 @@ describe("Database functions", async () => {
             expect(res.affected).to.be.equal(2);
         });
     });
+
 });
