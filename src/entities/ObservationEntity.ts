@@ -40,6 +40,10 @@ export class ObservationEntity {
     @Column()
     requestId: string
 
-    @ManyToOne(() => BlockEntity, (block) => block.height)
+    @ManyToOne(
+        () => BlockEntity,
+        (block) => block.height,
+        {onDelete: 'CASCADE',}
+    )
     block: BlockEntity
 }

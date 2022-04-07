@@ -11,6 +11,10 @@ export class BlockEntity {
     })
     hash: string
 
-    @OneToMany(() => ObservationEntity, (observation) => observation.block)
+    @OneToMany(
+        () => ObservationEntity,
+        (observation) => observation.block,
+        {cascade: true,}
+    )
     observations: ObservationEntity[]
 }

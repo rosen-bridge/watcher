@@ -53,7 +53,6 @@ class DataBase {
      * @return Promise<DeleteResult>
      */
     changeLastValidBlock = async (height: number): Promise<DeleteResult> => {
-        console.log()
         return await this.blockRepository.delete({
             height: MoreThanOrEqual(height)
         });
