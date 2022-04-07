@@ -14,8 +14,9 @@ export const loadDataBase = async (name: string): Promise<DataBase> => {
         synchronize: true,
         logging: false,
     });
-    const DB = new DataBase(WatcherDataSource);
-    await DB.init();
+    // const DB = new DataBase(WatcherDataSource);
+    // await DB.init();
+    const DB= await DataBase.init(WatcherDataSource);
     return DB;
 }
 

@@ -11,24 +11,26 @@ class DataBase {
     private blockRepository: Repository<BlockEntity>;
     private commitmentRepository: Repository<CommitmentEntity>;
 
-    constructor(dataSource: DataSource) {
+    private constructor(dataSource: DataSource) {
         this.dataSource = dataSource;
+        this.blockRepository = this.dataSource.getRepository(BlockEntity);
+        this.commitmentRepository = this.dataSource.getRepository(CommitmentEntity);
     }
 
     /**
      * init database connection
      * database should be init before any use
      */
-    init = async () => {
-        await this.dataSource
+    static init = async (dataSource: DataSource) => {
+        await dataSource
             .initialize()
             .then(() => {
                 console.log("Data Source has been initialized!");
-                this.blockRepository = this.dataSource.getRepository(BlockEntity);
             })
             .catch((err) => {
                 console.error("Error during Data Source initialization:", err);
             });
+        return new DataBase(dataSource);
     }
 
     /**
