@@ -88,7 +88,6 @@ export const main = async () => {
     const scanner = new Scanner(DB);
     if (typeof INTERVAL === 'number') {
         setInterval(scanner.update, INTERVAL * 1000);
-        console.log("first iteration");
     } else {
         console.log("scanner interval doesn't set in the config");
     }
