@@ -6,6 +6,7 @@ import { ormconfig } from "../../config/ormconfig";
 import { Block } from "../objects/apiModels";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
+const INITIAL_HEIGHT: number | undefined = config.get?.('scanner.initialBlockHeight');
 
 export class Scanner {
     private _dataBase: DataBase;
@@ -51,33 +52,46 @@ export class Scanner {
             const lastBlockHeight = await KoiosNetwork.getBlock(0).then(res => {
                 return res[0].block_height
             });
+            let height = null;
             if (lastSavedBlock !== undefined) {
-                for (let height = lastSavedBlock.block_height + 1; height <= lastBlockHeight; height++) {
-                    const [block, observations] = await this.getBlockAndObservations(height);
-                    if (!await this.isForkHappen()) {
-                        if (!await this._dataBase.saveBlock(block.block_height, block.hash, observations)) {
-                            break;
-                        }
-                    } else {
+                height = lastSavedBlock.block_height + 1;
+            } else {
+                if (typeof INITIAL_HEIGHT === 'number') {
+                    if (INITIAL_HEIGHT > lastBlockHeight) {
+                        console.log("scanner initial height is more than current block height!");
+                        return;
+                    }
+                    height = INITIAL_HEIGHT;
+                } else {
+                    console.log("scanner initial height doesn't set in the config!");
+                    return;
+                }
+            }
+            for (height; height <= lastBlockHeight; height++) {
+                const [block, observations] = await this.getBlockAndObservations(height);
+                if (!await this.isForkHappen()) {
+                    if (!await this._dataBase.saveBlock(block.block_height, block.hash, observations)) {
                         break;
                     }
+                } else {
+                    break;
                 }
-            } else {
-                const [block, observations] = await this.getBlockAndObservations(lastBlockHeight);
-                await this._dataBase.saveBlock(block.block_height, block.hash, observations);
             }
         } else {
             let forkPointer = lastSavedBlock!;
             let blockFromNetwork = await KoiosNetwork.getBlockAtHeight(forkPointer.block_height);
             while (blockFromNetwork.hash !== forkPointer.hash) {
-                forkPointer = (await this._dataBase.getBlockAtHeight(forkPointer.block_height - 1))!;
+                const block = await this._dataBase.getBlockAtHeight(forkPointer.block_height - 1);
+                if (block === undefined) {
+                    break;
+                } else {
+                    forkPointer = block;
+                }
                 blockFromNetwork = await KoiosNetwork.getBlockAtHeight(blockFromNetwork.block_height - 1);
             }
             await this._dataBase.changeLastValidBlock(forkPointer.block_height);
         }
-
     }
-
 }
 
 /**
