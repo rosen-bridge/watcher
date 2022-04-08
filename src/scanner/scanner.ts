@@ -2,7 +2,7 @@ import { KoiosNetwork } from "../network/koios";
 import { CardanoUtils } from "./utils";
 import config from "config";
 import DataBase from "./models";
-import { WatcherDataSource } from "../../config/watcher-data-source";
+import { ormconfig } from "../../config/ormconfig";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
@@ -68,7 +68,7 @@ export class Scanner {
  * main function that runs every `SCANNER_INTERVAL` time that sets in the config
  */
 export const main = async () => {
-    const DB = await DataBase.init(WatcherDataSource);
+    const DB = await DataBase.init(ormconfig);
 
     const scanner = new Scanner(DB);
     if (typeof INTERVAL === 'number') {

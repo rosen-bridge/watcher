@@ -7,17 +7,14 @@ import { Observation } from "../../src/scanner/utils";
 import { expect } from "chai";
 
 export const loadDataBase = async (name: string): Promise<DataBase> => {
-    const WatcherDataSource = new DataSource({
+    const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-+${name}.sqlite`,
         entities: [ObservationEntity, BlockEntity, CommitmentEntity],
         synchronize: true,
         logging: false,
     });
-    // const DB = new DataBase(WatcherDataSource);
-    // await DB.init();
-    const DB= await DataBase.init(WatcherDataSource);
-    return DB;
+    return await DataBase.init(ormConfig);
 }
 
 export const firstObservations: Array<Observation | undefined> = [{
