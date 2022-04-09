@@ -18,13 +18,14 @@ class DataBase {
     }
 
     /**
-     * init database connection
+     * init database connection & runing migrations
      * database should be init before any use
      */
     static init = async (dataSource: DataSource) => {
         await dataSource
             .initialize()
-            .then(() => {
+            .then(async () => {
+                await dataSource.runMigrations()
                 console.log("Data Source has been initialized!");
             })
             .catch((err) => {
