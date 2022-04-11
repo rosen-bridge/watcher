@@ -1,22 +1,29 @@
 import { KoiosNetwork } from "../network/koios";
+import { Column, ManyToOne } from "typeorm";
+import { BlockEntity } from "../entities/BlockEntity";
 
 export interface TX {
     //TODO: should feel later with knowledge of cardano utxo
     mock: any,
 }
 
-export class Observation {
-    //TODO: should feel later
+export interface Observation {
+    fromChain: string
+    toChain: string
+    toAddress: string
+    amount: string
+    fee: string
+    sourceChainTokenId: string
+    targetChainTokenId: string
+    sourceTxId: string
+    sourceBlockId: string
+    requestId: string
 
 }
 
 export class CardanoUtils {
     static checkTx = (tx: TX): Observation | undefined => {
-        if (Math.random() > .7) {
-            return new Observation();
-        } else {
-            return undefined;
-        }
+        return undefined
     }
 
     static txHashToData = (txHash: string): TX => {

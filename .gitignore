@@ -1,5 +1,10 @@
 package-lock.json
 
-
+sqlite
 .idea
 node_modules
+.nyc_output
+coverage
+dir
+build
+dist

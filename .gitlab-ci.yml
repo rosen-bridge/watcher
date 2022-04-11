@@ -16,5 +16,7 @@ install_dependencies:
     paths:
       - node_modules/
 test:
-  script:
-    - npm run test
+  script: npm run coverage
+  artifacts:
+    reports:
+      cobertura: coverage/cobertura-coverage.xml

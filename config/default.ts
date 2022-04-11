@@ -4,6 +4,6 @@ export default {
     },
     scanner: {
         interval: 10,
+        initialBlockHeight: 3433333,
     }
 };
-
