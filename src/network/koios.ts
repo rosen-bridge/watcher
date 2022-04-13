@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from 'config';
-import { Asset, Block, Tx, Utxo } from "../objects/apiModels";
+import { Asset, Block, Tx, TxMetaData, Utxo } from "../objects/apiModels";
 
 const URL: string | undefined = config.get?.('node.URL');
 export const koios = axios.create({
@@ -40,9 +40,8 @@ export class KoiosNetwork {
     }
 
     static getTxUtxos = (txHashes: Array<string>): Promise<Tx[]> => {
-        const query = {"_tx_hashes": txHashes};
         return koios.post(
-            '/tx_utxos', query
+            '/tx_utxos', {"_tx_hashes": txHashes}
         ).then(res => {
             return res.data.map((tx: { outputs: Array<Utxo> }) => {
                 return {
@@ -63,6 +62,14 @@ export class KoiosNetwork {
                 }
             });
         })
+    }
+
+    static getTxMetaData = (txHashes: Array<string>): Promise<TxMetaData[]> => {
+        return koios.post("/tx_metadata", {"_tx_hashes": txHashes}).then(
+            res => {
+                return res.data
+            }
+        )
     }
 }
 

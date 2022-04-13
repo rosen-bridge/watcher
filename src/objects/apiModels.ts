@@ -21,3 +21,19 @@ export interface Utxo {
 export interface Tx {
     utxos: Array<Utxo>
 }
+
+export interface MetaData {
+    0: RosenData,
+}
+
+export interface RosenData {
+    to: string,
+    from: string,
+    fee: string,
+    targetChainTokenId: string,
+}
+
+export interface TxMetaData {
+    tx_hash: string,
+    metadata: object,
+}
