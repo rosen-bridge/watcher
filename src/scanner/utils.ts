@@ -5,12 +5,6 @@ import AssetFingerprint from "@emurgo/cip14-js";
 
 const BANK: Array<string> | undefined = config.get?.('addresses.bank');
 
-
-export interface TX {
-    //TODO: should feel later with knowledge of cardano utxo
-    mock: any,
-}
-
 export interface Observation {
     fromChain: string
     toChain: string
@@ -26,6 +20,12 @@ export interface Observation {
 }
 
 export class CardanoUtils {
+
+    /**
+     * check if the object is the rosen bridge data type or not
+     * @param data
+     * @return boolean
+     */
     static isRosenData(data: object): data is RosenData {
         return 'to' in data &&
             'from' in data &&
@@ -33,10 +33,23 @@ export class CardanoUtils {
             'targetChainTokenId' in data;
     }
 
+    /**
+     * check if the metadata of cardano transaction have `0` key or not
+     * @param metaData
+     * @return boolean
+     */
     static isRosenMetaData(metaData: object): metaData is MetaData {
         return "0" in metaData;
     }
 
+    /**
+     * check if a transaction is an observation or not if yes returns an observation
+     * object else returns undefined
+     * @param txHash
+     * @param blockHash
+     * @param bank
+     * @return Promise<observation|undefined>
+     */
     static checkTx = async (txHash: string, blockHash: string, bank: Array<string>): Promise<Observation | undefined> => {
         const tx = (await KoiosNetwork.getTxUtxos([txHash]))[0];
         const utxos = tx.utxos.filter((utxo: Utxo) => {
@@ -70,7 +83,12 @@ export class CardanoUtils {
             return undefined;
         }
     }
-
+    
+    /**
+     * check all the transaction in a block and returns an array of observations and undefineds
+     * @param blockHash
+     * @return Promise<Array<(Observation | undefined)>>
+     */
     static observationsAtHeight = async (blockHash: string): Promise<Array<(Observation | undefined)>> => {
         const txs = await KoiosNetwork.getBlockTxs(blockHash);
         const observation = Array(txs.length).fill(undefined);
