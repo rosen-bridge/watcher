@@ -55,4 +55,62 @@ describe("Koios Apis", () => {
             ])
         });
     });
+    describe("getTxUtxos", () => {
+        it("get one tx utxos", async () => {
+            const data = await KoiosNetwork.getTxUtxos(["cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"]);
+            expect(data).to.be.eql(
+                [{
+                    utxos: [{
+                        payment_addr: {
+                            bech32: 'addr_test1vze7yqqlg8cjlyhz7jzvsg0f3fhxpuu6m3llxrajfzqecggw704re'
+                        },
+                        tx_hash: 'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa',
+                        value: '10000000',
+                        asset_list: [
+                            {
+                                policy_id: 'ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2',
+                                asset_name: '7369676d61',
+                                quantity: '10'
+                            }
+                        ]
+                    }, {
+                        payment_addr: {
+                            bech32: 'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0'
+                        },
+                        tx_hash: 'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa',
+                        value: '969261084',
+                        asset_list: [
+                            {
+                                policy_id: 'ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2',
+                                asset_name: '646f6765',
+                                quantity: '10000000'
+                            },
+                            {
+                                policy_id: 'ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2',
+                                asset_name: '7369676d61',
+                                quantity: '9999968'
+                            }
+                        ]
+                    }]
+                }]
+            );
+        });
+    });
+    describe("getTxMetaData", () => {
+        it("get one tx metaData", async () => {
+            const data = await KoiosNetwork.getTxMetaData(["cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"]);
+            expect(data).to.be.eql([{
+                "tx_hash": "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa",
+                "metadata": {
+                    "0": {
+                        "to": "ERGO",
+                        "fee": "10000",
+                        "from": "CARDANO",
+                        "toAddress": "ergoAddress",
+                        "targetChainTokenId": "cardanoTokenId"
+                    }
+                }
+            }]);
+        });
+    });
 });

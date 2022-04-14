@@ -1,6 +1,4 @@
 import { KoiosNetwork } from "../network/koios";
-import { Column, ManyToOne } from "typeorm";
-import { BlockEntity } from "../entities/BlockEntity";
 import { MetaData, RosenData, Utxo } from "../objects/apiModels";
 import config from "config";
 import AssetFingerprint from "@emurgo/cip14-js";
@@ -64,19 +62,13 @@ export class CardanoUtils {
                         targetChainTokenId: data.targetChainTokenId,
                         sourceTxId: txHash,
                         sourceBlockId: blockHash,
-                        ///TODO:should feel
-                        requestId: "mock",
+                        requestId: txHash,
                         toAddress: "mock",
                     }
                 }
             }
             return undefined;
         }
-    }
-
-    static txHashToData = (txHash: string): TX => {
-        //TODO: mock function to convert txhash to datatype needed (TX)
-        return {mock: ""}
     }
 
     static observationsAtHeight = async (blockHash: string): Promise<Array<(Observation | undefined)>> => {
