@@ -1,9 +1,7 @@
 import { KoiosNetwork } from "../network/koios";
 import { MetaData, RosenData, Utxo } from "../objects/apiModels";
-import config from "config";
 import AssetFingerprint from "@emurgo/cip14-js";
-
-const BANK: Array<string> | undefined = config.get?.('addresses.bank');
+import { BANK } from "./bankAddress";
 
 export interface Observation {
     fromChain: string
@@ -83,7 +81,7 @@ export class CardanoUtils {
             return undefined;
         }
     }
-    
+
     /**
      * check all the transaction in a block and returns an array of observations and undefineds
      * @param blockHash
@@ -92,12 +90,8 @@ export class CardanoUtils {
     static observationsAtHeight = async (blockHash: string): Promise<Array<(Observation | undefined)>> => {
         const txs = await KoiosNetwork.getBlockTxs(blockHash);
         const observation = Array(txs.length).fill(undefined);
-        if (BANK !== undefined) {
-            for (let i = 0; i < txs.length; i++) {
-                observation[i] = await this.checkTx(txs[i], blockHash, BANK);
-            }
-        } else {
-            console.log("there is no bank address set in the config!");
+        for (let i = 0; i < txs.length; i++) {
+            observation[i] = await this.checkTx(txs[i], blockHash, BANK);
         }
         return observation;
     }
