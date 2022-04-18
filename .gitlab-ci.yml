@@ -3,6 +3,7 @@ image: node:latest
 stages:
   - installation
   - test
+  - coverage
 
 cache:
   paths:
@@ -16,6 +17,8 @@ install_dependencies:
     paths:
       - node_modules/
 test:
+  script: npm run test
+coverage:
   script: npm run coverage
   artifacts:
     reports:
