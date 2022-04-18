@@ -23,9 +23,9 @@ export class KoiosNetwork {
         return koios.get(
             '/blocks',
             {params: {offset: offset, limit: limit, select: 'hash,block_height'}}
-        ).then(res => {
-            return res.data
-        })
+        ).then(
+            res => res.data
+        )
     }
 
     static getBlockTxs = (blockHash: string): Promise<string[]> => {
@@ -66,9 +66,7 @@ export class KoiosNetwork {
 
     static getTxMetaData = (txHashes: Array<string>): Promise<TxMetaData[]> => {
         return koios.post("/tx_metadata", {"_tx_hashes": txHashes}).then(
-            res => {
-                return res.data
-            }
+            res => res.data
         )
     }
 }

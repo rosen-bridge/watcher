@@ -99,7 +99,7 @@ describe("Koios Apis", () => {
     describe("getTxMetaData", () => {
         it("get one tx metaData", async () => {
             const data = await KoiosNetwork.getTxMetaData(["cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"]);
-            expect(data).to.be.eql([{
+            expect(data[0]).to.be.eql({
                 "tx_hash": "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa",
                 "metadata": {
                     "0": {
@@ -110,7 +110,7 @@ describe("Koios Apis", () => {
                         "targetChainTokenId": "cardanoTokenId"
                     }
                 }
-            }]);
+            });
         });
     });
 });
