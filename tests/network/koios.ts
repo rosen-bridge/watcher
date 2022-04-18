@@ -58,7 +58,6 @@ describe("Koios Apis", () => {
     describe("getTxUtxos", () => {
         it("get one tx utxos", async () => {
             const data = await KoiosNetwork.getTxUtxos(["cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"]);
-            console.log(data)
             expect(data).to.be.eql(
                 [{
                     utxos: [{
