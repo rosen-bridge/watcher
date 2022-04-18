@@ -1,4 +1,4 @@
-image: node:stable
+image: node:17-stretch
 
 stages:
   - installation
