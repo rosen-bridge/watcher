@@ -1,4 +1,4 @@
-image: node:17-stretch
+image: node:latest
 
 stages:
   - installation
@@ -21,3 +21,5 @@ test:
   artifacts:
     reports:
       cobertura: coverage/cobertura-coverage.xml
+    paths:
+      - sqlite/
