@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Scanner } from "../../src/scanner/scanner";
-import { firstObservations, loadDataBase } from "../scanner/models";
+import { firstObservations, loadDataBase } from "./models";
 
 describe("Scanner test", async () => {
     const DB = await loadDataBase("scanner");

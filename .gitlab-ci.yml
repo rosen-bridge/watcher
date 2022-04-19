@@ -21,5 +21,3 @@ test:
   artifacts:
     reports:
       cobertura: coverage/cobertura-coverage.xml
-    paths:
-      - sqlite/
