@@ -2,25 +2,28 @@ import { expect } from "chai";
 import { Scanner } from "../../src/scanner/scanner";
 import { firstObservations, loadDataBase } from "./models";
 
-describe("Scanner test", async () => {
-    const DB = await loadDataBase("scanner");
-    
-    describe("isForkHappen", () => {
+
+
+describe("Scanner test",  () => {
+
+    describe("isForkHappen",  () => {
 
         it("fork doesn't happened", async () => {
-            const DB1 = await loadDataBase("scanner");
+            const DB = await loadDataBase("scanner");
 
-            await DB1.changeLastValidBlock(3433333);
-            await DB1.saveBlock(
+            await DB.changeLastValidBlock(3433333);
+            await DB.saveBlock(
                 3433333,
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
                 firstObservations
             );
-            const scanner = new Scanner(DB1);
+            const scanner = new Scanner(DB);
             expect(await scanner.isForkHappen()).to.equal(false);
         });
 
         it("fork happened", async () => {
+            const DB = await loadDataBase("scanner");
+
             await DB.changeLastValidBlock(3433333);
             await DB.saveBlock(
                 3433333,
