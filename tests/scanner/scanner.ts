@@ -6,14 +6,17 @@ describe("Scanner test", async () => {
     const DB = await loadDataBase("scanner");
     
     describe("isForkHappen", () => {
+
         it("fork doesn't happened", async () => {
-            await DB.changeLastValidBlock(3433333);
-            await DB.saveBlock(
+            const DB1 = await loadDataBase("scanner");
+
+            await DB1.changeLastValidBlock(3433333);
+            await DB1.saveBlock(
                 3433333,
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
                 firstObservations
             );
-            const scanner = new Scanner(DB);
+            const scanner = new Scanner(DB1);
             expect(await scanner.isForkHappen()).to.equal(false);
         });
 
