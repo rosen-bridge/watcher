@@ -2,12 +2,8 @@ import { expect } from "chai";
 import { Scanner } from "../../src/scanner/scanner";
 import { firstObservations, loadDataBase } from "./models";
 
-
-
-describe("Scanner test",  () => {
-
-    describe("isForkHappen",  () => {
-
+describe("Scanner test", () => {
+    describe("isForkHappen", () => {
         it("fork doesn't happened", async () => {
             const DB = await loadDataBase("scanner");
 
