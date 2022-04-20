@@ -19,7 +19,7 @@ export class KoiosNetwork {
         )
     }
 
-    static getBlock = (offset: number = 0, limit: number = 1): Promise<Block[]> => {
+    static getBlock = (offset: number = 0, limit: number = 1): Promise<Array<Block>> => {
         return koios.get(
             '/blocks',
             {params: {offset: offset, limit: limit, select: 'hash,block_height'}}
