@@ -1,18 +1,14 @@
-import { DatabaseAbstract } from "./database-abstract";
-import { Block } from "../objects/apiModels";
+import { modelAbstract } from "./model-abstract";
+import { Block } from "../objects/apiModelsCardano";
 import { Observation } from "./utils";
 
-abstract class ScannerAbstract {
-    private _dataBase: DatabaseAbstract;
+export abstract class ScannerAbstract {
+    abstract _dataBase: modelAbstract;
 
-    protected constructor(db: DatabaseAbstract) {
-        this._dataBase = db;
-    }
+    abstract isForkHappen(): Promise<Boolean>;
 
-    abstract async isForkHappen(): Promise<Boolean>;
+    abstract getBlockAndObservations(height: number): Promise<[Block, Array<Observation | undefined>]>;
 
-    abstract async getBlockAndObservations(height: number): Promise<[Block, Array<Observation | undefined>]>;
-
-    abstract async update(): Promise<void>;
+    abstract update(): Promise<void>;
 
 }

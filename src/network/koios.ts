@@ -1,6 +1,7 @@
 import axios from "axios";
 import config from 'config';
-import { Block, Tx, TxMetaData, Utxo } from "../objects/apiModels";
+import { Block, Tx, TxMetaData, Utxo } from "../objects/apiModelsCardano";
+import { NetworkAbstract } from "../scanner/network-abstract";
 
 const URL: string | undefined = config.get?.('node.URL');
 export const koios = axios.create({

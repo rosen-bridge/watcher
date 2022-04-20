@@ -3,15 +3,18 @@ import { CardanoUtils, Observation } from "./utils";
 import config from "config";
 import DataBase from "./models";
 import { ormconfig } from "../../config/ormconfig";
-import { Block } from "../objects/apiModels";
+import { Block } from "../objects/apiModelsCardano";
+import { ScannerAbstract } from "./scanner-abstract";
+import { modelAbstract } from "./model-abstract";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 const INITIAL_HEIGHT: number | undefined = config.get?.('scanner.initialBlockHeight');
 
-export class Scanner {
-    private _dataBase: DataBase;
+export class Scanner extends ScannerAbstract {
+    _dataBase: modelAbstract;
 
     constructor(db: DataBase) {
+        super();
         this._dataBase = db;
     }
 

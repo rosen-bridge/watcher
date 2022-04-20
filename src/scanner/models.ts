@@ -1,17 +1,19 @@
 import { Observation } from "./utils";
 import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
 import { BlockEntity } from "../entities/BlockEntity";
-import { Block } from "../objects/apiModels";
+import { Block } from "../objects/apiModelsCardano";
 import { ObservationEntity } from "../entities/ObservationEntity";
 import { CommitmentEntity } from "../entities/CommitmentEntity";
+import { modelAbstract } from "./model-abstract";
 
-class DataBase {
+class DataBase extends modelAbstract{
 
     private dataSource: DataSource;
     private blockRepository: Repository<BlockEntity>;
     private commitmentRepository: Repository<CommitmentEntity>;
 
     private constructor(dataSource: DataSource) {
+        super();
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(BlockEntity);
         this.commitmentRepository = this.dataSource.getRepository(CommitmentEntity);

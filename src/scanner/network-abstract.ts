@@ -1,10 +1,13 @@
-import { Block } from "../objects/apiModels";
+import { Block, Tx, TxMetaData } from "../objects/apiModelsCardano";
 
-abstract class NetworkAbstract {
-    abstract async getBlockAtHeight(height: number): Promise<Block>;
+export abstract class NetworkAbstract {
+    abstract getBlockAtHeight(height: number): Promise<Block>;
 
-    abstract async getBlock(offset: number = 0, limit: number = 1): Promise<Array<Block>>;
+    abstract getBlock(offset: number = 0, limit: number = 1): Promise<Array<Block>>;
 
-    abstract async getBlockTxs(blockHash: string): Promise<string[]>;
+    abstract getBlockTxs(blockHash: string): Promise<string[]>;
 
+    abstract getTxUtxos(txHashes: Array<string>): Promise<Tx[]>;
+
+    abstract getTxMetaData(txHashes: Array<string>): Promise<TxMetaData[]>;
 }

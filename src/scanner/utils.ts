@@ -1,5 +1,5 @@
 import { KoiosNetwork } from "../network/koios";
-import { MetaData, RosenData, Utxo } from "../objects/apiModels";
+import { MetaData, RosenData, Utxo } from "../objects/apiModelsCardano";
 import AssetFingerprint from "@emurgo/cip14-js";
 import { BANK } from "./bankAddress";
 
