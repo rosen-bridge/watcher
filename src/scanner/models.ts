@@ -128,7 +128,7 @@ class DataBase {
      * @param eventId
      * @return Promise<string[]>
      */
-    getCommitments = (eventId: string): Promise<string[]> => {
+    getCommitments = async (eventId: string): Promise<string[]> => {
         return this.dataSource.initialize().then(async () => {
             const commitments = await this.commitmentRepository.findBy({
                 eventId: eventId,
