@@ -28,6 +28,7 @@ export class Scanner {
             return false;
         }
     }
+
     /**
      * getting last block and observations from the network
      * @param height

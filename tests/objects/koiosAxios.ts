@@ -18,18 +18,18 @@ mockedAxios.onGet(
     {params: {offset: 0, limit: 1, select: 'hash,block_height'}}
 ).reply(200, [
     {
-        "hash": "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
-        "block_height": 3433333
+        "hash": "ccb85a5f2f10bd1468e0cd9679a6bea360962747e2b60b73fa43abe98b09d15c",
+        "block_height": 3433334
     }
 ]);
 
 mockedAxios.onGet(
     '/blocks',
-    {params: {block_height: `eq.3433333`, select: 'hash,block_height'}}
+    {params: {block_height: `eq.3433334`, select: 'hash,block_height'}}
 ).reply(200, [
     {
-        "hash": "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
-        "block_height": 3433333
+        "hash": "ccb85a5f2f10bd1468e0cd9679a6bea360962747e2b60b73fa43abe98b09d15c",
+        "block_height": 3433334
     }
 ]);
 
@@ -94,6 +94,19 @@ mockedAxios.onGet(
 mockedAxios.onGet(
     '/block_txs',
     {params: {_block_hash: "93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3"}}
+).reply(200, [
+        {
+            "tx_hash": "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2"
+        },
+        {
+            "tx_hash": "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"
+        }
+    ]
+);
+
+mockedAxios.onGet(
+    '/block_txs',
+    {params: {_block_hash: "ccb85a5f2f10bd1468e0cd9679a6bea360962747e2b60b73fa43abe98b09d15c"}}
 ).reply(200, [
         {
             "tx_hash": "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2"
