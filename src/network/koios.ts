@@ -40,8 +40,7 @@ export class KoiosNetwork {
     }
 
     static getTxUtxos = (txHashes: Array<string>): Promise<Array<Tx>> => {
-
-        const test = koios.post<Array<{ outputs: Array<Utxo> }>>(
+        return koios.post<Array<{ outputs: Array<Utxo> }>>(
             '/tx_utxos', {"_tx_hashes": txHashes}
         ).then(res => {
             return res.data.map((tx: { outputs: Array<Utxo> }) => {
@@ -50,7 +49,6 @@ export class KoiosNetwork {
                 }
             });
         });
-        return test
     }
 
     static getTxMetaData = (txHashes: Array<string>): Promise<Array<TxMetaData>> => {
