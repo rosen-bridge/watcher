@@ -12,7 +12,7 @@ describe("Cardano Scanner Utils test", () => {
         sourceTxId: 'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa',
         sourceBlockId: '93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3',
         requestId: 'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa',
-        toAddress: 'mock'
+        toAddress: 'ergoAddress'
     };
     describe("isRosenData", () => {
         it("should be Rosen Data", () => {
