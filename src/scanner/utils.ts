@@ -2,6 +2,7 @@ import { KoiosNetwork } from "../network/koios";
 import { MetaData, RosenData, Utxo } from "../objects/apiModelsCardano";
 import AssetFingerprint from "@emurgo/cip14-js";
 import { BANK } from "./bankAddress";
+import { NetworkTemplate } from "./network-template";
 
 export interface Observation {
     fromChain: string
@@ -28,7 +29,8 @@ export class CardanoUtils {
         return 'to' in data &&
             'from' in data &&
             'fee' in data &&
-            'targetChainTokenId' in data;
+            'targetChainTokenId' in data &&
+            'toAddress' in data;
     }
 
     /**
@@ -48,13 +50,13 @@ export class CardanoUtils {
      * @param bank
      * @return Promise<observation|undefined>
      */
-    static checkTx = async (txHash: string, blockHash: string, bank: Array<string>): Promise<Observation | undefined> => {
-        const tx = (await KoiosNetwork.getTxUtxos([txHash]))[0];
+    static checkTx = async (txHash: string, blockHash: string, bank: Array<string>, networkAccess: NetworkTemplate): Promise<Observation | undefined> => {
+        const tx = (await networkAccess.getTxUtxos([txHash]))[0];
         const utxos = tx.utxos.filter((utxo: Utxo) => {
             return bank.find(address => address === utxo.payment_addr.bech32) != undefined;
         });
         if (utxos.length !== 0) {
-            const txMetaData = (await KoiosNetwork.getTxMetaData([txHash]))[0];
+            const txMetaData = (await networkAccess.getTxMetaData([txHash]))[0];
             const metaData = txMetaData.metadata;
             if (this.isRosenMetaData(metaData) && this.isRosenData(metaData["0"])) {
                 if (utxos[0].asset_list.length !== 0) {
@@ -74,7 +76,7 @@ export class CardanoUtils {
                         sourceTxId: txHash,
                         sourceBlockId: blockHash,
                         requestId: txHash,
-                        toAddress: "mock",
+                        toAddress: data.toAddress,
                     }
                 }
             }
@@ -87,11 +89,11 @@ export class CardanoUtils {
      * @param blockHash
      * @return Promise<Array<(Observation | undefined)>>
      */
-    static observationsAtHeight = async (blockHash: string): Promise<Array<(Observation | undefined)>> => {
-        const txs = await KoiosNetwork.getBlockTxs(blockHash);
+    static observationsAtHeight = async (blockHash: string, networkAccess: NetworkTemplate): Promise<Array<(Observation | undefined)>> => {
+        const txs = await networkAccess.getBlockTxs(blockHash);
         const observation = Array(txs.length).fill(undefined);
         for (let i = 0; i < txs.length; i++) {
-            observation[i] = await this.checkTx(txs[i], blockHash, BANK);
+            observation[i] = await this.checkTx(txs[i], blockHash, BANK, networkAccess);
         }
         return observation;
     }
