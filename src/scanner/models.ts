@@ -4,16 +4,14 @@ import { BlockEntity } from "../entities/BlockEntity";
 import { Block } from "../objects/apiModelsCardano";
 import { ObservationEntity } from "../entities/ObservationEntity";
 import { CommitmentEntity } from "../entities/CommitmentEntity";
-import { modelAbstract } from "./model-abstract";
 
-class DataBase extends modelAbstract{
+class DataBase {
 
     private dataSource: DataSource;
     private blockRepository: Repository<BlockEntity>;
     private commitmentRepository: Repository<CommitmentEntity>;
 
     private constructor(dataSource: DataSource) {
-        super();
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(BlockEntity);
         this.commitmentRepository = this.dataSource.getRepository(CommitmentEntity);

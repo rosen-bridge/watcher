@@ -5,9 +5,6 @@ import DataBase from "./models";
 import { ormconfig } from "../../config/ormconfig";
 import { Block } from "../objects/apiModelsCardano";
 import { ScannerAbstract } from "./scanner-abstract";
-import { modelAbstract } from "./model-abstract";
-import { NetworkTemplate } from "./network-template";
-import Config = Chai.Config;
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
@@ -30,7 +27,6 @@ export class Scanner extends ScannerAbstract {
         }
 
     }
-
 
     /**
      * getting last block and observations from the network

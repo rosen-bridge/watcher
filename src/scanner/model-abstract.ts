@@ -1,5 +1,5 @@
 import { Block } from "../objects/apiModelsCardano";
-import { DeleteResult } from "typeorm";
+import { DataSource, DeleteResult, Repository } from "typeorm";
 import { Observation } from "./utils";
 
 export abstract class modelAbstract {

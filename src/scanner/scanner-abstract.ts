@@ -70,5 +70,4 @@ export abstract class ScannerAbstract {
         }
     }
 
-
 }
