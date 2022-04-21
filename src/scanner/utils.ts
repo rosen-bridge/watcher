@@ -28,7 +28,8 @@ export class CardanoUtils {
         return 'to' in data &&
             'from' in data &&
             'fee' in data &&
-            'targetChainTokenId' in data;
+            'targetChainTokenId' in data &&
+            'toAddress' in data;
     }
 
     /**
@@ -74,7 +75,7 @@ export class CardanoUtils {
                         sourceTxId: txHash,
                         sourceBlockId: blockHash,
                         requestId: txHash,
-                        toAddress: "mock",
+                        toAddress: data.toAddress,
                     }
                 }
             }
