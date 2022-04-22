@@ -1,10 +1,10 @@
-import { modelAbstract } from "./model-abstract";
 import { Block } from "../objects/apiModelsCardano";
-import { Observation } from "./utils";
+import { Observation } from "../scanner/utils";
 import { NetworkTemplate } from "./network-template";
+import { DataBase } from "./model";
 
 export abstract class ScannerAbstract {
-    abstract _dataBase: modelAbstract;
+    abstract _dataBase: DataBase;
     abstract _networkAccess: NetworkTemplate;
     abstract _INITIAL_HEIGHT: number;
 

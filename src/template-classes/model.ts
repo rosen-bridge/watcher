@@ -1,11 +1,11 @@
-import { Observation } from "./utils";
-import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
-import { BlockEntity } from "../entities/BlockEntity";
 import { Block } from "../objects/apiModelsCardano";
-import { ObservationEntity } from "../entities/ObservationEntity";
+import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
+import { Observation } from "../scanner/utils";
+import { BlockEntity } from "../entities/BlockEntity";
 import { CommitmentEntity } from "../entities/CommitmentEntity";
+import { ObservationEntity } from "../entities/ObservationEntity";
 
-class DataBase {
+export class DataBase {
 
     private dataSource: DataSource;
     private blockRepository: Repository<BlockEntity>;
@@ -139,4 +139,3 @@ class DataBase {
 
 }
 
-export default DataBase;

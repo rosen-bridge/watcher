@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from 'config';
 import { Block, Tx, TxMetaData, Utxo } from "../objects/apiModelsCardano";
-import { NetworkTemplate } from "../scanner/network-template";
+import { NetworkTemplate } from "../template-classes/network-template";
 
 const URL: string | undefined = config.get?.('node.URL');
 export const koios = axios.create({

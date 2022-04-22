@@ -1,8 +1,7 @@
-import { KoiosNetwork } from "../network/koios";
 import { MetaData, RosenData, Utxo } from "../objects/apiModelsCardano";
 import AssetFingerprint from "@emurgo/cip14-js";
 import { BANK } from "./bankAddress";
-import { NetworkTemplate } from "./network-template";
+import { NetworkTemplate } from "../template-classes/network-template";
 
 export interface Observation {
     fromChain: string

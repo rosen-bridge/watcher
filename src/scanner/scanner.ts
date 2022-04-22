@@ -1,10 +1,10 @@
 import { KoiosNetwork } from "../network/koios";
 import { CardanoUtils, Observation } from "./utils";
 import config, { IConfig } from "config";
-import DataBase from "./models";
 import { ormconfig } from "../../config/ormconfig";
 import { Block } from "../objects/apiModelsCardano";
-import { ScannerAbstract } from "./scanner-abstract";
+import { ScannerAbstract } from "../template-classes/scanner-abstract";
+import { DataBase } from "../template-classes/model";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
