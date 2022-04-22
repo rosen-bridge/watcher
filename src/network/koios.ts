@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from 'config';
-import { Block } from "../objects/apiModels";
+import { Block, Tx, TxMetaData, Utxo } from "../objects/apiModels";
 
 const URL: string | undefined = config.get?.('node.URL');
 export const koios = axios.create({
@@ -11,33 +11,50 @@ export const koios = axios.create({
 
 export class KoiosNetwork {
     static getBlockAtHeight = (height: number): Promise<Block> => {
-        return koios.get(
+        return koios.get<Array<Block>>(
             '/blocks',
             {params: {block_height: `eq.${height}`, select: 'hash,block_height'}}
-        ).then(res => {
-                return res.data[0]
-            })
+        ).then(
+            res => res.data[0]
+        )
     }
 
-    static getBlock = (offset: number = 0, limit: number = 1): Promise<Block[]> => {
-        return koios.get(
+    static getBlock = (offset: number = 0, limit: number = 1): Promise<Array<Block>> => {
+        return koios.get<Array<Block>>(
             '/blocks',
             {params: {offset: offset, limit: limit, select: 'hash,block_height'}}
-        ).then(res => {
-                return res.data
-            })
+        ).then(
+            res => res.data
+        )
     }
 
     static getBlockTxs = (blockHash: string): Promise<string[]> => {
-        return koios.get(
+        return koios.get<Array<{ tx_hash: string }>>(
             '/block_txs',
             {params: {_block_hash: blockHash}}
         ).then(res => {
-                return res.data.map((item: { tx_hash: string }) => {
-                    return item.tx_hash
-                })
+            return res.data.map((item: { tx_hash: string }) => {
+                return item.tx_hash
             })
+        })
     }
 
+    static getTxUtxos = (txHashes: Array<string>): Promise<Array<Tx>> => {
+        return koios.post<Array<{ outputs: Array<Utxo> }>>(
+            '/tx_utxos', {"_tx_hashes": txHashes}
+        ).then(res => {
+            return res.data.map((tx: { outputs: Array<Utxo> }) => {
+                return {
+                    utxos: tx.outputs
+                }
+            });
+        });
+    }
+
+    static getTxMetaData = (txHashes: Array<string>): Promise<Array<TxMetaData>> => {
+        return koios.post<Array<TxMetaData>>("/tx_metadata", {"_tx_hashes": txHashes}).then(
+            res => res.data
+        )
+    }
 }
 

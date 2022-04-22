@@ -1,17 +1,17 @@
 import DataBase from "../../src/scanner/models";
 import { DataSource } from "typeorm";
-import { ObservationEntity } from "../../src/entities/ObservationEntity";
-import { BlockEntity } from "../../src/entities/BlockEntity";
-import { CommitmentEntity } from "../../src/entities/CommitmentEntity";
 import { Observation } from "../../src/scanner/utils";
 import { expect } from "chai";
+import { entities } from "../../src/entities";
+import { migrations } from "../../src/migrations";
 
 export const loadDataBase = async (name: string): Promise<DataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-+${name}.sqlite`,
-        entities: [ObservationEntity, BlockEntity, CommitmentEntity],
-        synchronize: true,
+        entities: entities,
+        synchronize: false,
+        migrations: migrations,
         logging: false,
     });
     return await DataBase.init(ormConfig);
@@ -25,9 +25,9 @@ export const firstObservations: Array<Observation | undefined> = [{
     fee: "1000000",
     sourceChainTokenId: "ergoTokenId",
     targetChainTokenId: "cardanoTokenId",
-    sourceTxId: "ergoTxId",
+    sourceTxId: "ergoTxId1",
     sourceBlockId: "ergoBlockId",
-    requestId: "reqId",
+    requestId: "reqId1",
 }, undefined];
 
 export const secondObservations: Array<Observation | undefined> = [{
@@ -38,9 +38,9 @@ export const secondObservations: Array<Observation | undefined> = [{
     fee: "1100000",
     sourceChainTokenId: "ergoTokenId",
     targetChainTokenId: "cardanoTokenId",
-    sourceTxId: "ergoTxId",
+    sourceTxId: "ergoTxId2",
     sourceBlockId: "ergoBlockId",
-    requestId: "reqId",
+    requestId: "reqId2",
 }, undefined, undefined];
 
 
@@ -49,6 +49,7 @@ describe("Database functions", async () => {
 
     describe("saveBlock", () => {
         it("should return true", async () => {
+            await DB.changeLastValidBlock(3433333);
             let res = await DB.saveBlock(
                 3433333,
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",

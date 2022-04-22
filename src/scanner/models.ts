@@ -18,7 +18,7 @@ class DataBase {
     }
 
     /**
-     * init database connection & runing migrations
+     * init database connection & running migrations'
      * database should be init before any use
      */
     static init = async (dataSource: DataSource) => {

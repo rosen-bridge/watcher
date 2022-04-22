@@ -18,18 +18,18 @@ mockedAxios.onGet(
     {params: {offset: 0, limit: 1, select: 'hash,block_height'}}
 ).reply(200, [
     {
-        "hash": "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
-        "block_height": 3433333
+        "hash": "ccb85a5f2f10bd1468e0cd9679a6bea360962747e2b60b73fa43abe98b09d15c",
+        "block_height": 3433334
     }
 ]);
 
 mockedAxios.onGet(
     '/blocks',
-    {params: {block_height: `eq.3433333`, select: 'hash,block_height'}}
+    {params: {block_height: `eq.3433334`, select: 'hash,block_height'}}
 ).reply(200, [
     {
-        "hash": "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
-        "block_height": 3433333
+        "hash": "ccb85a5f2f10bd1468e0cd9679a6bea360962747e2b60b73fa43abe98b09d15c",
+        "block_height": 3433334
     }
 ]);
 
@@ -90,3 +90,248 @@ mockedAxios.onGet(
         "tx_hash": "b092027357f70831dd34dd34cea54146c11e844dc194b4c2ea841bce7cd19816"
     }
 ]);
+
+mockedAxios.onGet(
+    '/block_txs',
+    {params: {_block_hash: "93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3"}}
+).reply(200, [
+        {
+            "tx_hash": "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2"
+        },
+        {
+            "tx_hash": "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"
+        }
+    ]
+);
+
+mockedAxios.onGet(
+    '/block_txs',
+    {params: {_block_hash: "ccb85a5f2f10bd1468e0cd9679a6bea360962747e2b60b73fa43abe98b09d15c"}}
+).reply(200, [
+        {
+            "tx_hash": "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2"
+        },
+        {
+            "tx_hash": "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"
+        }
+    ]
+);
+
+mockedAxios.onPost(
+    '/tx_utxos',
+    {
+        _tx_hashes: ["cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"]
+    }).reply(200,
+    [
+        {
+            "tx_hash": "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa",
+            "inputs": [
+                {
+                    "payment_addr": {
+                        "bech32": "addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0",
+                        "cred": "90ff35400c4d2cbddef24a750ad7064947a2461c1a0b9ca431c7e9f6"
+                    },
+                    "stake_addr": null,
+                    "tx_hash": "9f00d372e930d685c3b410a10f2bd035cd9a927c4fd8ef8e419c79b210af7ba6",
+                    "tx_index": 1,
+                    "value": "979445417",
+                    "asset_list": [
+                        {
+                            "policy_id": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
+                            "asset_name": "646f6765",
+                            "quantity": "10000000"
+                        },
+                        {
+                            "policy_id": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
+                            "asset_name": "7369676d61",
+                            "quantity": "9999978"
+                        }
+                    ]
+                }
+            ],
+            "outputs": [
+                {
+                    "payment_addr": {
+                        "bech32": "addr_test1vze7yqqlg8cjlyhz7jzvsg0f3fhxpuu6m3llxrajfzqecggw704re",
+                        "cred": "b3e2001f41f12f92e2f484c821e98a6e60f39adc7ff30fb248819c21"
+                    },
+                    "stake_addr": null,
+                    "tx_hash": "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa",
+                    "tx_index": 0,
+                    "value": "10000000",
+                    "asset_list": [
+                        {
+                            "policy_id": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
+                            "asset_name": "7369676d61",
+                            "quantity": "10"
+                        }
+                    ]
+                },
+                {
+                    "payment_addr": {
+                        "bech32": "addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0",
+                        "cred": "90ff35400c4d2cbddef24a750ad7064947a2461c1a0b9ca431c7e9f6"
+                    },
+                    "stake_addr": null,
+                    "tx_hash": "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa",
+                    "tx_index": 1,
+                    "value": "969261084",
+                    "asset_list": [
+                        {
+                            "policy_id": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
+                            "asset_name": "646f6765",
+                            "quantity": "10000000"
+                        },
+                        {
+                            "policy_id": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
+                            "asset_name": "7369676d61",
+                            "quantity": "9999968"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+);
+
+mockedAxios.onPost(
+    '/tx_utxos',
+    {
+        _tx_hashes: ["edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2"]
+    }).reply(200,
+    [
+        {
+            "tx_hash": "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2",
+            "inputs": [
+                {
+                    "payment_addr": {
+                        "bech32": "addr_test1vra2radc0sj882n9cuwwvzwyxxz442hxy06ftuyakzjxdlcxlstkz",
+                        "cred": "faa1f5b87c2473aa65c71ce609c431855aaae623f495f09db0a466ff"
+                    },
+                    "stake_addr": null,
+                    "tx_hash": "6f213bbeb895ebdb3805052f9e0c98b812d37ddaf8604157962171c3499a10ad",
+                    "tx_index": 1,
+                    "value": "23500000",
+                    "asset_list": [
+                        {
+                            "policy_id": "3794c001b97da7a47823ad27b29e049985a9a97f8aa6908429180e2c",
+                            "asset_name": "506c7574757350424c436f757273653031",
+                            "quantity": "1"
+                        },
+                        {
+                            "policy_id": "cef5bfce1ff3fc5b128296dd0aa87e075a8ee8833057230c192c4059",
+                            "asset_name": "706c6179",
+                            "quantity": "400"
+                        }
+                    ]
+                },
+                {
+                    "payment_addr": {
+                        "bech32": "addr_test1wrsdlj8k39g4e3rgsza9lstjqctrlml5mghvywf9m4e288gwxshfq",
+                        "cred": "e0dfc8f689515cc46880ba5fc17206163feff4da2ec23925dd72a39d"
+                    },
+                    "stake_addr": null,
+                    "tx_hash": "8220660833eca5e8dbe1d0067efcbc2fb5c7a2f41f2ea42be8ae87af343cd147",
+                    "tx_index": 1,
+                    "value": "25500000",
+                    "asset_list": [
+                        {
+                            "policy_id": "cef5bfce1ff3fc5b128296dd0aa87e075a8ee8833057230c192c4059",
+                            "asset_name": "706c6179",
+                            "quantity": "400"
+                        }
+                    ]
+                }
+            ],
+            "outputs": [
+                {
+                    "payment_addr": {
+                        "bech32": "addr_test1vra2radc0sj882n9cuwwvzwyxxz442hxy06ftuyakzjxdlcxlstkz",
+                        "cred": "faa1f5b87c2473aa65c71ce609c431855aaae623f495f09db0a466ff"
+                    },
+                    "stake_addr": null,
+                    "tx_hash": "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2",
+                    "tx_index": 0,
+                    "value": "20776498",
+                    "asset_list": []
+                },
+                {
+                    "payment_addr": {
+                        "bech32": "addr_test1wzd82fzfkrfjqnzpvjyzauve5ssw8wkhgepkd84jggx5n3gful79d",
+                        "cred": "9a752449b0d3204c4164882ef199a420e3bad74643669eb2420d49c5"
+                    },
+                    "stake_addr": null,
+                    "tx_hash": "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2",
+                    "tx_index": 1,
+                    "value": "5000000",
+                    "asset_list": [
+                        {
+                            "policy_id": "3794c001b97da7a47823ad27b29e049985a9a97f8aa6908429180e2c",
+                            "asset_name": "506c7574757350424c436f757273653031",
+                            "quantity": "1"
+                        },
+                        {
+                            "policy_id": "cef5bfce1ff3fc5b128296dd0aa87e075a8ee8833057230c192c4059",
+                            "asset_name": "706c6179",
+                            "quantity": "50"
+                        }
+                    ]
+                },
+                {
+                    "payment_addr": {
+                        "bech32": "addr_test1wrsdlj8k39g4e3rgsza9lstjqctrlml5mghvywf9m4e288gwxshfq",
+                        "cred": "e0dfc8f689515cc46880ba5fc17206163feff4da2ec23925dd72a39d"
+                    },
+                    "stake_addr": null,
+                    "tx_hash": "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2",
+                    "tx_index": 2,
+                    "value": "20500000",
+                    "asset_list": [
+                        {
+                            "policy_id": "cef5bfce1ff3fc5b128296dd0aa87e075a8ee8833057230c192c4059",
+                            "asset_name": "706c6179",
+                            "quantity": "350"
+                        }
+                    ]
+                },
+                {
+                    "payment_addr": {
+                        "bech32": "addr_test1vra2radc0sj882n9cuwwvzwyxxz442hxy06ftuyakzjxdlcxlstkz",
+                        "cred": "faa1f5b87c2473aa65c71ce609c431855aaae623f495f09db0a466ff"
+                    },
+                    "stake_addr": null,
+                    "tx_hash": "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2",
+                    "tx_index": 3,
+                    "value": "2000000",
+                    "asset_list": [
+                        {
+                            "policy_id": "cef5bfce1ff3fc5b128296dd0aa87e075a8ee8833057230c192c4059",
+                            "asset_name": "706c6179",
+                            "quantity": "400"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+);
+
+
+mockedAxios.onPost(
+    "/tx_metadata",
+    {
+        _tx_hashes: ["cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"]
+    }).reply(200,
+    [{
+        "tx_hash": "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa",
+        "metadata": {
+            "0": {
+                "to": "ERGO",
+                "fee": "10000",
+                "from": "CARDANO",
+                "toAddress": "ergoAddress",
+                "targetChainTokenId": "cardanoTokenId"
+            }
+        }
+    }]
+);

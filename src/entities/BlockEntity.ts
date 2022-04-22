@@ -8,6 +8,7 @@ export class BlockEntity {
 
     @Column({
         length: 64,
+        unique: true
     })
     hash: string
 
