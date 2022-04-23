@@ -30,17 +30,16 @@ export class Scanner extends ScannerAbstract<Tx, TxMetaData> {
     }
 
     /**
-     * getting last block and observations from the network
-     * @param height
-     * @return Promise<[Block, Array<Observation | undefined>]>
+     * getting block and extracting observations from the network
+     * @param block
+     * @return Promise<Array<Observation | undefined>>
      */
-    getBlockAndObservations = async (height: number): Promise<[Block, Array<Observation | undefined>]> => {
-        const block = await this._networkAccess.getBlockAtHeight(height);
+    getBlockObservations = async (block: Block): Promise<Array<Observation | undefined>> => {
         const observations = (await CardanoUtils.observationsAtHeight(block.hash, this._networkAccess))
             .filter((observation) => {
                 return observation !== undefined
             });
-        return [block, observations];
+        return observations;
     }
 
 }

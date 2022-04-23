@@ -22,7 +22,7 @@ export abstract class ScannerAbstract<TxT, TxMetaDataT> {
         }
     }
 
-    abstract getBlockAndObservations(height: number): Promise<[Block, Array<Observation | undefined>]>;
+    abstract getBlockObservations(block: Block): Promise<Array<Observation | undefined>>;
 
     /**
      * worker function that runs for syncing the database with the Cardano blockchain and checks if we have any fork
@@ -45,7 +45,8 @@ export abstract class ScannerAbstract<TxT, TxMetaDataT> {
                 height = this._INITIAL_HEIGHT;
             }
             for (height; height <= lastBlockHeight; height++) {
-                const [block, observations] = await this.getBlockAndObservations(height);
+                const block = await this._networkAccess.getBlockAtHeight(height);
+                const observations = await this.getBlockObservations(block);
                 if (!await this.isForkHappen()) {
                     if (!await this._dataBase.saveBlock(block.block_height, block.hash, observations)) {
                         break;
