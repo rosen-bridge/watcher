@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import { Scanner } from "../../src/scanner/scanner";
-import { firstObservations, loadDataBase } from "./models";
-import { KoiosNetwork } from "../../src/network/koios";
+import { Scanner } from "../../../src/cardano/scanner/scanner";
+import { firstObservations, loadDataBase } from "../models/models";
+import { KoiosNetwork } from "../../../src/cardano/network/koios";
 import config from "config";
 
 describe("Scanner test", () => {

@@ -1,14 +1,15 @@
 import { KoiosNetwork } from "../network/koios";
 import { CardanoUtils, Observation } from "./utils";
 import config, { IConfig } from "config";
-import { ormconfig } from "../../config/ormconfig";
-import { Block } from "../objects/apiModelsCardano";
-import { ScannerAbstract } from "../template-classes/scanner-abstract";
-import { DataBase } from "../template-classes/model";
+import { ormconfig } from "../../../config/ormconfig";
+import { ScannerAbstract } from "../../scanner/scanner-abstract";
+import { DataBase } from "../../models/model";
+import { Block } from "../../objects/interfaces";
+import { Tx, TxMetaData } from "../network/apiModelsCardano";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
-export class Scanner extends ScannerAbstract {
+export class Scanner extends ScannerAbstract<Tx, TxMetaData> {
     _dataBase: DataBase;
     _networkAccess: KoiosNetwork;
     _config: IConfig;

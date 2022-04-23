@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import { CardanoUtils } from "../../src/scanner/utils";
-import { KoiosNetwork } from "../../src/network/koios";
+import { CardanoUtils } from "../../../src/cardano/scanner/utils";
+import { KoiosNetwork } from "../../../src/cardano/network/koios";
 
 describe("Cardano Scanner Utils test", () => {
     const sampleObservation = {

@@ -1,4 +1,4 @@
-import { main } from "./scanner/scanner";
+import { main } from "./cardano/scanner/scanner";
 import "reflect-metadata";
 
 main()

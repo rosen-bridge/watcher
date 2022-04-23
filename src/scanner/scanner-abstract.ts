@@ -1,11 +1,11 @@
-import { Block } from "../objects/apiModelsCardano";
-import { Observation } from "../scanner/utils";
-import { NetworkTemplate } from "./network-template";
-import { DataBase } from "./model";
+import { Observation } from "../cardano/scanner/utils";
+import { NetworkAbstract } from "../network/network-abstract";
+import { DataBase } from "../models/model";
+import { Block } from "../objects/interfaces";
 
-export abstract class ScannerAbstract {
+export abstract class ScannerAbstract<TxT, TxMetaDataT> {
     abstract _dataBase: DataBase;
-    abstract _networkAccess: NetworkTemplate;
+    abstract _networkAccess: NetworkAbstract<TxT, TxMetaDataT>;
     abstract _INITIAL_HEIGHT: number;
 
     /**

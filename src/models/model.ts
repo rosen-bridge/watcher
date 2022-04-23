@@ -1,9 +1,9 @@
-import { Block } from "../objects/apiModelsCardano";
 import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
-import { Observation } from "../scanner/utils";
+import { Observation } from "../cardano/scanner/utils";
 import { BlockEntity } from "../entities/BlockEntity";
 import { CommitmentEntity } from "../entities/CommitmentEntity";
 import { ObservationEntity } from "../entities/ObservationEntity";
+import { Block } from "../objects/interfaces";
 
 export class DataBase {
 

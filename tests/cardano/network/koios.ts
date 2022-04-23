@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { KoiosNetwork } from "../../src/network/koios";
+import { KoiosNetwork } from "../../../src/cardano/network/koios";
 
 describe("Koios Apis", () => {
     describe("getBlockAtHeight", () => {
