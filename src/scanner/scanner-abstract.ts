@@ -1,7 +1,6 @@
-import { Observation } from "../cardano/scanner/utils";
 import { NetworkAbstract } from "../network/network-abstract";
 import { DataBase } from "../models/model";
-import { Block } from "../objects/interfaces";
+import { Block, Observation } from "../objects/interfaces";
 
 export abstract class ScannerAbstract<TxT, TxMetaDataT> {
     abstract _dataBase: DataBase;

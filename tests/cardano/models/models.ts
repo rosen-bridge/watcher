@@ -1,9 +1,9 @@
 import { DataSource } from "typeorm";
-import { Observation } from "../../../src/cardano/scanner/utils";
 import { expect } from "chai";
 import { entities } from "../../../src/entities";
 import { migrations } from "../../../src/migrations";
 import { DataBase } from "../../../src/models/model";
+import { Observation } from "../../../src/objects/interfaces";
 
 export const loadDataBase = async (name: string): Promise<DataBase> => {
     const ormConfig = new DataSource({

@@ -2,20 +2,7 @@ import { MetaData, RosenData, Tx, TxMetaData, Utxo } from "../network/apiModelsC
 import AssetFingerprint from "@emurgo/cip14-js";
 import { BANK } from "./bankAddress";
 import { NetworkAbstract } from "../../network/network-abstract";
-
-export interface Observation {
-    fromChain: string
-    toChain: string
-    toAddress: string
-    amount: string
-    fee: string
-    sourceChainTokenId: string
-    targetChainTokenId: string
-    sourceTxId: string
-    sourceBlockId: string
-    requestId: string
-
-}
+import { Observation } from "../../objects/interfaces";
 
 export class CardanoUtils {
 
@@ -88,7 +75,10 @@ export class CardanoUtils {
      * @param blockHash
      * @return Promise<Array<(Observation | undefined)>>
      */
-    static observationsAtHeight = async (blockHash: string, networkAccess: NetworkAbstract<Tx, TxMetaData>): Promise<Array<(Observation | undefined)>> => {
+    static observationsAtHeight = async (
+        blockHash: string,
+        networkAccess: NetworkAbstract<Tx, TxMetaData>
+    ): Promise<Array<(Observation | undefined)>> => {
         const txs = await networkAccess.getBlockTxs(blockHash);
         const observation = Array(txs.length).fill(undefined);
         for (let i = 0; i < txs.length; i++) {
