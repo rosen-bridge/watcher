@@ -1,10 +1,10 @@
-import { NetworkAbstract } from "../network/network-abstract";
+import { AbstractNetworkConnector } from "../network/abstract-network-connector";
 import { DataBase } from "../models/model";
 import { Block, Observation } from "../objects/interfaces";
 
 export abstract class ScannerAbstract<TxT, TxMetaDataT> {
     abstract _dataBase: DataBase;
-    abstract _networkAccess: NetworkAbstract<TxT, TxMetaDataT>;
+    abstract _networkAccess: AbstractNetworkConnector<TxT, TxMetaDataT>;
     abstract _INITIAL_HEIGHT: number;
 
     /**

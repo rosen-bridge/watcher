@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from 'config';
 import { Tx, TxMetaData, Utxo } from "./apiModelsCardano";
-import { NetworkAbstract } from "../../network/network-abstract";
+import { AbstractNetworkConnector } from "../../network/abstract-network-connector";
 import { Block } from "../../objects/interfaces";
 
 const URL: string | undefined = config.get?.('node.URL');
@@ -11,7 +11,7 @@ export const koios = axios.create({
     headers: {"Content-Type": "application/json"}
 });
 
-export class KoiosNetwork extends NetworkAbstract<Tx, TxMetaData> {
+export class KoiosNetwork extends AbstractNetworkConnector<Tx, TxMetaData> {
     getBlockAtHeight = (height: number): Promise<Block> => {
         return koios.get<Array<Block>>(
             '/blocks',

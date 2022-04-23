@@ -1,6 +1,6 @@
 import { Block } from "../objects/interfaces";
 
-export abstract class NetworkAbstract<TxT, TxMetaDataT> {
+export abstract class AbstractNetworkConnector<TxT, TxMetaDataT> {
     abstract getBlockAtHeight(height: number): Promise<Block>;
 
     abstract getBlock(offset: number, limit: number): Promise<Array<Block>>;

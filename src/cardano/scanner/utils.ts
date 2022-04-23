@@ -1,7 +1,7 @@
 import { MetaData, RosenData, Tx, TxMetaData, Utxo } from "../network/apiModelsCardano";
 import AssetFingerprint from "@emurgo/cip14-js";
 import { BANK } from "./bankAddress";
-import { NetworkAbstract } from "../../network/network-abstract";
+import { AbstractNetworkConnector } from "../../network/abstract-network-connector";
 import { Observation } from "../../objects/interfaces";
 
 export class CardanoUtils {
@@ -36,7 +36,7 @@ export class CardanoUtils {
      * @param bank
      * @return Promise<observation|undefined>
      */
-    static checkTx = async (txHash: string, blockHash: string, bank: Array<string>, networkAccess: NetworkAbstract<Tx, TxMetaData>): Promise<Observation | undefined> => {
+    static checkTx = async (txHash: string, blockHash: string, bank: Array<string>, networkAccess: AbstractNetworkConnector<Tx, TxMetaData>): Promise<Observation | undefined> => {
         const tx = (await networkAccess.getTxUtxos([txHash]))[0];
         const utxos = tx.utxos.filter((utxo: Utxo) => {
             return bank.find(address => address === utxo.payment_addr.bech32) != undefined;
@@ -77,7 +77,7 @@ export class CardanoUtils {
      */
     static observationsAtHeight = async (
         blockHash: string,
-        networkAccess: NetworkAbstract<Tx, TxMetaData>
+        networkAccess: AbstractNetworkConnector<Tx, TxMetaData>
     ): Promise<Array<(Observation | undefined)>> => {
         const txs = await networkAccess.getBlockTxs(blockHash);
         const observation = Array(txs.length).fill(undefined);
