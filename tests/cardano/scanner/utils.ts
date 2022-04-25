@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import { CardanoUtils } from "../../src/scanner/utils";
+import { CardanoUtils } from "../../../src/cardano/scanner/utils";
+import { KoiosNetwork } from "../../../src/cardano/network/koios";
 
 describe("Cardano Scanner Utils test", () => {
     const sampleObservation = {
@@ -50,26 +51,32 @@ describe("Cardano Scanner Utils test", () => {
     });
     describe("checkTx", () => {
         it("should be observation", async () => {
+            const koiosNetwork = new KoiosNetwork();
             const observation = await CardanoUtils.checkTx(
                 "cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa"
                 , "93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3"
                 , ["addr_test1vze7yqqlg8cjlyhz7jzvsg0f3fhxpuu6m3llxrajfzqecggw704re"]
+                , koiosNetwork
             );
             expect(observation).to.be.eql(sampleObservation);
         });
         it("should be undefined", async () => {
+            const koiosNetwork = new KoiosNetwork();
             const observation = await CardanoUtils.checkTx(
                 "edce02f2f23ddc3270964d2ba74ff6375a5a78fd6caf1c66102565b83f5d3ca2"
                 , "93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3"
                 , ["addr_test1vze7yqqlg8cjlyhz7jzvsg0f3fhxpuu6m3llxrajfzqecggw704re"]
+                , koiosNetwork
             );
             expect(observation).to.be.undefined;
         });
     });
     describe("observationAtHeight", () => {
+        const koiosNetwork = new KoiosNetwork();
         it("first index should be undefined and second be observation", async () => {
             const observations = await CardanoUtils.observationsAtHeight(
                 "93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3"
+                , koiosNetwork
             );
             expect(observations.length).to.be.equal(2);
             expect(observations[0]).to.be.undefined;

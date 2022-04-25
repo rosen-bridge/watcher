@@ -1,8 +1,3 @@
-export interface Block {
-    hash: string,
-    block_height: number,
-}
-
 export interface Asset {
     policy_id: string,
     asset_name: string,

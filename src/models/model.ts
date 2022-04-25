@@ -1,11 +1,10 @@
-import { Observation } from "./utils";
 import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
 import { BlockEntity } from "../entities/BlockEntity";
-import { Block } from "../objects/apiModels";
-import { ObservationEntity } from "../entities/ObservationEntity";
 import { CommitmentEntity } from "../entities/CommitmentEntity";
+import { ObservationEntity } from "../entities/ObservationEntity";
+import { Block, Observation } from "../objects/interfaces";
 
-class DataBase {
+export class DataBase {
 
     private dataSource: DataSource;
     private blockRepository: Repository<BlockEntity>;
@@ -128,7 +127,7 @@ class DataBase {
      * @param eventId
      * @return Promise<string[]>
      */
-    getCommitments = (eventId: string): Promise<string[]> => {
+    getCommitments = async (eventId: string): Promise<string[]> => {
         return this.dataSource.initialize().then(async () => {
             const commitments = await this.commitmentRepository.findBy({
                 eventId: eventId,
@@ -139,4 +138,3 @@ class DataBase {
 
 }
 
-export default DataBase;

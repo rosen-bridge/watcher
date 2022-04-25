@@ -1,14 +1,14 @@
-import DataBase from "../../src/scanner/models";
 import { DataSource } from "typeorm";
-import { Observation } from "../../src/scanner/utils";
 import { expect } from "chai";
-import { entities } from "../../src/entities";
-import { migrations } from "../../src/migrations";
+import { entities } from "../../../src/entities";
+import { migrations } from "../../../src/migrations";
+import { DataBase } from "../../../src/models/model";
+import { Observation } from "../../../src/objects/interfaces";
 
 export const loadDataBase = async (name: string): Promise<DataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
-        database: `./sqlite/watcher-test-+${name}.sqlite`,
+        database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: entities,
         synchronize: false,
         migrations: migrations,
