@@ -1,18 +1,38 @@
 import axios from "axios";
 import config from "config";
 import * as ergoLib from "ergo-lib-wasm-nodejs";
-import { RSNBox } from "../../objects/ergo";
+import { Info, RSNBox } from "../../objects/ergo";
 
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorer');
+const NODE_URL: string | undefined = config.get?.('ergo.node');
+
 // const RSN: string | undefined = config.get?.('ergo.RSN');
-const RSN = "0088eb2b6745ad637112b50a4c5e389881f910ebcf802b183d6633083c2b04fc";
+const RSN = "25bcbb2381e2569221737f12e06215c59cef8bb1403225084aaf6cf61f500bff";
+
+
 const explorerApi = axios.create({
     baseURL: EXPLORER_URL,
     timeout: 8000,
 });
 
+const nodeClient = axios.create({
+    baseURL: NODE_URL,
+    timeout: 8000,
+    headers: {"Content-Type": "application/json"}
+});
 
-export class Explorer {
+export class ErgoNetwork {
+
+    pay2ScriptAddress = (script: string): Promise<string> => {
+        return nodeClient.post("/script/p2sAddress", {source: script}).then(
+            res => res.data.address
+        )
+    }
+
+    getHeight = async (): Promise<number> => {
+        return nodeClient.get<Info>("/info").then((res) => res.data.fullHeight);
+    }
+
     getBoxesForAddress = async (tree: string, offset = 0, limit = 100) => {
         return explorerApi.get(`/api/v1/boxes/unspent/byErgoTree/${tree}?offset=${offset}&limit=${limit}`).then(res => res.data);
     }
@@ -79,5 +99,5 @@ export class Explorer {
         return new RSNBox(JSON.parse(box.boxes[0].to_json()))
     }
 
-    
+
 }

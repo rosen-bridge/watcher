@@ -1,5 +1,9 @@
 import { ErgoBox, ErgoTree } from 'ergo-lib-wasm-nodejs';
 
+export interface Info {
+    fullHeight: number,
+}
+
 abstract class Box {
     protected ergoBox: ErgoBox;
 
@@ -15,9 +19,13 @@ abstract class Box {
         return this.ergoBox.ergo_tree()
     }
 
+    getBoxJson = (): string => {
+        return this.ergoBox.to_json()
+    }
+
 }
 
-export class RSNBox extends Box{
+export class RSNBox extends Box {
     constructor(boxJson: JSON) {
         super(boxJson)
     }
