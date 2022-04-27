@@ -4,6 +4,8 @@ import express from "express";
 import { generateSK } from "./api/generateAddress";
 import generateAddress from "./api/generateAddress";
 import { Explorer } from "./ergo/network/explorer";
+import * as ergoLib from "ergo-lib-wasm-nodejs";
+
 // main()
 // const app = express();
 // app.use('/address', generateAddress);
@@ -18,4 +20,6 @@ import { Explorer } from "./ergo/network/explorer";
 //
 // generateSK()
 const api=new Explorer();
-api.getCoveringErgAndTokenForAddress("3Ww8f4ZxN579AayqphK1pqGRBgSZFvAHAEgmAF9My3aLgMmGibcP",1000);
+const tree=ergoLib.Address.from_mainnet_str("9erMHuJYNKQkZCaDs9REhpNaWbhMPbdVmqgM4s7M2GjtQ56j2xG").to_ergo_tree();
+
+ api.getCoveringErgAndTokenForAddress(tree.to_base16_bytes(),1000).then(res=>console.log(res))
