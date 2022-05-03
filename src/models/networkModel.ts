@@ -3,14 +3,15 @@ import { BlockEntity } from "../entities/BlockEntity";
 import { CommitmentEntity } from "../entities/CommitmentEntity";
 import { ObservationEntity } from "../entities/ObservationEntity";
 import { Block, Observation } from "../objects/interfaces";
+import {AbstractDataBase} from "./abstractModel";
 
-export class DataBase {
-
-    private dataSource: DataSource;
-    private blockRepository: Repository<BlockEntity>;
-    private commitmentRepository: Repository<CommitmentEntity>;
+export class NetworkDataBase extends AbstractDataBase<BlockEntity, Observation> {
+    dataSource: DataSource;
+    blockRepository: Repository<BlockEntity>;
+    commitmentRepository: Repository<CommitmentEntity>;
 
     private constructor(dataSource: DataSource) {
+        super()
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(BlockEntity);
         this.commitmentRepository = this.dataSource.getRepository(CommitmentEntity);
@@ -30,7 +31,7 @@ export class DataBase {
             .catch((err) => {
                 console.error("Error during Data Source initialization:", err);
             });
-        return new DataBase(dataSource);
+        return new NetworkDataBase(dataSource);
     }
 
     /**

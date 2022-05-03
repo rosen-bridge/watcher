@@ -1,9 +1,9 @@
 import { AbstractNetworkConnector } from "../network/abstract-network-connector";
-import { DataBase } from "../models/model";
-import { Block, Observation } from "../objects/interfaces";
+import { AbstractDataBase } from "../models/abstractModel";
+import { Block } from "../objects/interfaces";
 
-export abstract class AbstractScanner<TxT, TxMetaDataT> {
-    abstract _dataBase: DataBase;
+export abstract class AbstractScanner<TxT, TxMetaDataT, BlockT, DataT> {
+    abstract _dataBase: AbstractDataBase<BlockT, DataT>;
     abstract _networkAccess: AbstractNetworkConnector<TxT, TxMetaDataT>;
     abstract _INITIAL_HEIGHT: number;
 
@@ -21,7 +21,7 @@ export abstract class AbstractScanner<TxT, TxMetaDataT> {
         }
     }
 
-    abstract getBlockObservations(block: Block): Promise<Array<Observation | undefined>>;
+    abstract getBlockInformation(block: Block): Promise<Array<DataT | undefined>>;
 
     /**
      * worker function that runs for syncing the database with the Cardano blockchain and checks if we have any fork
@@ -45,7 +45,7 @@ export abstract class AbstractScanner<TxT, TxMetaDataT> {
             }
             for (height; height <= lastBlockHeight; height++) {
                 const block = await this._networkAccess.getBlockAtHeight(height);
-                const observations = await this.getBlockObservations(block);
+                const observations = await this.getBlockInformation(block);
                 if (!await this.isForkHappen()) {
                     if (!await this._dataBase.saveBlock(block.block_height, block.hash, observations)) {
                         break;

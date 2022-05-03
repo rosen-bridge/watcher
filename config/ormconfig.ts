@@ -2,9 +2,9 @@ import { DataSource } from "typeorm";
 import { entities } from "../src/entities";
 import { migrations } from "../src/migrations";
 
-export const ormconfig = new DataSource({
+export const cardanoOrmConfig = new DataSource({
     type: "sqlite",
-    database: __dirname + "/../sqlite/watcher.sqlite",
+    database: __dirname + "/../sqlite/cardanoWatcher.sqlite",
     entities: entities,
     migrations: migrations,
     synchronize: false,

@@ -12,7 +12,7 @@ export class CommitmentEntity {
     commitment: string
 
     @Column()
-    UTP: string
+    WID: string
 
     @Column()
     commitmentBoxId: string

@@ -2,10 +2,10 @@ import { DataSource } from "typeorm";
 import { expect } from "chai";
 import { entities } from "../../../src/entities";
 import { migrations } from "../../../src/migrations";
-import { DataBase } from "../../../src/models/model";
+import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
 
-export const loadDataBase = async (name: string): Promise<DataBase> => {
+export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
@@ -14,7 +14,7 @@ export const loadDataBase = async (name: string): Promise<DataBase> => {
         migrations: migrations,
         logging: false,
     });
-    return await DataBase.init(ormConfig);
+    return await NetworkDataBase.init(ormConfig);
 }
 
 export const firstObservations: Array<Observation | undefined> = [{
