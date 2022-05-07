@@ -1,3 +1,5 @@
+import * as wasm from "ergo-lib-wasm-nodejs";
+
 export default {
     node: {
         URL: "https://testnet.koios.rest/api/v0",
@@ -6,4 +8,18 @@ export default {
         interval: 10,
         initialBlockHeight: 3471392,
     },
+    ergo: {
+        nodeUrl: "",
+        networkType: wasm.NetworkPrefix.Mainnet
+    },
+    commitmentScanner: {
+        interval: 10,
+        initialBlockHeight: 100,
+    },
 };
+
+export const commitmentAddress = "alaki"
+export const tokens ={
+    RWT: "rwt",
+
+}
