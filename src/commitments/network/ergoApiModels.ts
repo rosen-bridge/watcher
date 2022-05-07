@@ -50,8 +50,14 @@ export type ExplorerTransaction = {
     outputs: ExplorerOutputBox[],
 }
 
-export type ExplorerBlock = {
+export type ExplorerBlockHeader = {
     id: string,
     height: number,
-    blockTransactions: ExplorerTransaction[]
+}
+
+export type ExplorerBlock = {
+    block: {
+        header: ExplorerBlockHeader,
+        blockTransactions: ExplorerTransaction[]
+    }
 }

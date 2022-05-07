@@ -9,6 +9,7 @@ export default {
         initialBlockHeight: 3471392,
     },
     ergo: {
+        explorerUrl: "https://api.ergoplatform.com/",
         nodeUrl: "",
         networkType: wasm.NetworkPrefix.Mainnet
     },
