@@ -3,7 +3,8 @@ import {Commitment} from "../../objects/interfaces";
 import {tokens} from "../../../config/default";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import {ErgoNetworkApi} from "../network/networkApi";
-import {extractBoxes, ergoTreeToBase58Address} from "../../utils/utils";
+import {decodeCollColl, decodeStr} from "../../utils/utils";
+import {ExplorerOutputBox, ExplorerTransaction} from "../network/ergoApiModels";
 
 export class CommitmentUtils {
 
@@ -22,18 +23,18 @@ export class CommitmentUtils {
                             networkAccess: ErgoNetworkApi):
         Promise<Commitment | undefined> => {
         const tx = (await networkAccess.getTxMetaData([txHash]))[0];
-        const commitment: wasm.ErgoBox = extractBoxes(tx).filter((box) => {
-            return commitmentAddresses.find(address => address === ergoTreeToBase58Address(box.ergo_tree())) != undefined;
-        }).filter(box => box.tokens().len() > 0 && box.tokens().get(0).id().to_str() == tokens.RWT)[0]
+        const commitment: ExplorerOutputBox = tx.outputs.filter((box) => {
+            return commitmentAddresses.find(address => address === box.address) != undefined;
+        }).filter(box => box.assets.length > 0 && box.assets[0].tokenId == tokens.RWT)[0]
         if(commitment != undefined){
-            const WID = commitment.register_value(0)?.to_coll_coll_byte()[0]!
-            const requestId = commitment.register_value(1)?.to_coll_coll_byte()[0]!
-            const eventDigest = commitment.register_value(2)?.to_byte_array()!
+            const WID = (await decodeCollColl(commitment.additionalRegisters['R4'].serializedValue))[0]
+            const requestId = (await decodeCollColl(commitment.additionalRegisters['R5'].serializedValue))[0]
+            const eventDigest = await decodeStr(commitment.additionalRegisters['R6'].serializedValue)
             return{
                 WID: Buffer.from(WID).toString('hex'),
                 eventId: Buffer.from(requestId).toString('hex'),
-                commitment: Buffer.from(eventDigest).toString('hex'),
-                commitmentBoxId: commitment.box_id().to_str()
+                commitment: eventDigest,
+                commitmentBoxId: commitment.boxId
             }
         }
         return undefined;

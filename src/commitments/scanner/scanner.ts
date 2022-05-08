@@ -7,10 +7,11 @@ import {ErgoNetworkApi} from "../network/networkApi";
 import {CBlockEntity} from "../../entities/CBlockEntity";
 import {CommitmentUtils} from "./utils";
 import * as wasm from "ergo-lib-wasm-nodejs";
+import {ExplorerTransaction} from "../network/ergoApiModels";
 
 const INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
 
-export class Scanner extends AbstractScanner<wasm.ErgoBox, wasm.Transaction, CBlockEntity, Commitment> {
+export class Scanner extends AbstractScanner<wasm.ErgoBox, ExplorerTransaction, CBlockEntity, Commitment> {
     _dataBase: CommitmentDataBase;
     _networkAccess: ErgoNetworkApi;
     _config: IConfig;
