@@ -80,7 +80,9 @@ export class ErgoNetworkApi extends AbstractNetworkConnector<wasm.ErgoBox, Explo
     }
 
     boxIsSpent = async (boxId: string): Promise<Boolean> => {
-        return Promise.resolve(true)
+        return explorerApi.get<{spentTransactionId: number}>(`/api/v1/boxes/${boxId}`).then(res => {
+            return res.data.spentTransactionId != null;
+        })
     }
 }
 
