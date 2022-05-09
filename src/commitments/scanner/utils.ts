@@ -12,13 +12,11 @@ export class CommitmentUtils {
      * check if a transaction generates a commitment or not if yes returns the commitment
      * object else returns undefined
      * @param txHash
-     * @param blockHash
      * @param commitmentAddresses
      * @param networkAccess
      * @return Promise<commitment|undefined>
      */
     static checkTx = async (txHash: string,
-                            blockHash: string,
                             commitmentAddresses: Array<string>,
                             networkAccess: ErgoNetworkApi):
         Promise<Commitment | undefined> => {
@@ -44,18 +42,18 @@ export class CommitmentUtils {
      * check all the transaction in a block and returns an array of commitments
      * @param blockHash
      * @param networkAccess
-     * @return Promise<Array<(Observation | undefined)>>
+     * @return Promise<Array<(Commitment | undefined)>>
      */
     static commitmentsAtHeight = async (
         blockHash: string,
         networkAccess: ErgoNetworkApi
     ): Promise<Array<(Commitment | undefined)>> => {
         const txs = await networkAccess.getBlockTxs(blockHash);
-        const observation = Array(txs.length).fill(undefined);
+        const commitment = Array(txs.length).fill(undefined);
         for (let i = 0; i < txs.length; i++) {
-            observation[i] = await this.checkTx(txs[i], blockHash, [commitmentAddress], networkAccess);
+            commitment[i] = await this.checkTx(txs[i], [commitmentAddress], networkAccess);
         }
-        return observation;
+        return commitment;
     }
 }
 

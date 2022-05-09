@@ -39,6 +39,19 @@ export class Scanner extends AbstractScanner<wasm.ErgoBox, ExplorerTransaction, 
         return (await CommitmentUtils.commitmentsAtHeight(block.hash, this._networkAccess))
             .filter(commitment => commitment !== undefined);
     }
+
+    /**
+     * removes old spent commitments older than block height limit config
+     */
+    removeOldCommitments = async () => {
+        const heightLimit: number = config.get?.('commitmentScanner.heightLimit');
+        const currentHeight = await this._networkAccess.getHeight()
+        const commitments = await this._dataBase.getOldCommitments(currentHeight - heightLimit)
+        const ids = commitments.filter(commitment => {
+            this._networkAccess.boxIsSpent(commitment.commitmentBoxId)
+        }).map(commitments => commitments.commitmentBoxId)
+        await this._dataBase.deleteCommitments(ids)
+    }
 }
 
 /**
@@ -50,6 +63,7 @@ export const main = async () => {
     const scanner = new Scanner(DB, apiNetwork, config);
     if (typeof INTERVAL === 'number') {
         setInterval(scanner.update, INTERVAL * 1000);
+        setInterval(scanner.removeOldCommitments, INTERVAL * 1000);
     } else {
         console.log("scanner interval doesn't set in the config");
     }

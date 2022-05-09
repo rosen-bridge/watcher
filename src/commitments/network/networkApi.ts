@@ -72,5 +72,15 @@ export class ErgoNetworkApi extends AbstractNetworkConnector<wasm.ErgoBox, Explo
         }
         return result
     }
+
+    getHeight = async (): Promise<number> => {
+        return explorerApi.get<{height: number}>('/api/v1/networkState').then(res => {
+            return res.data.height
+        })
+    }
+
+    boxIsSpent = async (boxId: string): Promise<Boolean> => {
+        return Promise.resolve(true)
+    }
 }
 

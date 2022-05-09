@@ -1,4 +1,4 @@
-import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
+import {DataSource, DeleteResult, In, LessThan, MoreThanOrEqual, Repository} from "typeorm";
 import {CBlockEntity} from "../entities/CBlockEntity";
 import {ObservedCommitmentEntity} from "../entities/ObservedCommitmentEntity";
 import { Block, Commitment } from "../objects/interfaces";
@@ -7,11 +7,13 @@ import {AbstractDataBase} from "./abstractModel";
 export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitment> {
     dataSource: DataSource;
     blockRepository: Repository<CBlockEntity>;
+    commitmentRepository: Repository<ObservedCommitmentEntity>
 
     private constructor(dataSource: DataSource) {
         super()
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(CBlockEntity);
+        this.commitmentRepository = this.dataSource.getRepository(ObservedCommitmentEntity);
     }
 
     /**
@@ -62,16 +64,16 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * save blocks with observation of that block
      * @param height
      * @param blockHash
-     * @param observations
+     * @param commitments
      * @return Promise<boolean>
      */
-    saveBlock = async (height: number, blockHash: string, observations: Array<(Commitment | undefined)>): Promise<boolean> => {
+    saveBlock = async (height: number, blockHash: string, commitments: Array<(Commitment | undefined)>): Promise<boolean> => {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         const block = new CBlockEntity();
         block.height = height;
         block.hash = blockHash;
-        const observationsEntity = observations
+        const commitmentsEntity = commitments
             .filter(
                 (block): block is Commitment => block !== undefined).map((commitment) => {
                 const commitmentEntity = new ObservedCommitmentEntity();
@@ -86,7 +88,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
         await queryRunner.startTransaction()
         try {
             await queryRunner.manager.save(block);
-            await queryRunner.manager.save(observationsEntity);
+            await queryRunner.manager.save(commitmentsEntity);
             await queryRunner.commitTransaction();
         } catch (err) {
             await queryRunner.rollbackTransaction();
@@ -111,6 +113,22 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
         } else {
             return undefined;
         }
+    }
+
+    getOldCommitments = async (height: number): Promise<Array<Commitment>> =>{
+        return await this.commitmentRepository.find({
+            where: {
+                block: LessThan(height)
+            }
+        })
+    }
+
+    /**
+     * deletes some rows of commitments table
+     * @param ids
+     */
+    deleteCommitments = async (ids: Array<string>) => {
+        await this.commitmentRepository.delete({commitmentBoxId: In(ids)})
     }
 }
 
