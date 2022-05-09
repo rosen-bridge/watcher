@@ -16,11 +16,11 @@ export default {
     commitmentScanner: {
         interval: 10,
         initialBlockHeight: 100,
+        heightLimit: 100,
     },
 };
 
-export const commitmentAddress = "alaki"
+export const commitmentAddress = "address"
 export const tokens ={
-    RWT: "rwt",
-
+    RWT: "4a275f6cfe862e1e6bcf0bc9ea540d66c7daf2d35eae141fd14e021d5cf20317",
 }

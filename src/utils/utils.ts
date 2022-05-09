@@ -22,7 +22,7 @@ export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree): string => {
 }
 
 export const decodeCollColl = async (str: string): Promise<Uint8Array[]> => {
-    return wasm.Constant.decode_from_base16(str).to_tuple_coll_bytes()
+    return wasm.Constant.decode_from_base16(str).to_coll_coll_byte()
 }
 
 export const decodeStr = async (str: string): Promise<string> => {
