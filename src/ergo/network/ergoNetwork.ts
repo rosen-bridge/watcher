@@ -43,6 +43,19 @@ export class ErgoNetwork {
         return explorerApi.get(`/api/v1/boxes/unspent/byAddress/${address}`).then(res => res.data)
     }
 
+    getLastBlockHeader = () => {
+        return nodeClient.get("/blocks/lastHeaders/10").then(
+            res => res.data
+        )
+    }
+
+    getErgoStateContext = async (): Promise<ergoLib.ErgoStateContext> => {
+        const blockHeaderJson = await this.getLastBlockHeader();
+        const blockHeaders = ergoLib.BlockHeaders.from_json(blockHeaderJson);
+        const preHeader = ergoLib.PreHeader.from_block_header(blockHeaders.get(0));
+        return new ergoLib.ErgoStateContext(preHeader, blockHeaders);
+    }
+
     getCoveringErgAndTokenForAddress = async (
         tree: string,
         amount: number,
@@ -77,6 +90,7 @@ export class ErgoNetwork {
 
     }
 
+    //TODO: the functions should become one
     getRSNBoxes = async (): Promise<RSNBox> => {
         const watcherAddress = ergoLib.Address.from_mainnet_str("9erMHuJYNKQkZCaDs9REhpNaWbhMPbdVmqgM4s7M2GjtQ56j2xG");
 

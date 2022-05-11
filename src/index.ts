@@ -6,7 +6,7 @@ import generateAddress from "./api/generateAddress";
 import { ErgoNetwork } from "./ergo/network/ergoNetwork";
 import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { Contracts } from "./api/contracts";
-import { createRepoBox } from "./api/lock";
+import { Transactions } from "./api/lock";
 
 // main()
 // const app = express();
@@ -30,10 +30,15 @@ import { createRepoBox } from "./api/lock";
 // const rwtRepo=Contracts.generateRWTRepoContractAddress().then(res=>console.log(res));
 // const test = createRepoBox();
 
-const api = new ErgoNetwork();
-api.getRSNBoxes().then(res => console.log(res.getErgoBox()))
-api.getRepoBox().then(res=>console.log(res.getErgoBox()))
 
+// const api = new ErgoNetwork();
+// api.getRSNBoxes().then(res => console.log(res.getErgoBox()))
+// api.getRepoBox().then(res => console.log(res.getErgoBox()))
 
+const lock = new Transactions();
+lock.initRepoBox(1,10,"2");
+// const api = new ErgoNetwork();
+// api.getErgoStateContext().then(res => console.log(res))
+// lock.initRepoBox();
 
 
