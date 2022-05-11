@@ -8,7 +8,7 @@ const NODE_URL: string | undefined = config.get?.('ergo.node');
 
 // const RSN: string | undefined = config.get?.('ergo.RSN');
 const RSN = "25bcbb2381e2569221737f12e06215c59cef8bb1403225084aaf6cf61f500bff";
-const watcherAddress = "9erMHuJYNKQkZCaDs9REhpNaWbhMPbdVmqgM4s7M2GjtQ56j2xG";
+const watcherAddress = "9fEsTTtn2i4sHLmYMJqTLMPvrEQjMgWJxoupr1v2b6nT98Eyvgb";
 const RepoNFT = "3688bf4dbfa9e77606446ca0189546621097cee6979e2befc8ef56825ba82580";
 
 
@@ -48,6 +48,13 @@ export class ErgoNetwork {
             res => res.data
         )
     }
+
+    sendTx = (tx: any) => {
+        return nodeClient.post("/transactions", JSON.parse(tx)).then(response => ({"txId": response.data as string})).catch(exp => {
+            console.log(exp.response.data)
+        });
+    };
+
 
     getErgoStateContext = async (): Promise<ergoLib.ErgoStateContext> => {
         const blockHeaderJson = await this.getLastBlockHeader();
@@ -92,7 +99,7 @@ export class ErgoNetwork {
 
     //TODO: the functions should become one
     getRSNBoxes = async (): Promise<RSNBox> => {
-        const watcherAddress = ergoLib.Address.from_mainnet_str("9erMHuJYNKQkZCaDs9REhpNaWbhMPbdVmqgM4s7M2GjtQ56j2xG");
+        const watcherAddress = ergoLib.Address.from_mainnet_str("9fEsTTtn2i4sHLmYMJqTLMPvrEQjMgWJxoupr1v2b6nT98Eyvgb");
 
         const box = await this.getCoveringErgAndTokenForAddress(
             watcherAddress.to_ergo_tree().to_base16_bytes(),
@@ -116,7 +123,7 @@ export class ErgoNetwork {
     }
 
     getRepoBox = async () => {
-        const watcherAddress = ergoLib.Address.from_mainnet_str("9erMHuJYNKQkZCaDs9REhpNaWbhMPbdVmqgM4s7M2GjtQ56j2xG");
+        const watcherAddress = ergoLib.Address.from_mainnet_str("9fEsTTtn2i4sHLmYMJqTLMPvrEQjMgWJxoupr1v2b6nT98Eyvgb");
 
         const box = await this.getCoveringErgAndTokenForAddress(
             watcherAddress.to_ergo_tree().to_base16_bytes(),

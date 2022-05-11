@@ -7,6 +7,7 @@ import { ErgoNetwork } from "./ergo/network/ergoNetwork";
 import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { Contracts } from "./api/contracts";
 import { Transactions } from "./api/lock";
+import { strToUint8Array } from "./utils/utils";
 
 // main()
 // const app = express();
@@ -35,10 +36,16 @@ import { Transactions } from "./api/lock";
 // api.getRSNBoxes().then(res => console.log(res.getErgoBox()))
 // api.getRepoBox().then(res => console.log(res.getErgoBox()))
 
+
+
 const lock = new Transactions();
 lock.initRepoBox(1,10,"2");
+
+
 // const api = new ErgoNetwork();
 // api.getErgoStateContext().then(res => console.log(res))
 // lock.initRepoBox();
 
+// const sk = ergoLib.SecretKey.dlog_from_bytes(strToUint8Array("0e63ebf90bb888862f38b3e1def61707e14ea1775b4003f6f708305550824652"));
+// console.log(sk.get_address().to_base58(0));
 
