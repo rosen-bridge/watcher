@@ -8,6 +8,8 @@ const NODE_URL: string | undefined = config.get?.('ergo.node');
 
 // const RSN: string | undefined = config.get?.('ergo.RSN');
 const RSN = "25bcbb2381e2569221737f12e06215c59cef8bb1403225084aaf6cf61f500bff";
+const watcherAddress = "9erMHuJYNKQkZCaDs9REhpNaWbhMPbdVmqgM4s7M2GjtQ56j2xG";
+const RepoNFT = "3688bf4dbfa9e77606446ca0189546621097cee6979e2befc8ef56825ba82580";
 
 
 const explorerApi = axios.create({
@@ -75,7 +77,7 @@ export class ErgoNetwork {
 
     }
 
-    getRSNBoxes = async (setIndex: number): Promise<RSNBox> => {
+    getRSNBoxes = async (): Promise<RSNBox> => {
         const watcherAddress = ergoLib.Address.from_mainnet_str("9erMHuJYNKQkZCaDs9REhpNaWbhMPbdVmqgM4s7M2GjtQ56j2xG");
 
         const box = await this.getCoveringErgAndTokenForAddress(
@@ -95,6 +97,30 @@ export class ErgoNetwork {
         )
         if (!box.covered) {
             throw Error("rsn box not found")
+        }
+        return new RSNBox(JSON.parse(box.boxes[0].to_json()))
+    }
+
+    getRepoBox = async () => {
+        const watcherAddress = ergoLib.Address.from_mainnet_str("9erMHuJYNKQkZCaDs9REhpNaWbhMPbdVmqgM4s7M2GjtQ56j2xG");
+
+        const box = await this.getCoveringErgAndTokenForAddress(
+            watcherAddress.to_ergo_tree().to_base16_bytes(),
+            0,
+            {[RepoNFT]: 1},
+            box => {
+                if (!box.hasOwnProperty('assets')) {
+                    return false
+                }
+                let found = false
+                box.assets.forEach((item: { tokenId: string }) => {
+                    if (item.tokenId === RepoNFT) found = true
+                });
+                return found
+            }
+        )
+        if (!box.covered) {
+            throw Error("repo box not found")
         }
         return new RSNBox(JSON.parse(box.boxes[0].to_json()))
     }
