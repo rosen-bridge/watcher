@@ -36,16 +36,22 @@ import { strToUint8Array } from "./utils/utils";
 // api.getRSNBoxes().then(res => console.log(res.getErgoBox()))
 // api.getRepoBox().then(res => console.log(res.getErgoBox()))
 
-
+// console.log(ergoLib.I64.from_str("12").checked_add(ergoLib.I64.from_str("-12")).to_str());
+// ergoLib.I64.from_str("-"+RWTCount.toString())
 
 const lock = new Transactions();
-lock.initRepoBox(1,10,"2");
-
+// lock.initRepoBox(200,10,"2");
+lock.getPermit(1);
 
 // const api = new ErgoNetwork();
 // api.getErgoStateContext().then(res => console.log(res))
 // lock.initRepoBox();
 
+// const SK = ergoLib.SecretKey.random_dlog();
+// console.log(Buffer.from(SK.to_bytes()).toString('hex'));
+// console.log(SK.get_address().to_base58(0));
+const sk = "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2";
+const address = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
 // const sk = ergoLib.SecretKey.dlog_from_bytes(strToUint8Array("0e63ebf90bb888862f38b3e1def61707e14ea1775b4003f6f708305550824652"));
 // console.log(sk.get_address().to_base58(0));
 

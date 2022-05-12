@@ -6,9 +6,15 @@ import { strToUint8Array } from "../utils/utils";
 
 
 const BANK = "9fEsTTtn2i4sHLmYMJqTLMPvrEQjMgWJxoupr1v2b6nT98Eyvgb";
-const SK = "0e63ebf90bb888862f38b3e1def61707e14ea1775b4003f6f708305550824652";
-const RSN = "25bcbb2381e2569221737f12e06215c59cef8bb1403225084aaf6cf61f500bff";
-const RepoNFTId = "3688bf4dbfa9e77606446ca0189546621097cee6979e2befc8ef56825ba82580";
+// const SK = "0e63ebf90bb888862f38b3e1def61707e14ea1775b4003f6f708305550824652";
+const SK = "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2";
+// const RSN = "25bcbb2381e2569221737f12e06215c59cef8bb1403225084aaf6cf61f500bff";
+const RSN = "34a217f1d2bc0f84607dad61c886de53f1ca919c389f184136f05a0de1d196f2";
+// const RepoNFTId = "3688bf4dbfa9e77606446ca0189546621097cee6979e2befc8ef56825ba82580";
+const RepoNFTId = "2d94a61d4981814007949bb580711c4b514670401748286d1084f45bae256c20";
+
+// const RWTId = "333661c5deaeb94a7b09c9b7d01e8cd057960a3526e9eb8a46a803cb7e8423f8";
+const RWTId = "c554d20275ea7dec74989eee60fc5bbc3924b96bfd06561f67f73b4711d72493";
 
 export class Transactions {
 
@@ -30,7 +36,7 @@ export class Transactions {
         R7: number) => {
         //TODO: repo nft should be handled correctly
 
-        const RepoNFT = "3688bf4dbfa9e77606446ca0189546621097cee6979e2befc8ef56825ba82580";
+        const RepoNFT = RepoNFTId;
 
 
         const RWTRepoContract = await Contracts.generateRWTRepoContractAddress();
@@ -52,7 +58,7 @@ export class Transactions {
         );
 
         const RWTTokenId = ergoLib.TokenId.from_str(RWTId);
-        const RWTTokenAmount = ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(RSNCount.toString()));
+        const RWTTokenAmount = ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(RWTCount.toString()));
         const RWTToken = new ergoLib.Token(RWTTokenId, RWTTokenAmount);
 
         repoBuilder.add_token(
@@ -72,16 +78,18 @@ export class Transactions {
 
     }
 
-    createRepoBox = async (RSNCount: number) => {
+    getPermit = async (RSNCount: number) => {
         const ergoNetwork = new ErgoNetwork();
         const height = await ergoNetwork.getHeight();
         const bankAddress = ergoLib.Address.from_base58(BANK);
 
-        const RWTCount = RSNCount / 100;
+        // const RWTCount = RSNCount / 100;
+        const RWTCount = RSNCount;
 
         //TODO:should handled if is not exist
-        const box1 = (await ergoNetwork.getRSNBoxes()).getErgoBox();
+        const RSNBox = (await ergoNetwork.getRSNBoxes()).getErgoBox();
         const repoBox = (await (ergoNetwork.getRepoBox())).getErgoBox();
+        //TODO: in case of RSNBox and RepoBox are the same should handled correctly
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte();
         //TODO: should handled with error handling
         if (users === undefined) {
@@ -94,21 +102,95 @@ export class Transactions {
         if (usersCount === undefined) {
             return;
         }
+
         const count = RWTCount.toString();
         usersCount.push(count);
+        // console.log('test');
+        // console.log(repoBox.to_json());
+        const RepoRWTCount = repoBox.tokens().get(1).amount().as_i64().checked_add(
+            ergoLib.I64.from_str(
+                "-" + RWTCount.toString()
+            )
+        );
+        const RSNTokenCount = RSNBox.tokens().get(0).amount().as_i64().checked_add(
+            ergoLib.I64.from_str(
+                (RWTCount).toString()
+            )
+        );
 
-        // //TODO: should be completed
-        // const RWTId="2222222222222222222222222222222222222222222222222222222222222222";
-        // const repoOut=createRepo(height,RWTId,);
-        // await createRepo(10,
-        //     "2222222222222222222222222222222222222222222222222222222222222222",
-        //     10,
-        //     10,
-        //     [testUser],
-        //     [0],
-        //     0
-        // );
 
+        // console.log(RSNBox.to_json());
+
+        const repoOut = await this.createRepo(
+            height,
+            RWTId,
+            Number(RepoRWTCount.to_str()),
+            Number(RSNTokenCount.to_str()),
+            users,
+            usersCount,
+            0
+        );
+        // console.log(repoOut.tokens().get(0).to_json())
+        // console.log(repoOut.tokens().get(1).to_json())
+
+        const inputBoxes = new ergoLib.ErgoBoxes(repoBox);
+        inputBoxes.add(RSNBox);
+        const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
+        const boxSelector = new ergoLib.SimpleBoxSelector();
+        const coveringTokens = new ergoLib.Tokens();
+
+        const RepoNFTToken = new ergoLib.Token(
+            ergoLib.TokenId.from_str(RepoNFTId),
+            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1"))
+        );
+        coveringTokens.add(RepoNFTToken);
+
+        const RWTToken = new ergoLib.Token(
+            ergoLib.TokenId.from_str(RWTId),
+            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(RWTCount.toString())),
+        );
+
+        coveringTokens.add(RWTToken);
+
+        const RSNToken = new ergoLib.Token(
+            ergoLib.TokenId.from_str(RSN),
+            ergoLib.TokenAmount.from_i64(RSNTokenCount),
+        );
+
+        coveringTokens.add(RSNToken);
+        console.log(RSNBox.to_json());
+        console.log(repoBox.to_json());
+        console.log("test");
+
+        const selection = boxSelector.select(
+            inputBoxes,
+            ergoLib.BoxValue.from_i64(
+                ergoLib.BoxValue.SAFE_USER_MIN().as_i64().checked_add(
+                    ergoLib.BoxValue.SAFE_USER_MIN().as_i64()
+                )
+            ),
+            coveringTokens
+        );
+
+        const builder = ergoLib.TxBuilder.new(
+            selection,
+            outputBoxes,
+            height,
+            ergoLib.BoxValue.SAFE_USER_MIN(),
+            ergoLib.Address.from_mainnet_str(BANK),
+            ergoLib.BoxValue.SAFE_USER_MIN()
+        );
+        const tx = builder.build();
+        const sks = new ergoLib.SecretKeys();
+        const sk = ergoLib.SecretKey.dlog_from_bytes(strToUint8Array(SK));
+        sks.add(sk);
+        const wallet = ergoLib.Wallet.from_secrets(sks);
+        const ctx = await this.ergoNetwork.getErgoStateContext();
+        const tx_data_inputs = ergoLib.ErgoBoxes.from_boxes_json([]);
+        const signedTx = wallet.sign_transaction(ctx, tx, inputBoxes, tx_data_inputs);
+        // await this.ergoNetwork.sendTx(signedTx.to_json());
+        console.log("transaction is sent to the network");
+        console.log("transaction id is", signedTx.id().to_str());
 
         // createRepo = async (
         //     height: number,
@@ -119,6 +201,10 @@ export class Transactions {
         //     //TODO: should check number
         //     userRWT: Array<string>,
         //     R7: number) => {
+
+
+        // //TODO: should be completed
+        // const RWTId="2222222222222222222222222222222222222222222222222222222222222222";
 
 
         // const users=
@@ -151,12 +237,13 @@ export class Transactions {
 
 
     initRepoBox = async (RWTCount: number, Factor: number, chainId: string) => {
-        const RSNBox = await this.ergoNetwork.getRSNBoxes();
+        // const RSNBox = await this.ergoNetwork.getRSNBoxes();
         const RepoNFT = await this.ergoNetwork.getRepoBox();
-        console.log(RepoNFT.getErgoBox().value().as_i64().to_str());
-
+        // console.log(RepoNFT.getErgoBox().value().as_i64().to_str());
+        // console.log(RSNBox.getErgoBox().tokens().get(0).id().to_str())
+        // console.log(RepoNFT.getErgoBox().tokens().get(0).id().to_str())
         const height = await this.ergoNetwork.getHeight();
-        const RWTId = RSNBox.getErgoBox().box_id().to_str();
+        const RWTId = RepoNFT.getErgoBox().box_id().to_str();
 
         const repoOut = await this.createRepo(
             height,
@@ -172,45 +259,51 @@ export class Transactions {
         // console.log(RepoNFT.getBoxJson());
         // console.log(repoOut.tokens().get(0).to_json());
         // console.log(repoOut.tokens().get(1).to_json());
-        const inputBoxes = new ergoLib.ErgoBoxes(RSNBox.getErgoBox());
-        inputBoxes.add(RepoNFT.getErgoBox());
+        const inputBoxes = new ergoLib.ErgoBoxes(RepoNFT.getErgoBox());
+        // inputBoxes.add(RepoNFT.getErgoBox());
         const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
-        const box_selector = new ergoLib.SimpleBoxSelector();
+        const boxSelector = new ergoLib.SimpleBoxSelector();
         const coveringTokens = new ergoLib.Tokens();
         // const
 
         // const  = ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(RSNCount.toString()));
-        const RSNToken = new ergoLib.Token(
-            ergoLib.TokenId.from_str(RSN),
-            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1"))
-        );
-        coveringTokens.add(RSNToken);
+        // const RSNToken = new ergoLib.Token(
+        //     ergoLib.TokenId.from_str(RSN),
+        //     ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1"))
+        // );
+        // coveringTokens.add(RSNToken);
 
         const RepoNFTToken = new ergoLib.Token(
             ergoLib.TokenId.from_str(RepoNFTId),
             ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1"))
         );
+        // const RWTToken = new ergoLib.Token(
+        //     ergoLib.TokenId.from_str(RWTId),
+        //     ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1"))
+        // );
+        // coveringTokens.add(RWTToken);
         // ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(.toString()))
+
         coveringTokens.add(RepoNFTToken);
-        const selection = box_selector.select(
+        const selection = boxSelector.select(
             inputBoxes,
-            ergoLib.BoxValue.from_i64(ergoLib.I64.from_str("11000000")),
+            ergoLib.BoxValue.from_i64(
+                ergoLib.BoxValue.SAFE_USER_MIN().as_i64().checked_add(
+                    ergoLib.BoxValue.SAFE_USER_MIN().as_i64()
+                )
+            ),
             coveringTokens
         );
-        // const selection = new ergoLib.BoxSelection(inputBoxes, new ergoLib.ErgoBoxAssetsDataList());
+
         const builder = ergoLib.TxBuilder.new(
             selection,
             outputBoxes,
             height,
             ergoLib.BoxValue.SAFE_USER_MIN(),
-            // ergoLib.BoxValue.from_i64(ergoLib.I64.from_str("2000000")),
             ergoLib.Address.from_mainnet_str(BANK),
             ergoLib.BoxValue.SAFE_USER_MIN()
         );
-
         const tx = builder.build();
-        // console.log(tx.to_json());
-
         const sks = new ergoLib.SecretKeys();
         const sk = ergoLib.SecretKey.dlog_from_bytes(strToUint8Array(SK));
         sks.add(sk);
@@ -220,7 +313,7 @@ export class Transactions {
         const signedTx = wallet.sign_transaction(ctx, tx, inputBoxes, tx_data_inputs);
         await this.ergoNetwork.sendTx(signedTx.to_json());
         console.log("transaction is sent to the network");
-        console.log(signedTx.to_json());
+        console.log("transaction id is", signedTx.id().to_str());
     }
 
 }
