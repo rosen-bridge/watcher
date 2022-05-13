@@ -5,12 +5,11 @@ import { cardanoOrmConfig } from "../../../config/ormconfig";
 import { AbstractScanner } from "../../scanner/abstract-scanner";
 import { NetworkDataBase } from "../../models/networkModel";
 import { Block, Observation } from "../../objects/interfaces";
-import { Tx, TxMetaData } from "../network/apiModelsCardano";
-import {BlockEntity} from "../../entities/BlockEntity";
+import { BlockEntity } from "../../entities/BlockEntity";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
-export class Scanner extends AbstractScanner<Tx, TxMetaData, BlockEntity, Observation> {
+export class Scanner extends AbstractScanner<BlockEntity, Observation> {
     _dataBase: NetworkDataBase;
     _networkAccess: KoiosNetwork;
     _config: IConfig;

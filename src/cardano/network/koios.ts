@@ -11,7 +11,7 @@ export const koios = axios.create({
     headers: {"Content-Type": "application/json"}
 });
 
-export class KoiosNetwork extends AbstractNetworkConnector<Tx, TxMetaData> {
+export class KoiosNetwork extends AbstractNetworkConnector {
     getBlockAtHeight = (height: number): Promise<Block> => {
         return koios.get<Array<Block>>(
             '/blocks',
@@ -21,10 +21,10 @@ export class KoiosNetwork extends AbstractNetworkConnector<Tx, TxMetaData> {
         )
     }
 
-    getBlock = (offset: number = 0, limit: number = 1): Promise<Array<Block>> => {
-        return koios.get<Array<Block>>(
+    getCurrentHeight = (): Promise<Block> => {
+        return koios.get<Block>(
             '/blocks',
-            {params: {offset: offset, limit: limit, select: 'hash,block_height'}}
+            {params: {offset: 0, limit: 1, select: 'hash,block_height'}}
         ).then(
             res => res.data
         )

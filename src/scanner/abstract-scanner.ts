@@ -2,9 +2,9 @@ import { AbstractNetworkConnector } from "../network/abstract-network-connector"
 import { AbstractDataBase } from "../models/abstractModel";
 import { Block } from "../objects/interfaces";
 
-export abstract class AbstractScanner<TxT, TxMetaDataT, BlockT, DataT> {
+export abstract class AbstractScanner<BlockT, DataT> {
     abstract _dataBase: AbstractDataBase<BlockT, DataT>;
-    abstract _networkAccess: AbstractNetworkConnector<TxT, TxMetaDataT>;
+    abstract _networkAccess: AbstractNetworkConnector;
     abstract _INITIAL_HEIGHT: number;
 
     /**
@@ -30,8 +30,8 @@ export abstract class AbstractScanner<TxT, TxMetaDataT, BlockT, DataT> {
     update = async () => {
         const lastSavedBlock = (await this._dataBase.getLastSavedBlock());
         if (!await this.isForkHappen()) {
-            const lastBlockHeight = await this._networkAccess.getBlock(0, 1).then(res => {
-                return res[0].block_height
+            const lastBlockHeight = await this._networkAccess.getCurrentHeight().then(res => {
+                return res.block_height
             });
             let height = null;
             if (lastSavedBlock !== undefined) {
