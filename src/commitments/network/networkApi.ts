@@ -44,11 +44,5 @@ export class ErgoNetworkApi extends AbstractNetworkConnector {
             return res.data.transactions
         })
     }
-
-    boxIsSpent = async (boxId: string): Promise<Boolean> => {
-        return nodeApi.get<{spentTransactionId: number}>(`/api/v1/boxes/${boxId}`).then(res => {
-            return res.data.spentTransactionId != null;
-        })
-    }
 }
 

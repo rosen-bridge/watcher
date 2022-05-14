@@ -5,6 +5,7 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import {ErgoNetworkApi} from "../network/networkApi";
 import {decodeCollColl, decodeStr, ergoTreeToBase58Address} from "../../utils/utils";
 import {ExplorerOutputBox, ExplorerTransaction, NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
+import {CommitmentDataBase} from "../../models/commitmentModel";
 
 export class CommitmentUtils {
 
@@ -13,18 +14,14 @@ export class CommitmentUtils {
      * object else returns undefined
      * @param tx
      * @param commitmentAddresses
-     * @param networkAccess
      * @return Promise<commitment|undefined>
      */
     static checkTx = async (tx: NodeTransaction,
-                            commitmentAddresses: Array<string>,
-                            networkAccess: ErgoNetworkApi):
+                            commitmentAddresses: Array<string>):
         Promise<Commitment | undefined> => {
-        const commitment: NodeOutputBox = tx.outputs.filter((box) => {
-            return commitmentAddresses.find(address =>
-                address === ergoTreeToBase58Address(wasm.ErgoTree.from_base16_bytes(box.ergoTree)))
-                != undefined;
-        }).filter(box => box.assets.length > 0 && box.assets[0].tokenId == tokens.RWT)[0]
+        const commitment: NodeOutputBox = tx.outputs.filter((box) =>
+            commitmentAddresses.includes(ergoTreeToBase58Address(wasm.ErgoTree.from_base16_bytes(box.ergoTree)))
+        ).filter(box => box.assets.length > 0 && box.assets[0].tokenId == tokens.RWT)[0]
         if(commitment != undefined){
             const WID = (await decodeCollColl(commitment.additionalRegisters['R4']))[0]
             const requestId = (await decodeCollColl(commitment.additionalRegisters['R5']))[0]
@@ -33,27 +30,38 @@ export class CommitmentUtils {
                 WID: Buffer.from(WID).toString('hex'),
                 eventId: Buffer.from(requestId).toString('hex'),
                 commitment: eventDigest,
-                commitmentBoxId: commitment.boxId
+                commitmentBoxId: commitment.boxId,
             }
         }
         return undefined;
     }
 
     /**
-     * check all the transaction in a block and returns an array of commitments
-     * @param blockHash
-     * @param networkAccess
+     * Check all the transaction in a block and returns an array of commitments
+     * It also updates the spent commitments in the database
+     * @param txs
+     * @param database
+     * @param blockHeight
      * @return Promise<Array<(Commitment | undefined)>>
      */
     static commitmentsAtHeight = async (
-        blockHash: string,
-        networkAccess: ErgoNetworkApi
-    ): Promise<Array<(Commitment | undefined)>> => {
-        const txs = await networkAccess.getBlockTxs(blockHash);
+        txs: NodeTransaction[],
+        database: CommitmentDataBase,
+        blockHeight: number
+        ): Promise<Array<(Commitment | undefined)>> => {
         const commitment = Array(txs.length).fill(undefined);
         for (let i = 0; i < txs.length; i++) {
-            commitment[i] = await this.checkTx(txs[i], [commitmentAddress], networkAccess);
+            commitment[i] = await this.checkTx(txs[i], [commitmentAddress]);
         }
+        for( const tx of txs){
+            const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
+            const foundCommitments = await database.findCommitmentsById(inputBoxIds)
+            // TODO: Add Created eventTrigger BoxId
+            foundCommitments.forEach(commitment => database.updateSpentCommitment(commitment.id, blockHeight))
+        }
+        txs.forEach(tx => {
+
+        })
         return commitment;
     }
 }

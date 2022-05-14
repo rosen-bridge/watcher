@@ -34,7 +34,8 @@ export class Scanner extends AbstractScanner<CBlockEntity, Commitment> {
      * @return Promise<Array<Commitment | undefined>>
      */
     getBlockInformation = async (block: Block): Promise<Array<Commitment | undefined>> => {
-        return (await CommitmentUtils.commitmentsAtHeight(block.hash, this._networkAccess))
+        const txs = await this._networkAccess.getBlockTxs(block.hash);
+        return (await CommitmentUtils.commitmentsAtHeight(txs, this._dataBase, block.block_height))
             .filter(commitment => commitment !== undefined);
     }
 
@@ -44,11 +45,8 @@ export class Scanner extends AbstractScanner<CBlockEntity, Commitment> {
     removeOldCommitments = async () => {
         const heightLimit: number = config.get?.('commitmentScanner.heightLimit');
         const currentHeight = (await this._networkAccess.getCurrentHeight()).block_height
-        const commitments = await this._dataBase.getOldCommitments(currentHeight - heightLimit)
-        const ids = commitments.filter(commitment => {
-            this._networkAccess.boxIsSpent(commitment.commitmentBoxId)
-        }).map(commitments => commitments.commitmentBoxId)
-        await this._dataBase.deleteCommitments(ids)
+        const commitments = await this._dataBase.getOldSpentCommitments(currentHeight - heightLimit)
+        await this._dataBase.deleteCommitments(commitments.map(commitment => commitment.commitmentBoxId))
     }
 }
 

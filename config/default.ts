@@ -22,5 +22,5 @@ export default {
 
 export const commitmentAddress = "address"
 export const tokens ={
-    RWT: "4a275f6cfe862e1e6bcf0bc9ea540d66c7daf2d35eae141fd14e021d5cf20317",
+    RWT: "469255244f7b12ea7d375ec94ec8d2838a98be0779c8231ece3529ae69c421db",
 }

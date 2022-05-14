@@ -115,20 +115,48 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
         }
     }
 
-    getOldCommitments = async (height: number): Promise<Array<Commitment>> =>{
+    /**
+     * returns old spent commitments
+     * @param height
+     */
+    getOldSpentCommitments = async (height: number): Promise<Array<Commitment>> =>{
         return await this.commitmentRepository.find({
             where: {
-                block: LessThan(height)
+                spendHeight: LessThan(height)
             }
         })
     }
 
     /**
-     * deletes some rows of commitments table
+     * delete commitments by their box ids
      * @param ids
      */
     deleteCommitments = async (ids: Array<string>) => {
         await this.commitmentRepository.delete({commitmentBoxId: In(ids)})
+    }
+
+    /**
+     * find commitments by their box ids
+     * @param ids
+     */
+    findCommitmentsById = async (ids: Array<string>) => {
+        return await this.commitmentRepository.find({
+            where: {
+                commitmentBoxId: In(ids)
+            }
+        })
+    }
+
+    /**
+     * update the commitments spent status by their id
+     * @param id
+     * @param height
+     */
+    updateSpentCommitment = async (id: number, height: number) => {
+        await this.commitmentRepository.save({
+            id: id,
+            spendHeight: height,
+        })
     }
 }
 
