@@ -6,12 +6,10 @@ import {commitmentOrmConfig} from "../../../config/ormconfig";
 import {ErgoNetworkApi} from "../network/networkApi";
 import {CBlockEntity} from "../../entities/CBlockEntity";
 import {CommitmentUtils} from "./utils";
-import * as wasm from "ergo-lib-wasm-nodejs";
-import {ExplorerTransaction} from "../network/ergoApiModels";
 
 const INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
 
-export class Scanner extends AbstractScanner<wasm.ErgoBox, ExplorerTransaction, CBlockEntity, Commitment> {
+export class Scanner extends AbstractScanner<CBlockEntity, Commitment> {
     _dataBase: CommitmentDataBase;
     _networkAccess: ErgoNetworkApi;
     _config: IConfig;
@@ -45,7 +43,7 @@ export class Scanner extends AbstractScanner<wasm.ErgoBox, ExplorerTransaction, 
      */
     removeOldCommitments = async () => {
         const heightLimit: number = config.get?.('commitmentScanner.heightLimit');
-        const currentHeight = await this._networkAccess.getHeight()
+        const currentHeight = (await this._networkAccess.getCurrentHeight()).block_height
         const commitments = await this._dataBase.getOldCommitments(currentHeight - heightLimit)
         const ids = commitments.filter(commitment => {
             this._networkAccess.boxIsSpent(commitment.commitmentBoxId)

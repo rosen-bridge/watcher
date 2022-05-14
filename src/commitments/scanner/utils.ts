@@ -3,31 +3,32 @@ import {Commitment} from "../../objects/interfaces";
 import {tokens} from "../../../config/default";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import {ErgoNetworkApi} from "../network/networkApi";
-import {decodeCollColl, decodeStr} from "../../utils/utils";
-import {ExplorerOutputBox, ExplorerTransaction} from "../network/ergoApiModels";
+import {decodeCollColl, decodeStr, ergoTreeToBase58Address} from "../../utils/utils";
+import {ExplorerOutputBox, ExplorerTransaction, NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
 
 export class CommitmentUtils {
 
     /**
      * check if a transaction generates a commitment or not if yes returns the commitment
      * object else returns undefined
-     * @param txHash
+     * @param tx
      * @param commitmentAddresses
      * @param networkAccess
      * @return Promise<commitment|undefined>
      */
-    static checkTx = async (txHash: string,
+    static checkTx = async (tx: NodeTransaction,
                             commitmentAddresses: Array<string>,
                             networkAccess: ErgoNetworkApi):
         Promise<Commitment | undefined> => {
-        const tx = (await networkAccess.getTxMetaData([txHash]))[0];
-        const commitment: ExplorerOutputBox = tx.outputs.filter((box) => {
-            return commitmentAddresses.find(address => address === box.address) != undefined;
+        const commitment: NodeOutputBox = tx.outputs.filter((box) => {
+            return commitmentAddresses.find(address =>
+                address === ergoTreeToBase58Address(wasm.ErgoTree.from_base16_bytes(box.ergoTree)))
+                != undefined;
         }).filter(box => box.assets.length > 0 && box.assets[0].tokenId == tokens.RWT)[0]
         if(commitment != undefined){
-            const WID = (await decodeCollColl(commitment.additionalRegisters['R4'].serializedValue))[0]
-            const requestId = (await decodeCollColl(commitment.additionalRegisters['R5'].serializedValue))[0]
-            const eventDigest = await decodeStr(commitment.additionalRegisters['R6'].serializedValue)
+            const WID = (await decodeCollColl(commitment.additionalRegisters['R4']))[0]
+            const requestId = (await decodeCollColl(commitment.additionalRegisters['R5']))[0]
+            const eventDigest = await decodeStr(commitment.additionalRegisters['R6'])
             return{
                 WID: Buffer.from(WID).toString('hex'),
                 eventId: Buffer.from(requestId).toString('hex'),

@@ -10,7 +10,7 @@ export default {
     },
     ergo: {
         explorerUrl: "https://api.ergoplatform.com/",
-        nodeUrl: "",
+        nodeUrl: "http://10.10.9.3:9064",
         networkType: wasm.NetworkPrefix.Mainnet
     },
     commitmentScanner: {
