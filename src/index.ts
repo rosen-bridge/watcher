@@ -39,9 +39,11 @@ import { strToUint8Array } from "./utils/utils";
 // console.log(ergoLib.I64.from_str("12").checked_add(ergoLib.I64.from_str("-12")).to_str());
 // ergoLib.I64.from_str("-"+RWTCount.toString())
 
+console.log(ergoLib.BoxValue.SAFE_USER_MIN().as_i64().to_str());
+
 const lock = new Transactions();
 // lock.initRepoBox(200,10,"2");
-lock.getPermit(1);
+lock.getPermit(100);
 
 // const api = new ErgoNetwork();
 // api.getErgoStateContext().then(res => console.log(res))
