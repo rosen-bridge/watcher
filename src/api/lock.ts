@@ -21,6 +21,7 @@ const watcherPermitAddress = "EE7687i4URb4YuSGSQXPCbAjMfN4dUt5Qx8BqKZJiZhDY8fdnS
 
 const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
 
+const minBoxValue = ergoLib.BoxValue.from_i64(ergoLib.I64.from_str("1100000"));
 
 export class Transactions {
 
@@ -33,7 +34,7 @@ export class Transactions {
     createPermitBox = async (height: number, RWTId: string, RWTCount: number, WID: Uint8Array) => {
         const permitBuilder = new ergoLib.ErgoBoxCandidateBuilder(
             //TODO: minimum box value should added to the config file
-            ergoLib.BoxValue.SAFE_USER_MIN(),
+            minBoxValue,
             ergoLib.Contract.pay_to_address(ergoLib.Address.from_base58(watcherPermitAddress)),
             height
         );
@@ -58,7 +59,7 @@ export class Transactions {
         const userBoxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
             //TODO: minimum box value should added to the config file
             ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(amount.toString())),
-            ergoLib.Contract.pay_to_address(ergoLib.Address.from_base58(watcherPermitAddress)),
+            ergoLib.Contract.pay_to_address(ergoLib.Address.from_base58("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT")),
             height
         );
         userBoxBuilder.add_token(
@@ -83,12 +84,15 @@ export class Transactions {
         const RepoNFT = RepoNFTId;
 
 
-        const RWTRepoContract = await Contracts.generateRWTRepoContractAddress();
+        // const RWTRepoContract = await Contracts.generateRWTRepoContractAddress();
+
+        const repoAddress = ergoLib.Address.from_base58("N9nHZxAm7Z476Nbw6yF2X6BQEct7nNCm4SJeCK8DJEkERj6LXMJvKqG49WWSfNDufuuFEtN8msfWDd8UR4QUCmLEwFRWXC5hxEdk1XhdRSgiwuqyiPqpSTXtqUgGf67uCzEtHtN5nQKKuRYyr6xfFfV8YXKhms5JVqhmCM9869Nr4KzmLAdSLqwG6LswnFwRWwZZfC6Jf65RKV4xV5GTDqL5Ppc2QwnGDYFEUPPgLdskLbDAgwfDgE2mZnCfovUGmCjinh8UD1tW3AKfBPjFJbdF6eST8SB7EpDt162cZu7992Gaa3jNYwYnJKGKqU1izwb2WRVC3yXSHFQxr8GkTa3uQ9WAL1hyMSSNg7GqzF5a8GXFUTCw97zXUevKjtBAKxmjLQTfsmDdzYTe1oBNXEgffhVndtxhCfViYbnHVHUqEv8NQA8xiZaEzj9eCfrYyPepiq1sRruFwgjqhqhpetrQaKcSXmFjeFzCHnDR3aAV9dXQr6SyqAf7p7ML9H4rYNhLJAc4Usbuq8rVH8ysmTZPb7erhWmKXG8yFWqc6mE6tekXUuyvPhh3uXJWZgc6Z2RDbDNRvZNkxbUMDEDfb3iLtcNd3wGGLFndzryQNft8FZS4xwaskVZFQkFga3dfCgkMv3NAXrRTPmrDYD2WgurR8PfewJAJ2nu4GpMJadgTkkkLYvgrVxC8jp3w39dXzSCKAcQ7cGWyvYW6HK1s1VcG9QiogDf6YhM5mfroCCn6HweQ7hDdYtRvSyuDBVaZAJmhxKBffsGsApKocqPeZMjo8hsRr3bWgJA2xBhzxn42HCgDf2qULBH4b9HN5N3hyR7WURyVr9Y1vXwFTakEtMsr861X88mi2yUi7aqRh3XAFoN11Do9N34UPSzreELFk3SCxJT4uAdsKQrCm5yRo1zt5Mgh4tpHfgk4SsY7");
+        
 
         const repoBuilder = new ergoLib.ErgoBoxCandidateBuilder(
             //TODO: minimum box value should added to the config file
-            ergoLib.BoxValue.SAFE_USER_MIN(),
-            ergoLib.Contract.pay_to_address(RWTRepoContract),
+            minBoxValue,
+            ergoLib.Contract.pay_to_address(repoAddress),
             height
         );
         const RepoNFTTokenId = ergoLib.TokenId.from_str(RepoNFT);
@@ -110,9 +114,18 @@ export class Transactions {
             RWTToken.amount(),
         );
 
+        const RSNTokenId = ergoLib.TokenId.from_str(RSN);
+        const RSNTokenAmount = ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(RSNCount.toString()));
+        const RSNTOken = new ergoLib.Token(RSNTokenId, RSNTokenAmount);
+
+        repoBuilder.add_token(
+            RSNTOken.id(),
+            RSNTOken.amount(),
+        );
+
         repoBuilder.set_register_value(4, ergoLib.Constant.from_coll_coll_byte(users));
         repoBuilder.set_register_value(5, ergoLib.Constant.from_i64_str_array(userRWT));
-        repoBuilder.set_register_value(6, ergoLib.Constant.from_i64_str_array([100, 51, 0, 999]));
+        repoBuilder.set_register_value(6, ergoLib.Constant.from_i64_str_array(["100", "51", "0", "9999"]));
         repoBuilder.set_register_value(7, ergoLib.Constant.from_i32(R7));
 
         return repoBuilder.build();
@@ -160,6 +173,8 @@ export class Transactions {
             )
         );
 
+        console.log(RSNTokenCount.to_str())
+
 
         // console.log(RSNBox.to_json());
         console.log("***********************************");
@@ -185,7 +200,7 @@ export class Transactions {
 
         const testTokenId = ergoLib.TokenId.from_str(repoBox.box_id().to_str());
         const testTokenAmount = ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1"));
-        const userOut = await this.createUserBoxCandidate(height, userAddress, 1000000, testTokenId, testTokenAmount);
+        const userOut = await this.createUserBoxCandidate(height, userAddress, 1100000, testTokenId, testTokenAmount);
         // = async (height: number, address: string, amount: number, tokenId: TokenId, tokenAmount: TokenAmount) => {
 
 
@@ -229,14 +244,7 @@ export class Transactions {
 
         const selection = boxSelector.select(
             inputBoxes,
-            ergoLib.BoxValue.from_i64(
-                ergoLib.BoxValue.SAFE_USER_MIN().as_i64().checked_add(
-                    ergoLib.BoxValue.SAFE_USER_MIN().as_i64().checked_add(ergoLib.BoxValue.SAFE_USER_MIN().as_i64()
-                        .checked_add(ergoLib.BoxValue.SAFE_USER_MIN().as_i64()
-                        )
-                    )
-                )
-            ),
+            ergoLib.BoxValue.from_i64(ergoLib.I64.from_str("4400000")),
             coveringTokens
         );
 
@@ -244,9 +252,9 @@ export class Transactions {
             selection,
             outputBoxes,
             height,
-            ergoLib.BoxValue.SAFE_USER_MIN(),
+            minBoxValue,
             ergoLib.Address.from_mainnet_str(BANK),
-            ergoLib.BoxValue.SAFE_USER_MIN()
+            minBoxValue
         );
         const tx = builder.build();
         console.log("****************************");
