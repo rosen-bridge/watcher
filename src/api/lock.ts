@@ -3,6 +3,7 @@ import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { Address, BoxValue, Contract, TokenAmount, TokenId } from "ergo-lib-wasm-nodejs";
 import { strToUint8Array } from "../utils/utils";
 import bigInt from "big-integer";
+import { RepoBox, RSNBox } from "../objects/ergo";
 
 export class Transactions {
 
@@ -15,7 +16,8 @@ export class Transactions {
     userAddressContract: Contract;
     userAddress: Address;
     userSecret: string;
-    repoAddress: Contract;
+    repoAddressContract: Contract;
+    repoAddress: Address;
 
     constructor(
         rosenConfig: {
@@ -33,11 +35,16 @@ export class Transactions {
         this.RepoNFTId = ergoLib.TokenId.from_str(rosenConfig.RepoNFT);
         this.RWTTokenId = ergoLib.TokenId.from_str(rosenConfig.RWTId);
         this.RSN = ergoLib.TokenId.from_str(rosenConfig.RSN);
-        this.watcherPermitAddress = ergoLib.Contract.pay_to_address(ergoLib.Address.from_base58(rosenConfig.watcherPermitAddress));
+        this.watcherPermitAddress = ergoLib.Contract.pay_to_address(
+            ergoLib.Address.from_base58(
+                rosenConfig.watcherPermitAddress
+            )
+        );
         this.minBoxValue = ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(rosenConfig.minBoxValue));
-        this.userAddressContract = ergoLib.Contract.pay_to_address(ergoLib.Address.from_base58(userAddress));
         this.userAddress = ergoLib.Address.from_base58(userAddress);
-        this.repoAddress = ergoLib.Contract.pay_to_address(ergoLib.Address.from_base58(rosenConfig.watcherRepoAddress));
+        this.userAddressContract = ergoLib.Contract.pay_to_address(this.userAddress);
+        this.repoAddress = ergoLib.Address.from_base58(rosenConfig.watcherRepoAddress);
+        this.repoAddressContract = ergoLib.Contract.pay_to_address(this.repoAddress);
         this.userSecret = userSecret;
     }
 
@@ -96,7 +103,7 @@ export class Transactions {
 
         const repoBuilder = new ergoLib.ErgoBoxCandidateBuilder(
             this.minBoxValue,
-            this.repoAddress,
+            this.repoAddressContract,
             height
         );
 
@@ -123,18 +130,32 @@ export class Transactions {
         repoBuilder.set_register_value(7, ergoLib.Constant.from_i32(R7));
 
         return repoBuilder.build();
-
     }
 
     getPermit = async (RSNCount: string) => {
-
         const ergoNetwork = new ErgoNetwork();
         const height = await ergoNetwork.getHeight();
 
-
         const RWTCount = bigInt(RSNCount).divide("100");
-        const RSNBox = (await ergoNetwork.getRSNBoxes()).getErgoBox();
-        const repoBox = (await (ergoNetwork.getRepoBox())).getErgoBox();
+
+        const RSNInput = new RSNBox(
+            await (
+                ergoNetwork.getBoxWithNFT(
+                    this.userAddress,
+                    this.RSN.to_str()
+                )
+            )
+        ).getErgoBox();
+
+        const repoBox = new RepoBox(
+            await (
+                ergoNetwork.getBoxWithNFT(
+                    this.repoAddress,
+                    this.RSN.to_str()
+                )
+            )
+        ).getErgoBox();
+
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte();
         if (users === undefined) {
             return;
@@ -182,7 +203,7 @@ export class Transactions {
         );
 
         const inputBoxes = new ergoLib.ErgoBoxes(repoBox);
-        inputBoxes.add(RSNBox);
+        inputBoxes.add(RSNInput);
         const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
         outputBoxes.add(permitOut);
         outputBoxes.add(userOut);
@@ -238,7 +259,6 @@ export class Transactions {
         // await this.ergoNetwork.sendTx(signedTx.to_json());
         console.log("transaction is sent to the network");
         console.log("transaction id is", signedTx.id().to_str());
-
     }
 
 }

@@ -8,7 +8,7 @@ abstract class Box {
     protected ergoBox: ErgoBox;
 
     constructor(boxJson: JSON) {
-        this.ergoBox = ErgoBox.from_json(JSON.stringify(boxJson))
+        this.ergoBox = ErgoBox.from_json(JSON.stringify(boxJson));
     }
 
     getErgoBox = (): ErgoBox => {
@@ -27,6 +27,12 @@ abstract class Box {
 
 export class RSNBox extends Box {
     constructor(boxJson: JSON) {
-        super(boxJson)
+        super(boxJson);
+    }
+}
+
+export class RepoBox extends Box {
+    constructor(boxJson: JSON) {
+        super(boxJson);
     }
 }

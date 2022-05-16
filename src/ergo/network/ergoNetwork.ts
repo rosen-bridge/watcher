@@ -2,16 +2,10 @@ import axios from "axios";
 import config from "config";
 import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { Info, RSNBox } from "../../objects/ergo";
+import { Address } from "ergo-lib-wasm-nodejs";
 
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorer');
 const NODE_URL: string | undefined = config.get?.('ergo.node');
-
-// const RSN: string | undefined = config.get?.('ergo.RSN');
-// const RSN = "25bcbb2381e2569221737f12e06215c59cef8bb1403225084aaf6cf61f500bff";
-export const RSN = "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516";
-const watcherAddress = "9fEsTTtn2i4sHLmYMJqTLMPvrEQjMgWJxoupr1v2b6nT98Eyvgb";
-// const RepoNFT = "3688bf4dbfa9e77606446ca0189546621097cee6979e2befc8ef56825ba82580";
-export const RepoNFT = "a40b86c663fbbfefa243c9c6ebbc5690fc4e385f15b44c49ba469c91c5af0f48";
 
 const explorerApi = axios.create({
     baseURL: EXPLORER_URL,
@@ -98,58 +92,26 @@ export class ErgoNetwork {
 
     }
 
-    //TODO: the functions should become one
-    getRSNBoxes = async (): Promise<RSNBox> => {
-        const watcherAddress = ergoLib.Address.from_mainnet_str("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
-
+    getBoxWithNFT = async (address: Address, tokenId: string): Promise<JSON> => {
         const box = await this.getCoveringErgAndTokenForAddress(
-            watcherAddress.to_ergo_tree().to_base16_bytes(),
+            address.to_ergo_tree().to_base16_bytes(),
             0,
-            {[RSN]: 1},
+            {[tokenId]: 1},
             box => {
                 if (!box.hasOwnProperty('assets')) {
                     return false
                 }
                 let found = false
                 box.assets.forEach((item: { tokenId: string }) => {
-                    if (item.tokenId === RSN) found = true
+                    if (item.tokenId === tokenId) found = true
                 });
                 return found
             }
         )
         if (!box.covered) {
-            throw Error("rsn box not found")
+            throw Error("box with NFT:" + tokenId + " not found")
         }
-        return new RSNBox(JSON.parse(box.boxes[0].to_json()))
+        return JSON.parse(box.boxes[0].to_json());
     }
-
-    getRepoBox = async () => {
-        const bankAddress = ergoLib.Address.from_mainnet_str(
-            "N9nHZxAm7Z476Nbw6yF2X6BQEct7nNCm4SJeCK8DJEkERj6LXMJvKqG49WWSfNDufuuFEtN8msfWDd8UR4QUCmLEwFRWXC5hxEdk1XhdRSgiwuqyiPqpSTXtqUgGf67uCzEtHtN5nQKKuRYyr6xfFfV8YXKhms5JVqhmCM9869Nr4KzmLAdSLqwG6LswnFwRWwZZfC6Jf65RKV4xV5GTDqL5Ppc2QwnGDYFEUPPgLdskLbDAgwfDgE2mZnCfovUGmCjinh8UD1tW3AKfBPjFJbdF6eST8SB7EpDt162cZu7992Gaa3jNYwYnJKGKqU1izwb2WRVC3yXSHFQxr8GkTa3uQ9WAL1hyMSSNg7GqzF5a8GXFUTCw97zXUevKjtBAKxmjLQTfsmDdzYTe1oBNXEgffhVndtxhCfViYbnHVHUqEv8NQA8xiZaEzj9eCfrYyPepiq1sRruFwgjqhqhpetrQaKcSXmFjeFzCHnDR3aAV9dXQr6SyqAf7p7ML9H4rYNhLJAc4Usbuq8rVH8ysmTZPb7erhWmKXG8yFWqc6mE6tekXUuyvPhh3uXJWZgc6Z2RDbDNRvZNkxbUMDEDfb3iLtcNd3wGGLFndzryQNft8FZS4xwaskVZFQkFga3dfCgkMv3NAXrRTPmrDYD2WgurR8PfewJAJ2nu4GpMJadgTkkkLYvgrVxC8jp3w39dXzSCKAcQ7cGWyvYW6HK1s1VcG9QiogDf6YhM5mfroCCn6HweQ7hDdYtRvSyuDBVaZAJmhxKBffsGsApKocqPeZMjo8hsRr3bWgJA2xBhzxn42HCgDf2qULBH4b9HN5N3hyR7WURyVr9Y1vXwFTakEtMsr861X88mi2yUi7aqRh3XAFoN11Do9N34UPSzreELFk3SCxJT4uAdsKQrCm5yRo1zt5Mgh4tpHfgk4SsY7"
-            // "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT",
-        );
-        console.log(bankAddress.to_ergo_tree().to_base16_bytes());
-
-        const box = await this.getCoveringErgAndTokenForAddress(
-            bankAddress.to_ergo_tree().to_base16_bytes(),
-            0,
-            {[RepoNFT]: 1},
-            box => {
-                if (!box.hasOwnProperty('assets')) {
-                    return false
-                }
-                let found = false
-                box.assets.forEach((item: { tokenId: string }) => {
-                    if (item.tokenId === RepoNFT) found = true
-                });
-                return found
-            }
-        )
-        if (!box.covered) {
-            throw Error("repo box not found")
-        }
-        return new RSNBox(JSON.parse(box.boxes[0].to_json()))
-    }
-
 
 }
