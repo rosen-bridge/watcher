@@ -38,7 +38,7 @@
     "axios": "^0.26.1",
     "chai-spies": "^1.0.0",
     "config": "^3.3.7",
-    "ergo-lib-wasm-nodejs": "^0.15.0-alpha-592596c",
+    "ergo-lib-wasm-nodejs": "^0.16.1",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.0.2",

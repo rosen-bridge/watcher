@@ -16,10 +16,7 @@ describe("Koios Apis", () => {
         it("get the last block offset=0 and limit=1", async () => {
             const koiosNetwork = new KoiosNetwork();
             const data = await koiosNetwork.getCurrentHeight();
-            expect(data).to.eql({
-                "hash": "ccb85a5f2f10bd1468e0cd9679a6bea360962747e2b60b73fa43abe98b09d15c",
-                "block_height": 3433334
-            });
+            expect(data).to.eql(3433334);
         });
 
     });

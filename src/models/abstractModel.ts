@@ -19,7 +19,7 @@ export abstract class AbstractDataBase <BlockT, DataT>{
      * @param height
      * @return Promise<DeleteResult>
      */
-    abstract changeLastValidBlock(height: number): Promise<DeleteResult>;
+    abstract removeForkedBlocks(height: number): Promise<DeleteResult>;
 
     /**
      * save blocks with observation of that block

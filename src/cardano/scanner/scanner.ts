@@ -34,12 +34,8 @@ export class Scanner extends AbstractScanner<BlockEntity, Observation> {
      * @param block
      * @return Promise<Array<Observation | undefined>>
      */
-    getBlockInformation = async (block: Block): Promise<Array<Observation | undefined>> => {
-        const observations = (await CardanoUtils.observationsAtHeight(block.hash, this._networkAccess))
-            .filter((observation) => {
-                return observation !== undefined
-            });
-        return observations;
+    getBlockInformation = async (block: Block): Promise<Array<Observation>> => {
+        return (await CardanoUtils.observationsAtHeight(block.hash, this._networkAccess))
     }
 
 }

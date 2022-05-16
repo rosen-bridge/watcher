@@ -5,7 +5,7 @@ import MockAdapter from "axios-mock-adapter";
 
 const blockAtHeight = require('../dataset/blockAtHeight.json');
 const blockTxs = require('../dataset/blockTxs.json');
-const latestBlock = require('../dataset/latestBlock.json');
+const info = require('../dataset/info.json');
 const mockedAxios = new MockAdapter(nodeApi);
 const ergoNetwork = new ErgoNetworkApi();
 
@@ -16,8 +16,8 @@ mockedAxios.onGet(`/blocks/at/${blockHeight}`)
     .reply(200, blockAtHeight)
 mockedAxios.onGet(`/blocks/${blockHash}/transactions`)
     .reply(200, blockTxs)
-mockedAxios.onGet(`/blocks/lastHeaders/1`)
-    .reply(200, latestBlock)
+mockedAxios.onGet(`info`)
+    .reply(200, info)
 
 describe("Testing ergo network api", () => {
     describe("getBlockAtHeight", () => {
@@ -40,9 +40,7 @@ describe("Testing ergo network api", () => {
     describe("getCurrentHeight", () => {
         it("get the latest block", async () => {
             const data = await ergoNetwork.getCurrentHeight()
-            expect(data).to.haveOwnProperty("hash")
-            expect(data).to.haveOwnProperty("block_height")
-            expect(data.block_height).to.eql(blockHeight);
+            expect(data).to.eq(205800)
         });
     });
 })

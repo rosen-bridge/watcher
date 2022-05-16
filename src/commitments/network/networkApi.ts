@@ -24,15 +24,12 @@ export class ErgoNetworkApi extends AbstractNetworkConnector {
         )
     }
 
-    getCurrentHeight = (): Promise<Block> => {
-        return nodeApi.get<{height: number, id: string}[]>(
-            `/blocks/lastHeaders/1`
+    getCurrentHeight = (): Promise<number> => {
+        return nodeApi.get<{fullHeight: number}>(
+            `/info`
         ).then(
             res => {
-                return {
-                    hash: res.data[0].id,
-                    block_height: res.data[0].height
-                }
+                return res.data.fullHeight
             }
         )
     }

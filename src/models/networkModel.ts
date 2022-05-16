@@ -55,7 +55,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Observation> 
      * @param height
      * @return Promise<DeleteResult>
      */
-    changeLastValidBlock = async (height: number): Promise<DeleteResult> => {
+    removeForkedBlocks = async (height: number): Promise<DeleteResult> => {
         return await this.blockRepository.delete({
             height: MoreThanOrEqual(height)
         });
@@ -68,15 +68,14 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Observation> 
      * @param observations
      * @return Promise<boolean>
      */
-    saveBlock = async (height: number, blockHash: string, observations: Array<(Observation | undefined)>): Promise<boolean> => {
+    saveBlock = async (height: number, blockHash: string, observations: Array<Observation>): Promise<boolean> => {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         const block = new BlockEntity();
         block.height = height;
         block.hash = blockHash;
         const observationsEntity = observations
-            .filter(
-                (block): block is Observation => block !== undefined).map((observation) => {
+            .map((observation) => {
                 const observationEntity = new ObservationEntity();
                 observationEntity.fee = observation.fee;
                 observationEntity.sourceBlockId = observation.sourceBlockId;

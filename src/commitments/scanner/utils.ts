@@ -1,11 +1,10 @@
 import {commitmentAddress} from "../../../config/default";
 import {Commitment} from "../../objects/interfaces";
 import {tokens} from "../../../config/default";
-import * as wasm from "ergo-lib-wasm-nodejs";
-import {ErgoNetworkApi} from "../network/networkApi";
 import {decodeCollColl, decodeStr, ergoTreeToBase58Address} from "../../utils/utils";
 import {ExplorerOutputBox, ExplorerTransaction, NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
 import {CommitmentDataBase} from "../../models/commitmentModel";
+import {Address} from "ergo-lib-wasm-nodejs";
 
 export class CommitmentUtils {
 
@@ -19,8 +18,9 @@ export class CommitmentUtils {
     static checkTx = async (tx: NodeTransaction,
                             commitmentAddresses: Array<string>):
         Promise<Commitment | undefined> => {
+        const commitmentErgoTrees: Array<string> = commitmentAddresses.map(ad => Address.from_base58(ad).to_ergo_tree().to_base16_bytes())
         const commitment: NodeOutputBox = tx.outputs.filter((box) =>
-            commitmentAddresses.includes(ergoTreeToBase58Address(wasm.ErgoTree.from_base16_bytes(box.ergoTree)))
+            commitmentErgoTrees.includes(box.ergoTree)
         ).filter(box => box.assets.length > 0 && box.assets[0].tokenId == tokens.RWT)[0]
         if(commitment != undefined){
             const WID = (await decodeCollColl(commitment.additionalRegisters['R4']))[0]
@@ -44,25 +44,21 @@ export class CommitmentUtils {
      * @param blockHeight
      * @return Promise<Array<(Commitment | undefined)>>
      */
-    static commitmentsAtHeight = async (
-        txs: NodeTransaction[],
-        database: CommitmentDataBase,
-        blockHeight: number
-        ): Promise<Array<(Commitment | undefined)>> => {
-        const commitment = Array(txs.length).fill(undefined);
+    static commitmentsAtHeight = async (txs: NodeTransaction[],
+                                        database: CommitmentDataBase,
+                                        blockHeight: number): Promise<Array<Commitment>> => {
+        const commitments: Array<Commitment> = []
         for (let i = 0; i < txs.length; i++) {
-            commitment[i] = await this.checkTx(txs[i], [commitmentAddress]);
+            const c = await this.checkTx(txs[i], [commitmentAddress])
+            if(c!== undefined) commitments.push(c);
         }
-        for( const tx of txs){
+        for (const tx of txs){
             const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
             const foundCommitments = await database.findCommitmentsById(inputBoxIds)
             // TODO: Add Created eventTrigger BoxId
             foundCommitments.forEach(commitment => database.updateSpentCommitment(commitment.id, blockHeight))
         }
-        txs.forEach(tx => {
-
-        })
-        return commitment;
+        return commitments;
     }
 }
 

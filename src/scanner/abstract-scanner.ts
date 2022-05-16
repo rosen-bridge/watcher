@@ -21,7 +21,7 @@ export abstract class AbstractScanner<BlockT, DataT> {
         }
     }
 
-    abstract getBlockInformation(block: Block): Promise<Array<DataT | undefined>>;
+    abstract getBlockInformation(block: Block): Promise<Array<DataT>>;
 
     /**
      * worker function that runs for syncing the database with the Cardano blockchain and checks if we have any fork
@@ -30,9 +30,7 @@ export abstract class AbstractScanner<BlockT, DataT> {
     update = async () => {
         const lastSavedBlock = (await this._dataBase.getLastSavedBlock());
         if (!await this.isForkHappen()) {
-            const lastBlockHeight = await this._networkAccess.getCurrentHeight().then(res => {
-                return res.block_height
-            });
+            const lastBlockHeight = await this._networkAccess.getCurrentHeight()
             let height = null;
             if (lastSavedBlock !== undefined) {
                 height = lastSavedBlock.block_height + 1;
@@ -66,7 +64,7 @@ export abstract class AbstractScanner<BlockT, DataT> {
                 }
                 blockFromNetwork = await this._networkAccess.getBlockAtHeight(blockFromNetwork.block_height - 1);
             }
-            await this._dataBase.changeLastValidBlock(forkPointer.block_height);
+            await this._dataBase.removeForkedBlocks(forkPointer.block_height);
         }
     }
 

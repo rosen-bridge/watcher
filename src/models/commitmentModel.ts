@@ -54,7 +54,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * @param height
      * @return Promise<DeleteResult>
      */
-    changeLastValidBlock = async (height: number): Promise<DeleteResult> => {
+    removeForkedBlocks = async (height: number): Promise<DeleteResult> => {
         return await this.blockRepository.delete({
             height: MoreThanOrEqual(height)
         });
@@ -67,15 +67,14 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * @param commitments
      * @return Promise<boolean>
      */
-    saveBlock = async (height: number, blockHash: string, commitments: Array<(Commitment | undefined)>): Promise<boolean> => {
+    saveBlock = async (height: number, blockHash: string, commitments: Array<Commitment>): Promise<boolean> => {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         const block = new CBlockEntity();
         block.height = height;
         block.hash = blockHash;
         const commitmentsEntity = commitments
-            .filter(
-                (block): block is Commitment => block !== undefined).map((commitment) => {
+            .map((commitment) => {
                 const commitmentEntity = new ObservedCommitmentEntity();
                 commitmentEntity.eventId = commitment.eventId
                 commitmentEntity.commitment = commitment.commitment
