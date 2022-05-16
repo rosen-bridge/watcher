@@ -5,7 +5,7 @@ import { strToUint8Array } from "../utils/utils";
 import bigInt from "big-integer";
 import { RepoBox, RSNBox } from "../objects/ergo";
 
-export class Transactions {
+export class Transaction {
 
     ergoNetwork: ErgoNetwork;
     RepoNFTId: TokenId;
@@ -132,7 +132,7 @@ export class Transactions {
         return repoBuilder.build();
     }
 
-    getPermit = async (RSNCount: string) => {
+    getPermit = async (RSNCount: string): Promise<string> => {
         const ergoNetwork = new ErgoNetwork();
         const height = await ergoNetwork.getHeight();
 
@@ -158,13 +158,13 @@ export class Transactions {
 
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte();
         if (users === undefined) {
-            return;
+            return "";
         }
         const repoBoxId = repoBox.box_id().as_bytes();
         users.push(repoBoxId);
         const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array();
         if (usersCount === undefined) {
-            return;
+            return "";
         }
 
         const count = RWTCount.toString();
@@ -257,8 +257,10 @@ export class Transactions {
         const tx_data_inputs = ergoLib.ErgoBoxes.from_boxes_json([]);
         const signedTx = wallet.sign_transaction(ctx, tx, inputBoxes, tx_data_inputs);
         // await this.ergoNetwork.sendTx(signedTx.to_json());
-        console.log("transaction is sent to the network");
+        // console.log("transaction is sent to the network");
         console.log("transaction id is", signedTx.id().to_str());
+        console.log(signedTx.to_json());
+        return signedTx.id().to_str();
     }
 
 }

@@ -6,23 +6,22 @@ import generateAddress from "./api/generateAddress";
 import { ErgoNetwork } from "./ergo/network/ergoNetwork";
 import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { Contracts } from "./api/contracts";
-import { Transactions } from "./api/lock";
+import { Transaction } from "./api/lock";
 import { strToUint8Array } from "./utils/utils";
 import config from "config";
 import { rosenConfig } from "./api/rosenConfig";
 import bigInt from "big-integer";
+import lockRSN from "./api/lockRSN";
 
 // main()
-// const app = express();
-// app.use('/address', generateAddress);
-//
-// app.get("/secret", (req, res) => {
-//
-// });
-//
-// const port = process.env.PORT || 3000;
-//
-// app.listen(port, () => console.log(`app listening on port ${port}`));
+const app = express();
+app.use('/address', generateAddress);
+app.use('/lock',lockRSN);
+
+
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => console.log(`app listening on port ${port}`));
 //
 // generateSK()
 // const api=new ErgoNetwork();
@@ -41,12 +40,12 @@ import bigInt from "big-integer";
 
 // console.log(ergoLib.I64.from_str("12").checked_add(ergoLib.I64.from_str("-12")).to_str());
 // ergoLib.I64.from_str("-"+RWTCount.toString())
-
-console.log(ergoLib.BoxValue.SAFE_USER_MIN().as_i64().to_str());
-
-
-const lock = new Transactions(rosenConfig, "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT", "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2");
-lock.getPermit("100");
+//
+// console.log(ergoLib.BoxValue.SAFE_USER_MIN().as_i64().to_str());
+//
+//
+// const lock = new Transaction(rosenConfig, "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT", "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2");
+// lock.getPermit("100");
 
 // const test = bigInt("1111111111111111111111111111111111111111");
 // console.log(test.toString())
