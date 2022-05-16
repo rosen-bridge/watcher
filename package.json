@@ -37,6 +37,7 @@
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
     "axios": "^0.26.1",
+    "big-integer": "^1.6.51",
     "config": "^3.3.7",
     "ergo-lib-wasm-nodejs": "^0.15.0",
     "express": "^4.17.3",
