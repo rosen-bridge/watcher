@@ -37,11 +37,17 @@ router.get("/lock", async (req, res) => {
         return;
     }
 
+
     const watcherAddress = ergoLib.SecretKey.dlog_from_bytes(
         strToUint8Array(SECRET_KEY)
     ).get_address().to_base58(networkType);
 
     const transaction = new Transaction(rosenConfig, watcherAddress, SECRET_KEY);
+
+    if (await transaction.watcherHasLocked()) {
+        res.status(400).send("you have locked RSN");
+    }
+
     const transactionId = await transaction.getPermit("100");
     if (transactionId === "") {
         res.status(400).send("Error");
