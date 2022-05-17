@@ -3,8 +3,10 @@ import {CBlockEntity} from "../entities/CBlockEntity";
 import {ObservedCommitmentEntity} from "../entities/ObservedCommitmentEntity";
 import { Block, Commitment } from "../objects/interfaces";
 import {AbstractDataBase} from "./abstractModel";
+import {commitmentInformation} from "../commitments/scanner/scanner";
+import {CommitmentEntity} from "../entities/CommitmentEntity";
 
-export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitment> {
+export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, commitmentInformation> {
     dataSource: DataSource;
     blockRepository: Repository<CBlockEntity>;
     commitmentRepository: Repository<ObservedCommitmentEntity>
@@ -64,30 +66,48 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * save blocks with observation of that block
      * @param height
      * @param blockHash
-     * @param commitments
+     * @param information
      * @return Promise<boolean>
      */
-    saveBlock = async (height: number, blockHash: string, commitments: Array<Commitment>): Promise<boolean> => {
+    saveBlock = async (height: number, blockHash: string, information: commitmentInformation): Promise<boolean> => {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         const block = new CBlockEntity();
         block.height = height;
         block.hash = blockHash;
-        const commitmentsEntity = commitments
+        const commitmentsEntity = information.newCommitments
             .map((commitment) => {
                 const commitmentEntity = new ObservedCommitmentEntity();
                 commitmentEntity.eventId = commitment.eventId
                 commitmentEntity.commitment = commitment.commitment
                 commitmentEntity.WID = commitment.WID
                 commitmentEntity.commitmentBoxId = commitment.commitmentBoxId
+                commitmentEntity.block = block
                 return commitmentEntity;
             });
+
+        const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
+        for(const boxId of information.newCommitments){
+            const oldCommitment = await this.commitmentRepository.findOne({
+                where: { commitmentBoxId: information.updatedCommitments[0] }
+            })
+            const newCommitment = new ObservedCommitmentEntity()
+            Object.assign(newCommitment, {
+                ...oldCommitment,
+                ...{
+                    commitmentBoxId: information.updatedCommitments[0],
+                    spendBlock: block
+                }
+            })
+            updatedCommitmentEntities.push(newCommitment)
+        }
 
         let error = true;
         await queryRunner.startTransaction()
         try {
             await queryRunner.manager.save(block);
             await queryRunner.manager.save(commitmentsEntity);
+            await queryRunner.manager.save(updatedCommitmentEntities);
             await queryRunner.commitTransaction();
         } catch (err) {
             await queryRunner.rollbackTransaction();
@@ -122,7 +142,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
     getOldSpentCommitments = async (height: number): Promise<Array<Commitment>> =>{
         return await this.commitmentRepository.find({
             where: {
-                spendHeight: LessThan(height)
+                spendBlock: LessThan(height)
             }
         })
     }
@@ -144,18 +164,6 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
             where: {
                 commitmentBoxId: In(ids)
             }
-        })
-    }
-
-    /**
-     * update the commitments spent status by their id
-     * @param id
-     * @param height
-     */
-    updateSpentCommitment = async (id: number, height: number) => {
-        await this.commitmentRepository.save({
-            id: id,
-            spendHeight: height,
         })
     }
 }

@@ -28,7 +28,7 @@ export abstract class AbstractDataBase <BlockT, DataT>{
      * @param data
      * @return Promise<boolean>
      */
-    abstract saveBlock (height: number, blockHash: string, data: Array<(DataT | undefined)>): Promise<boolean>;
+    abstract saveBlock (height: number, blockHash: string, data: DataT): Promise<boolean>;
 
     /**
      * get block hash and height

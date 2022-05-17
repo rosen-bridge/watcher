@@ -1,8 +1,8 @@
 import {commitmentAddress} from "../../../config/default";
 import {Commitment} from "../../objects/interfaces";
 import {tokens} from "../../../config/default";
-import {decodeCollColl, decodeStr, ergoTreeToBase58Address} from "../../utils/utils";
-import {ExplorerOutputBox, ExplorerTransaction, NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
+import {decodeCollColl, decodeStr} from "../../utils/utils";
+import {NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
 import {CommitmentDataBase} from "../../models/commitmentModel";
 import {Address} from "ergo-lib-wasm-nodejs";
 
@@ -40,25 +40,36 @@ export class CommitmentUtils {
      * Check all the transaction in a block and returns an array of commitments
      * It also updates the spent commitments in the database
      * @param txs
-     * @param database
-     * @param blockHeight
      * @return Promise<Array<(Commitment | undefined)>>
      */
-    static commitmentsAtHeight = async (txs: NodeTransaction[],
-                                        database: CommitmentDataBase,
-                                        blockHeight: number): Promise<Array<Commitment>> => {
+    static commitmentsAtHeight = async (txs: NodeTransaction[]): Promise<Array<Commitment>> => {
         const commitments: Array<Commitment> = []
         for (let i = 0; i < txs.length; i++) {
             const c = await this.checkTx(txs[i], [commitmentAddress])
             if(c!== undefined) commitments.push(c);
         }
-        for (const tx of txs){
-            const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
-            const foundCommitments = await database.findCommitmentsById(inputBoxIds)
-            // TODO: Add Created eventTrigger BoxId
-            foundCommitments.forEach(commitment => database.updateSpentCommitment(commitment.id, blockHeight))
-        }
         return commitments;
+    }
+
+    /**
+     * Returns spent commitments on the block to update the database information
+     * @param txs
+     * @param database
+     * @param newCommitments
+     * @return list of updated commitment box ids
+     */
+    static updatedCommitmentsAtHeight = async (txs: Array<NodeTransaction>,
+                                               database: CommitmentDataBase,
+                                               newCommitments: Array<string>) => {
+        let updatedCommitments: Array<string> = []
+        for(const tx of txs) {
+            const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
+            const foundCommitments = (await database.findCommitmentsById(inputBoxIds)).map(commitment => commitment.commitmentBoxId)
+            const newUpdatedCommitments = inputBoxIds.filter(boxId => newCommitments.includes(boxId))
+            updatedCommitments = updatedCommitments.concat(foundCommitments)
+            updatedCommitments = updatedCommitments.concat(newUpdatedCommitments)
+        }
+        return updatedCommitments
     }
 }
 

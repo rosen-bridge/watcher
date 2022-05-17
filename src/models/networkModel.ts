@@ -5,7 +5,7 @@ import { ObservationEntity } from "../entities/ObservationEntity";
 import { Block, Observation } from "../objects/interfaces";
 import {AbstractDataBase} from "./abstractModel";
 
-export class NetworkDataBase extends AbstractDataBase<BlockEntity, Observation> {
+export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observation>> {
     dataSource: DataSource;
     blockRepository: Repository<BlockEntity>;
     commitmentRepository: Repository<CommitmentEntity>;

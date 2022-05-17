@@ -17,5 +17,5 @@ export class CBlockEntity {
         (commitment) => commitment.block,
         {cascade: true,}
     )
-    observations: ObservedCommitmentEntity[]
+    commitments: ObservedCommitmentEntity[]
 }

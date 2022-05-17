@@ -18,16 +18,20 @@ export class ObservedCommitmentEntity {
     @Column()
     commitmentBoxId: string
 
-    @Column()
-    spendHeight: number
-
-    @Column()
-    eventTriggerBoxId: string
-
     @ManyToOne(
         () => CBlockEntity,
         (block) => block.height,
         {onDelete: 'CASCADE',}
     )
     block: CBlockEntity
+
+    @ManyToOne(
+        () => CBlockEntity,
+        (block) => block.height,
+        {onDelete: 'SET NULL', nullable: true}
+    )
+    spendBlock: CBlockEntity
+
+    @Column({nullable: true})
+    eventTriggerBoxId: string
 }

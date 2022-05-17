@@ -21,7 +21,7 @@ export abstract class AbstractScanner<BlockT, DataT> {
         }
     }
 
-    abstract getBlockInformation(block: Block): Promise<Array<DataT>>;
+    abstract getBlockInformation(block: Block): Promise<DataT>;
 
     /**
      * worker function that runs for syncing the database with the Cardano blockchain and checks if we have any fork

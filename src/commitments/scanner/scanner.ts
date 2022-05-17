@@ -9,7 +9,12 @@ import {CommitmentUtils} from "./utils";
 
 const INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
 
-export class Scanner extends AbstractScanner<CBlockEntity, Commitment> {
+export type commitmentInformation = {
+    newCommitments: Array<Commitment>
+    updatedCommitments: Array<string>
+}
+
+export class Scanner extends AbstractScanner<CBlockEntity, commitmentInformation> {
     _dataBase: CommitmentDataBase;
     _networkAccess: ErgoNetworkApi;
     _config: IConfig;
@@ -33,9 +38,15 @@ export class Scanner extends AbstractScanner<CBlockEntity, Commitment> {
      * @param block
      * @return Promise<Array<Commitment | undefined>>
      */
-    getBlockInformation = async (block: Block): Promise<Array<Commitment>> => {
+    getBlockInformation = async (block: Block): Promise<commitmentInformation> => {
         const txs = await this._networkAccess.getBlockTxs(block.hash);
-        return (await CommitmentUtils.commitmentsAtHeight(txs, this._dataBase, block.block_height))
+        const newCommitments = (await CommitmentUtils.commitmentsAtHeight(txs))
+        const updatedCommitments = await CommitmentUtils.updatedCommitmentsAtHeight(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
+        // TODO: Add eventTrigger box id to updated commitments
+        return {
+            newCommitments: newCommitments,
+            updatedCommitments: updatedCommitments
+        }
     }
 
     /**

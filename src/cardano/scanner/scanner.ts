@@ -9,7 +9,7 @@ import { BlockEntity } from "../../entities/BlockEntity";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
-export class Scanner extends AbstractScanner<BlockEntity, Observation> {
+export class Scanner extends AbstractScanner<BlockEntity, Array<Observation>> {
     _dataBase: NetworkDataBase;
     _networkAccess: KoiosNetwork;
     _config: IConfig;
