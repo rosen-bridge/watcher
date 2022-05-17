@@ -1,7 +1,7 @@
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { Address, BoxValue, Contract, TokenAmount, TokenId } from "ergo-lib-wasm-nodejs";
-import { strToUint8Array } from "../utils/utils";
+import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import bigInt from "big-integer";
 import { RepoBox, RSNBox } from "../objects/ergo";
 
@@ -133,14 +133,14 @@ export class Transaction {
     }
 
     getPermit = async (RSNCount: string): Promise<string> => {
-        const ergoNetwork = new ErgoNetwork();
-        const height = await ergoNetwork.getHeight();
+
+        const height = await this.ergoNetwork.getHeight();
 
         const RWTCount = bigInt(RSNCount).divide("100");
 
         const RSNInput = new RSNBox(
             await (
-                ergoNetwork.getBoxWithNFT(
+                this.ergoNetwork.getBoxWithNFT(
                     this.userAddress,
                     this.RSN.to_str()
                 )
@@ -149,9 +149,9 @@ export class Transaction {
 
         const repoBox = new RepoBox(
             await (
-                ergoNetwork.getBoxWithNFT(
+                this.ergoNetwork.getBoxWithNFT(
                     this.repoAddress,
-                    this.RSN.to_str()
+                    this.RepoNFTId.to_str()
                 )
             )
         ).getErgoBox();
@@ -259,8 +259,43 @@ export class Transaction {
         // await this.ergoNetwork.sendTx(signedTx.to_json());
         // console.log("transaction is sent to the network");
         console.log("transaction id is", signedTx.id().to_str());
-        console.log(signedTx.to_json());
+        // console.log(signedTx.to_json());
         return signedTx.id().to_str();
+    }
+
+    watcherHasLocked = async (): Promise<boolean> => {
+        const repoBox = new RepoBox(
+            await (
+                this.ergoNetwork.getBoxWithNFT(
+                    this.repoAddress,
+                    this.RepoNFTId.to_str(),
+                )
+            )
+        ).getErgoBox();
+        const users = repoBox.register_value(4)?.to_coll_coll_byte();
+        if (users === undefined) {
+            return false;
+        }
+        const ans = users.map(async (id) => {
+            const wid = uint8ArrayToHex(id);
+            try {
+                const box = await (
+                    this.ergoNetwork.getBoxWithNFT(
+                        this.userAddress,
+                        wid,
+                    )
+                );
+                return true;
+            } catch (error) {
+                return false;
+            }
+        });
+        return (
+            await Promise.all(ans))
+            .reduce(
+                (prev, curr) => prev || curr,
+                false
+            );
     }
 
 }
