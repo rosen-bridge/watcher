@@ -26,7 +26,7 @@ export const firstCommitment: Commitment = {
 
 
 describe("Commitment Database functions", async () => {
-    const DB = await loadDataBase("dataBase");
+    const DB = await loadDataBase("commitments");
 
     describe("commitment saveBlock", () => {
         it("should return true", async () => {

@@ -91,6 +91,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
             await queryRunner.commitTransaction();
         } catch (err) {
             await queryRunner.rollbackTransaction();
+            console.log(err)
             error = false;
         } finally {
             await queryRunner.release();

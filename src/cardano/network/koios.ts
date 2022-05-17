@@ -22,11 +22,11 @@ export class KoiosNetwork extends AbstractNetworkConnector {
     }
 
     getCurrentHeight = (): Promise<number> => {
-        return koios.get<Block>(
+        return koios.get<Array<Block>>(
             '/blocks',
             {params: {offset: 0, limit: 1, select: 'hash,block_height'}}
         ).then(
-            res => res.data.block_height
+            res => res.data[0].block_height
         )
     }
 

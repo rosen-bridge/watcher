@@ -30,6 +30,19 @@ export const firstObservations: Array<Observation> = [{
     requestId: "reqId1",
 }];
 
+export const secondObservations: Array<Observation> = [{
+    fromChain: "erg",
+    toChain: "cardano",
+    toAddress: "cardanoAddress",
+    amount: "1100000000",
+    fee: "1100000",
+    sourceChainTokenId: "ergoTokenId",
+    targetChainTokenId: "cardanoTokenId",
+    sourceTxId: "ergoTxId2",
+    sourceBlockId: "ergoBlockId",
+    requestId: "reqId2",
+}];
+
 
 describe("Database functions", async () => {
     const DB = await loadDataBase("dataBase");
@@ -41,6 +54,12 @@ describe("Database functions", async () => {
                 3433333,
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
                 firstObservations
+            );
+            expect(res).to.be.true;
+            res = await DB.saveBlock(
+                3433334,
+                "19b60182cba99d621b3d02457fefb4cda81f4fbde3ca719617cbed2e4cc5c0ce",
+                secondObservations
             );
             expect(res).to.be.true;
         });
