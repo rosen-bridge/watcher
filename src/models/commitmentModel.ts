@@ -87,7 +87,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, commitmen
             });
 
         const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
-        for(const boxId of information.newCommitments){
+        for(const boxId of information.updatedCommitments){
             const oldCommitment = await this.commitmentRepository.findOne({
                 where: { commitmentBoxId: information.updatedCommitments[0] }
             })

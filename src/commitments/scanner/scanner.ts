@@ -2,7 +2,7 @@ import {AbstractScanner} from "../../scanner/abstract-scanner";
 import {CommitmentDataBase} from "../../models/commitmentModel";
 import config, {IConfig} from "config";
 import {Block, Commitment} from "../../objects/interfaces";
-import {commitmentOrmConfig} from "../../../config/ormconfig";
+import {commitmentOrmConfig} from "../../../config/commitmentOrmConfig";
 import {ErgoNetworkApi} from "../network/networkApi";
 import {CBlockEntity} from "../../entities/CBlockEntity";
 import {CommitmentUtils} from "./utils";

@@ -1,7 +1,7 @@
 import {CommitmentUtils} from "../../../src/commitments/scanner/utils";
 import {expect} from "chai";
 import {CommitmentDataBase} from "../../../src/models/commitmentModel";
-import {commitmentOrmConfig} from "../../../config/ormconfig";
+import {commitmentOrmConfig} from "../../../config/commitmentOrmConfig";
 
 const chai = require("chai")
 const spies = require("chai-spies")

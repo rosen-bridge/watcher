@@ -1,6 +1,6 @@
 import {DataSource} from "typeorm";
 import {commitmentEntities} from "../../../src/entities";
-import {migrations} from "../../../src/migrations";
+import {commitmentMigrations} from "../../../src/migrations";
 import {CommitmentDataBase} from "../../../src/models/commitmentModel";
 import {Commitment} from "../../../src/objects/interfaces";
 import {expect} from "chai";
@@ -11,7 +11,7 @@ const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
         database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: commitmentEntities,
         synchronize: true,
-        migrations: migrations,
+        // migrations: commitmentMigrations,
         logging: false,
     });
     return await CommitmentDataBase.init(ormConfig);
