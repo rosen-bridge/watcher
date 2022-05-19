@@ -3,7 +3,7 @@ import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { Address, BoxValue, Contract, TokenAmount, TokenId } from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import bigInt from "big-integer";
-import { RepoBox, RSNBox } from "../objects/ergo";
+import { PermitBox, RepoBox, RSNBox, WIDBox } from "../objects/ergo";
 
 export class Transaction {
 
@@ -132,6 +132,192 @@ export class Transaction {
         return repoBuilder.build();
     }
 
+    returnPermit = async () => {
+        const height = await this.ergoNetwork.getHeight();
+
+        //TODO:Error handling!!
+        const permitBox = new PermitBox(
+            await (
+                this.ergoNetwork.getBoxWithToken(
+                    this.userAddress,
+                    this.RepoNFTId.to_str(),
+                )
+            )
+        ).getErgoBox();
+
+        //TODO: chaining transaction should be completed
+        const repoBox = new RepoBox(
+            await (
+                this.ergoNetwork.getBoxWithToken(
+                    this.repoAddress,
+                    this.RepoNFTId.to_str()
+                )
+            )
+        ).getErgoBox();
+
+        //TODO: copy code should be deleted
+        const users = repoBox.register_value(4)?.to_coll_coll_byte();
+        if (users === undefined) {
+            return false;
+        }
+        const ans = users.map(async (id) => {
+            const wid = uint8ArrayToHex(id);
+            try {
+                const box = await (
+                    this.ergoNetwork.getBoxWithToken(
+                        this.userAddress,
+                        wid,
+                    )
+                );
+                return true;
+            } catch (error) {
+                return false;
+            }
+        });
+
+        let WID = "";
+        for (let i = 0; i < ans.length; i++) {
+            if (ans[i] === true) {
+                WID = uint8ArrayToHex(users[i]);
+                break;
+            }
+        }
+        if (WID === "") {
+            return;
+        }
+
+        const widBox = new WIDBox(
+            await (
+                this.ergoNetwork.getBoxWithToken(
+                    this.userAddress,
+                    WID,
+                )
+            )
+        ).getErgoBox();
+
+        const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array();
+        if (usersCount === undefined) {
+            return "";
+        }
+
+        const widIndex = users.map(user => uint8ArrayToHex(user)).indexOf(WID);
+
+        const inputRWTCount = bigInt(usersCount[widIndex]);
+
+        const newUsers = users.slice(0, widIndex).concat(users.slice(widIndex, users.length));
+        const newUsersCount = usersCount.slice(0, widIndex).concat(usersCount.slice(widIndex, usersCount.length));
+
+
+        const RepoRWTCount = repoBox.tokens().get(1).amount().as_i64().checked_add(
+            ergoLib.I64.from_str(
+                inputRWTCount.toString()
+            )
+        );
+        const RSNTokenCount = repoBox.tokens().get(0).amount().as_i64().checked_add(
+            ergoLib.I64.from_str(
+                inputRWTCount.times(bigInt("-100")).toString()
+            )
+        );
+
+        const repoOut = await this.createRepo(
+            height,
+            RepoRWTCount.to_str(),
+            RSNTokenCount.to_str(),
+            newUsers,
+            newUsersCount,
+            widIndex
+        );
+
+        const inputBoxes = new ergoLib.ErgoBoxes(repoBox);
+        inputBoxes.add(permitBox);
+        inputBoxes.add(widBox);
+
+        const boxSelector = new ergoLib.SimpleBoxSelector();
+        const coveringTokens = new ergoLib.Tokens();
+
+        const RepoNFTToken = new ergoLib.Token(
+            this.RepoNFTId,
+            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1"))
+        );
+        coveringTokens.add(RepoNFTToken);
+
+        const RWTToken = new ergoLib.Token(
+            this.RWTTokenId,
+            ergoLib.TokenAmount.from_i64(RepoRWTCount),
+        );
+        coveringTokens.add(RWTToken);
+
+        const RSNToken = new ergoLib.Token(
+            this.RSN,
+            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(
+                inputRWTCount.times(bigInt("100")).toString()
+            )),
+        );
+        coveringTokens.add(RSNToken);
+
+        // const WIDToken = new ergoLib.Token(
+        //     widBox.tokens().get(0).id(),
+        //     widBox.tokens().get(0).amount(),
+        // );
+        // coveringTokens.add(WIDToken);
+
+        const selection = boxSelector.select(
+            inputBoxes,
+            ergoLib.BoxValue.from_i64(
+                ergoLib.I64.from_str(
+                    bigInt(
+                        this.minBoxValue.as_i64().to_str()
+                    ).times(bigInt("2")).toString()
+                )
+            ),
+            coveringTokens
+        );
+
+        const repoValue = repoBox.value();
+
+
+        const userOutBoxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+            ergoLib.BoxValue.from_i64(
+                repoValue.as_i64().checked_add(
+                    ergoLib.I64.from_str(
+                        "-" + this.minBoxValue.as_i64().to_str()
+                    )
+                )
+            ),
+            this.userAddressContract,
+            height
+        );
+        userOutBoxBuilder.add_token(
+            this.RSN,
+            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(
+                    inputRWTCount.times(bigInt("100")).toString()
+                )
+            ),
+        );
+        const userOutBox = userOutBoxBuilder.build();
+
+        const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
+        outputBoxes.add(userOutBox);
+        const builder = ergoLib.TxBuilder.new(
+            selection,
+            outputBoxes,
+            height,
+            this.minBoxValue,
+            this.userAddress,
+            this.minBoxValue,
+        );
+        const tx = builder.build();
+        const sks = new ergoLib.SecretKeys();
+        const sk = ergoLib.SecretKey.dlog_from_bytes(strToUint8Array(this.userSecret));
+        sks.add(sk);
+        const wallet = ergoLib.Wallet.from_secrets(sks);
+        const ctx = await this.ergoNetwork.getErgoStateContext();
+        const tx_data_inputs = ergoLib.ErgoBoxes.from_boxes_json([]);
+        const signedTx = wallet.sign_transaction(ctx, tx, inputBoxes, tx_data_inputs);
+
+
+    }
+
     getPermit = async (RSNCount: string): Promise<string> => {
 
         const height = await this.ergoNetwork.getHeight();
@@ -140,7 +326,7 @@ export class Transaction {
 
         const RSNInput = new RSNBox(
             await (
-                this.ergoNetwork.getBoxWithNFT(
+                this.ergoNetwork.getBoxWithToken(
                     this.userAddress,
                     this.RSN.to_str()
                 )
@@ -149,7 +335,7 @@ export class Transaction {
 
         const repoBox = new RepoBox(
             await (
-                this.ergoNetwork.getBoxWithNFT(
+                this.ergoNetwork.getBoxWithToken(
                     this.repoAddress,
                     this.RepoNFTId.to_str()
                 )
@@ -266,7 +452,7 @@ export class Transaction {
     watcherHasLocked = async (): Promise<boolean> => {
         const repoBox = new RepoBox(
             await (
-                this.ergoNetwork.getBoxWithNFT(
+                this.ergoNetwork.getBoxWithToken(
                     this.repoAddress,
                     this.RepoNFTId.to_str(),
                 )
@@ -280,7 +466,7 @@ export class Transaction {
             const wid = uint8ArrayToHex(id);
             try {
                 const box = await (
-                    this.ergoNetwork.getBoxWithNFT(
+                    this.ergoNetwork.getBoxWithToken(
                         this.userAddress,
                         wid,
                     )
@@ -290,6 +476,8 @@ export class Transaction {
                 return false;
             }
         });
+
+        //TODO: should replaced with includes
         return (
             await Promise.all(ans))
             .reduce(

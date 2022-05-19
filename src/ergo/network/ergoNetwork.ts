@@ -92,7 +92,7 @@ export class ErgoNetwork {
 
     }
 
-    getBoxWithNFT = async (address: Address, tokenId: string): Promise<JSON> => {
+    getBoxWithToken = async (address: Address, tokenId: string): Promise<JSON> => {
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
             0,
@@ -109,7 +109,7 @@ export class ErgoNetwork {
             }
         )
         if (!box.covered) {
-            throw Error("box with NFT:" + tokenId + " not found")
+            throw Error("box with Token:" + tokenId + " not found")
         }
         return JSON.parse(box.boxes[0].to_json());
     }

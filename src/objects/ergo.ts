@@ -36,3 +36,16 @@ export class RepoBox extends Box {
         super(boxJson);
     }
 }
+
+export class PermitBox extends Box{
+    constructor(boxJson: JSON) {
+        super(boxJson);
+    }
+}
+
+export class WIDBox extends Box{
+    constructor(boxJson: JSON) {
+        super(boxJson);
+    }
+}
+
