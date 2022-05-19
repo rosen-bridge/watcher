@@ -11,11 +11,3 @@ export const cardanoOrmConfig = new DataSource({
     logging: false,
 });
 
-export const commitmentOrmConfig = new DataSource({
-    type: "sqlite",
-    database: __dirname + "/../sqlite/commitmentWatcher.sqlite",
-    entities: commitmentEntities,
-    migrations: migrations,
-    synchronize: false,
-    logging: false,
-});
