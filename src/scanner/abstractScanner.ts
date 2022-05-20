@@ -1,4 +1,4 @@
-import { AbstractNetworkConnector } from "../network/abstract-network-connector";
+import { AbstractNetworkConnector } from "../network/abstractNetworkConnector";
 import { AbstractDataBase } from "../models/abstractModel";
 import { Block } from "../objects/interfaces";
 

@@ -2,7 +2,7 @@ import { KoiosNetwork } from "../network/koios";
 import { CardanoUtils } from "./utils";
 import config, { IConfig } from "config";
 import { cardanoOrmConfig } from "../../../config/ormconfig";
-import { AbstractScanner } from "../../scanner/abstract-scanner";
+import { AbstractScanner } from "../../scanner/abstractScanner";
 import { NetworkDataBase } from "../../models/networkModel";
 import { Block, Observation } from "../../objects/interfaces";
 import { BlockEntity } from "../../entities/BlockEntity";

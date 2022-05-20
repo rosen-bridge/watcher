@@ -3,7 +3,7 @@ export type NodeRegister = { [key: string]: string };
 
 export type NodeToken = {
     tokenId: string;
-    amount: number;
+    amount: bigint;
 };
 
 export type NodeInputBox = {
@@ -12,7 +12,7 @@ export type NodeInputBox = {
 
 export type NodeOutputBox = {
     boxId: string;
-    value: number;
+    value: bigint;
     index: number;
     creationHeight: number;
     ergoTree: string;

@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from "config";
-import {AbstractNetworkConnector} from "../../network/abstract-network-connector";
+import {AbstractNetworkConnector} from "../../network/abstractNetworkConnector";
 import {Block} from "../../objects/interfaces";
 import {NodeBlock, NodeTransaction} from "./ergoApiModels";
 

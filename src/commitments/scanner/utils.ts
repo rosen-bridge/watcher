@@ -3,7 +3,7 @@ import {Commitment} from "../../objects/interfaces";
 import {tokens} from "../../../config/default";
 import {decodeCollColl, decodeStr} from "../../utils/utils";
 import {NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
-import {CommitmentDataBase} from "../../models/commitmentModel";
+import {CommitmentDataBase} from "../models/commitmentModel";
 import {Address} from "ergo-lib-wasm-nodejs";
 
 export class CommitmentUtils {

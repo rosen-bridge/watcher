@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from 'config';
 import { Tx, TxMetaData, Utxo } from "./apiModelsCardano";
-import { AbstractNetworkConnector } from "../../network/abstract-network-connector";
+import { AbstractNetworkConnector } from "../../network/abstractNetworkConnector";
 import { Block } from "../../objects/interfaces";
 
 const URL: string | undefined = config.get?.('node.URL');

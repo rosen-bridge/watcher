@@ -1,7 +1,7 @@
 import {DataSource} from "typeorm";
 import {commitmentEntities} from "../../../src/entities";
 import {commitmentMigrations} from "../../../src/migrations";
-import {CommitmentDataBase} from "../../../src/models/commitmentModel";
+import {CommitmentDataBase} from "../../../src/commitments/models/commitmentModel";
 import {Commitment} from "../../../src/objects/interfaces";
 import {expect} from "chai";
 

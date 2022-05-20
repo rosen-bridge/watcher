@@ -1,5 +1,5 @@
-import {AbstractScanner} from "../../scanner/abstract-scanner";
-import {CommitmentDataBase} from "../../models/commitmentModel";
+import {AbstractScanner} from "../../scanner/abstractScanner";
+import {CommitmentDataBase} from "../models/commitmentModel";
 import config, {IConfig} from "config";
 import {Block, Commitment} from "../../objects/interfaces";
 import {commitmentOrmConfig} from "../../../config/commitmentOrmConfig";
@@ -9,12 +9,12 @@ import {CommitmentUtils} from "./utils";
 
 const INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
 
-export type commitmentInformation = {
+export type CommitmentInformation = {
     newCommitments: Array<Commitment>
     updatedCommitments: Array<string>
 }
 
-export class Scanner extends AbstractScanner<CBlockEntity, commitmentInformation> {
+export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation> {
     _dataBase: CommitmentDataBase;
     _networkAccess: ErgoNetworkApi;
     _config: IConfig;
@@ -34,11 +34,11 @@ export class Scanner extends AbstractScanner<CBlockEntity, commitmentInformation
     }
 
     /**
-     * getting block and extracting observations from the network
+     * getting block and extracting new commitments and old spent commitments from the specified block
      * @param block
-     * @return Promise<Array<Commitment | undefined>>
+     * @return Promise<Array<CommitmentInformation>>
      */
-    getBlockInformation = async (block: Block): Promise<commitmentInformation> => {
+    getBlockInformation = async (block: Block): Promise<CommitmentInformation> => {
         const txs = await this._networkAccess.getBlockTxs(block.hash);
         const newCommitments = (await CommitmentUtils.commitmentsAtHeight(txs))
         const updatedCommitments = await CommitmentUtils.updatedCommitmentsAtHeight(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))

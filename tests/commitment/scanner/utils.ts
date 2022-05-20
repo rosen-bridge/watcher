@@ -1,6 +1,6 @@
 import {CommitmentUtils} from "../../../src/commitments/scanner/utils";
 import {expect} from "chai";
-import {CommitmentDataBase} from "../../../src/models/commitmentModel";
+import {CommitmentDataBase} from "../../../src/commitments/models/commitmentModel";
 import {commitmentOrmConfig} from "../../../config/commitmentOrmConfig";
 
 const chai = require("chai")

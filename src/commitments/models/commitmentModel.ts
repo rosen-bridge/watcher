@@ -1,12 +1,11 @@
 import {DataSource, DeleteResult, In, LessThan, MoreThanOrEqual, Repository} from "typeorm";
-import {CBlockEntity} from "../entities/CBlockEntity";
-import {ObservedCommitmentEntity} from "../entities/ObservedCommitmentEntity";
-import { Block, Commitment } from "../objects/interfaces";
-import {AbstractDataBase} from "./abstractModel";
-import {commitmentInformation} from "../commitments/scanner/scanner";
-import {CommitmentEntity} from "../entities/CommitmentEntity";
+import {CBlockEntity} from "../../entities/CBlockEntity";
+import {ObservedCommitmentEntity} from "../../entities/ObservedCommitmentEntity";
+import { Block, Commitment } from "../../objects/interfaces";
+import {AbstractDataBase} from "../../models/abstractModel";
+import {CommitmentInformation} from "../scanner/scanner";
 
-export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, commitmentInformation> {
+export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, CommitmentInformation> {
     dataSource: DataSource;
     blockRepository: Repository<CBlockEntity>;
     commitmentRepository: Repository<ObservedCommitmentEntity>
@@ -69,7 +68,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, commitmen
      * @param information
      * @return Promise<boolean>
      */
-    saveBlock = async (height: number, blockHash: string, information: commitmentInformation): Promise<boolean> => {
+    saveBlock = async (height: number, blockHash: string, information: CommitmentInformation): Promise<boolean> => {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         const block = new CBlockEntity();
