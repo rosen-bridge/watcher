@@ -15,7 +15,7 @@ export default {
     },
     commitmentScanner: {
         interval: 10,
-        initialBlockHeight: 100,
+        initialBlockHeight: 208640,
         heightLimit: 100,
     },
 };

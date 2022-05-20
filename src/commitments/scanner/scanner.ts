@@ -63,12 +63,12 @@ export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation
 /**
  * main function that runs every `SCANNER_INTERVAL` time that sets in the config
  */
-export const main = async () => {
+export const commitmentMain = async () => {
     const DB = await CommitmentDataBase.init(commitmentOrmConfig);
     const apiNetwork = new ErgoNetworkApi();
     const scanner = new Scanner(DB, apiNetwork, config);
     if (typeof INTERVAL === 'number') {
-        setInterval(scanner.update, INTERVAL * 1000);
+        setInterval(scanner.update, INTERVAL * 5000);
         setInterval(scanner.removeOldCommitments, INTERVAL * 1000);
     } else {
         console.log("scanner interval doesn't set in the config");

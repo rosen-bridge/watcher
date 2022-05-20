@@ -1,7 +1,7 @@
-import {DataSource, DeleteResult, In, LessThan, MoreThanOrEqual, Repository} from "typeorm";
+import {DataSource, DeleteResult, In, MoreThanOrEqual, Repository} from "typeorm";
 import {CBlockEntity} from "../../entities/CBlockEntity";
 import {ObservedCommitmentEntity} from "../../entities/ObservedCommitmentEntity";
-import { Block, Commitment } from "../../objects/interfaces";
+import { Block } from "../../objects/interfaces";
 import {AbstractDataBase} from "../../models/abstractModel";
 import {CommitmentInformation} from "../scanner/scanner";
 
@@ -109,8 +109,8 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
             await queryRunner.manager.save(updatedCommitmentEntities);
             await queryRunner.commitTransaction();
         } catch (err) {
-            await queryRunner.rollbackTransaction();
             console.log(err)
+            await queryRunner.rollbackTransaction();
             error = false;
         } finally {
             await queryRunner.release();
@@ -138,12 +138,10 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * returns old spent commitments
      * @param height
      */
-    getOldSpentCommitments = async (height: number): Promise<Array<Commitment>> =>{
-        return await this.commitmentRepository.find({
-            where: {
-                spendBlock: LessThan(height)
-            }
-        })
+    getOldSpentCommitments = async (height: number): Promise<Array<ObservedCommitmentEntity>> =>{
+        return await this.commitmentRepository.createQueryBuilder("observed_commitment_entity")
+            .where("observed_commitment_entity.spendBlock < :height", {height})
+            .execute()
     }
 
     /**

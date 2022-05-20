@@ -1,6 +1,5 @@
 import {DataSource} from "typeorm";
 import {commitmentEntities} from "../../../src/entities";
-import {commitmentMigrations} from "../../../src/migrations";
 import {CommitmentDataBase} from "../../../src/commitments/models/commitmentModel";
 import {Commitment} from "../../../src/objects/interfaces";
 import {expect} from "chai";
@@ -11,7 +10,6 @@ const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
         database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: commitmentEntities,
         synchronize: true,
-        // migrations: commitmentMigrations,
         logging: false,
     });
     return await CommitmentDataBase.init(ormConfig);
@@ -69,6 +67,19 @@ describe("Commitment Database functions", async () => {
         })
     })
 
+    describe("getOldSpentCommitments", () => {
+        it("should return an old commitment", async() => {
+            let data = await DB.getOldSpentCommitments(3433335)
+            expect(data).to.have.length(1)
+        })
+    })
 
+    describe("deleteCommitments", () => {
+        it("should delete two commitments", async() => {
+            await DB.deleteCommitments([firstCommitment.commitmentBoxId, secondCommitment.commitmentBoxId])
+            let data = await DB.getOldSpentCommitments(3433335)
+            expect(data).to.have.length(0)
+        })
+    })
 })
 
