@@ -6,6 +6,7 @@ import {commitmentOrmConfig} from "../../../config/commitmentOrmConfig";
 import {ErgoNetworkApi} from "../network/networkApi";
 import {CBlockEntity} from "../../entities/CBlockEntity";
 import {CommitmentUtils} from "./utils";
+import {contracts} from "../contracts/contracts";
 
 const INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
 
@@ -67,8 +68,9 @@ export const commitmentMain = async () => {
     const DB = await CommitmentDataBase.init(commitmentOrmConfig);
     const apiNetwork = new ErgoNetworkApi();
     const scanner = new Scanner(DB, apiNetwork, config);
+    await contracts.init(apiNetwork)
     if (typeof INTERVAL === 'number') {
-        setInterval(scanner.update, INTERVAL * 5000);
+        setInterval(scanner.update, INTERVAL * 10000);
         setInterval(scanner.removeOldCommitments, INTERVAL * 1000);
     } else {
         console.log("scanner interval doesn't set in the config");

@@ -30,10 +30,8 @@ export abstract class AbstractScanner<BlockT, DataT> {
     update = async () => {
         try {
             const lastSavedBlock = (await this._dataBase.getLastSavedBlock());
-            console.log(lastSavedBlock)
             if (!await this.isForkHappen()) {
                 const lastBlockHeight = await this._networkAccess.getCurrentHeight()
-                console.log("Current Height: " + lastBlockHeight)
                 let height = null;
                 if (lastSavedBlock !== undefined) {
                     height = lastSavedBlock.block_height + 1;
@@ -45,7 +43,6 @@ export abstract class AbstractScanner<BlockT, DataT> {
                     height = this._INITIAL_HEIGHT;
                 }
                 for (height; height <= lastBlockHeight; height++) {
-                    console.log("Getting block at height: " + height)
                     const block = await this._networkAccess.getBlockAtHeight(height);
                     const info = await this.getBlockInformation(block);
                     if (!await this.isForkHappen()) {

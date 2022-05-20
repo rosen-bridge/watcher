@@ -7,7 +7,7 @@ import {NodeBlock, NodeTransaction} from "./ergoApiModels";
 const URL: string | undefined = config.get?.('ergo.nodeUrl');
 export const nodeApi = axios.create({
     baseURL: URL,
-    timeout: 8000
+    timeout: 10000
 })
 
 export class ErgoNetworkApi extends AbstractNetworkConnector {

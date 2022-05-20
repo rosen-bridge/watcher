@@ -45,7 +45,7 @@ export class CommitmentUtils {
     static commitmentsAtHeight = async (txs: NodeTransaction[]): Promise<Array<Commitment>> => {
         const commitments: Array<Commitment> = []
         for (let i = 0; i < txs.length; i++) {
-            const c = await this.checkTx(txs[i], [contracts.addressCache.commitment])
+            const c = await this.checkTx(txs[i], [contracts.addressCache.commitment!])
             if(c!== undefined) commitments.push(c);
         }
         return commitments;
