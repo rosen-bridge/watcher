@@ -1,10 +1,10 @@
-import {commitmentAddress} from "../../../config/default";
 import {Commitment} from "../../objects/interfaces";
 import {tokens} from "../../../config/default";
 import {decodeCollColl, decodeStr} from "../../utils/utils";
 import {NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
 import {CommitmentDataBase} from "../models/commitmentModel";
 import {Address} from "ergo-lib-wasm-nodejs";
+import {contracts} from "../contracts/contracts";
 
 export class CommitmentUtils {
 
@@ -13,7 +13,7 @@ export class CommitmentUtils {
      * object else returns undefined
      * @param tx
      * @param commitmentAddresses
-     * @return Promise<commitment|undefined>
+     * @return Promise<commitment>
      */
     static checkTx = async (tx: NodeTransaction,
                             commitmentAddresses: Array<string>):
@@ -45,7 +45,7 @@ export class CommitmentUtils {
     static commitmentsAtHeight = async (txs: NodeTransaction[]): Promise<Array<Commitment>> => {
         const commitments: Array<Commitment> = []
         for (let i = 0; i < txs.length; i++) {
-            const c = await this.checkTx(txs[i], [commitmentAddress])
+            const c = await this.checkTx(txs[i], [contracts.addressCache.commitment])
             if(c!== undefined) commitments.push(c);
         }
         return commitments;

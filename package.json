@@ -43,6 +43,7 @@
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.0.2",
-    "typeorm": "^0.3.4"
+    "typeorm": "^0.3.4",
+    "ethereum-cryptography": "^0.1.3"
   }
 }

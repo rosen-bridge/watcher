@@ -41,5 +41,11 @@ export class ErgoNetworkApi extends AbstractNetworkConnector {
             return res.data.transactions
         })
     }
+
+    pay2ScriptAddress = (script: string): Promise<string> => {
+        return nodeApi.post("/script/p2sAddress", {source: script}).then(
+            res => res.data.address
+        )
+    }
 }
 
