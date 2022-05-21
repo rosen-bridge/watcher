@@ -3,14 +3,15 @@ import { BlockEntity } from "../entities/BlockEntity";
 import { CommitmentEntity } from "../entities/CommitmentEntity";
 import { ObservationEntity } from "../entities/ObservationEntity";
 import { Block, Observation } from "../objects/interfaces";
+import {AbstractDataBase} from "./abstractModel";
 
-export class DataBase {
-
-    private dataSource: DataSource;
-    private blockRepository: Repository<BlockEntity>;
-    private commitmentRepository: Repository<CommitmentEntity>;
+export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observation>> {
+    dataSource: DataSource;
+    blockRepository: Repository<BlockEntity>;
+    commitmentRepository: Repository<CommitmentEntity>;
 
     private constructor(dataSource: DataSource) {
+        super()
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(BlockEntity);
         this.commitmentRepository = this.dataSource.getRepository(CommitmentEntity);
@@ -30,7 +31,7 @@ export class DataBase {
             .catch((err) => {
                 console.error("Error during Data Source initialization:", err);
             });
-        return new DataBase(dataSource);
+        return new NetworkDataBase(dataSource);
     }
 
     /**
@@ -54,7 +55,7 @@ export class DataBase {
      * @param height
      * @return Promise<DeleteResult>
      */
-    changeLastValidBlock = async (height: number): Promise<DeleteResult> => {
+    removeForkedBlocks = async (height: number): Promise<DeleteResult> => {
         return await this.blockRepository.delete({
             height: MoreThanOrEqual(height)
         });
@@ -67,15 +68,14 @@ export class DataBase {
      * @param observations
      * @return Promise<boolean>
      */
-    saveBlock = async (height: number, blockHash: string, observations: Array<(Observation | undefined)>): Promise<boolean> => {
+    saveBlock = async (height: number, blockHash: string, observations: Array<Observation>): Promise<boolean> => {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         const block = new BlockEntity();
         block.height = height;
         block.hash = blockHash;
         const observationsEntity = observations
-            .filter(
-                (block): block is Observation => block !== undefined).map((observation) => {
+            .map((observation) => {
                 const observationEntity = new ObservationEntity();
                 observationEntity.fee = observation.fee;
                 observationEntity.sourceBlockId = observation.sourceBlockId;

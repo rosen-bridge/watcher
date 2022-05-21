@@ -2,10 +2,10 @@ import { DataSource } from "typeorm";
 import { expect } from "chai";
 import { entities } from "../../../src/entities";
 import { migrations } from "../../../src/migrations";
-import { DataBase } from "../../../src/models/model";
+import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
 
-export const loadDataBase = async (name: string): Promise<DataBase> => {
+export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
@@ -14,10 +14,10 @@ export const loadDataBase = async (name: string): Promise<DataBase> => {
         migrations: migrations,
         logging: false,
     });
-    return await DataBase.init(ormConfig);
+    return await NetworkDataBase.init(ormConfig);
 }
 
-export const firstObservations: Array<Observation | undefined> = [{
+export const firstObservations: Array<Observation> = [{
     fromChain: "erg",
     toChain: "cardano",
     toAddress: "cardanoAddress",
@@ -28,9 +28,9 @@ export const firstObservations: Array<Observation | undefined> = [{
     sourceTxId: "ergoTxId1",
     sourceBlockId: "ergoBlockId",
     requestId: "reqId1",
-}, undefined];
+}];
 
-export const secondObservations: Array<Observation | undefined> = [{
+export const secondObservations: Array<Observation> = [{
     fromChain: "erg",
     toChain: "cardano",
     toAddress: "cardanoAddress",
@@ -41,7 +41,7 @@ export const secondObservations: Array<Observation | undefined> = [{
     sourceTxId: "ergoTxId2",
     sourceBlockId: "ergoBlockId",
     requestId: "reqId2",
-}, undefined, undefined];
+}];
 
 
 describe("Database functions", async () => {
@@ -49,7 +49,7 @@ describe("Database functions", async () => {
 
     describe("saveBlock", () => {
         it("should return true", async () => {
-            await DB.changeLastValidBlock(3433333);
+            await DB.removeForkedBlocks(3433333);
             let res = await DB.saveBlock(
                 3433333,
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
@@ -88,7 +88,7 @@ describe("Database functions", async () => {
 
     describe("changeLastValidBlock", () => {
         it("should affect 1 row", async () => {
-            const res = await DB.changeLastValidBlock(3433333);
+            const res = await DB.removeForkedBlocks(3433333);
             expect(res.affected).to.be.equal(2);
         });
     });

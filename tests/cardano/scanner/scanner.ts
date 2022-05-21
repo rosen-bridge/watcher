@@ -8,7 +8,7 @@ describe("Scanner test", () => {
     describe("isForkHappen", () => {
         it("fork doesn't happened", async () => {
             const DB = await loadDataBase("scanner");
-            await DB.changeLastValidBlock(3433333);
+            await DB.removeForkedBlocks(3433333);
             await DB.saveBlock(
                 3433333,
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
@@ -21,7 +21,7 @@ describe("Scanner test", () => {
 
         it("fork happened", async () => {
             const DB = await loadDataBase("scanner");
-            await DB.changeLastValidBlock(3433333);
+            await DB.removeForkedBlocks(3433333);
             await DB.saveBlock(
                 3433333,
                 "e1699582bd2e3426839e10f7f5066bafc6e3847fd4511a2013ba3b4e13514267",
@@ -43,7 +43,7 @@ describe("Scanner test", () => {
     describe("update", () => {
         it("scanner without fork", async () => {
             const DB = await loadDataBase("scanner-without-fork");
-            await DB.changeLastValidBlock(3433333);
+            await DB.removeForkedBlocks(3433333);
             await DB.saveBlock(
                 3433333,
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
@@ -57,7 +57,7 @@ describe("Scanner test", () => {
         });
         it("scanner without fork", async () => {
             const DB = await loadDataBase("scanner-with-fork");
-            await DB.changeLastValidBlock(3433333);
+            await DB.removeForkedBlocks(3433333);
             await DB.saveBlock(
                 3433333,
                 "397e969e0525d82dc46a33e31634187dae94b12a6cc4b534e4e52f6d313aef22",

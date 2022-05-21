@@ -10,6 +10,7 @@
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
     "typeorm:migrate": "typeorm migration:create src/migrations/migration",
     "typeorm:generate": "rm -rf dist/ && tsc && typeorm migration:generate src/migrations/migration -d dist/config/ormconfig.js",
+    "typeorm:generate:commitment": "rm -rf dist/ && tsc && typeorm migration:generate src/migrations/migration -d dist/config/commitmentOrmConfig.js",
     "typeorm:run": "rm -rf dist/ && tsc && typeorm migration:run -d dist/config/ormconfig.js"
   },
   "repository": {
@@ -36,10 +37,13 @@
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
     "axios": "^0.26.1",
+    "chai-spies": "^1.0.0",
     "config": "^3.3.7",
+    "ergo-lib-wasm-nodejs": "^0.16.1",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.0.2",
-    "typeorm": "^0.3.4"
+    "typeorm": "^0.3.4",
+    "ethereum-cryptography": "^0.1.3"
   }
 }
