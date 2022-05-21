@@ -2,7 +2,7 @@ import axios from "axios";
 import config from "config";
 import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { Info, RSNBox } from "../../objects/ergo";
-import { Address } from "ergo-lib-wasm-nodejs";
+import { Address, ErgoBox } from "ergo-lib-wasm-nodejs";
 
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorer');
 const NODE_URL: string | undefined = config.get?.('ergo.node');
@@ -112,6 +112,21 @@ export class ErgoNetwork {
             throw Error("box with Token:" + tokenId + " not found")
         }
         return JSON.parse(box.boxes[0].to_json());
+    }
+
+    getErgBox = async (address: Address, amount: number): Promise<Array<ErgoBox>> => {
+        const box = await this.getCoveringErgAndTokenForAddress(
+            address.to_ergo_tree().to_base16_bytes(),
+            amount,
+            {},
+            box => {
+                return box.hasOwnProperty('assets')
+            }
+        )
+        if (!box.covered) {
+            throw Error("erg box not found")
+        }
+        return box.boxes;
     }
 
 }

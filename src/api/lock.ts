@@ -11,7 +11,8 @@ export class Transaction {
     RepoNFTId: TokenId;
     RWTTokenId: TokenId;
     RSN: TokenId;
-    watcherPermitAddress: Contract;
+    watcherPermitContract: Contract;
+    watcherPermitAddress: Address;
     minBoxValue: BoxValue;
     userAddressContract: Contract;
     userAddress: Address;
@@ -35,11 +36,8 @@ export class Transaction {
         this.RepoNFTId = ergoLib.TokenId.from_str(rosenConfig.RepoNFT);
         this.RWTTokenId = ergoLib.TokenId.from_str(rosenConfig.RWTId);
         this.RSN = ergoLib.TokenId.from_str(rosenConfig.RSN);
-        this.watcherPermitAddress = ergoLib.Contract.pay_to_address(
-            ergoLib.Address.from_base58(
-                rosenConfig.watcherPermitAddress
-            )
-        );
+        this.watcherPermitAddress = ergoLib.Address.from_base58(rosenConfig.watcherPermitAddress);
+        this.watcherPermitContract = ergoLib.Contract.pay_to_address(this.watcherPermitAddress);
         this.minBoxValue = ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(rosenConfig.minBoxValue));
         this.userAddress = ergoLib.Address.from_base58(userAddress);
         this.userAddressContract = ergoLib.Contract.pay_to_address(this.userAddress);
@@ -55,7 +53,7 @@ export class Transaction {
     ) => {
         const permitBuilder = new ergoLib.ErgoBoxCandidateBuilder(
             this.minBoxValue,
-            this.watcherPermitAddress,
+            this.watcherPermitContract,
             height
         );
 
@@ -128,19 +126,20 @@ export class Transaction {
                 ["100", "51", "0", "9999"]
             ));
         repoBuilder.set_register_value(7, ergoLib.Constant.from_i32(R7));
-
         return repoBuilder.build();
     }
 
     returnPermit = async () => {
         const height = await this.ergoNetwork.getHeight();
+        // console.log(this.userAddress.to_base58(ergoLib.NetworkPrefix.Mainnet));
 
         //TODO:Error handling!!
+        //TODO: permit box should grab from the network with respect to the value in the register
         const permitBox = new PermitBox(
             await (
                 this.ergoNetwork.getBoxWithToken(
-                    this.userAddress,
-                    this.RepoNFTId.to_str(),
+                    this.watcherPermitAddress,
+                    this.RWTTokenId.to_str(),
                 )
             )
         ).getErgoBox();
@@ -154,6 +153,11 @@ export class Transaction {
                 )
             )
         ).getErgoBox();
+
+
+        const ergBox = (await this.ergoNetwork.getErgBox(this.userAddress, this.minBoxValue.as_i64().as_num()))[0];
+
+        // console.log("Erg box",ergBox.to_json());
 
         //TODO: copy code should be deleted
         const users = repoBox.register_value(4)?.to_coll_coll_byte();
@@ -175,9 +179,10 @@ export class Transaction {
             }
         });
 
+        //TODO:should replaced with promise.all
         let WID = "";
         for (let i = 0; i < ans.length; i++) {
-            if (ans[i] === true) {
+            if (await ans[i]) {
                 WID = uint8ArrayToHex(users[i]);
                 break;
             }
@@ -185,6 +190,8 @@ export class Transaction {
         if (WID === "") {
             return;
         }
+
+        console.log("WID is: ", WID);
 
         const widBox = new WIDBox(
             await (
@@ -204,8 +211,8 @@ export class Transaction {
 
         const inputRWTCount = bigInt(usersCount[widIndex]);
 
-        const newUsers = users.slice(0, widIndex).concat(users.slice(widIndex, users.length));
-        const newUsersCount = usersCount.slice(0, widIndex).concat(usersCount.slice(widIndex, usersCount.length));
+        const newUsers = users.slice(0, widIndex).concat(users.slice(widIndex + 1, users.length));
+        const newUsersCount = usersCount.slice(0, widIndex).concat(usersCount.slice(widIndex + 1, usersCount.length));
 
 
         const RepoRWTCount = repoBox.tokens().get(1).amount().as_i64().checked_add(
@@ -213,11 +220,16 @@ export class Transaction {
                 inputRWTCount.toString()
             )
         );
-        const RSNTokenCount = repoBox.tokens().get(0).amount().as_i64().checked_add(
+        const RSNTokenCount = repoBox.tokens().get(2).amount().as_i64().checked_add(
             ergoLib.I64.from_str(
                 inputRWTCount.times(bigInt("-100")).toString()
             )
         );
+
+
+        console.log("input RWT Count is:", inputRWTCount.toString());
+        console.log("Repo RWT Count is:", RepoRWTCount.to_str());
+        console.log("RSN Token Count is:", RSNTokenCount.to_str());
 
         const repoOut = await this.createRepo(
             height,
@@ -228,9 +240,15 @@ export class Transaction {
             widIndex
         );
 
+        console.log("repo out value is", repoOut.value().as_i64().to_str())
         const inputBoxes = new ergoLib.ErgoBoxes(repoBox);
         inputBoxes.add(permitBox);
         inputBoxes.add(widBox);
+        inputBoxes.add(ergBox);
+
+        console.log("repoBox is: ", repoBox.to_json());
+        console.log("permitBox is: ", permitBox.to_json());
+        console.log("widBox is: ", widBox.to_json());
 
         const boxSelector = new ergoLib.SimpleBoxSelector();
         const coveringTokens = new ergoLib.Tokens();
@@ -249,17 +267,31 @@ export class Transaction {
 
         const RSNToken = new ergoLib.Token(
             this.RSN,
-            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(
-                inputRWTCount.times(bigInt("100")).toString()
-            )),
+            // ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(
+            //     inputRWTCount.times(bigInt("100")).toString()
+            // )),
+            repoBox.tokens().get(2).amount()
         );
         coveringTokens.add(RSNToken);
 
-        // const WIDToken = new ergoLib.Token(
-        //     widBox.tokens().get(0).id(),
-        //     widBox.tokens().get(0).amount(),
-        // );
-        // coveringTokens.add(WIDToken);
+        console.log("RSN Token amount:")
+        console.log(RSNToken.to_json())
+
+        const WIDToken = new ergoLib.Token(
+            widBox.tokens().get(0).id(),
+            widBox.tokens().get(0).amount(),
+        );
+        coveringTokens.add(WIDToken);
+
+        console.log("until box selection");
+        console.log("Box selection is :", ergoLib.BoxValue.from_i64(
+            ergoLib.I64.from_str(
+                bigInt(
+                    this.minBoxValue.as_i64().to_str()
+                ).times(bigInt("3")).toString()
+            )
+        ).as_i64().to_str());
+
 
         const selection = boxSelector.select(
             inputBoxes,
@@ -267,21 +299,28 @@ export class Transaction {
                 ergoLib.I64.from_str(
                     bigInt(
                         this.minBoxValue.as_i64().to_str()
-                    ).times(bigInt("2")).toString()
+                    ).times(bigInt("3")).toString()
                 )
             ),
             coveringTokens
         );
 
-        const repoValue = repoBox.value();
+        console.log("after box selection");
 
+
+        //TODO: fee and minimum box value should seperated from each other
+        const repoValue = repoBox.value();
+        const permitValue = permitBox.value();
+        const widValue = widBox.value();
+
+        const totalInputValue = repoValue.as_i64().checked_add(permitValue.as_i64().checked_add(widValue.as_i64()));
 
         const userOutBoxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
             ergoLib.BoxValue.from_i64(
-                repoValue.as_i64().checked_add(
+                totalInputValue.checked_add(
                     ergoLib.I64.from_str(
                         "-" + this.minBoxValue.as_i64().to_str()
-                    )
+                    ).checked_add(ergoLib.I64.from_str("-" + repoValue.as_i64().to_str()))
                 )
             ),
             this.userAddressContract,
@@ -296,6 +335,29 @@ export class Transaction {
         );
         const userOutBox = userOutBoxBuilder.build();
 
+
+        console.log("User OutBox rns count  is:", userOutBox.tokens().get(0).to_json());
+
+        console.log("****************Debuging***********************");
+        const WIDIndex = repoOut.register_value(7)?.to_i32();
+        if (WIDIndex === undefined) return;
+        console.log("WID index is ", WIDIndex);
+        console.log(repoOut.register_value(5)?.to_i64_str_array()[WIDIndex]);
+        console.log("Repo out register 4");
+        console.log(repoOut.register_value(4)?.to_coll_coll_byte());
+        console.log("Repo input register 4");
+        console.log(repoBox.register_value(4)?.to_coll_coll_byte());
+        console.log("Watcher count repo input: ", repoBox.register_value(5)?.to_i64_str_array().length)
+        console.log("Watcher count repo out: ", repoOut.register_value(5)?.to_i64_str_array().length)
+
+        console.log("Repo out register 5");
+        console.log(repoBox.register_value(5)?.to_i64_str_array());
+        console.log("Repo input register 5");
+        console.log(repoOut.register_value(5)?.to_i64_str_array());
+        console.log("permit box value");
+        console.log(permitBox.register_value(4)?.to_coll_coll_byte());
+        console.log(strToUint8Array(WID))
+
         const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
         outputBoxes.add(userOutBox);
         const builder = ergoLib.TxBuilder.new(
@@ -307,6 +369,9 @@ export class Transaction {
             this.minBoxValue,
         );
         const tx = builder.build();
+
+        console.log(tx.to_json());
+
         const sks = new ergoLib.SecretKeys();
         const sk = ergoLib.SecretKey.dlog_from_bytes(strToUint8Array(this.userSecret));
         sks.add(sk);
@@ -314,6 +379,7 @@ export class Transaction {
         const ctx = await this.ergoNetwork.getErgoStateContext();
         const tx_data_inputs = ergoLib.ErgoBoxes.from_boxes_json([]);
         const signedTx = wallet.sign_transaction(ctx, tx, inputBoxes, tx_data_inputs);
+        console.log(signedTx.to_json())
 
 
     }
