@@ -12,7 +12,7 @@ const ergoNetwork = new ErgoNetworkApi();
 const txId1 = "54ab224b98e3c87ecb2a1ccd9a7ff794c9cc9507be8520cb4376539ad555bd3a"
 const blockHash = "b1b7249cb76560cd7ee15c8baa29b870fd23e5482ddfcedf5d02048723caa7b7"
 const blockHeight = 204105
-mockedAxios.onGet(`/blocks/at/${blockHeight}`)
+mockedAxios.onGet(`/blocks/chainSlice`, {params: {fromHeight: blockHeight, toHeight: blockHeight}})
     .reply(200, blockAtHeight)
 mockedAxios.onGet(`/blocks/${blockHash}/transactions`)
     .reply(200, blockTxs)

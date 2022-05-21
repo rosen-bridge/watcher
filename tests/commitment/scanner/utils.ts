@@ -28,6 +28,7 @@ describe("Commitment Scanner Utils test", () => {
 
     describe("commitmentAtHeight", () => {
         it("Should find one valid commitment", async () => {
+            chai.spy.on(CommitmentUtils, 'checkTx', () => [{}])
             const commitments = await CommitmentUtils.commitmentsAtHeight(
                 [commitmentTx]
             );
