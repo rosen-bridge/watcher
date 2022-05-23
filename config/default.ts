@@ -11,7 +11,11 @@ export default {
     ergo: {
         explorerUrl: "https://api.ergoplatform.com/",
         nodeUrl: "http://10.10.9.3:9064",
-        networkType: wasm.NetworkPrefix.Mainnet
+        networkType: wasm.NetworkPrefix.Mainnet,
+        sendTxTimeout: 10000,
+        txFee: 1000000,
+        minBoxVal: 1000000,
+        address: "",
     },
     commitmentScanner: {
         interval: 10,

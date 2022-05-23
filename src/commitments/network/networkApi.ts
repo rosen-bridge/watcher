@@ -10,7 +10,13 @@ export const nodeApi = axios.create({
     timeout: 10000
 })
 
-export class ErgoNetworkApi extends AbstractNetworkConnector {
+export class CommitmentNetworkApi extends AbstractNetworkConnector {
+    getCurrentHeight = (): Promise<number> => {
+        return nodeApi.get<{fullHeight: number}>(`/info`).then(
+            res => res.data.fullHeight
+        )
+    }
+
     getBlockAtHeight = (height: number): Promise<Block> => {
         return nodeApi.get<Array<{id: string}>>(
             `/blocks/chainSlice`, {params: {fromHeight: height, toHeight: height}}
@@ -24,28 +30,12 @@ export class ErgoNetworkApi extends AbstractNetworkConnector {
         )
     }
 
-    getCurrentHeight = (): Promise<number> => {
-        return nodeApi.get<{fullHeight: number}>(
-            `/info`
-        ).then(
-            res => {
-                return res.data.fullHeight
-            }
-        )
-    }
-
     getBlockTxs = (blockHash: string): Promise<NodeTransaction[]> => {
         return nodeApi.get<NodeBlock>(
             `/blocks/${blockHash}/transactions`
         ).then(res => {
             return res.data.transactions
         })
-    }
-
-    pay2ScriptAddress = (script: string): Promise<string> => {
-        return nodeApi.post("/script/p2sAddress", {source: script}).then(
-            res => res.data.address
-        )
     }
 }
 

@@ -1,10 +1,10 @@
 import {Commitment} from "../../objects/interfaces";
 import {tokens} from "../../../config/default";
-import {decodeCollColl, decodeStr} from "../../utils/utils";
 import {NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
 import {CommitmentDataBase} from "../models/commitmentModel";
 import {Address} from "ergo-lib-wasm-nodejs";
-import {contracts} from "../contracts/contracts";
+import {contracts} from "../../contracts/contracts";
+import {decodeCollColl, decodeStr} from "../../ergoUtils/utils";
 
 export class CommitmentUtils {
 

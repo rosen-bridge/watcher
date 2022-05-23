@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import {ErgoNetworkApi, nodeApi} from "../../../src/commitments/network/networkApi"
+import {CommitmentNetworkApi, nodeApi} from "../../../src/commitments/network/networkApi"
 import {describe} from "mocha";
 import MockAdapter from "axios-mock-adapter";
 
@@ -7,7 +7,7 @@ const blockAtHeight = require('../dataset/blockAtHeight.json');
 const blockTxs = require('../dataset/blockTxs.json');
 const info = require('../dataset/info.json');
 const mockedAxios = new MockAdapter(nodeApi);
-const ergoNetwork = new ErgoNetworkApi();
+const ergoNetwork = new CommitmentNetworkApi();
 
 const txId1 = "54ab224b98e3c87ecb2a1ccd9a7ff794c9cc9507be8520cb4376539ad555bd3a"
 const blockHash = "b1b7249cb76560cd7ee15c8baa29b870fd23e5482ddfcedf5d02048723caa7b7"
