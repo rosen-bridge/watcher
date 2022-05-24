@@ -114,14 +114,12 @@ export class ErgoNetwork {
         return JSON.parse(box.boxes[0].to_json());
     }
 
-    getErgBox = async (address: Address, amount: number): Promise<Array<ErgoBox>> => {
+    getErgBox = async (address: Address, amount: number, filter: (box: any) => boolean = () => true): Promise<Array<ErgoBox>> => {
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
             amount,
             {},
-            box => {
-                return box.hasOwnProperty('assets')
-            }
+            filter,
         )
         if (!box.covered) {
             throw Error("erg box not found")
