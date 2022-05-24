@@ -339,16 +339,16 @@ export class Transaction {
         console.log("User OutBox rns count  is:", userOutBox.tokens().get(0).to_json());
 
         console.log("****************Debuging***********************");
-        const WIDIndex = repoOut.register_value(7)?.to_i32();
-        if (WIDIndex === undefined) return;
-        console.log("WID index is ", WIDIndex);
-        console.log(repoOut.register_value(5)?.to_i64_str_array()[WIDIndex]);
-        console.log("Repo out register 4");
-        console.log(repoOut.register_value(4)?.to_coll_coll_byte());
-        console.log("Repo input register 4");
-        console.log(repoBox.register_value(4)?.to_coll_coll_byte());
-        console.log("Watcher count repo input: ", repoBox.register_value(5)?.to_i64_str_array().length)
-        console.log("Watcher count repo out: ", repoOut.register_value(5)?.to_i64_str_array().length)
+        // const WIDIndex = repoOut.register_value(7)?.to_i32();
+        // if (WIDIndex === undefined) return;
+        // console.log("WID index is ", WIDIndex);
+        // console.log(repoOut.register_value(5)?.to_i64_str_array()[WIDIndex]);
+        // console.log("Repo out register 4");
+        // console.log(repoOut.register_value(4)?.to_coll_coll_byte());
+        // console.log("Repo input register 4");
+        // console.log(repoBox.register_value(4)?.to_coll_coll_byte());
+        // console.log("Watcher count repo input: ", repoBox.register_value(5)?.to_i64_str_array().length)
+        // console.log("Watcher count repo out: ", repoOut.register_value(5)?.to_i64_str_array().length)
 
         console.log("Repo out register 5");
         console.log(repoBox.register_value(5)?.to_i64_str_array());
@@ -357,6 +357,28 @@ export class Transaction {
         console.log("permit box value");
         console.log(permitBox.register_value(4)?.to_coll_coll_byte());
         console.log(strToUint8Array(WID))
+
+        console.log("##############################Debugging line by line######################")
+        console.log("RWTIn ", repoOut.tokens().get(1).amount().as_i64().as_num() - repoBox.tokens().get(1).amount().as_i64().as_num())
+        const WIDIndex = repoOut.register_value(7)?.to_i32();
+        if (WIDIndex === undefined) return;
+        console.log("WID index is ", WIDIndex);
+        console.log("watcherCount ", repoBox.register_value(5)?.to_i64_str_array().length);
+        console.log("? > rwtin", repoBox.register_value(5)?.to_i64_str_array()[WIDIndex]);
+        console.log("repo in register 4")
+        console.log(repoBox.register_value(4)?.to_coll_coll_byte());
+        console.log("repoOut register 4")
+        console.log(repoOut.register_value(4)?.to_coll_coll_byte());
+
+        console.log("repo in register 5")
+        console.log(repoBox.register_value(5)?.to_i64_str_array())
+        console.log("repoOut register 5")
+        console.log(repoOut.register_value(5)?.to_i64_str_array())
+
+        console.log("repo register 6")
+        console.log(repoBox.register_value(6)?.to_i64_str_array())
+
+
 
         const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
         outputBoxes.add(userOutBox);
