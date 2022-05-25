@@ -177,15 +177,6 @@ export class Transaction {
             )
         ).getErgoBox();
 
-        // //TODO: chaining transaction should be completed
-        // const repoBox = new RepoBox(
-        //     await (
-        //         this.ergoNetwork.getBoxWithToken(
-        //             this.repoAddress,
-        //             this.RepoNFTId.to_str()
-        //         )
-        //     )
-        // ).getErgoBox();
         const repoBox = await this.getRepoBox();
 
         const users = repoBox.register_value(4)?.to_coll_coll_byte();
@@ -366,16 +357,7 @@ export class Transaction {
             )
         ).getErgoBox();
 
-        // const repoBox = await this.ergoNetwork.trackMemPool(new RepoBox(
-        //     await (
-        //         this.ergoNetwork.getBoxWithToken(
-        //             this.repoAddress,
-        //             this.RepoNFTId.to_str()
-        //         )
-        //     )
-        // ).getErgoBox());
         const repoBox = await this.getRepoBox();
-
 
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte();
         if (users === undefined) {
@@ -496,14 +478,6 @@ export class Transaction {
     }
 
     watcherHasLocked = async (): Promise<boolean> => {
-        // const repoBox = new RepoBox(
-        //     await (
-        //         this.ergoNetwork.getBoxWithToken(
-        //             this.repoAddress,
-        //             this.RepoNFTId.to_str(),
-        //         )
-        //     )
-        // ).getErgoBox();
 
         const repoBox = await this.getRepoBox();
         const users = repoBox.register_value(4)?.to_coll_coll_byte();
