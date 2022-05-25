@@ -10,9 +10,7 @@ import {
     TokenId, TxBuilder
 } from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
-import bigInt from "big-integer";
 import { PermitBox, RepoBox, RSNBox, WIDBox } from "../objects/ergo";
-import { sign } from "crypto";
 
 export class Transaction {
 
@@ -169,7 +167,6 @@ export class Transaction {
     returnPermit = async () => {
         const height = await this.ergoNetwork.getHeight();
 
-        //TODO:Error handling!!
         //TODO: permit box should grab from the network with respect to the value in the register
         const permitBox = new PermitBox(
             await (
@@ -193,7 +190,7 @@ export class Transaction {
 
         const users = repoBox.register_value(4)?.to_coll_coll_byte();
         if (users === undefined) {
-            return;
+            throw new Error("Incorrect RepoBox input");
         }
         const ans = this.checkWID(users);
         let WID = "";
@@ -204,7 +201,7 @@ export class Transaction {
             }
         }
         if (WID === "") {
-            return;
+            throw new Error("You don't have locked any RSN token");
         }
 
         const widBox = new WIDBox(
@@ -218,12 +215,12 @@ export class Transaction {
 
         const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array();
         if (usersCount === undefined) {
-            return "";
+            throw new Error("Incorrect RepoBox input");
         }
 
         const widIndex = users.map(user => uint8ArrayToHex(user)).indexOf(WID);
 
-        const inputRWTCount = bigInt(usersCount[widIndex]);
+        const inputRWTCount = BigInt(usersCount[widIndex]);
 
         const newUsers = users.slice(0, widIndex).concat(users.slice(widIndex + 1, users.length));
         const newUsersCount = usersCount.slice(0, widIndex).concat(usersCount.slice(widIndex + 1, usersCount.length));
@@ -235,7 +232,7 @@ export class Transaction {
         );
         const RSNTokenCount = repoBox.tokens().get(2).amount().as_i64().checked_add(
             ergoLib.I64.from_str(
-                inputRWTCount.times(bigInt("-100")).toString()
+                (inputRWTCount * BigInt("-100")).toString()
             )
         );
 
@@ -253,6 +250,16 @@ export class Transaction {
         inputBoxes.add(widBox);
 
         const inputBoxSelection = new BoxSelection(inputBoxes, new ErgoBoxAssetsDataList());
+
+
+        const changeTokens = this.inputBoxesTokenMap(inputBoxes, 2);
+
+        let rsnCount = changeTokens.get(this.RSN.to_str());
+        if (rsnCount === undefined) {
+            rsnCount = "0";
+        } else {
+            changeTokens.delete(this.RSN.to_str());
+        }
 
         const repoValue = repoBox.value();
         const permitValue = permitBox.value();
@@ -273,10 +280,19 @@ export class Transaction {
         userOutBoxBuilder.add_token(
             this.RSN,
             ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(
-                    inputRWTCount.times(bigInt("100")).toString()
+                    (inputRWTCount * BigInt("100") + BigInt(rsnCount)).toString()
                 )
             ),
         );
+
+        for (const [tokenId, tokenAmount] of changeTokens) {
+            if (tokenAmount !== "0") {
+                userOutBoxBuilder.add_token(
+                    ergoLib.TokenId.from_str(tokenId),
+                    ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(tokenAmount)),
+                );
+            }
+        }
 
         const userOutBox = userOutBoxBuilder.build();
 
@@ -292,6 +308,7 @@ export class Transaction {
         );
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
         await this.ergoNetwork.sendTx(signedTx.to_json());
+        // console.log(signedTx.to_json())
         return signedTx.id().to_str();
     }
 
@@ -306,51 +323,28 @@ export class Transaction {
         return wallet.sign_transaction(ctx, tx, inputBoxes, tx_data_inputs);
     }
 
-    // private userChangeBoxBuilder = (height: number, inputBoxes: ErgoBoxes, outputValue: bigInt, permitRSNCount: string) => {
-    //     const totalInputValue = ergoLib.I64.from_str("0");
-    //     for (let i = 0; i < inputBoxes.len(); i++) {
-    //         totalInputValue.checked_add(inputBoxes.get(i).value().as_i64());
-    //     }
-    //
-    //     const inputTokens = new Map<string, string>();
-    //     for (let i = 1; i < inputBoxes.len(); i++) {
-    //         const boxTokens = inputBoxes.get(i).tokens();
-    //         for (let j = 0; j < boxTokens.len(); j++) {
-    //             const token = boxTokens.get(0);
-    //             const tokenId = token.id().to_str();
-    //             const tokenAmount = token.amount().as_i64();
-    //             if (inputTokens.get(tokenId) !== undefined) {
-    //                 tokenAmount.checked_add(token.amount().as_i64());
-    //             }
-    //             inputTokens.set(tokenId, tokenAmount.to_str());
-    //         }
-    //     }
-    //
-    //     const rsnCount = inputTokens.get(this.RSN.to_str());
-    //     inputTokens.set(this.RSN.to_str(), bigInt(rsnCount).minus(bigInt(permitRSNCount)).toString());
-    //     const changeBoxValue = ergoLib.BoxValue.from_i64((ergoLib.I64.from_str(bigInt(totalInputValue.to_str()).minus(outputValue).toString())));
-    //     const repoBuilder = new ergoLib.ErgoBoxCandidateBuilder(
-    //         changeBoxValue,
-    //         this.repoAddressContract,
-    //         height
-    //     );
-    //
-    //     for (const [tokenId, tokenAmount] of inputTokens) {
-    //         repoBuilder.add_token(
-    //             ergoLib.TokenId.from_str(tokenId),
-    //             ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(tokenAmount)),
-    //         );
-    //     }
-    //
-    //     return repoBuilder.build();
-    // }
-
+    private inputBoxesTokenMap = (inputBoxes: ErgoBoxes, offset: number = 0): Map<string, string> => {
+        const changeTokens = new Map<string, string>();
+        for (let i = offset; i < inputBoxes.len(); i++) {
+            const boxTokens = inputBoxes.get(i).tokens();
+            for (let j = 0; j < boxTokens.len(); j++) {
+                const token = boxTokens.get(0);
+                const tokenId = token.id().to_str();
+                const tokenAmount = token.amount().as_i64();
+                if (changeTokens.get(tokenId) !== undefined) {
+                    tokenAmount.checked_add(token.amount().as_i64());
+                }
+                changeTokens.set(tokenId, tokenAmount.to_str());
+            }
+        }
+        return changeTokens;
+    }
 
     getPermit = async (RSNCount: string): Promise<string> => {
 
         const height = await this.ergoNetwork.getHeight();
 
-        const RWTCount = bigInt(RSNCount).divide("100");
+        const RWTCount = BigInt(RSNCount) / BigInt("100");
 
         const RSNInput = new RSNBox(
             await (
@@ -372,13 +366,13 @@ export class Transaction {
 
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte();
         if (users === undefined) {
-            return "";
+            throw new Error("Incorrect RepoBox input");
         }
         const repoBoxId = repoBox.box_id().as_bytes();
         users.push(repoBoxId);
         const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array();
         if (usersCount === undefined) {
-            return "";
+            throw new Error("Incorrect RepoBox input");
         }
 
         const count = RWTCount.toString();
@@ -386,12 +380,12 @@ export class Transaction {
 
         const RepoRWTCount = repoBox.tokens().get(1).amount().as_i64().checked_add(
             ergoLib.I64.from_str(
-                RWTCount.times(bigInt("-1")).toString()
+                (RWTCount * BigInt("-1")).toString()
             )
         );
         const RSNTokenCount = repoBox.tokens().get(0).amount().as_i64().checked_add(
             ergoLib.I64.from_str(
-                RWTCount.times(bigInt("100")).toString()
+                (RWTCount * BigInt("100")).toString()
             )
         );
 
@@ -415,56 +409,46 @@ export class Transaction {
 
         const repoValue = repoBox.value();
         const permitValue = RSNInput.value();
-        const preTotalInputValue = bigInt(repoValue.as_i64().checked_add(permitValue.as_i64()).to_str());
-        const outputValue = bigInt(this.fee.as_i64().to_str()).add(
-            bigInt(this.minBoxValue.as_i64().to_str()
-            ).times(
-                bigInt("3"))
-        );
-        if (!preTotalInputValue.geq(outputValue)) {
+        const preTotalInputValue = BigInt(repoValue.as_i64().checked_add(permitValue.as_i64()).to_str());
+        const outputValue = BigInt(this.minBoxValue.as_i64().to_str()) * (BigInt("3"));
+        if (!(preTotalInputValue >= outputValue)) {
             try {
                 const boxes = await this.ergoNetwork.getErgBox(
                     this.userAddress,
-                    outputValue.minus(preTotalInputValue).toJSNumber(),
+                    parseInt((outputValue - preTotalInputValue).toString()),
                     (box => {
                         return box.boxId !== RSNInput.box_id().to_str()
                     }),
                 );
                 boxes.forEach(box => inputBoxes.add(box));
             } catch {
-                return "";
+                throw new Error("You don't have enough Erg to make the transaction");
             }
         }
 
-        const totalInputValue = ergoLib.I64.from_str("0");
+        let totalInputValue = ergoLib.I64.from_str("0");
         for (let i = 0; i < inputBoxes.len(); i++) {
-            totalInputValue.checked_add(inputBoxes.get(i).value().as_i64());
+            totalInputValue = totalInputValue.checked_add(inputBoxes.get(i).value().as_i64());
         }
 
-        const changeTokens = new Map<string, string>();
-        for (let i = 1; i < inputBoxes.len(); i++) {
-            const boxTokens = inputBoxes.get(i).tokens();
-            for (let j = 0; j < boxTokens.len(); j++) {
-                const token = boxTokens.get(0);
-                const tokenId = token.id().to_str();
-                const tokenAmount = token.amount().as_i64();
-                if (changeTokens.get(tokenId) !== undefined) {
-                    tokenAmount.checked_add(token.amount().as_i64());
-                }
-                changeTokens.set(tokenId, tokenAmount.to_str());
-            }
-        }
+        const changeTokens = this.inputBoxesTokenMap(inputBoxes, 1);
 
         const rsnCount = changeTokens.get(this.RSN.to_str());
         if (rsnCount === undefined) {
-            return "";
+            throw new Error("You don't have enough RSN");
         }
 
-        const RSNChangeAmount = bigInt(rsnCount).minus(bigInt(RSNCount)).toString();
-        //TODO:if it becomes negative
-        (RSNChangeAmount!=="0"?changeTokens.set(this.RSN.to_str(), RSNChangeAmount):changeTokens.delete(this.RSN.to_str()))
+        const RSNChangeAmount = (BigInt(rsnCount) - BigInt(RSNCount));
+        if (RSNChangeAmount < 0) {
+            throw new Error("You don't have enough RSN");
+        }
 
-        const changeBoxValue = bigInt(outputValue).minus(totalInputValue.to_str()).toString();
+        (RSNChangeAmount !== 0n
+                ? changeTokens.set(this.RSN.to_str(), RSNChangeAmount.toString())
+                : changeTokens.delete(this.RSN.to_str())
+        )
+
+        const changeBoxValue = (BigInt(totalInputValue.to_str()) - (outputValue)).toString();
 
         const userOut = await this.createUserBoxCandidate(
             height,
@@ -476,6 +460,7 @@ export class Transaction {
             changeTokens,
         );
 
+
         const inputBoxSelection = new BoxSelection(inputBoxes, new ErgoBoxAssetsDataList());
         const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
         outputBoxes.add(permitOut);
@@ -485,13 +470,14 @@ export class Transaction {
             inputBoxSelection,
             outputBoxes,
             height,
-            this.minBoxValue,
+            this.fee,
             this.userAddress,
             this.minBoxValue,
         );
+        console.log(builder.build().to_json())
 
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
-        // await this.ergoNetwork.sendTx(signedTx.to_json());
+        await this.ergoNetwork.sendTx(signedTx.to_json());
         console.log(signedTx.to_json())
         return signedTx.id().to_str();
     }

@@ -33,7 +33,7 @@ const checkConfigFile = (): Transaction => {
         strToUint8Array(SECRET_KEY)
     ).get_address().to_base58(networkType);
 
-    console.log("watcher address is ",watcherAddress.toString());
+    console.log("watcher address is ", watcherAddress.toString());
 
     return new Transaction(rosenConfig, watcherAddress, SECRET_KEY);
 
@@ -59,9 +59,11 @@ router.get("/getPermit", async (req, res) => {
         return;
     }
 
-    const transactionId = await transaction.getPermit(RSNCount);
-    if (transactionId === "") {
-        res.status(400).send("Error");
+    let transactionId: string;
+    try {
+        transactionId = await transaction.getPermit(RSNCount);
+    } catch (e) {
+        res.status(400).send(e)
         return;
     }
     res.status(200).json({txid: transactionId});
@@ -82,9 +84,11 @@ router.get("/returnPermit", async (req, res) => {
         return;
     }
 
-    const transactionId = await transaction.returnPermit();
-    if (transactionId === "") {
-        res.status(400).send("Error");
+    let transactionId: string;
+    try {
+        transactionId = await transaction.returnPermit();
+    } catch (e) {
+        res.status(400).send(e)
         return;
     }
     res.status(200).json({txid: transactionId});
