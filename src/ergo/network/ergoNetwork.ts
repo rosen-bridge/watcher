@@ -1,8 +1,10 @@
 import axios from "axios";
 import config from "config";
 import * as ergoLib from "ergo-lib-wasm-nodejs";
-import { Info, RSNBox } from "../../objects/ergo";
+import { Info } from "../../objects/ergo";
 import { Address, ErgoBox } from "ergo-lib-wasm-nodejs";
+import { ergoTreeToBase58Address } from "../../api/ergoUtils";
+import ErgoTx from "./types";
 
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorer');
 const NODE_URL: string | undefined = config.get?.('ergo.node');
@@ -126,5 +128,33 @@ export class ErgoNetwork {
         }
         return box.boxes;
     }
+
+    trackMemPool = async (box: ergoLib.ErgoBox): Promise<ergoLib.ErgoBox> => {
+        const address: string = ergoTreeToBase58Address(box.ergo_tree())
+        let memPoolBoxesMap = new Map<string, ergoLib.ErgoBox>();
+        (await this.getMemPoolTxForAddress(address).then(res => {
+            return res.items
+        })).forEach((tx: ErgoTx) => {
+            for (let inBox of tx.inputs) {
+                if (inBox.address === address) {
+                    for (let outBox of tx.outputs) {
+                        if (outBox.address === address) {
+                            memPoolBoxesMap.set(inBox.boxId, ergoLib.ErgoBox.from_json(JSON.stringify(outBox)))
+                            break
+                        }
+                    }
+                    break
+                }
+            }
+        })
+        let lastBox: ergoLib.ErgoBox = box
+        while (memPoolBoxesMap.has(lastBox.box_id().to_str())) lastBox = memPoolBoxesMap.get(lastBox.box_id().to_str())!
+        return lastBox
+    }
+
+    getMemPoolTxForAddress = async (address: string) => {
+        return await explorerApi.get<{ items: Array<ErgoTx>, total: number }>(`/api/v1/mempool/transactions/byAddress/${address}`).then(res => res.data)
+    }
+
 
 }
