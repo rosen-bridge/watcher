@@ -20,6 +20,7 @@ export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
 export const firstObservations: Array<Observation> = [{
     fromChain: "erg",
     toChain: "cardano",
+    fromAddress: "ErgoAddress",
     toAddress: "cardanoAddress",
     amount: "1000000000",
     fee: "1000000",
@@ -33,6 +34,7 @@ export const firstObservations: Array<Observation> = [{
 export const secondObservations: Array<Observation> = [{
     fromChain: "erg",
     toChain: "cardano",
+    fromAddress: "ergoAddress",
     toAddress: "cardanoAddress",
     amount: "1100000000",
     fee: "1100000",

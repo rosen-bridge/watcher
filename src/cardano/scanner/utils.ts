@@ -16,7 +16,8 @@ export class CardanoUtils {
             'from' in data &&
             'fee' in data &&
             'targetChainTokenId' in data &&
-            'toAddress' in data;
+            'toAddress' in data &&
+            'fromAddress' in data;
     }
 
     /**
@@ -52,6 +53,7 @@ export class CardanoUtils {
                         Buffer.from(asset.policy_id, 'hex'),
                         Buffer.from(asset.asset_name, 'hex'),
                     );
+                    // TODO Edit from address
                     const data = metaData["0"];
                     return {
                         fromChain: data.from,
@@ -64,6 +66,7 @@ export class CardanoUtils {
                         sourceBlockId: blockHash,
                         requestId: txHash,
                         toAddress: data.toAddress,
+                        fromAddress: ""
                     }
                 }
             }

@@ -4,11 +4,17 @@ import {tokens} from "../../config/default";
 import {strToUint8Array} from "./utils";
 import config from "config";
 const permitBox = require('../dataset/permitBox.json');
+const WIDBox = require('../dataset/WIDBox.json');
 
 export class boxes{
-    getPermits = async(WID: string): Promise<Array<wasm.ErgoBox>> => {
+    static getPermits = async(WID: string): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Implement this mocked function
         return Promise.resolve([wasm.ErgoBox.from_json(permitBox)])
+    }
+
+    static getWIDBox = async(WID: string): Promise<Array<wasm.ErgoBox>> => {
+        // TODO: Implement this mocked function
+        return Promise.resolve([wasm.ErgoBox.from_json(WIDBox)])
     }
 
     static createPermit = (value: number, height: number, RWTCount: number, WID: string): wasm.ErgoBoxCandidate => {
@@ -23,7 +29,7 @@ export class boxes{
         return builder.build()
     }
 
-    static createCommitment = (value: number, height: number, WID: string, requestId: string, eventDigest: string, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
+    static createCommitment = (value: number, height: number, WID: string, requestId: string, eventDigest: Uint8Array, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
         const contract = contracts.addressCache.commitmentContract!
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
@@ -34,7 +40,7 @@ export class boxes{
             wasm.TokenAmount.from_i64(wasm.I64.from_str("1")))
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([strToUint8Array(WID)]))
         builder.set_register_value(5, wasm.Constant.from_coll_coll_byte([strToUint8Array(requestId)]))
-        builder.set_register_value(6, wasm.Constant.from_byte_array(strToUint8Array(eventDigest)))
+        builder.set_register_value(6, wasm.Constant.from_byte_array(eventDigest))
         builder.set_register_value(7, wasm.Constant.from_byte_array(permitScriptHash))
         return builder.build()
     }
