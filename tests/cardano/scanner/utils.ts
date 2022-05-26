@@ -13,7 +13,8 @@ describe("Cardano Scanner Utils test", () => {
         sourceTxId: 'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa',
         sourceBlockId: '93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3',
         requestId: 'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa',
-        toAddress: 'ergoAddress'
+        toAddress: 'ergoAddress',
+        fromAddress: 'cardanoAddress',
     };
     describe("isRosenData", () => {
         it("should be Rosen Data", () => {
@@ -22,7 +23,8 @@ describe("Cardano Scanner Utils test", () => {
                 "fee": "10000",
                 "from": "CARDANO",
                 "toAddress": "ergoAddress",
-                "targetChainTokenId": "cardanoTokenId"
+                "fromAddress": "cardanoAddress",
+                "targetChainTokenId": "cardanoTokenId",
             };
             expect(CardanoUtils.isRosenData(validData)).to.be.true;
         });
@@ -58,6 +60,7 @@ describe("Cardano Scanner Utils test", () => {
                 , ["addr_test1vze7yqqlg8cjlyhz7jzvsg0f3fhxpuu6m3llxrajfzqecggw704re"]
                 , koiosNetwork
             );
+            console.log(observation)
             expect(observation).to.be.eql(sampleObservation);
         });
         it("should be undefined", async () => {

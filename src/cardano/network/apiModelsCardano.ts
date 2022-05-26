@@ -27,6 +27,7 @@ export interface RosenData {
     fee: string,
     targetChainTokenId: string,
     toAddress: string,
+    fromAddress: string,
 }
 
 export interface TxMetaData {
