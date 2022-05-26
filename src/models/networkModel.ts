@@ -4,7 +4,6 @@ import {CommitmentEntity, txStatus} from "../entities/CommitmentEntity";
 import {ObservationEntity} from "../entities/ObservationEntity";
 import {Block, Commitment, Observation} from "../objects/interfaces";
 import {AbstractDataBase} from "./abstractModel";
-import {ObservedCommitmentEntity} from "../entities/ObservedCommitmentEntity";
 
 export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observation>> {
     dataSource: DataSource;
@@ -145,9 +144,9 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      */
     getConfirmedObservations = async (confirmation: number): Promise<Array<ObservationEntity>> => {
         const height: number = (await this.getLastSavedBlock())?.block_height!
-        const requiredHeight = height + confirmation
+        const requiredHeight = height - confirmation
         return await this.observationRepository.createQueryBuilder("observation_entity")
-            .where("observation_entity.block < :height", {requiredHeight})
+            .where("observation_entity.block < :requiredHeight", {requiredHeight})
             .execute()
     }
 
@@ -173,10 +172,25 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         Object.assign(newObservation, {
             ...oldObservation,
             ...{
-                commitment: commitment
+                commitment: commitmentEntity
             }
         })
-        await this.observationRepository.save(newObservation)
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+
+        let error = true;
+        await queryRunner.startTransaction()
+        try {
+            await queryRunner.manager.save(commitmentEntity);
+            await queryRunner.manager.save(newObservation);
+            await queryRunner.commitTransaction();
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+            error = false;
+        } finally {
+            await queryRunner.release();
+        }
+        return error;
     }
 
 }

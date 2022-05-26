@@ -4,6 +4,8 @@ import { entities } from "../../../src/entities";
 import { migrations } from "../../../src/migrations";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
+import {firstCommitment} from "../../commitment/models/commitmentModel";
+import exp from "constants";
 
 export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -64,6 +66,23 @@ describe("Database functions", async () => {
                 secondObservations
             );
             expect(res).to.be.true;
+        });
+    });
+
+    describe("getConfirmedObservations", () => {
+        it("returns 1 row", async () => {
+            const res = await DB.getConfirmedObservations(0);
+            expect(res).to.have.length(1)
+        });
+    });
+
+    describe("saveCommitment", () => {
+        it("should save the commitment and update the observation", async () => {
+            const observation = (await DB.getConfirmedObservations(0))[0]
+            const res = await DB.saveCommitment(firstCommitment, "txId", observation.id)
+            expect(res).to.be.false
+            const observation2 = (await DB.getConfirmedObservations(0))[0]
+            expect(observation2.commitment).to.not.null
         });
     });
 

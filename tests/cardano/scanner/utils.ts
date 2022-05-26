@@ -60,7 +60,6 @@ describe("Cardano Scanner Utils test", () => {
                 , ["addr_test1vze7yqqlg8cjlyhz7jzvsg0f3fhxpuu6m3llxrajfzqecggw704re"]
                 , koiosNetwork
             );
-            console.log(observation)
             expect(observation).to.be.eql(sampleObservation);
         });
         it("should be undefined", async () => {
