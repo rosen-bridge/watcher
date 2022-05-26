@@ -223,9 +223,11 @@ export class Transaction {
         );
         const RSNTokenCount = repoBox.tokens().get(2).amount().as_i64().checked_add(
             ergoLib.I64.from_str(
-                (inputRWTCount * BigInt("-100")).toString()
+                (inputRWTCount * (-BigInt("100"))).toString()
             )
         );
+
+        console.log("here")
 
         const repoOut = await this.createRepo(
             height,
@@ -235,6 +237,8 @@ export class Transaction {
             newUsersCount,
             widIndex
         );
+
+        console.log("here")
 
         const inputBoxes = new ergoLib.ErgoBoxes(repoBox);
         inputBoxes.add(permitBox);
@@ -285,7 +289,13 @@ export class Transaction {
             }
         }
 
+        console.log("here")
+
+
         const userOutBox = userOutBoxBuilder.build();
+
+        console.log("here")
+
 
         const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
         outputBoxes.add(userOutBox);
@@ -297,7 +307,11 @@ export class Transaction {
             this.userAddress,
             this.minBoxValue,
         );
+        console.log("before sign")
+
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
+        console.log("after sign")
+        console.log(signedTx.to_json())
         await this.ergoNetwork.sendTx(signedTx.to_json());
         // console.log(signedTx.to_json())
         return signedTx.id().to_str();
@@ -410,7 +424,7 @@ export class Transaction {
             try {
                 const boxes = await this.ergoNetwork.getErgBox(
                     this.userAddress,
-                    parseInt((outputValue - preTotalInputValue).toString()),
+                    outputValue - preTotalInputValue,
                     (box => {
                         return box.boxId !== RSNInput.box_id().to_str()
                     }),

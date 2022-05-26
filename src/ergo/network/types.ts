@@ -7,9 +7,26 @@ type TxOutput = {
     address: string,
 }
 
-type ErgoTx = {
+export type ErgoTx = {
     inputs: Array<TxInput>,
-    outputs: Array<TxOutput>
+    outputs: Array<TxOutput>,
 }
 
-export default ErgoTx
+type Asset = {
+    tokenId: string,
+    index: number,
+    amount: bigint,
+    name: string,
+}
+
+interface ErgoBoxJson  {
+    boxId: string,
+    address: string,
+    value: bigint,
+    assets?: Array<Asset>,
+}
+
+export interface AddressBoxes  {
+    items: Array<ErgoBoxJson>,
+    total: number,
+}
