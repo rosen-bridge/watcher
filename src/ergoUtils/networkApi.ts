@@ -36,10 +36,6 @@ export class ErgoNetworkApi {
         return new wasm.ErgoStateContext(preHeader, blockHeaders);
     }
 
-    static getTransaction = async (txId: string) => {
-        return await nodeApi.get(`/api/v1/transactions/${txId}`).then(res => res.data)
-    }
-
     static pay2ScriptAddress = (script: string): Promise<string> => {
         return nodeApi.post("/script/p2sAddress", {source: script}).then(
             res => res.data.address

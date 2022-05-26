@@ -2,11 +2,9 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import {ErgoBox} from "ergo-lib-wasm-nodejs";
 import config from "config";
 import {ErgoNetworkApi} from "./networkApi";
-import sleep from "sleep-promise";
-import {ObservationEntity} from "../entities/ObservationEntity";
-import {Commitment} from "../objects/interfaces";
 import {blake2b} from "ethereum-cryptography/blake2b";
 import {Buffer} from "buffer";
+import {Observation} from "../objects/interfaces";
 
 const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');
 const txFee = parseInt(config.get?.('ergo.txFee'))
@@ -107,8 +105,8 @@ export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBo
     return signTx(secret, txBuilder.build(), boxSelection, dataInputs ? dataInputs : wasm.ErgoBoxes.from_boxes_json([]))
 }
 
-export const commitmentFromObservation = (observation: ObservationEntity, WID: string): Uint8Array => {
-    return blake2b(Buffer.concat([
+export const commitmentFromObservation = (observation: Observation, WID: string): Uint8Array => {
+    const x = Buffer.concat([
         Buffer.from(observation.sourceTxId),
         Buffer.from(observation.fromChain),
         Buffer.from(observation.toChain),
@@ -120,5 +118,7 @@ export const commitmentFromObservation = (observation: ObservationEntity, WID: s
         Buffer.from(observation.targetChainTokenId),
         Buffer.from(observation.sourceBlockId),
         Buffer.from(WID),
-    ]))
+    ])
+    console.log(x.length)
+    return blake2b(x)
 }
