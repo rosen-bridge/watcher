@@ -2,14 +2,14 @@ import { KoiosNetwork } from "../network/koios";
 import { CardanoUtils } from "./utils";
 import config, { IConfig } from "config";
 import { ormconfig } from "../../../config/ormconfig";
-import { ScannerAbstract } from "../../scanner/scanner-abstract";
+import { AbstractScanner } from "../../scanner/abstract-scanner";
 import { DataBase } from "../../models/model";
 import { Block, Observation } from "../../objects/interfaces";
 import { Tx, TxMetaData } from "../network/apiModelsCardano";
 
 const INTERVAL: number | undefined = config.get?.('scanner.interval');
 
-export class Scanner extends ScannerAbstract<Tx, TxMetaData> {
+export class Scanner extends AbstractScanner<Tx, TxMetaData> {
     _dataBase: DataBase;
     _networkAccess: KoiosNetwork;
     _config: IConfig;
