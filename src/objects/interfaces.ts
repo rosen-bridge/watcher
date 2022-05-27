@@ -15,3 +15,10 @@ export interface Observation {
     sourceBlockId: string
     requestId: string
 }
+
+export interface Commitment{
+    eventId: string,
+    commitment: string,
+    WID: string,
+    commitmentBoxId: string
+}

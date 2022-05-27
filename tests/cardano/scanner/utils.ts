@@ -78,9 +78,8 @@ describe("Cardano Scanner Utils test", () => {
                 "93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3"
                 , koiosNetwork
             );
-            expect(observations.length).to.be.equal(2);
-            expect(observations[0]).to.be.undefined;
-            expect(observations[1]).to.be.eql(sampleObservation);
+            expect(observations.length).to.be.equal(1);
+            expect(observations[0]).to.be.eql(sampleObservation);
         });
     })
 });

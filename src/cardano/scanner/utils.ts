@@ -1,8 +1,8 @@
-import { MetaData, RosenData, Tx, TxMetaData, Utxo } from "../network/apiModelsCardano";
+import { MetaData, RosenData, Utxo } from "../network/apiModelsCardano";
 import AssetFingerprint from "@emurgo/cip14-js";
 import { BANK } from "./bankAddress";
-import { AbstractNetworkConnector } from "../../network/abstract-network-connector";
-import { Observation } from "../../objects/interfaces";
+import {Commitment, Observation} from "../../objects/interfaces";
+import { KoiosNetwork } from "../network/koios";
 
 export class CardanoUtils {
 
@@ -34,9 +34,10 @@ export class CardanoUtils {
      * @param txHash
      * @param blockHash
      * @param bank
+     * @param networkAccess
      * @return Promise<observation|undefined>
      */
-    static checkTx = async (txHash: string, blockHash: string, bank: Array<string>, networkAccess: AbstractNetworkConnector<Tx, TxMetaData>): Promise<Observation | undefined> => {
+    static checkTx = async (txHash: string, blockHash: string, bank: Array<string>, networkAccess: KoiosNetwork): Promise<Observation | undefined> => {
         const tx = (await networkAccess.getTxUtxos([txHash]))[0];
         const utxos = tx.utxos.filter((utxo: Utxo) => {
             return bank.find(address => address === utxo.payment_addr.bech32) != undefined;
@@ -73,18 +74,18 @@ export class CardanoUtils {
     /**
      * check all the transaction in a block and returns an array of observations and undefineds
      * @param blockHash
+     * @param networkAccess
      * @return Promise<Array<(Observation | undefined)>>
      */
-    static observationsAtHeight = async (
-        blockHash: string,
-        networkAccess: AbstractNetworkConnector<Tx, TxMetaData>
-    ): Promise<Array<(Observation | undefined)>> => {
+    static observationsAtHeight = async (blockHash: string,
+                                         networkAccess: KoiosNetwork): Promise<Array<Observation>> => {
         const txs = await networkAccess.getBlockTxs(blockHash);
-        const observation = Array(txs.length).fill(undefined);
+        const observations: Array<Observation> = []
         for (let i = 0; i < txs.length; i++) {
-            observation[i] = await this.checkTx(txs[i], blockHash, BANK, networkAccess);
+            const o = await this.checkTx(txs[i], blockHash, BANK, networkAccess)
+            if(o != undefined) observations.push(o)
         }
-        return observation;
+        return observations;
     }
 }
 

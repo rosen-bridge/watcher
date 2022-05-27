@@ -15,31 +15,10 @@ describe("Koios Apis", () => {
     describe("getBlock", () => {
         it("get the last block offset=0 and limit=1", async () => {
             const koiosNetwork = new KoiosNetwork();
-            const data = await koiosNetwork.getBlock(0, 1);
-            expect(data[0]).to.eql({
-                "hash": "ccb85a5f2f10bd1468e0cd9679a6bea360962747e2b60b73fa43abe98b09d15c",
-                "block_height": 3433334
-            });
+            const data = await koiosNetwork.getCurrentHeight();
+            expect(data).to.equal(3433334);
         });
 
-        it("get the last 3 blocks with offset of 5", async () => {
-            const koiosNetwork = new KoiosNetwork();
-            const data = await koiosNetwork.getBlock(5, 3);
-            expect(data).to.eql([
-                {
-                    "hash": "e1699582bd2e3426839e10f7f5066bafc6e3847fd4511a2013ba3b4e13514267",
-                    "block_height": 3433332
-                },
-                {
-                    "hash": "397e969e0525d82dc46a33e31634187dae94b12a6cc4b534e4e52f6d313aef22",
-                    "block_height": 3433331
-                },
-                {
-                    "hash": "19b60182cba99d621b3d02457fefb4cda81f4fbde3ca719617cbed2e4cc5c0ce",
-                    "block_height": 3433330
-                }
-            ]);
-        });
     });
     describe("getBlockTxs", () => {
         it("get the block transactions with block hash", async () => {

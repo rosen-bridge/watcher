@@ -7,8 +7,8 @@ import { ergoTreeToBase58Address } from "../../api/ergoUtils";
 import { AddressBoxes, ErgoTx } from "./types";
 import { JsonBI } from "../../network/parser";
 
-const EXPLORER_URL: string | undefined = config.get?.('ergo.explorer');
-const NODE_URL: string | undefined = config.get?.('ergo.node');
+const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
+const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
 
 const explorerApi = axios.create({
     baseURL: EXPLORER_URL,

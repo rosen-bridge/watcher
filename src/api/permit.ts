@@ -33,10 +33,7 @@ const checkConfigFile = (): Transaction => {
         strToUint8Array(SECRET_KEY)
     ).get_address().to_base58(networkType);
 
-    console.log("watcher address is ", watcherAddress.toString());
-
     return new Transaction(rosenConfig, watcherAddress, SECRET_KEY);
-
 }
 
 router.get("/get", async (req, res) => {
