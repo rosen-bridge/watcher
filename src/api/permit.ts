@@ -2,7 +2,7 @@ import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { NetworkPrefix } from "ergo-lib-wasm-nodejs";
 import config from "config";
 import express, { Response } from "express";
-import { Transaction } from "./lock";
+import { Transaction } from "./Transaction";
 import { rosenConfig } from "./rosenConfig";
 import { strToUint8Array } from "../utils/utils";
 
@@ -39,7 +39,7 @@ const checkConfigFile = (): Transaction => {
 
 }
 
-router.get("/getPermit", async (req, res) => {
+router.get("/get", async (req, res) => {
     const RSNCount = req.query.count;
     if (typeof RSNCount !== "string") {
         res.status(400).send("RSNCount doesn't set");
@@ -69,7 +69,7 @@ router.get("/getPermit", async (req, res) => {
     res.status(200).json({txid: transactionId});
 });
 
-router.get("/returnPermit", async (req, res) => {
+router.get("/return", async (req, res) => {
 
     let transaction: Transaction;
     try {

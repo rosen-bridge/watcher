@@ -13,7 +13,7 @@ export const generateSK = (): SecretKey => {
     return ergoLib.SecretKey.random_dlog();
 }
 
-router.get("/address", (req, res) => {
+router.get("/generate", (req, res) => {
     //TODO: should complete later to save the secret key
     const secretKey = ergoLib.SecretKey.random_dlog();
     let networkType: NetworkPrefix = ergoLib.NetworkPrefix.Testnet;
@@ -33,6 +33,5 @@ router.get("/address", (req, res) => {
     const secret = Buffer.from(secretKey.to_bytes()).toString('hex');
     res.json({address: address, secret: secret});
 });
-
 
 export default router;

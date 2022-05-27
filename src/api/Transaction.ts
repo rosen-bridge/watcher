@@ -210,12 +210,9 @@ export class Transaction {
         }
 
         const widIndex = users.map(user => uint8ArrayToHex(user)).indexOf(WID);
-
         const inputRWTCount = BigInt(usersCount[widIndex]);
-
         const newUsers = users.slice(0, widIndex).concat(users.slice(widIndex + 1, users.length));
         const newUsersCount = usersCount.slice(0, widIndex).concat(usersCount.slice(widIndex + 1, usersCount.length));
-
         const RepoRWTCount = repoBox.tokens().get(1).amount().as_i64().checked_add(
             ergoLib.I64.from_str(
                 inputRWTCount.toString()
@@ -227,8 +224,6 @@ export class Transaction {
             )
         );
 
-        console.log("here")
-
         const repoOut = await this.createRepo(
             height,
             RepoRWTCount.to_str(),
@@ -238,15 +233,11 @@ export class Transaction {
             widIndex
         );
 
-        console.log("here")
-
         const inputBoxes = new ergoLib.ErgoBoxes(repoBox);
         inputBoxes.add(permitBox);
         inputBoxes.add(widBox);
 
         const inputBoxSelection = new BoxSelection(inputBoxes, new ErgoBoxAssetsDataList());
-
-
         const changeTokens = this.inputBoxesTokenMap(inputBoxes, 2);
 
         let rsnCount = changeTokens.get(this.RSN.to_str());
@@ -288,15 +279,7 @@ export class Transaction {
                 );
             }
         }
-
-        console.log("here")
-
-
         const userOutBox = userOutBoxBuilder.build();
-
-        console.log("here")
-
-
         const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
         outputBoxes.add(userOutBox);
         const builder = ergoLib.TxBuilder.new(
@@ -307,13 +290,9 @@ export class Transaction {
             this.userAddress,
             this.minBoxValue,
         );
-        console.log("before sign")
 
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
-        console.log("after sign")
-        console.log(signedTx.to_json())
         await this.ergoNetwork.sendTx(signedTx.to_json());
-        // console.log(signedTx.to_json())
         return signedTx.id().to_str();
     }
 
@@ -408,11 +387,8 @@ export class Transaction {
         );
 
         const permitOut = await this.createPermitBox(height, RWTCount.toString(), repoBox.box_id().as_bytes());
-
         const testTokenId = ergoLib.TokenId.from_str(repoBox.box_id().to_str());
         const testTokenAmount = ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1"));
-
-
         const inputBoxes = new ergoLib.ErgoBoxes(repoBox);
         inputBoxes.add(RSNInput);
 
@@ -483,11 +459,9 @@ export class Transaction {
             this.userAddress,
             this.minBoxValue,
         );
-        console.log(builder.build().to_json())
 
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
         await this.ergoNetwork.sendTx(signedTx.to_json());
-        console.log(signedTx.to_json())
         return signedTx.id().to_str();
     }
 
@@ -523,6 +497,3 @@ export class Transaction {
     }
 
 }
-
-
-
