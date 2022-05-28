@@ -1,7 +1,7 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import {contracts} from "../contracts/contracts";
 import {tokens} from "../../config/default";
-import {strToUint8Array} from "./utils";
+import {strToUint8Array} from "./ergoUtils";
 import config from "config";
 const permitBox = require('../dataset/permitBox.json');
 const WIDBox = require('../dataset/WIDBox.json');

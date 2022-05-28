@@ -4,7 +4,7 @@ import {NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
 import {CommitmentDataBase} from "../models/commitmentModel";
 import {Address} from "ergo-lib-wasm-nodejs";
 import {contracts} from "../../contracts/contracts";
-import {decodeCollColl, decodeStr} from "../../ergoUtils/utils";
+import {decodeCollColl, decodeStr} from "../../ergoUtils/ergoUtils";
 
 export class CommitmentUtils {
 

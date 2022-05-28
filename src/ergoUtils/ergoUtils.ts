@@ -2,9 +2,10 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import {ErgoBox} from "ergo-lib-wasm-nodejs";
 import config from "config";
 import {ErgoNetworkApi} from "./networkApi";
-import {blake2b} from "ethereum-cryptography/blake2b";
 import {Buffer} from "buffer";
 import {Observation} from "../objects/interfaces";
+import {bigIntToUint8Array} from "../utils/utils";
+let blake2b = require('blake2b')
 
 const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');
 const txFee = parseInt(config.get?.('ergo.txFee'))
@@ -80,8 +81,7 @@ const signTx = async (secret: wasm.SecretKey, tx: wasm.UnsignedTransaction, boxS
     return wallet.sign_transaction(ctx, tx, boxSelection.boxes(), dataInputs)
 }
 
-export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCandidate>, height?: number, dataInputs?: wasm.ErgoBoxes, changeContract?: wasm.Contract) => {
-    if (!height) height = 10//await ErgoNetworkApi.getCurrentHeight()
+export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCandidate>, height: number, dataInputs?: wasm.ErgoBoxes, changeContract?: wasm.Contract) => {
     const change = createChangeBox(boxes, candidates, height, secret, changeContract)
     const candidateBoxes = new wasm.ErgoBoxCandidates(candidates[0])
     candidates.slice(1).forEach(item => candidateBoxes.add(item))
@@ -106,19 +106,26 @@ export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBo
 }
 
 export const commitmentFromObservation = (observation: Observation, WID: string): Uint8Array => {
-    const x = Buffer.concat([
-        Buffer.from(observation.sourceTxId),
+    const content = Buffer.concat([
+        Buffer.from(observation.sourceTxId, "hex"),
         Buffer.from(observation.fromChain),
         Buffer.from(observation.toChain),
         Buffer.from(observation.fromAddress),
         Buffer.from(observation.toAddress),
-        Buffer.alloc(8, observation.amount),
-        Buffer.alloc(8, observation.fee),
-        Buffer.from(observation.sourceChainTokenId),
-        Buffer.from(observation.targetChainTokenId),
-        Buffer.from(observation.sourceBlockId),
-        Buffer.from(WID),
+        bigIntToUint8Array(BigInt(observation.amount)),
+        bigIntToUint8Array(BigInt(observation.fee)),
+        Buffer.from(observation.sourceChainTokenId, "hex"),
+        Buffer.from(observation.targetChainTokenId, "hex"),
+        Buffer.from(observation.sourceBlockId, "hex"),
+        Buffer.from(WID, "hex"),
     ])
-    console.log(x.length)
-    return blake2b(x)
+    return blake2b(32).update(content).digest()
+}
+
+export const contractHash = (contract: wasm.Contract): Buffer => {
+    return Buffer.from(
+        blake2b(32)
+            .update(Buffer.from(contract.ergo_tree().to_base16_bytes(), "hex"))
+            .digest()
+    )
 }

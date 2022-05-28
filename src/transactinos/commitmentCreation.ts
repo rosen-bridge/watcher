@@ -3,10 +3,8 @@ import {contracts} from "../contracts/contracts";
 import {ErgoNetworkApi} from "../ergoUtils/networkApi";
 import config from "config";
 import {boxes} from "../ergoUtils/boxes";
-import {blake2b} from "ethereum-cryptography/blake2b";
-import {commitmentFromObservation, createAndSignTx, extractTokens} from "../ergoUtils/utils";
+import {commitmentFromObservation, contractHash, createAndSignTx} from "../ergoUtils/ergoUtils";
 import {NetworkDataBase} from "../models/networkModel";
-import {Buffer} from "buffer";
 
 const minBoxVal = parseInt(config.get?.('ergo.minBoxVal'))
 const txFee = parseInt(config.get?.('ergo.txFee'))
@@ -23,7 +21,7 @@ export class commitmentCreation {
 
     createCommitmentTx = async (WID: string, requestId: string, eventDigest: Uint8Array, permits: Array<wasm.ErgoBox>, WIDBox: wasm.ErgoBox): Promise<string> => {
         const height = await ErgoNetworkApi.getCurrentHeight()
-        const permitHash = blake2b(Buffer.from(contracts.addressCache.permitContract!.ergo_tree().to_base16_bytes(), "hex"), 32)
+        const permitHash = contractHash(contracts.addressCache.permitContract!)
         const outCommitment = boxes.createCommitment(minBoxVal, height, WID, requestId, eventDigest, permitHash)
         const RWTCount: number = permits.map(permit => permit.tokens().get(0).amount().as_i64().as_num()).reduce((a, b) => a + b, 0)
         const outPermit = boxes.createPermit(minBoxVal, height, RWTCount - 1, WID)
@@ -50,7 +48,7 @@ export class commitmentCreation {
             const commitment = commitmentFromObservation(observation, WID)
             const permits = await boxes.getPermits(WID)
             const WIDBox = await boxes.getWIDBox(WID)
-            const txId = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox[0])
+            const txId = await this.createCommitmentTx(WID, observation.requestId, new Uint8Array(), permits, WIDBox[0])
             await this._dataBase.saveCommitment({
                 eventId: observation.requestId,
                 commitment: commitment.toString(),

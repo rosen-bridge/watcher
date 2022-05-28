@@ -1,27 +1,26 @@
 import {Observation} from "../../src/objects/interfaces";
-import {commitmentFromObservation} from "../../src/ergoUtils/utils";
-import * as wasm from "ergo-lib-wasm-nodejs";
+import {commitmentFromObservation} from "../../src/ergoUtils/ergoUtils";
 import {expect} from "chai";
+import {toHexString} from "../../src/utils/utils";
 
 const observation: Observation = {
     fromChain: "ADA",
     toChain: "ERG",
-    fromAddress: "ErgoAddress",
-    toAddress: "cardanoAddress",
+    fromAddress: "9i1Jy713XfahaB8oFFm2T9kpM7mzT1F4dMvMZKo7rJPB3U4vNVq",
+    toAddress: "9hPZKvu48kKkPAwrhDukwVxmNrTAa1vXdSsbDijXVsEEYaUt3x5",
     amount: "100000",
     fee: "2520",
-    sourceChainTokenId: "c185f29d4fc84b70a72d1b3235dad09f7c81b029dad7c5fb58577dfa26b22d41",
-    targetChainTokenId: "d4b43a3f2b43498b258cbcd17786bf504ab08279962bef3f5de672106b06716e",
-    sourceTxId: "1260867c6b0010a680f7d1a6593bdf1702949257bfe19c958bc5268752187d29",
-    sourceBlockId: "7d3b083ea32eb2cd1680816792dc45e34d92ccec68a79dd7c11de436c2be216e",
+    sourceChainTokenId: "a5d0d1dd7c9faad78a662b065bf053d7e9b454af446fbd50c3bb2e3ba566e164",
+    targetChainTokenId: "1db2acc8c356680e21d4d06ce345b83bdf61a89e6b0475768557e06aeb24709f",
+    sourceTxId: "cb459f7f8189d3524e6b7361b55baa40c34a71ec5ac506628736096c7aa66f1a",
+    sourceBlockId: "7e3b6c9cf8146cf49c0b255d9a8fbeeeb76bea64345f74edc25f8dfee0473968",
     requestId: "reqId1",
 }
-const WID = "da0f9e9d44491eafbf385a880fd7ce75f4b49c705b423e07e72e369cd18e151f"
+const WID = "245341e0dda895feca93adbd2db9e643a74c50a1b3702db4c2535f23f1c72e6e"
 
 describe("commitmentFromObservation", () => {
     it("should return the correct commitment", () => {
         const res = commitmentFromObservation(observation, WID)
-        console.log(res)
-        expect(wasm.Constant.from_byte_array(res).encode_to_base16()).to.eql("08a40967ea0d2712416b82c92bdcb65113c02840b4900614c9dcb7d3e1df7872")
+        expect(toHexString(res)).to.eql("e53f94b874427ddc736f0fd2e71bb0c7bff4dc18e8a07a1d9b2f84960ca97ccf")
     })
 })
