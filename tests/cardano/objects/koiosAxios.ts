@@ -1,5 +1,6 @@
 import MockAdapter from "axios-mock-adapter";
 import { koios } from "../../../src/cardano/network/koios";
+import { explorerApi, nodeClient } from "../../../src/ergo/network/ergoNetwork";
 
 const mockedAxios = new MockAdapter(koios);
 

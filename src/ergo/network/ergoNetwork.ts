@@ -10,12 +10,12 @@ import { JsonBI } from "../../network/parser";
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
 
-const explorerApi = axios.create({
+export const explorerApi = axios.create({
     baseURL: EXPLORER_URL,
     timeout: 8000,
 });
 
-const nodeClient = axios.create({
+export const nodeClient = axios.create({
     baseURL: NODE_URL,
     timeout: 8000,
     headers: {"Content-Type": "application/json"}
@@ -34,12 +34,11 @@ export class ErgoNetwork {
     }
 
     getBoxesForAddress = async (tree: string, offset = 0, limit = 100): Promise<AddressBoxes> => {
-        // console.log(`/api/v1/boxes/unspent/byErgoTree/${tree}?offset=${offset}&limit=${limit}`)
         return explorerApi.get<AddressBoxes>(
-            `/api/v1/boxes/unspent/byErgoTree/${tree}?offset=${offset}&limit=${limit}`,
-            {transformResponse: data => JsonBI.parse(data)}
+            `/api/v1/boxes/unspent/byErgoTree/${tree}`,
+            {params:{offset: offset, limit: limit},transformResponse: data => JsonBI.parse(data)}
         ).then(
-            res => res.data
+            res => {console.log(res.data);return res.data}
         );
     }
 
@@ -75,12 +74,13 @@ export class ErgoNetwork {
     ): Promise<{ covered: boolean, boxes: Array<ergoLib.ErgoBox> }> => {
         let res = []
         const boxesItems = await this.getBoxesForAddress(tree, 0, 1)
+        console.log(boxesItems.items[0].boxId)
         const total = boxesItems.total;
         let offset = 0;
         const bigIntMax = (a: bigint, b: bigint) => a > b ? a : b;
         const remaining = () => {
             const tokenRemain = Object.entries(covering)
-                .map(([key, amount]) => bigIntMax(amount, 0n)).reduce(
+                .map(([, amount]) => bigIntMax(amount, 0n)).reduce(
                     (a, b) => a + b,
                     0n
                 );
@@ -109,6 +109,7 @@ export class ErgoNetwork {
     }
 
     getBoxWithToken = async (address: Address, tokenId: string): Promise<JSON> => {
+        console.log(tokenId)
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
             0n,
@@ -125,8 +126,10 @@ export class ErgoNetwork {
             }
         )
         if (!box.covered) {
+            console.log("not covered")
             throw Error("box with Token:" + tokenId + " not found")
         }
+        console.log(box)
         return JsonBI.parse(box.boxes[0].to_json());
     }
 

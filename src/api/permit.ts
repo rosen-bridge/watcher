@@ -32,7 +32,7 @@ const checkConfigFile = (): Transaction => {
     const watcherAddress = ergoLib.SecretKey.dlog_from_bytes(
         strToUint8Array(SECRET_KEY)
     ).get_address().to_base58(networkType);
-
+    console.log(watcherAddress)
     return new Transaction(rosenConfig, watcherAddress, SECRET_KEY);
 }
 

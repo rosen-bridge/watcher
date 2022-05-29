@@ -56,7 +56,7 @@ export class Transaction {
         this.fee = ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(rosenConfig.fee));
     }
 
-    private createPermitBox = async (
+    createPermitBox = async (
         height: number,
         RWTCount: string,
         WID: Uint8Array
@@ -81,7 +81,7 @@ export class Transaction {
 
     }
 
-    private createUserBoxCandidate = async (
+    createUserBoxCandidate = async (
         height: number,
         address: string,
         amount: string,
@@ -109,9 +109,13 @@ export class Transaction {
         return userBoxBuilder.build();
     }
 
-    private checkWID = (users: Array<Uint8Array>): Array<Promise<boolean>> => {
+    checkWID = (users: Array<Uint8Array>): Array<Promise<boolean>> => {
+        console.log("teeeeeeeeeeeeeeeeeeeeest")
+        console.log(this.userAddress.to_ergo_tree().to_base16_bytes())
         return users.map(async (id) => {
             const wid = uint8ArrayToHex(id);
+            console.log(wid)
+            console.log(await this.ergoNetwork.getBoxesForAddress(this.userAddress.to_ergo_tree().to_base16_bytes(),0,1))
             try {
                 const box = await (
                     this.ergoNetwork.getBoxWithToken(
@@ -119,6 +123,7 @@ export class Transaction {
                         wid,
                     )
                 );
+                console.log(box);
                 return true;
             } catch (error) {
                 return false;
@@ -176,7 +181,6 @@ export class Transaction {
                 )
             )
         ).getErgoBox();
-
         const repoBox = await this.getRepoBox();
 
         const users = repoBox.register_value(4)?.to_coll_coll_byte();
@@ -292,7 +296,7 @@ export class Transaction {
         );
 
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
-        await this.ergoNetwork.sendTx(signedTx.to_json());
+        // await this.ergoNetwork.sendTx(signedTx.to_json());
         return signedTx.id().to_str();
     }
 
