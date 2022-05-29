@@ -1,18 +1,19 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import {contracts} from "../contracts/contracts";
-import {tokens} from "../../config/default";
-import {strToUint8Array} from "./ergoUtils";
+import { contracts } from "../contracts/contracts";
+import { tokens } from "../../config/default";
+import { strToUint8Array } from "./ergoUtils";
 import config from "config";
+
 const permitBox = require('../dataset/permitBox.json');
 const WIDBox = require('../dataset/WIDBox.json');
 
-export class boxes{
-    static getPermits = async(WID: string): Promise<Array<wasm.ErgoBox>> => {
+export class boxes {
+    static getPermits = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Implement this mocked function
         return Promise.resolve([wasm.ErgoBox.from_json(permitBox)])
     }
 
-    static getWIDBox = async(WID: string): Promise<Array<wasm.ErgoBox>> => {
+    static getWIDBox = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Implement this mocked function
         return Promise.resolve([wasm.ErgoBox.from_json(WIDBox)])
     }

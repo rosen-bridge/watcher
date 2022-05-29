@@ -1,5 +1,5 @@
-import {Column, Entity, OneToOne, PrimaryColumn} from "typeorm";
-import {ObservationEntity} from "./ObservationEntity";
+import { Column, Entity, OneToOne, PrimaryColumn } from "typeorm";
+import { ObservationEntity } from "./ObservationEntity";
 
 export enum txStatus {
     SENT = 'sent',

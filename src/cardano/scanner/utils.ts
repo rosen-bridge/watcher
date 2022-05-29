@@ -1,7 +1,7 @@
 import { MetaData, RosenData, Utxo } from "../network/apiModelsCardano";
 import AssetFingerprint from "@emurgo/cip14-js";
 import { BANK } from "./bankAddress";
-import {Commitment, Observation} from "../../objects/interfaces";
+import { Observation } from "../../objects/interfaces";
 import { KoiosNetwork } from "../network/koios";
 
 export class CardanoUtils {
@@ -85,7 +85,7 @@ export class CardanoUtils {
         const observations: Array<Observation> = []
         for (let i = 0; i < txs.length; i++) {
             const o = await this.checkTx(txs[i], blockHash, BANK, networkAccess)
-            if(o != undefined) observations.push(o)
+            if (o != undefined) observations.push(o)
         }
         return observations;
     }

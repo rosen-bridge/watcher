@@ -1,9 +1,9 @@
-import {ErgoNetworkApi} from "../ergoUtils/networkApi";
-import {scripts} from "./scripts";
-import {tokens} from "../../config/default";
+import { ErgoNetworkApi } from "../ergoUtils/networkApi";
+import { scripts } from "./scripts";
+import { tokens } from "../../config/default";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import config from "config";
-import {contractHash} from "../ergoUtils/ergoUtils";
+import { contractHash } from "../ergoUtils/ergoUtils";
 
 interface AddressCache {
     fraud?: string
@@ -14,7 +14,7 @@ interface AddressCache {
     permitContract?: wasm.Contract
 }
 
-export class contracts{
+export class contracts {
     static addressCache: AddressCache = {}
 
     static init = async () => {

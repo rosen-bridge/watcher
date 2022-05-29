@@ -1,6 +1,6 @@
-import {Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn} from "typeorm";
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BlockEntity } from "./BlockEntity";
-import {CommitmentEntity} from "./CommitmentEntity";
+import { CommitmentEntity } from "./CommitmentEntity";
 
 @Entity()
 export class ObservationEntity {
@@ -41,7 +41,7 @@ export class ObservationEntity {
     @Column()
     sourceBlockId: string
 
-    @Column({ unique: true })
+    @Column({unique: true})
     requestId: string
 
     @ManyToOne(

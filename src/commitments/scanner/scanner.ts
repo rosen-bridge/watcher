@@ -1,12 +1,12 @@
-import {AbstractScanner} from "../../scanner/abstractScanner";
-import {CommitmentDataBase} from "../models/commitmentModel";
-import config, {IConfig} from "config";
-import {Block, Commitment} from "../../objects/interfaces";
-import {commitmentOrmConfig} from "../../../config/commitmentOrmConfig";
-import {CommitmentNetworkApi} from "../network/networkApi";
-import {CBlockEntity} from "../../entities/CBlockEntity";
-import {CommitmentUtils} from "./utils";
-import {contracts} from "../../contracts/contracts";
+import { AbstractScanner } from "../../scanner/abstractScanner";
+import { CommitmentDataBase } from "../models/commitmentModel";
+import config, { IConfig } from "config";
+import { Block, Commitment } from "../../objects/interfaces";
+import { commitmentOrmConfig } from "../../../config/commitmentOrmConfig";
+import { CommitmentNetworkApi } from "../network/networkApi";
+import { CBlockEntity } from "../../entities/CBlockEntity";
+import { CommitmentUtils } from "./utils";
+import { contracts } from "../../contracts/contracts";
 
 const INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
 

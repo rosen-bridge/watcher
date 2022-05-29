@@ -1,6 +1,6 @@
-import {DataSource} from "typeorm";
-import {commitmentEntities} from "../src/entities";
-import {commitmentMigrations} from "../src/migrations";
+import { DataSource } from "typeorm";
+import { commitmentEntities } from "../src/entities";
+import { commitmentMigrations } from "../src/migrations";
 
 export const commitmentOrmConfig = new DataSource({
     type: "sqlite",

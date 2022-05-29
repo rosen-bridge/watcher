@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import {ErgoNetworkApi, nodeApi} from "../../src/ergoUtils/networkApi";
-import {describe} from "mocha";
+import { ErgoNetworkApi, nodeApi } from "../../src/ergoUtils/networkApi";
+import { describe } from "mocha";
 import MockAdapter from "axios-mock-adapter";
 
 const lastBlockHeaders = require('./dataset/lastBlockHeaders.json');

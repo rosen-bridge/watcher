@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import {CommitmentNetworkApi, nodeApi} from "../../../src/commitments/network/networkApi"
-import {describe} from "mocha";
+import { CommitmentNetworkApi, nodeApi } from "../../../src/commitments/network/networkApi"
+import { describe } from "mocha";
 import MockAdapter from "axios-mock-adapter";
 
 const blockAtHeight = require('../dataset/blockAtHeight.json');

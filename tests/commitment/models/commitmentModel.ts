@@ -1,8 +1,8 @@
-import {DataSource} from "typeorm";
-import {commitmentEntities} from "../../../src/entities";
-import {CommitmentDataBase} from "../../../src/commitments/models/commitmentModel";
-import {Commitment} from "../../../src/objects/interfaces";
-import {expect} from "chai";
+import { DataSource } from "typeorm";
+import { commitmentEntities } from "../../../src/entities";
+import { CommitmentDataBase } from "../../../src/commitments/models/commitmentModel";
+import { Commitment } from "../../../src/objects/interfaces";
+import { expect } from "chai";
 
 const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
     const ormConfig = new DataSource({
@@ -59,7 +59,7 @@ describe("Commitment Database functions", async () => {
     });
 
     describe("getBlockAtHeight", () => {
-        it("should return a block", async() => {
+        it("should return a block", async () => {
             let data = await DB.getBlockAtHeight(3433333)
             expect(data).to.haveOwnProperty("hash")
             expect(data).to.haveOwnProperty("block_height")
@@ -68,14 +68,14 @@ describe("Commitment Database functions", async () => {
     })
 
     describe("getOldSpentCommitments", () => {
-        it("should return an old commitment", async() => {
+        it("should return an old commitment", async () => {
             let data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(1)
         })
     })
 
     describe("deleteCommitments", () => {
-        it("should delete two commitments", async() => {
+        it("should delete two commitments", async () => {
             await DB.deleteCommitments([firstCommitment.commitmentBoxId, secondCommitment.commitmentBoxId])
             let data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(0)

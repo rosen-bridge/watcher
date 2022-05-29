@@ -1,7 +1,7 @@
-import {Observation} from "../../src/objects/interfaces";
-import {commitmentFromObservation} from "../../src/ergoUtils/ergoUtils";
-import {expect} from "chai";
-import {toHexString} from "../../src/utils/utils";
+import { Observation } from "../../src/objects/interfaces";
+import { commitmentFromObservation } from "../../src/ergoUtils/ergoUtils";
+import { expect } from "chai";
+import { toHexString } from "../../src/utils/utils";
 
 const observation: Observation = {
     fromChain: "ADA",

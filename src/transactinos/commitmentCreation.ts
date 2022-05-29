@@ -1,10 +1,10 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import {contracts} from "../contracts/contracts";
-import {ErgoNetworkApi} from "../ergoUtils/networkApi";
+import { contracts } from "../contracts/contracts";
+import { ErgoNetworkApi } from "../ergoUtils/networkApi";
 import config from "config";
-import {boxes} from "../ergoUtils/boxes";
-import {commitmentFromObservation, contractHash, createAndSignTx} from "../ergoUtils/ergoUtils";
-import {NetworkDataBase} from "../models/networkModel";
+import { boxes } from "../ergoUtils/boxes";
+import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergoUtils/ergoUtils";
+import { NetworkDataBase } from "../models/networkModel";
 
 const minBoxVal = parseInt(config.get?.('ergo.minBoxVal'))
 const txFee = parseInt(config.get?.('ergo.txFee'))
@@ -44,7 +44,7 @@ export class commitmentCreation {
 
     job = async () => {
         const observations = await this._dataBase.getConfirmedObservations(this._requiredConfirmation)
-        for(const observation of observations){
+        for (const observation of observations) {
             const commitment = commitmentFromObservation(observation, WID)
             const permits = await boxes.getPermits(WID)
             const WIDBox = await boxes.getWIDBox(WID)

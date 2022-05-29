@@ -1,9 +1,9 @@
-import {DataSource, DeleteResult, In, MoreThanOrEqual, Repository} from "typeorm";
-import {CBlockEntity} from "../../entities/CBlockEntity";
-import {ObservedCommitmentEntity} from "../../entities/ObservedCommitmentEntity";
+import { DataSource, DeleteResult, In, MoreThanOrEqual, Repository } from "typeorm";
+import { CBlockEntity } from "../../entities/CBlockEntity";
+import { ObservedCommitmentEntity } from "../../entities/ObservedCommitmentEntity";
 import { Block } from "../../objects/interfaces";
-import {AbstractDataBase} from "../../models/abstractModel";
-import {CommitmentInformation} from "../scanner/scanner";
+import { AbstractDataBase } from "../../models/abstractModel";
+import { CommitmentInformation } from "../scanner/scanner";
 
 export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, CommitmentInformation> {
     dataSource: DataSource;
@@ -86,9 +86,9 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
             });
 
         const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
-        for(const boxId of information.updatedCommitments){
+        for (const boxId of information.updatedCommitments) {
             const oldCommitment = await this.commitmentRepository.findOne({
-                where: { commitmentBoxId: information.updatedCommitments[0] }
+                where: {commitmentBoxId: information.updatedCommitments[0]}
             })
             const newCommitment = new ObservedCommitmentEntity()
             Object.assign(newCommitment, {
@@ -138,7 +138,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * returns old spent commitments
      * @param height
      */
-    getOldSpentCommitments = async (height: number): Promise<Array<ObservedCommitmentEntity>> =>{
+    getOldSpentCommitments = async (height: number): Promise<Array<ObservedCommitmentEntity>> => {
         return await this.commitmentRepository.createQueryBuilder("observed_commitment_entity")
             .where("observed_commitment_entity.spendBlock < :height", {height})
             .execute()

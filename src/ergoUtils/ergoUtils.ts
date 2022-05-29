@@ -1,10 +1,10 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import {ErgoBox} from "ergo-lib-wasm-nodejs";
+import { ErgoBox } from "ergo-lib-wasm-nodejs";
 import config from "config";
-import {ErgoNetworkApi} from "./networkApi";
-import {Buffer} from "buffer";
-import {Observation} from "../objects/interfaces";
-import {bigIntToUint8Array} from "../utils/utils";
+import { ErgoNetworkApi } from "./networkApi";
+import { Buffer } from "buffer";
+import { Observation } from "../objects/interfaces";
+import { bigIntToUint8Array } from "../utils/utils";
 let blake2b = require('blake2b')
 
 const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');

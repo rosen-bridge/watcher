@@ -1,9 +1,9 @@
-import {DataSource, DeleteResult, MoreThanOrEqual, Repository} from "typeorm";
-import {BlockEntity} from "../entities/BlockEntity";
-import {CommitmentEntity, txStatus} from "../entities/CommitmentEntity";
-import {ObservationEntity} from "../entities/ObservationEntity";
-import {Block, Commitment, Observation} from "../objects/interfaces";
-import {AbstractDataBase} from "./abstractModel";
+import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
+import { BlockEntity } from "../entities/BlockEntity";
+import { CommitmentEntity, txStatus } from "../entities/CommitmentEntity";
+import { ObservationEntity } from "../entities/ObservationEntity";
+import { Block, Commitment, Observation } from "../objects/interfaces";
+import { AbstractDataBase } from "./abstractModel";
 
 export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observation>> {
     dataSource: DataSource;
@@ -166,7 +166,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         commitmentEntity.flag = txStatus.SENT
 
         const oldObservation = await this.observationRepository.findOne({
-            where: { id: observationId }
+            where: {id: observationId}
         })
         const newObservation = new ObservationEntity()
         Object.assign(newObservation, {
