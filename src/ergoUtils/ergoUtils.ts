@@ -34,6 +34,17 @@ export const strToUint8Array = (str: string): Uint8Array => {
     return new Uint8Array(Buffer.from(str, "hex"))
 }
 
+/**
+ * Creates a change box from the input and output boxes
+ * if output boxes have more assets than the inputs throws an exception
+ * if some input assets needs to be burnt throw exception
+ * if all input assets were transferred to the outputs returns null
+ * @param boxes
+ * @param candidates
+ * @param height
+ * @param secret
+ * @param contract change contract if it is needed, unless use the secret's public address as the change address
+ */
 export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCandidate>, height: number, secret: wasm.SecretKey, contract?: wasm.Contract): wasm.ErgoBoxCandidate | null => {
     const processBox = (box: wasm.ErgoBox | wasm.ErgoBoxCandidate, tokens: { [id: string]: number; }, sign: number) => {
         extractTokens(box.tokens()).forEach(token => {
@@ -80,6 +91,13 @@ export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.Er
     return null
 }
 
+/**
+ * signs the transaction by required secret
+ * @param secret
+ * @param tx
+ * @param boxSelection
+ * @param dataInputs
+ */
 const signTx = async (secret: wasm.SecretKey, tx: wasm.UnsignedTransaction, boxSelection: wasm.BoxSelection, dataInputs: wasm.ErgoBoxes) => {
     const secrets = new wasm.SecretKeys()
     secrets.add(secret)
@@ -88,6 +106,15 @@ const signTx = async (secret: wasm.SecretKey, tx: wasm.UnsignedTransaction, boxS
     return wallet.sign_transaction(ctx, tx, boxSelection.boxes(), dataInputs)
 }
 
+/**
+ * Creates the transaction from input, data input and output boxes, then signs the created transaction with the secrets
+ * @param secret
+ * @param boxes inout boxes
+ * @param candidates output boxes
+ * @param height current network height
+ * @param dataInputs
+ * @param changeContract change contract if it is needed, unless use the secret's public address as the change address
+ */
 export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCandidate>, height: number, dataInputs?: wasm.ErgoBoxes, changeContract?: wasm.Contract) => {
     const change = createChangeBox(boxes, candidates, height, secret, changeContract)
     const candidateBoxes = new wasm.ErgoBoxCandidates(candidates[0])
@@ -112,6 +139,11 @@ export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBo
     return signTx(secret, txBuilder.build(), boxSelection, dataInputs ? dataInputs : wasm.ErgoBoxes.from_boxes_json([]))
 }
 
+/**
+ * Creates commitment from observation information and the watcher WID
+ * @param observation
+ * @param WID
+ */
 export const commitmentFromObservation = (observation: Observation, WID: string): Uint8Array => {
     const content = Buffer.concat([
         Buffer.from(observation.sourceTxId, "hex"),
@@ -129,6 +161,10 @@ export const commitmentFromObservation = (observation: Observation, WID: string)
     return blake2b(32).update(content).digest()
 }
 
+/**
+ * Produces the contract hash
+ * @param contract
+ */
 export const contractHash = (contract: wasm.Contract): Buffer => {
     return Buffer.from(
         blake2b(32)

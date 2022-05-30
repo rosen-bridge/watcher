@@ -10,18 +10,28 @@ export const nodeApi = axios.create({
 })
 
 export class ErgoNetworkApi {
+    /**
+     * returns current network height
+     */
     static getCurrentHeight = (): Promise<number> => {
         return nodeApi.get<{fullHeight: number}>(`/info`).then(
             res => res.data.fullHeight
         )
     }
 
+    /**
+     * returns 10 last block header
+     */
     static getLastBlockHeader = () => {
         return nodeApi.get("/blocks/lastHeaders/10").then(
             res => res.data
         )
     }
 
+    /**
+     * submits a signed transaction
+     * @param tx signed transaction
+     */
     static sendTx = (tx: any) => {
         return nodeApi.post("/transactions", JSON.parse(tx)).then(response => ({"txId": response.data as string})).catch(exp => {
             console.log(exp.response.data)
@@ -29,6 +39,9 @@ export class ErgoNetworkApi {
         });
     };
 
+    /**
+     * creates the state context from last block headers
+     */
     static getErgoStateContext = async (): Promise<wasm.ErgoStateContext> => {
         const blockHeaderJson = await this.getLastBlockHeader();
         const blockHeaders = wasm.BlockHeaders.from_json(blockHeaderJson);
@@ -36,6 +49,10 @@ export class ErgoNetworkApi {
         return new wasm.ErgoStateContext(preHeader, blockHeaders);
     }
 
+    /**
+     * Send the contract script to the node and returns the compiled contract
+     * @param script
+     */
     static pay2ScriptAddress = (script: string): Promise<string> => {
         return nodeApi.post("/script/p2sAddress", {source: script}).then(
             res => res.data.address

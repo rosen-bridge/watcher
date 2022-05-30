@@ -18,6 +18,13 @@ export class boxes {
         return Promise.resolve([wasm.ErgoBox.from_json(WIDBox)])
     }
 
+    /**
+     * creates a new permit box with required data
+     * @param value
+     * @param height
+     * @param RWTCount
+     * @param WID
+     */
     static createPermit = (value: number, height: number, RWTCount: number, WID: string): wasm.ErgoBoxCandidate => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
@@ -30,6 +37,15 @@ export class boxes {
         return builder.build()
     }
 
+    /**
+     * creates a new commitment box with the required information on registers
+     * @param value
+     * @param height
+     * @param WID
+     * @param requestId
+     * @param eventDigest
+     * @param permitScriptHash
+     */
     static createCommitment = (value: number, height: number, WID: string, requestId: string, eventDigest: Uint8Array, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
         const contract = contracts.addressCache.commitmentContract!
         const builder = new wasm.ErgoBoxCandidateBuilder(
@@ -46,6 +62,12 @@ export class boxes {
         return builder.build()
     }
 
+    /**
+     * creates user payment box, it should contain the WID token and collected rewards
+     * @param value
+     * @param height
+     * @param tokens
+     */
     static createPayment = (value: number, height: number, tokens: Array<wasm.Token>): wasm.ErgoBoxCandidate => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),

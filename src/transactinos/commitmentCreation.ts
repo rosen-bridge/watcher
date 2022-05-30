@@ -20,17 +20,32 @@ export class commitmentCreation {
         this._requiredConfirmation = confirmation
     }
 
-    createCommitmentTx = async (WID: string, requestId: string, eventDigest: Uint8Array, permits: Array<wasm.ErgoBox>, WIDBox: wasm.ErgoBox): Promise<string> => {
+    /**
+     * creates the commitment transaction and sends it to the network
+     * @param WID
+     * @param requestId
+     * @param eventDigest
+     * @param permits
+     * @param WIDBox
+     */
+    createCommitmentTx = async (WID: string,
+                                requestId: string,
+                                eventDigest: Uint8Array,
+                                permits: Array<wasm.ErgoBox>,
+                                WIDBox: wasm.ErgoBox): Promise<string> => {
         const height = await ErgoNetworkApi.getCurrentHeight()
         const permitHash = contractHash(contracts.addressCache.permitContract!)
         const outCommitment = boxes.createCommitment(minBoxVal, height, WID, requestId, eventDigest, permitHash)
-        const RWTCount: number = permits.map(permit => permit.tokens().get(0).amount().as_i64().as_num()).reduce((a, b) => a + b, 0)
+        const RWTCount: number = permits.map(permit =>
+            permit.tokens().get(0).amount().as_i64().as_num())
+            .reduce((a, b) => a + b, 0)
         const outPermit = boxes.createPermit(minBoxVal, height, RWTCount - 1, WID)
-        const paymentValue = permits.map(permit => permit.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
+        const rewardValue = permits.map(permit => permit.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
         // TODO: Complete Watcher Payment (Token rewards)
         // Don't forget to consider WIDBox assets
         // const paymentTokens: Array<wasm.Token> = permits.map(permit => extractTokens(permit.tokens())).
-        const watcherPayment = boxes.createPayment(WIDBox.value().as_i64().as_num() + paymentValue - txFee - 2 * minBoxVal, height, [])
+        const paymentValue = WIDBox.value().as_i64().as_num() + rewardValue - txFee - 2 * minBoxVal
+        const watcherPayment = boxes.createPayment(paymentValue, height, [])
         const inputBoxes = new wasm.ErgoBoxes(WIDBox);
         permits.forEach(permit => inputBoxes.add(permit))
         try {
@@ -51,13 +66,17 @@ export class commitmentCreation {
         }
     }
 
+    /**
+     * Extracts the confirmed observations and creates the commitment transaction
+     * Finally saves the created commitment in the database
+     */
     job = async () => {
         const observations = await this._dataBase.getConfirmedObservations(this._requiredConfirmation)
         for (const observation of observations) {
             const commitment = commitmentFromObservation(observation, WID)
             const permits = await boxes.getPermits(WID)
             const WIDBox = await boxes.getWIDBox(WID)
-            const txId = await this.createCommitmentTx(WID, observation.requestId, new Uint8Array(), permits, WIDBox[0])
+            const txId = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox[0])
             await this._dataBase.saveCommitment({
                 eventId: observation.requestId,
                 commitment: commitment.toString(),
