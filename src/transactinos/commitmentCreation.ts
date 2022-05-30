@@ -5,6 +5,7 @@ import config from "config";
 import { boxes } from "../ergoUtils/boxes";
 import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergoUtils/ergoUtils";
 import { NetworkDataBase } from "../models/networkModel";
+import { boxCreationError } from "../utils/utils";
 
 const minBoxVal = parseInt(config.get?.('ergo.minBoxVal'))
 const txFee = parseInt(config.get?.('ergo.txFee'))
@@ -32,14 +33,22 @@ export class commitmentCreation {
         const watcherPayment = boxes.createPayment(WIDBox.value().as_i64().as_num() + paymentValue - txFee - 2 * minBoxVal, height, [])
         const inputBoxes = new wasm.ErgoBoxes(WIDBox);
         permits.forEach(permit => inputBoxes.add(permit))
-        const signed = await createAndSignTx(
-            config.get("ergo.secret"),
-            inputBoxes,
-            [outPermit, outCommitment, watcherPayment],
-            height
-        )
-        await ErgoNetworkApi.sendTx(signed.to_json())
-        return signed.id().to_str()
+        try {
+            const signed = await createAndSignTx(
+                config.get("ergo.secret"),
+                inputBoxes,
+                [outPermit, outCommitment, watcherPayment],
+                height
+            )
+            await ErgoNetworkApi.sendTx(signed.to_json())
+            return signed.id().to_str()
+        } catch (e) {
+            if (e instanceof boxCreationError) {
+                console.log("Transaction input and output doesn't match. Input boxes assets must be more or equal to the outputs assets.")
+            }
+            console.log("Skipping the commitment creation.")
+            return ""
+        }
     }
 
     job = async () => {

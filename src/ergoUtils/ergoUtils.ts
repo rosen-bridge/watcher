@@ -4,15 +4,15 @@ import config from "config";
 import { ErgoNetworkApi } from "./networkApi";
 import { Buffer } from "buffer";
 import { Observation } from "../objects/interfaces";
-import { bigIntToUint8Array } from "../utils/utils";
+import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
 let blake2b = require('blake2b')
 
 const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');
 const txFee = parseInt(config.get?.('ergo.txFee'))
 
-export const extractBoxes = (tx: wasm.Transaction): Array<ErgoBox> => {
-    return Array(tx.outputs().len()).fill("")
-        .map((item, index) => tx.outputs().get(index))
+export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<ErgoBox> => {
+    return Array(boxes.len()).fill("")
+        .map((item, index) => boxes.get(index))
 }
 export const extractTokens = (tokens: wasm.Tokens): Array<wasm.Token> => {
     return Array(tokens.len()).fill("")
@@ -34,10 +34,9 @@ export const strToUint8Array = (str: string): Uint8Array => {
     return new Uint8Array(Buffer.from(str, "hex"))
 }
 
-const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCandidate>, height: number, secret: wasm.SecretKey, contract?: wasm.Contract): wasm.ErgoBoxCandidate | null => {
+export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCandidate>, height: number, secret: wasm.SecretKey, contract?: wasm.Contract): wasm.ErgoBoxCandidate | null => {
     const processBox = (box: wasm.ErgoBox | wasm.ErgoBoxCandidate, tokens: { [id: string]: number; }, sign: number) => {
-        Array(box.tokens().len()).fill("").forEach((notUsed, tokenIndex) => {
-            const token = box.tokens().get(tokenIndex);
+        extractTokens(box.tokens()).forEach(token => {
             if (!tokens.hasOwnProperty(token.id().to_str())) {
                 tokens[token.id().to_str()] = token.amount().as_i64().as_num() * sign
             } else {
@@ -47,16 +46,14 @@ const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCa
     }
     let value: number = 0;
     let tokens: { [id: string]: number; } = {}
-    Array(boxes.len()).fill("").forEach((item, index) => {
-        const box = boxes.get(index);
+    extractBoxes(boxes).forEach(box => {
         value += box.value().as_i64().as_num()
         processBox(box, tokens, 1)
-    });
+    })
     candidates.forEach(candidate => {
         value -= candidate.value().as_i64().as_num()
         processBox(candidate, tokens, -1)
     })
-    const changeTokens = Object.entries(tokens).filter(([key, value]) => value > 0)
     if (value > txFee + wasm.BoxValue.SAFE_USER_MIN().as_i64().as_num()) {
         const change = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str((value - txFee).toString())),
@@ -66,9 +63,19 @@ const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCa
         Object.entries(tokens).forEach(([key, value]) => {
             if (value > 0) {
                 change.add_token(wasm.TokenId.from_str(key), wasm.TokenAmount.from_i64(wasm.I64.from_str(value.toString())))
+            } else if (value < 0) {
+                throw new boxCreationError
             }
         })
         return change.build()
+    } else if (value < 0) {
+        throw new boxCreationError
+    } else {
+        Object.entries(tokens).forEach(([key, value]) => {
+            if (value != 0) {
+                throw new boxCreationError
+            }
+        })
     }
     return null
 }

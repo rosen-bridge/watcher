@@ -15,7 +15,8 @@ export default {
         sendTxTimeout: 10000,
         txFee: 1000000,
         minBoxVal: 1000000,
-        address: "",
+        address: "9fumSiEfuizh81u1HX2iVJAT7rqbbMmjiZZjgEFuevTShfVtWar",
+        secret: "4d94b2b1dbf57501af9de6cd2c4f3f07a85b85de3b82de1c11c7231058c45dd0",
     },
     commitmentScanner: {
         interval: 10,
