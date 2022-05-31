@@ -163,5 +163,11 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
             }
         })
     }
+
+    commitmentsByEventId = async (eventId: string): Promise<Array<ObservedCommitmentEntity>> => {
+        return await this.commitmentRepository.createQueryBuilder("observed_commitment_entity")
+            .where("observed_commitment_entity.eventId == :eventId", {eventId})
+            .execute()
+    }
 }
 

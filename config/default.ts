@@ -17,6 +17,7 @@ export default {
         minBoxVal: 1000000,
         address: "9fumSiEfuizh81u1HX2iVJAT7rqbbMmjiZZjgEFuevTShfVtWar",
         secret: "4d94b2b1dbf57501af9de6cd2c4f3f07a85b85de3b82de1c11c7231058c45dd0",
+        commitmentLimit: 10
     },
     commitmentScanner: {
         interval: 10,

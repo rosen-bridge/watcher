@@ -193,5 +193,10 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         return error;
     }
 
+    getCreatedCommitments = async (): Promise<Array<CommitmentEntity>> => {
+        return await this.commitmentRepository.createQueryBuilder("commitment_entity")
+            .where("commitment_entity.flag == 'created'")
+            .execute()
+    }
 }
 
