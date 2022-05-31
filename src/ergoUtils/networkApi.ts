@@ -60,6 +60,10 @@ export class ErgoNetworkApi {
         )
     }
 
+    /**
+     * Returns the box by its id
+     * @param id
+     */
     static boxById = (id: string): Promise<ErgoBox> => {
         return nodeApi.get(`utxo/byId/${id}`).then(
             res => res.data

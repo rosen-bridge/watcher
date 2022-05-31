@@ -89,6 +89,13 @@ export class boxes {
         return builder.build()
     }
 
+    /**
+     * Creates trigger event box with the aggregated information of WIDs
+     * @param value
+     * @param height
+     * @param WIDs
+     * @param observation
+     */
     static createTriggerEvent = (value: number, height: number, WIDs: Array<Uint8Array>, observation: Observation) => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),

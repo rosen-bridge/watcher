@@ -19,6 +19,13 @@ export class commitmentReveal{
     _commitmentDataBase: CommitmentDataBase
     _observationDataBase: NetworkDataBase
 
+    /**
+     * creates and sends the trigger event transaction
+     * @param commitmentBoxes
+     * @param observation
+     * @param WIDs
+     * @param feeBox
+     */
     triggerEventCreationTx = async (commitmentBoxes: Array<ErgoBox>, observation: Observation, WIDs: Array<Uint8Array>, feeBox: ErgoBox): Promise<string> => {
         const height = await ErgoNetworkApi.getCurrentHeight()
         const triggerEvent = await boxes.createTriggerEvent(commitmentBoxes.length* minBoxValue, height, WIDs, observation)
@@ -42,21 +49,34 @@ export class commitmentReveal{
         }
     }
 
-    commitmentCheck = async (commitments: Array<ObservedCommitmentEntity>, observation: Observation, eventDigest: string): Promise<Boolean> => {
+    /**
+     * Returns the valid commitments with the observation
+     * It reproduces the commitments with their WID and check to match the saved commitment
+     * @param commitments
+     * @param observation
+     */
+    commitmentCheck = (commitments: Array<ObservedCommitmentEntity>, observation: Observation): Array<ObservedCommitmentEntity> => {
+        const result: Array<ObservedCommitmentEntity> = []
         commitments.forEach(commitment => {
-                if (commitmentFromObservation(observation, commitment.WID).toString() != eventDigest) return false
+                if (commitmentFromObservation(observation, commitment.WID).toString() == commitment.commitment)
+                    result.push(commitment)
             }
         )
-        return true
+        return result
     }
 
+    /**
+     * Gets the created commitments and check if required number of commitments created in the network
+     * If the number of valid commitments are more than the required commitments it generates the trigger event
+     */
     job = async () => {
         const createdCommitments = await this._observationDataBase.getCreatedCommitments()
         for (const commitment of createdCommitments) {
             const observedCommitments = await this._commitmentDataBase.commitmentsByEventId(commitment.eventId)
             if(observedCommitments.length >= commitmentLimit) {
-                if(await this.commitmentCheck(observedCommitments, commitment.observation, commitment.commitment)){
-                    const commitmentBoxes = observedCommitments.map(async(commitment) => {
+                const validCommitments = this.commitmentCheck(observedCommitments, commitment.observation)
+                if(validCommitments.length >= commitmentLimit){
+                    const commitmentBoxes = validCommitments.map(async(commitment) => {
                         return await ErgoNetworkApi.boxById(commitment.commitmentBoxId)
                     })
                     Promise.all(commitmentBoxes).then(async(cBoxes) => {
