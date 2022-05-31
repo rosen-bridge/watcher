@@ -8,6 +8,7 @@ import { contractHash } from "../ergoUtils/ergoUtils";
 interface AddressCache {
     fraud?: string
     eventTrigger?: string
+    eventTriggerContract?: wasm.Contract
     commitment?: string
     commitmentContract?: wasm.Contract
     permit?: string
@@ -31,8 +32,8 @@ export class contracts {
             .replace("FRAUD_SCRIPT_HASH", fraudHash)
             .replace("CLEANUP_CONFIRMATION", config.get?.('commitmentScanner.cleanupConfirmation'))
         this.addressCache.eventTrigger = await ErgoNetworkApi.pay2ScriptAddress(replacedEventTriggerScript)
-        const eventTriggerContract = wasm.Contract.pay_to_address(wasm.Address.from_base58(this.addressCache.eventTrigger));
-        const eventTriggerHash = contractHash(eventTriggerContract).toString("base64")
+        this.addressCache.eventTriggerContract = wasm.Contract.pay_to_address(wasm.Address.from_base58(this.addressCache.eventTrigger));
+        const eventTriggerHash = contractHash(this.addressCache.eventTriggerContract).toString("base64")
 
         const replacedCommitmentScript = scripts.commitmentScript
             .replace("EVENT_TRIGGER_SCRIPT_HASH", eventTriggerHash)
