@@ -12,6 +12,9 @@ import {
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { PermitBox, RepoBox, RSNBox, WIDBox } from "../objects/ergo";
 
+/**
+ * Transaction class used by watcher to generate transaction for ergo network
+ */
 export class Transaction {
 
     ergoNetwork: ErgoNetwork;
@@ -28,6 +31,12 @@ export class Transaction {
     repoAddressContract: Contract;
     repoAddress: Address;
 
+    /**
+     * constructor
+     * @param rosenConfig hard coded Json of rosen config
+     * @param userAddress string
+     * @param userSecret  string
+     */
     constructor(
         rosenConfig: {
             RSN: string,
@@ -56,6 +65,12 @@ export class Transaction {
         this.fee = ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(rosenConfig.fee));
     }
 
+    /**
+     * generating permit box used in returning permit and getting permit
+     * @param height
+     * @param RWTCount
+     * @param WID
+     */
     createPermitBox = async (
         height: number,
         RWTCount: string,
@@ -81,6 +96,15 @@ export class Transaction {
 
     }
 
+    /**
+     * user output box used in getting permit transaction by watcher
+     * @param height
+     * @param address
+     * @param amount
+     * @param tokenId issued token for the getting permit transaction
+     * @param tokenAmount
+     * @param changeTokens other tokens in the input of transaction
+     */
     createUserBoxCandidate = async (
         height: number,
         address: string,
@@ -109,13 +133,14 @@ export class Transaction {
         return userBoxBuilder.build();
     }
 
+    /**
+     * checks user boxes to see if there is any input boxes that lock tokens that saved
+     *  in the repo box registers or not
+     * @param users
+     */
     checkWID = (users: Array<Uint8Array>): Array<Promise<boolean>> => {
-        console.log("teeeeeeeeeeeeeeeeeeeeest")
-        console.log(this.userAddress.to_ergo_tree().to_base16_bytes())
         return users.map(async (id) => {
             const wid = uint8ArrayToHex(id);
-            console.log(wid)
-            console.log(await this.ergoNetwork.getBoxesForAddress(this.userAddress.to_ergo_tree().to_base16_bytes(),0,1))
             try {
                 const box = await (
                     this.ergoNetwork.getBoxWithToken(
@@ -123,15 +148,22 @@ export class Transaction {
                         wid,
                     )
                 );
-                console.log(box);
                 return true;
             } catch (error) {
                 return false;
             }
         });
     }
-
-    private createRepo = async (
+    /**
+     * create repo box that used in output of permit transactions
+     * @param height
+     * @param RWTCount
+     * @param RSNCount
+     * @param users
+     * @param userRWT
+     * @param R7
+     */
+    createRepo = async (
         height: number,
         RWTCount: string,
         RSNCount: string,
@@ -169,6 +201,9 @@ export class Transaction {
         return repoBuilder.build();
     }
 
+    /**
+     * generating returning permit transaction and send it to the network
+     */
     returnPermit = async () => {
         const height = await this.ergoNetwork.getHeight();
 
@@ -290,17 +325,22 @@ export class Transaction {
             inputBoxSelection,
             outputBoxes,
             height,
-            this.minBoxValue,
+            this.fee,
             this.userAddress,
             this.minBoxValue,
         );
 
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
-        // await this.ergoNetwork.sendTx(signedTx.to_json());
+        await this.ergoNetwork.sendTx(signedTx.to_json());
         return signedTx.id().to_str();
     }
 
-    private buildTxAndSign = async (builder: TxBuilder, inputBoxes: ErgoBoxes): Promise<ergoLib.Transaction> => {
+    /**
+     * get a unsigned transaction and sign it using watcher secret key
+     * @param builder
+     * @param inputBoxes
+     */
+    buildTxAndSign = async (builder: TxBuilder, inputBoxes: ErgoBoxes): Promise<ergoLib.Transaction> => {
         const tx = builder.build();
         const sks = new ergoLib.SecretKeys();
         const sk = ergoLib.SecretKey.dlog_from_bytes(strToUint8Array(this.userSecret));
@@ -311,7 +351,13 @@ export class Transaction {
         return wallet.sign_transaction(ctx, tx, inputBoxes, tx_data_inputs);
     }
 
-    private inputBoxesTokenMap = (inputBoxes: ErgoBoxes, offset: number = 0): Map<string, string> => {
+    /**
+     * generate a map of tokenId and amount from inputBoxes list with offset set to 0
+     *  by default
+     * @param inputBoxes
+     * @param offset
+     */
+    inputBoxesTokenMap = (inputBoxes: ErgoBoxes, offset: number = 0): Map<string, string> => {
         const changeTokens = new Map<string, string>();
         for (let i = offset; i < inputBoxes.len(); i++) {
             const boxTokens = inputBoxes.get(i).tokens();
@@ -328,7 +374,10 @@ export class Transaction {
         return changeTokens;
     }
 
-    private getRepoBox = async (): Promise<ergoLib.ErgoBox> => {
+    /**
+     * getting repoBox from network with tracking mempool transactions
+     */
+    getRepoBox = async (): Promise<ergoLib.ErgoBox> => {
         return await this.ergoNetwork.trackMemPool(new RepoBox(
             await (
                 this.ergoNetwork.getBoxWithToken(
@@ -339,6 +388,10 @@ export class Transaction {
         ).getErgoBox());
     }
 
+    /**
+     * getting watcher permit transaction
+     * @param RSNCount
+     */
     getPermit = async (RSNCount: string): Promise<string> => {
 
         const height = await this.ergoNetwork.getHeight();
@@ -353,6 +406,7 @@ export class Transaction {
                 )
             )
         ).getErgoBox();
+
 
         const repoBox = await this.getRepoBox();
 
@@ -375,7 +429,7 @@ export class Transaction {
                 (RWTCount * BigInt("-1")).toString()
             )
         );
-        const RSNTokenCount = repoBox.tokens().get(0).amount().as_i64().checked_add(
+        const RSNTokenCount = repoBox.tokens().get(2).amount().as_i64().checked_add(
             ergoLib.I64.from_str(
                 (RWTCount * BigInt("100")).toString()
             )
@@ -449,7 +503,6 @@ export class Transaction {
             changeTokens,
         );
 
-
         const inputBoxSelection = new BoxSelection(inputBoxes, new ErgoBoxAssetsDataList());
         const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
         outputBoxes.add(permitOut);
@@ -469,6 +522,9 @@ export class Transaction {
         return signedTx.id().to_str();
     }
 
+    /**
+     * checks if watcher has locked RSN or not
+     */
     watcherHasLocked = async (): Promise<boolean> => {
 
         const repoBox = await this.getRepoBox();

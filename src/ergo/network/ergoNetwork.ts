@@ -36,18 +36,33 @@ export class ErgoNetwork {
     getBoxesForAddress = async (tree: string, offset = 0, limit = 100): Promise<AddressBoxes> => {
         return explorerApi.get<AddressBoxes>(
             `/api/v1/boxes/unspent/byErgoTree/${tree}`,
-            {params:{offset: offset, limit: limit},transformResponse: data => JsonBI.parse(data)}
+            {params: {offset: offset, limit: limit}, transformResponse: data => JsonBI.parse(data)}
         ).then(
-            res => {console.log(res.data);return res.data}
+            res => res.data
         );
     }
 
-    getBoxesByAddress = (address: string) => {
-        return explorerApi.get(`/api/v1/boxes/unspent/byAddress/${address}`).then(res => JsonBI.parse(res.data))
+    getBoxesByAddress = (address: string): Promise<Array<string>> => {
+        console.log(address)
+        return explorerApi.get<AddressBoxes>(
+            `/api/v1/boxes/unspent/byAddress/${address}`,
+            {transformResponse: data => JsonBI.parse(data)}
+        ).then((res) => {
+                let boxes: Array<string> = [];
+                if (res.data.total > 0) {
+                    res.data.items.forEach(box => {
+                        boxes.push(JsonBI.stringify(box))
+                    })
+                }
+                return boxes;
+            }
+        );
     }
 
     getLastBlockHeader = () => {
-        return nodeClient.get("/blocks/lastHeaders/10").then(
+        return nodeClient.get(
+            "/blocks/lastHeaders/10",
+        ).then(
             res => res.data
         )
     }
@@ -57,7 +72,6 @@ export class ErgoNetwork {
             console.log(exp.response.data)
         });
     };
-
 
     getErgoStateContext = async (): Promise<ergoLib.ErgoStateContext> => {
         const blockHeaderJson = await this.getLastBlockHeader();
@@ -74,7 +88,6 @@ export class ErgoNetwork {
     ): Promise<{ covered: boolean, boxes: Array<ergoLib.ErgoBox> }> => {
         let res = []
         const boxesItems = await this.getBoxesForAddress(tree, 0, 1)
-        console.log(boxesItems.items[0].boxId)
         const total = boxesItems.total;
         let offset = 0;
         const bigIntMax = (a: bigint, b: bigint) => a > b ? a : b;
@@ -104,12 +117,14 @@ export class ErgoNetwork {
             }
             offset += 10;
         }
-        return {boxes: res.map(box => ergoLib.ErgoBox.from_json(JsonBI.stringify(box))), covered: !remaining()}
+        return {
+            boxes: res.map(box => ergoLib.ErgoBox.from_json(JsonBI.stringify(box).toString())),
+            covered: !remaining()
+        }
 
     }
 
     getBoxWithToken = async (address: Address, tokenId: string): Promise<JSON> => {
-        console.log(tokenId)
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
             0n,
@@ -126,10 +141,8 @@ export class ErgoNetwork {
             }
         )
         if (!box.covered) {
-            console.log("not covered")
             throw Error("box with Token:" + tokenId + " not found")
         }
-        console.log(box)
         return JsonBI.parse(box.boxes[0].to_json());
     }
 
@@ -149,28 +162,35 @@ export class ErgoNetwork {
     trackMemPool = async (box: ergoLib.ErgoBox): Promise<ergoLib.ErgoBox> => {
         const address: string = ergoTreeToBase58Address(box.ergo_tree())
         let memPoolBoxesMap = new Map<string, ergoLib.ErgoBox>();
-        (await this.getMemPoolTxForAddress(address).then(res => {
-            return res.items
-        })).forEach((tx: ErgoTx) => {
-            for (let inBox of tx.inputs) {
-                if (inBox.address === address) {
-                    for (let outBox of tx.outputs) {
-                        if (outBox.address === address) {
-                            memPoolBoxesMap.set(inBox.boxId, ergoLib.ErgoBox.from_json(JsonBI.stringify(outBox)))
-                            break
-                        }
-                    }
-                    break
-                }
+        const transactions = await this.getMemPoolTxForAddress(address).then(
+            res => {
+                return res.items
             }
-        })
+        );
+        if (transactions !== undefined) {
+            transactions.forEach((tx: ErgoTx) => {
+                for (let inBox of tx.inputs) {
+                    if (inBox.address === address) {
+                        for (let outBox of tx.outputs) {
+                            if (outBox.address === address) {
+                                memPoolBoxesMap.set(inBox.boxId, ergoLib.ErgoBox.from_json(JsonBI.stringify(outBox)))
+                                break
+                            }
+                        }
+                        break
+                    }
+                }
+            })
+        }
         let lastBox: ergoLib.ErgoBox = box
         while (memPoolBoxesMap.has(lastBox.box_id().to_str())) lastBox = memPoolBoxesMap.get(lastBox.box_id().to_str())!
         return lastBox
     }
 
     getMemPoolTxForAddress = async (address: string) => {
-        return await explorerApi.get<{ items: Array<ErgoTx>, total: number }>(`/api/v1/mempool/transactions/byAddress/${address}`).then(res => res.data)
+        return await explorerApi.get<{ items: Array<ErgoTx> | undefined, total: number }>(
+            `/api/v1/mempool/transactions/byAddress/${address}`
+        ).then(res => res.data)
     }
 
 }

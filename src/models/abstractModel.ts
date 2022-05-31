@@ -1,10 +1,7 @@
-import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
-import { BlockEntity } from "../entities/BlockEntity";
-import { CommitmentEntity } from "../entities/CommitmentEntity";
-import { ObservationEntity } from "../entities/ObservationEntity";
-import { Block, Observation } from "../objects/interfaces";
+import { DataSource, DeleteResult, Repository } from "typeorm";
+import { Block } from "../objects/interfaces";
 
-export abstract class AbstractDataBase <BlockT, DataT>{
+export abstract class AbstractDataBase<BlockT, DataT> {
     abstract dataSource: DataSource;
     abstract blockRepository: Repository<BlockT>;
 
@@ -28,13 +25,13 @@ export abstract class AbstractDataBase <BlockT, DataT>{
      * @param data
      * @return Promise<boolean>
      */
-    abstract saveBlock (height: number, blockHash: string, data: DataT): Promise<boolean>;
+    abstract saveBlock(height: number, blockHash: string, data: DataT): Promise<boolean>;
 
     /**
      * get block hash and height
      * @param height
      * @return Promise<Block|undefined>
      */
-    abstract getBlockAtHeight (height: number): Promise<Block | undefined>;
+    abstract getBlockAtHeight(height: number): Promise<Block | undefined>;
 }
 
