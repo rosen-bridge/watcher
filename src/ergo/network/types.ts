@@ -19,7 +19,7 @@ type Asset = {
     name: string,
 }
 
-interface ErgoBoxJson  {
+export interface ErgoBoxJson  {
     boxId: string,
     address: string,
     value: bigint,

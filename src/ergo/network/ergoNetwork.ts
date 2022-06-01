@@ -3,20 +3,19 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { Info } from "../../objects/ergo";
 import { Address, ErgoBox } from "ergo-lib-wasm-nodejs";
 import { ergoTreeToBase58Address } from "../../api/ergoUtils";
-import { AddressBoxes, ErgoTx } from "./types";
+import { AddressBoxes, ErgoBoxJson, ErgoTx } from "./types";
 import { JsonBI } from "../../network/parser";
+import { initConfig } from "../../../config/config";
 
-
-const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
-const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
+const config = initConfig();
 
 export const explorerApi = axios.create({
-    baseURL: EXPLORER_URL,
+    baseURL: config.explorerUrl,
     timeout: 8000,
 });
 
 export const nodeClient = axios.create({
-    baseURL: NODE_URL,
+    baseURL: config.nodeUrl,
     timeout: 8000,
     headers: {"Content-Type": "application/json"}
 });
@@ -43,7 +42,6 @@ export class ErgoNetwork {
     }
 
     getBoxesByAddress = (address: string): Promise<Array<string>> => {
-        console.log(address)
         return explorerApi.get<AddressBoxes>(
             `/api/v1/boxes/unspent/byAddress/${address}`,
             {transformResponse: data => JsonBI.parse(data)}
@@ -84,9 +82,9 @@ export class ErgoNetwork {
         tree: string,
         amount: bigint,
         covering: { [id: string]: bigint } = {},
-        filter: (box: any) => boolean = () => true
+        filter: (box: wasm.ErgoBox) => boolean = () => true
     ): Promise<{ covered: boolean, boxes: Array<wasm.ErgoBox> }> => {
-        let res = []
+        let res: Array<wasm.ErgoBox> = []
         const boxesItems = await this.getBoxesForAddress(tree, 0, 1)
         const total = boxesItems.total;
         let offset = 0;
@@ -100,17 +98,21 @@ export class ErgoNetwork {
             return tokenRemain + bigIntMax(amount, 0n) > 0;
         }
         while (offset < total && remaining()) {
-            const boxes = await this.getBoxesForAddress(tree, offset, 10)
-            for (let box of boxes.items) {
+            const boxes = await this.getBoxesForAddress(tree, offset, 10);
+            const ergoBoxes = wasm.ErgoBoxes.from_boxes_json(boxes.items.map(box => JsonBI.stringify(box).toString()));
+            for (let i = 0; i < ergoBoxes.len(); i++) {
+                const box = ergoBoxes.get(i);
                 if (filter(box)) {
                     res.push(box);
-                    amount -= box.value;
-                    if (box.assets) {
-                        box.assets.map((asset: any) => {
-                            if (covering.hasOwnProperty(asset.tokenId)) {
-                                covering[asset.tokenId] -= asset.amount;
+                    amount -= BigInt(box.value().as_i64().to_str());
+                    if (box.tokens().len() > 0) {
+                        for (let j = 0; j < box.tokens().len(); j++) {
+                            const tokenId = box.tokens().get(j).id().to_str();
+                            const tokenAmount = BigInt(box.tokens().get(j).amount().as_i64().to_str());
+                            if (covering.hasOwnProperty(tokenId)) {
+                                covering[tokenId] -= tokenAmount;
                             }
-                        })
+                        }
                     }
                     if (!remaining()) break
                 }
@@ -118,32 +120,32 @@ export class ErgoNetwork {
             offset += 10;
         }
         return {
-            boxes: res.map(box => wasm.ErgoBox.from_json(JsonBI.stringify(box).toString())),
+            boxes: res,
             covered: !remaining()
         }
 
     }
 
-    getBoxWithToken = async (address: Address, tokenId: string): Promise<JSON> => {
+    getBoxWithToken = async (address: Address, tokenId: string): Promise<wasm.ErgoBox> => {
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
             0n,
             {[tokenId]: 1n},
             box => {
-                if (!box.assets) {
+                if (box.tokens().len() === 0) {
                     return false
                 }
                 let found = false
-                box.assets.forEach((item: { tokenId: string }) => {
-                    if (item.tokenId === tokenId) found = true
-                });
+                for (let i = 0; i < box.tokens().len(); i++) {
+                    if (box.tokens().get(i).id().to_str() === tokenId) found = true;
+                }
                 return found
             }
         )
         if (!box.covered) {
             throw Error("box with Token:" + tokenId + " not found")
         }
-        return JsonBI.parse(box.boxes[0].to_json());
+        return box.boxes[0]
     }
 
     getErgBox = async (address: Address, amount: bigint, filter: (box: any) => boolean = () => true): Promise<Array<ErgoBox>> => {
@@ -162,11 +164,7 @@ export class ErgoNetwork {
     trackMemPool = async (box: wasm.ErgoBox): Promise<wasm.ErgoBox> => {
         const address: string = ergoTreeToBase58Address(box.ergo_tree())
         let memPoolBoxesMap = new Map<string, wasm.ErgoBox>();
-        const transactions = await this.getMemPoolTxForAddress(address).then(
-            res => {
-                return res.items
-            }
-        );
+        const transactions = await this.getMemPoolTxForAddress(address).then(res => res.items);
         if (transactions !== undefined) {
             transactions.forEach((tx: ErgoTx) => {
                 for (let inBox of tx.inputs) {

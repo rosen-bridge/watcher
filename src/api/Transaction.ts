@@ -1,7 +1,6 @@
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
-import { PermitBox, RepoBox, RSNBox, WIDBox } from "../objects/ergo";
 import { Contracts } from "./contractAddresses";
 import { rosenConfig } from "./rosenConfig";
 
@@ -216,14 +215,12 @@ export class Transaction {
         const height = await this.ergoNetwork.getHeight();
 
         //TODO: permit box should grab from the network with respect to the value in the register
-        const permitBox = new PermitBox(
-            await (
-                this.ergoNetwork.getBoxWithToken(
-                    this.watcherPermitAddress,
-                    this.RWTTokenId.to_str(),
-                )
+        const permitBox = await (
+            this.ergoNetwork.getBoxWithToken(
+                this.watcherPermitAddress,
+                this.RWTTokenId.to_str(),
             )
-        ).getErgoBox();
+        );
         const repoBox = await this.getRepoBox();
 
         const users = repoBox.register_value(4)?.to_coll_coll_byte();
@@ -242,14 +239,12 @@ export class Transaction {
             throw new Error("You don't have locked any RSN token");
         }
 
-        const widBox = new WIDBox(
-            await (
-                this.ergoNetwork.getBoxWithToken(
-                    this.userAddress,
-                    WID,
-                )
+        const widBox = await (
+            this.ergoNetwork.getBoxWithToken(
+                this.userAddress,
+                WID,
             )
-        ).getErgoBox();
+        )
 
         const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array();
         if (usersCount === undefined) {
@@ -416,14 +411,14 @@ export class Transaction {
      * getting repoBox from network with tracking mempool transactions
      */
     getRepoBox = async (): Promise<wasm.ErgoBox> => {
-        return await this.ergoNetwork.trackMemPool(new RepoBox(
+        return await this.ergoNetwork.trackMemPool(
             await (
                 this.ergoNetwork.getBoxWithToken(
                     this.repoAddress,
                     this.RepoNFTId.to_str()
                 )
             )
-        ).getErgoBox());
+        )
     }
 
     /**
@@ -444,14 +439,12 @@ export class Transaction {
 
         const RWTCount = BigInt(RSNCount) / BigInt(R6.to_i64_str_array()[0]);
 
-        const RSNInput = new RSNBox(
-            await (
-                this.ergoNetwork.getBoxWithToken(
-                    this.userAddress,
-                    this.RSN.to_str()
-                )
+        const RSNInput = await (
+            this.ergoNetwork.getBoxWithToken(
+                this.userAddress,
+                this.RSN.to_str()
             )
-        ).getErgoBox();
+        );
 
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte();
         if (users === undefined) {

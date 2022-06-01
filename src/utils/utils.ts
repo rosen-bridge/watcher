@@ -1,5 +1,5 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import {ErgoBox} from "ergo-lib-wasm-nodejs";
+import { ErgoBox } from "ergo-lib-wasm-nodejs";
 import config from "config";
 
 const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');
@@ -13,7 +13,7 @@ export const strToUint8Array = (str: string): Uint8Array => {
 }
 
 export const uint8ArrayToHex = (buffer: Uint8Array): string => {
-    return [...buffer].map(b => b.toString(16).padStart(2, "0")).join("");
+    return Buffer.from(buffer).toString('hex');
 }
 
 export const extractBoxes = (tx: wasm.Transaction): Array<ErgoBox> => {
