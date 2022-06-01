@@ -22,25 +22,45 @@ export const nodeClient = axios.create({
 
 export class ErgoNetwork {
 
+    /**
+     * generates pay 2 script address by script
+     * @param script
+     */
     pay2ScriptAddress = (script: string): Promise<string> => {
         return nodeClient.post("/script/p2sAddress", {source: script}).then(
             res => res.data.address
         )
     }
 
+    /**
+     * gets last block height
+     */
     getHeight = async (): Promise<number> => {
         return nodeClient.get<Info>("/info").then((res) => res.data.fullHeight);
     }
 
+    /**
+     * gets unspent boxes for an specific ergotree with default limit of 100 and offset 0
+     * @param tree
+     * @param offset
+     * @param limit
+     */
     getBoxesForAddress = async (tree: string, offset = 0, limit = 100): Promise<AddressBoxes> => {
         return explorerApi.get<AddressBoxes>(
             `/api/v1/boxes/unspent/byErgoTree/${tree}`,
-            {params: {offset: offset, limit: limit}, transformResponse: data => JsonBI.parse(data)}
+            {
+                params: {offset: offset, limit: limit},
+                transformResponse: data => JsonBI.parse(data)
+            }
         ).then(
             res => res.data
         );
     }
 
+    /**
+     * get unspent boxes for and specific address
+     * @param address
+     */
     getBoxesByAddress = (address: string): Promise<Array<string>> => {
         return explorerApi.get<AddressBoxes>(
             `/api/v1/boxes/unspent/byAddress/${address}`,
@@ -57,6 +77,9 @@ export class ErgoNetwork {
         );
     }
 
+    /**
+     * gets last 10 block headers
+     */
     getLastBlockHeader = () => {
         return nodeClient.get(
             "/blocks/lastHeaders/10",
@@ -65,12 +88,19 @@ export class ErgoNetwork {
         )
     }
 
+    /**
+     * sending a transaction(json) to the network
+     * @param tx
+     */
     sendTx = (tx: string) => {
         return nodeClient.post("/transactions", tx).then(response => ({"txId": response.data as string})).catch(exp => {
             console.log(exp.response.data)
         });
     };
 
+    /**
+     * getting state context used for signing transactions
+     */
     getErgoStateContext = async (): Promise<wasm.ErgoStateContext> => {
         const blockHeaderJson = await this.getLastBlockHeader();
         const blockHeaders = wasm.BlockHeaders.from_json(blockHeaderJson);
@@ -78,6 +108,14 @@ export class ErgoNetwork {
         return new wasm.ErgoStateContext(preHeader, blockHeaders);
     }
 
+    /**
+     * selects boxes for specific ergoTree that has enough amount of erg and tokens also with filter
+     *  for filtering undesired boxes
+     * @param tree
+     * @param amount
+     * @param covering
+     * @param filter
+     */
     getCoveringErgAndTokenForAddress = async (
         tree: string,
         amount: bigint,
@@ -126,6 +164,11 @@ export class ErgoNetwork {
 
     }
 
+    /**
+     * gets a box with a specific token(NFT)
+     * @param address
+     * @param tokenId
+     */
     getBoxWithToken = async (address: Address, tokenId: string): Promise<wasm.ErgoBox> => {
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
@@ -148,7 +191,14 @@ export class ErgoNetwork {
         return box.boxes[0]
     }
 
-    getErgBox = async (address: Address, amount: bigint, filter: (box: any) => boolean = () => true): Promise<Array<ErgoBox>> => {
+    /**
+     * gets covering boxes with or without tokens also with custom filter input for not to choose undesired
+     *  boxes
+     * @param address
+     * @param amount
+     * @param filter
+     */
+    getErgBox = async (address: Address, amount: bigint, filter: (box: wasm.ErgoBox) => boolean = () => true): Promise<Array<ErgoBox>> => {
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
             amount,
@@ -161,6 +211,10 @@ export class ErgoNetwork {
         return box.boxes;
     }
 
+    /**
+     * tracks mempool boxes used for chaining transactions
+     * @param box
+     */
     trackMemPool = async (box: wasm.ErgoBox): Promise<wasm.ErgoBox> => {
         const address: string = ergoTreeToBase58Address(box.ergo_tree())
         let memPoolBoxesMap = new Map<string, wasm.ErgoBox>();
@@ -185,6 +239,10 @@ export class ErgoNetwork {
         return lastBox
     }
 
+    /**
+     * gets mempool transaction for specific address
+     * @param address
+     */
     getMemPoolTxForAddress = async (address: string) => {
         return await explorerApi.get<{ items: Array<ErgoTx> | undefined, total: number }>(
             `/api/v1/mempool/transactions/byAddress/${address}`

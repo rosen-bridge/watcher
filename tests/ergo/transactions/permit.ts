@@ -3,6 +3,9 @@ import { Transaction } from "../../../src/api/Transaction";
 import { strToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
+import { initConfig } from "../../../config/config";
+
+const config = initConfig();
 
 describe("Watcher Permit Transactions", async () => {
     const transaction = await Transaction.init(
@@ -12,7 +15,7 @@ describe("Watcher Permit Transactions", async () => {
     );
 
     describe('createRepo', () => {
-        it("checks box data", async () => {
+        it("checks repoBox tokens order and count", async () => {
             const RWTCount = "100";
             const RSNCount = "1";
             const repoBox = await transaction.createRepo(
@@ -29,13 +32,12 @@ describe("Watcher Permit Transactions", async () => {
             expect(repoBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
             expect(repoBox.tokens().get(1).amount().as_i64().to_str()).to.be.equal(RWTCount);
             expect(repoBox.tokens().get(2).amount().as_i64().to_str()).to.be.equal(RSNCount);
-            //TODO:should completed
         });
     });
 
     describe("createPermitBox", () => {
 
-        it("checks box data", async () => {
+        it("checks permit box registers and tokens", async () => {
             const WID = strToUint8Array("4198da878b927fdd33e884d7ed399a3dbd22cf9d855ff5a103a50301e70d89fc");
             const RWTCount = "100";
             const permitBox = await transaction.createPermitBox(
@@ -47,7 +49,7 @@ describe("Watcher Permit Transactions", async () => {
             expect(permitBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
             expect(permitBox.tokens().len()).to.be.equal(1);
             expect(permitBox.tokens().get(0).amount().as_i64().to_str()).to.be.equal(RWTCount);
-            expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(rosenConfig.RWTId);
+            expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(config.RWTId);
             expect(permitBox.register_value(4)?.to_coll_coll_byte().length).to.be.equal(1);
             expect(permitBox.register_value(4)?.to_coll_coll_byte()[0]).to.be.eql(WID);
             expect(permitBox.register_value(5)?.to_byte_array()).to.be.eql(new Uint8Array([0]));
@@ -56,7 +58,7 @@ describe("Watcher Permit Transactions", async () => {
     });
 
     describe("createUserBoxCandidate", () => {
-        it("checks box data", async () => {
+        it("checks userbox tokens and value", async () => {
             const tokensId = [
                 "4198da878b927fdd33e884d7ed399a3dbd22cf9d855ff5a103a50301e70d89fc",
                 "00ac861f0a121f86691ad3d0e928604e3dc77c1f37e71099218dcb162667911b",
@@ -95,7 +97,7 @@ describe("Watcher Permit Transactions", async () => {
     });
 
     describe("checkWID", () => {
-        it("should be true in the array", async () => {
+        it("checks is there any wid in the usersBoxes", async () => {
 
             const usersHex = ["414441", "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8"];
             let users: Array<Uint8Array> = [];
@@ -124,7 +126,6 @@ describe("Watcher Permit Transactions", async () => {
             }
 
             const height = await transaction.ergoNetwork.getHeight();
-
 
             const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
                 transaction.minBoxValue,

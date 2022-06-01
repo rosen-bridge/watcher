@@ -3,7 +3,11 @@ import { strToUint8Array } from "../utils/utils";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { rosenConfig } from "./rosenConfig";
+import { initConfig } from "../../config/config";
+
 let blake2b = require('blake2b');
+
+const config = initConfig();
 
 export class Contracts {
     fraud?: string;
@@ -17,7 +21,7 @@ export class Contracts {
 
     constructor() {
         this.ergoNetwork = new ErgoNetwork();
-        this.repoNFT = strToUint8Array(rosenConfig.RepoNFT);
+        this.repoNFT = strToUint8Array(config.RepoNFT);
         this.guardNFT = strToUint8Array(rosenConfig.guardNFT);
     }
 

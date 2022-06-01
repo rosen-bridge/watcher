@@ -9,6 +9,8 @@ const INTERVAL: number | undefined = config.get?.('scanner.interval');
 const INITIAL_HEIGHT: number | undefined = config.get?.('scanner.initialBlockHeight');
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
+const RWT_ID: string | undefined = config.get?.('ergo.RWTId');
+const REPO_NFT: string | undefined = config.get?.('ergo.repoNFT');
 
 export interface BaseConfig {
     networkType: NetworkPrefix;
@@ -18,6 +20,8 @@ export interface BaseConfig {
     initialHeight: number;
     explorerUrl: string;
     nodeUrl: string;
+    RWTId: string;
+    RepoNFT: string;
 }
 
 export const initConfig = (): BaseConfig => {
@@ -59,6 +63,14 @@ export const initConfig = (): BaseConfig => {
         throw new Error("Ergo Node Url is not set in the config");
     }
 
+    if (RWT_ID === undefined) {
+        throw new Error("RWTId doesn't set in config file");
+    }
+
+    if (REPO_NFT === undefined) {
+        throw new Error("Repo NFT doesn't set in config file");
+    }
+
     return {
         networkType: networkType,
         secretKey: SECRET_KEY,
@@ -67,10 +79,12 @@ export const initConfig = (): BaseConfig => {
         initialHeight: INITIAL_HEIGHT,
         explorerUrl: EXPLORER_URL,
         nodeUrl: NODE_URL,
+        RWTId: RWT_ID,
+        RepoNFT: REPO_NFT,
     }
 }
 
-export const tokens ={
+export const tokens = {
     RWT: "469255244f7b12ea7d375ec94ec8d2838a98be0779c8231ece3529ae69c421db",
     RepoNFT: "2222222222222222222222222222222222222222222222222222222222222222",
     GuardNFT: "3333333333333333333333333333333333333333333333333333333333333333",
