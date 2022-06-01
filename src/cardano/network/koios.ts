@@ -1,10 +1,12 @@
 import axios from "axios";
-import config from 'config';
 import { Tx, TxMetaData, Utxo } from "./apiModelsCardano";
 import { AbstractNetworkConnector } from "../../network/abstractNetworkConnector";
 import { Block } from "../../objects/interfaces";
+import { initConfig } from "../../../config/config";
 
-const URL: string | undefined = config.get?.('node.URL');
+const config = initConfig();
+const URL = config.url;
+
 export const koios = axios.create({
     baseURL: URL,
     timeout: 8000,

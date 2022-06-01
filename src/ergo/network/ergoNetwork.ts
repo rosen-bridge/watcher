@@ -1,11 +1,11 @@
 import axios from "axios";
-import config from "config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Info } from "../../objects/ergo";
 import { Address, ErgoBox } from "ergo-lib-wasm-nodejs";
 import { ergoTreeToBase58Address } from "../../api/ergoUtils";
 import { AddressBoxes, ErgoTx } from "./types";
 import { JsonBI } from "../../network/parser";
+
 
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
