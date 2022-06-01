@@ -10,7 +10,7 @@ export default {
         explorerUrl: "http://10.10.9.3:7000",
         nodeUrl: "http://10.10.9.3:9064",
         networkType: "Mainnet",
-        watcherSecretKey: "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+        watcherSecretKey: "a498c0ee3ba21ee27ade45bb500686c313460b32267dda605253d815579605ea",
     },
     commitmentScanner: {
         interval: 10,

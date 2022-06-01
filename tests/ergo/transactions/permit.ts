@@ -2,7 +2,7 @@ import { rosenConfig } from "../../../src/api/rosenConfig";
 import { Transaction } from "../../../src/api/Transaction";
 import { strToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
-import * as ergoLib from "ergo-lib-wasm-nodejs";
+import * as wasm from "ergo-lib-wasm-nodejs";
 
 describe("Watcher Permit Transactions", () => {
     const transaction = new Transaction(
@@ -75,8 +75,8 @@ describe("Watcher Permit Transactions", () => {
                 1,
                 "",
                 amount,
-                ergoLib.TokenId.from_str(tokenId),
-                ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(tokenAmount)),
+                wasm.TokenId.from_str(tokenId),
+                wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount)),
                 changeTokens,
             );
 
@@ -115,7 +115,7 @@ describe("Watcher Permit Transactions", () => {
                 transaction.userAddress,
                 outValue,
             );
-            const inputBoxes = new ergoLib.ErgoBoxes(transactionInput[0]);
+            const inputBoxes = new wasm.ErgoBoxes(transactionInput[0]);
             if (transactionInput.length > 1) {
                 for (let i = 0; i < transactionInput.length; i++) {
                     inputBoxes.add(transactionInput[1]);
@@ -125,19 +125,19 @@ describe("Watcher Permit Transactions", () => {
             const height = await transaction.ergoNetwork.getHeight();
 
 
-            const outBoxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+            const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
                 transaction.minBoxValue,
                 transaction.userAddressContract,
                 height
             );
 
             const outBox = outBoxBuilder.build();
-            const txOutBox = new ergoLib.ErgoBoxCandidates(outBox);
+            const txOutBox = new wasm.ErgoBoxCandidates(outBox);
 
-            const boxSelector = new ergoLib.SimpleBoxSelector();
-            const targetBalance = ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(outValue.toString()));
-            const boxSelection = boxSelector.select(inputBoxes, targetBalance, new ergoLib.Tokens());
-            const builder = ergoLib.TxBuilder.new(
+            const boxSelector = new wasm.SimpleBoxSelector();
+            const targetBalance = wasm.BoxValue.from_i64(wasm.I64.from_str(outValue.toString()));
+            const boxSelection = boxSelector.select(inputBoxes, targetBalance, new wasm.Tokens());
+            const builder = wasm.TxBuilder.new(
                 boxSelection,
                 txOutBox,
                 height,
@@ -161,7 +161,7 @@ describe("Watcher Permit Transactions", () => {
     describe("inputBoxesTokenMap", () => {
         it('', async () => {
             const inputBoxes = await transaction.ergoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
-            const ergoBoxes = ergoLib.ErgoBoxes.from_boxes_json(inputBoxes);
+            const ergoBoxes = wasm.ErgoBoxes.from_boxes_json(inputBoxes);
             let map = transaction.inputBoxesTokenMap(ergoBoxes, 0);
             expect(map.get("4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8")).to.be.equal("1");
             expect(map.get("a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516")).to.be.equal("100");

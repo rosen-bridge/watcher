@@ -1,16 +1,9 @@
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import * as ergoLib from "ergo-lib-wasm-nodejs";
-import {
-    Address,
-    BoxSelection,
-    BoxValue,
-    Contract,
-    ErgoBoxAssetsDataList, ErgoBoxes,
-    TokenAmount,
-    TokenId, TxBuilder
-} from "ergo-lib-wasm-nodejs";
+import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { PermitBox, RepoBox, RSNBox, WIDBox } from "../objects/ergo";
+import { Contracts } from "./contractAddresses";
+import { rosenConfig } from "./rosenConfig";
 
 /**
  * Transaction class used by watcher to generate transaction for ergo network
@@ -18,51 +11,64 @@ import { PermitBox, RepoBox, RSNBox, WIDBox } from "../objects/ergo";
 export class Transaction {
 
     ergoNetwork: ErgoNetwork;
-    RepoNFTId: TokenId;
-    RWTTokenId: TokenId;
-    RSN: TokenId;
-    watcherPermitContract: Contract;
-    watcherPermitAddress: Address;
-    minBoxValue: BoxValue;
-    fee: BoxValue;
-    userAddressContract: Contract;
-    userAddress: Address;
+    RepoNFTId: wasm.TokenId;
+    RWTTokenId: wasm.TokenId;
+    RSN: wasm.TokenId;
+    watcherPermitContract: wasm.Contract;
+    watcherPermitAddress: wasm.Address;
+    minBoxValue: wasm.BoxValue;
+    fee: wasm.BoxValue;
+    userAddressContract: wasm.Contract;
+    userAddress: wasm.Address;
     userSecret: string;
-    repoAddressContract: Contract;
-    repoAddress: Address;
+    repoAddressContract: wasm.Contract;
+    repoAddress: wasm.Address;
+    watcherLockState?: boolean;
+    contracts: Contracts;
 
     /**
      * constructor
      * @param rosenConfig hard coded Json of rosen config
      * @param userAddress string
      * @param userSecret  string
+     * @param watcherPermitAddress
+     * @param watcherRepoAddress
      */
-    constructor(
-        rosenConfig: {
-            RSN: string,
-            RepoNFT: string,
-            RWTId: string,
-            minBoxValue: string,
-            fee: string,
-            watcherPermitAddress: string,
-            watcherRepoAddress: string,
-        },
+    private constructor(
+        rosenConfig: rosenConfig,
         userAddress: string,
         userSecret: string,
+        watcherPermitAddress: string,
+        watcherRepoAddress: string,
     ) {
         this.ergoNetwork = new ErgoNetwork();
-        this.RepoNFTId = ergoLib.TokenId.from_str(rosenConfig.RepoNFT);
-        this.RWTTokenId = ergoLib.TokenId.from_str(rosenConfig.RWTId);
-        this.RSN = ergoLib.TokenId.from_str(rosenConfig.RSN);
-        this.watcherPermitAddress = ergoLib.Address.from_base58(rosenConfig.watcherPermitAddress);
-        this.watcherPermitContract = ergoLib.Contract.pay_to_address(this.watcherPermitAddress);
-        this.minBoxValue = ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(rosenConfig.minBoxValue));
-        this.userAddress = ergoLib.Address.from_base58(userAddress);
-        this.userAddressContract = ergoLib.Contract.pay_to_address(this.userAddress);
-        this.repoAddress = ergoLib.Address.from_base58(rosenConfig.watcherRepoAddress);
-        this.repoAddressContract = ergoLib.Contract.pay_to_address(this.repoAddress);
+        this.contracts = new Contracts();
+        this.RepoNFTId = wasm.TokenId.from_str(rosenConfig.RepoNFT);
+        this.RWTTokenId = wasm.TokenId.from_str(rosenConfig.RWTId);
+        this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
+        this.watcherPermitAddress = wasm.Address.from_base58(watcherPermitAddress);
+        this.watcherPermitContract = wasm.Contract.pay_to_address(this.watcherPermitAddress);
+        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
+        this.userAddress = wasm.Address.from_base58(userAddress);
+        this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);
+        this.repoAddress = wasm.Address.from_base58(watcherRepoAddress);
+        this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
         this.userSecret = userSecret;
-        this.fee = ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(rosenConfig.fee));
+        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
+        this.watcherLockState = undefined;
+    }
+
+    static init = async (rosenConfig: rosenConfig, userAddress: string, userSecret: string): Promise<Transaction> => {
+        const contracts = new Contracts();
+        const watcherPermitAddress = await contracts.generateWatcherPermitContract();
+        const watcherRepoAddress = await contracts.generateRWTRepoContractAddress();
+        return new Transaction(
+            rosenConfig,
+            userAddress,
+            userSecret,
+            watcherPermitAddress,
+            watcherRepoAddress
+        );
     }
 
     /**
@@ -76,21 +82,21 @@ export class Transaction {
         RWTCount: string,
         WID: Uint8Array
     ) => {
-        const permitBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+        const permitBuilder = new wasm.ErgoBoxCandidateBuilder(
             this.minBoxValue,
             this.watcherPermitContract,
             height
         );
 
-        const RWTTokenAmount = ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(RWTCount));
+        const RWTTokenAmount = wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount));
 
         permitBuilder.add_token(
             this.RWTTokenId,
             RWTTokenAmount
         );
 
-        permitBuilder.set_register_value(4, ergoLib.Constant.from_coll_coll_byte([WID]));
-        permitBuilder.set_register_value(5, ergoLib.Constant.from_byte_array(new Uint8Array([0])));
+        permitBuilder.set_register_value(4, wasm.Constant.from_coll_coll_byte([WID]));
+        permitBuilder.set_register_value(5, wasm.Constant.from_byte_array(new Uint8Array([0])));
 
         return permitBuilder.build();
 
@@ -109,12 +115,12 @@ export class Transaction {
         height: number,
         address: string,
         amount: string,
-        tokenId: TokenId,
-        tokenAmount: TokenAmount,
+        tokenId: wasm.TokenId,
+        tokenAmount: wasm.TokenAmount,
         changeTokens: Map<string, string>,
     ) => {
-        const userBoxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
-            ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(amount)),
+        const userBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
+            wasm.BoxValue.from_i64(wasm.I64.from_str(amount)),
             this.userAddressContract,
             height
         );
@@ -125,8 +131,8 @@ export class Transaction {
 
         for (const [tokenId, tokenAmount] of changeTokens) {
             userBoxBuilder.add_token(
-                ergoLib.TokenId.from_str(tokenId),
-                ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(tokenAmount)),
+                wasm.TokenId.from_str(tokenId),
+                wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount)),
             );
         }
 
@@ -161,6 +167,7 @@ export class Transaction {
      * @param RSNCount
      * @param users
      * @param userRWT
+     * @param R6
      * @param R7
      */
     createRepo = async (
@@ -169,9 +176,10 @@ export class Transaction {
         RSNCount: string,
         users: Array<Uint8Array>,
         userRWT: Array<string>,
+        R6: wasm.Constant,
         R7: number) => {
 
-        const repoBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+        const repoBuilder = new wasm.ErgoBoxCandidateBuilder(
             this.minBoxValue,
             this.repoAddressContract,
             height
@@ -179,32 +187,32 @@ export class Transaction {
 
         repoBuilder.add_token(
             this.RepoNFTId,
-            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1")),
+            wasm.TokenAmount.from_i64(wasm.I64.from_str("1")),
         );
         repoBuilder.add_token(
             this.RWTTokenId,
-            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(RWTCount)),
+            wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount)),
         );
         repoBuilder.add_token(
             this.RSN,
-            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(RSNCount)),
+            wasm.TokenAmount.from_i64(wasm.I64.from_str(RSNCount)),
         );
 
-        repoBuilder.set_register_value(4, ergoLib.Constant.from_coll_coll_byte(users));
-        repoBuilder.set_register_value(5, ergoLib.Constant.from_i64_str_array(userRWT));
-        repoBuilder.set_register_value(
-            6,
-            ergoLib.Constant.from_i64_str_array(
-                ["100", "51", "0", "9999"]
-            ));
-        repoBuilder.set_register_value(7, ergoLib.Constant.from_i32(R7));
+        repoBuilder.set_register_value(4, wasm.Constant.from_coll_coll_byte(users));
+        repoBuilder.set_register_value(5, wasm.Constant.from_i64_str_array(userRWT));
+        repoBuilder.set_register_value(6, R6);
+        repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
         return repoBuilder.build();
     }
 
     /**
      * generating returning permit transaction and send it to the network
      */
-    returnPermit = async () => {
+    returnPermit = async (RWTCountString: string) => {
+        if (!await this.watcherHasLocked()) {
+            throw new Error("you have locked RSN");
+        }
+        const RWTCount = BigInt(RWTCountString);
         const height = await this.ergoNetwork.getHeight();
 
         //TODO: permit box should grab from the network with respect to the value in the register
@@ -250,18 +258,35 @@ export class Transaction {
 
         const widIndex = users.map(user => uint8ArrayToHex(user)).indexOf(WID);
         const inputRWTCount = BigInt(usersCount[widIndex]);
-        const newUsers = users.slice(0, widIndex).concat(users.slice(widIndex + 1, users.length));
-        const newUsersCount = usersCount.slice(0, widIndex).concat(usersCount.slice(widIndex + 1, usersCount.length));
+        let newUsers = users;
+        let newUsersCount = usersCount;
+        let needOutputPermitBox = false;
+        if (inputRWTCount == RWTCount) {
+            newUsers = users.slice(0, widIndex).concat(users.slice(widIndex + 1, users.length));
+            newUsersCount = usersCount.slice(0, widIndex).concat(usersCount.slice(widIndex + 1, usersCount.length));
+        } else if (inputRWTCount > RWTCount) {
+            newUsersCount[widIndex] = (inputRWTCount - RWTCount).toString();
+            needOutputPermitBox = true;
+        } else {
+            throw new Error("You don't have enough RWT locked to extract from repo box");
+        }
         const RepoRWTCount = repoBox.tokens().get(1).amount().as_i64().checked_add(
-            ergoLib.I64.from_str(
+            wasm.I64.from_str(
                 inputRWTCount.toString()
             )
         );
         const RSNTokenCount = repoBox.tokens().get(2).amount().as_i64().checked_add(
-            ergoLib.I64.from_str(
+            wasm.I64.from_str(
                 (inputRWTCount * (-BigInt("100"))).toString()
             )
         );
+
+        const R6 = repoBox.register_value(6);
+        if (R6 === undefined) {
+            throw new Error("register 6 of repo box is not set");
+        }
+
+        const RSNRWTRatio = R6.to_i64_str_array()[0];
 
         const repoOut = await this.createRepo(
             height,
@@ -269,14 +294,15 @@ export class Transaction {
             RSNTokenCount.to_str(),
             newUsers,
             newUsersCount,
+            R6,
             widIndex
         );
 
-        const inputBoxes = new ergoLib.ErgoBoxes(repoBox);
+        const inputBoxes = new wasm.ErgoBoxes(repoBox);
         inputBoxes.add(permitBox);
         inputBoxes.add(widBox);
 
-        const inputBoxSelection = new BoxSelection(inputBoxes, new ErgoBoxAssetsDataList());
+        const inputBoxSelection = new wasm.BoxSelection(inputBoxes, new wasm.ErgoBoxAssetsDataList());
         const changeTokens = this.inputBoxesTokenMap(inputBoxes, 2);
 
         let rsnCount = changeTokens.get(this.RSN.to_str());
@@ -286,26 +312,27 @@ export class Transaction {
             changeTokens.delete(this.RSN.to_str());
         }
 
-        const repoValue = repoBox.value();
-        const permitValue = permitBox.value();
-        const widValue = widBox.value();
-        const totalInputValue = repoValue.as_i64().checked_add(permitValue.as_i64().checked_add(widValue.as_i64()));
+        const repoValue = BigInt(repoBox.value().as_i64().to_str());
+        const permitValue = BigInt(permitBox.value().as_i64().to_str());
+        const widValue = BigInt(widBox.value().as_i64().to_str());
+        const totalInputValue = repoValue + permitValue + widValue;
 
-        const userOutBoxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
-            ergoLib.BoxValue.from_i64(
-                totalInputValue.checked_add(
-                    ergoLib.I64.from_str(
-                        "-" + this.fee.as_i64().to_str()
-                    ).checked_add(ergoLib.I64.from_str("-" + repoValue.as_i64().to_str()))
-                )
-            ),
+        const userOutBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
+            wasm.BoxValue.from_i64(wasm.I64.from_str(
+                (totalInputValue -
+                    BigInt(this.fee.as_i64().to_str()) - repoValue -
+                    ((needOutputPermitBox ? BigInt("1") : BigInt("0")) *
+                        BigInt(this.minBoxValue.as_i64().to_str())
+                    )
+                ).toString())),
             this.userAddressContract,
             height
         );
+
         userOutBoxBuilder.add_token(
             this.RSN,
-            ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(
-                    (inputRWTCount * BigInt("100") + BigInt(rsnCount)).toString()
+            wasm.TokenAmount.from_i64(wasm.I64.from_str(
+                    (inputRWTCount * BigInt(RSNRWTRatio) + BigInt(rsnCount)).toString()
                 )
             ),
         );
@@ -313,15 +340,25 @@ export class Transaction {
         for (const [tokenId, tokenAmount] of changeTokens) {
             if (tokenAmount !== "0") {
                 userOutBoxBuilder.add_token(
-                    ergoLib.TokenId.from_str(tokenId),
-                    ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(tokenAmount)),
+                    wasm.TokenId.from_str(tokenId),
+                    wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount)),
                 );
             }
         }
         const userOutBox = userOutBoxBuilder.build();
-        const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
+        const outputBoxes = new wasm.ErgoBoxCandidates(repoOut);
         outputBoxes.add(userOutBox);
-        const builder = ergoLib.TxBuilder.new(
+        const permitBoxRWTCount = BigInt(permitBox.tokens().get(0).amount().as_i64().to_str());
+        if (permitBoxRWTCount > RWTCount) {
+            const permitOut = await this.createPermitBox(
+                height,
+                (permitBoxRWTCount - RWTCount).toString(),
+                strToUint8Array(WID)
+            );
+            outputBoxes.add(permitOut);
+        }
+
+        const builder = wasm.TxBuilder.new(
             inputBoxSelection,
             outputBoxes,
             height,
@@ -332,22 +369,23 @@ export class Transaction {
 
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
         await this.ergoNetwork.sendTx(signedTx.to_json());
+        this.watcherLockState = !this.watcherLockState;
         return signedTx.id().to_str();
     }
 
     /**
-     * get a unsigned transaction and sign it using watcher secret key
+     * get an unsigned transaction and sign it using watcher secret key
      * @param builder
      * @param inputBoxes
      */
-    buildTxAndSign = async (builder: TxBuilder, inputBoxes: ErgoBoxes): Promise<ergoLib.Transaction> => {
+    buildTxAndSign = async (builder: wasm.TxBuilder, inputBoxes: wasm.ErgoBoxes): Promise<wasm.Transaction> => {
         const tx = builder.build();
-        const sks = new ergoLib.SecretKeys();
-        const sk = ergoLib.SecretKey.dlog_from_bytes(strToUint8Array(this.userSecret));
+        const sks = new wasm.SecretKeys();
+        const sk = wasm.SecretKey.dlog_from_bytes(strToUint8Array(this.userSecret));
         sks.add(sk);
-        const wallet = ergoLib.Wallet.from_secrets(sks);
+        const wallet = wasm.Wallet.from_secrets(sks);
         const ctx = await this.ergoNetwork.getErgoStateContext();
-        const tx_data_inputs = ergoLib.ErgoBoxes.from_boxes_json([]);
+        const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);
         return wallet.sign_transaction(ctx, tx, inputBoxes, tx_data_inputs);
     }
 
@@ -357,7 +395,7 @@ export class Transaction {
      * @param inputBoxes
      * @param offset
      */
-    inputBoxesTokenMap = (inputBoxes: ErgoBoxes, offset: number = 0): Map<string, string> => {
+    inputBoxesTokenMap = (inputBoxes: wasm.ErgoBoxes, offset: number = 0): Map<string, string> => {
         const changeTokens = new Map<string, string>();
         for (let i = offset; i < inputBoxes.len(); i++) {
             const boxTokens = inputBoxes.get(i).tokens();
@@ -377,7 +415,7 @@ export class Transaction {
     /**
      * getting repoBox from network with tracking mempool transactions
      */
-    getRepoBox = async (): Promise<ergoLib.ErgoBox> => {
+    getRepoBox = async (): Promise<wasm.ErgoBox> => {
         return await this.ergoNetwork.trackMemPool(new RepoBox(
             await (
                 this.ergoNetwork.getBoxWithToken(
@@ -393,10 +431,18 @@ export class Transaction {
      * @param RSNCount
      */
     getPermit = async (RSNCount: string): Promise<string> => {
-
+        if (await this.watcherHasLocked()) {
+            throw new Error("you don't have any RSN");
+        }
         const height = await this.ergoNetwork.getHeight();
+        const repoBox = await this.getRepoBox();
+        const R6 = repoBox.register_value(6);
+        if (R6 === undefined) {
+            throw new Error("register 6 of repo box is not set");
+        }
+        const RSNRWTRation = R6.to_i64_str_array()[0];
 
-        const RWTCount = BigInt(RSNCount) / BigInt("100");
+        const RWTCount = BigInt(RSNCount) / BigInt(R6.to_i64_str_array()[0]);
 
         const RSNInput = new RSNBox(
             await (
@@ -406,9 +452,6 @@ export class Transaction {
                 )
             )
         ).getErgoBox();
-
-
-        const repoBox = await this.getRepoBox();
 
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte();
         if (users === undefined) {
@@ -425,13 +468,13 @@ export class Transaction {
         usersCount.push(count);
 
         const RepoRWTCount = repoBox.tokens().get(1).amount().as_i64().checked_add(
-            ergoLib.I64.from_str(
+            wasm.I64.from_str(
                 (RWTCount * BigInt("-1")).toString()
             )
         );
         const RSNTokenCount = repoBox.tokens().get(2).amount().as_i64().checked_add(
-            ergoLib.I64.from_str(
-                (RWTCount * BigInt("100")).toString()
+            wasm.I64.from_str(
+                (RWTCount * BigInt(RSNRWTRation)).toString()
             )
         );
 
@@ -441,13 +484,14 @@ export class Transaction {
             RSNTokenCount.to_str(),
             users,
             usersCount,
+            R6,
             0
         );
 
         const permitOut = await this.createPermitBox(height, RWTCount.toString(), repoBox.box_id().as_bytes());
-        const testTokenId = ergoLib.TokenId.from_str(repoBox.box_id().to_str());
-        const testTokenAmount = ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str("1"));
-        const inputBoxes = new ergoLib.ErgoBoxes(repoBox);
+        const testTokenId = wasm.TokenId.from_str(repoBox.box_id().to_str());
+        const testTokenAmount = wasm.TokenAmount.from_i64(wasm.I64.from_str("1"));
+        const inputBoxes = new wasm.ErgoBoxes(repoBox);
         inputBoxes.add(RSNInput);
 
         const repoValue = repoBox.value();
@@ -469,7 +513,7 @@ export class Transaction {
             }
         }
 
-        let totalInputValue = ergoLib.I64.from_str("0");
+        let totalInputValue = wasm.I64.from_str("0");
         for (let i = 0; i < inputBoxes.len(); i++) {
             totalInputValue = totalInputValue.checked_add(inputBoxes.get(i).value().as_i64());
         }
@@ -496,19 +540,19 @@ export class Transaction {
         const userOut = await this.createUserBoxCandidate(
             height,
             //TODO:should change to read from config
-            this.userAddress.to_base58(ergoLib.NetworkPrefix.Mainnet),
+            this.userAddress.to_base58(wasm.NetworkPrefix.Mainnet),
             changeBoxValue,
             testTokenId,
             testTokenAmount,
             changeTokens,
         );
 
-        const inputBoxSelection = new BoxSelection(inputBoxes, new ErgoBoxAssetsDataList());
-        const outputBoxes = new ergoLib.ErgoBoxCandidates(repoOut);
+        const inputBoxSelection = new wasm.BoxSelection(inputBoxes, new wasm.ErgoBoxAssetsDataList());
+        const outputBoxes = new wasm.ErgoBoxCandidates(repoOut);
         outputBoxes.add(permitOut);
         outputBoxes.add(userOut);
 
-        const builder = ergoLib.TxBuilder.new(
+        const builder = wasm.TxBuilder.new(
             inputBoxSelection,
             outputBoxes,
             height,
@@ -519,6 +563,7 @@ export class Transaction {
 
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
         await this.ergoNetwork.sendTx(signedTx.to_json());
+        this.watcherLockState = !this.watcherLockState;
         return signedTx.id().to_str();
     }
 
@@ -526,34 +571,36 @@ export class Transaction {
      * checks if watcher has locked RSN or not
      */
     watcherHasLocked = async (): Promise<boolean> => {
-
-        const repoBox = await this.getRepoBox();
-        const users = repoBox.register_value(4)?.to_coll_coll_byte();
-        if (users === undefined) {
-            return false;
-        }
-        const ans = users.map(async (id) => {
-            const wid = uint8ArrayToHex(id);
-            try {
-                const box = await (
-                    this.ergoNetwork.getBoxWithToken(
-                        this.userAddress,
-                        wid,
-                    )
-                );
-                return true;
-            } catch (error) {
+        if (this.watcherLockState === undefined) {
+            const repoBox = await this.getRepoBox();
+            const users = repoBox.register_value(4)?.to_coll_coll_byte();
+            if (users === undefined) {
                 return false;
             }
-        });
+            const ans = users.map(async (id) => {
+                const wid = uint8ArrayToHex(id);
+                try {
+                    const box = await (
+                        this.ergoNetwork.getBoxWithToken(
+                            this.userAddress,
+                            wid,
+                        )
+                    );
+                    return true;
+                } catch (error) {
+                    return false;
+                }
+            });
 
-        //TODO: should replaced with includes
-        return (
-            await Promise.all(ans))
-            .reduce(
-                (prev, curr) => prev || curr,
-                false
-            );
+            //TODO: should replaced with includes
+            this.watcherLockState = (
+                await Promise.all(ans))
+                .reduce(
+                    (prev, curr) => prev || curr,
+                    false
+                );
+        }
+
+        return this.watcherLockState;
     }
-
 }
