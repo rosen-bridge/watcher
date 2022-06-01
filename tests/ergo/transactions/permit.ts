@@ -4,8 +4,8 @@ import { strToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
 
-describe("Watcher Permit Transactions", () => {
-    const transaction = new Transaction(
+describe("Watcher Permit Transactions", async () => {
+    const transaction = await Transaction.init(
         rosenConfig,
         "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT",
         "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
@@ -21,6 +21,7 @@ describe("Watcher Permit Transactions", () => {
                 RSNCount,
                 [new Uint8Array([])],
                 [],
+                wasm.Constant.from_i64_str_array([]),
                 0
             );
 
@@ -176,7 +177,7 @@ describe("Watcher Permit Transactions", () => {
 
     describe("getPermit", () => {
         it("", async () => {
-            const secondTransaction = new Transaction(
+            const secondTransaction = await Transaction.init(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
                 "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"
@@ -190,7 +191,7 @@ describe("Watcher Permit Transactions", () => {
 
     describe("returnPermit", () => {
         it("", async () => {
-            const txId = await transaction.returnPermit();
+            const txId = await transaction.returnPermit("100");
             expect(txId).to.be.equal("f956bd5ce3e52b37fa4a207245fc4ac790dbdf84436c3d1540c3983f01053ecb");
         });
     });
@@ -201,7 +202,7 @@ describe("Watcher Permit Transactions", () => {
         });
 
         it("should be true", async () => {
-            const secondTransaction = new Transaction(
+            const secondTransaction = await Transaction.init(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
                 "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"

@@ -3,8 +3,7 @@ import { strToUint8Array } from "../utils/utils";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { rosenConfig } from "./rosenConfig";
-import { blake2b } from "ethereum-cryptography/blake2b";
-
+let blake2b = require('blake2b');
 
 export class Contracts {
     fraud?: string;
@@ -24,14 +23,16 @@ export class Contracts {
 
     P2SAToScriptHash = (P2SA: string) => {
         const contract = wasm.Contract.pay_to_address(wasm.Address.from_base58(P2SA));
-        return blake2b(
-            Buffer.from(
-                contract.ergo_tree().to_base16_bytes(),
-                "hex"
-            ),
-            32
-        ).toString('hex');
-
+        return Buffer.from(
+            blake2b(32)
+                .update(
+                    Buffer.from(
+                        contract.ergo_tree().to_base16_bytes(),
+                        "hex"
+                    )
+                )
+                .digest()
+        ).toString("hex");
     }
 
     generateRWTRepoContractAddress = async () => {
