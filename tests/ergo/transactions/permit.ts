@@ -8,6 +8,12 @@ import { initConfig } from "../../../config/config";
 const config = initConfig();
 
 describe("Watcher Permit Transactions", async () => {
+    const tokens=[
+        "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8",
+        "00ac861f0a121f86691ad3d0e928604e3dc77c1f37e71099218dcb162667911b",
+        "002b4ebc5e0eb147fa95a0c10cc9e44d0e6464fd51864be5ae4f1b86174b465d",
+        "00419c7bdd23e71c14f6ff1e1180a5899a7be0e13f6aa6000cb2eeb514930df7",
+    ];
     const transaction = await Transaction.init(
         rosenConfig,
         "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT",
@@ -59,19 +65,13 @@ describe("Watcher Permit Transactions", async () => {
 
     describe("createUserBoxCandidate", () => {
         it("checks userbox tokens and value", async () => {
-            const tokensId = [
-                "4198da878b927fdd33e884d7ed399a3dbd22cf9d855ff5a103a50301e70d89fc",
-                "00ac861f0a121f86691ad3d0e928604e3dc77c1f37e71099218dcb162667911b",
-                "002b4ebc5e0eb147fa95a0c10cc9e44d0e6464fd51864be5ae4f1b86174b465d",
-                "00419c7bdd23e71c14f6ff1e1180a5899a7be0e13f6aa6000cb2eeb514930df7"
-            ];
             const tokensAmount = ["100", "1", "8000", "999000"];
             const amount = "11111111111"
-            const tokenId = tokensId[0];
+            const tokenId = tokens[0];
             const tokenAmount = tokensAmount[0];
             const changeTokens = new Map<string, string>();
             for (let i = 1; i < 4; i++) {
-                changeTokens.set(tokensId[i], tokensAmount[i]);
+                changeTokens.set(tokens[i], tokensAmount[i]);
             }
 
             const userBoxCandidate = await transaction.createUserBoxCandidate(
@@ -91,7 +91,7 @@ describe("Watcher Permit Transactions", async () => {
                 boxTokensId.push(userBoxCandidate.tokens().get(i).id().to_str());
                 boxTokensAmount.push(userBoxCandidate.tokens().get(i).amount().as_i64().to_str());
             }
-            expect(boxTokensId).to.be.eql(tokensId);
+            expect(boxTokensId).to.be.eql(tokens);
             expect(boxTokensAmount).to.be.eql(boxTokensAmount);
         });
     });
@@ -162,17 +162,16 @@ describe("Watcher Permit Transactions", async () => {
 
     describe("inputBoxesTokenMap", () => {
         it('', async () => {
-            const inputBoxes = await transaction.ergoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
-            const ergoBoxes = wasm.ErgoBoxes.from_boxes_json(inputBoxes);
+            const ergoBoxes = await transaction.ergoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
             let map = transaction.inputBoxesTokenMap(ergoBoxes, 0);
-            expect(map.get("4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8")).to.be.equal("1");
-            expect(map.get("a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516")).to.be.equal("100");
-            expect(map.get("34a217f1d2bc0f84607dad61c886de53f1ca919c389f184136f05a0de1d196f2")).to.be.equal("100");
-            expect(map.get("2c966d5840c8725aff53414b3e60f494d4f1b79e642c9ef806e6536ec32f77f9")).to.be.equal("100");
+            expect(map.get(tokens[0])).to.be.equal("1");
+            expect(map.get(tokens[1])).to.be.equal("100");
+            expect(map.get(tokens[2])).to.be.equal("100");
+            expect(map.get(tokens[3])).to.be.equal("100");
             map = transaction.inputBoxesTokenMap(ergoBoxes, 1);
-            expect(map.get("a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516")).to.be.equal("100");
-            expect(map.get("34a217f1d2bc0f84607dad61c886de53f1ca919c389f184136f05a0de1d196f2")).to.be.equal("100");
-            expect(map.get("2c966d5840c8725aff53414b3e60f494d4f1b79e642c9ef806e6536ec32f77f9")).to.be.equal("100");
+            expect(map.get(tokens[0])).to.be.equal("100");
+            expect(map.get(tokens[1])).to.be.equal("100");
+            expect(map.get(tokens[2])).to.be.equal("100");
         });
     });
 

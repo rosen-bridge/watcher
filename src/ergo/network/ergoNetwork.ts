@@ -61,18 +61,12 @@ export class ErgoNetwork {
      * get unspent boxes for and specific address
      * @param address
      */
-    getBoxesByAddress = (address: string): Promise<Array<string>> => {
+    getBoxesByAddress = (address: string): Promise<wasm.ErgoBoxes> => {
         return explorerApi.get<AddressBoxes>(
             `/api/v1/boxes/unspent/byAddress/${address}`,
             {transformResponse: data => JsonBI.parse(data)}
         ).then((res) => {
-                let boxes: Array<string> = [];
-                if (res.data.total > 0) {
-                    res.data.items.forEach(box => {
-                        boxes.push(JsonBI.stringify(box))
-                    })
-                }
-                return boxes;
+                return wasm.ErgoBoxes.from_boxes_json(res.data.items)
             }
         );
     }
