@@ -15,7 +15,14 @@ describe("Watcher Permit Transactions", async () => {
         "00419c7bdd23e71c14f6ff1e1180a5899a7be0e13f6aa6000cb2eeb514930df7",
     ];
     const transaction = await Transaction.init(
-        rosenConfig,
+        {
+            RSN: "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516",
+            minBoxValue: "1100000",
+            fee: "1100000",
+            guardNFT: "a6ac381e6fa99929fd1477b3ba9499790a775e91d4c14c5aa86e9a118dfac853",
+            cleanupNFT: "ac0c16cee8caefd0814c5568a9d50bea51fec88e8abbd3ac8347b94d054a1b65",
+            cleanupConfirm: 0
+        },
         "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT",
         "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
     );
@@ -154,9 +161,9 @@ describe("Watcher Permit Transactions", async () => {
     });
 
     describe("getRepoBox", () => {
-        it("should return repoBox", async () => {
+        it("should return repoBox(with tracking mempool)", async () => {
             const repoBox = await transaction.getRepoBox();
-            expect(repoBox.box_id().to_str()).to.be.equal("2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350");
+            expect(repoBox.box_id().to_str()).to.be.equal("906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82");
         });
     });
 
