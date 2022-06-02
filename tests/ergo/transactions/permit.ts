@@ -8,7 +8,7 @@ import { initConfig } from "../../../config/config";
 const config = initConfig();
 
 describe("Watcher Permit Transactions", async () => {
-    const tokens=[
+    const tokens = [
         "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8",
         "00ac861f0a121f86691ad3d0e928604e3dc77c1f37e71099218dcb162667911b",
         "002b4ebc5e0eb147fa95a0c10cc9e44d0e6464fd51864be5ae4f1b86174b465d",

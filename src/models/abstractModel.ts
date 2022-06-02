@@ -1,7 +1,7 @@
 import { DataSource, DeleteResult, Repository } from "typeorm";
 import { Block } from "../objects/interfaces";
 
-export abstract class AbstractDataBase<BlockT, DataT> {
+export abstract class AbstractDataBase<BlockT, DataT>{
     abstract dataSource: DataSource;
     abstract blockRepository: Repository<BlockT>;
 
