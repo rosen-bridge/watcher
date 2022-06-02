@@ -10,7 +10,7 @@ export default {
         explorerUrl: "http://10.10.9.3:7000",
         nodeUrl: "http://10.10.9.3:9064",
         networkType: "Mainnet",
-        watcherSecretKey: "a498c0ee3ba21ee27ade45bb500686c313460b32267dda605253d815579605ea",
+        watcherSecretKey: "1111111111111111111111111111111111111111111111111111111111111111",
         RWTId: "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267",
         repoNFT: "a40b86c663fbbfefa243c9c6ebbc5690fc4e385f15b44c49ba469c91c5af0f48",
     },
