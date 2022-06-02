@@ -106,6 +106,18 @@ describe("Database functions", async () => {
         });
     });
 
+    describe("getCreatedCommitments", () => {
+        it("should return nothing", async () => {
+            const commitments = await DB.getCreatedCommitments()
+            expect(commitments.length).to.eql(0)
+        })
+        it("should return a commitment", async () => {
+            // TODO: complete this test after updating the commitments
+            const commitments = await DB.getCreatedCommitments()
+            expect(commitments.length).to.eql(0)
+        })
+    })
+
     describe("changeLastValidBlock", () => {
         it("should affect 1 row", async () => {
             const res = await DB.removeForkedBlocks(3433333);

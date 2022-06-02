@@ -1,7 +1,7 @@
-import { DataSource, DeleteResult, In, MoreThanOrEqual, Repository } from "typeorm";
+import { DataSource, DeleteResult, In, LessThan, MoreThanOrEqual, Repository } from "typeorm";
 import { CBlockEntity } from "../../entities/CBlockEntity";
 import { ObservedCommitmentEntity } from "../../entities/ObservedCommitmentEntity";
-import { Block } from "../../objects/interfaces";
+import { Block, Commitment } from "../../objects/interfaces";
 import { AbstractDataBase } from "../../models/abstractModel";
 import { CommitmentInformation } from "../scanner/scanner";
 
@@ -156,7 +156,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * find commitments by their box ids
      * @param ids
      */
-    findCommitmentsById = async (ids: Array<string>) => {
+    findCommitmentsById = async (ids: Array<string>): Promise<Array<ObservedCommitmentEntity>> => {
         return await this.commitmentRepository.find({
             where: {
                 commitmentBoxId: In(ids)
@@ -169,9 +169,11 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * @param eventId
      */
     commitmentsByEventId = async (eventId: string): Promise<Array<ObservedCommitmentEntity>> => {
-        return await this.commitmentRepository.createQueryBuilder("observed_commitment_entity")
-            .where("observed_commitment_entity.eventId == :eventId", {eventId})
-            .execute()
+        return await this.commitmentRepository.find({
+            where: {
+                eventId: eventId
+            }
+        })
     }
 }
 

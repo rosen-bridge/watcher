@@ -1,15 +1,15 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { contracts } from "../contracts/contracts";
 import { tokens } from "../../config/default";
-import { contractHash, strToUint8Array } from "./ergoUtils";
+import { contractHash, hexStrToUint8Array } from "./ergoUtils";
 import config from "config";
 import { Observation } from "../objects/interfaces";
 import { Buffer } from "buffer";
 import { bigIntToUint8Array } from "../utils/utils";
 
-const permitBox = require('../dataset/permitBox.json');
-const WIDBox = require('../dataset/WIDBox.json');
-const feeBox = require('../dataset/feeBox.json');
+const permitBox = require('./dataset/permitBox.json');
+const WIDBox = require('./dataset/WIDBox.json');
+const feeBox = require('./dataset/feeBox.json');
 
 export class boxes {
     static getPermits = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
@@ -42,7 +42,7 @@ export class boxes {
         );
         builder.add_token(wasm.TokenId.from_str(tokens.RWT),
             wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString())))
-        builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([strToUint8Array(WID)]))
+        builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(WID)]))
         return builder.build()
     }
 
@@ -64,8 +64,8 @@ export class boxes {
         );
         builder.add_token(wasm.TokenId.from_str(tokens.RWT),
             wasm.TokenAmount.from_i64(wasm.I64.from_str("1")))
-        builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([strToUint8Array(WID)]))
-        builder.set_register_value(5, wasm.Constant.from_coll_coll_byte([strToUint8Array(requestId)]))
+        builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(WID)]))
+        builder.set_register_value(5, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(requestId)]))
         builder.set_register_value(6, wasm.Constant.from_byte_array(eventDigest))
         builder.set_register_value(7, wasm.Constant.from_byte_array(permitScriptHash))
         return builder.build()
