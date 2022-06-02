@@ -71,6 +71,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @return Promise<boolean>
      */
     saveBlock = async (height: number, blockHash: string, observations: Array<Observation>): Promise<boolean> => {
+        console.log("saving ---- " + height.toString())
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         const block = new BlockEntity();

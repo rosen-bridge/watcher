@@ -69,6 +69,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * @return Promise<boolean>
      */
     saveBlock = async (height: number, blockHash: string, information: CommitmentInformation): Promise<boolean> => {
+        console.log("saving in commitment ---- " + height.toString())
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         const block = new CBlockEntity();

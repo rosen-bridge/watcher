@@ -35,17 +35,17 @@ export class commitmentCreation {
                                 WIDBox: wasm.ErgoBox): Promise<string> => {
         const height = await ErgoNetworkApi.getCurrentHeight()
         const permitHash = contractHash(contracts.addressCache.permitContract!)
-        const outCommitment = boxes.createCommitment(minBoxVal, height, WID, requestId, eventDigest, permitHash)
+        const outCommitment = boxes.createCommitment(BigInt(minBoxVal), height, WID, requestId, eventDigest, permitHash)
         const RWTCount: number = permits.map(permit =>
             permit.tokens().get(0).amount().as_i64().as_num())
             .reduce((a, b) => a + b, 0)
-        const outPermit = boxes.createPermit(minBoxVal, height, RWTCount - 1, WID)
-        const rewardValue = permits.map(permit => permit.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
+        const outPermit = boxes.createPermit(BigInt(minBoxVal), height, RWTCount - 1, WID)
+        const rewardValue = permits.map(permit => BigInt(permit.value().as_i64().to_str())).reduce((a, b) => a + b, BigInt(0))
         // TODO: Complete Watcher Payment (Token rewards)
         // Don't forget to consider WIDBox assets
         // const paymentTokens: Array<wasm.Token> = permits.map(permit => extractTokens(permit.tokens())).
-        const paymentValue = WIDBox.value().as_i64().as_num() + rewardValue - txFee - 2 * minBoxVal
-        const watcherPayment = boxes.createPayment(paymentValue, height, [])
+        const paymentValue = BigInt(WIDBox.value().as_i64().to_str()) + rewardValue - BigInt(txFee + 2 * minBoxVal)
+        const watcherPayment = boxes.createPayment(BigInt(paymentValue), height, [])
         const inputBoxes = new wasm.ErgoBoxes(WIDBox);
         permits.forEach(permit => inputBoxes.add(permit))
         try {

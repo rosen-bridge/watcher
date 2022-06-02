@@ -46,28 +46,28 @@ export const strToUint8Array = (str: string): Uint8Array => {
  * @param contract change contract if it is needed, unless use the secret's public address as the change address
  */
 export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCandidate>, height: number, secret: wasm.SecretKey, contract?: wasm.Contract): wasm.ErgoBoxCandidate | null => {
-    const processBox = (box: wasm.ErgoBox | wasm.ErgoBoxCandidate, tokens: { [id: string]: number; }, sign: number) => {
+    const processBox = (box: wasm.ErgoBox | wasm.ErgoBoxCandidate, tokens: { [id: string]: bigint; }, sign: number) => {
         extractTokens(box.tokens()).forEach(token => {
             if (!tokens.hasOwnProperty(token.id().to_str())) {
-                tokens[token.id().to_str()] = token.amount().as_i64().as_num() * sign
+                tokens[token.id().to_str()] = BigInt(token.amount().as_i64().as_num() * sign)
             } else {
-                tokens[token.id().to_str()] += token.amount().as_i64().as_num() * sign
+                tokens[token.id().to_str()] += BigInt(token.amount().as_i64().as_num() * sign)
             }
         })
     }
-    let value: number = 0;
-    let tokens: { [id: string]: number; } = {}
+    let value: bigint = BigInt(0);
+    let tokens: { [id: string]: bigint; } = {}
     extractBoxes(boxes).forEach(box => {
-        value += box.value().as_i64().as_num()
+        value += BigInt(box.value().as_i64().to_str())
         processBox(box, tokens, 1)
     })
     candidates.forEach(candidate => {
-        value -= candidate.value().as_i64().as_num()
+        value -= BigInt(candidate.value().as_i64().to_str())
         processBox(candidate, tokens, -1)
     })
     if (value > txFee + wasm.BoxValue.SAFE_USER_MIN().as_i64().as_num()) {
         const change = new wasm.ErgoBoxCandidateBuilder(
-            wasm.BoxValue.from_i64(wasm.I64.from_str((value - txFee).toString())),
+            wasm.BoxValue.from_i64(wasm.I64.from_str((value - BigInt(txFee)).toString())),
             contract ? contract : wasm.Contract.pay_to_address(secret.get_address()),
             height
         )
@@ -83,7 +83,7 @@ export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.Er
         throw new boxCreationError
     } else {
         Object.entries(tokens).forEach(([key, value]) => {
-            if (value != 0) {
+            if (value != BigInt(0)) {
                 throw new boxCreationError
             }
         })

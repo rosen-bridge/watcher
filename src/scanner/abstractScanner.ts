@@ -28,6 +28,7 @@ export abstract class AbstractScanner<BlockT, DataT> {
      * scenario in the blockchain and invalidate the database till the database synced again.
      */
     update = async () => {
+        console.log(Date.now() + " ---- update started --------------------------------")
         try {
             const lastSavedBlock = (await this._dataBase.getLastSavedBlock());
             if (!await this.isForkHappen()) {
