@@ -1,9 +1,10 @@
 import { Observation } from "../../src/objects/interfaces";
-import { commitmentFromObservation, createChangeBox, extractBoxes } from "../../src/ergoUtils/ergoUtils";
+import { commitmentFromObservation, contractHash, createChangeBox, extractBoxes } from "../../src/ergoUtils/ergoUtils";
 import { expect } from "chai";
 import { boxCreationError, toHexString } from "../../src/utils/utils";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import config from "config";
+import { cache } from "./boxes";
 
 const observation: Observation = {
     fromChain: "ADA",
@@ -75,6 +76,13 @@ describe("Testing ergoUtils", () => {
             expect(res).to.not.null
             expect(res?.value().as_i64().as_num()).to.eql(totalValue - 2*txFee)
             expect(res?.tokens().get(0).amount().as_i64().as_num()).to.eql(90)
+        })
+    })
+
+    describe("contractHash", () => {
+        it("tests the contract hash creation", () => {
+            const data = contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(cache.fraud!)))
+            expect(data.toString("base64")).to.eql("ZKVYGZQSUzUZtgTQ6rtiZDba9hT6mOuvpBHNXw7Z7ZY=")
         })
     })
 })

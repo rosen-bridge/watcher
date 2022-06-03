@@ -4,8 +4,8 @@ import { tokens } from "../../config/default";
 import { strToUint8Array } from "./ergoUtils";
 import config from "config";
 
-const permitBox = require('../dataset/permitBox.json');
-const WIDBox = require('../dataset/WIDBox.json');
+const permitBox = require('./dataset/permitBox.json');
+const WIDBox = require('./dataset/WIDBox.json');
 
 export class boxes {
     static getPermits = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
@@ -69,9 +69,10 @@ export class boxes {
      * @param tokens
      */
     static createPayment = (value: bigint, height: number, tokens: Array<wasm.Token>): wasm.ErgoBoxCandidate => {
+        const address = wasm.Address.from_base58(config.get("ergo.address"))
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
-            wasm.Contract.pay_to_address(config.get("ergo.address")),
+            wasm.Contract.pay_to_address(address),
             height
         );
         tokens.forEach(token => {

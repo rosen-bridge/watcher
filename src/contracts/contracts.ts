@@ -5,7 +5,7 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import config from "config";
 import { contractHash } from "../ergoUtils/ergoUtils";
 
-interface AddressCache {
+export interface AddressCache {
     fraud?: string
     eventTrigger?: string
     commitment?: string

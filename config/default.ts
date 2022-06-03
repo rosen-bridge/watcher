@@ -22,7 +22,7 @@ export default {
         interval: 10,
         initialBlockHeight: 208640,
         heightLimit: 100,
-        cleanupConfirmation: 10,
+        cleanupConfirmation: 0,
     },
 };
 
