@@ -45,47 +45,49 @@ export class Config{
                 throw new Error("Network type doesn't set correctly in config file");
             }
         }
+
+        if (SECRET_KEY === undefined) {
+            throw new Error("Secret key doesn't set in config file");
+        }
+
+        if (URL === undefined) {
+            throw new Error("koios URL is not set config file");
+        }
+
+        if (INTERVAL === undefined) {
+            throw new Error("Scanner interval is not set in the config file");
+        }
+
+        if (INITIAL_HEIGHT === undefined) {
+            throw new Error("Scanner initial height is not set in the config file");
+        }
+
+        if (EXPLORER_URL === undefined) {
+            throw new Error("Ergo Explorer Url is not set in the config");
+        }
+
+        if (NODE_URL === undefined) {
+            throw new Error("Ergo Node Url is not set in the config");
+        }
+
+        if (RWT_ID === undefined) {
+            throw new Error("RWTId doesn't set in config file");
+        }
+
+        if (REPO_NFT === undefined) {
+            throw new Error("Repo NFT doesn't set in config file");
+        }
+
         this.networkType = networkType;
-        (
-            SECRET_KEY ?
-                this.secretKey = SECRET_KEY :
-                throw new Error("Secret key doesn't set in config file")
-        );
-        (
-            URL ?
-                this.url = URL :
-                throw new Error("koios URL is not set config file")
-        );
-        (
-            INTERVAL ?
-                this.interval = INTERVAL :
-                throw new Error("Scanner interval is not set in the config file")
-        );
-        (
-            INITIAL_HEIGHT ?
-                this.initialHeight = INITIAL_HEIGHT :
-                throw new Error("Scanner initial height is not set in the config file")
-        );
-        (
-            EXPLORER_URL ?
-                this.explorerUrl = EXPLORER_URL :
-                throw new Error("Ergo Explorer Url is not set in the config")
-        );
-        (
-            NODE_URL ?
-                this.nodeUrl = NODE_URL :
-                throw new Error("Ergo Node Url is not set in the config")
-        );
-        (
-            RWT_ID ?
-                this.RWTId = RWT_ID :
-                throw new Error("RWTId doesn't set in config file")
-        );
-        (
-            REPO_NFT ?
-                this.RepoNFT = REPO_NFT :
-                throw new Error("Repo NFT doesn't set in config file")
-        );
+        this.secretKey = SECRET_KEY;
+        this.url = URL;
+        this.interval = INTERVAL;
+        this.initialHeight = INITIAL_HEIGHT;
+        this.explorerUrl = EXPLORER_URL;
+        this.nodeUrl = NODE_URL;
+        this.RWTId = RWT_ID;
+        this.RepoNFT = REPO_NFT;
+
     }
 
     static getConfig() {
