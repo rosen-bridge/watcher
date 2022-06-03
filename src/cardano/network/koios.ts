@@ -2,9 +2,9 @@ import axios from "axios";
 import { Tx, TxMetaData, Utxo } from "./apiModelsCardano";
 import { AbstractNetworkConnector } from "../../network/abstractNetworkConnector";
 import { Block } from "../../objects/interfaces";
-import { initConfig } from "../../../config/config";
+import { Config } from "../../../config/config";
 
-const config = initConfig();
+const config = Config.getConfig();
 const URL = config.url;
 
 export const koios = axios.create({
@@ -13,7 +13,7 @@ export const koios = axios.create({
     headers: {"Content-Type": "application/json"}
 });
 
-export class KoiosNetwork extends AbstractNetworkConnector {
+export class KoiosNetwork extends AbstractNetworkConnector{
     getBlockAtHeight = (height: number): Promise<Block> => {
         return koios.get<Array<Block>>(
             '/blocks',

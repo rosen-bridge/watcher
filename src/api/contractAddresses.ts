@@ -3,13 +3,13 @@ import { strToUint8Array } from "../utils/utils";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { rosenConfig } from "./rosenConfig";
-import { initConfig } from "../../config/config";
+import { Config } from "../../config/config";
 
 let blake2b = require('blake2b');
 
-const config = initConfig();
+const config = Config.getConfig();
 
-export class Contracts {
+export class Contracts{
     fraud?: string;
     trigerEvent?: string;
     commitment?: string;

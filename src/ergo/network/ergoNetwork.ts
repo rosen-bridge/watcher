@@ -5,9 +5,9 @@ import { Address, ErgoBox } from "ergo-lib-wasm-nodejs";
 import { ergoTreeToBase58Address } from "../../api/ergoUtils";
 import { AddressBoxes, ErgoBoxJson, ErgoTx } from "./types";
 import { JsonBI } from "../../network/parser";
-import { initConfig } from "../../../config/config";
+import { Config } from "../../../config/config";
 
-const config = initConfig();
+const config = Config.getConfig();
 
 export const explorerApi = axios.create({
     baseURL: config.explorerUrl,
@@ -20,7 +20,7 @@ export const nodeClient = axios.create({
     headers: {"Content-Type": "application/json"}
 });
 
-export class ErgoNetwork {
+export class ErgoNetwork{
 
     /**
      * generates pay 2 script address by script

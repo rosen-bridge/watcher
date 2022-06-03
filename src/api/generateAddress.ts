@@ -1,5 +1,5 @@
 import express from "express";
-import { BaseConfig, initConfig } from "../../config/config";
+import { Config } from "../../config/config";
 import { generateSK } from "./ergoUtils";
 
 const router = express.Router();
@@ -7,9 +7,9 @@ const router = express.Router();
 router.get("/generate", (req, res) => {
     //TODO: should complete later to save the secret key
     const secretKey = generateSK();
-    let config: BaseConfig;
+    let config: Config;
     try {
-        config = initConfig();
+        config = Config.getConfig();
     } catch (e) {
         res.status(500).send(e);
         return;

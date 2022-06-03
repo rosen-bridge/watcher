@@ -3,14 +3,14 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { Contracts } from "./contractAddresses";
 import { rosenConfig } from "./rosenConfig";
-import { initConfig } from "../../config/config";
+import { Config } from "../../config/config";
 
-const config=initConfig();
+const config = Config.getConfig();
 
 /**
  * Transaction class used by watcher to generate transaction for ergo network
  */
-export class Transaction {
+export class Transaction{
 
     ergoNetwork: ErgoNetwork;
     RepoNFTId: wasm.TokenId;

@@ -3,9 +3,9 @@ import { Transaction } from "../../../src/api/Transaction";
 import { strToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { initConfig } from "../../../config/config";
+import { Config } from "../../../config/config";
 
-const config = initConfig();
+const config = Config.getConfig();
 
 describe("Watcher Permit Transactions", async () => {
     const tokens = [
