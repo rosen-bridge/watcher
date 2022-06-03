@@ -1,6 +1,6 @@
 import { ErgoNetworkApi } from "../ergoUtils/networkApi";
 import { scripts } from "./scripts";
-import { tokens } from "../../../config/config";
+import { tokens } from "../../config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import config from "config";
 import { contractHash } from "../ergoUtils/ergoUtils";

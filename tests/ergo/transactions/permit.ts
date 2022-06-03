@@ -3,7 +3,7 @@ import { Transaction } from "../../../src/api/Transaction";
 import { strToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { Config } from "../../../config/config";
+import { Config } from "../../../src/config/config";
 
 const config = Config.getConfig();
 

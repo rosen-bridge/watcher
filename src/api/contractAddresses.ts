@@ -3,7 +3,7 @@ import { strToUint8Array } from "../utils/utils";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { rosenConfig } from "./rosenConfig";
-import { Config } from "../../config/config";
+import { Config } from "../config/config";
 
 let blake2b = require('blake2b');
 

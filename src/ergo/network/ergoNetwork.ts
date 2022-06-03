@@ -5,7 +5,7 @@ import { Address, ErgoBox } from "ergo-lib-wasm-nodejs";
 import { ergoTreeToBase58Address } from "../../api/ergoUtils";
 import { AddressBoxes, ErgoBoxJson, ErgoTx } from "./types";
 import { JsonBI } from "../../network/parser";
-import { Config } from "../../../config/config";
+import { Config } from "../../config/config";
 
 const config = Config.getConfig();
 

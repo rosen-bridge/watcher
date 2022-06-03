@@ -3,7 +3,7 @@ import express from "express";
 import generateAddress from "./api/generateAddress";
 import lockRSN from "./api/permit";
 import { Transaction } from "./api/Transaction";
-import { Config } from "../config/config";
+import { Config } from "./config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array } from "./utils/utils";
 import { rosenConfig } from "./api/rosenConfig";

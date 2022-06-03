@@ -3,7 +3,7 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { Contracts } from "./contractAddresses";
 import { rosenConfig } from "./rosenConfig";
-import { Config } from "../../config/config";
+import { Config } from "../config/config";
 
 const config = Config.getConfig();
 
@@ -588,7 +588,6 @@ export class Transaction{
                 }
             });
 
-            //TODO: should replaced with includes
             this.watcherLockState = (
                 await Promise.all(ans))
                 .reduce(

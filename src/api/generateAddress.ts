@@ -1,11 +1,10 @@
 import express from "express";
-import { Config } from "../../config/config";
+import { Config } from "../config/config";
 import { generateSK } from "./ergoUtils";
 
 const router = express.Router();
 
 router.get("/generate", (req, res) => {
-    //TODO: should complete later to save the secret key
     const secretKey = generateSK();
     let config: Config;
     try {
