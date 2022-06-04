@@ -414,6 +414,13 @@ export class Transaction{
      * getting repoBox from network with tracking mempool transactions
      */
     getRepoBox = async (): Promise<wasm.ErgoBox> => {
+        const test = await (
+            this.ergoNetwork.getBoxWithToken(
+                this.repoAddress,
+                this.RepoNFTId.to_str()
+            ));
+        console.log("box id in string is", test.box_id().to_str());
+        console.log("***************************************")
         return await this.ergoNetwork.trackMemPool(
             await (
                 this.ergoNetwork.getBoxWithToken(
@@ -430,7 +437,7 @@ export class Transaction{
      */
     getPermit = async (RSNCount: string): Promise<string> => {
         if (await this.watcherHasLocked()) {
-            throw new Error("you don't have any RSN");
+            throw new Error("you don't have locked any RSN");
         }
         const height = await this.ergoNetwork.getHeight();
         const repoBox = await this.getRepoBox();

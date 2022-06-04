@@ -36,11 +36,11 @@ export class ErgoNetwork{
      * gets last block height
      */
     getHeight = async (): Promise<number> => {
-        return nodeClient.get<Info>("/info").then((res) => res.data.fullHeight);
+        return nodeClient.get<Info>("/info").then(res => res.data.fullHeight);
     }
 
     /**
-     * gets unspent boxes for an specific ergotree with default limit of 100 and offset 0
+     * gets unspent boxes for a specific ergotree with default limit of 100 and offset 0
      * @param tree
      * @param offset
      * @param limit
@@ -66,7 +66,9 @@ export class ErgoNetwork{
             `/api/v1/boxes/unspent/byAddress/${address}`,
             {transformResponse: data => JsonBI.parse(data)}
         ).then((res) => {
-                return wasm.ErgoBoxes.from_boxes_json(res.data.items)
+                const boxes: Array<string> = [];
+                res.data.items.forEach(box => boxes.push(JsonBI.stringify(box)));
+                return wasm.ErgoBoxes.from_boxes_json(boxes)
             }
         );
     }
@@ -87,7 +89,11 @@ export class ErgoNetwork{
      * @param tx
      */
     sendTx = (tx: string) => {
-        return nodeClient.post("/transactions", tx).then(response => ({"txId": response.data as string})).catch(exp => {
+        return nodeClient.post("/transactions", tx).then(
+            response => (
+                {"txId": response.data as string}
+            )
+        ).catch(exp => {
             console.log(exp.response.data)
         });
     };

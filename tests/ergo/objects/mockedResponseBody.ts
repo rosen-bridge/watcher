@@ -1066,6 +1066,81 @@ export const mockedResponseBody = {
     }
 `,
 
+    sampleScript:
+        `{
+        // ----------------- REGISTERS
+        // R4: Coll[Coll[Byte]] = [WID]
+        // ----------------- TOKENS
+        // 0: RWT
+
+        val repoNFT = fromBase64("REPO_NFT");
+        val cleanupNFT = fromBase64("CLEANUP_NFT");
+        val outputWithToken = OUTPUTS.slice(1, OUTPUTS.size).filter { (box: Box) => box.tokens.size > 0 }
+        val outputWithRWT = outputWithToken.exists { (box: Box) => box.tokens.exists { (token: (Coll[Byte], Long)) => token._1 == SELF.tokens(0)._1 } }
+        // RSN Slash
+        // [Repo, Fraud, Cleanup] => [Repo, Cleanup, Slashed]
+        sigmaProp(
+            allOf(
+                Coll(
+                    outputWithRWT == false,
+                    INPUTS(0).tokens(0)._1 == repoNFT,
+                    INPUTS(2).tokens(0)._1 == cleanupNFT,
+                )
+            )
+        )
+      }
+`,
+
+    p2sAddress:
+        {
+            "address": "LFz5FPkW7nPVq2NA5Ycb8gu5kAnbT4HuaiK2XJtJi1hZCL4ZtPaXqJZkhonpoVLW34mTrqwMCeW96tt7nyK5XTu6QmUAD9T22mLYa6opX3WdM1wpJC5ofhDUym8N4AB2Y7FnJ9ku512wGU8GJZ5xVgMQ3G5oHJJTQ1uBd72RphnWbfHUVjF49h2jgz4H9gBZQ8wFwZizTFjVh3CnMs76HP9mnnN4ngysoGzEZJqd2BREmGxPdPvBw"
+        },
+
+    emptyAddressBox: `{"items": [],"total": 1}`,
+
+    sampleTxJson:
+        `{
+            "id": "2ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
+            "inputs": [
+                {
+                    "boxId": "1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
+                    "spendingProof": {
+                        "proofBytes": "4ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd1173ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd1173ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
+                        "extension": {
+                            "1": "a2aed72ff1b139f35d1ad2938cb44c9848a34d4dcfd6d8ab717ebde40a7304f2541cf628ffc8b5c496e6161eba3f169c6dd440704b1719e0"
+                        }
+                    }
+                }
+            ],
+            "dataInputs": [
+                {
+                    "boxId": "1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117"
+                }
+            ],
+            "outputs": [
+                {
+                    "boxId": "1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
+                    "value": 147,
+                    "ergoTree": "0008cd0336100ef59ced80ba5f89c4178ebd57b6c1dd0f3d135ee1db9f62fc634d637041",
+                    "creationHeight": 9149,
+                    "assets": [
+                        {
+                            "tokenId": "4ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
+                            "amount": 1000
+                        }
+                    ],
+                    "additionalRegisters": {
+                        "R4": "100204a00b08cd0336100ef59ced80ba5f89c4178ebd57b6c1dd0f3d135ee1db9f62fc634d637041ea02d192a39a8cc7a70173007301"
+                    },
+                    "transactionId": "2ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
+                    "index": 0
+                }
+            ],
+            "size": 0
+        }`,
+
+    sampleTxId: "2ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
+
 }
 
 
