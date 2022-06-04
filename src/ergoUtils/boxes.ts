@@ -31,8 +31,10 @@ export class boxes {
             contracts.addressCache.permitContract!,
             height
         );
-        builder.add_token(wasm.TokenId.from_str(tokens.RWT),
-            wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString())))
+        if(RWTCount > 0) {
+            builder.add_token(wasm.TokenId.from_str(tokens.RWT),
+                wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString())))
+        }
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([strToUint8Array(WID)]))
         return builder.build()
     }
