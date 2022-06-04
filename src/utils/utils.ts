@@ -1,8 +1,8 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoBox } from "ergo-lib-wasm-nodejs";
-import config from "config";
+import { ErgoConfig } from "../config/config";
 
-const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');
+const ergoConfig = ErgoConfig.getConfig();
 
 export function notEmpty<T>(value: T | null | undefined): value is T {
     return value !== null && value !== undefined;
@@ -26,7 +26,7 @@ export const ergoTreeToAddress = (ergoTree: wasm.ErgoTree): wasm.Address => {
 }
 
 export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree): string => {
-    return ergoTreeToAddress(ergoTree).to_base58(networkType)
+    return ergoTreeToAddress(ergoTree).to_base58(ergoConfig.networkType)
 }
 
 export const decodeCollColl = async (str: string): Promise<Uint8Array[]> => {

@@ -2,10 +2,10 @@ import axios from "axios";
 import { Tx, TxMetaData, Utxo } from "./apiModelsCardano";
 import { AbstractNetworkConnector } from "../../network/abstractNetworkConnector";
 import { Block } from "../../objects/interfaces";
-import { Config } from "../../config/config";
+import { CardanoConfig } from "../../config/config";
 
-const config = Config.getConfig();
-const URL = config.url;
+const cardanoConfig = CardanoConfig.getConfig();
+const URL = cardanoConfig.koiosURL;
 
 export const koios = axios.create({
     baseURL: URL,

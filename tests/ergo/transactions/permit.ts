@@ -3,9 +3,8 @@ import { Transaction } from "../../../src/api/Transaction";
 import { strToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { Config } from "../../../src/config/config";
 
-const config = Config.getConfig();
+const RWTId = "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267";
 
 describe("Watcher Permit Transactions", async () => {
     const tokens = [
@@ -62,7 +61,7 @@ describe("Watcher Permit Transactions", async () => {
             expect(permitBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
             expect(permitBox.tokens().len()).to.be.equal(1);
             expect(permitBox.tokens().get(0).amount().as_i64().to_str()).to.be.equal(RWTCount);
-            expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(config.RWTId);
+            expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(RWTId);
             expect(permitBox.register_value(4)?.to_coll_coll_byte().length).to.be.equal(1);
             expect(permitBox.register_value(4)?.to_coll_coll_byte()[0]).to.be.eql(WID);
             expect(permitBox.register_value(5)?.to_byte_array()).to.be.eql(new Uint8Array([0]));

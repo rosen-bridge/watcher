@@ -3,9 +3,9 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { Contracts } from "./contractAddresses";
 import { rosenConfig } from "./rosenConfig";
-import { Config } from "../config/config";
+import { ErgoConfig } from "../config/config";
 
-const config = Config.getConfig();
+const ergoConfig = ErgoConfig.getConfig();
 
 /**
  * Transaction class used by watcher to generate transaction for ergo network
@@ -45,8 +45,8 @@ export class Transaction{
     ) {
         this.ergoNetwork = new ErgoNetwork();
         this.contracts = new Contracts();
-        this.RepoNFTId = wasm.TokenId.from_str(config.RepoNFT);
-        this.RWTTokenId = wasm.TokenId.from_str(config.RWTId);
+        this.RepoNFTId = wasm.TokenId.from_str(ergoConfig.RepoNFT);
+        this.RWTTokenId = wasm.TokenId.from_str(ergoConfig.RWTId);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
         this.watcherPermitAddress = wasm.Address.from_base58(watcherPermitAddress);
         this.watcherPermitContract = wasm.Contract.pay_to_address(this.watcherPermitAddress);

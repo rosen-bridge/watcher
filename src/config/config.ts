@@ -19,13 +19,10 @@ export const tokens = {
     CleanupNFT: "4444444444444444444444444444444444444444444444444444444444444444"
 }
 
-export class Config{
-    private static instance: Config;
+export class ErgoConfig{
+    private static instance: ErgoConfig;
     networkType: NetworkPrefix;
     secretKey: string;
-    url: string;
-    interval: number;
-    initialHeight: number;
     explorerUrl: string;
     nodeUrl: string;
     RWTId: string;
@@ -49,52 +46,63 @@ export class Config{
         if (SECRET_KEY === undefined) {
             throw new Error("Secret key doesn't set in config file");
         }
-
-        if (URL === undefined) {
-            throw new Error("koios URL is not set config file");
-        }
-
-        if (INTERVAL === undefined) {
-            throw new Error("Scanner interval is not set in the config file");
-        }
-
-        if (INITIAL_HEIGHT === undefined) {
-            throw new Error("Scanner initial height is not set in the config file");
-        }
-
         if (EXPLORER_URL === undefined) {
             throw new Error("Ergo Explorer Url is not set in the config");
         }
-
         if (NODE_URL === undefined) {
             throw new Error("Ergo Node Url is not set in the config");
         }
-
         if (RWT_ID === undefined) {
             throw new Error("RWTId doesn't set in config file");
         }
-
         if (REPO_NFT === undefined) {
             throw new Error("Repo NFT doesn't set in config file");
         }
 
         this.networkType = networkType;
         this.secretKey = SECRET_KEY;
-        this.url = URL;
-        this.interval = INTERVAL;
-        this.initialHeight = INITIAL_HEIGHT;
         this.explorerUrl = EXPLORER_URL;
         this.nodeUrl = NODE_URL;
         this.RWTId = RWT_ID;
         this.RepoNFT = REPO_NFT;
+    }
+
+    static getConfig() {
+        if (!ErgoConfig.instance) {
+            ErgoConfig.instance = new ErgoConfig();
+        }
+        return ErgoConfig.instance;
+    }
+}
+
+export class CardanoConfig{
+    private static instance: CardanoConfig;
+    koiosURL: string;
+    interval: number;
+    initialHeight: number;
+
+    private constructor() {
+
+        if (URL === undefined) {
+            throw new Error("koios URL is not set config file");
+        }
+        if (INTERVAL === undefined) {
+            throw new Error("Cardano Scanner interval is not set in the config file");
+        }
+        if (INITIAL_HEIGHT === undefined) {
+            throw new Error("Cardano Scanner initial height is not set in the config file");
+        }
+
+        this.koiosURL = URL;
+        this.interval = INTERVAL;
+        this.initialHeight = INITIAL_HEIGHT;
 
     }
 
     static getConfig() {
-        if (!Config.instance) {
-            Config.instance = new Config();
+        if (!CardanoConfig.instance) {
+            CardanoConfig.instance = new CardanoConfig();
         }
-        return Config.instance;
+        return CardanoConfig.instance;
     }
 }
-

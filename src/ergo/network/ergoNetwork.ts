@@ -3,19 +3,19 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { Info } from "../../objects/ergo";
 import { Address, ErgoBox } from "ergo-lib-wasm-nodejs";
 import { ergoTreeToBase58Address } from "../../api/ergoUtils";
-import { AddressBoxes, ErgoBoxJson, ErgoTx } from "./types";
+import { AddressBoxes, ErgoTx } from "./types";
 import { JsonBI } from "../../network/parser";
-import { Config } from "../../config/config";
+import { ErgoConfig } from "../../config/config";
 
-const config = Config.getConfig();
+const ergoConfig = ErgoConfig.getConfig();
 
 export const explorerApi = axios.create({
-    baseURL: config.explorerUrl,
+    baseURL: ergoConfig.explorerUrl,
     timeout: 8000,
 });
 
 export const nodeClient = axios.create({
-    baseURL: config.nodeUrl,
+    baseURL: ergoConfig.nodeUrl,
     timeout: 8000,
     headers: {"Content-Type": "application/json"}
 });
