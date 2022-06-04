@@ -34,7 +34,6 @@ mockedNodeClient.onPost(
     {source: mockedResponseBody.fraudScript})
     .reply(200, mockedResponseBody.fraudP2SAddress);
 
-
 mockedNodeClient.onPost('/transactions')
     .reply(config =>
         (config.data === mockedResponseBody.sampleTxJson ? [200, mockedResponseBody.sampleTxId] : [400, "error"])
