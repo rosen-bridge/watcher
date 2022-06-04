@@ -9,8 +9,8 @@ describe("Ergo Network(API)", () => {
     const ergoNetwork = new ErgoNetwork();
     describe("pay2ScriptAddress", () => {
         it("should returns p2sa", async () => {
-            const res = await ergoNetwork.pay2ScriptAddress(mockedResponseBody.sampleScript);
-            expect(res).to.be.equal(mockedResponseBody.p2sAddress.address);
+            const res = await ergoNetwork.pay2ScriptAddress(mockedResponseBody.fraudScript);
+            expect(res).to.be.equal(mockedResponseBody.fraudP2SAddress.address);
         });
     });
 

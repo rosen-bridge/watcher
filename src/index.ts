@@ -7,6 +7,7 @@ import { ErgoConfig } from "./config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array } from "./utils/utils";
 import { rosenConfig } from "./api/rosenConfig";
+import { Contracts } from "./api/contractAddresses";
 
 export let watcherTransaction: Transaction;
 
