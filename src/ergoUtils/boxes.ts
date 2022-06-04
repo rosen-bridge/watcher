@@ -14,12 +14,12 @@ const feeBox = require('./dataset/feeBox.json');
 export class boxes {
     static getPermits = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Implement this mocked function
-        return Promise.resolve([wasm.ErgoBox.from_json(permitBox)])
+        return Promise.resolve([wasm.ErgoBoxes.from_boxes_json(permitBox).get(0)])
     }
 
     static getWIDBox = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Implement this mocked function
-        return Promise.resolve([wasm.ErgoBox.from_json(WIDBox)])
+        return Promise.resolve([wasm.ErgoBoxes.from_boxes_json(WIDBox).get(0)])
     }
 
     static getFeeBox = async (value: number): Promise<wasm.ErgoBox> => {
@@ -34,7 +34,7 @@ export class boxes {
      * @param RWTCount
      * @param WID
      */
-    static createPermit = (value: number, height: number, RWTCount: number, WID: string): wasm.ErgoBoxCandidate => {
+    static createPermit = (value: bigint, height: number, RWTCount: number, WID: string): wasm.ErgoBoxCandidate => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
             contracts.addressCache.permitContract!,
@@ -55,7 +55,7 @@ export class boxes {
      * @param eventDigest
      * @param permitScriptHash
      */
-    static createCommitment = (value: number, height: number, WID: string, requestId: string, eventDigest: Uint8Array, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
+    static createCommitment = (value: bigint, height: number, WID: string, requestId: string, eventDigest: Uint8Array, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
         const contract = contracts.addressCache.commitmentContract!
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
@@ -77,10 +77,11 @@ export class boxes {
      * @param height
      * @param tokens
      */
-    static createPayment = (value: number, height: number, tokens: Array<wasm.Token>): wasm.ErgoBoxCandidate => {
+    static createPayment = (value: bigint, height: number, tokens: Array<wasm.Token>): wasm.ErgoBoxCandidate => {
+        const address = wasm.Address.from_base58(config.get("ergo.address"))
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
-            wasm.Contract.pay_to_address(config.get("ergo.address")),
+            wasm.Contract.pay_to_address(address),
             height
         );
         tokens.forEach(token => {

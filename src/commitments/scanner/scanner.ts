@@ -69,8 +69,9 @@ export const commitmentMain = async () => {
     const apiNetwork = new CommitmentNetworkApi();
     const scanner = new Scanner(DB, apiNetwork, config);
     await contracts.init()
+    await scanner.update()
     if (typeof INTERVAL === 'number') {
-        setInterval(scanner.update, INTERVAL * 10000);
+        setInterval(scanner.update, INTERVAL * 1000);
         setInterval(scanner.removeOldCommitments, INTERVAL * 1000);
     } else {
         console.log("scanner interval doesn't set in the config");

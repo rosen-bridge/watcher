@@ -19,7 +19,7 @@ export class CommitmentUtils {
                             commitmentAddresses: Array<string>):
         Promise<Commitment | undefined> => {
         const commitmentErgoTrees: Array<string> = commitmentAddresses.map(ad => Address.from_base58(ad).to_ergo_tree().to_base16_bytes())
-        const commitment: NodeOutputBox = tx.outputs.filter((box) =>
+        const commitment: NodeOutputBox | undefined = tx.outputs.filter((box) =>
             commitmentErgoTrees.includes(box.ergoTree)
         ).filter(box => box.assets.length > 0 && box.assets[0].tokenId == tokens.RWT)[0]
         if (commitment != undefined) {

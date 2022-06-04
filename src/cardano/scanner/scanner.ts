@@ -47,6 +47,7 @@ export const main = async () => {
     const DB = await NetworkDataBase.init(cardanoOrmConfig);
     const koiosNetwork = new KoiosNetwork();
     const scanner = new Scanner(DB, koiosNetwork, config);
+    await scanner.update()
     if (typeof INTERVAL === 'number') {
         setInterval(scanner.update, INTERVAL * 1000);
     } else {
