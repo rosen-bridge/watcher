@@ -5,7 +5,6 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { firstCommitment } from "../commitment/models/commitmentModel";
 import { contractHash } from "../../src/ergoUtils/ergoUtils";
 import { Buffer } from "buffer";
-import { tokens } from "../../config/default";
 
 const chai = require("chai")
 const spies = require("chai-spies")

@@ -10,12 +10,12 @@ const WIDBox = require('./dataset/WIDBox.json');
 export class boxes {
     static getPermits = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Implement this mocked function
-        return Promise.resolve([wasm.ErgoBox.from_json(permitBox)])
+        return Promise.resolve([wasm.ErgoBoxes.from_boxes_json(permitBox).get(0)])
     }
 
     static getWIDBox = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Implement this mocked function
-        return Promise.resolve([wasm.ErgoBox.from_json(WIDBox)])
+        return Promise.resolve([wasm.ErgoBoxes.from_boxes_json(WIDBox).get(0)])
     }
 
     /**

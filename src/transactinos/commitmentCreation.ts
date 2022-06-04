@@ -6,6 +6,8 @@ import { boxes } from "../ergoUtils/boxes";
 import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergoUtils/ergoUtils";
 import { NetworkDataBase } from "../models/networkModel";
 import { boxCreationError } from "../utils/utils";
+import { cardanoOrmConfig } from "../../config/ormconfig";
+import { Commitment, Observation } from "../objects/interfaces";
 
 const minBoxVal = parseInt(config.get?.('ergo.minBoxVal'))
 const txFee = parseInt(config.get?.('ergo.txFee'))
@@ -40,19 +42,19 @@ export class commitmentCreation {
             permit.tokens().get(0).amount().as_i64().as_num())
             .reduce((a, b) => a + b, 0)
         const outPermit = boxes.createPermit(BigInt(minBoxVal), height, RWTCount - 1, WID)
-        const rewardValue = permits.map(permit => BigInt(permit.value().as_i64().to_str())).reduce((a, b) => a + b, BigInt(0))
+        // const rewardValue = permits.map(permit => BigInt(permit.value().as_i64().to_str())).reduce((a, b) => a + b, BigInt(0))
         // TODO: Complete Watcher Payment (Token rewards)
         // Don't forget to consider WIDBox assets
         // const paymentTokens: Array<wasm.Token> = permits.map(permit => extractTokens(permit.tokens())).
-        const paymentValue = BigInt(WIDBox.value().as_i64().to_str()) + rewardValue - BigInt(txFee + 2 * minBoxVal)
-        const watcherPayment = boxes.createPayment(BigInt(paymentValue), height, [])
+        // const paymentValue = BigInt(WIDBox.value().as_i64().to_str()) + rewardValue - BigInt(txFee + 2 * minBoxVal)
+        // const watcherPayment = boxes.createPayment(BigInt(paymentValue), height, [])
         const inputBoxes = new wasm.ErgoBoxes(WIDBox);
         permits.forEach(permit => inputBoxes.add(permit))
         try {
             const signed = await createAndSignTx(
                 config.get("ergo.secret"),
                 inputBoxes,
-                [outPermit, outCommitment, watcherPayment],
+                [outPermit, outCommitment],
                 height
             )
             await ErgoNetworkApi.sendTx(signed.to_json())
@@ -85,4 +87,48 @@ export class commitmentCreation {
             }, txId, observation.id)
         }
     }
+}
+
+const firstObservations: Array<Observation> = [{
+    fromChain: "erg",
+    toChain: "cardano",
+    fromAddress: "ErgoAddress",
+    toAddress: "cardanoAddress",
+    amount: "1000000000",
+    fee: "1000000",
+    sourceChainTokenId: "ergoTokenId",
+    targetChainTokenId: "cardanoTokenId",
+    sourceTxId: "ergoTxId1",
+    sourceBlockId: "ergoBlockId",
+    requestId: "reqId1",
+}];
+
+const secondObservations: Array<Observation> = [{
+    fromChain: "erg",
+    toChain: "cardano",
+    fromAddress: "ergoAddress",
+    toAddress: "cardanoAddress",
+    amount: "1100000000",
+    fee: "1100000",
+    sourceChainTokenId: "ergoTokenId",
+    targetChainTokenId: "cardanoTokenId",
+    sourceTxId: "ergoTxId2",
+    sourceBlockId: "ergoBlockId",
+    requestId: "reqId2",
+}];
+
+export const commitmentCreationMain = async() => {
+    const DB = await NetworkDataBase.init(cardanoOrmConfig);
+    await DB.saveBlock(
+        3433333,
+        "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
+        firstObservations
+    );
+    await DB.saveBlock(
+        3433334,
+        "19b60182cba99d621b3d02457fefb4cda81f4fbde3ca719617cbed2e4cc5c0ce",
+        secondObservations
+    );
+    const cc = new commitmentCreation(DB, 0)
+    await cc.job()
 }

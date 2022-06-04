@@ -5,6 +5,7 @@ import { ErgoNetworkApi } from "./networkApi";
 import { Buffer } from "buffer";
 import { Observation } from "../objects/interfaces";
 import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
+import { ObservationEntity } from "../entities/ObservationEntity";
 let blake2b = require('blake2b')
 
 const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');
@@ -145,6 +146,7 @@ export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBo
  * @param WID
  */
 export const commitmentFromObservation = (observation: Observation, WID: string): Uint8Array => {
+    console.log(observation)
     const content = Buffer.concat([
         Buffer.from(observation.sourceTxId, "hex"),
         Buffer.from(observation.fromChain),
