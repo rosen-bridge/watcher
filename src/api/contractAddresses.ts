@@ -47,7 +47,6 @@ export class Contracts{
                 .replace("GUARD_NFT", Buffer.from(this.guardNFT).toString('base64'))
                 .replace("RSN_TOKEN", Buffer.from(RSNToken).toString('base64'))
                 .replace("PERMIT_SCRIPT_HASH", Buffer.from(watcherPermitHash).toString('base64'));
-            console.log(script)
             this.RWTRepo = await this.ergoNetwork.pay2ScriptAddress(script);
         }
         return this.RWTRepo;
