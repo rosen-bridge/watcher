@@ -28,7 +28,7 @@ export class commitmentReveal{
      */
     triggerEventCreationTx = async (commitmentBoxes: Array<ErgoBox>, observation: Observation, WIDs: Array<Uint8Array>, feeBox: ErgoBox): Promise<string> => {
         const height = await ErgoNetworkApi.getCurrentHeight()
-        const triggerEvent = await boxes.createTriggerEvent(commitmentBoxes.length* minBoxValue, height, WIDs, observation)
+        const triggerEvent = await boxes.createTriggerEvent(BigInt(commitmentBoxes.length* minBoxValue), height, WIDs, observation)
         const inputBoxes = new wasm.ErgoBoxes(feeBox);
         commitmentBoxes.forEach(box => inputBoxes.add(box))
         try {

@@ -97,7 +97,7 @@ export class boxes {
      * @param WIDs
      * @param observation
      */
-    static createTriggerEvent = (value: number, height: number, WIDs: Array<Uint8Array>, observation: Observation) => {
+    static createTriggerEvent = (value: bigint, height: number, WIDs: Array<Uint8Array>, observation: Observation) => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
             contracts.addressCache.eventTriggerContract!,

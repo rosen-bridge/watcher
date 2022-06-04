@@ -146,7 +146,6 @@ export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBo
  * @param WID
  */
 export const commitmentFromObservation = (observation: Observation, WID: string): Uint8Array => {
-    console.log(observation)
     const content = Buffer.concat([
         Buffer.from(observation.sourceTxId, "hex"),
         Buffer.from(observation.fromChain),
