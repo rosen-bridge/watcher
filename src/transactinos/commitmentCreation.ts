@@ -37,15 +37,15 @@ export class commitmentCreation {
         const height = await ErgoNetworkApi.getCurrentHeight()
         const permitHash = contractHash(contracts.addressCache.permitContract!)
         const outCommitment = boxes.createCommitment(BigInt(minBoxVal), height, WID, requestId, eventDigest, permitHash)
-        const RWTCount: number = permits.map(permit =>
-            permit.tokens().get(0).amount().as_i64().as_num())
-            .reduce((a, b) => a + b, 0)
+        const RWTCount: bigint = permits.map(permit =>
+            BigInt(permit.tokens().get(0).amount().as_i64().to_str()))
+            .reduce((a, b) => a + b, BigInt(0))
         if(RWTCount <= 1){
             // TODO: Fix this problem
             console.log("Not enough RWT tokens to create a new commitment")
             return ""
         }
-        const outPermit = boxes.createPermit(BigInt(minBoxVal), height, RWTCount - 1, WID)
+        const outPermit = boxes.createPermit(BigInt(minBoxVal), height, RWTCount - BigInt(1), WID)
         const inputBoxes = new wasm.ErgoBoxes(permits[0]);
         WIDBox.forEach(box => inputBoxes.add(box))
         permits.slice(1).forEach(permit => inputBoxes.add(permit))

@@ -82,7 +82,7 @@ export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.Er
         throw new boxCreationError
     } else {
         Object.entries(tokens).forEach(([key, value]) => {
-            if (value != BigInt(0)) {
+            if (value !== BigInt(0)) {
                 throw new boxCreationError
             }
         })

@@ -16,7 +16,7 @@ export default {
         txFee: 1000000,
         minBoxVal: 1000000,
         address: "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT",
-        secret: "b3a6478ffd4a75a79463507552aeb052faf456e862a48f776ca21167cc1db3a8",
+        secret: "1111111111111111111111111111111111111111111111111111111111111111",
         WID: "906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82"
     },
     commitmentScanner: {
