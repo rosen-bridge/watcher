@@ -10,7 +10,7 @@ router.get("/generate", (req, res) => {
     try {
         ergoConfig = ErgoConfig.getConfig();
     } catch (e) {
-        res.status(500).send(e);
+        res.status(500).send({message: e, code: 500});
         return;
     }
     const address = secretKey.get_address().to_base58(ergoConfig.networkType);

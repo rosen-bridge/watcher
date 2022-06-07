@@ -27,7 +27,6 @@ export class ErgoNetwork{
      * @param script
      */
     pay2ScriptAddress = (script: string): Promise<string> => {
-        console.log(script)
         return nodeClient.post("/script/p2sAddress", {source: script}).then(
             res => res.data.address
         )

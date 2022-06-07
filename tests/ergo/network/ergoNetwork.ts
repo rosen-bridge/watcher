@@ -122,11 +122,18 @@ describe("Ergo Network(API)", () => {
         });
     });
 
-    // describe("trackMemPool", () => {
-    //     it("should return last box in the mempool", () => {
-    //        const res=await ergoNetwork.trackMemPool()
-    //     });
-    // });
+    describe("trackMemPool", () => {
+        it("should return last box in the mempool", async () => {
+            const ergoBox = wasm.ErgoBox.from_json(mockedResponseBody.unspentBox);
+            const res = await ergoNetwork.trackMemPool(ergoBox);
+            expect(
+                res.box_id().to_str()
+            ).to.be.equal(
+                "2afbd9393fb1ddb982e9d82a269e27b1b97184c1bc45451d5c63dae28d25d708"
+            );
+
+        });
+    });
 
     describe("getMemPoolTxForAddress", () => {
         it("should return mempool transactions", async () => {

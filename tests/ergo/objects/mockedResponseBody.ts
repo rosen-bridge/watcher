@@ -1466,6 +1466,90 @@ export const mockedResponseBody = {
 
     sampleTxId: "2ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
 
+    unspentBox:
+        `{
+            "boxId": "ec0dcb8cfd0a8460068830210d723e4d0ec14b2adeaf7076ad64b606aef7a881",
+            "transactionId": "0359045585957c6cba13cb873171b41da5f2bde97aee840719a40c51ec2f210b",
+            "blockId": "024c093294376f40bc524ced694bb38020f242c3bafc4c0e789dcc74baf909a5",
+            "value": 1000000000,
+            "index": 0,
+            "globalIndex": 483293,
+            "creationHeight": 221243,
+            "settlementHeight": 221245,
+            "ergoTree": "0008cd03df7b309dc5db4506dd1f400eff35931cf889338d29aacefba8491633333d6b3c",
+            "address": "9iAEDf2b4J5T1QSAPStkSbSzNUUW38cy8EMJkKC3cxHCBoaQYfY",
+            "assets": [],
+            "additionalRegisters": {},
+            "spentTransactionId": null,
+            "mainChain": true
+        }`,
+
+    mempoolTxs:
+        `{
+            "items": [
+                {
+                    "id": "66bc08610b836e810620236eb727b7a7264d5b6e6428eb94a6aed84895f61b15",
+                    "creationTimestamp": 1654588295781,
+                    "inputs": [
+                        {
+                            "boxId": "ec0dcb8cfd0a8460068830210d723e4d0ec14b2adeaf7076ad64b606aef7a881",
+                            "value": 1000000000,
+                            "index": 0,
+                            "spendingProof": "15311039251ca496b21eaf89794ec14db748fe3974060d74b6e8dbcce40aa87bacc6eec9cd59e2de987f59f543c9fff704859a71064aafc2",
+                            "outputBlockId": "024c093294376f40bc524ced694bb38020f242c3bafc4c0e789dcc74baf909a5",
+                            "outputTransactionId": "0359045585957c6cba13cb873171b41da5f2bde97aee840719a40c51ec2f210b",
+                            "outputIndex": 0,
+                            "ergoTree": "0008cd03df7b309dc5db4506dd1f400eff35931cf889338d29aacefba8491633333d6b3c",
+                            "address": "9iAEDf2b4J5T1QSAPStkSbSzNUUW38cy8EMJkKC3cxHCBoaQYfY",
+                            "assets": [],
+                            "additionalRegisters": {}
+                        }
+                    ],
+                    "dataInputs": [],
+                    "outputs": [
+                        {
+                            "boxId": "2afbd9393fb1ddb982e9d82a269e27b1b97184c1bc45451d5c63dae28d25d708",
+                            "transactionId": "66bc08610b836e810620236eb727b7a7264d5b6e6428eb94a6aed84895f61b15",
+                            "value": 1000000,
+                            "index": 0,
+                            "creationHeight": 0,
+                            "ergoTree": "0008cd03df7b309dc5db4506dd1f400eff35931cf889338d29aacefba8491633333d6b3c",
+                            "address": "9iAEDf2b4J5T1QSAPStkSbSzNUUW38cy8EMJkKC3cxHCBoaQYfY",
+                            "assets": [],
+                            "additionalRegisters": {},
+                            "spentTransactionId": null
+                        },
+                        {
+                            "boxId": "00499ad9b345018ee3ec3a661adaed59736ec8cbccd2ffd79d03805563eb2a48",
+                            "transactionId": "66bc08610b836e810620236eb727b7a7264d5b6e6428eb94a6aed84895f61b15",
+                            "value": 998000000,
+                            "index": 1,
+                            "creationHeight": 0,
+                            "ergoTree": "0008cd03df7b309dc5db4506dd1f400eff35931cf889338d29aacefba8491633333d6b3c",
+                            "address": "9iAEDf2b4J5T1QSAPStkSbSzNUUW38cy8EMJkKC3cxHCBoaQYfY",
+                            "assets": [],
+                            "additionalRegisters": {},
+                            "spentTransactionId": null
+                        },
+                        {
+                            "boxId": "467fc622b55a8e0540c1b42b9ed221c558e77dfd5f71d93b484700206d813bbe",
+                            "transactionId": "66bc08610b836e810620236eb727b7a7264d5b6e6428eb94a6aed84895f61b15",
+                            "value": 1000000,
+                            "index": 2,
+                            "creationHeight": 0,
+                            "ergoTree": "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304",
+                            "address": "2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe",
+                            "assets": [],
+                            "additionalRegisters": {},
+                            "spentTransactionId": null
+                        }
+                    ],
+                    "size": 291
+                }
+            ],
+            "total": 1
+        }`,
+
 }
 
 
