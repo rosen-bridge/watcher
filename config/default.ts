@@ -2,7 +2,7 @@ export default {
     node: {
         URL: "https://testnet.koios.rest/api/v0",
     },
-    scanner: {
+    cardano: {
         interval: 10,
         initialBlockHeight: 3471392,
     },
@@ -22,9 +22,3 @@ export default {
     },
 };
 
-export const tokens = {
-    RWT: "469255244f7b12ea7d375ec94ec8d2838a98be0779c8231ece3529ae69c421db",
-    RepoNFT: "2222222222222222222222222222222222222222222222222222222222222222",
-    GuardNFT: "3333333333333333333333333333333333333333333333333333333333333333",
-    CleanupNFT: "4444444444444444444444444444444444444444444444444444444444444444"
-}

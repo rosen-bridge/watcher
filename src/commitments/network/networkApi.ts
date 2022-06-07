@@ -1,18 +1,19 @@
 import axios from "axios";
-import config from "config";
-import {AbstractNetworkConnector} from "../../network/abstractNetworkConnector";
-import {Block} from "../../objects/interfaces";
-import {NodeBlock, NodeTransaction} from "./ergoApiModels";
+import { AbstractNetworkConnector } from "../../network/abstractNetworkConnector";
+import { Block } from "../../objects/interfaces";
+import { NodeBlock, NodeTransaction } from "./ergoApiModels";
+import { ErgoConfig } from "../../config/config";
 
-const URL: string | undefined = config.get?.('ergo.nodeUrl');
+const ergoConfig = ErgoConfig.getConfig();
+
 export const nodeApi = axios.create({
-    baseURL: URL,
+    baseURL: ergoConfig.nodeUrl,
     timeout: 10000
 })
 
-export class ErgoNetworkApi extends AbstractNetworkConnector {
+export class ErgoNetworkApi extends AbstractNetworkConnector{
     getBlockAtHeight = (height: number): Promise<Block> => {
-        return nodeApi.get<Array<{id: string}>>(
+        return nodeApi.get<Array<{ id: string }>>(
             `/blocks/chainSlice`, {params: {fromHeight: height, toHeight: height}}
         ).then(
             res => {
@@ -25,7 +26,7 @@ export class ErgoNetworkApi extends AbstractNetworkConnector {
     }
 
     getCurrentHeight = (): Promise<number> => {
-        return nodeApi.get<{fullHeight: number}>(
+        return nodeApi.get<{ fullHeight: number }>(
             `/info`
         ).then(
             res => {

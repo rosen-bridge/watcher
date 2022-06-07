@@ -1,37 +1,33 @@
-import {AbstractScanner} from "../../scanner/abstractScanner";
-import {CommitmentDataBase} from "../models/commitmentModel";
-import config, {IConfig} from "config";
-import {Block, Commitment} from "../../objects/interfaces";
-import {commitmentOrmConfig} from "../../../config/commitmentOrmConfig";
-import {ErgoNetworkApi} from "../network/networkApi";
-import {CBlockEntity} from "../../entities/CBlockEntity";
-import {CommitmentUtils} from "./utils";
-import {contracts} from "../contracts/contracts";
+import { AbstractScanner } from "../../scanner/abstractScanner";
+import { CommitmentDataBase } from "../models/commitmentModel";
+import config, { IConfig } from "config";
+import { Block, Commitment } from "../../objects/interfaces";
+import { commitmentOrmConfig } from "../../../config/commitmentOrmConfig";
+import { ErgoNetworkApi } from "../network/networkApi";
+import { CBlockEntity } from "../../entities/CBlockEntity";
+import { CommitmentUtils } from "./utils";
+import { contracts } from "../contracts/contracts";
+import { ErgoConfig } from "../../config/config";
 
-const INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
+const ergoConfig = ErgoConfig.getConfig();
 
 export type CommitmentInformation = {
     newCommitments: Array<Commitment>
     updatedCommitments: Array<string>
 }
 
-export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation> {
+export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation>{
     _dataBase: CommitmentDataBase;
     _networkAccess: ErgoNetworkApi;
     _config: IConfig;
-    _INITIAL_HEIGHT: number;
+    _initialHeight: number;
 
     constructor(db: CommitmentDataBase, network: ErgoNetworkApi, config: IConfig) {
         super();
         this._dataBase = db;
         this._networkAccess = network;
         this._config = config;
-        const INITIAL_HEIGHT: number | undefined = config.get?.('commitmentScanner.initialBlockHeight');
-        if (typeof INITIAL_HEIGHT !== 'number') {
-            throw new Error("scanner initial height doesn't set in the config!");
-        } else {
-            this._INITIAL_HEIGHT = INITIAL_HEIGHT;
-        }
+        this._initialHeight = ergoConfig.commitmentInitialHeight;
     }
 
     /**
@@ -54,7 +50,7 @@ export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation
      * removes old spent commitments older than block height limit config
      */
     removeOldCommitments = async () => {
-        const heightLimit: number = config.get?.('commitmentScanner.heightLimit');
+        const heightLimit = ergoConfig.commitmentHeightLimit;
         const currentHeight = await this._networkAccess.getCurrentHeight()
         const commitments = await this._dataBase.getOldSpentCommitments(currentHeight - heightLimit)
         await this._dataBase.deleteCommitments(commitments.map(commitment => commitment.commitmentBoxId))
@@ -69,10 +65,7 @@ export const commitmentMain = async () => {
     const apiNetwork = new ErgoNetworkApi();
     const scanner = new Scanner(DB, apiNetwork, config);
     await contracts.init(apiNetwork)
-    if (typeof INTERVAL === 'number') {
-        setInterval(scanner.update, INTERVAL * 10000);
-        setInterval(scanner.removeOldCommitments, INTERVAL * 1000);
-    } else {
-        console.log("scanner interval doesn't set in the config");
-    }
+    setInterval(scanner.update, ergoConfig.commitmentInterval * 1000);
+    setInterval(scanner.removeOldCommitments, ergoConfig.commitmentInterval * 1000);
+
 }

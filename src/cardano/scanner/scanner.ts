@@ -6,27 +6,22 @@ import { AbstractScanner } from "../../scanner/abstractScanner";
 import { NetworkDataBase } from "../../models/networkModel";
 import { Block, Observation } from "../../objects/interfaces";
 import { BlockEntity } from "../../entities/BlockEntity";
+import { CardanoConfig } from "../../config/config";
 
-const INTERVAL: number | undefined = config.get?.('scanner.interval');
+const cardanoConfig = CardanoConfig.getConfig();
 
-export class Scanner extends AbstractScanner<BlockEntity, Array<Observation>> {
+export class Scanner extends AbstractScanner<BlockEntity, Array<Observation>>{
     _dataBase: NetworkDataBase;
     _networkAccess: KoiosNetwork;
     _config: IConfig;
-    _INITIAL_HEIGHT: number;
+    _initialHeight: number;
 
     constructor(db: NetworkDataBase, network: KoiosNetwork, config: IConfig) {
         super();
         this._dataBase = db;
         this._networkAccess = network;
         this._config = config;
-        const INITIAL_HEIGHT: number | undefined = config.get?.('scanner.initialBlockHeight');
-        if (typeof INITIAL_HEIGHT !== 'number') {
-            throw new Error("scanner initial height doesn't set in the config!");
-        } else {
-            this._INITIAL_HEIGHT = INITIAL_HEIGHT;
-        }
-
+        this._initialHeight = cardanoConfig.initialHeight;
     }
 
     /**
@@ -47,10 +42,5 @@ export const main = async () => {
     const DB = await NetworkDataBase.init(cardanoOrmConfig);
     const koiosNetwork = new KoiosNetwork();
     const scanner = new Scanner(DB, koiosNetwork, config);
-    if (typeof INTERVAL === 'number') {
-        setInterval(scanner.update, INTERVAL * 1000);
-    } else {
-        console.log("scanner interval doesn't set in the config");
-    }
-
+    setInterval(scanner.update, cardanoConfig.interval * 1000);
 }

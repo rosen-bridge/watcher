@@ -5,19 +5,16 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
 const URL: string | undefined = config.get?.('node.URL');
-const INTERVAL: number | undefined = config.get?.('scanner.interval');
-const INITIAL_HEIGHT: number | undefined = config.get?.('scanner.initialBlockHeight');
+const INTERVAL: number | undefined = config.get?.('cardano.interval');
+const INITIAL_HEIGHT: number | undefined = config.get?.('cardano.initialBlockHeight');
+const COMMITMENT_INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
+const COMMITMENT_INITIAL_HEIGHT: number | undefined = config.get?.('commitmentScanner.initialBlockHeight');
+const COMMITMENT_HEIGHT_LIMIT: number | undefined = config.get?.('commitmentScanner.heightLimit');
+const CLEANUP_CONFIRMATION: number | undefined = config.get?.('commitmentScanner.cleanupConfirmation');
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
 const RWT_ID: string | undefined = config.get?.('ergo.RWTId');
 const REPO_NFT: string | undefined = config.get?.('ergo.repoNFT');
-
-export const tokens = {
-    RWT: "469255244f7b12ea7d375ec94ec8d2838a98be0779c8231ece3529ae69c421db",
-    RepoNFT: "2222222222222222222222222222222222222222222222222222222222222222",
-    GuardNFT: "3333333333333333333333333333333333333333333333333333333333333333",
-    CleanupNFT: "4444444444444444444444444444444444444444444444444444444444444444"
-}
 
 export class ErgoConfig{
     private static instance: ErgoConfig;
@@ -27,6 +24,10 @@ export class ErgoConfig{
     nodeUrl: string;
     RWTId: string;
     RepoNFT: string;
+    commitmentInterval: number;
+    commitmentInitialHeight: number;
+    commitmentHeightLimit: number;
+    cleanupConfirmation: number;
 
     private constructor() {
         let networkType: NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -58,6 +59,18 @@ export class ErgoConfig{
         if (REPO_NFT === undefined) {
             throw new Error("Repo NFT doesn't set in config file");
         }
+        if (COMMITMENT_INTERVAL === undefined) {
+            throw new Error("Commitment scanner interval doesn't set correctly");
+        }
+        if (COMMITMENT_INITIAL_HEIGHT === undefined) {
+            throw new Error("Commitment scanner initial height doesn't set correctly");
+        }
+        if (COMMITMENT_HEIGHT_LIMIT === undefined) {
+            throw new Error("Commitment scanner height limit doesn't set correctly");
+        }
+        if (CLEANUP_CONFIRMATION === undefined) {
+            throw new Error("Clean up doesn't set correctly");
+        }
 
         this.networkType = networkType;
         this.secretKey = SECRET_KEY;
@@ -65,6 +78,10 @@ export class ErgoConfig{
         this.nodeUrl = NODE_URL;
         this.RWTId = RWT_ID;
         this.RepoNFT = REPO_NFT;
+        this.commitmentInterval = COMMITMENT_INTERVAL;
+        this.commitmentInitialHeight = COMMITMENT_INITIAL_HEIGHT;
+        this.commitmentHeightLimit = COMMITMENT_HEIGHT_LIMIT;
+        this.cleanupConfirmation = CLEANUP_CONFIRMATION;
     }
 
     static getConfig() {
