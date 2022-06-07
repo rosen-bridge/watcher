@@ -206,13 +206,11 @@ describe("Watcher Permit Transactions", () => {
             );
             const ergoBoxes = await transaction.ergoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
             let map = transaction.inputBoxesTokenMap(ergoBoxes, 0);
-            console.log(map)
             expect(map.get(tokens[0])).to.be.equal("1");
             expect(map.get(tokens[1])).to.be.equal("100");
             expect(map.get(tokens[2])).to.be.equal("100");
             expect(map.get(tokens[3])).to.be.equal("100");
             map = transaction.inputBoxesTokenMap(ergoBoxes, 1);
-            console.log(map)
             expect(map.get(tokens[1])).to.be.equal("100");
             expect(map.get(tokens[2])).to.be.equal("100");
             expect(map.get(tokens[3])).to.be.equal("100");
