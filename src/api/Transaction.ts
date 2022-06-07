@@ -1,7 +1,6 @@
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
-import { Contracts } from "./contractAddresses";
 import { rosenConfig } from "./rosenConfig";
 import { ErgoConfig } from "../config/config";
 
@@ -34,7 +33,6 @@ export class Transaction{
     repoAddressContract: wasm.Contract;
     repoAddress: wasm.Address;
     watcherLockState?: boolean;
-    contracts: Contracts;
 
     /**
      * constructor
@@ -52,7 +50,6 @@ export class Transaction{
         watcherRepoAddress: string,
     ) {
         this.ergoNetwork = new ErgoNetwork();
-        this.contracts = new Contracts();
         this.RepoNFTId = wasm.TokenId.from_str(ergoConfig.RepoNFT);
         this.RWTTokenId = wasm.TokenId.from_str(ergoConfig.RWTId);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);

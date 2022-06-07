@@ -7,8 +7,8 @@ export default {
         }
     },
     ergo: {
-        explorerUrl: "http://10.10.9.3:7000",
-        nodeUrl: "http://10.10.9.3:9064",
+        explorerUrl: "",
+        nodeUrl: "",
         networkType: "Mainnet",
         watcherSecretKey: "1111111111111111111111111111111111111111111111111111111111111111",
         RWTId: "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267",
