@@ -4,7 +4,7 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
-const URL: string | undefined = config.get?.('node.URL');
+const URL: string | undefined = config.get?.('cardano.node.URL');
 const INTERVAL: number | undefined = config.get?.('cardano.interval');
 const INITIAL_HEIGHT: number | undefined = config.get?.('cardano.initialBlockHeight');
 const COMMITMENT_INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
