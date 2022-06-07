@@ -1,12 +1,12 @@
-import {AbstractScanner} from "../../scanner/abstractScanner";
-import {CommitmentDataBase} from "../models/commitmentModel";
-import config, {IConfig} from "config";
-import {Block, Commitment} from "../../objects/interfaces";
-import {commitmentOrmConfig} from "../../../config/commitmentOrmConfig";
-import {ErgoNetworkApi} from "../network/networkApi";
-import {CBlockEntity} from "../../entities/CBlockEntity";
-import {CommitmentUtils} from "./utils";
-import {contracts} from "../contracts/contracts";
+import { AbstractScanner } from "../../scanner/abstractScanner";
+import { CommitmentDataBase } from "../models/commitmentModel";
+import config, { IConfig } from "config";
+import { Block, Commitment } from "../../objects/interfaces";
+import { commitmentOrmConfig } from "../../../config/commitmentOrmConfig";
+import { CommitmentNetworkApi } from "../network/networkApi";
+import { CBlockEntity } from "../../entities/CBlockEntity";
+import { CommitmentUtils } from "./utils";
+import { contracts } from "../../contracts/contracts";
 
 const INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
 
@@ -17,11 +17,11 @@ export type CommitmentInformation = {
 
 export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation> {
     _dataBase: CommitmentDataBase;
-    _networkAccess: ErgoNetworkApi;
+    _networkAccess: CommitmentNetworkApi;
     _config: IConfig;
     _INITIAL_HEIGHT: number;
 
-    constructor(db: CommitmentDataBase, network: ErgoNetworkApi, config: IConfig) {
+    constructor(db: CommitmentDataBase, network: CommitmentNetworkApi, config: IConfig) {
         super();
         this._dataBase = db;
         this._networkAccess = network;
@@ -66,11 +66,12 @@ export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation
  */
 export const commitmentMain = async () => {
     const DB = await CommitmentDataBase.init(commitmentOrmConfig);
-    const apiNetwork = new ErgoNetworkApi();
+    const apiNetwork = new CommitmentNetworkApi();
     const scanner = new Scanner(DB, apiNetwork, config);
-    await contracts.init(apiNetwork)
+    await contracts.init()
+    await scanner.update()
     if (typeof INTERVAL === 'number') {
-        setInterval(scanner.update, INTERVAL * 10000);
+        setInterval(scanner.update, INTERVAL * 1000);
         setInterval(scanner.removeOldCommitments, INTERVAL * 1000);
     } else {
         console.log("scanner interval doesn't set in the config");

@@ -4,6 +4,7 @@ import { entities } from "../../../src/entities";
 import { migrations } from "../../../src/migrations";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
+import { firstCommitment } from "../../commitment/models/commitmentModel";
 
 export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -20,6 +21,7 @@ export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
 export const firstObservations: Array<Observation> = [{
     fromChain: "erg",
     toChain: "cardano",
+    fromAddress: "ErgoAddress",
     toAddress: "cardanoAddress",
     amount: "1000000000",
     fee: "1000000",
@@ -33,6 +35,7 @@ export const firstObservations: Array<Observation> = [{
 export const secondObservations: Array<Observation> = [{
     fromChain: "erg",
     toChain: "cardano",
+    fromAddress: "ergoAddress",
     toAddress: "cardanoAddress",
     amount: "1100000000",
     fee: "1100000",
@@ -62,6 +65,23 @@ describe("Database functions", async () => {
                 secondObservations
             );
             expect(res).to.be.true;
+        });
+    });
+
+    describe("getConfirmedObservations", () => {
+        it("returns 1 row", async () => {
+            const res = await DB.getConfirmedObservations(0);
+            expect(res).to.have.length(1)
+        });
+    });
+
+    describe("saveCommitment", () => {
+        it("should save the commitment and update the observation", async () => {
+            const observation = (await DB.getConfirmedObservations(0))[0]
+            const res = await DB.saveCommitment(firstCommitment, "txId", observation.id)
+            expect(res).to.be.false
+            const observation2 = (await DB.getConfirmedObservations(0))[0]
+            expect(observation2.commitment).to.not.null
         });
     });
 

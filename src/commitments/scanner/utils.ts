@@ -1,10 +1,10 @@
-import {Commitment} from "../../objects/interfaces";
-import {tokens} from "../../../config/default";
-import {decodeCollColl, decodeStr} from "../../utils/utils";
-import {NodeOutputBox, NodeTransaction} from "../network/ergoApiModels";
-import {CommitmentDataBase} from "../models/commitmentModel";
-import {Address} from "ergo-lib-wasm-nodejs";
-import {contracts} from "../contracts/contracts";
+import { Commitment } from "../../objects/interfaces";
+import { tokens } from "../../../config/default";
+import { NodeOutputBox, NodeTransaction } from "../network/ergoApiModels";
+import { CommitmentDataBase } from "../models/commitmentModel";
+import { Address } from "ergo-lib-wasm-nodejs";
+import { contracts } from "../../contracts/contracts";
+import { decodeCollColl, decodeStr } from "../../ergoUtils/ergoUtils";
 
 export class CommitmentUtils {
 
@@ -19,14 +19,14 @@ export class CommitmentUtils {
                             commitmentAddresses: Array<string>):
         Promise<Commitment | undefined> => {
         const commitmentErgoTrees: Array<string> = commitmentAddresses.map(ad => Address.from_base58(ad).to_ergo_tree().to_base16_bytes())
-        const commitment: NodeOutputBox = tx.outputs.filter((box) =>
+        const commitment: NodeOutputBox | undefined = tx.outputs.filter((box) =>
             commitmentErgoTrees.includes(box.ergoTree)
         ).filter(box => box.assets.length > 0 && box.assets[0].tokenId == tokens.RWT)[0]
-        if(commitment != undefined){
+        if (commitment != undefined) {
             const WID = (await decodeCollColl(commitment.additionalRegisters['R4']))[0]
             const requestId = (await decodeCollColl(commitment.additionalRegisters['R5']))[0]
             const eventDigest = await decodeStr(commitment.additionalRegisters['R6'])
-            return{
+            return {
                 WID: Buffer.from(WID).toString('hex'),
                 eventId: Buffer.from(requestId).toString('hex'),
                 commitment: eventDigest,
@@ -46,7 +46,7 @@ export class CommitmentUtils {
         const commitments: Array<Commitment> = []
         for (let i = 0; i < txs.length; i++) {
             const c = await this.checkTx(txs[i], [contracts.addressCache.commitment!])
-            if(c!== undefined) commitments.push(c);
+            if (c !== undefined) commitments.push(c);
         }
         return commitments;
     }
@@ -62,7 +62,7 @@ export class CommitmentUtils {
                                                database: CommitmentDataBase,
                                                newCommitments: Array<string>) => {
         let updatedCommitments: Array<string> = []
-        for(const tx of txs) {
+        for (const tx of txs) {
             const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
             const foundCommitments = (await database.findCommitmentsById(inputBoxIds)).map(commitment => commitment.commitmentBoxId)
             const newUpdatedCommitments = inputBoxIds.filter(boxId => newCommitments.includes(boxId))

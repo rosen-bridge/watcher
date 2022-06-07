@@ -1,8 +1,5 @@
-import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
-import { BlockEntity } from "../entities/BlockEntity";
-import { CommitmentEntity } from "../entities/CommitmentEntity";
-import { ObservationEntity } from "../entities/ObservationEntity";
-import { Block, Observation } from "../objects/interfaces";
+import { DataSource, DeleteResult, Repository } from "typeorm";
+import { Block } from "../objects/interfaces";
 
 export abstract class AbstractDataBase <BlockT, DataT>{
     abstract dataSource: DataSource;

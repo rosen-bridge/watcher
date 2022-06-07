@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
-import {ObservedCommitmentEntity} from "./ObservedCommitmentEntity";
+import { ObservedCommitmentEntity } from "./ObservedCommitmentEntity";
 
 @Entity()
 export class CBlockEntity {

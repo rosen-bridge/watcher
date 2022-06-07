@@ -1,30 +1,33 @@
-import * as wasm from "ergo-lib-wasm-nodejs";
-import {ErgoBox} from "ergo-lib-wasm-nodejs";
-import config from "config";
 
-const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');
+export class boxCreationError extends Error {
+    constructor(message?: string) {
+        super(message)
+        this.name = "BoxCreationError"
+    }
+}
 
 export function notEmpty<T>(value: T | null | undefined): value is T {
     return value !== null && value !== undefined;
 }
 
-export const extractBoxes = (tx: wasm.Transaction): Array<ErgoBox> => {
-    return Array(tx.outputs().len()).fill("")
-        .map((item, index) => tx.outputs().get(index))
+export function toHexString(byteArray: Uint8Array) {
+    return Array.from(byteArray, function(byte) {
+        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('')
 }
 
-export const ergoTreeToAddress = (ergoTree: wasm.ErgoTree): wasm.Address => {
-    return wasm.Address.recreate_from_ergo_tree(ergoTree)
+export function bigIntToUint8Array(num: bigint) {
+    const b = new ArrayBuffer(8)
+    new DataView(b).setBigUint64(0, num);
+    return new Uint8Array(b);
 }
 
-export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree): string => {
-    return ergoTreeToAddress(ergoTree).to_base58(networkType)
-}
-
-export const decodeCollColl = async (str: string): Promise<Uint8Array[]> => {
-    return wasm.Constant.decode_from_base16(str).to_coll_coll_byte()
-}
-
-export const decodeStr = async (str: string): Promise<string> => {
-    return Buffer.from(wasm.Constant.decode_from_base16(str).to_byte_array()).toString('hex')
+export function applyMixins(derivedCtor: any, baseCtors: any[]) {
+    baseCtors.forEach(baseCtor => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
+            if (name !== 'constructor') {
+                derivedCtor.prototype[name] = baseCtor.prototype[name];
+            }
+        });
+    });
 }

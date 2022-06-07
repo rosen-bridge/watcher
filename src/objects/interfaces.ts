@@ -6,6 +6,7 @@ export interface Block {
 export interface Observation {
     fromChain: string
     toChain: string
+    fromAddress: string
     toAddress: string
     amount: string
     fee: string
