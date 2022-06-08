@@ -1,10 +1,12 @@
 import { Observation } from "../../src/objects/interfaces";
 import { commitmentFromObservation, contractHash, createChangeBox, extractBoxes } from "../../src/ergoUtils/ergoUtils";
 import { expect } from "chai";
-import { boxCreationError, toHexString } from "../../src/utils/utils";
+import { boxCreationError, uint8ArrayToHex } from "../../src/utils/utils";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import config from "config";
-import { cache } from "./boxes";
+import { ErgoConfig } from "../../src/config/config";
+import { rosenConfig } from "../../src/api/rosenConfig";
+
+const ergoConfig = ErgoConfig.getConfig();
 
 const observation: Observation = {
     fromChain: "ADA",
@@ -27,16 +29,16 @@ describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {
         it("should return the correct commitment", () => {
             const res = commitmentFromObservation(observation, WID)
-            expect(toHexString(res)).to.eql("e53f94b874427ddc736f0fd2e71bb0c7bff4dc18e8a07a1d9b2f84960ca97ccf")
+            expect(uint8ArrayToHex(res)).to.eql("e53f94b874427ddc736f0fd2e71bb0c7bff4dc18e8a07a1d9b2f84960ca97ccf")
         })
     })
 
     describe("createChangeBox", () => {
         const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson)
-        const totalValue = extractBoxes(boxes).map(box => box.value().as_i64().as_num()).reduce((a, b) => a+b, 0)
-        const secretHex: string = config.get?.('ergo.secret')
+        const totalValue = extractBoxes(boxes).map(box => box.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
+        const secretHex: string = ergoConfig.secretKey;
         const secret = wasm.SecretKey.dlog_from_bytes(Uint8Array.from(Buffer.from(secretHex, "hex")))
-        const txFee = parseInt(config.get?.('ergo.txFee'))
+        const txFee = parseInt(rosenConfig.fee)
         const contract = wasm.Contract.pay_to_address(secret.get_address())
 
         it("should not return change box all assets are spent", () => {
@@ -56,7 +58,9 @@ describe("Testing ergoUtils", () => {
                 contract,
                 10
             ).build()]
-            expect(function(){createChangeBox(boxes, outputs, 10, secret)}).to.throw(boxCreationError)
+            expect(function () {
+                createChangeBox(boxes, outputs, 10, secret)
+            }).to.throw(boxCreationError)
         })
         it("should return change box with all tokens", () => {
             const res = createChangeBox(boxes, [], 10, secret)
@@ -74,14 +78,15 @@ describe("Testing ergoUtils", () => {
                 wasm.TokenAmount.from_i64(wasm.I64.from_str("10")))
             const res = createChangeBox(boxes, [builder.build()], 10, secret)
             expect(res).to.not.null
-            expect(res?.value().as_i64().as_num()).to.eql(totalValue - 2*txFee)
+            expect(res?.value().as_i64().as_num()).to.eql(totalValue - 2 * txFee)
             expect(res?.tokens().get(0).amount().as_i64().as_num()).to.eql(90)
         })
     })
 
     describe("contractHash", () => {
         it("tests the contract hash creation", () => {
-            const data = contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(cache.fraud!)))
+            const fraudAddress = "LFz5FPkW7nPVq2NA5YcZAdSTVwt2BDL1ixGkVvoU7mNY3B8PoX6ix4YiqUe9WMRPQNdPZD7BJESqWiXwvjHh2Fik3XxFz6JYJLCS5WKrgzzZeXDctKRHYydwLbxpqXjqQda7s7M6FzuZ4uCdKudW19Ku8caVcZY6kQfqb8PUiRMpRQPuqfYtcr9S2feShR3BicKV9m2upFVmjd7bzsV6sXZXdaSAuCYCCoNbSoasJ9Xxtg1NVE94d";
+            const data = contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(fraudAddress)))
             expect(data.toString("base64")).to.eql("ZKVYGZQSUzUZtgTQ6rtiZDba9hT6mOuvpBHNXw7Z7ZY=")
         })
     })

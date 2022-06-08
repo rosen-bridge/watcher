@@ -4,6 +4,13 @@ import { ErgoConfig } from "../config/config";
 
 const ergoConfig = ErgoConfig.getConfig();
 
+export class boxCreationError extends Error {
+    constructor(message?: string) {
+        super(message)
+        this.name = "BoxCreationError"
+    }
+}
+
 export function notEmpty<T>(value: T | null | undefined): value is T {
     return value !== null && value !== undefined;
 }
@@ -32,6 +39,13 @@ export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree): string => {
 export const decodeCollColl = async (str: string): Promise<Uint8Array[]> => {
     return wasm.Constant.decode_from_base16(str).to_coll_coll_byte()
 }
+
+export function bigIntToUint8Array(num: bigint) {
+    const b = new ArrayBuffer(8)
+    new DataView(b).setBigUint64(0, num);
+    return new Uint8Array(b);
+}
+
 
 export const decodeStr = async (str: string): Promise<string> => {
     return Buffer.from(wasm.Constant.decode_from_base16(str).to_byte_array()).toString('hex')

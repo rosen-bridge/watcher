@@ -1,13 +1,16 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import config from "config";
 import { ErgoNetworkApi } from "./networkApi";
-import { Buffer } from "buffer";
 import { Observation } from "../objects/interfaces";
 import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
+import { rosenConfig } from "../api/rosenConfig";
+import { ErgoConfig } from "../config/config";
+
 let blake2b = require('blake2b')
 
-const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');
-const txFee = parseInt(config.get?.('ergo.txFee'))
+const ergoConfig = ErgoConfig.getConfig();
+
+const networkType: wasm.NetworkPrefix = ergoConfig.networkType;
+const txFee = parseInt(rosenConfig.fee)
 
 export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
     return Array(boxes.len()).fill("")

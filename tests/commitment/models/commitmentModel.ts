@@ -15,7 +15,7 @@ const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
     return await CommitmentDataBase.init(ormConfig);
 }
 
-const firstCommitment: Commitment = {
+export const firstCommitment: Commitment = {
     WID: "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b",
     commitment: "c0666e24aa83e38b3955aae906140bda7f2e1974aca897c28962e7eaebd84026",
     eventId: "ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b",
@@ -46,6 +46,7 @@ describe("Commitment Database functions", () => {
             expect(res).to.be.true;
         });
         it("should store the new commitment and update the existing one", async () => {
+            const DB = await loadDataBase("commitments");
             let res = await DB.saveBlock(
                 3433334,
                 "3ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",

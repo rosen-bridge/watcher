@@ -1,18 +1,20 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { contracts } from "../contracts/contracts";
 import { ErgoNetworkApi } from "../ergoUtils/networkApi";
-import config from "config";
 import { boxes } from "../ergoUtils/boxes";
 import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergoUtils/ergoUtils";
 import { NetworkDataBase } from "../models/networkModel";
 import { boxCreationError } from "../utils/utils";
 import { ObservationEntity } from "../entities/ObservationEntity";
+import { rosenConfig } from "../api/rosenConfig";
+import { ErgoConfig } from "../config/config";
 
-const minBoxVal = parseInt(config.get?.('ergo.minBoxVal'))
-const txFee = parseInt(config.get?.('ergo.txFee'))
-const WID: string = config.get('ergo.WID')
+const minBoxVal = parseInt(rosenConfig.minBoxValue)
+const txFee = parseInt(rosenConfig.fee)
+const ergoConfig = ErgoConfig.getConfig();
+//TODO:hard coded should implemented later
+const WID: string = "906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82"
 
-export class commitmentCreation {
+export class commitmentCreation{
     _dataBase: NetworkDataBase
     _requiredConfirmation: number
 
@@ -35,12 +37,18 @@ export class commitmentCreation {
                                 permits: Array<wasm.ErgoBox>,
                                 WIDBox: Array<wasm.ErgoBox>): Promise<string> => {
         const height = await ErgoNetworkApi.getCurrentHeight()
-        const permitHash = contractHash(contracts.addressCache.permitContract!)
+        const permitHash = contractHash(
+            wasm.Contract.pay_to_address(
+                wasm.Address.from_base58(
+                    rosenConfig.watcherPermitAddress
+                )
+            )
+        )
         const outCommitment = boxes.createCommitment(BigInt(minBoxVal), height, WID, requestId, eventDigest, permitHash)
         const RWTCount: bigint = permits.map(permit =>
             BigInt(permit.tokens().get(0).amount().as_i64().to_str()))
             .reduce((a, b) => a + b, BigInt(0))
-        if(RWTCount <= 1){
+        if (RWTCount <= 1) {
             // TODO: Fix this problem
             console.log("Not enough RWT tokens to create a new commitment")
             return ""
@@ -49,7 +57,7 @@ export class commitmentCreation {
         const inputBoxes = new wasm.ErgoBoxes(permits[0]);
         WIDBox.forEach(box => inputBoxes.add(box))
         permits.slice(1).forEach(permit => inputBoxes.add(permit))
-        const s: string = config.get?.("ergo.secret")
+        const s: string = ergoConfig.secretKey;
         const secret = wasm.SecretKey.dlog_from_bytes(Buffer.from(s, "hex"))
         try {
             const signed = await createAndSignTx(
