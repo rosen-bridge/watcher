@@ -147,7 +147,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         const requiredHeight = height - confirmation
         return await this.observationRepository.createQueryBuilder("observation_entity")
             .where("observation_entity.block < :requiredHeight", {requiredHeight})
-            .execute()
+            .getMany()
     }
 
     /**

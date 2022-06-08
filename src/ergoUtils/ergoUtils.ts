@@ -1,17 +1,15 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoBox } from "ergo-lib-wasm-nodejs";
 import config from "config";
 import { ErgoNetworkApi } from "./networkApi";
 import { Buffer } from "buffer";
 import { Observation } from "../objects/interfaces";
 import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
-import { ObservationEntity } from "../entities/ObservationEntity";
 let blake2b = require('blake2b')
 
 const networkType: wasm.NetworkPrefix = config.get?.('ergo.networkType');
 const txFee = parseInt(config.get?.('ergo.txFee'))
 
-export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<ErgoBox> => {
+export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
     return Array(boxes.len()).fill("")
         .map((item, index) => boxes.get(index))
 }
@@ -66,7 +64,7 @@ export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.Er
         value -= BigInt(candidate.value().as_i64().to_str())
         processBox(candidate, tokens, -1)
     })
-    if (value > txFee + wasm.BoxValue.SAFE_USER_MIN().as_i64().as_num()) {
+    if (value > BigInt(txFee + wasm.BoxValue.SAFE_USER_MIN().as_i64().as_num())) {
         const change = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str((value - BigInt(txFee)).toString())),
             contract ? contract : wasm.Contract.pay_to_address(secret.get_address()),
@@ -84,7 +82,7 @@ export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.Er
         throw new boxCreationError
     } else {
         Object.entries(tokens).forEach(([key, value]) => {
-            if (value != BigInt(0)) {
+            if (value !== BigInt(0)) {
                 throw new boxCreationError
             }
         })

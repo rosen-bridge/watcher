@@ -34,7 +34,7 @@ describe("Testing Box Creation", () => {
     sinon.stub(contracts, 'addressCache').value(cache)
     describe("createPermit", () => {
         it("tests the permit box creation", () => {
-            const data = boxes.createPermit(value, 10, 9, WID)
+            const data = boxes.createPermit(value, 10, BigInt(9), WID)
             expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(9)

@@ -34,15 +34,17 @@ export class boxes {
      * @param RWTCount
      * @param WID
      */
-    static createPermit = (value: bigint, height: number, RWTCount: number, WID: string): wasm.ErgoBoxCandidate => {
+    static createPermit = (value: bigint, height: number, RWTCount: bigint, WID: string): wasm.ErgoBoxCandidate => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
             contracts.addressCache.permitContract!,
             height
         );
-        builder.add_token(wasm.TokenId.from_str(tokens.RWT),
-            wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString())))
-        builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(WID)]))
+        if(RWTCount > 0) {
+            builder.add_token(wasm.TokenId.from_str(tokens.RWT),
+                wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString())))
+        }
+        builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([strToUint8Array(WID)]))
         return builder.build()
     }
 

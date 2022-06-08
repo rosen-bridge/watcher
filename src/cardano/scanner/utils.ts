@@ -54,6 +54,7 @@ export class CardanoUtils {
                         Buffer.from(asset.asset_name, 'hex'),
                     );
                     const data = metaData["0"];
+                    // TODO: Request id should be digest of tx id
                     return {
                         fromChain: data.from,
                         toChain: data.to,
