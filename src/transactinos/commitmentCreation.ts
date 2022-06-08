@@ -5,7 +5,7 @@ import { commitmentFromObservation, contractHash, createAndSignTx } from "../erg
 import { NetworkDataBase } from "../models/networkModel";
 import { boxCreationError } from "../utils/utils";
 import { ObservationEntity } from "../entities/ObservationEntity";
-import { rosenConfig } from "../api/rosenConfig";
+import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 
 const minBoxVal = parseInt(rosenConfig.minBoxValue)

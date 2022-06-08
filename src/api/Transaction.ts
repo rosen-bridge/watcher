@@ -1,7 +1,7 @@
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
-import { rosenConfig } from "./rosenConfig";
+import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 
 const ergoConfig = ErgoConfig.getConfig();

@@ -11,12 +11,12 @@ const ergoConfig = ErgoConfig.getConfig();
 
 export const explorerApi = axios.create({
     baseURL: ergoConfig.explorerUrl,
-    timeout: 8000,
+    timeout: ergoConfig.nodeTimeout,
 });
 
 export const nodeClient = axios.create({
     baseURL: ergoConfig.nodeUrl,
-    timeout: 8000,
+    timeout: ergoConfig.explorerTimeout,
     headers: {"Content-Type": "application/json"}
 });
 

@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { boxCreationError, uint8ArrayToHex } from "../../src/utils/utils";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoConfig } from "../../src/config/config";
-import { rosenConfig } from "../../src/api/rosenConfig";
+import { rosenConfig } from "../../src/config/rosenConfig";
 
 const ergoConfig = ErgoConfig.getConfig();
 

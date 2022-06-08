@@ -2,7 +2,7 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetworkApi } from "./networkApi";
 import { Observation } from "../objects/interfaces";
 import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
-import { rosenConfig } from "../api/rosenConfig";
+import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 
 let blake2b = require('blake2b')

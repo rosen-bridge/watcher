@@ -9,7 +9,7 @@ const URL = cardanoConfig.koiosURL;
 
 export const koios = axios.create({
     baseURL: URL,
-    timeout: 8000,
+    timeout: cardanoConfig.timeout,
     headers: {"Content-Type": "application/json"}
 });
 

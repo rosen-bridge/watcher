@@ -8,7 +8,7 @@ const ergoConfig = ErgoConfig.getConfig();
 
 export const nodeApi = axios.create({
     baseURL: ergoConfig.nodeUrl,
-    timeout: 10000
+    timeout: ergoConfig.nodeTimeout
 })
 
 export class ErgoNetworkApi extends AbstractNetworkConnector{

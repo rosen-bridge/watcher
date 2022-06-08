@@ -15,6 +15,9 @@ const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
 const RWT_ID: string | undefined = config.get?.('ergo.RWTId');
 const REPO_NFT: string | undefined = config.get?.('ergo.repoNFT');
+const CARDANO_TIMEOUT: number | undefined = config.get?.('cardano.timeout');
+const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.('ergo.explorerTimeout');
+const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
 
 export class ErgoConfig{
     private static instance: ErgoConfig;
@@ -22,6 +25,8 @@ export class ErgoConfig{
     secretKey: string;
     explorerUrl: string;
     nodeUrl: string;
+    nodeTimeout: number;
+    explorerTimeout: number;
     RWTId: string;
     RepoNFT: string;
     commitmentInterval: number;
@@ -71,11 +76,19 @@ export class ErgoConfig{
         if (CLEANUP_CONFIRMATION === undefined) {
             throw new Error("Clean up doesn't set correctly");
         }
+        if (ERGO_EXPLORER_TIMEOUT === undefined) {
+            throw new Error("Ergo explorer timeout doesn't set correctly");
+        }
+        if (ERGO_NODE_TIMEOUT === undefined) {
+            throw new Error("Ergo node timeout doesn't set correctly");
+        }
 
         this.networkType = networkType;
         this.secretKey = SECRET_KEY;
         this.explorerUrl = EXPLORER_URL;
         this.nodeUrl = NODE_URL;
+        this.explorerTimeout = ERGO_EXPLORER_TIMEOUT;
+        this.nodeTimeout = ERGO_NODE_TIMEOUT;
         this.RWTId = RWT_ID;
         this.RepoNFT = REPO_NFT;
         this.commitmentInterval = COMMITMENT_INTERVAL;
@@ -96,6 +109,7 @@ export class CardanoConfig{
     private static instance: CardanoConfig;
     koiosURL: string;
     interval: number;
+    timeout: number;
     initialHeight: number;
 
     private constructor() {
@@ -109,9 +123,13 @@ export class CardanoConfig{
         if (INITIAL_HEIGHT === undefined) {
             throw new Error("Cardano Scanner initial height is not set in the config file");
         }
+        if (CARDANO_TIMEOUT === undefined) {
+            throw new Error("Cardano network timeout doesn't set correctly");
+        }
 
         this.koiosURL = URL;
         this.interval = INTERVAL;
+        this.timeout = CARDANO_TIMEOUT;
         this.initialHeight = INITIAL_HEIGHT;
 
     }

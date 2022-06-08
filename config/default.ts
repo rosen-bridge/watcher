@@ -2,13 +2,16 @@ export default {
     cardano: {
         interval: 10,
         initialBlockHeight: 3471392,
-        node:{
+        timeout: 10000,
+        node: {
             URL: "https://testnet.koios.rest/api/v0",
         }
     },
     ergo: {
         explorerUrl: "",
         nodeUrl: "",
+        explorerTimeout: 10000,
+        nodeTimeout: 10000,
         networkType: "Mainnet",
         watcherSecretKey: "1111111111111111111111111111111111111111111111111111111111111111",
         RWTId: "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267",
