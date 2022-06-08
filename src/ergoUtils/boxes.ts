@@ -44,7 +44,7 @@ export class boxes {
             builder.add_token(wasm.TokenId.from_str(tokens.RWT),
                 wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString())))
         }
-        builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([strToUint8Array(WID)]))
+        builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(WID)]))
         return builder.build()
     }
 
