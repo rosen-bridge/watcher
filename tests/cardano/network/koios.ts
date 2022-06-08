@@ -98,6 +98,7 @@ describe("Koios Apis", () => {
                         "fee": "10000",
                         "from": "CARDANO",
                         "toAddress": "ergoAddress",
+                        "fromAddress": "cardanoAddress",
                         "targetChainTokenId": "cardanoTokenId"
                     }
                 }

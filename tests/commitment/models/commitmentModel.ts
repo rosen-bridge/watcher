@@ -1,8 +1,8 @@
-import {DataSource} from "typeorm";
-import {commitmentEntities} from "../../../src/entities";
-import {CommitmentDataBase} from "../../../src/commitments/models/commitmentModel";
-import {Commitment} from "../../../src/objects/interfaces";
-import {expect} from "chai";
+import { DataSource } from "typeorm";
+import { commitmentEntities } from "../../../src/entities";
+import { CommitmentDataBase } from "../../../src/commitments/models/commitmentModel";
+import { Commitment } from "../../../src/objects/interfaces";
+import { expect } from "chai";
 
 const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
     const ormConfig = new DataSource({
@@ -46,7 +46,6 @@ describe("Commitment Database functions", () => {
             expect(res).to.be.true;
         });
         it("should store the new commitment and update the existing one", async () => {
-            const DB = await loadDataBase("commitments");
             let res = await DB.saveBlock(
                 3433334,
                 "3ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
