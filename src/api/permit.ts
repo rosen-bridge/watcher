@@ -40,7 +40,6 @@ router.get("/return", async (req, res) => {
     } catch (e) {
         console.log(e)
         res.status(500).send({message: e})
-
     }
 });
 
