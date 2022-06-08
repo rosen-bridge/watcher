@@ -90,7 +90,7 @@ describe("Commitment Database functions", async () => {
     })
 
     describe("findCommitmentsById", () => {
-        it("should return a commitment with specified id", async () => {
+        it("should return exactly two commitments with the specified id", async () => {
             const data  = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
             expect(data).to.have.length(2)
             expect(data[0].commitment).to.eql(secondCommitment.commitment)

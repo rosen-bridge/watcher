@@ -107,11 +107,12 @@ describe("Database functions", async () => {
     });
 
     describe("getCreatedCommitments", () => {
-        it("should return nothing", async () => {
+        it("all stored commitments in the database has 'sent' flag, so it should return nothing", async () => {
             const commitments = await DB.getCreatedCommitments()
             expect(commitments.length).to.eql(0)
         })
-        it("should return a commitment", async () => {
+        it("should return a created commitment", async () => {
+            // TODO: add a created commitment
             // TODO: complete this test after updating the commitments
             const commitments = await DB.getCreatedCommitments()
             expect(commitments.length).to.eql(0)

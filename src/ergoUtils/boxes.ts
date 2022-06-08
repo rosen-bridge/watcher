@@ -22,7 +22,7 @@ export class boxes {
         return Promise.resolve([wasm.ErgoBoxes.from_boxes_json(WIDBox).get(0)])
     }
 
-    static getFeeBox = async (value: number): Promise<wasm.ErgoBox> => {
+    static getUserPaymentBox = async (value: number): Promise<wasm.ErgoBox> => {
         // TODO: Implement this mocked function
         return Promise.resolve(wasm.ErgoBox.from_json(feeBox))
     }

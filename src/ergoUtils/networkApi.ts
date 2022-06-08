@@ -2,7 +2,6 @@ import config from "config";
 import axios from "axios";
 import SleepPromise from 'sleep-promise';
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoBox } from "ergo-lib-wasm-nodejs";
 
 const URL: string | undefined = config.get?.('ergo.nodeUrl');
 export const nodeApi = axios.create({
@@ -64,8 +63,8 @@ export class ErgoNetworkApi {
      * Returns the box by its id
      * @param id
      */
-    static boxById = (id: string): Promise<ErgoBox> => {
-        return nodeApi.get(`utxo/byId/${id}`).then(
+    static boxById = (id: string): Promise<wasm.ErgoBox> => {
+        return nodeApi.get<wasm.ErgoBox>(`utxo/byId/${id}`).then(
             res => res.data
         )
     }

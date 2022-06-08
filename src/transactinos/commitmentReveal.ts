@@ -28,7 +28,8 @@ export class commitmentReveal{
      */
     triggerEventCreationTx = async (commitmentBoxes: Array<ErgoBox>, observation: Observation, WIDs: Array<Uint8Array>, feeBox: ErgoBox): Promise<string> => {
         const height = await ErgoNetworkApi.getCurrentHeight()
-        const triggerEvent = await boxes.createTriggerEvent(BigInt(commitmentBoxes.length* minBoxValue), height, WIDs, observation)
+        const boxValues = commitmentBoxes.map(box => BigInt(box.value().as_i64().to_str())).reduce((a, b) =>  a + b, BigInt(0))
+        const triggerEvent = await boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
         const inputBoxes = new wasm.ErgoBoxes(feeBox);
         commitmentBoxes.forEach(box => inputBoxes.add(box))
         try {
@@ -56,13 +57,9 @@ export class commitmentReveal{
      * @param observation
      */
     commitmentCheck = (commitments: Array<ObservedCommitmentEntity>, observation: Observation): Array<ObservedCommitmentEntity> => {
-        const result: Array<ObservedCommitmentEntity> = []
-        commitments.forEach(commitment => {
-                if (commitmentFromObservation(observation, commitment.WID).toString() == commitment.commitment)
-                    result.push(commitment)
-            }
-        )
-        return result
+        return commitments.filter(commitment => {
+            return commitmentFromObservation(observation, commitment.WID).toString() === commitment.commitment
+        })
     }
 
     /**
@@ -83,7 +80,7 @@ export class commitmentReveal{
                         const WIDs: Array<Uint8Array> = observedCommitments.map(commitment => {
                             return Buffer.from(commitment.WID)
                         })
-                        await this.triggerEventCreationTx(cBoxes, commitment.observation, WIDs, await boxes.getFeeBox(txFee))
+                        await this.triggerEventCreationTx(cBoxes, commitment.observation, WIDs, await boxes.getUserPaymentBox(txFee))
                     })
                 }
             }
