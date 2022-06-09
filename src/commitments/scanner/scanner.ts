@@ -6,7 +6,6 @@ import { commitmentOrmConfig } from "../../../config/commitmentOrmConfig";
 import { ErgoNetworkApi } from "../network/networkApi";
 import { CBlockEntity } from "../../entities/CBlockEntity";
 import { CommitmentUtils } from "./utils";
-import { contracts } from "../contracts/contracts";
 import { ErgoConfig } from "../../config/config";
 
 const ergoConfig = ErgoConfig.getConfig();
@@ -64,7 +63,6 @@ export const commitmentMain = async () => {
     const DB = await CommitmentDataBase.init(commitmentOrmConfig);
     const apiNetwork = new ErgoNetworkApi();
     const scanner = new Scanner(DB, apiNetwork, config);
-    await contracts.init(apiNetwork)
     setInterval(scanner.update, ergoConfig.commitmentInterval * 1000);
     setInterval(scanner.removeOldCommitments, ergoConfig.commitmentInterval * 1000);
 

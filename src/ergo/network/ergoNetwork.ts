@@ -23,16 +23,6 @@ export const nodeClient = axios.create({
 export class ErgoNetwork{
 
     /**
-     * generates pay 2 script address by script
-     * @param script
-     */
-    pay2ScriptAddress = (script: string): Promise<string> => {
-        return nodeClient.post("/script/p2sAddress", {source: script}).then(
-            res => res.data.address
-        )
-    }
-
-    /**
      * gets last block height
      */
     getHeight = async (): Promise<number> => {
@@ -111,10 +101,11 @@ export class ErgoNetwork{
     /**
      * selects boxes for specific ergoTree that has enough amount of erg and tokens also with filter
      *  for filtering undesired boxes
-     * @param tree
-     * @param amount
-     * @param covering
-     * @param filter
+     * @param tree ergotree of address you want grab boxes from
+     * @param amount amount of erg you want to cover
+     * @param covering tokens that you want to cover with their count default = {}
+     * @param filter filter function call back in case you want to filter out some boxes from covering
+     *  default is () => true
      */
     getCoveringErgAndTokenForAddress = async (
         tree: string,
@@ -220,19 +211,13 @@ export class ErgoNetwork{
         let memPoolBoxesMap = new Map<string, wasm.ErgoBox>();
         const transactions = await this.getMemPoolTxForAddress(address).then(res => res.items);
         if (transactions !== undefined) {
-            transactions.forEach((tx: ErgoTx) => {
-                for (let inBox of tx.inputs) {
-                    if (inBox.address === address) {
-                        for (let outBox of tx.outputs) {
-                            if (outBox.address === address) {
-                                memPoolBoxesMap.set(inBox.boxId, wasm.ErgoBox.from_json(JsonBI.stringify(outBox)))
-                                break
-                            }
-                        }
-                        break
-                    }
+            transactions.forEach(tx => {
+                const inputs = tx.inputs.filter(box => box.address === address);
+                const outputs = tx.outputs.filter(box => box.address === address);
+                if (inputs.length === 1 && outputs.length >= 1) {
+                    memPoolBoxesMap.set(inputs[0].boxId, wasm.ErgoBox.from_json(JsonBI.stringify(outputs[0])))
                 }
-            })
+            });
         }
         let lastBox: wasm.ErgoBox = box
         while (memPoolBoxesMap.has(lastBox.box_id().to_str())) lastBox = memPoolBoxesMap.get(lastBox.box_id().to_str())!
@@ -243,8 +228,8 @@ export class ErgoNetwork{
      * gets mempool transaction for specific address
      * @param address
      */
-    getMemPoolTxForAddress = async (address: string) => {
-        return await explorerApi.get<{ items: Array<ErgoTx> | undefined, total: number }>(
+    getMemPoolTxForAddress = async (address: string): Promise<{ items: Array<ErgoTx>, total: number }> => {
+        return await explorerApi.get<{ items: Array<ErgoTx>, total: number }>(
             `/api/v1/mempool/transactions/byAddress/${address}`
         ).then(res => res.data)
     }

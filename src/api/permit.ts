@@ -11,7 +11,7 @@ router.get("/get", async (req, res) => {
     }
     let response: ApiResponse | ApiError;
     try {
-        response = await watcherTransaction.getPermit(RSNCount);
+        response = await watcherTransaction.getPermit(BigInt(RSNCount));
         if ("txId" in response) {
             res.status(200).send(response)
         } else {
@@ -31,7 +31,7 @@ router.get("/return", async (req, res) => {
     }
     let response: ApiResponse | ApiError;
     try {
-        response = await watcherTransaction.returnPermit(RWTCount);
+        response = await watcherTransaction.returnPermit(BigInt(RWTCount));
         if ("txId" in response) {
             res.status(200).send(response)
         } else {

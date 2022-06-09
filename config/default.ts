@@ -8,8 +8,8 @@ export default {
         }
     },
     ergo: {
-        explorerUrl: "",
-        nodeUrl: "",
+        explorerUrl: "http://10.10.9.3:7000",
+        nodeUrl: "http://10.10.9.3:9064",
         explorerTimeout: 10000,
         nodeTimeout: 10000,
         networkType: "Mainnet",

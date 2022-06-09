@@ -9,31 +9,6 @@ mockedNodeClient.onGet('/blocks/lastHeaders/10').reply(200, mockedResponseBody.l
 
 mockedNodeClient.onGet('/info').reply(200, mockedResponseBody.networkInfo);
 
-mockedNodeClient.onPost(
-    '/script/p2sAddress',
-    {source: mockedResponseBody.RWTRepoContract})
-    .reply(200, mockedResponseBody.RWTRepoP2SAddress);
-
-mockedNodeClient.onPost(
-    '/script/p2sAddress',
-    {source: mockedResponseBody.watcherPermitContract})
-    .reply(200, mockedResponseBody.watcherPermitP2SA);
-
-mockedNodeClient.onPost(
-    '/script/p2sAddress',
-    {source: mockedResponseBody.commitmentContract})
-    .reply(200, mockedResponseBody.commitmentP2SAddress);
-
-mockedNodeClient.onPost(
-    '/script/p2sAddress',
-    {source: mockedResponseBody.eventTriggerScript})
-    .reply(200, mockedResponseBody.eventTriggerP2SAddress);
-
-mockedNodeClient.onPost(
-    '/script/p2sAddress',
-    {source: mockedResponseBody.fraudScript})
-    .reply(200, mockedResponseBody.fraudP2SAddress);
-
 mockedNodeClient.onPost('/transactions')
     .reply(config =>
         (config.data === mockedResponseBody.sampleTxJson ? [200, mockedResponseBody.sampleTxId] : [400, "error"])

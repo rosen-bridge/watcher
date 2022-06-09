@@ -1,8 +1,5 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoBox } from "ergo-lib-wasm-nodejs";
 import { ErgoConfig } from "../config/config";
-
-const ergoConfig = ErgoConfig.getConfig();
 
 export class boxCreationError extends Error {
     constructor(message?: string) {
@@ -23,7 +20,7 @@ export const uint8ArrayToHex = (buffer: Uint8Array): string => {
     return Buffer.from(buffer).toString('hex');
 }
 
-export const extractBoxes = (tx: wasm.Transaction): Array<ErgoBox> => {
+export const extractBoxes = (tx: wasm.Transaction): Array<wasm.ErgoBox> => {
     return Array(tx.outputs().len()).fill("")
         .map((item, index) => tx.outputs().get(index))
 }
@@ -32,9 +29,6 @@ export const ergoTreeToAddress = (ergoTree: wasm.ErgoTree): wasm.Address => {
     return wasm.Address.recreate_from_ergo_tree(ergoTree)
 }
 
-export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree): string => {
-    return ergoTreeToAddress(ergoTree).to_base58(ergoConfig.networkType)
-}
 
 export const decodeCollColl = async (str: string): Promise<Uint8Array[]> => {
     return wasm.Constant.decode_from_base16(str).to_coll_coll_byte()

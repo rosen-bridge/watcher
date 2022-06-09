@@ -1,6 +1,9 @@
 import config from "config";
 import { NetworkPrefix } from "ergo-lib-wasm-nodejs";
 import * as wasm from "ergo-lib-wasm-nodejs";
+import { SecretError } from "../errors/ConfigError";
+import { generateSK } from "../api/ergoUtils";
+import { uint8ArrayToHex } from "../utils/utils";
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
@@ -49,8 +52,14 @@ export class ErgoConfig{
             }
         }
 
-        if (SECRET_KEY === undefined) {
-            throw new Error("Secret key doesn't set in config file");
+        if (SECRET_KEY === undefined || SECRET_KEY === "") {
+            console.log(
+                "we generate a secret key for you can use this if you want:",
+                uint8ArrayToHex(
+                    generateSK().to_bytes()
+                )
+            );
+            throw new SecretError("Secret key doesn't set in config file");
         }
         if (EXPLORER_URL === undefined) {
             throw new Error("Ergo Explorer Url is not set in the config");

@@ -32,23 +32,22 @@ export class Transaction{
     userSecret: string;
     repoAddressContract: wasm.Contract;
     repoAddress: wasm.Address;
-    watcherLockState?: boolean;
+    watcherPermitState?: boolean;
+    watcherWID?: string;
 
     /**
      * constructor
      * @param rosenConfig hard coded Json of rosen config
      * @param userAddress string
      * @param userSecret  string
-     * @param watcherPermitAddress
-     * @param watcherRepoAddress
      */
-    private constructor(
+    constructor(
         rosenConfig: rosenConfig,
         userAddress: string,
         userSecret: string,
-        watcherPermitAddress: string,
-        watcherRepoAddress: string,
     ) {
+        const watcherPermitAddress = rosenConfig.watcherPermitAddress;
+        const watcherRepoAddress = rosenConfig.RWTRepoAddress;
         this.ergoNetwork = new ErgoNetwork();
         this.RepoNFTId = wasm.TokenId.from_str(ergoConfig.RepoNFT);
         this.RWTTokenId = wasm.TokenId.from_str(ergoConfig.RWTId);
@@ -62,19 +61,9 @@ export class Transaction{
         this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
         this.userSecret = userSecret;
         this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
-        this.watcherLockState = undefined;
-    }
-
-    static init = async (rosenConfig: rosenConfig, userAddress: string, userSecret: string): Promise<Transaction> => {
-        const watcherPermitAddress = rosenConfig.watcherPermitAddress;
-        const watcherRepoAddress = rosenConfig.RWTRepoAddress;
-        return new Transaction(
-            rosenConfig,
-            userAddress,
-            userSecret,
-            watcherPermitAddress,
-            watcherRepoAddress
-        );
+        this.watcherPermitState = undefined;
+        this.watcherWID = "";
+        this.getWatcherState();
     }
 
     /**
@@ -146,12 +135,12 @@ export class Transaction{
     }
 
     /**
-     * checks user boxes to see if there is any input boxes that lock tokens that saved
-     *  in the repo box registers or not
+     * it gets repoBox users list and find the corresponding wid to the watcher and
+     *  returns it's wid or in case of no permits return empty string
      * @param users
      */
-    checkWID = (users: Array<Uint8Array>): Array<Promise<boolean>> => {
-        return users.map(async (id) => {
+    getWID = async (users: Array<Uint8Array>): Promise<string> => {
+        const usersWID = users.map(async (id) => {
             const wid = uint8ArrayToHex(id);
             try {
                 const box = await (
@@ -165,6 +154,14 @@ export class Transaction{
                 return false;
             }
         });
+
+        for (const [i, userWID] of usersWID.entries()) {
+            if (await userWID) {
+                return uint8ArrayToHex(users[i])
+            }
+        }
+
+        return "";
     }
     /**
      * create repo box that used in output of permit transactions
@@ -213,50 +210,25 @@ export class Transaction{
 
     /**
      * generating returning permit transaction and send it to the network
+     * @param RWTCount
      */
-    returnPermit = async (RWTCountString: string): Promise<ApiResponse | ApiError> => {
-        if (!await this.watcherHasLocked()) {
-            return {message: "you have locked RSN", code: 500}
+    returnPermit = async (RWTCount: bigint): Promise<ApiResponse | ApiError> => {
+        await this.getWatcherState();
+        if (!this.watcherPermitState) {
+            return {message: "you doesn't have permit box", code: 500}
         }
-        const RWTCount = BigInt(RWTCountString);
+        const WID = this.watcherWID!;
         const height = await this.ergoNetwork.getHeight();
 
         //TODO: permit box should grab from the network with respect to the value in the register
-        const permitBox = await (
-            this.ergoNetwork.getBoxWithToken(
-                this.watcherPermitAddress,
-                this.RWTTokenId.to_str(),
-            )
-        );
+        const permitBox = await this.ergoNetwork.getBoxWithToken(this.watcherPermitAddress, this.RWTTokenId.to_str());
         const repoBox = await this.getRepoBox();
 
-        const users = repoBox.register_value(4)?.to_coll_coll_byte();
-        if (users === undefined) {
-            return {message: "Incorrect RepoBox input", code: 500}
-        }
-        const ans = this.checkWID(users);
-        let WID = "";
-        for (let i = 0; i < ans.length; i++) {
-            if (await ans[i]) {
-                WID = uint8ArrayToHex(users[i]);
-                break;
-            }
-        }
-        if (WID === "") {
-            return {message: "You don't have locked any RSN token", code: 500}
-        }
+        const users = repoBox.register_value(4)?.to_coll_coll_byte()!;
 
-        const widBox = await (
-            this.ergoNetwork.getBoxWithToken(
-                this.userAddress,
-                WID,
-            )
-        )
+        const widBox = await this.ergoNetwork.getBoxWithToken(this.userAddress, WID)
 
-        const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array();
-        if (usersCount === undefined) {
-            return {message: "Incorrect RepoBox input", code: 500}
-        }
+        const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array()!;
 
         const widIndex = users.map(user => uint8ArrayToHex(user)).indexOf(WID);
         const inputRWTCount = BigInt(usersCount[widIndex]);
@@ -371,7 +343,8 @@ export class Transaction{
 
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
         await this.ergoNetwork.sendTx(signedTx.to_json());
-        this.watcherLockState = !this.watcherLockState;
+        this.watcherPermitState = !this.watcherPermitState;
+        this.watcherWID = "";
         return {txId: signedTx.id().to_str()}
     }
 
@@ -379,16 +352,20 @@ export class Transaction{
      * get an unsigned transaction and sign it using watcher secret key
      * @param builder
      * @param inputBoxes
+     * @param dataInputs
      */
-    buildTxAndSign = async (builder: wasm.TxBuilder, inputBoxes: wasm.ErgoBoxes): Promise<wasm.Transaction> => {
+    buildTxAndSign = async (
+        builder: wasm.TxBuilder,
+        inputBoxes: wasm.ErgoBoxes,
+        dataInputs: wasm.ErgoBoxes = wasm.ErgoBoxes.from_boxes_json([])
+    ): Promise<wasm.Transaction> => {
         const tx = builder.build();
         const sks = new wasm.SecretKeys();
         const sk = wasm.SecretKey.dlog_from_bytes(strToUint8Array(this.userSecret));
         sks.add(sk);
         const wallet = wasm.Wallet.from_secrets(sks);
         const ctx = await this.ergoNetwork.getErgoStateContext();
-        const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);
-        return wallet.sign_transaction(ctx, tx, inputBoxes, tx_data_inputs);
+        return wallet.sign_transaction(ctx, tx, inputBoxes, dataInputs);
     }
 
     /**
@@ -418,17 +395,10 @@ export class Transaction{
      * getting repoBox from network with tracking mempool transactions
      */
     getRepoBox = async (): Promise<wasm.ErgoBox> => {
-        const test = await (
-            this.ergoNetwork.getBoxWithToken(
+        return await this.ergoNetwork.trackMemPool(
+            await this.ergoNetwork.getBoxWithToken(
                 this.repoAddress,
                 this.RepoNFTId.to_str()
-            ));
-        return await this.ergoNetwork.trackMemPool(
-            await (
-                this.ergoNetwork.getBoxWithToken(
-                    this.repoAddress,
-                    this.RepoNFTId.to_str()
-                )
             )
         )
     }
@@ -437,8 +407,9 @@ export class Transaction{
      * getting watcher permit transaction
      * @param RSNCount
      */
-    getPermit = async (RSNCount: string): Promise<ApiResponse | ApiError> => {
-        if (await this.watcherHasLocked()) {
+    getPermit = async (RSNCount: bigint): Promise<ApiResponse | ApiError> => {
+        await this.getWatcherState();
+        if (this.watcherPermitState) {
             return {message: "you don't have locked any RSN", code: 500};
         }
         const height = await this.ergoNetwork.getHeight();
@@ -449,7 +420,7 @@ export class Transaction{
         }
         const RSNRWTRation = R6.to_i64_str_array()[0];
 
-        const RWTCount = BigInt(RSNCount) / BigInt(R6.to_i64_str_array()[0]);
+        const RWTCount = RSNCount / BigInt(R6.to_i64_str_array()[0]);
 
         const RSNInput = await (
             this.ergoNetwork.getBoxWithToken(
@@ -494,8 +465,8 @@ export class Transaction{
         );
 
         const permitOut = await this.createPermitBox(height, RWTCount.toString(), repoBox.box_id().as_bytes());
-        const testTokenId = wasm.TokenId.from_str(repoBox.box_id().to_str());
-        const testTokenAmount = wasm.TokenAmount.from_i64(wasm.I64.from_str("1"));
+        const WIDToken = wasm.TokenId.from_str(repoBox.box_id().to_str());
+        const WIDTokenAmount = wasm.TokenAmount.from_i64(wasm.I64.from_str("1"));
         const inputBoxes = new wasm.ErgoBoxes(repoBox);
         inputBoxes.add(RSNInput);
 
@@ -530,7 +501,7 @@ export class Transaction{
             return {message: "You don't have enough RSN", code: 500};
         }
 
-        const RSNChangeAmount = (BigInt(rsnCount) - BigInt(RSNCount));
+        const RSNChangeAmount = (BigInt(rsnCount) - RSNCount);
         if (RSNChangeAmount < 0) {
             return {message: "You don't have enough RSN", code: 500};
         }
@@ -547,8 +518,8 @@ export class Transaction{
             //TODO:should change to read from config
             this.userAddress.to_base58(wasm.NetworkPrefix.Mainnet),
             changeBoxValue,
-            testTokenId,
-            testTokenAmount,
+            WIDToken,
+            WIDTokenAmount,
             changeTokens,
         );
 
@@ -568,43 +539,20 @@ export class Transaction{
 
         const signedTx = await this.buildTxAndSign(builder, inputBoxes);
         await this.ergoNetwork.sendTx(signedTx.to_json());
-        this.watcherLockState = !this.watcherLockState;
+        this.watcherPermitState = !this.watcherPermitState;
+        this.watcherWID = WIDToken.to_str();
         return {txId: signedTx.id().to_str()};
     }
 
     /**
-     * checks if watcher has locked RSN or not
+     * updating watcher state(permitState and WID if exist)
      */
-    watcherHasLocked = async (): Promise<boolean> => {
-        if (this.watcherLockState === undefined) {
+    getWatcherState = async () => {
+        if (this.watcherPermitState === undefined) {
             const repoBox = await this.getRepoBox();
-            const users = repoBox.register_value(4)?.to_coll_coll_byte();
-            if (users === undefined) {
-                return false;
-            }
-            const ans = users.map(async (id) => {
-                const wid = uint8ArrayToHex(id);
-                try {
-                    const box = await (
-                        this.ergoNetwork.getBoxWithToken(
-                            this.userAddress,
-                            wid,
-                        )
-                    );
-                    return true;
-                } catch (error) {
-                    return false;
-                }
-            });
-
-            this.watcherLockState = (
-                await Promise.all(ans))
-                .reduce(
-                    (prev, curr) => prev || curr,
-                    false
-                );
+            const users = repoBox.register_value(4)?.to_coll_coll_byte()!;
+            this.watcherWID = await this.getWID(users);
+            this.watcherPermitState = (this.watcherWID !== "");
         }
-
-        return this.watcherLockState;
     }
 }

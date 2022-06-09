@@ -30,7 +30,7 @@ const rosenConfig = {
 describe("Watcher Permit Transactions", () => {
     describe('createRepo', () => {
         it("checks repoBox tokens order and count", async () => {
-            const transaction = await Transaction.init(
+            const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
@@ -57,7 +57,7 @@ describe("Watcher Permit Transactions", () => {
     describe("createPermitBox", () => {
 
         it("checks permit box registers and tokens", async () => {
-            const transaction = await Transaction.init(
+            const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
@@ -83,7 +83,7 @@ describe("Watcher Permit Transactions", () => {
 
     describe("createUserBoxCandidate", () => {
         it("checks userbox tokens and value", async () => {
-            const transaction = await Transaction.init(
+            const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
@@ -121,26 +121,25 @@ describe("Watcher Permit Transactions", () => {
 
     describe("checkWID", () => {
         it("checks is there any wid in the usersBoxes", async () => {
-            const transaction = await Transaction.init(
+            const sampleWID = "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8";
+            const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
             );
-            const usersHex = ["414441", "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8"];
+            const usersHex = ["414441", sampleWID];
             let users: Array<Uint8Array> = [];
             for (let user of usersHex) {
                 users.push(strToUint8Array(user));
             }
-            const checkWID = Promise.all(transaction.checkWID(users)).then(
-                res => res.reduce((prev, curr) => prev || curr, false)
-            );
-            expect(await checkWID).to.be.true;
+            const WID = await transaction.getWID(users);
+            expect(WID).to.be.equal(sampleWID);
         });
     });
 
     describe("buildTxAndSign", () => {
         it("should sign the transaction", async () => {
-            const transaction = await Transaction.init(
+            const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
@@ -180,14 +179,15 @@ describe("Watcher Permit Transactions", () => {
                 transaction.minBoxValue,
             );
 
-            const signedTx = await transaction.buildTxAndSign(builder, inputBoxes);
+            const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);
+            const signedTx = await transaction.buildTxAndSign(builder, inputBoxes, tx_data_inputs);
             expect(signedTx.id().to_str()).not.to.be.null;
         });
     });
 
     describe("getRepoBox", () => {
         it("should return repoBox(with tracking mempool)", async () => {
-            const transaction = await Transaction.init(
+            const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
@@ -199,7 +199,7 @@ describe("Watcher Permit Transactions", () => {
 
     describe("inputBoxesTokenMap", () => {
         it('', async () => {
-            const transaction = await Transaction.init(
+            const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
@@ -219,20 +219,28 @@ describe("Watcher Permit Transactions", () => {
 
     describe("getPermit", () => {
         it("checks get permit transaction is signed", async () => {
-            const transaction = await Transaction.init(
-                rosenConfig,
-                userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
-            );
-            const secondTransaction = await Transaction.init(
+            const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
                 "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"
             );
-
-            const response = await secondTransaction.getPermit("100");
+            const response = await secondTransaction.getPermit(100n);
             if ("txId" in response)
                 expect(response.txId).to.be.equal("e12a37d2a920e44c062ef278af174ea88acd93481428182618ed747217f00a12");
+            else
+                assert.throw(() => {
+                }, Error, "Error")
+        });
+        
+        it("tests that if watcher have permit box should returns error", async () => {
+            const transaction = new Transaction(
+                rosenConfig,
+                userAddress,
+                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
+            );
+            const res = await transaction.getPermit(100n);
+            if ("code" in res)
+                expect(res.code).to.be.equal(500)
             else
                 assert.throw(() => {
                 }, Error, "Error")
@@ -241,37 +249,53 @@ describe("Watcher Permit Transactions", () => {
 
     describe("returnPermit", () => {
         it("checks transaction is signed", async () => {
-            const transaction = await Transaction.init(
+            const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
             );
-            const res = await transaction.returnPermit("1");
+            const res = await transaction.returnPermit(1n);
             if ("txId" in res)
                 expect(res.txId).to.be.equal("185ddc04cc26eab29aa6d903aaf36a6fe5e78faa58507cf618ff066d275fbfb6");
             else
                 assert.throw(() => {
                 }, Error, "Error")
         });
-    });
 
-    describe("watcherHasLocked", () => {
-        it("should be true", async () => {
-            const transaction = await Transaction.init(
-                rosenConfig,
-                userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
-            );
-            expect(await transaction.watcherHasLocked()).to.be.true;
-        });
-
-        it("should be true", async () => {
-            const secondTransaction = await Transaction.init(
+        it("tests that if watcher doesn't have permit box should returns error", async () => {
+            const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
                 "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"
             );
-            expect(await secondTransaction.watcherHasLocked()).to.be.false;
+            const res = await secondTransaction.returnPermit(1n);
+            if ("code" in res)
+                expect(res.code).to.be.equal(500)
+            else
+                assert.throw(() => {
+                }, Error, "Error")
+        });
+    });
+
+    describe("getWatcherState", () => {
+        it("should be true", async () => {
+            const transaction = new Transaction(
+                rosenConfig,
+                userAddress,
+                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
+            );
+            await transaction.getWatcherState();
+            expect(transaction.watcherPermitState).to.be.true;
+        });
+
+        it("should be true", async () => {
+            const secondTransaction = new Transaction(
+                rosenConfig,
+                "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
+                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"
+            );
+            await secondTransaction.getWatcherState();
+            expect(secondTransaction.watcherPermitState).to.be.false;
         });
     });
 

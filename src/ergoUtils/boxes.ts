@@ -50,7 +50,7 @@ export class boxes{
      * @param permitScriptHash
      */
     static createCommitment = (value: bigint, height: number, WID: string, requestId: string, eventDigest: Uint8Array, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
-        const contract=wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.commitmentAddress));
+        const contract = wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.commitmentAddress));
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
             contract,

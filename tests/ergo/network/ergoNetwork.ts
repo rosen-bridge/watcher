@@ -7,12 +7,6 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 
 describe("Ergo Network(API)", () => {
     const ergoNetwork = new ErgoNetwork();
-    describe("pay2ScriptAddress", () => {
-        it("should returns p2sa", async () => {
-            const res = await ergoNetwork.pay2ScriptAddress(mockedResponseBody.fraudScript);
-            expect(res).to.be.equal(mockedResponseBody.fraudP2SAddress.address);
-        });
-    });
 
     describe("getHeight", () => {
         it("should return last block height", async () => {
