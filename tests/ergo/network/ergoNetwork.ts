@@ -4,6 +4,9 @@ import { expect } from "chai";
 import { JsonBI } from "../../../src/network/parser";
 import { RWTRepoAddress, userAddress } from "../transactions/permit";
 import * as wasm from "ergo-lib-wasm-nodejs";
+import { initMockedAxios } from "../objects/axios";
+
+initMockedAxios();
 
 describe("Ergo Network(API)", () => {
     const ergoNetwork = new ErgoNetwork();

@@ -6,12 +6,9 @@ import { ErgoConfig } from "../config/config";
 
 const ergoConfig = ErgoConfig.getConfig();
 
-export type ApiError = {
-    message: string;
-    code: number;
-}
 export type ApiResponse = {
-    txId: string;
+    response: string;
+    status: number;
 }
 
 /**
@@ -212,10 +209,10 @@ export class Transaction{
      * generating returning permit transaction and send it to the network
      * @param RWTCount
      */
-    returnPermit = async (RWTCount: bigint): Promise<ApiResponse | ApiError> => {
+    returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
         await this.getWatcherState();
         if (!this.watcherPermitState) {
-            return {message: "you doesn't have permit box", code: 500}
+            return {response: "you doesn't have permit box", status: 500}
         }
         const WID = this.watcherWID!;
         const height = await this.ergoNetwork.getHeight();
@@ -242,22 +239,22 @@ export class Transaction{
             newUsersCount[widIndex] = (inputRWTCount - RWTCount).toString();
             needOutputPermitBox = true;
         } else {
-            return {message: "You don't have enough RWT locked to extract from repo box", code: 500}
+            return {response: "You don't have enough RWT locked to extract from repo box", status: 500}
         }
         const RepoRWTCount = repoBox.tokens().get(1).amount().as_i64().checked_add(
             wasm.I64.from_str(
-                inputRWTCount.toString()
+                RWTCount.toString()
             )
         );
         const RSNTokenCount = repoBox.tokens().get(2).amount().as_i64().checked_add(
             wasm.I64.from_str(
-                (inputRWTCount * (-BigInt("100"))).toString()
+                (RWTCount * (-BigInt("100"))).toString()
             )
         );
 
         const R6 = repoBox.register_value(6);
         if (R6 === undefined) {
-            return {message: "register 6 of repo box is not set", code: 500}
+            return {response: "register 6 of repo box is not set", status: 500}
         }
 
         const RSNRWTRatio = R6.to_i64_str_array()[0];
@@ -306,7 +303,7 @@ export class Transaction{
         userOutBoxBuilder.add_token(
             this.RSN,
             wasm.TokenAmount.from_i64(wasm.I64.from_str(
-                    (inputRWTCount * BigInt(RSNRWTRatio) + BigInt(rsnCount)).toString()
+                    ((RWTCount) * BigInt(RSNRWTRatio) + BigInt(rsnCount)).toString()
                 )
             ),
         );
@@ -321,7 +318,6 @@ export class Transaction{
         }
         const userOutBox = userOutBoxBuilder.build();
         const outputBoxes = new wasm.ErgoBoxCandidates(repoOut);
-        outputBoxes.add(userOutBox);
         const permitBoxRWTCount = BigInt(permitBox.tokens().get(0).amount().as_i64().to_str());
         if (permitBoxRWTCount > RWTCount) {
             const permitOut = await this.createPermitBox(
@@ -331,6 +327,7 @@ export class Transaction{
             );
             outputBoxes.add(permitOut);
         }
+        outputBoxes.add(userOutBox);
 
         const builder = wasm.TxBuilder.new(
             inputBoxSelection,
@@ -345,7 +342,7 @@ export class Transaction{
         await this.ergoNetwork.sendTx(signedTx.to_json());
         this.watcherPermitState = !this.watcherPermitState;
         this.watcherWID = "";
-        return {txId: signedTx.id().to_str()}
+        return {response: signedTx.id().to_str(), status: 200}
     }
 
     /**
@@ -407,16 +404,16 @@ export class Transaction{
      * getting watcher permit transaction
      * @param RSNCount
      */
-    getPermit = async (RSNCount: bigint): Promise<ApiResponse | ApiError> => {
+    getPermit = async (RSNCount: bigint): Promise<ApiResponse> => {
         await this.getWatcherState();
         if (this.watcherPermitState) {
-            return {message: "you don't have locked any RSN", code: 500};
+            return {response: "you don't have locked any RSN", status: 500};
         }
         const height = await this.ergoNetwork.getHeight();
         const repoBox = await this.getRepoBox();
         const R6 = repoBox.register_value(6);
         if (R6 === undefined) {
-            return {message: "register 6 of repo box is not set", code: 500};
+            return {response: "register 6 of repo box is not set", status: 500};
         }
         const RSNRWTRation = R6.to_i64_str_array()[0];
 
@@ -429,16 +426,10 @@ export class Transaction{
             )
         );
 
-        const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte();
-        if (users === undefined) {
-            return {message: "Incorrect RepoBox input", code: 500};
-        }
+        const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte()!;
         const repoBoxId = repoBox.box_id().as_bytes();
         users.push(repoBoxId);
-        const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array();
-        if (usersCount === undefined) {
-            return {message: "Incorrect RepoBox input", code: 500};
-        }
+        const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array()!;
 
         const count = RWTCount.toString();
         usersCount.push(count);
@@ -485,7 +476,7 @@ export class Transaction{
                 );
                 boxes.forEach(box => inputBoxes.add(box));
             } catch {
-                return {message: "You don't have enough Erg to make the transaction", code: 500};
+                return {response: "You don't have enough Erg to make the transaction", status: 500};
             }
         }
 
@@ -498,12 +489,12 @@ export class Transaction{
 
         const rsnCount = changeTokens.get(this.RSN.to_str());
         if (rsnCount === undefined) {
-            return {message: "You don't have enough RSN", code: 500};
+            return {response: "You don't have enough RSN", status: 500};
         }
 
         const RSNChangeAmount = (BigInt(rsnCount) - RSNCount);
         if (RSNChangeAmount < 0) {
-            return {message: "You don't have enough RSN", code: 500};
+            return {response: "You don't have enough RSN", status: 500};
         }
 
         (RSNChangeAmount !== 0n
@@ -541,7 +532,7 @@ export class Transaction{
         await this.ergoNetwork.sendTx(signedTx.to_json());
         this.watcherPermitState = !this.watcherPermitState;
         this.watcherWID = WIDToken.to_str();
-        return {txId: signedTx.id().to_str()};
+        return {response: signedTx.id().to_str(), status: 200};
     }
 
     /**

@@ -7,7 +7,6 @@ import { ErgoConfig } from "./config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array } from "./utils/utils";
 import { rosenConfig } from "./config/rosenConfig";
-import { SecretError } from "./errors/ConfigError";
 
 export let watcherTransaction: Transaction;
 
@@ -40,12 +39,9 @@ const init = async () => {
             watcherTransaction = res;
             initExpress();
         }
-    ).catch(e =>{
-        if(e instanceof SecretError){
-            console.log("************8")
-        }}
-        // console.log("Watcher initiate Error with Error: " + e)
-    );
+    ).catch(e => {
+        console.log(e)
+    });
 }
 
 init();

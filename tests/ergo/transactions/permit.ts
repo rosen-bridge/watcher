@@ -2,6 +2,8 @@ import { Transaction } from "../../../src/api/Transaction";
 import { strToUint8Array } from "../../../src/utils/utils";
 import { assert, expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
+import { initMockedAxios } from "../objects/axios";
+
 
 const RWTId = "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267";
 export const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
@@ -27,8 +29,19 @@ const rosenConfig = {
     commitmentAddress: "EurZwDoNU1Y6ZDtRgb2ufgAGAnJ4oNyiFvr7VyoJeKW9r1W7NbbitXDiqMNzAh8vQRATLiFRXra42mHBogMxySorHXF4hwKcPNasRPBfwcEMbRMTp8Xo1gur26V561z8wit9BE8nvRztDstzKdMkXLwjh1GGpXuFHV8GKo5Sz4d2Rb4W7QiqbFbFdRVe3TRqmv7yy2VvF9kWhRr5xTLkmxAUpEmYQwVVLmdU52XyahV7Hnw15DY3faHne4SkYtMMKSH5rvtXFUNf7UDeU8U2mjmt8oZYpprCi2ZouQNcLrDXT9i6hJ3jcmwhMfF1whQjZRNooFvcM59bmnvG3U1dJupdVpjTqXwwmGT9BkJFnX2eWjmNQ2EEfpSyUPMf5mpXBp8484u7ibjfobHpe3Jw9bHGe5nqtuLdEVKt7pe5pp5Lpv8Lqw1h8kopx9kHGKfZrVoQCsJRjHGpGZEnFgqtk4p58mLvn1y86HQwfkMBcfeRiy1qimmwbaTrn4tHbz1WJ481z8H8VxSTrrsWSpDZf4CJaRzh6mmqMTw2SxgN3vsxxAyb21yVazMryAtPAr12hjBAVf2MTuZ8QTQp68VHHZg7ePXaitbS6qkV16T9cTbkYyCWqahQbq7LLp3xMQXywZa9XpnRvFEboLtQJjNBvLtTT1UV4N2Hqw3h8qHq1DFqd4dzkj9ycaazTMiDe67mq5avy3zmgjzXUZdTxPKHkxWJCSccwnp7d2wJU3gCfF7k3Z81ui6XBMh6pzgND2U2rGzpF3aUE5LftZMhkQ5d5dg7JHnBQ62jLj2UF",
 };
 
+initMockedAxios();
+
+/**
+ * requirements: an object of Transaction class, rosenConfig, userAddress, userSecret
+ */
 describe("Watcher Permit Transactions", () => {
+    /**
+     * createRepo function tests
+     */
     describe('createRepo', () => {
+        /**
+         *  the token counts and order in the outputBox should follow the assertions
+         */
         it("checks repoBox tokens order and count", async () => {
             const transaction = new Transaction(
                 rosenConfig,
@@ -54,8 +67,13 @@ describe("Watcher Permit Transactions", () => {
         });
     });
 
+    /**
+     * createPermitBox function tests
+     */
     describe("createPermitBox", () => {
-
+        /**
+         * the registers and tokens of permit box should follow the assertions bellow
+         */
         it("checks permit box registers and tokens", async () => {
             const transaction = new Transaction(
                 rosenConfig,
@@ -81,8 +99,14 @@ describe("Watcher Permit Transactions", () => {
         });
     });
 
+    /**
+     * createUserBoxCandidate function tests
+     */
     describe("createUserBoxCandidate", () => {
-        it("checks userbox tokens and value", async () => {
+        /**
+         * checks userChangeBox and erg amount is made correctly with respect to input tokens
+         */
+        it("checks userBox tokens and value", async () => {
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -119,7 +143,13 @@ describe("Watcher Permit Transactions", () => {
         });
     });
 
-    describe("checkWID", () => {
+    /**
+     * getWID functions tests
+     */
+    describe("getWID", () => {
+        /**
+         * it checks that functions find the user WID correctly
+         */
         it("checks is there any wid in the usersBoxes", async () => {
             const sampleWID = "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8";
             const transaction = new Transaction(
@@ -137,7 +167,13 @@ describe("Watcher Permit Transactions", () => {
         });
     });
 
+    /**
+     * buildTxAndSign function tests
+     */
     describe("buildTxAndSign", () => {
+        /**
+         * the transaction should signed without error
+         */
         it("should sign the transaction", async () => {
             const transaction = new Transaction(
                 rosenConfig,
@@ -185,7 +221,13 @@ describe("Watcher Permit Transactions", () => {
         });
     });
 
+    /**
+     * getRepoBox function tests
+     */
     describe("getRepoBox", () => {
+        /**
+         * it should return repoBox id that is in output of transaction in mempool
+         */
         it("should return repoBox(with tracking mempool)", async () => {
             const transaction = new Transaction(
                 rosenConfig,
@@ -197,8 +239,14 @@ describe("Watcher Permit Transactions", () => {
         });
     });
 
+    /**
+     * inputBoxesTokenMap function tests
+     */
     describe("inputBoxesTokenMap", () => {
-        it('', async () => {
+        /**
+         * the token map of input and output should be the same
+         */
+        it('the token map of input and output should be the same', async () => {
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -217,7 +265,13 @@ describe("Watcher Permit Transactions", () => {
         });
     });
 
+    /**
+     * getPermit function tests
+     */
     describe("getPermit", () => {
+        /**
+         * checks getPermit with correct inputs and state should be signed
+         */
         it("checks get permit transaction is signed", async () => {
             const secondTransaction = new Transaction(
                 rosenConfig,
@@ -225,13 +279,12 @@ describe("Watcher Permit Transactions", () => {
                 "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"
             );
             const response = await secondTransaction.getPermit(100n);
-            if ("txId" in response)
-                expect(response.txId).to.be.equal("e12a37d2a920e44c062ef278af174ea88acd93481428182618ed747217f00a12");
-            else
-                assert.throw(() => {
-                }, Error, "Error")
+            expect(response.response).to.be.equal("e12a37d2a920e44c062ef278af174ea88acd93481428182618ed747217f00a12");
         });
-        
+
+        /**
+         * in the case of watcher have permit box in his/her address the getPermit should returns error
+         */
         it("tests that if watcher have permit box should returns error", async () => {
             const transaction = new Transaction(
                 rosenConfig,
@@ -239,46 +292,67 @@ describe("Watcher Permit Transactions", () => {
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
             );
             const res = await transaction.getPermit(100n);
-            if ("code" in res)
-                expect(res.code).to.be.equal(500)
-            else
-                assert.throw(() => {
-                }, Error, "Error")
+            expect(res.status).to.be.equal(500)
         });
     });
 
+    /**
+     * returnPermit function tests
+     */
     describe("returnPermit", () => {
+        /**
+         * it checks if the state of the watcher permit and input is correct the transaction
+         *  should be signed without error
+         */
         it("checks transaction is signed", async () => {
+            initMockedAxios();
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
             );
             const res = await transaction.returnPermit(1n);
-            if ("txId" in res)
-                expect(res.txId).to.be.equal("185ddc04cc26eab29aa6d903aaf36a6fe5e78faa58507cf618ff066d275fbfb6");
-            else
-                assert.throw(() => {
-                }, Error, "Error")
+            expect(res.response).to.be.equal("185ddc04cc26eab29aa6d903aaf36a6fe5e78faa58507cf618ff066d275fbfb6");
         });
 
+        /**
+         * it checks case that the return permit transaction have permit box in its output
+         */
+        it("it checks case that the return permit transaction have permit box in its output", async () => {
+            initMockedAxios(1);
+            const transaction = new Transaction(
+                rosenConfig,
+                "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9",
+                "1111111111111111111111111111111111111111111111111111111111111111"
+            );
+            const res = await transaction.returnPermit(1n);
+            expect(res.response).to.be.equal("9cd17c5c0076b7673853b389fb2a5d160dced8559253aa84d3dc6b7e54e18a6c")
+        });
+
+        /**
+         * tests that if watcher doesn't have permit box should returns error
+         */
         it("tests that if watcher doesn't have permit box should returns error", async () => {
+            initMockedAxios();
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
                 "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"
             );
             const res = await secondTransaction.returnPermit(1n);
-            if ("code" in res)
-                expect(res.code).to.be.equal(500)
-            else
-                assert.throw(() => {
-                }, Error, "Error")
+            expect(res.status).to.be.equal(500)
         });
     });
 
+    /**
+     * getWatcherState function tests
+     */
     describe("getWatcherState", () => {
+        /**
+         * the watcher state with this mocked input should be true(have permitBox)
+         */
         it("should be true", async () => {
+            initMockedAxios();
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -288,7 +362,11 @@ describe("Watcher Permit Transactions", () => {
             expect(transaction.watcherPermitState).to.be.true;
         });
 
-        it("should be true", async () => {
+        /**
+         * the watcher state with this mocked input should be false(no permitBox)
+         */
+        it("should be false", async () => {
+            initMockedAxios();
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",

@@ -1,6 +1,6 @@
 import express from "express";
 import { watcherTransaction } from "../index";
-import { ApiError, ApiResponse } from "./Transaction";
+import { ApiResponse } from "./Transaction";
 
 const router = express.Router();
 router.get("/get", async (req, res) => {
@@ -9,13 +9,13 @@ router.get("/get", async (req, res) => {
         res.status(400).send({message: "RSNCount doesn't set"});
         return;
     }
-    let response: ApiResponse | ApiError;
+    let response: ApiResponse;
     try {
         response = await watcherTransaction.getPermit(BigInt(RSNCount));
-        if ("txId" in response) {
-            res.status(200).send(response)
+        if (response.status === 200) {
+            res.status(200).send({txId: response.response})
         } else {
-            res.status(response.code).send(response)
+            res.status(response.status).send({message: response.response})
         }
     } catch (e) {
         console.log(e)
@@ -29,13 +29,13 @@ router.get("/return", async (req, res) => {
         res.status(400).send({message: "RWTCount doesn't set"});
         return;
     }
-    let response: ApiResponse | ApiError;
+    let response: ApiResponse;
     try {
         response = await watcherTransaction.returnPermit(BigInt(RWTCount));
-        if ("txId" in response) {
-            res.status(200).send(response)
+        if (response.status === 200) {
+            res.status(200).send({txId: response.response})
         } else {
-            res.status(response.code).send(response)
+            res.status(response.status).send({message: response.response})
         }
     } catch (e) {
         console.log(e)
