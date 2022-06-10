@@ -6,25 +6,37 @@ import config from "config";
 import { Observation } from "../objects/interfaces";
 import { Buffer } from "buffer";
 import { bigIntToUint8Array } from "../utils/utils";
+import { CommitmentDataBase } from "../commitments/models/commitmentModel";
+import { boxType } from "../entities/BoxEntity";
+import { ErgoNetworkApi } from "./networkApi";
 
 const permitBox = require('./dataset/permitBox.json');
 const WIDBox = require('./dataset/WIDBox.json');
 const feeBox = require('./dataset/feeBox.json');
 
 export class boxes {
-    static getPermits = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
-        // TODO: Implement this mocked function
-        return Promise.resolve([wasm.ErgoBoxes.from_boxes_json(permitBox).get(0)])
+    _dataBase: CommitmentDataBase
+
+    constructor(db: CommitmentDataBase) {
+        this._dataBase = db
     }
 
-    static getWIDBox = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
-        // TODO: Implement this mocked function
-        return Promise.resolve([wasm.ErgoBoxes.from_boxes_json(WIDBox).get(0)])
+    getPermits = async (): Promise<Array<wasm.ErgoBox>> => {
+        const permitIds = await this._dataBase.getUnspentSpecialBoxIds(boxType.PERMIT)
+        const permitBoxes = permitIds.map(async (boxId: string) => {return await ErgoNetworkApi.boxById(boxId)})
+        return Promise.all(permitBoxes)
     }
 
-    static getUserPaymentBox = async (value: number): Promise<wasm.ErgoBox> => {
-        // TODO: Implement this mocked function
-        return Promise.resolve(wasm.ErgoBox.from_json(feeBox))
+    getWIDBox = async (): Promise<Array<wasm.ErgoBox>> => {
+        const ids = await this._dataBase.getUnspentSpecialBoxIds(boxType.WID)
+        const boxes = ids.map(async (boxId: string) => {return await ErgoNetworkApi.boxById(boxId)})
+        return Promise.all(boxes)
+    }
+
+    getUserPaymentBox = async (value: number): Promise<Array<wasm.ErgoBox>> => {
+        const permitIds = await this._dataBase.getUnspentSpecialBoxIds(boxType.PLAIN)
+        const permitBoxes = permitIds.map(async (boxId: string) => {return await ErgoNetworkApi.boxById(boxId)})
+        return Promise.all(permitBoxes)
     }
 
     /**

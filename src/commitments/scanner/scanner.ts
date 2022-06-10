@@ -46,11 +46,13 @@ export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation
         const newCommitments = (await CommitmentUtils.commitmentsAtHeight(txs))
         const updatedCommitments = await CommitmentUtils.updatedCommitmentsAtHeight(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
         // TODO: Add eventTrigger box id to updated commitments
+        const newBoxes = await CommitmentUtils.specialBoxesAtHeight(txs, contracts.addressCache.permit!, config.get?.("ergo.address"), config.get?.("ergo.WID"))
+        const spentBoxes = await CommitmentUtils.spentSpecialBoxesAtHeight(txs, this._dataBase, [])
         return {
             newCommitments: newCommitments,
             updatedCommitments: updatedCommitments,
-            newBoxes: [],
-            spentBoxes: []
+            newBoxes: newBoxes,
+            spentBoxes: spentBoxes
         }
     }
 

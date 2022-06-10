@@ -1,10 +1,11 @@
-import { Commitment } from "../../objects/interfaces";
+import { Commitment, SpecialBox } from "../../objects/interfaces";
 import { tokens } from "../../../config/default";
 import { NodeOutputBox, NodeTransaction } from "../network/ergoApiModels";
 import { CommitmentDataBase } from "../models/commitmentModel";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { contracts } from "../../contracts/contracts";
 import { decodeCollColl, decodeStr } from "../../ergoUtils/ergoUtils";
+import { boxType } from "../../entities/BoxEntity";
 
 export class CommitmentUtils {
 
@@ -70,6 +71,49 @@ export class CommitmentUtils {
             updatedCommitments = updatedCommitments.concat(newUpdatedCommitments)
         }
         return updatedCommitments
+    }
+
+    static specialBoxesAtHeight = async (txs: Array<NodeTransaction>,
+                                         permitAddress: string,
+                                         watcherAddress: string,
+                                         WID: string): Promise<Array<SpecialBox>> => {
+        const specialBoxes: Array<SpecialBox> = []
+        const permitErgoTree = Address.from_base58(permitAddress).to_ergo_tree().to_base16_bytes()
+        const watcherErgoTree = Address.from_base58(watcherAddress).to_ergo_tree().to_base16_bytes()
+        for (const tx of txs) {
+            // Adding new permit boxes
+            tx.outputs.filter(box => {
+                return box.ergoTree === permitErgoTree &&
+                    box.assets.length > 0 &&
+                    box.assets[0].tokenId == tokens.RWT
+            }).forEach(permit => specialBoxes.push({boxId: permit.boxId, type: boxType.PERMIT}))
+            // Adding new WID boxes
+            const watcherBoxes = tx.outputs.filter(box => {return box.ergoTree === watcherErgoTree})
+            const WIDBOxes = watcherBoxes.filter(box => {
+                return box.ergoTree === watcherErgoTree &&
+                    box.assets.length > 0 &&
+                    box.assets[0].tokenId == WID
+            })
+            WIDBOxes.forEach(WIDBox => specialBoxes.push({boxId: WIDBox.boxId, type: boxType.WID}))
+            // Adding other owned boxes
+            watcherBoxes.filter(box => !WIDBOxes.includes(box))
+                .forEach(box => {specialBoxes.push({boxId: box.boxId, type: boxType.PLAIN})})
+        }
+        return specialBoxes;
+    }
+
+    static spentSpecialBoxesAtHeight = async (txs: Array<NodeTransaction>,
+                                               database: CommitmentDataBase,
+                                               newBoxes: Array<string>) => {
+        let spentBoxes: Array<string> = []
+        for (const tx of txs) {
+            const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
+            const foundBoxes = (await database.findSpecialBoxesById(inputBoxIds)).map(box => box.boxId)
+            const newUpdatedBoxes = inputBoxIds.filter(boxId => newBoxes.includes(boxId))
+            spentBoxes = spentBoxes.concat(foundBoxes)
+            spentBoxes = spentBoxes.concat(newUpdatedBoxes)
+        }
+        return spentBoxes
     }
 }
 

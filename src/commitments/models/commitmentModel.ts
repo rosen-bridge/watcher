@@ -211,5 +211,14 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
             }
         })).map(box => box.boxId)
     }
+
+    findSpecialBoxesById = async (ids: Array<string>): Promise<Array<BoxEntity>> => {
+        return await this.boxesRepository.find({
+            where: {
+                spendBlock: undefined,
+                boxId: In(ids)
+            }
+        })
+    }
 }
 
