@@ -4,17 +4,20 @@ import { ObservedCommitmentEntity } from "../../entities/ObservedCommitmentEntit
 import { Block } from "../../objects/interfaces";
 import { AbstractDataBase } from "../../models/abstractModel";
 import { CommitmentInformation } from "../scanner/scanner";
+import { BoxEntity, boxType } from "../../entities/BoxEntity";
 
 export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, CommitmentInformation> {
-    dataSource: DataSource;
-    blockRepository: Repository<CBlockEntity>;
+    dataSource: DataSource
+    blockRepository: Repository<CBlockEntity>
     commitmentRepository: Repository<ObservedCommitmentEntity>
+    boxesRepository: Repository<BoxEntity>
 
     private constructor(dataSource: DataSource) {
         super()
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(CBlockEntity);
         this.commitmentRepository = this.dataSource.getRepository(ObservedCommitmentEntity);
+        this.boxesRepository = this.dataSource.getRepository(BoxEntity);
     }
 
     /**
@@ -85,20 +88,42 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
                 return commitmentEntity;
             });
 
+        const boxEntities = information.newBoxes
+            .map((box) => {
+                const boxEntity = new BoxEntity()
+                boxEntity.boxId = box.boxId
+                boxEntity.type = box.type
+                boxEntity.block = block
+            })
+
         const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
         for (const boxId of information.updatedCommitments) {
             const oldCommitment = await this.commitmentRepository.findOne({
-                where: {commitmentBoxId: information.updatedCommitments[0]}
+                where: {commitmentBoxId: boxId}
             })
             const newCommitment = new ObservedCommitmentEntity()
             Object.assign(newCommitment, {
                 ...oldCommitment,
                 ...{
-                    commitmentBoxId: information.updatedCommitments[0],
                     spendBlock: block
                 }
             })
             updatedCommitmentEntities.push(newCommitment)
+        }
+
+        const spentBoxEntities: Array<BoxEntity> = []
+        for (const id of information.spentBoxes) {
+            const oldBox = await this.boxesRepository.findOne({
+                where: {boxId: id}
+            })
+            const newBox = new BoxEntity()
+            Object.assign(newBox, {
+                ...oldBox,
+                ...{
+                    spendBlock: block
+                }
+            })
+            spentBoxEntities.push(newBox)
         }
 
         let error = true;
@@ -106,7 +131,9 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
         try {
             await queryRunner.manager.save(block);
             await queryRunner.manager.save(commitmentsEntity);
+            await queryRunner.manager.save(boxEntities)
             await queryRunner.manager.save(updatedCommitmentEntities);
+            await queryRunner.manager.save(spentBoxEntities);
             await queryRunner.commitTransaction();
         } catch (err) {
             console.log(err)
@@ -174,6 +201,15 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
                 eventId: eventId
             }
         })
+    }
+
+    getUnspentSpecialBoxIds = async (type: boxType): Promise<Array<string>> => {
+        return (await this.boxesRepository.find({
+            where: {
+                type: type,
+                spendBlock: undefined
+            }
+        })).map(box => box.boxId)
     }
 }
 

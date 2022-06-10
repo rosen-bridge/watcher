@@ -48,7 +48,9 @@ describe("Commitment Database functions", async () => {
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
                 {
                     newCommitments: [firstCommitment],
-                    updatedCommitments: []
+                    updatedCommitments: [],
+                    newBoxes: [],
+                    spentBoxes: []
                 }
             );
             expect(res).to.be.true;
@@ -59,7 +61,9 @@ describe("Commitment Database functions", async () => {
                 "3ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
                 {
                     newCommitments: [secondCommitment, thirdCommitment],
-                    updatedCommitments: ["1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117"]
+                    updatedCommitments: ["1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117"],
+                    newBoxes: [],
+                    spentBoxes: []
                 }
             );
             expect(res).to.be.true;

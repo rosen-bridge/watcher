@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { ObservedCommitmentEntity } from "./ObservedCommitmentEntity";
+import { BoxEntity } from "./BoxEntity";
 
 @Entity()
 export class CBlockEntity {
@@ -18,4 +19,11 @@ export class CBlockEntity {
         {cascade: true,}
     )
     commitments: ObservedCommitmentEntity[]
+
+    @OneToMany(
+        () => BoxEntity,
+        (box) => box.block,
+        {cascade: true,}
+    )
+    boxes: BoxEntity[]
 }

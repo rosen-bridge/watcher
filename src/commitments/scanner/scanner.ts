@@ -1,7 +1,7 @@
 import { AbstractScanner } from "../../scanner/abstractScanner";
 import { CommitmentDataBase } from "../models/commitmentModel";
 import config, { IConfig } from "config";
-import { Block, Commitment } from "../../objects/interfaces";
+import { Block, Commitment, SpecialBox } from "../../objects/interfaces";
 import { commitmentOrmConfig } from "../../../config/commitmentOrmConfig";
 import { CommitmentNetworkApi } from "../network/networkApi";
 import { CBlockEntity } from "../../entities/CBlockEntity";
@@ -13,6 +13,8 @@ const INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
 export type CommitmentInformation = {
     newCommitments: Array<Commitment>
     updatedCommitments: Array<string>
+    newBoxes: Array<SpecialBox>
+    spentBoxes: Array<string>
 }
 
 export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation> {
@@ -46,7 +48,9 @@ export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation
         // TODO: Add eventTrigger box id to updated commitments
         return {
             newCommitments: newCommitments,
-            updatedCommitments: updatedCommitments
+            updatedCommitments: updatedCommitments,
+            newBoxes: [],
+            spentBoxes: []
         }
     }
 
