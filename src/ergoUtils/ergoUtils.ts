@@ -32,7 +32,7 @@ export const decodeCollColl = async (str: string): Promise<Uint8Array[]> => {
 export const decodeStr = async (str: string): Promise<string> => {
     return Buffer.from(wasm.Constant.decode_from_base16(str).to_byte_array()).toString('hex')
 }
-export const strToUint8Array = (str: string): Uint8Array => {
+export const hexStrToUint8Array = (str: string): Uint8Array => {
     return new Uint8Array(Buffer.from(str, "hex"))
 }
 

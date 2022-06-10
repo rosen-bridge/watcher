@@ -58,4 +58,14 @@ export class ErgoNetworkApi {
             res => res.data.address
         )
     }
+
+    /**
+     * Returns the box by its id
+     * @param id
+     */
+    static boxById = (id: string): Promise<wasm.ErgoBox> => {
+        return nodeApi.get<wasm.ErgoBox>(`utxo/byId/${id}`).then(
+            res => res.data
+        )
+    }
 }

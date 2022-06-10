@@ -1,5 +1,6 @@
 import { boxes } from "../../src/ergoUtils/boxes";
 import { expect } from "chai";
+import { AddressCache, contracts } from "../../src/contracts/contracts";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { firstCommitment } from "../commitment/models/commitmentModel";
 import { contractHash } from "../../src/ergoUtils/ergoUtils";
@@ -46,6 +47,15 @@ describe("Testing Box Creation", () => {
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(5)
             expect(data.tokens().get(0).id().to_str()).to.eq(tokenId)
+        })
+    })
+
+    describe("createTriggerEvent", () => {
+        it("tests the event trigger box creation", () => {
+            const data = boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservations[0])
+            expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
+            expect(data.tokens().len()).to.eq(1)
+            expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(2)
         })
     })
 })

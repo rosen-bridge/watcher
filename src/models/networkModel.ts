@@ -193,5 +193,15 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         return error;
     }
 
+    /**
+     * returns all created events by the watcher that are still valid
+     */
+    getCreatedCommitments = async (): Promise<Array<CommitmentEntity>> => {
+        return await this.commitmentRepository.find({
+            where: {
+                flag: txStatus.CREATED
+            }
+        })
+    }
 }
 
