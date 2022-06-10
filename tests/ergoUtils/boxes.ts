@@ -1,9 +1,9 @@
 import { boxes } from "../../src/ergoUtils/boxes";
 import { expect } from "chai";
-import { AddressCache, contracts } from "../../src/contracts/contracts";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { firstCommitment } from "../commitment/models/commitmentModel";
 import { contractHash } from "../../src/ergoUtils/ergoUtils";
+import { firstObservations } from "../cardano/models/models";
 
 const chai = require("chai")
 const spies = require("chai-spies")

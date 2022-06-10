@@ -86,6 +86,7 @@ describe("Commitment Database functions", () => {
 
     describe("commitmentsByEventId", () => {
         it("should return a commitment with specified event id", async () => {
+            const DB = await loadDataBase("commitments");
             const data = await DB.commitmentsByEventId(firstCommitment.eventId)
             expect(data).to.have.length(2)
         })
@@ -93,6 +94,7 @@ describe("Commitment Database functions", () => {
 
     describe("findCommitmentsById", () => {
         it("should return exactly two commitments with the specified id", async () => {
+            const DB = await loadDataBase("commitments");
             const data  = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
             expect(data).to.have.length(2)
             expect(data[0].commitment).to.eql(secondCommitment.commitment)
