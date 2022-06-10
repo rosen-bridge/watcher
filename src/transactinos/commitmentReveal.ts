@@ -1,7 +1,6 @@
 import { CommitmentDataBase } from "../commitments/models/commitmentModel";
 import { Observation } from "../objects/interfaces";
 import { NetworkDataBase } from "../models/networkModel";
-import { ErgoBox } from "ergo-lib-wasm-nodejs";
 import { ErgoNetworkApi } from "../ergoUtils/networkApi";
 import config from "config";
 import { ObservedCommitmentEntity } from "../entities/ObservedCommitmentEntity";
@@ -12,13 +11,16 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { boxCreationError } from "../utils/utils";
 
 const commitmentLimit = parseInt(config.get?.('commitmentLimit'))
-const minBoxValue = parseInt(config.get?.('ergo.minBoxVal'))
 const txFee = parseInt(config.get?.('ergo.txFee'))
 
 export class commitmentReveal{
     _commitmentDataBase: CommitmentDataBase
     _observationDataBase: NetworkDataBase
+    _secret: wasm.SecretKey
 
+    constructor(secret: wasm.SecretKey) {
+        this._secret = secret
+    }
     /**
      * creates and sends the trigger event transaction
      * @param commitmentBoxes
@@ -26,7 +28,10 @@ export class commitmentReveal{
      * @param WIDs
      * @param feeBox
      */
-    triggerEventCreationTx = async (commitmentBoxes: Array<ErgoBox>, observation: Observation, WIDs: Array<Uint8Array>, feeBox: ErgoBox): Promise<string> => {
+    triggerEventCreationTx = async (commitmentBoxes: Array<wasm.ErgoBox>,
+                                    observation: Observation,
+                                    WIDs: Array<Uint8Array>,
+                                    feeBox: wasm.ErgoBox): Promise<string> => {
         const height = await ErgoNetworkApi.getCurrentHeight()
         const boxValues = commitmentBoxes.map(box => BigInt(box.value().as_i64().to_str())).reduce((a, b) =>  a + b, BigInt(0))
         const triggerEvent = await boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
@@ -34,7 +39,7 @@ export class commitmentReveal{
         commitmentBoxes.forEach(box => inputBoxes.add(box))
         try {
             const signed = await createAndSignTx(
-                config.get("ergo.secret"),
+                this._secret,
                 inputBoxes,
                 [triggerEvent],
                 height
