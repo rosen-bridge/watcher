@@ -140,12 +140,7 @@ export class Transaction{
         const usersWID = users.map(async (id) => {
             const wid = uint8ArrayToHex(id);
             try {
-                const box = await (
-                    this.ergoNetwork.getBoxWithToken(
-                        this.userAddress,
-                        wid,
-                    )
-                );
+                const box = await this.ergoNetwork.getBoxWithToken(this.userAddress, wid,);
                 return true;
             } catch (error) {
                 return false;
@@ -419,12 +414,7 @@ export class Transaction{
 
         const RWTCount = RSNCount / BigInt(R6.to_i64_str_array()[0]);
 
-        const RSNInput = await (
-            this.ergoNetwork.getBoxWithToken(
-                this.userAddress,
-                this.RSN.to_str()
-            )
-        );
+        const RSNInput = await this.ergoNetwork.getBoxWithToken(this.userAddress, this.RSN.to_str())
 
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte()!;
         const repoBoxId = repoBox.box_id().as_bytes();

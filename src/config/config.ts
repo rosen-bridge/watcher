@@ -1,5 +1,4 @@
 import config from "config";
-import { NetworkPrefix } from "ergo-lib-wasm-nodejs";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { SecretError } from "../errors/ConfigError";
 import { generateSK } from "../api/ergoUtils";
@@ -24,7 +23,7 @@ const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
 
 export class ErgoConfig{
     private static instance: ErgoConfig;
-    networkType: NetworkPrefix;
+    networkType: wasm.NetworkPrefix;
     secretKey: string;
     explorerUrl: string;
     nodeUrl: string;
@@ -38,7 +37,7 @@ export class ErgoConfig{
     cleanupConfirmation: number;
 
     private constructor() {
-        let networkType: NetworkPrefix = wasm.NetworkPrefix.Testnet;
+        let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
         switch (NETWORK_TYPE) {
             case "Mainnet": {
                 networkType = wasm.NetworkPrefix.Mainnet;

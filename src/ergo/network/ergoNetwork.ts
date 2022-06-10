@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Info } from "../../objects/ergo";
-import { Address, ErgoBox } from "ergo-lib-wasm-nodejs";
 import { ergoTreeToBase58Address } from "../../api/ergoUtils";
 import { AddressBoxes, ErgoTx } from "./types";
 import { JsonBI } from "../../network/parser";
@@ -160,7 +159,7 @@ export class ErgoNetwork{
      * @param address
      * @param tokenId
      */
-    getBoxWithToken = async (address: Address, tokenId: string): Promise<wasm.ErgoBox> => {
+    getBoxWithToken = async (address: wasm.Address, tokenId: string): Promise<wasm.ErgoBox> => {
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
             0n,
@@ -189,7 +188,7 @@ export class ErgoNetwork{
      * @param amount
      * @param filter
      */
-    getErgBox = async (address: Address, amount: bigint, filter: (box: wasm.ErgoBox) => boolean = () => true): Promise<Array<ErgoBox>> => {
+    getErgBox = async (address: wasm.Address, amount: bigint, filter: (box: wasm.ErgoBox) => boolean = () => true): Promise<Array<wasm.ErgoBox>> => {
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
             amount,
@@ -214,8 +213,10 @@ export class ErgoNetwork{
             transactions.forEach(tx => {
                 const inputs = tx.inputs.filter(box => box.address === address);
                 const outputs = tx.outputs.filter(box => box.address === address);
-                if (inputs.length === 1 && outputs.length >= 1) {
-                    memPoolBoxesMap.set(inputs[0].boxId, wasm.ErgoBox.from_json(JsonBI.stringify(outputs[0])))
+                if (inputs.length >= 1 && outputs.length >= 1) {
+                    inputs.forEach(input => {
+                        memPoolBoxesMap.set(input.boxId, wasm.ErgoBox.from_json(JsonBI.stringify(outputs[0])))
+                    });
                 }
             });
         }
