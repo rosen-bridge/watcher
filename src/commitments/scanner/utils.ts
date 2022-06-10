@@ -1,12 +1,14 @@
 import { Commitment } from "../../objects/interfaces";
-import { tokens } from "../../../config/default";
+import { decodeCollColl, decodeStr } from "../../utils/utils";
 import { NodeOutputBox, NodeTransaction } from "../network/ergoApiModels";
 import { CommitmentDataBase } from "../models/commitmentModel";
 import { Address } from "ergo-lib-wasm-nodejs";
-import { contracts } from "../../contracts/contracts";
-import { decodeCollColl, decodeStr } from "../../ergoUtils/ergoUtils";
+import { rosenConfig } from "../../config/rosenConfig";
+import { ErgoConfig } from "../../config/config";
 
-export class CommitmentUtils {
+const ergoConfig = ErgoConfig.getConfig();
+
+export class CommitmentUtils{
 
     /**
      * check if a transaction generates a commitment or not if yes returns the commitment
@@ -19,9 +21,9 @@ export class CommitmentUtils {
                             commitmentAddresses: Array<string>):
         Promise<Commitment | undefined> => {
         const commitmentErgoTrees: Array<string> = commitmentAddresses.map(ad => Address.from_base58(ad).to_ergo_tree().to_base16_bytes())
-        const commitment: NodeOutputBox | undefined = tx.outputs.filter((box) =>
+        const commitment: NodeOutputBox = tx.outputs.filter((box) =>
             commitmentErgoTrees.includes(box.ergoTree)
-        ).filter(box => box.assets.length > 0 && box.assets[0].tokenId == tokens.RWT)[0]
+        ).filter(box => box.assets.length > 0 && box.assets[0].tokenId == ergoConfig.RWTId)[0]
         if (commitment != undefined) {
             const WID = (await decodeCollColl(commitment.additionalRegisters['R4']))[0]
             const requestId = (await decodeCollColl(commitment.additionalRegisters['R5']))[0]
@@ -45,7 +47,7 @@ export class CommitmentUtils {
     static commitmentsAtHeight = async (txs: NodeTransaction[]): Promise<Array<Commitment>> => {
         const commitments: Array<Commitment> = []
         for (let i = 0; i < txs.length; i++) {
-            const c = await this.checkTx(txs[i], [contracts.addressCache.commitment!])
+            const c = await this.checkTx(txs[i], [rosenConfig.commitmentAddress])
             if (c !== undefined) commitments.push(c);
         }
         return commitments;

@@ -5,7 +5,7 @@ import { Block } from "../objects/interfaces";
 export abstract class AbstractScanner<BlockT, DataT> {
     abstract _dataBase: AbstractDataBase<BlockT, DataT>;
     abstract _networkAccess: AbstractNetworkConnector;
-    abstract _INITIAL_HEIGHT: number;
+    abstract _initialHeight: number;
 
     /**
      * function that checks if fork is happen in the blockchain or not
@@ -36,11 +36,11 @@ export abstract class AbstractScanner<BlockT, DataT> {
                 if (lastSavedBlock !== undefined) {
                     height = lastSavedBlock.block_height + 1;
                 } else {
-                    if (this._INITIAL_HEIGHT > lastBlockHeight) {
+                    if (this._initialHeight > lastBlockHeight) {
                         console.log("scanner initial height is more than current block height!");
                         return;
                     }
-                    height = this._INITIAL_HEIGHT;
+                    height = this._initialHeight;
                 }
                 for (height; height <= lastBlockHeight; height++) {
                     const block = await this._networkAccess.getBlockAtHeight(height);

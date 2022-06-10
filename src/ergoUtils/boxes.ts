@@ -1,11 +1,11 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { contracts } from "../contracts/contracts";
-import { tokens } from "../../config/default";
 import { contractHash, hexStrToUint8Array } from "./ergoUtils";
-import config from "config";
-import { Observation } from "../objects/interfaces";
-import { Buffer } from "buffer";
+import { ErgoConfig } from "../config/config";
+import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array } from "../utils/utils";
+import { Observation } from "../objects/interfaces";
+
+const ergoConfig = ErgoConfig.getConfig();
 
 const permitBox = require('./dataset/permitBox.json');
 const WIDBox = require('./dataset/WIDBox.json');
@@ -37,11 +37,11 @@ export class boxes {
     static createPermit = (value: bigint, height: number, RWTCount: bigint, WID: string): wasm.ErgoBoxCandidate => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
-            contracts.addressCache.permitContract!,
+            wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.watcherPermitAddress)),
             height
         );
-        if(RWTCount > 0) {
-            builder.add_token(wasm.TokenId.from_str(tokens.RWT),
+        if (RWTCount > 0) {
+            builder.add_token(wasm.TokenId.from_str(ergoConfig.RWTId),
                 wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString())))
         }
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(WID)]))
@@ -58,13 +58,13 @@ export class boxes {
      * @param permitScriptHash
      */
     static createCommitment = (value: bigint, height: number, WID: string, requestId: string, eventDigest: Uint8Array, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
-        const contract = contracts.addressCache.commitmentContract!
+        const contract = wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.commitmentAddress));
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
             contract,
             height
         );
-        builder.add_token(wasm.TokenId.from_str(tokens.RWT),
+        builder.add_token(wasm.TokenId.from_str(ergoConfig.RWTId),
             wasm.TokenAmount.from_i64(wasm.I64.from_str("1")))
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(WID)]))
         builder.set_register_value(5, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(requestId)]))
@@ -80,7 +80,7 @@ export class boxes {
      * @param tokens
      */
     static createPayment = (value: bigint, height: number, tokens: Array<wasm.Token>): wasm.ErgoBoxCandidate => {
-        const address = wasm.Address.from_base58(config.get("ergo.address"))
+        const address = wasm.SecretKey.dlog_from_bytes(hexStrToUint8Array(ergoConfig.secretKey)).get_address()
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
             wasm.Contract.pay_to_address(address),
@@ -102,10 +102,10 @@ export class boxes {
     static createTriggerEvent = (value: bigint, height: number, WIDs: Array<Uint8Array>, observation: Observation) => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
-            contracts.addressCache.eventTriggerContract!,
+            wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.eventTriggerAddress)),
             height
         );
-        builder.add_token(wasm.TokenId.from_str(tokens.RWT),
+        builder.add_token(wasm.TokenId.from_str(ergoConfig.RWTId),
             wasm.TokenAmount.from_i64(wasm.I64.from_str(WIDs.length.toString())))
         const eventData = [
             Buffer.from(observation.sourceTxId, "hex"),
@@ -118,7 +118,7 @@ export class boxes {
             Buffer.from(observation.sourceChainTokenId, "hex"),
             Buffer.from(observation.targetChainTokenId, "hex"),
             Buffer.from(observation.sourceBlockId, "hex")]
-        const permitHash = contractHash(contracts.addressCache.permitContract!)
+        const permitHash = contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.watcherPermitAddress)))
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte(WIDs))
         builder.set_register_value(5, wasm.Constant.from_coll_coll_byte(eventData))
         builder.set_register_value(6, wasm.Constant.from_byte_array(permitHash))

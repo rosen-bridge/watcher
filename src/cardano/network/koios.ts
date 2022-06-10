@@ -1,17 +1,19 @@
 import axios from "axios";
-import config from 'config';
 import { Tx, TxMetaData, Utxo } from "./apiModelsCardano";
 import { AbstractNetworkConnector } from "../../network/abstractNetworkConnector";
 import { Block } from "../../objects/interfaces";
+import { CardanoConfig } from "../../config/config";
 
-const URL: string | undefined = config.get?.('node.URL');
+const cardanoConfig = CardanoConfig.getConfig();
+const URL = cardanoConfig.koiosURL;
+
 export const koios = axios.create({
     baseURL: URL,
-    timeout: 8000,
+    timeout: cardanoConfig.timeout,
     headers: {"Content-Type": "application/json"}
 });
 
-export class KoiosNetwork extends AbstractNetworkConnector {
+export class KoiosNetwork extends AbstractNetworkConnector{
     getBlockAtHeight = (height: number): Promise<Block> => {
         return koios.get<Array<Block>>(
             '/blocks',
