@@ -5,6 +5,7 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { firstCommitment } from "../commitment/models/commitmentModel";
 import { contractHash } from "../../src/ergoUtils/ergoUtils";
 import { Buffer } from "buffer";
+import { firstObservations } from "../cardano/models/models";
 
 const chai = require("chai")
 const spies = require("chai-spies")
@@ -21,6 +22,7 @@ const permit = "EE7687i4URb4YuSGSQXPCb6iAFxAd5s8H1DLbUFQnSrJ8rED2KXdq8kUPQZ3pcPV
 export const cache: AddressCache = {
     fraud: fraud,
     eventTrigger: eventTrigger,
+    eventTriggerContract: wasm.Contract.pay_to_address(wasm.Address.from_base58(eventTrigger)),
     commitment: commitment,
     commitmentContract: wasm.Contract.pay_to_address(wasm.Address.from_base58(commitment)),
     permit: permit,
@@ -58,6 +60,15 @@ describe("Testing Box Creation", () => {
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(5)
             expect(data.tokens().get(0).id().to_str()).to.eq(tokenId)
+        })
+    })
+
+    describe("createTriggerEvent", () => {
+        it("tests the event trigger box creation", () => {
+            const data = boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservations[0])
+            expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
+            expect(data.tokens().len()).to.eq(1)
+            expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(2)
         })
     })
 })

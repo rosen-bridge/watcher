@@ -156,10 +156,22 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * find commitments by their box ids
      * @param ids
      */
-    findCommitmentsById = async (ids: Array<string>) => {
+    findCommitmentsById = async (ids: Array<string>): Promise<Array<ObservedCommitmentEntity>> => {
         return await this.commitmentRepository.find({
             where: {
                 commitmentBoxId: In(ids)
+            }
+        })
+    }
+
+    /**
+     * Returns all commitments related to a specific event
+     * @param eventId
+     */
+    commitmentsByEventId = async (eventId: string): Promise<Array<ObservedCommitmentEntity>> => {
+        return await this.commitmentRepository.find({
+            where: {
+                eventId: eventId
             }
         })
     }

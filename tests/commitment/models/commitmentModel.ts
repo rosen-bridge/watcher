@@ -3,6 +3,7 @@ import { commitmentEntities } from "../../../src/entities";
 import { CommitmentDataBase } from "../../../src/commitments/models/commitmentModel";
 import { Commitment } from "../../../src/objects/interfaces";
 import { expect } from "chai";
+import { ObservedCommitmentEntity } from "../../../src/entities/ObservedCommitmentEntity";
 
 const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
     const ormConfig = new DataSource({
@@ -29,6 +30,13 @@ const secondCommitment: Commitment = {
     commitmentBoxId: "43d0ead059054f29ca9c831c93613e1ca98e8fbbc8b166c4fa24120a9d489824"
 };
 
+const thirdCommitment: Commitment = {
+    WID: "ecbde212e49df0e8f65dbaba5f59a6760a8f4c58a3d3451bad68b72ee3588703",
+    commitment: "f0fc04ceea089b372c6e312f974be9be0ec8a9fa3568a0a6c155cb7d535186c7",
+    eventId: "ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b",
+    commitmentBoxId: "a18dc1f812aa156037c47db5bd7fc9ef85646c97a1abb76b30045b8e5f7e31e2"
+}
+
 
 describe("Commitment Database functions", async () => {
     const DB = await loadDataBase("commitments");
@@ -50,7 +58,7 @@ describe("Commitment Database functions", async () => {
                 3433334,
                 "3ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
                 {
-                    newCommitments: [secondCommitment],
+                    newCommitments: [secondCommitment, thirdCommitment],
                     updatedCommitments: ["1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117"]
                 }
             );
@@ -74,9 +82,24 @@ describe("Commitment Database functions", async () => {
         })
     })
 
+    describe("commitmentsByEventId", () => {
+        it("should return a commitment with specified event id", async () => {
+            const data = await DB.commitmentsByEventId(firstCommitment.eventId)
+            expect(data).to.have.length(2)
+        })
+    })
+
+    describe("findCommitmentsById", () => {
+        it("should return exactly two commitments with the specified id", async () => {
+            const data  = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
+            expect(data).to.have.length(2)
+            expect(data[0].commitment).to.eql(secondCommitment.commitment)
+        })
+    })
+
     describe("deleteCommitments", () => {
         it("should delete two commitments", async () => {
-            await DB.deleteCommitments([firstCommitment.commitmentBoxId, secondCommitment.commitmentBoxId])
+            await DB.deleteCommitments([firstCommitment.commitmentBoxId, secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
             let data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(0)
         })

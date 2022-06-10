@@ -58,6 +58,16 @@ describe("Testing ergoUtils", () => {
             ).build()]
             expect(function(){createChangeBox(boxes, outputs, 10, secret)}).to.throw(boxCreationError)
         })
+        it("should return error because output tokens are more", () => {
+            const builder = new wasm.ErgoBoxCandidateBuilder(
+                wasm.BoxValue.from_i64(wasm.I64.from_str(txFee.toString())),
+                wasm.Contract.pay_to_address(secret.get_address()),
+                10
+            )
+            builder.add_token(wasm.TokenId.from_str(tokenId),
+                wasm.TokenAmount.from_i64(wasm.I64.from_str("101")))
+            expect(function(){createChangeBox(boxes, [builder.build()], 10, secret)}).to.throw(boxCreationError)
+        })
         it("should return change box with all tokens", () => {
             const res = createChangeBox(boxes, [], 10, secret)
             expect(res).to.not.null
