@@ -371,7 +371,7 @@ export class Transaction{
         for (let i = offset; i < inputBoxes.len(); i++) {
             const boxTokens = inputBoxes.get(i).tokens();
             for (let j = 0; j < boxTokens.len(); j++) {
-                const token = boxTokens.get(0);
+                const token = boxTokens.get(j);
                 const tokenId = token.id().to_str();
                 const tokenAmount = token.amount().as_i64();
                 if (changeTokens.get(tokenId) !== undefined) {
