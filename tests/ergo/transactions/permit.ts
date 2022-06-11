@@ -326,7 +326,7 @@ describe("Watcher Permit Transactions", () => {
                 "1111111111111111111111111111111111111111111111111111111111111111"
             );
             const res = await transaction.returnPermit(1n);
-            expect(res.response).to.be.equal("9cd17c5c0076b7673853b389fb2a5d160dced8559253aa84d3dc6b7e54e18a6c")
+            expect(res.response).to.be.equal("f734636700c599306c964709bb920776c5f180579046c704110fbf6cf57f40fe")
         });
 
         /**
