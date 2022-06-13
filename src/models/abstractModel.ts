@@ -1,7 +1,7 @@
 import { DataSource, DeleteResult, Repository } from "typeorm";
 import { Block } from "../objects/interfaces";
 
-export abstract class AbstractDataBase <BlockT, DataT>{
+export abstract class AbstractDataBase<BlockT, DataT>{
     abstract dataSource: DataSource;
     abstract blockRepository: Repository<BlockT>;
 
@@ -25,13 +25,13 @@ export abstract class AbstractDataBase <BlockT, DataT>{
      * @param data
      * @return Promise<boolean>
      */
-    abstract saveBlock (height: number, blockHash: string, data: DataT): Promise<boolean>;
+    abstract saveBlock(height: number, blockHash: string, data: DataT): Promise<boolean>;
 
     /**
      * get block hash and height
      * @param height
      * @return Promise<Block|undefined>
      */
-    abstract getBlockAtHeight (height: number): Promise<Block | undefined>;
+    abstract getBlockAtHeight(height: number): Promise<Block | undefined>;
 }
 
