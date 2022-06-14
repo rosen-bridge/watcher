@@ -1,8 +1,8 @@
 import config from "config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { SecretError } from "../errors/ConfigError";
-import { generateSK } from "../api/ergoUtils";
 import { uint8ArrayToHex } from "../utils/utils";
+import { generateSK } from "../ergo/utils";
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');

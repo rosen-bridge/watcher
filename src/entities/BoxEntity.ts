@@ -15,11 +15,17 @@ export class BoxEntity {
     @Column()
     boxId: string
 
+    @Column()
+    value: bigint
+
     @Column({
         type: 'simple-enum',
         enum: boxType
     })
     type: boxType
+
+    @Column()
+    boxJson: string
 
     @ManyToOne(
         () => CBlockEntity,

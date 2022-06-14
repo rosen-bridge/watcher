@@ -7,6 +7,12 @@ export class boxCreationError extends Error {
         this.name = "BoxCreationError"
     }
 }
+export class NotEnoughFund extends Error {
+    constructor(message?: string) {
+        super(message)
+        this.name = "NotEnoughFund"
+    }
+}
 
 export function notEmpty<T>(value: T | null | undefined): value is T {
     return value !== null && value !== undefined;

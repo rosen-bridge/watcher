@@ -1,8 +1,8 @@
-import { boxes } from "../../src/ergoUtils/boxes";
+import { Boxes } from "../../src/ergo/boxes";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { firstCommitment } from "../commitment/models/commitmentModel";
-import { contractHash } from "../../src/ergoUtils/ergoUtils";
+import { contractHash } from "../../src/ergo/utils";
 import { firstObservations } from "../cardano/models/models";
 
 const chai = require("chai")
@@ -17,7 +17,7 @@ describe("Testing Box Creation", () => {
     const value = BigInt(10000000)
     describe("createPermit", () => {
         it("tests the permit box creation", () => {
-            const data = boxes.createPermit(value, 10, BigInt(9), WID)
+            const data = Boxes.createPermit(value, 10, BigInt(9), WID)
             expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(9)
@@ -31,7 +31,7 @@ describe("Testing Box Creation", () => {
                     permit
                 )
             ))
-            const data = boxes.createCommitment(value, 10, WID, firstCommitment.eventId, Buffer.from(firstCommitment.commitment, 'hex'), permitHash)
+            const data = Boxes.createCommitment(value, 10, WID, firstCommitment.eventId, Buffer.from(firstCommitment.commitment, 'hex'), permitHash)
             expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(1)
@@ -42,7 +42,7 @@ describe("Testing Box Creation", () => {
         it("tests the payment creation", () => {
             const token = new wasm.Token(wasm.TokenId.from_str(tokenId),
                 wasm.TokenAmount.from_i64(wasm.I64.from_str("5")))
-            const data = boxes.createPayment(value, 10, [token])
+            const data = Boxes.createPayment(value, 10, [token])
             expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(5)
@@ -52,7 +52,7 @@ describe("Testing Box Creation", () => {
 
     describe("createTriggerEvent", () => {
         it("tests the event trigger box creation", () => {
-            const data = boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservations[0])
+            const data = Boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservations[0])
             expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(2)

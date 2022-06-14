@@ -7,6 +7,7 @@ import { ErgoNetworkApi } from "../network/networkApi";
 import { CBlockEntity } from "../../entities/CBlockEntity";
 import { CommitmentUtils } from "./utils";
 import { ErgoConfig } from "../../config/config";
+import { rosenConfig } from "../../config/rosenConfig";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -41,7 +42,8 @@ export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation
         const newCommitments = (await CommitmentUtils.commitmentsAtHeight(txs))
         const updatedCommitments = await CommitmentUtils.updatedCommitmentsAtHeight(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
         // TODO: Add eventTrigger box id to updated commitments
-        const newBoxes = await CommitmentUtils.specialBoxesAtHeight(txs, contracts.addressCache.permit!, config.get?.("ergo.address"), config.get?.("ergo.WID"))
+        // TODO: fix config
+        const newBoxes = await CommitmentUtils.specialBoxesAtHeight(txs, rosenConfig.watcherPermitAddress, config.get?.("ergo.address"), config.get?.("ergo.WID"))
         const spentBoxes = await CommitmentUtils.spentSpecialBoxesAtHeight(txs, this._dataBase, [])
         return {
             newCommitments: newCommitments,

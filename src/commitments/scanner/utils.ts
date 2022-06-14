@@ -88,7 +88,12 @@ export class CommitmentUtils{
                 return box.ergoTree === permitErgoTree &&
                     box.assets.length > 0 &&
                     box.assets[0].tokenId == ergoConfig.RWTId
-            }).forEach(permit => specialBoxes.push({boxId: permit.boxId, type: boxType.PERMIT}))
+            }).forEach(permit => specialBoxes.push({
+                boxId: permit.boxId,
+                type: boxType.PERMIT,
+                value: permit.value,
+                boxJson: JSON.stringify(permit)
+            }))
             // Adding new WID boxes
             const watcherBoxes = tx.outputs.filter(box => {return box.ergoTree === watcherErgoTree})
             const WIDBOxes = watcherBoxes.filter(box => {
@@ -96,10 +101,20 @@ export class CommitmentUtils{
                     box.assets.length > 0 &&
                     box.assets[0].tokenId == WID
             })
-            WIDBOxes.forEach(WIDBox => specialBoxes.push({boxId: WIDBox.boxId, type: boxType.WID}))
+            WIDBOxes.forEach(WIDBox => specialBoxes.push({
+                boxId: WIDBox.boxId,
+                type: boxType.WID,
+                value: WIDBox.value,
+                boxJson: JSON.stringify(WIDBox)
+            }))
             // Adding other owned boxes
             watcherBoxes.filter(box => !WIDBOxes.includes(box))
-                .forEach(box => {specialBoxes.push({boxId: box.boxId, type: boxType.PLAIN})})
+                .forEach(box => specialBoxes.push({
+                    boxId: box.boxId,
+                    type: boxType.PLAIN,
+                    value: box.value,
+                    boxJson: JSON.stringify(box)
+                }))
         }
         return specialBoxes;
     }

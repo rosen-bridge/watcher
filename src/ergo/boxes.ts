@@ -1,20 +1,17 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { contractHash, hexStrToUint8Array } from "./ergoUtils";
+import { contractHash, hexStrToUint8Array } from "./utils";
 import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
-import { bigIntToUint8Array } from "../utils/utils";
+import { bigIntToUint8Array, NotEnoughFund } from "../utils/utils";
 import { CommitmentDataBase } from "../commitments/models/commitmentModel";
 import { boxType } from "../entities/BoxEntity";
-import { ErgoNetworkApi } from "./networkApi";
 import { Observation } from "../objects/interfaces";
+import { ErgoNetwork } from "./network/ergoNetwork";
 
 const ergoConfig = ErgoConfig.getConfig();
 
-const permitBox = require('./dataset/permitBox.json');
-const WIDBox = require('./dataset/WIDBox.json');
-const feeBox = require('./dataset/feeBox.json');
 
-export class boxes {
+export class Boxes {
     _dataBase: CommitmentDataBase
 
     constructor(db: CommitmentDataBase) {
@@ -22,21 +19,39 @@ export class boxes {
     }
 
     getPermits = async (): Promise<Array<wasm.ErgoBox>> => {
-        const permitIds = await this._dataBase.getUnspentSpecialBoxIds(boxType.PERMIT)
-        const permitBoxes = permitIds.map(async (boxId: string) => {return await ErgoNetworkApi.boxById(boxId)})
+        const permits = await this._dataBase.getUnspentSpecialBoxes(boxType.PERMIT)
+        const permitBoxes = permits.map(async (permit) => {
+            const box = wasm.ErgoBox.from_json(permit.boxJson)
+            return await ErgoNetwork.trackMemPool(box)
+        })
         return Promise.all(permitBoxes)
     }
 
-    getWIDBox = async (): Promise<Array<wasm.ErgoBox>> => {
-        const ids = await this._dataBase.getUnspentSpecialBoxIds(boxType.WID)
-        const boxes = ids.map(async (boxId: string) => {return await ErgoNetworkApi.boxById(boxId)})
-        return Promise.all(boxes)
+    getWIDBox = async (): Promise<wasm.ErgoBox> => {
+        const WID = (await this._dataBase.getUnspentSpecialBoxes(boxType.PERMIT))[0]
+        let WIDBox = wasm.ErgoBox.from_json(WID.boxJson)
+        WIDBox = await ErgoNetwork.trackMemPool(WIDBox)
+        return WIDBox
     }
 
-    getUserPaymentBox = async (value: number): Promise<Array<wasm.ErgoBox>> => {
-        const permitIds = await this._dataBase.getUnspentSpecialBoxIds(boxType.PLAIN)
-        const permitBoxes = permitIds.map(async (boxId: string) => {return await ErgoNetworkApi.boxById(boxId)})
-        return Promise.all(permitBoxes)
+    getUserPaymentBox = async (requiredValue: number): Promise<Array<wasm.ErgoBox>> => {
+        const boxes = await this._dataBase.getUnspentSpecialBoxes(boxType.PERMIT)
+        let selectedBoxes = []
+        let totalValue = BigInt(0)
+        for(const box of boxes){
+            totalValue = totalValue + box.value
+            selectedBoxes.push(box)
+            if(totalValue > requiredValue) break
+        }
+        if(totalValue < requiredValue){
+            console.log("ERROR: Not enough fund to create the transaction")
+            throw NotEnoughFund
+        }
+        const outBoxes = selectedBoxes.map(async (fund) => {
+            const box = wasm.ErgoBox.from_json(fund.boxJson)
+            return await ErgoNetwork.trackMemPool(box)
+        })
+        return Promise.all(outBoxes)
     }
 
     /**

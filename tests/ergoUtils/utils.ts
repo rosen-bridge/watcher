@@ -1,5 +1,5 @@
 import { Observation } from "../../src/objects/interfaces";
-import { commitmentFromObservation, contractHash, createChangeBox, extractBoxes } from "../../src/ergoUtils/ergoUtils";
+import { commitmentFromObservation, contractHash, createChangeBox, extractBoxes } from "../../src/ergo/utils";
 import { expect } from "chai";
 import { boxCreationError, uint8ArrayToHex } from "../../src/utils/utils";
 import * as wasm from "ergo-lib-wasm-nodejs";

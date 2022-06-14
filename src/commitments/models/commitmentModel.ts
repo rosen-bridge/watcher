@@ -1,7 +1,7 @@
 import { DataSource, DeleteResult, In, MoreThanOrEqual, Repository } from "typeorm";
 import { CBlockEntity } from "../../entities/CBlockEntity";
 import { ObservedCommitmentEntity } from "../../entities/ObservedCommitmentEntity";
-import { Block } from "../../objects/interfaces";
+import { Block, SpecialBox } from "../../objects/interfaces";
 import { AbstractDataBase } from "../../models/abstractModel";
 import { CommitmentInformation } from "../scanner/scanner";
 import { BoxEntity, boxType } from "../../entities/BoxEntity";
@@ -93,6 +93,8 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
                 const boxEntity = new BoxEntity()
                 boxEntity.boxId = box.boxId
                 boxEntity.type = box.type
+                boxEntity.value = box.value
+                boxEntity.boxJson = box.boxJson
                 boxEntity.block = block
             })
 
@@ -203,13 +205,13 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
         })
     }
 
-    getUnspentSpecialBoxIds = async (type: boxType): Promise<Array<string>> => {
+    getUnspentSpecialBoxes = async (type: boxType): Promise<Array<SpecialBox>> => {
         return (await this.boxesRepository.find({
             where: {
                 type: type,
                 spendBlock: undefined
             }
-        })).map(box => box.boxId)
+        }))
     }
 
     findSpecialBoxesById = async (ids: Array<string>): Promise<Array<BoxEntity>> => {

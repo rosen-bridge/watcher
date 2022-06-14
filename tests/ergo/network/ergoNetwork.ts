@@ -12,7 +12,6 @@ initMockedAxios();
  * Ergo Network class tests
  */
 describe("Ergo Network(API)", () => {
-    const ergoNetwork = new ErgoNetwork();
     /**
      * getHeight function tests
      */
@@ -21,7 +20,7 @@ describe("Ergo Network(API)", () => {
          * it should last block height
          */
         it("should return last block height", async () => {
-            const res = await ergoNetwork.getHeight();
+            const res = await ErgoNetwork.getHeight();
             expect(res).to.equal(215809);
         });
     });
@@ -34,7 +33,7 @@ describe("Ergo Network(API)", () => {
          * should return `AddressBoxes` instance with the offset set to 0
          */
         it("should return `AddressBoxes` instance offset=0", async () => {
-            const res = await ergoNetwork.getBoxesForAddress(
+            const res = await ErgoNetwork.getBoxesForAddress(
                 "0008cd03c880d703131f301badf289ceb9b7f86d674e8cbe390461f66e844f507571a1d6",
                 0,
                 1
@@ -50,7 +49,7 @@ describe("Ergo Network(API)", () => {
          * should return emptyAddressBox instance with the offset set to 1
          */
         it("should return emptyAddressBox instance offset=1", async () => {
-            const res = await ergoNetwork.getBoxesForAddress(
+            const res = await ErgoNetwork.getBoxesForAddress(
                 "0008cd03c880d703131f301badf289ceb9b7f86d674e8cbe390461f66e844f507571a1d6",
                 1,
                 1
@@ -71,7 +70,7 @@ describe("Ergo Network(API)", () => {
          * should return ErgoBoxes that asserted in the tests body
          */
         it("should return array of ErgoBoxes", async () => {
-            const res = await ergoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
+            const res = await ErgoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
             expect(res.len().valueOf()).to.be.equal(4);
             expect(res.get(0).box_id().to_str()).to.be.equal("3ac7e967200368b6a95f0714d24f830161fb0d5c7c173beae316969687ba98af");
             expect(res.get(1).box_id().to_str()).to.be.equal("762a25c986e4cc2dfbad6e092b214307ab88de9a073d01e80c17a81efab6d98b");
@@ -89,7 +88,7 @@ describe("Ergo Network(API)", () => {
          * should return last 10 block headers
          */
         it("should return last 10 block headers", async () => {
-            const res = await ergoNetwork.getLastBlockHeader();
+            const res = await ErgoNetwork.getLastBlockHeader();
             expect(res).to.be.eql(mockedResponseBody.last10BlockHeaders);
         });
     });
@@ -102,7 +101,7 @@ describe("Ergo Network(API)", () => {
          * the transaction should be accepted by node and the txId should return
          */
         it("should return txId", async () => {
-            const res = await ergoNetwork.sendTx(mockedResponseBody.sampleTxJson) as { txId: string };
+            const res = await ErgoNetwork.sendTx(mockedResponseBody.sampleTxJson) as { txId: string };
             expect(res.txId).to.be.equal(mockedResponseBody.sampleTxId);
         });
     });
@@ -115,7 +114,7 @@ describe("Ergo Network(API)", () => {
          * should return ErgoStateContext without error
          */
         it("should return ErgoStateContext without error", async () => {
-            const res = await ergoNetwork.getErgoStateContext();
+            const res = await ErgoNetwork.getErgoStateContext();
         });
     });
 
@@ -127,7 +126,7 @@ describe("Ergo Network(API)", () => {
          * checks that function returns covering boxes(ERG) correctly with assertions
          */
         it("test covering erg ", async () => {
-            const res = await ergoNetwork.getCoveringErgAndTokenForAddress(
+            const res = await ErgoNetwork.getCoveringErgAndTokenForAddress(
                 "0008cd03c29ad59831be2e5baded45a03ce9a7d4c2e83d683e11c79790e76f640d0d3e30",
                 BigInt("94500000") + BigInt("10000000"),
             );
@@ -139,7 +138,7 @@ describe("Ergo Network(API)", () => {
          * checks that function returns covering boxes(Token) correctly with assertions
          */
         it("test covering tokens", async () => {
-            const res = await ergoNetwork.getCoveringErgAndTokenForAddress(
+            const res = await ErgoNetwork.getCoveringErgAndTokenForAddress(
                 "0008cd03c29ad59831be2e5baded45a03ce9a7d4c2e83d683e11c79790e76f640d0d3e30",
                 BigInt("100000"),
                 {["a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516"]: 100n},
@@ -157,7 +156,7 @@ describe("Ergo Network(API)", () => {
          * it should return box with NFT in it
          */
         it("returns box with NFT in it", async () => {
-            const res = await ergoNetwork.getBoxWithToken(
+            const res = await ErgoNetwork.getBoxWithToken(
                 wasm.Address.from_mainnet_str(userAddress),
                 "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8"
             );
@@ -173,7 +172,7 @@ describe("Ergo Network(API)", () => {
          * the function should return covering boxes with enough erg in it
          */
         it("get covering Erg without any covering token", async () => {
-            const res = await ergoNetwork.getErgBox(
+            const res = await ErgoNetwork.getErgBox(
                 wasm.Address.from_mainnet_str(userAddress),
                 BigInt("20000000"),
             );
@@ -190,7 +189,7 @@ describe("Ergo Network(API)", () => {
          */
         it("should return last box in the mempool", async () => {
             const ergoBox = wasm.ErgoBox.from_json(mockedResponseBody.unspentBox);
-            const res = await ergoNetwork.trackMemPool(ergoBox);
+            const res = await ErgoNetwork.trackMemPool(ergoBox);
             expect(
                 res.box_id().to_str()
             ).to.be.equal(
@@ -208,7 +207,7 @@ describe("Ergo Network(API)", () => {
          * should return mempool transactions
          */
         it("should return mempool transactions", async () => {
-            const res = await ergoNetwork.getMemPoolTxForAddress(RWTRepoAddress);
+            const res = await ErgoNetwork.getMemPoolTxForAddress(RWTRepoAddress);
             expect(res.total).to.be.equal(1);
         });
     });
