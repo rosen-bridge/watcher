@@ -29,6 +29,6 @@ export interface Commitment{
 export interface SpecialBox{
     boxId: string,
     type: boxType,
-    value: bigint,
+    value: string,
     boxJson: string
 }

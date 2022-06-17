@@ -15,8 +15,8 @@ export class BoxEntity {
     @Column()
     boxId: string
 
-    @Column()
-    value: bigint
+    @Column({type: 'bigint'})
+    value: string
 
     @Column({
         type: 'simple-enum',

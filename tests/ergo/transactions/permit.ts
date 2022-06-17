@@ -3,6 +3,7 @@ import { strToUint8Array } from "../../../src/utils/utils";
 import { assert, expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../objects/axios";
+import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 
 
 const RWTId = "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267";
@@ -181,7 +182,7 @@ describe("Watcher Permit Transactions", () => {
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
             );
             const outValue = BigInt(transaction.minBoxValue.as_i64().checked_add(transaction.fee.as_i64()).to_str());
-            const transactionInput = await transaction.ergoNetwork.getErgBox(
+            const transactionInput = await ErgoNetwork.getErgBox(
                 transaction.userAddress,
                 outValue,
             );
@@ -192,7 +193,7 @@ describe("Watcher Permit Transactions", () => {
                 }
             }
 
-            const height = await transaction.ergoNetwork.getHeight();
+            const height = await ErgoNetwork.getHeight();
 
             const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
                 transaction.minBoxValue,
@@ -252,7 +253,7 @@ describe("Watcher Permit Transactions", () => {
                 userAddress,
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
             );
-            const ergoBoxes = await transaction.ergoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
+            const ergoBoxes = await ErgoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
             let map = transaction.inputBoxesTokenMap(ergoBoxes, 0);
             expect(map.get(tokens[0])).to.be.equal("1");
             expect(map.get(tokens[1])).to.be.equal("100");

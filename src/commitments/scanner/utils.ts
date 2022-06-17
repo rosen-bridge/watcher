@@ -91,7 +91,7 @@ export class CommitmentUtils{
             }).forEach(permit => specialBoxes.push({
                 boxId: permit.boxId,
                 type: boxType.PERMIT,
-                value: permit.value,
+                value: permit.value.toString(),
                 boxJson: JSON.stringify(permit)
             }))
             // Adding new WID boxes
@@ -104,7 +104,7 @@ export class CommitmentUtils{
             WIDBOxes.forEach(WIDBox => specialBoxes.push({
                 boxId: WIDBox.boxId,
                 type: boxType.WID,
-                value: WIDBox.value,
+                value: WIDBox.value.toString(),
                 boxJson: JSON.stringify(WIDBox)
             }))
             // Adding other owned boxes
@@ -112,7 +112,7 @@ export class CommitmentUtils{
                 .forEach(box => specialBoxes.push({
                     boxId: box.boxId,
                     type: boxType.PLAIN,
-                    value: box.value,
+                    value: box.value.toString(),
                     boxJson: JSON.stringify(box)
                 }))
         }

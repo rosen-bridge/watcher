@@ -4,7 +4,7 @@ import { CommitmentDataBase } from "../../../src/commitments/models/commitmentMo
 import { Commitment } from "../../../src/objects/interfaces";
 import { expect } from "chai";
 
-const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
+export const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,

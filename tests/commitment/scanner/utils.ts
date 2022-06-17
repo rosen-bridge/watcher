@@ -1,7 +1,5 @@
 import { CommitmentUtils } from "../../../src/commitments/scanner/utils";
 import { expect } from "chai";
-import { CommitmentDataBase } from "../../../src/commitments/models/commitmentModel";
-import { commitmentOrmConfig } from "../../../config/commitmentOrmConfig";
 
 const chai = require("chai")
 const spies = require("chai-spies")
@@ -11,6 +9,7 @@ const tx = require('../dataset/tx.json');
 const commitmentTx = require('../dataset/commitmentTx.json');
 const commitmentAddress = "EurZwDoNTXuraUu37sjKwpEPkoumCwXHrwk8jUZzRCVyrrDywfQsbXSfh4sD9KYuNw3sqJDyKqh9URkzGTKzpFU28hWx2uUJJVhJ6LigNANqfVVjEFf4g5kkwTqLES4CpAyNLv3v8tBgtB2kGzjMZpU3qbwpZ8eh4JQQUw5cztzXc715H61hqPTH13i1qfGdph8GLV8DkczLHGektosSWXNQRXJBRvH6DVuyPRYsEeyjYr4agBxyEZ5PTx7KgYwKGFWhKbgkdaLzySZjFV7bSZXArLGpykP1UgS62o6aBydg1oPM3PTFugHQJbtusQShDNGCu5V7XXfePtJ2ybhS32NT3vP15Lzf1sXwXerGbMWLiznyLc4op1TJd5LyWrCYtznhwmjEZ7iKBxNT49BuL5QBQ3RiFFmazkhXrLLQnnqmhBfH8s8yA6rQD8hmyFm5YCaTfBPTG1LznGWtw6G9h5pZnAMuqHBBsEnKjRArTTR7uabKTCBK11oaVo8bqh3JPpHumLv7YAiC1GDHYst7KoVct9vwF5kByEag6turXiWA1JH4KNayh4VVwz8PLcGx5eyThMLkNw6t1VApcgM6DehcMhCc5D5jW4MicKrvwwYTEU4qwfHjMQ1ftanb7pRZkDZPuL9qppvQZhDdM8DzgXdMGnJK44aXujkuWZFvzKVzpPVyswgqnaLyznPEQ9xt5PVQmGrVXe44TPw9UDdeeW9wEzyVx4BHkC36LgHkbhWM36mAAfSDvFAxrDaBEBGEPt3wrJct8A6C4osCpcvUDRqKCPg2PkgrcYuem"
 import { ErgoConfig } from "../../../src/config/config"
+import { loadDataBase } from "../models/commitmentModel";
 
 describe("Commitment Scanner Utils test", () => {
     describe("checkTx", () => {
@@ -40,7 +39,7 @@ describe("Commitment Scanner Utils test", () => {
 
     describe("updatedCommitmentsAtHeight", () => {
         it("should find 3 updated commitments", async () => {
-            const DB = await CommitmentDataBase.init(commitmentOrmConfig);
+            const DB = await loadDataBase("commitments");
             chai.spy.on(DB, 'findCommitmentsById', () => [])
             const data = await CommitmentUtils.updatedCommitmentsAtHeight(
                 [commitmentTx],
