@@ -1,6 +1,5 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { SecretKey } from "ergo-lib-wasm-nodejs";
-import { ErgoNetworkApi } from "../ergoUtils/networkApi";
 import { Observation } from "../objects/interfaces";
 import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
