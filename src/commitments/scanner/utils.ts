@@ -125,7 +125,7 @@ export class CommitmentUtils{
         let spentBoxes: Array<string> = []
         for (const tx of txs) {
             const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
-            const foundBoxes = (await database.findSpecialBoxesById(inputBoxIds)).map(box => box.boxId)
+            const foundBoxes = (await database.findUnspentSpecialBoxesById(inputBoxIds)).map(box => box.boxId)
             const newUpdatedBoxes = inputBoxIds.filter(boxId => newBoxes.includes(boxId))
             spentBoxes = spentBoxes.concat(foundBoxes)
             spentBoxes = spentBoxes.concat(newUpdatedBoxes)

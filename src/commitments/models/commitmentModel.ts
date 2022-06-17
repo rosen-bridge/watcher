@@ -1,10 +1,11 @@
-import { DataSource, DeleteResult, In, MoreThanOrEqual, Repository } from "typeorm";
+import { DataSource, DeleteResult, In, IsNull, MoreThanOrEqual, Repository } from "typeorm";
 import { CBlockEntity } from "../../entities/CBlockEntity";
 import { ObservedCommitmentEntity } from "../../entities/ObservedCommitmentEntity";
 import { Block, SpecialBox } from "../../objects/interfaces";
 import { AbstractDataBase } from "../../models/abstractModel";
 import { CommitmentInformation } from "../scanner/scanner";
 import { BoxEntity, boxType } from "../../entities/BoxEntity";
+import { isNull } from "util";
 
 export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, CommitmentInformation> {
     dataSource: DataSource
@@ -96,7 +97,11 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
                 boxEntity.value = box.value
                 boxEntity.boxJson = box.boxJson
                 boxEntity.block = block
+                return boxEntity
             })
+        console.log("---------------------------------------------")
+        console.log(boxEntities)
+        console.log("---------------------------------------------")
 
         const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
         for (const boxId of information.updatedCommitments) {
@@ -125,6 +130,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
                     spendBlock: block
                 }
             })
+            console.log(newBox)
             spentBoxEntities.push(newBox)
         }
 
@@ -170,7 +176,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
     getOldSpentCommitments = async (height: number): Promise<Array<ObservedCommitmentEntity>> => {
         return await this.commitmentRepository.createQueryBuilder("observed_commitment_entity")
             .where("observed_commitment_entity.spendBlock < :height", {height})
-            .execute()
+            .getMany()
     }
 
     /**
@@ -205,16 +211,24 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
         })
     }
 
+    /**
+     * Returns unspent boxes with the specified type
+     * @param type
+     */
     getUnspentSpecialBoxes = async (type: boxType): Promise<Array<SpecialBox>> => {
         return (await this.boxesRepository.find({
             where: {
                 type: type,
-                spendBlock: undefined
+                spendBlock: IsNull()
             }
         }))
     }
 
-    findSpecialBoxesById = async (ids: Array<string>): Promise<Array<BoxEntity>> => {
+    /**
+     * Finds unspent special boxes by their box id
+     * @param ids: Array of box ids
+     */
+    findUnspentSpecialBoxesById = async (ids: Array<string>): Promise<Array<BoxEntity>> => {
         return await this.boxesRepository.find({
             where: {
                 spendBlock: undefined,

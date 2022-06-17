@@ -1,13 +1,33 @@
 import { Boxes } from "../../src/ergo/boxes";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { firstCommitment } from "../commitment/models/commitmentModel";
+import { firstCommitment, loadDataBase } from "../commitment/models/commitmentModel";
 import { contractHash } from "../../src/ergo/utils";
 import { firstObservations } from "../cardano/models/models";
+import { SpecialBox } from "../../src/objects/interfaces";
+import { boxType } from "../../src/entities/BoxEntity";
+import exp from "constants";
+import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 
 const chai = require("chai")
 const spies = require("chai-spies")
 chai.use(spies);
+const permitJson = JSON.stringify(require("./dataset/permitBox.json"))
+const WIDJson = JSON.stringify(require("./dataset/WIDBox.json"))
+
+const permitBox: SpecialBox = {
+    boxId: "6ba81a7de39dce3303d100516bf80228e8c03464c130d5b0f8ff6f78f66bcbc8",
+    type: boxType.PERMIT,
+    value: "10000000",
+    boxJson: permitJson
+}
+
+const WIDBox: SpecialBox ={
+    boxId: "2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655",
+    type: boxType.WID,
+    value: "10000000",
+    boxJson: WIDJson
+}
 
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
 const tokenId = "469255244f7b12ea7d375ec94ec8d2838a98be0779c8231ece3529ae69c421db"
@@ -16,7 +36,29 @@ const permit = "EE7687i4URb4YuSGSQXPCb6iAFxAd5s8H1DLbUFQnSrJ8rED2KXdq8kUPQZ3pcPV
 describe("Testing Box Creation", () => {
     const value = BigInt(10000000)
 
-     // TODO : tests
+    describe("getPermits", () => {
+        it("returns all permits ready to merge", async () => {
+            const DB = await loadDataBase("commitments");
+            chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [permitBox])
+            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(permitJson))
+            const boxes = new Boxes(DB)
+            const data = await boxes.getPermits()
+            expect(data).to.have.length(1)
+            expect(data[0].box_id().to_str()).to.eq(permitBox.boxId)
+        })
+    })
+
+    describe("getWIDBox", () => {
+        it("returns all wids ready to merge", async () => {
+            const DB = await loadDataBase("commitments");
+            chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [WIDBox])
+            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(WIDJson))
+            const boxes = new Boxes(DB)
+            const data = await boxes.getWIDBox()
+            expect(data.box_id().to_str()).to.eq(WIDBox.boxId)
+        })
+    })
+
     describe("createPermit", () => {
         it("tests the permit box creation", () => {
             const data = Boxes.createPermit(value, 10, BigInt(9), WID)
