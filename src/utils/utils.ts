@@ -1,18 +1,4 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoConfig } from "../config/config";
-
-export class boxCreationError extends Error {
-    constructor(message?: string) {
-        super(message)
-        this.name = "BoxCreationError"
-    }
-}
-export class NotEnoughFund extends Error {
-    constructor(message?: string) {
-        super(message)
-        this.name = "NotEnoughFund"
-    }
-}
 
 export function notEmpty<T>(value: T | null | undefined): value is T {
     return value !== null && value !== undefined;

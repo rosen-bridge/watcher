@@ -1,10 +1,11 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { SecretKey } from "ergo-lib-wasm-nodejs";
 import { Observation } from "../objects/interfaces";
-import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
+import { bigIntToUint8Array} from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "./network/ergoNetwork";
+import { boxCreationError } from "../errors/errors";
 
 let blake2b = require('blake2b')
 

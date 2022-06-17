@@ -1,15 +1,14 @@
 import { CommitmentDataBase } from "../commitments/models/commitmentModel";
 import { Observation } from "../objects/interfaces";
 import { NetworkDataBase } from "../models/networkModel";
-import { ErgoNetworkApi } from "../ergoUtils/networkApi";
 import config from "config";
 import { ObservedCommitmentEntity } from "../entities/ObservedCommitmentEntity";
 import { commitmentFromObservation, createAndSignTx } from "../ergo/utils";
 import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { boxCreationError } from "../utils/utils";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
+import { boxCreationError } from "../errors/errors";
 
 const commitmentLimit = parseInt(config.get?.('commitmentLimit'))
 const txFee = parseInt(config.get?.('ergo.txFee'))
@@ -35,7 +34,7 @@ export class commitmentReveal{
                                     observation: Observation,
                                     WIDs: Array<Uint8Array>,
                                     feeBoxes: Array<wasm.ErgoBox>): Promise<string> => {
-        const height = await ErgoNetworkApi.getCurrentHeight()
+        const height = await ErgoNetwork.getHeight()
         const boxValues = commitmentBoxes.map(box => BigInt(box.value().as_i64().to_str())).reduce((a, b) =>  a + b, BigInt(0))
         const triggerEvent = await Boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
         const inputBoxes = new wasm.ErgoBoxes(feeBoxes[0]);

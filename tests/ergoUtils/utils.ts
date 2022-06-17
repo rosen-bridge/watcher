@@ -1,10 +1,11 @@
 import { Observation } from "../../src/objects/interfaces";
 import { commitmentFromObservation, contractHash, createChangeBox, extractBoxes } from "../../src/ergo/utils";
 import { expect } from "chai";
-import { boxCreationError, uint8ArrayToHex } from "../../src/utils/utils";
+import { uint8ArrayToHex } from "../../src/utils/utils";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoConfig } from "../../src/config/config";
 import { rosenConfig } from "../../src/config/rosenConfig";
+import { boxCreationError } from "../../src/errors/errors";
 
 const ergoConfig = ErgoConfig.getConfig();
 

@@ -2,11 +2,12 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { contractHash, hexStrToUint8Array } from "./utils";
 import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
-import { bigIntToUint8Array, NotEnoughFund } from "../utils/utils";
+import { bigIntToUint8Array} from "../utils/utils";
 import { CommitmentDataBase } from "../commitments/models/commitmentModel";
 import { boxType } from "../entities/BoxEntity";
 import { Observation } from "../objects/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
+import { NotEnoughFund } from "../errors/errors";
 
 const ergoConfig = ErgoConfig.getConfig();
 

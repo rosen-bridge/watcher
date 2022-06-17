@@ -3,11 +3,11 @@ import { ErgoNetworkApi } from "../ergoUtils/networkApi";
 import { Boxes } from "../ergo/boxes";
 import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergo/utils";
 import { NetworkDataBase } from "../models/networkModel";
-import { boxCreationError } from "../utils/utils";
 import { ObservationEntity } from "../entities/ObservationEntity";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
+import { boxCreationError } from "../errors/errors";
 
 const minBoxVal = parseInt(rosenConfig.minBoxValue)
 const txFee = parseInt(rosenConfig.fee)

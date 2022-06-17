@@ -15,6 +15,8 @@ const permit = "EE7687i4URb4YuSGSQXPCb6iAFxAd5s8H1DLbUFQnSrJ8rED2KXdq8kUPQZ3pcPV
 
 describe("Testing Box Creation", () => {
     const value = BigInt(10000000)
+
+     // TODO : tests
     describe("createPermit", () => {
         it("tests the permit box creation", () => {
             const data = Boxes.createPermit(value, 10, BigInt(9), WID)

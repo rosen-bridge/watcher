@@ -240,8 +240,10 @@ export class ErgoNetwork{
      * @param id
      */
     static boxById = (id: string): Promise<wasm.ErgoBox> => {
-        return nodeClient.get<wasm.ErgoBox>(`utxo/byId/${id}`).then(
-            res => res.data
+        return nodeClient.get<string>(`utxo/byId/${id}`).then(
+            res => {
+                return wasm.ErgoBox.from_json(JSON.stringify(res.data))
+            }
         )
     }
 
