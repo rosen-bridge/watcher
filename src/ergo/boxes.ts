@@ -39,7 +39,7 @@ export class Boxes {
         let selectedBoxes = []
         let totalValue = BigInt(0)
         for(const box of boxes){
-            totalValue = totalValue + box.value
+            totalValue = totalValue + BigInt(box.value)
             selectedBoxes.push(box)
             if(totalValue > requiredValue) break
         }

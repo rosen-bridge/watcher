@@ -4,7 +4,6 @@ import { Info } from "../../objects/ergo";
 import { AddressBoxes, ErgoTx } from "./types";
 import { JsonBI } from "../../network/parser";
 import { ErgoConfig } from "../../config/config";
-import { nodeApi } from "../../ergoUtils/networkApi";
 import { ergoTreeToBase58Address } from "../utils";
 
 const ergoConfig = ErgoConfig.getConfig();
@@ -241,7 +240,7 @@ export class ErgoNetwork{
      * @param id
      */
     static boxById = (id: string): Promise<wasm.ErgoBox> => {
-        return nodeApi.get<wasm.ErgoBox>(`utxo/byId/${id}`).then(
+        return nodeClient.get<wasm.ErgoBox>(`utxo/byId/${id}`).then(
             res => res.data
         )
     }
