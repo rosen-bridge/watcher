@@ -6,16 +6,19 @@ import { contractHash } from "../../src/ergo/utils";
 import { firstObservations } from "../cardano/models/models";
 import { SpecialBox } from "../../src/objects/interfaces";
 import { boxType } from "../../src/entities/BoxEntity";
-import exp from "constants";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
+import { NotEnoughFund } from "../../src/errors/errors";
 
 const chai = require("chai")
 const sinon = require("sinon");
 const spies = require("chai-spies")
+const chaiPromise = require("chai-as-promised")
 chai.use(spies);
+chai.use(chaiPromise)
 
 const permitJson = JSON.stringify(require("./dataset/permitBox.json"))
 const WIDJson = JSON.stringify(require("./dataset/WIDBox.json"))
+const plainJson = JSON.stringify(require("./dataset/plainBox.json"))
 
 const permitBox: SpecialBox = {
     boxId: "6ba81a7de39dce3303d100516bf80228e8c03464c130d5b0f8ff6f78f66bcbc8",
@@ -27,6 +30,13 @@ const permitBox: SpecialBox = {
 const WIDBox: SpecialBox ={
     boxId: "2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655",
     type: boxType.WID,
+    value: "10000000",
+    boxJson: WIDJson
+}
+
+const plainBox: SpecialBox ={
+    boxId: "57dc591ecba4c90f9116740bf49ffea2c7b73625f259e60ec0c23add86b14f47",
+    type: boxType.PLAIN,
     value: "10000000",
     boxJson: WIDJson
 }
@@ -45,6 +55,7 @@ describe("Testing Box Creation", () => {
             const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool')
             mempoolTrack.onCall(0).returns(wasm.ErgoBox.from_json(permitJson))
             mempoolTrack.onCall(1).returns(wasm.ErgoBox.from_json(WIDJson))
+            mempoolTrack.onCall(2).returns(wasm.ErgoBox.from_json(plainJson))
             const boxes = new Boxes(DB)
             const data = await boxes.getPermits()
             expect(data).to.have.length(1)
@@ -59,6 +70,23 @@ describe("Testing Box Creation", () => {
             const boxes = new Boxes(DB)
             const data = await boxes.getWIDBox()
             expect(data.box_id().to_str()).to.eq(WIDBox.boxId)
+        })
+    })
+
+    describe("getUserPaymentBox", () => {
+        it("returns a covering plain boxes", async () => {
+            const DB = await loadDataBase("commitments");
+            chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [plainBox])
+            const boxes = new Boxes(DB)
+            const data = await boxes.getUserPaymentBox(value)
+            expect(data).to.have.length(1)
+            expect(data[0].box_id().to_str()).to.eq(plainBox.boxId)
+        })
+        it("throws an error not covering the required amount", async () => {
+            const DB = await loadDataBase("commitments");
+            chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [plainBox])
+            const boxes = new Boxes(DB)
+            await expect(boxes.getUserPaymentBox(value*BigInt(2))).to.rejectedWith(NotEnoughFund)
         })
     })
 

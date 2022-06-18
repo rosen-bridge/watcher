@@ -35,7 +35,7 @@ export class Boxes {
         return WIDBox
     }
 
-    getUserPaymentBox = async (requiredValue: number): Promise<Array<wasm.ErgoBox>> => {
+    getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
         const boxes = await this._dataBase.getUnspentSpecialBoxes(boxType.PERMIT)
         let selectedBoxes = []
         let totalValue = BigInt(0)
@@ -46,7 +46,7 @@ export class Boxes {
         }
         if(totalValue < requiredValue){
             console.log("ERROR: Not enough fund to create the transaction")
-            throw NotEnoughFund
+            throw new NotEnoughFund
         }
         const outBoxes = selectedBoxes.map(async (fund) => {
             const box = wasm.ErgoBox.from_json(fund.boxJson)
