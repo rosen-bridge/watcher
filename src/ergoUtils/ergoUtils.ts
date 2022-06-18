@@ -4,7 +4,7 @@ import { Observation } from "../objects/interfaces";
 import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
-import {blake2b} from "blakejs";
+import { blake2b } from "blakejs";
 
 const ergoConfig = ErgoConfig.getConfig();
 

@@ -1,5 +1,5 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import {blake2b} from "blakejs";
+import { blake2b } from "blakejs";
 
 /**
  * Produces the contract hash
