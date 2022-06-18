@@ -3,15 +3,10 @@ import { SecretKey } from "ergo-lib-wasm-nodejs";
 import { Observation } from "../objects/interfaces";
 import { bigIntToUint8Array} from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
+import { blake2b } from "blakejs";
 
-let blake2b = require('blake2b')
-
-const ergoConfig = ErgoConfig.getConfig();
-
-const networkType: wasm.NetworkPrefix = ergoConfig.networkType;
 const txFee = parseInt(rosenConfig.fee)
 
 export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
@@ -166,7 +161,7 @@ export const commitmentFromObservation = (observation: Observation, WID: string)
         Buffer.from(observation.sourceBlockId, "hex"),
         Buffer.from(WID, "hex"),
     ])
-    return blake2b(32).update(content).digest()
+    return blake2b(content, undefined, 32)
 }
 
 /**
@@ -175,8 +170,6 @@ export const commitmentFromObservation = (observation: Observation, WID: string)
  */
 export const contractHash = (contract: wasm.Contract): Buffer => {
     return Buffer.from(
-        blake2b(32)
-            .update(Buffer.from(contract.ergo_tree().to_base16_bytes(), "hex"))
-            .digest()
+        blake2b(Buffer.from(contract.ergo_tree().to_base16_bytes(), "hex"), undefined, 32)
     )
 }
