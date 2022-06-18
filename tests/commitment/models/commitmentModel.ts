@@ -113,7 +113,6 @@ describe("Commitment Database functions", () => {
         it("should return an old commitment", async() => {
             const DB = await loadDataBase("commitments");
             let data = await DB.getOldSpentCommitments(3433335)
-            console.log(data[0])
             expect(data).to.have.length(1)
         })
     })
@@ -148,7 +147,6 @@ describe("Commitment Database functions", () => {
         it("should return one unspent permit box", async() => {
             const DB = await loadDataBase("commitments");
             let data = await DB.getUnspentSpecialBoxes(boxType.PERMIT)
-            console.log(data)
             expect(data).to.have.length(1)
         })
         it("should return one unspent WID box", async() => {

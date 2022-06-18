@@ -5,6 +5,7 @@ import { loadDataBase } from "../models/commitmentModel";
 import { boxType } from "../../../src/entities/BoxEntity";
 
 const chai = require("chai")
+const sinon = require("sinon");
 const spies = require("chai-spies")
 chai.use(spies);
 
@@ -83,7 +84,7 @@ describe("Commitment Scanner Utils test", () => {
     describe("spentSpecialBoxesAtHeight", () => {
         it("should find 2 updated boxes", async () => {
             const DB = await loadDataBase("commitments");
-            chai.spy.on(DB, 'findSpecialBoxesById', () => [{boxId: "cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"}])
+            chai.spy.on(DB, 'findUnspentSpecialBoxesById', () => [{boxId: "cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"}])
             const data = await CommitmentUtils.spentSpecialBoxesAtHeight(
                 [commitmentTx],
                 DB,

@@ -1,5 +1,4 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoNetworkApi } from "../ergoUtils/networkApi";
 import { Boxes } from "../ergo/boxes";
 import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergo/utils";
 import { NetworkDataBase } from "../models/networkModel";

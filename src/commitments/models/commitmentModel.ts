@@ -6,6 +6,7 @@ import { AbstractDataBase } from "../../models/abstractModel";
 import { CommitmentInformation } from "../scanner/scanner";
 import { BoxEntity, boxType } from "../../entities/BoxEntity";
 import { isNull } from "util";
+import { BlockEntity } from "../../entities/BlockEntity";
 
 export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, CommitmentInformation> {
     dataSource: DataSource
@@ -99,9 +100,6 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
                 boxEntity.block = block
                 return boxEntity
             })
-        console.log("---------------------------------------------")
-        console.log(boxEntities)
-        console.log("---------------------------------------------")
 
         const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
         for (const boxId of information.updatedCommitments) {
@@ -130,7 +128,6 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
                     spendBlock: block
                 }
             })
-            console.log(newBox)
             spentBoxEntities.push(newBox)
         }
 
@@ -216,12 +213,11 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * @param type
      */
     getUnspentSpecialBoxes = async (type: boxType): Promise<Array<SpecialBox>> => {
-        return (await this.boxesRepository.find({
-            where: {
-                type: type,
-                spendBlock: IsNull()
-            }
-        }))
+        return this.boxesRepository.createQueryBuilder("box_entity")
+            .leftJoin("box_entity.spendBlock", "c_block_entity")
+            .where("box_entity.type == 'permit'")
+            .andWhere("box_entity.spendBlock is null")
+            .getMany()
     }
 
     /**

@@ -10,8 +10,10 @@ import exp from "constants";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 
 const chai = require("chai")
+const sinon = require("sinon");
 const spies = require("chai-spies")
 chai.use(spies);
+
 const permitJson = JSON.stringify(require("./dataset/permitBox.json"))
 const WIDJson = JSON.stringify(require("./dataset/WIDBox.json"))
 
@@ -40,7 +42,9 @@ describe("Testing Box Creation", () => {
         it("returns all permits ready to merge", async () => {
             const DB = await loadDataBase("commitments");
             chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [permitBox])
-            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(permitJson))
+            const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool')
+            mempoolTrack.onCall(0).returns(wasm.ErgoBox.from_json(permitJson))
+            mempoolTrack.onCall(1).returns(wasm.ErgoBox.from_json(WIDJson))
             const boxes = new Boxes(DB)
             const data = await boxes.getPermits()
             expect(data).to.have.length(1)
@@ -52,7 +56,6 @@ describe("Testing Box Creation", () => {
         it("returns all wids ready to merge", async () => {
             const DB = await loadDataBase("commitments");
             chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [WIDBox])
-            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(WIDJson))
             const boxes = new Boxes(DB)
             const data = await boxes.getWIDBox()
             expect(data.box_id().to_str()).to.eq(WIDBox.boxId)
