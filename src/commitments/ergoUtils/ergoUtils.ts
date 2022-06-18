@@ -1,6 +1,5 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-
-let blake2b = require('blake2b')
+import { blake2b } from "blakejs";
 
 /**
  * Produces the contract hash
@@ -8,8 +7,6 @@ let blake2b = require('blake2b')
  */
 export const contractHash = (contract: wasm.Contract): Buffer => {
     return Buffer.from(
-        blake2b(32)
-            .update(Buffer.from(contract.ergo_tree().to_base16_bytes(), "hex"))
-            .digest()
+        blake2b(Buffer.from(contract.ergo_tree().to_base16_bytes(), "hex"), undefined, 32)
     )
 }

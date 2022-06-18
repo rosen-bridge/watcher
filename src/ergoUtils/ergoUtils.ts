@@ -4,8 +4,7 @@ import { Observation } from "../objects/interfaces";
 import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
-
-let blake2b = require('blake2b')
+import { blake2b } from "blakejs";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -160,7 +159,7 @@ export const commitmentFromObservation = (observation: Observation, WID: string)
         Buffer.from(observation.sourceBlockId, "hex"),
         Buffer.from(WID, "hex"),
     ])
-    return blake2b(32).update(content).digest()
+    return blake2b(content, undefined, 32)
 }
 
 /**
@@ -169,8 +168,6 @@ export const commitmentFromObservation = (observation: Observation, WID: string)
  */
 export const contractHash = (contract: wasm.Contract): Buffer => {
     return Buffer.from(
-        blake2b(32)
-            .update(Buffer.from(contract.ergo_tree().to_base16_bytes(), "hex"))
-            .digest()
+        blake2b(Buffer.from(contract.ergo_tree().to_base16_bytes(), "hex"), undefined, 32)
     )
 }
