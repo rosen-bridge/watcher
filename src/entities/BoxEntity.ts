@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { CBlockEntity } from "./CBlockEntity";
 
-export enum boxType {
+export enum BoxType {
     PERMIT = 'permit',
     WID = 'wid',
     PLAIN = 'plain'
@@ -20,9 +20,9 @@ export class BoxEntity {
 
     @Column({
         type: 'simple-enum',
-        enum: boxType
+        enum: BoxType
     })
-    type: boxType
+    type: BoxType
 
     @Column()
     boxJson: string

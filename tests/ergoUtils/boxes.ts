@@ -5,7 +5,7 @@ import { firstCommitment, loadDataBase } from "../commitment/models/commitmentMo
 import { contractHash } from "../../src/ergo/utils";
 import { firstObservations } from "../cardano/models/models";
 import { SpecialBox } from "../../src/objects/interfaces";
-import { boxType } from "../../src/entities/BoxEntity";
+import { BoxType } from "../../src/entities/BoxEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { NotEnoughFund } from "../../src/errors/errors";
 
@@ -22,21 +22,21 @@ const plainJson = JSON.stringify(require("./dataset/plainBox.json"))
 
 const permitBox: SpecialBox = {
     boxId: "6ba81a7de39dce3303d100516bf80228e8c03464c130d5b0f8ff6f78f66bcbc8",
-    type: boxType.PERMIT,
+    type: BoxType.PERMIT,
     value: "10000000",
     boxJson: permitJson
 }
 
 const WIDBox: SpecialBox ={
     boxId: "2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655",
-    type: boxType.WID,
+    type: BoxType.WID,
     value: "10000000",
     boxJson: WIDJson
 }
 
 const plainBox: SpecialBox ={
     boxId: "57dc591ecba4c90f9116740bf49ffea2c7b73625f259e60ec0c23add86b14f47",
-    type: boxType.PLAIN,
+    type: BoxType.PLAIN,
     value: "10000000",
     boxJson: WIDJson
 }

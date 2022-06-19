@@ -1,12 +1,10 @@
-import { DataSource, DeleteResult, In, IsNull, MoreThanOrEqual, Repository } from "typeorm";
+import { DataSource, DeleteResult, In, MoreThanOrEqual, Repository } from "typeorm";
 import { CBlockEntity } from "../../entities/CBlockEntity";
 import { ObservedCommitmentEntity } from "../../entities/ObservedCommitmentEntity";
 import { Block, SpecialBox } from "../../objects/interfaces";
 import { AbstractDataBase } from "../../models/abstractModel";
 import { CommitmentInformation } from "../scanner/scanner";
-import { BoxEntity, boxType } from "../../entities/BoxEntity";
-import { isNull } from "util";
-import { BlockEntity } from "../../entities/BlockEntity";
+import { BoxEntity, BoxType } from "../../entities/BoxEntity";
 
 export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, CommitmentInformation> {
     dataSource: DataSource
@@ -212,7 +210,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * Returns unspent boxes with the specified type
      * @param type
      */
-    getUnspentSpecialBoxes = async (type: boxType): Promise<Array<SpecialBox>> => {
+    getUnspentSpecialBoxes = async (type: BoxType): Promise<Array<SpecialBox>> => {
         return this.boxesRepository.createQueryBuilder("box_entity")
             .leftJoin("box_entity.spendBlock", "c_block_entity")
             .where("box_entity.type == 'permit'")

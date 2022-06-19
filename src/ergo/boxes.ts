@@ -4,7 +4,7 @@ import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array} from "../utils/utils";
 import { CommitmentDataBase } from "../commitments/models/commitmentModel";
-import { boxType } from "../entities/BoxEntity";
+import { BoxType } from "../entities/BoxEntity";
 import { Observation } from "../objects/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { NotEnoughFund } from "../errors/errors";
@@ -20,7 +20,7 @@ export class Boxes {
     }
 
     getPermits = async (): Promise<Array<wasm.ErgoBox>> => {
-        const permits = await this._dataBase.getUnspentSpecialBoxes(boxType.PERMIT)
+        const permits = await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT)
         const permitBoxes = permits.map(async (permit) => {
             const box = wasm.ErgoBox.from_json(permit.boxJson)
             return await ErgoNetwork.trackMemPool(box)
@@ -29,14 +29,14 @@ export class Boxes {
     }
 
     getWIDBox = async (): Promise<wasm.ErgoBox> => {
-        const WID = (await this._dataBase.getUnspentSpecialBoxes(boxType.PERMIT))[0]
+        const WID = (await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT))[0]
         let WIDBox = wasm.ErgoBox.from_json(WID.boxJson)
         WIDBox = await ErgoNetwork.trackMemPool(WIDBox)
         return WIDBox
     }
 
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
-        const boxes = await this._dataBase.getUnspentSpecialBoxes(boxType.PERMIT)
+        const boxes = await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT)
         let selectedBoxes = []
         let totalValue = BigInt(0)
         for(const box of boxes){

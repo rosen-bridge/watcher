@@ -39,12 +39,12 @@ export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation
      */
     getBlockInformation = async (block: Block): Promise<CommitmentInformation> => {
         const txs = await this._networkAccess.getBlockTxs(block.hash);
-        const newCommitments = (await CommitmentUtils.commitmentsAtHeight(txs))
-        const updatedCommitments = await CommitmentUtils.updatedCommitmentsAtHeight(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
+        const newCommitments = (await CommitmentUtils.extractCommitments(txs))
+        const updatedCommitments = await CommitmentUtils.updatedCommitments(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
         // TODO: Add eventTrigger box id to updated commitments
         // TODO: fix config
-        const newBoxes = await CommitmentUtils.specialBoxesAtHeight(txs, rosenConfig.watcherPermitAddress, config.get?.("ergo.address"), config.get?.("ergo.WID"))
-        const spentBoxes = await CommitmentUtils.spentSpecialBoxesAtHeight(txs, this._dataBase, [])
+        const newBoxes = await CommitmentUtils.extractSpecialBoxes(txs, rosenConfig.watcherPermitAddress, config.get?.("ergo.address"), config.get?.("ergo.WID"))
+        const spentBoxes = await CommitmentUtils.spentSpecialBoxes(txs, this._dataBase, [])
         return {
             newCommitments: newCommitments,
             updatedCommitments: updatedCommitments,

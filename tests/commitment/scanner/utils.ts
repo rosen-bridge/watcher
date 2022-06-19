@@ -2,7 +2,7 @@ import { CommitmentUtils } from "../../../src/commitments/scanner/utils";
 import { expect } from "chai";
 import { ErgoConfig } from "../../../src/config/config"
 import { loadDataBase } from "../models/commitmentModel";
-import { boxType } from "../../../src/entities/BoxEntity";
+import { BoxType } from "../../../src/entities/BoxEntity";
 
 const chai = require("chai")
 const sinon = require("sinon");
@@ -35,7 +35,7 @@ describe("Commitment Scanner Utils test", () => {
     describe("commitmentAtHeight", () => {
         it("Should find one valid commitment", async () => {
             chai.spy.on(CommitmentUtils, 'checkTx', () => [{}])
-            const commitments = await CommitmentUtils.commitmentsAtHeight(
+            const commitments = await CommitmentUtils.extractCommitments(
                 [commitmentTx]
             );
             expect(commitments.length).to.be.equal(1);
@@ -46,7 +46,7 @@ describe("Commitment Scanner Utils test", () => {
         it("should find 1 updated commitments", async () => {
             const DB = await loadDataBase("commitments");
             chai.spy.on(DB, 'findCommitmentsById', () => [])
-            const data = await CommitmentUtils.updatedCommitmentsAtHeight(
+            const data = await CommitmentUtils.updatedCommitments(
                 [commitmentTx],
                 DB,
                 ["cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"]
@@ -59,25 +59,25 @@ describe("Commitment Scanner Utils test", () => {
     describe("specialBoxesAtHeight", () => {
         it("Should find one permit box and one WID box", async () => {
             commitmentTx.outputs[0].assets[0].tokenId = ErgoConfig.getConfig().RWTId
-            const specialBoxes = await CommitmentUtils.specialBoxesAtHeight(
+            const specialBoxes = await CommitmentUtils.extractSpecialBoxes(
                 [commitmentTx],
                 permitAddress,
                 watcherAddress,
                 WID
             );
             expect(specialBoxes.length).to.be.equal(2);
-            expect(specialBoxes[0].type).to.eq(boxType.PERMIT)
-            expect(specialBoxes[1].type).to.eq(boxType.WID)
+            expect(specialBoxes[0].type).to.eq(BoxType.PERMIT)
+            expect(specialBoxes[1].type).to.eq(BoxType.WID)
         });
         it("Should find one plain watcher box", async () => {
-            const specialBoxes = await CommitmentUtils.specialBoxesAtHeight(
+            const specialBoxes = await CommitmentUtils.extractSpecialBoxes(
                 [tx],
                 permitAddress,
                 watcherAddress,
                 WID
             );
             expect(specialBoxes.length).to.be.equal(1);
-            expect(specialBoxes[0].type).to.eq(boxType.PLAIN)
+            expect(specialBoxes[0].type).to.eq(BoxType.PLAIN)
         });
     })
 
@@ -85,7 +85,7 @@ describe("Commitment Scanner Utils test", () => {
         it("should find 2 updated boxes", async () => {
             const DB = await loadDataBase("commitments");
             chai.spy.on(DB, 'findUnspentSpecialBoxesById', () => [{boxId: "cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"}])
-            const data = await CommitmentUtils.spentSpecialBoxesAtHeight(
+            const data = await CommitmentUtils.spentSpecialBoxes(
                 [commitmentTx],
                 DB,
                 ["cd0e9ad2ae564768bc6bf74a350934117040686fd267f313fce27d7df00fe549"]

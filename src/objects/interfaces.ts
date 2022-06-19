@@ -1,4 +1,4 @@
-import { boxType } from "../entities/BoxEntity";
+import { BoxType } from "../entities/BoxEntity";
 
 export interface Block {
     hash: string,
@@ -28,7 +28,7 @@ export interface Commitment{
 
 export interface SpecialBox{
     boxId: string,
-    type: boxType,
+    type: BoxType,
     value: string,
     boxJson: string
 }

@@ -5,7 +5,7 @@ import { CommitmentDataBase } from "../models/commitmentModel";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { rosenConfig } from "../../config/rosenConfig";
 import { ErgoConfig } from "../../config/config";
-import { boxType } from "../../entities/BoxEntity";
+import { BoxType } from "../../entities/BoxEntity";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -45,7 +45,7 @@ export class CommitmentUtils{
      * @param txs
      * @return Promise<Array<(Commitment | undefined)>>
      */
-    static commitmentsAtHeight = async (txs: NodeTransaction[]): Promise<Array<Commitment>> => {
+    static extractCommitments = async (txs: NodeTransaction[]): Promise<Array<Commitment>> => {
         const commitments: Array<Commitment> = []
         for (let i = 0; i < txs.length; i++) {
             const c = await this.checkTx(txs[i], [rosenConfig.commitmentAddress])
@@ -61,9 +61,9 @@ export class CommitmentUtils{
      * @param newCommitments
      * @return list of updated commitment box ids
      */
-    static updatedCommitmentsAtHeight = async (txs: Array<NodeTransaction>,
-                                               database: CommitmentDataBase,
-                                               newCommitments: Array<string>) => {
+    static updatedCommitments = async (txs: Array<NodeTransaction>,
+                                       database: CommitmentDataBase,
+                                       newCommitments: Array<string>) => {
         let updatedCommitments: Array<string> = []
         for (const tx of txs) {
             const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
@@ -75,10 +75,17 @@ export class CommitmentUtils{
         return updatedCommitments
     }
 
-    static specialBoxesAtHeight = async (txs: Array<NodeTransaction>,
-                                         permitAddress: string,
-                                         watcherAddress: string,
-                                         WID: string): Promise<Array<SpecialBox>> => {
+    /**
+     * Extracts new special boxes created in an array of transaction from a block
+     * @param txs
+     * @param permitAddress
+     * @param watcherAddress
+     * @param WID
+     */
+    static extractSpecialBoxes = async (txs: Array<NodeTransaction>,
+                                        permitAddress: string,
+                                        watcherAddress: string,
+                                        WID: string): Promise<Array<SpecialBox>> => {
         const specialBoxes: Array<SpecialBox> = []
         const permitErgoTree = Address.from_base58(permitAddress).to_ergo_tree().to_base16_bytes()
         const watcherErgoTree = Address.from_base58(watcherAddress).to_ergo_tree().to_base16_bytes()
@@ -90,38 +97,43 @@ export class CommitmentUtils{
                     box.assets[0].tokenId == ergoConfig.RWTId
             }).forEach(permit => specialBoxes.push({
                 boxId: permit.boxId,
-                type: boxType.PERMIT,
+                type: BoxType.PERMIT,
                 value: permit.value.toString(),
                 boxJson: JSON.stringify(permit)
             }))
             // Adding new WID boxes
             const watcherBoxes = tx.outputs.filter(box => {return box.ergoTree === watcherErgoTree})
-            const WIDBOxes = watcherBoxes.filter(box => {
-                return box.ergoTree === watcherErgoTree &&
-                    box.assets.length > 0 &&
-                    box.assets[0].tokenId == WID
-            })
-            WIDBOxes.forEach(WIDBox => specialBoxes.push({
-                boxId: WIDBox.boxId,
-                type: boxType.WID,
-                value: WIDBox.value.toString(),
-                boxJson: JSON.stringify(WIDBox)
-            }))
-            // Adding other owned boxes
-            watcherBoxes.filter(box => !WIDBOxes.includes(box))
-                .forEach(box => specialBoxes.push({
-                    boxId: box.boxId,
-                    type: boxType.PLAIN,
-                    value: box.value.toString(),
-                    boxJson: JSON.stringify(box)
-                }))
+            for(const box of watcherBoxes) {
+                if(box.assets.length > 0 && box.assets[0].tokenId == WID){
+                    specialBoxes.push({
+                        boxId: box.boxId,
+                        type: BoxType.WID,
+                        value: box.value.toString(),
+                        boxJson: JSON.stringify(box)
+                    })
+                }
+                else{
+                    specialBoxes.push({
+                        boxId: box.boxId,
+                        type: BoxType.PLAIN,
+                        value: box.value.toString(),
+                        boxJson: JSON.stringify(box)
+                    })
+                }
+            }
         }
         return specialBoxes;
     }
 
-    static spentSpecialBoxesAtHeight = async (txs: Array<NodeTransaction>,
-                                               database: CommitmentDataBase,
-                                               newBoxes: Array<string>) => {
+    /**
+     * Extract spent special boxes from the block transactions
+     * @param txs
+     * @param database
+     * @param newBoxes
+     */
+    static spentSpecialBoxes = async (txs: Array<NodeTransaction>,
+                                      database: CommitmentDataBase,
+                                      newBoxes: Array<string>) => {
         let spentBoxes: Array<string> = []
         for (const tx of txs) {
             const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)

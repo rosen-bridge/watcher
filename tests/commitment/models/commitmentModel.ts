@@ -3,7 +3,7 @@ import { commitmentEntities } from "../../../src/entities";
 import { CommitmentDataBase } from "../../../src/commitments/models/commitmentModel";
 import { Commitment, SpecialBox } from "../../../src/objects/interfaces";
 import { expect } from "chai";
-import { boxType } from "../../../src/entities/BoxEntity";
+import { BoxType } from "../../../src/entities/BoxEntity";
 
 export const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
     const ormConfig = new DataSource({
@@ -39,28 +39,28 @@ const thirdCommitment: Commitment = {
 
 const firstPermitBox: SpecialBox = {
     boxId: "cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7",
-    type: boxType.PERMIT,
+    type: BoxType.PERMIT,
     value: "10000000",
     boxJson: "fakeSample"
 }
 
 const secondPermitBox: SpecialBox = {
     boxId: "6ba81a7de39dce3303d100516bf80228e8c03464c130d5b0f8ff6f78f66bcbc8",
-    type: boxType.PERMIT,
+    type: BoxType.PERMIT,
     value: "10000000",
     boxJson: "fakeSample"
 }
 
 const firstWIDBox: SpecialBox ={
     boxId: "cd0e9ad2ae564768bc6bf74a350934117040686fd267f313fce27d7df00fe549",
-    type: boxType.WID,
+    type: BoxType.WID,
     value: "100000000",
     boxJson: "fakeSample"
 }
 
 const secondWIDBox: SpecialBox ={
     boxId: "2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655",
-    type: boxType.WID,
+    type: BoxType.WID,
     value: "10000000",
     boxJson: "fakeSample"
 }
@@ -146,12 +146,12 @@ describe("Commitment Database functions", () => {
     describe("getUnspentSpecialBoxes", () => {
         it("should return one unspent permit box", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.getUnspentSpecialBoxes(boxType.PERMIT)
+            let data = await DB.getUnspentSpecialBoxes(BoxType.PERMIT)
             expect(data).to.have.length(1)
         })
         it("should return one unspent WID box", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.getUnspentSpecialBoxes(boxType.WID)
+            let data = await DB.getUnspentSpecialBoxes(BoxType.WID)
             expect(data).to.have.length(1)
         })
     })

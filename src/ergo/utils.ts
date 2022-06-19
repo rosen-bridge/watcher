@@ -1,7 +1,6 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { SecretKey } from "ergo-lib-wasm-nodejs";
 import { Observation } from "../objects/interfaces";
-import { bigIntToUint8Array} from "../utils/utils";
+import { bigIntToUint8Array } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
@@ -33,7 +32,7 @@ export const decodeStr = async (str: string): Promise<string> => {
 export const hexStrToUint8Array = (str: string): Uint8Array => {
     return new Uint8Array(Buffer.from(str, "hex"))
 }
-export const generateSK = (): SecretKey => {
+export const generateSK = (): wasm.SecretKey => {
     return wasm.SecretKey.random_dlog();
 }
 
