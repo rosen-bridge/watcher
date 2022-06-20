@@ -1,4 +1,4 @@
-import { CommitmentUtils } from "../../../src/commitments/scanner/utils";
+import { CommitmentUtils } from "../../../src/bridge/scanner/utils";
 import { expect } from "chai";
 import { ErgoConfig } from "../../../src/config/config"
 import { loadDataBase } from "../models/commitmentModel";
@@ -43,7 +43,7 @@ describe("Commitment Scanner Utils test", () => {
     })
 
     describe("updatedCommitmentsAtHeight", () => {
-        it("should find 1 updated commitments", async () => {
+        it("should find 1 updated bridge", async () => {
             const DB = await loadDataBase("commitments");
             chai.spy.on(DB, 'findCommitmentsById', () => [])
             const data = await CommitmentUtils.updatedCommitments(

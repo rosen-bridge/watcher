@@ -3,7 +3,7 @@ import { contractHash, hexStrToUint8Array } from "./utils";
 import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array} from "../utils/utils";
-import { CommitmentDataBase } from "../commitments/models/commitmentModel";
+import { BridgeDataBase } from "../bridge/models/bridgeModel";
 import { BoxType } from "../entities/BoxEntity";
 import { Observation } from "../objects/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
@@ -13,9 +13,9 @@ const ergoConfig = ErgoConfig.getConfig();
 
 
 export class Boxes {
-    _dataBase: CommitmentDataBase
+    _dataBase: BridgeDataBase
 
-    constructor(db: CommitmentDataBase) {
+    constructor(db: BridgeDataBase) {
         this._dataBase = db
     }
 

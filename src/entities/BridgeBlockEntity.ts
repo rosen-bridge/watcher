@@ -3,7 +3,7 @@ import { ObservedCommitmentEntity } from "./ObservedCommitmentEntity";
 import { BoxEntity } from "./BoxEntity";
 
 @Entity()
-export class CBlockEntity {
+export class BridgeBlockEntity {
     @PrimaryColumn()
     height: number
 

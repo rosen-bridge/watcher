@@ -1,4 +1,4 @@
-import { CommitmentDataBase } from "../commitments/models/commitmentModel";
+import { BridgeDataBase } from "../bridge/models/bridgeModel";
 import { Observation } from "../objects/interfaces";
 import { NetworkDataBase } from "../models/networkModel";
 import config from "config";
@@ -14,7 +14,7 @@ const commitmentLimit = parseInt(config.get?.('commitmentLimit'))
 const txFee = parseInt(config.get?.('ergo.txFee'))
 
 export class commitmentReveal{
-    _commitmentDataBase: CommitmentDataBase
+    _commitmentDataBase: BridgeDataBase
     _observationDataBase: NetworkDataBase
     _secret: wasm.SecretKey
     _boxes: Boxes
@@ -59,8 +59,8 @@ export class commitmentReveal{
     }
 
     /**
-     * Returns the valid commitments with the observation
-     * It reproduces the commitments with their WID and check to match the saved commitment
+     * Returns the valid bridge with the observation
+     * It reproduces the bridge with their WID and check to match the saved commitment
      * @param commitments
      * @param observation
      */
@@ -71,8 +71,8 @@ export class commitmentReveal{
     }
 
     /**
-     * Gets the created commitments and check if required number of commitments created in the network
-     * If the number of valid commitments are more than the required commitments it generates the trigger event
+     * Gets the created bridge and check if required number of bridge created in the network
+     * If the number of valid bridge are more than the required bridge it generates the trigger event
      */
     job = async () => {
         const createdCommitments = await this._observationDataBase.getCreatedCommitments()

@@ -1,11 +1,11 @@
 import { DataSource } from "typeorm";
 import { commitmentEntities } from "../../../src/entities";
-import { CommitmentDataBase } from "../../../src/commitments/models/commitmentModel";
+import { BridgeDataBase } from "../../../src/bridge/models/bridgeModel";
 import { Commitment, SpecialBox } from "../../../src/objects/interfaces";
 import { expect } from "chai";
 import { BoxType } from "../../../src/entities/BoxEntity";
 
-export const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
+export const loadDataBase = async (name: string): Promise<BridgeDataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
@@ -13,7 +13,7 @@ export const loadDataBase = async (name: string): Promise<CommitmentDataBase> =>
         synchronize: true,
         logging: false,
     });
-    return await CommitmentDataBase.init(ormConfig);
+    return await BridgeDataBase.init(ormConfig);
 }
 
 export const firstCommitment: Commitment = {
@@ -126,7 +126,7 @@ describe("Commitment Database functions", () => {
     })
 
     describe("findCommitmentsById", () => {
-        it("should return exactly two commitments with the specified id", async () => {
+        it("should return exactly two bridge with the specified id", async () => {
             const DB = await loadDataBase("commitments");
             const data  = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
             expect(data).to.have.length(2)
@@ -135,7 +135,7 @@ describe("Commitment Database functions", () => {
     })
 
     describe("deleteCommitments", () => {
-        it("should delete two commitments", async() => {
+        it("should delete two bridge", async() => {
             const DB = await loadDataBase("commitments");
             await DB.deleteCommitments([firstCommitment.commitmentBoxId, secondCommitment.commitmentBoxId])
             let data = await DB.getOldSpentCommitments(3433335)

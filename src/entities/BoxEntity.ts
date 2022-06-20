@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
-import { CBlockEntity } from "./CBlockEntity";
+import { BridgeBlockEntity } from "./BridgeBlockEntity";
 
 export enum BoxType {
     PERMIT = 'permit',
@@ -28,16 +28,16 @@ export class BoxEntity {
     boxJson: string
 
     @ManyToOne(
-        () => CBlockEntity,
+        () => BridgeBlockEntity,
         (block) => block.height,
         {onDelete: 'CASCADE'}
     )
-    block: CBlockEntity
+    block: BridgeBlockEntity
 
     @ManyToOne(
-        () => CBlockEntity,
+        () => BridgeBlockEntity,
         (block) => block.height,
         {onDelete: 'SET NULL', nullable: true}
     )
-    spendBlock: CBlockEntity
+    spendBlock: BridgeBlockEntity
 }

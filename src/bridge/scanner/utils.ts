@@ -1,7 +1,7 @@
 import { Commitment, SpecialBox } from "../../objects/interfaces";
 import { decodeCollColl, decodeStr } from "../../utils/utils";
 import { NodeOutputBox, NodeTransaction } from "../network/ergoApiModels";
-import { CommitmentDataBase } from "../models/commitmentModel";
+import { BridgeDataBase } from "../models/bridgeModel";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { rosenConfig } from "../../config/rosenConfig";
 import { ErgoConfig } from "../../config/config";
@@ -40,8 +40,8 @@ export class CommitmentUtils{
     }
 
     /**
-     * Check all the transaction in a block and returns an array of commitments
-     * It also updates the spent commitments in the database
+     * Check all the transaction in a block and returns an array of bridge
+     * It also updates the spent bridge in the database
      * @param txs
      * @return Promise<Array<(Commitment | undefined)>>
      */
@@ -55,14 +55,14 @@ export class CommitmentUtils{
     }
 
     /**
-     * Returns spent commitments on the block to update the database information
+     * Returns spent bridge on the block to update the database information
      * @param txs
      * @param database
      * @param newCommitments
      * @return list of updated commitment box ids
      */
     static updatedCommitments = async (txs: Array<NodeTransaction>,
-                                       database: CommitmentDataBase,
+                                       database: BridgeDataBase,
                                        newCommitments: Array<string>) => {
         let updatedCommitments: Array<string> = []
         for (const tx of txs) {
@@ -132,7 +132,7 @@ export class CommitmentUtils{
      * @param newBoxes
      */
     static spentSpecialBoxes = async (txs: Array<NodeTransaction>,
-                                      database: CommitmentDataBase,
+                                      database: BridgeDataBase,
                                       newBoxes: Array<string>) => {
         let spentBoxes: Array<string> = []
         for (const tx of txs) {
