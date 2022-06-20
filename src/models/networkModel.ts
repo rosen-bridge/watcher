@@ -1,6 +1,5 @@
-import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
+import { DataSource, DeleteResult, In, MoreThanOrEqual, Repository } from "typeorm";
 import { BlockEntity } from "../entities/BlockEntity";
-import { CommitmentEntity, txStatus } from "../entities/CommitmentEntity";
 import { ObservationEntity } from "../entities/ObservationEntity";
 import { Block, Commitment, Observation } from "../objects/interfaces";
 import { AbstractDataBase } from "./abstractModel";
@@ -8,14 +7,12 @@ import { AbstractDataBase } from "./abstractModel";
 export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observation>> {
     dataSource: DataSource;
     blockRepository: Repository<BlockEntity>;
-    commitmentRepository: Repository<CommitmentEntity>;
     observationRepository: Repository<ObservationEntity>;
 
     private constructor(dataSource: DataSource) {
         super()
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(BlockEntity);
-        this.commitmentRepository = this.dataSource.getRepository(CommitmentEntity);
         this.observationRepository = this.dataSource.getRepository(ObservationEntity);
     }
 
@@ -126,18 +123,6 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
     }
 
     /**
-     * get bridge
-     * @param eventId
-     * @return Promise<string[]>
-     */
-    getCommitments = async (eventId: string): Promise<string[]> => {
-        const commitments = await this.commitmentRepository.findBy({
-            eventId: eventId,
-        });
-        return commitments.map((commitment) => commitment.commitment);
-    }
-
-    /**
      * returns confirmed observation after required confirmation
      * ignores unused observation where
      * @param confirmation
@@ -156,14 +141,14 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param txId
      * @param observationId
      */
-    saveCommitment = async (commitment: Commitment, txId: string, observationId: number) => {
+    updateObservation = async (commitment: Commitment, txId: string, observationId: number) => {
         const commitmentEntity = new CommitmentEntity();
         commitmentEntity.eventId = commitment.eventId
         commitmentEntity.commitment = commitment.commitment
         commitmentEntity.WID = commitment.WID
         commitmentEntity.commitmentBoxId = commitment.commitmentBoxId
         commitmentEntity.commitmentTxId = txId
-        commitmentEntity.flag = txStatus.SENT
+        commitmentEntity.flag = TxStatus.SENT
 
         const oldObservation = await this.observationRepository.findOne({
             where: {id: observationId}
@@ -191,17 +176,6 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
             await queryRunner.release();
         }
         return error;
-    }
-
-    /**
-     * returns all created events by the watcher that are still valid
-     */
-    getCreatedCommitments = async (): Promise<Array<CommitmentEntity>> => {
-        return await this.commitmentRepository.find({
-            where: {
-                flag: txStatus.CREATED
-            }
-        })
     }
 }
 

@@ -1,6 +1,5 @@
-import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BlockEntity } from "./BlockEntity";
-import { CommitmentEntity } from "./CommitmentEntity";
 
 @Entity()
 export class ObservationEntity {
@@ -51,10 +50,6 @@ export class ObservationEntity {
     )
     block: BlockEntity
 
-    @OneToOne(
-        () => CommitmentEntity,
-        (commitment) => commitment.id,
-        {onDelete: "SET NULL", nullable: true}
-    )
-    commitment: CommitmentEntity
+    @Column({ nullable: true})
+    commitmentBoxId: string
 }

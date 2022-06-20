@@ -165,7 +165,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * returns old spent bridge
+     * returns old spent commitments
      * @param height
      */
     getOldSpentCommitments = async (height: number): Promise<Array<ObservedCommitmentEntity>> => {
@@ -175,7 +175,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * delete bridge by their box ids
+     * delete commitments by their box ids
      * @param ids
      */
     deleteCommitments = async (ids: Array<string>) => {
@@ -183,7 +183,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * find bridge by their box ids
+     * find commitments by their box ids
      * @param ids
      */
     findCommitmentsById = async (ids: Array<string>): Promise<Array<ObservedCommitmentEntity>> => {
@@ -195,7 +195,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * Returns all bridge related to a specific event
+     * Returns all commitments related to a specific event
      * @param eventId
      */
     commitmentsByEventId = async (eventId: string): Promise<Array<ObservedCommitmentEntity>> => {

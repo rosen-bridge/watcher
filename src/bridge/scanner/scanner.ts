@@ -8,7 +8,6 @@ import { BridgeBlockEntity } from "../../entities/BridgeBlockEntity";
 import { CommitmentUtils } from "./utils";
 import { ErgoConfig } from "../../config/config";
 import { rosenConfig } from "../../config/rosenConfig";
-import { NetworkDataBase } from "../../models/networkModel";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -21,7 +20,6 @@ export type BridgeBlockInformation = {
 
 export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInformation>{
     _dataBase: BridgeDataBase;
-    _dataBase2: NetworkDataBase;
     _networkAccess: ErgoNetworkApi;
     _config: IConfig;
     _initialHeight: number;
@@ -43,9 +41,9 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
         const txs = await this._networkAccess.getBlockTxs(block.hash);
         const newCommitments = (await CommitmentUtils.extractCommitments(txs))
         const updatedCommitments = await CommitmentUtils.updatedCommitments(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
-        // TODO: Add eventTrigger box id to updated bridge
-        // TODO: fix config
-        const newBoxes = await CommitmentUtils.extractSpecialBoxes(txs, rosenConfig.watcherPermitAddress, config.get?.("ergo.address"), config.get?.("ergo.WID"))
+        // TODO: Add eventTrigger box id to updated commitment
+        // TODO: fix WID config
+        const newBoxes = await CommitmentUtils.extractSpecialBoxes(txs, rosenConfig.watcherPermitAddress, ergoConfig.address, config.get?.("ergo.WID"))
         const spentBoxes = await CommitmentUtils.spentSpecialBoxes(txs, this._dataBase, [])
         return {
             newCommitments: newCommitments,

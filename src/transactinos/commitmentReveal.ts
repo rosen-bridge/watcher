@@ -10,8 +10,9 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 
+// TODO: fix config
 const commitmentLimit = parseInt(config.get?.('commitmentLimit'))
-const txFee = parseInt(config.get?.('ergo.txFee'))
+const txFee = BigInt(config.get?.('ergo.txFee'))
 
 export class commitmentReveal{
     _commitmentDataBase: BridgeDataBase
@@ -75,6 +76,8 @@ export class commitmentReveal{
      * If the number of valid bridge are more than the required bridge it generates the trigger event
      */
     job = async () => {
+        // TODO: Query all observations check if it has commitmentBoxId and its valid or not?
+        // TODO: Check if other commitments created the trigger event or not
         const createdCommitments = await this._observationDataBase.getCreatedCommitments()
         for (const commitment of createdCommitments) {
             const observedCommitments = await this._commitmentDataBase.commitmentsByEventId(commitment.eventId)
