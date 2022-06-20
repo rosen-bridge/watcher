@@ -6,6 +6,8 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoConfig } from "../../src/config/config";
 import { rosenConfig } from "../../src/config/rosenConfig";
 
+import boxesJson from "./dataset/boxes.json"
+
 const ergoConfig = ErgoConfig.getConfig();
 
 const observation: Observation = {
@@ -23,7 +25,6 @@ const observation: Observation = {
 }
 const WID = "245341e0dda895feca93adbd2db9e643a74c50a1b3702db4c2535f23f1c72e6e"
 const tokenId = "0088eb2b6745ad637112b50a4c5e389881f910ebcf802b183d6633083c2b04fc"
-const boxesJson = require("./dataset/boxes.json")
 
 describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {

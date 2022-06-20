@@ -5,7 +5,7 @@ import { mockedResponseBody } from "./mockedResponseBody";
 const mockedExplorer = new MockAdapter(explorerApi);
 const mockedNodeClient = new MockAdapter(nodeClient);
 
-export const initMockedAxios = (vector: number = 0) => {
+export const initMockedAxios = (vector = 0) => {
     mockedNodeClient.reset();
     mockedExplorer.reset();
     switch (vector) {

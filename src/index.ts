@@ -34,14 +34,16 @@ const init = async () => {
         app.listen(port, () => console.log(`app listening on port ${port}`));
     }
 
-    generateTransactionObject().then(
-        res => {
-            watcherTransaction = res;
-            initExpress();
-        }
-    ).catch(e => {
-        console.log(e)
-    });
+    initExpress();
+
+    // generateTransactionObject().then(
+    //     res => {
+    //         watcherTransaction = res;
+    //         initExpress();
+    //     }
+    // ).catch(e => {
+    //     console.log(e)
+    // });
 }
 
 init();

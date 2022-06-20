@@ -3,7 +3,8 @@ import { ErgoNetworkApi, nodeApi } from "../../src/ergoUtils/networkApi";
 import { describe } from "mocha";
 import MockAdapter from "axios-mock-adapter";
 
-const lastBlockHeaders = require('./dataset/lastBlockHeaders.json');
+import lastBlockHeaders from "./dataset/lastBlockHeaders.json"
+
 const mockedAxios = new MockAdapter(nodeApi);
 
 mockedAxios.onGet(`/blocks/lastHeaders/10`)

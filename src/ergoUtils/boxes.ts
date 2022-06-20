@@ -5,11 +5,12 @@ import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array } from "../utils/utils";
 import { Observation } from "../objects/interfaces";
 
+import permitBox from "./dataset/permitBox.json"
+import WIDBox from "./dataset/WIDBox.json"
+import feeBox from "./dataset/feeBox.json"
+
 const ergoConfig = ErgoConfig.getConfig();
 
-const permitBox = require('./dataset/permitBox.json');
-const WIDBox = require('./dataset/WIDBox.json');
-const feeBox = require('./dataset/feeBox.json');
 
 export class boxes {
     static getPermits = async (WID: string): Promise<Array<wasm.ErgoBox>> => {
@@ -24,7 +25,7 @@ export class boxes {
 
     static getUserPaymentBox = async (value: number): Promise<wasm.ErgoBox> => {
         // TODO: Implement this mocked function
-        return Promise.resolve(wasm.ErgoBox.from_json(feeBox))
+        return Promise.resolve(wasm.ErgoBox.from_json(<any>feeBox))
     }
 
     /**

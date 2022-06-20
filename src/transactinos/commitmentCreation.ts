@@ -12,7 +12,7 @@ const minBoxVal = parseInt(rosenConfig.minBoxValue)
 const txFee = parseInt(rosenConfig.fee)
 const ergoConfig = ErgoConfig.getConfig();
 //TODO:hard coded should implemented later
-const WID: string = "906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82"
+const WID = "906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82"
 
 export class commitmentCreation{
     _dataBase: NetworkDataBase

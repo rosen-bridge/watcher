@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import {Column, Entity, ManyToOne, PrimaryColumn, Relation} from "typeorm";
 import { CBlockEntity } from "./CBlockEntity";
 
 @Entity()
@@ -23,14 +23,14 @@ export class ObservedCommitmentEntity {
         (block) => block.height,
         {onDelete: 'CASCADE',}
     )
-    block: CBlockEntity
+    block: Relation<CBlockEntity>
 
     @ManyToOne(
         () => CBlockEntity,
         (block) => block.height,
         {onDelete: 'SET NULL', nullable: true}
     )
-    spendBlock: CBlockEntity
+    spendBlock: Relation<CBlockEntity>
 
     @Column({nullable: true})
     eventTriggerBoxId: string

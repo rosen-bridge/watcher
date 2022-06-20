@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import {Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, Relation} from "typeorm";
 import { BlockEntity } from "./BlockEntity";
 import { CommitmentEntity } from "./CommitmentEntity";
 
@@ -49,7 +49,7 @@ export class ObservationEntity {
         (block) => block.height,
         {onDelete: 'CASCADE',}
     )
-    block: BlockEntity
+    block: Relation<BlockEntity>
 
     @OneToOne(
         () => CommitmentEntity,

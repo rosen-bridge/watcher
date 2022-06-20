@@ -56,8 +56,8 @@ export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.Er
             }
         })
     }
-    let value: bigint = BigInt(0);
-    let tokens: { [id: string]: bigint; } = {}
+    let value = BigInt(0);
+    const tokens: { [id: string]: bigint; } = {}
     extractBoxes(boxes).forEach(box => {
         value += BigInt(box.value().as_i64().to_str())
         processBox(box, tokens, 1)

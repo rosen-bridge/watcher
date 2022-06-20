@@ -3,9 +3,10 @@ import { ErgoNetworkApi, nodeApi } from "../../../src/commitments/network/networ
 import { describe } from "mocha";
 import MockAdapter from "axios-mock-adapter";
 
-const blockAtHeight = require('../dataset/blockAtHeight.json');
-const blockTxs = require('../dataset/blockTxs.json');
-const info = require('../dataset/info.json');
+import blockAtHeight from "../dataset/blockAtHeight.json"
+import blockTxs from "../dataset/blockTxs.json"
+import info from "../dataset/info.json"
+
 const mockedAxios = new MockAdapter(nodeApi);
 const ergoNetwork = new ErgoNetworkApi();
 

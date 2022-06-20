@@ -112,7 +112,7 @@ export class ErgoNetwork{
         covering: { [id: string]: bigint } = {},
         filter: (box: wasm.ErgoBox) => boolean = () => true
     ): Promise<{ covered: boolean, boxes: Array<wasm.ErgoBox> }> => {
-        let res: Array<wasm.ErgoBox> = []
+        const res: Array<wasm.ErgoBox> = []
         const boxesItems = await this.getBoxesForAddress(tree, 0, 1)
         const total = boxesItems.total;
         let offset = 0;
@@ -207,7 +207,7 @@ export class ErgoNetwork{
      */
     trackMemPool = async (box: wasm.ErgoBox): Promise<wasm.ErgoBox> => {
         const address: string = ergoTreeToBase58Address(box.ergo_tree())
-        let memPoolBoxesMap = new Map<string, wasm.ErgoBox>();
+        const memPoolBoxesMap = new Map<string, wasm.ErgoBox>();
         const transactions = await this.getMemPoolTxForAddress(address).then(res => res.items);
         if (transactions !== undefined) {
             transactions.forEach(tx => {

@@ -4,9 +4,9 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { firstCommitment } from "../commitment/models/commitmentModel";
 import { contractHash } from "../../src/ergoUtils/ergoUtils";
 import { firstObservations } from "../cardano/models/models";
+import chai from "chai";
+import spies from "chai-spies";
 
-const chai = require("chai")
-const spies = require("chai-spies")
 chai.use(spies);
 
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
