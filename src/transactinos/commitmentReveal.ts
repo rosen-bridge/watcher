@@ -11,7 +11,7 @@ import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 
 const commitmentLimit = parseInt(config.get?.('commitmentLimit'))
-const txFee = parseInt(config.get?.('ergo.txFee'))
+const txFee = BigInt(config.get?.('ergo.txFee'))
 
 export class commitmentReveal{
     _commitmentDataBase: BridgeDataBase
