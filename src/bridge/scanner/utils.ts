@@ -90,8 +90,8 @@ export class CommitmentUtils{
         const permitErgoTree = Address.from_base58(permitAddress).to_ergo_tree().to_base16_bytes()
         const watcherErgoTree = Address.from_base58(watcherAddress).to_ergo_tree().to_base16_bytes()
         for (const tx of txs) {
-            // Adding new permit boxes
             tx.outputs.forEach(box => {
+                // Adding new permit boxes
                 if(box.ergoTree === permitErgoTree &&
                     box.assets.length > 0 &&
                     box.assets[0].tokenId == ergoConfig.RWTId) {
@@ -102,8 +102,6 @@ export class CommitmentUtils{
                         boxJson: JSON.stringify(box)
                     })
                 }
-            })
-            tx.outputs.forEach(box => {
                 if (box.ergoTree === watcherErgoTree) {
                     // Adding new WID boxes
                     if (box.assets.length > 0 && box.assets[0].tokenId == WID) {
