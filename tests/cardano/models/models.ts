@@ -79,8 +79,8 @@ describe("Database functions",  () => {
         it("should save the commitment and update the observation", async () => {
             const DB = await loadDataBase("dataBase");
             const observation = (await DB.getConfirmedObservations(0))[0]
-            const res = await DB.updateObservation(firstCommitment.commitmentBoxId, "txId", observation.id)
-            expect(res).to.be.true
+            const res = await DB.updateObservation("txId", observation)
+            expect(res.commitmentBoxId).to.eql("txId")
             const observation2 = (await DB.getConfirmedObservations(0))[0]
             expect(observation2.commitmentBoxId).to.not.null
         });

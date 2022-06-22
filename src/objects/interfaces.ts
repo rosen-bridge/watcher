@@ -17,6 +17,7 @@ export interface Observation {
     sourceTxId: string
     sourceBlockId: string
     requestId: string
+    commitmentBoxId?: string
 }
 
 export interface Commitment{
@@ -31,4 +32,9 @@ export interface SpecialBox{
     type: BoxType,
     value: string,
     boxJson: string
+}
+
+export interface CommitmentSet{
+    commitments: Array<Commitment>,
+    observation: Observation
 }

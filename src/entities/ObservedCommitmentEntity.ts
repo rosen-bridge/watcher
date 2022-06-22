@@ -1,6 +1,11 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { BridgeBlockEntity } from "./BridgeBlockEntity";
 
+export enum SpendReason {
+    MERGE = "merge",
+    REDEEM = "redeem"
+}
+
 @Entity()
 export class ObservedCommitmentEntity {
     @PrimaryColumn()
@@ -33,5 +38,5 @@ export class ObservedCommitmentEntity {
     spendBlock: BridgeBlockEntity
 
     @Column({nullable: true})
-    eventTriggerBoxId: string
+    spendReason: string
 }

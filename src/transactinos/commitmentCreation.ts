@@ -1,12 +1,11 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Boxes } from "../ergo/boxes";
 import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergo/utils";
-import { NetworkDataBase } from "../models/networkModel";
-import { ObservationEntity } from "../entities/ObservationEntity";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
+import { databaseConnection } from "../ergo/databaseConnection";
 
 const minBoxVal = parseInt(rosenConfig.minBoxValue)
 const txFee = parseInt(rosenConfig.fee)
@@ -15,13 +14,11 @@ const ergoConfig = ErgoConfig.getConfig();
 const WID: string = "906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82"
 
 export class commitmentCreation{
-    _dataBase: NetworkDataBase
-    _requiredConfirmation: number
+    _dataBaseConnection: databaseConnection
     _boxes: Boxes
 
-    constructor(db: NetworkDataBase, confirmation: number, boxes: Boxes) {
-        this._dataBase = db
-        this._requiredConfirmation = confirmation
+    constructor(db: databaseConnection, confirmation: number, boxes: Boxes) {
+        this._dataBaseConnection = db
         this._boxes = boxes
     }
 
@@ -37,7 +34,7 @@ export class commitmentCreation{
                                 requestId: string,
                                 eventDigest: Uint8Array,
                                 permits: Array<wasm.ErgoBox>,
-                                WIDBox: wasm.ErgoBox): Promise<string> => {
+                                WIDBox: wasm.ErgoBox): Promise<{txId?: string, commitmentBoxId?: string}> => {
         const height = await ErgoNetwork.getHeight()
         const permitHash = contractHash(
             wasm.Contract.pay_to_address(
@@ -53,7 +50,7 @@ export class commitmentCreation{
         if (RWTCount <= 1) {
             // TODO: Fix this problem
             console.log("Not enough RWT tokens to create a new commitment")
-            return ""
+            return {}
         }
         const outPermit = Boxes.createPermit(BigInt(minBoxVal), height, RWTCount - BigInt(1), WID)
         const inputBoxes = new wasm.ErgoBoxes(permits[0]);
@@ -69,14 +66,17 @@ export class commitmentCreation{
                 height
             )
             await ErgoNetwork.sendTx(signed.to_json())
-            return signed.id().to_str()
+            return {
+                txId: signed.id().to_str(),
+                commitmentBoxId: signed.outputs().get(1).box_id().to_str(),
+            }
         } catch (e) {
             console.log(e)
             if (e instanceof boxCreationError) {
                 console.log("Transaction input and output doesn't match. Input boxes assets must be more or equal to the outputs assets.")
             }
             console.log("Skipping the commitment creation.")
-            return ""
+            return {}
         }
     }
 
@@ -85,14 +85,14 @@ export class commitmentCreation{
      * Finally saves the created commitment in the database
      */
     job = async () => {
-        const observations: Array<ObservationEntity> = await this._dataBase.getConfirmedObservations(this._requiredConfirmation)
+        const observations = await this._dataBaseConnection.allReadyObservations()
         for (const observation of observations) {
             const commitment = commitmentFromObservation(observation, WID)
             const permits = await this._boxes.getPermits()
             const WIDBox = await this._boxes.getWIDBox()
-            const txId = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox)
-            // TODO: Fix box id
-            await this._dataBase.updateObservation("", txId, observation.id)
+            const txInfo = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox)
+            if(txInfo.commitmentBoxId !== undefined)
+                await this._dataBaseConnection.updateObservation(txInfo.commitmentBoxId, observation)
         }
     }
 }

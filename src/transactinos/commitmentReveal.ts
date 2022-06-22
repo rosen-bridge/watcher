@@ -1,5 +1,5 @@
 import { BridgeDataBase } from "../bridge/models/bridgeModel";
-import { Observation } from "../objects/interfaces";
+import { Commitment, Observation } from "../objects/interfaces";
 import { NetworkDataBase } from "../models/networkModel";
 import config from "config";
 import { ObservedCommitmentEntity } from "../entities/ObservedCommitmentEntity";
@@ -9,20 +9,21 @@ import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
+import { databaseConnection } from "../ergo/databaseConnection";
 
 // TODO: fix config
 const commitmentLimit = parseInt(config.get?.('commitmentLimit'))
 const txFee = BigInt(config.get?.('ergo.txFee'))
 
 export class commitmentReveal{
-    _commitmentDataBase: BridgeDataBase
-    _observationDataBase: NetworkDataBase
+    _databaseConnection: databaseConnection
     _secret: wasm.SecretKey
     _boxes: Boxes
 
-    constructor(secret: wasm.SecretKey, boxes: Boxes) {
+    constructor(secret: wasm.SecretKey, boxes: Boxes, db: databaseConnection) {
         this._secret = secret
         this._boxes = boxes
+        this._databaseConnection = db
     }
     /**
      * creates and sends the trigger event transaction
@@ -65,7 +66,7 @@ export class commitmentReveal{
      * @param commitments
      * @param observation
      */
-    commitmentCheck = (commitments: Array<ObservedCommitmentEntity>, observation: Observation): Array<ObservedCommitmentEntity> => {
+    commitmentCheck = (commitments: Array<Commitment>, observation: Observation): Array<Commitment> => {
         return commitments.filter(commitment => {
             return commitmentFromObservation(observation, commitment.WID).toString() === commitment.commitment
         })
@@ -76,25 +77,20 @@ export class commitmentReveal{
      * If the number of valid bridge are more than the required bridge it generates the trigger event
      */
     job = async () => {
-        // TODO: Query all observations check if it has commitmentBoxId and its valid or not?
-        // TODO: Check if other commitments created the trigger event or not
-        // const createdCommitments = []//await this._observationDataBase.getCreatedCommitments()
-        // for (const commitment of createdCommitments) {
-        //     const observedCommitments = await this._commitmentDataBase.commitmentsByEventId(commitment.eventId)
-        //     if(observedCommitments.length >= commitmentLimit) {
-        //         const validCommitments = this.commitmentCheck(observedCommitments, commitment.observation)
-        //         if(validCommitments.length >= commitmentLimit){
-        //             const commitmentBoxes = validCommitments.map(async(commitment) => {
-        //                 return await ErgoNetwork.boxById(commitment.commitmentBoxId)
-        //             })
-        //             Promise.all(commitmentBoxes).then(async(cBoxes) => {
-        //                 const WIDs: Array<Uint8Array> = observedCommitments.map(commitment => {
-        //                     return Buffer.from(commitment.WID)
-        //                 })
-        //                 await this.triggerEventCreationTx(cBoxes, commitment.observation, WIDs, await this._boxes.getUserPaymentBox(txFee))
-        //             })
-        //         }
-        //     }
-        // }
+        const commitmentSets = await this._databaseConnection.allReadyCommitmentSets()
+        for (const commitmentSet of commitmentSets) {
+            const validCommitments = this.commitmentCheck(commitmentSet.commitments, commitmentSet.observation)
+            if(validCommitments.length >= commitmentLimit){
+                const commitmentBoxes = validCommitments.map(async(commitment) => {
+                    return await ErgoNetwork.boxById(commitment.commitmentBoxId)
+                })
+                Promise.all(commitmentBoxes).then(async(cBoxes) => {
+                    const WIDs: Array<Uint8Array> = validCommitments.map(commitment => {
+                        return Buffer.from(commitment.WID)
+                    })
+                    await this.triggerEventCreationTx(cBoxes, commitmentSet.observation, WIDs, await this._boxes.getUserPaymentBox(txFee))
+                })
+            }
+        }
     }
 }

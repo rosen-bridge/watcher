@@ -41,7 +41,7 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
         const txs = await this._networkAccess.getBlockTxs(block.hash);
         const newCommitments = (await CommitmentUtils.extractCommitments(txs))
         const updatedCommitments = await CommitmentUtils.updatedCommitments(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
-        // TODO: Add eventTrigger box id to updated commitment
+        // TODO: Add SpendReason to updated commitments
         // TODO: fix WID config
         const newBoxes = await CommitmentUtils.extractSpecialBoxes(txs, rosenConfig.watcherPermitAddress, ergoConfig.address, config.get?.("ergo.WID"))
         const spentBoxes = await CommitmentUtils.spentSpecialBoxes(txs, this._dataBase, [])

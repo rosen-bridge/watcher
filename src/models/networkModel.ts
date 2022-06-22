@@ -124,7 +124,6 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
 
     /**
      * returns confirmed observation after required confirmation
-     * ignores unused observation where
      * @param confirmation
      */
     getConfirmedObservations = async (confirmation: number): Promise<Array<ObservationEntity>> => {
@@ -138,35 +137,17 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
     /**
      * Save a newly created commitment and updates the related observation
      * @param commitmentBoxId
-     * @param txId
-     * @param observationId
+     * @param observation
      */
-    updateObservation = async (commitmentBoxId: string, txId: string, observationId: number) => {
-        const oldObservation = await this.observationRepository.findOne({
-            where: {id: observationId}
-        })
+    updateObservation = async (commitmentBoxId: string, observation: ObservationEntity) => {
         const newObservation = new ObservationEntity()
         Object.assign(newObservation, {
-            ...oldObservation,
+            ...observation,
             ...{
                 commitmentBoxId: commitmentBoxId
             }
         })
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-
-        let error = true;
-        await queryRunner.startTransaction()
-        try {
-            await queryRunner.manager.save(newObservation);
-            await queryRunner.commitTransaction();
-        } catch (err) {
-            await queryRunner.rollbackTransaction();
-            error = false;
-        } finally {
-            await queryRunner.release();
-        }
-        return error;
+        return this.observationRepository.save(newObservation)
     }
 }
 
