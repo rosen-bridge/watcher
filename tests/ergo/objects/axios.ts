@@ -4,6 +4,7 @@ import { mockedResponseBody } from "./mockedResponseBody";
 
 const mockedExplorer = new MockAdapter(explorerApi);
 const mockedNodeClient = new MockAdapter(nodeClient);
+export const boxId = "95f1165089b39f91b096e1dec1d1d55acb4f7e821df0656f5ad3c633e370d065"
 
 export const initMockedAxios = (vector: number = 0) => {
     mockedNodeClient.reset();
@@ -59,6 +60,8 @@ export const initMockedAxios = (vector: number = 0) => {
         .reply(config =>
             (config.data === mockedResponseBody.sampleTxJson ? [200, mockedResponseBody.sampleTxId] : [400, "error"])
         );
+
+    mockedNodeClient.onGet(`utxo/byId/${boxId}`).reply(200, mockedResponseBody.utxo)
 
     mockedExplorer.onGet('/api/v1/boxes/unspent/byAddress/9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT'
     ).reply(200, mockedResponseBody.watcherUnspentBoxes);

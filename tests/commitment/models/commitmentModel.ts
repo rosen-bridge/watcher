@@ -1,10 +1,11 @@
 import { DataSource } from "typeorm";
 import { commitmentEntities } from "../../../src/entities";
-import { CommitmentDataBase } from "../../../src/commitments/models/commitmentModel";
-import { Commitment } from "../../../src/objects/interfaces";
+import { BridgeDataBase } from "../../../src/bridge/models/bridgeModel";
+import { Commitment, SpecialBox } from "../../../src/objects/interfaces";
 import { expect } from "chai";
+import { BoxType } from "../../../src/entities/BoxEntity";
 
-const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
+export const loadDataBase = async (name: string): Promise<BridgeDataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
@@ -12,7 +13,7 @@ const loadDataBase = async (name: string): Promise<CommitmentDataBase> => {
         synchronize: true,
         logging: false,
     });
-    return await CommitmentDataBase.init(ormConfig);
+    return await BridgeDataBase.init(ormConfig);
 }
 
 export const firstCommitment: Commitment = {
@@ -36,6 +37,34 @@ const thirdCommitment: Commitment = {
     commitmentBoxId: "a18dc1f812aa156037c47db5bd7fc9ef85646c97a1abb76b30045b8e5f7e31e2"
 }
 
+const firstPermitBox: SpecialBox = {
+    boxId: "cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7",
+    type: BoxType.PERMIT,
+    value: "10000000",
+    boxJson: "fakeSample"
+}
+
+const secondPermitBox: SpecialBox = {
+    boxId: "6ba81a7de39dce3303d100516bf80228e8c03464c130d5b0f8ff6f78f66bcbc8",
+    type: BoxType.PERMIT,
+    value: "10000000",
+    boxJson: "fakeSample"
+}
+
+const firstWIDBox: SpecialBox ={
+    boxId: "cd0e9ad2ae564768bc6bf74a350934117040686fd267f313fce27d7df00fe549",
+    type: BoxType.WID,
+    value: "100000000",
+    boxJson: "fakeSample"
+}
+
+const secondWIDBox: SpecialBox ={
+    boxId: "2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655",
+    type: BoxType.WID,
+    value: "10000000",
+    boxJson: "fakeSample"
+}
+
 
 describe("Commitment Database functions", () => {
 
@@ -47,7 +76,9 @@ describe("Commitment Database functions", () => {
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
                 {
                     newCommitments: [firstCommitment],
-                    updatedCommitments: []
+                    updatedCommitments: [],
+                    newBoxes: [firstPermitBox, firstWIDBox],
+                    spentBoxes: []
                 }
             );
             expect(res).to.be.true;
@@ -59,7 +90,9 @@ describe("Commitment Database functions", () => {
                 "3ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
                 {
                     newCommitments: [secondCommitment, thirdCommitment],
-                    updatedCommitments: ["1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117"]
+                    updatedCommitments: ["1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117"],
+                    newBoxes: [secondPermitBox, secondWIDBox],
+                    spentBoxes: [firstPermitBox.boxId, firstWIDBox.boxId]
                 }
             );
             expect(res).to.be.true;
@@ -93,7 +126,7 @@ describe("Commitment Database functions", () => {
     })
 
     describe("findCommitmentsById", () => {
-        it("should return exactly two commitments with the specified id", async () => {
+        it("should return exactly two bridge with the specified id", async () => {
             const DB = await loadDataBase("commitments");
             const data  = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
             expect(data).to.have.length(2)
@@ -102,11 +135,32 @@ describe("Commitment Database functions", () => {
     })
 
     describe("deleteCommitments", () => {
-        it("should delete two commitments", async() => {
+        it("should delete two bridge", async() => {
             const DB = await loadDataBase("commitments");
             await DB.deleteCommitments([firstCommitment.commitmentBoxId, secondCommitment.commitmentBoxId])
             let data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(0)
+        })
+    })
+
+    describe("getUnspentSpecialBoxes", () => {
+        it("should return one unspent permit box", async() => {
+            const DB = await loadDataBase("commitments");
+            let data = await DB.getUnspentSpecialBoxes(BoxType.PERMIT)
+            expect(data).to.have.length(1)
+        })
+        it("should return one unspent WID box", async() => {
+            const DB = await loadDataBase("commitments");
+            let data = await DB.getUnspentSpecialBoxes(BoxType.WID)
+            expect(data).to.have.length(1)
+        })
+    })
+
+    describe("findUnspentSpecialBoxesById", () => {
+        it("should return two unspent special boxes by id", async() => {
+            const DB = await loadDataBase("commitments");
+            let data = await DB.findUnspentSpecialBoxesById([secondWIDBox.boxId, secondPermitBox.boxId])
+            expect(data).to.have.length(2)
         })
     })
 })

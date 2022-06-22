@@ -1,27 +1,32 @@
 import { AbstractScanner } from "../../scanner/abstractScanner";
-import { CommitmentDataBase } from "../models/commitmentModel";
+import { BridgeDataBase } from "../models/bridgeModel";
 import config, { IConfig } from "config";
-import { Block, Commitment } from "../../objects/interfaces";
+import { Block, Commitment, SpecialBox } from "../../objects/interfaces";
 import { commitmentOrmConfig } from "../../../config/commitmentOrmConfig";
 import { ErgoNetworkApi } from "../network/networkApi";
-import { CBlockEntity } from "../../entities/CBlockEntity";
+import { BridgeBlockEntity } from "../../entities/BridgeBlockEntity";
 import { CommitmentUtils } from "./utils";
 import { ErgoConfig } from "../../config/config";
+import { rosenConfig } from "../../config/rosenConfig";
+import { NetworkDataBase } from "../../models/networkModel";
 
 const ergoConfig = ErgoConfig.getConfig();
 
-export type CommitmentInformation = {
+export type BridgeBlockInformation = {
     newCommitments: Array<Commitment>
     updatedCommitments: Array<string>
+    newBoxes: Array<SpecialBox>
+    spentBoxes: Array<string>
 }
 
-export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation>{
-    _dataBase: CommitmentDataBase;
+export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInformation>{
+    _dataBase: BridgeDataBase;
+    _dataBase2: NetworkDataBase;
     _networkAccess: ErgoNetworkApi;
     _config: IConfig;
     _initialHeight: number;
 
-    constructor(db: CommitmentDataBase, network: ErgoNetworkApi, config: IConfig) {
+    constructor(db: BridgeDataBase, network: ErgoNetworkApi, config: IConfig) {
         super();
         this._dataBase = db;
         this._networkAccess = network;
@@ -30,23 +35,28 @@ export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation
     }
 
     /**
-     * getting block and extracting new commitments and old spent commitments from the specified block
+     * getting block and extracting new bridge and old spent bridge from the specified block
      * @param block
-     * @return Promise<Array<CommitmentInformation>>
+     * @return Promise<Array<BridgeBlockInformation>>
      */
-    getBlockInformation = async (block: Block): Promise<CommitmentInformation> => {
+    getBlockInformation = async (block: Block): Promise<BridgeBlockInformation> => {
         const txs = await this._networkAccess.getBlockTxs(block.hash);
-        const newCommitments = (await CommitmentUtils.commitmentsAtHeight(txs))
-        const updatedCommitments = await CommitmentUtils.updatedCommitmentsAtHeight(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
-        // TODO: Add eventTrigger box id to updated commitments
+        const newCommitments = (await CommitmentUtils.extractCommitments(txs))
+        const updatedCommitments = await CommitmentUtils.updatedCommitments(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
+        // TODO: Add eventTrigger box id to updated bridge
+        // TODO: fix config
+        const newBoxes = await CommitmentUtils.extractSpecialBoxes(txs, rosenConfig.watcherPermitAddress, config.get?.("ergo.address"), config.get?.("ergo.WID"))
+        const spentBoxes = await CommitmentUtils.spentSpecialBoxes(txs, this._dataBase, [])
         return {
             newCommitments: newCommitments,
-            updatedCommitments: updatedCommitments
+            updatedCommitments: updatedCommitments,
+            newBoxes: newBoxes,
+            spentBoxes: spentBoxes
         }
     }
 
     /**
-     * removes old spent commitments older than block height limit config
+     * removes old spent bridge older than block height limit config
      */
     removeOldCommitments = async () => {
         const heightLimit = ergoConfig.commitmentHeightLimit;
@@ -60,7 +70,7 @@ export class Scanner extends AbstractScanner<CBlockEntity, CommitmentInformation
  * main function that runs every `SCANNER_INTERVAL` time that sets in the config
  */
 export const commitmentMain = async () => {
-    const DB = await CommitmentDataBase.init(commitmentOrmConfig);
+    const DB = await BridgeDataBase.init(commitmentOrmConfig);
     const apiNetwork = new ErgoNetworkApi();
     const scanner = new Scanner(DB, apiNetwork, config);
     setInterval(scanner.update, ergoConfig.commitmentInterval * 1000);
