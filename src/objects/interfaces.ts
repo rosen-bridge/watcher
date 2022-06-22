@@ -1,5 +1,4 @@
 import { BoxType } from "../entities/BoxEntity";
-import { TxStatus } from "../entities/CommitmentEntity";
 
 export interface Block {
     hash: string,

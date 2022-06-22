@@ -47,11 +47,10 @@ export const secondObservations: Array<Observation> = [{
 }];
 
 
-describe("Database functions", async () => {
-    const DB = await loadDataBase("dataBase");
-
+describe("Database functions",  () => {
     describe("saveBlock", () => {
         it("should return true", async () => {
+            const DB = await loadDataBase("dataBase");
             await DB.removeForkedBlocks(3433333);
             let res = await DB.saveBlock(
                 3433333,
@@ -70,6 +69,7 @@ describe("Database functions", async () => {
 
     describe("getConfirmedObservations", () => {
         it("returns 1 row", async () => {
+            const DB = await loadDataBase("dataBase");
             const res = await DB.getConfirmedObservations(0);
             expect(res).to.have.length(1)
         });
@@ -77,16 +77,19 @@ describe("Database functions", async () => {
 
     describe("saveCommitment", () => {
         it("should save the commitment and update the observation", async () => {
+            const DB = await loadDataBase("dataBase");
             const observation = (await DB.getConfirmedObservations(0))[0]
-            const res = await DB.saveCommitment(firstCommitment, "txId", observation.id)
-            expect(res).to.be.false
+            const res = await DB.updateObservation(firstCommitment.commitmentBoxId, "txId", observation.id)
+            expect(res).to.be.true
             const observation2 = (await DB.getConfirmedObservations(0))[0]
-            expect(observation2.commitment).to.not.null
+            expect(observation2.commitmentBoxId).to.not.null
         });
     });
 
     describe("getLastSavedBlock", () => {
         it("should return last saved block", async () => {
+            const DB = await loadDataBase("dataBase");
+
             const lastBlock = await DB.getLastSavedBlock();
             expect(lastBlock).to.eql({
                 "hash": "19b60182cba99d621b3d02457fefb4cda81f4fbde3ca719617cbed2e4cc5c0ce",
@@ -97,30 +100,20 @@ describe("Database functions", async () => {
 
     describe("getBlockAtHeight", () => {
         it("should return block Hash", async () => {
+            const DB = await loadDataBase("dataBase");
             const blockHash = await DB.getBlockAtHeight(3433333);
             expect(blockHash?.hash).to.be.equal("26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6");
         });
         it("should return block undefined", async () => {
+            const DB = await loadDataBase("dataBase");
             const blockHash = await DB.getBlockAtHeight(3433222);
             expect(blockHash).to.be.undefined;
         });
     });
 
-    describe("getCreatedCommitments", () => {
-        it("all stored bridge in the database has 'sent' flag, so it should return nothing", async () => {
-            const commitments = await DB.getCreatedCommitments()
-            expect(commitments.length).to.eql(0)
-        })
-        it("should return a created commitment", async () => {
-            // TODO: add a created commitment
-            // TODO: complete this test after updating the bridge
-            const commitments = await DB.getCreatedCommitments()
-            expect(commitments.length).to.eql(0)
-        })
-    })
-
     describe("changeLastValidBlock", () => {
         it("should affect 1 row", async () => {
+            const DB = await loadDataBase("dataBase");
             const res = await DB.removeForkedBlocks(3433333);
             expect(res.affected).to.be.equal(2);
         });

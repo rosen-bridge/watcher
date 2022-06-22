@@ -137,19 +137,11 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
 
     /**
      * Save a newly created commitment and updates the related observation
-     * @param commitment
+     * @param commitmentBoxId
      * @param txId
      * @param observationId
      */
-    updateObservation = async (commitment: Commitment, txId: string, observationId: number) => {
-        const commitmentEntity = new CommitmentEntity();
-        commitmentEntity.eventId = commitment.eventId
-        commitmentEntity.commitment = commitment.commitment
-        commitmentEntity.WID = commitment.WID
-        commitmentEntity.commitmentBoxId = commitment.commitmentBoxId
-        commitmentEntity.commitmentTxId = txId
-        commitmentEntity.flag = TxStatus.SENT
-
+    updateObservation = async (commitmentBoxId: string, txId: string, observationId: number) => {
         const oldObservation = await this.observationRepository.findOne({
             where: {id: observationId}
         })
@@ -157,7 +149,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         Object.assign(newObservation, {
             ...oldObservation,
             ...{
-                commitment: commitmentEntity
+                commitmentBoxId: commitmentBoxId
             }
         })
         const queryRunner = this.dataSource.createQueryRunner();
@@ -166,7 +158,6 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         let error = true;
         await queryRunner.startTransaction()
         try {
-            await queryRunner.manager.save(commitmentEntity);
             await queryRunner.manager.save(newObservation);
             await queryRunner.commitTransaction();
         } catch (err) {

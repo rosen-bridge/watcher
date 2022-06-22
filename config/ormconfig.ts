@@ -1,5 +1,5 @@
 import { DataSource } from "typeorm";
-import { entities, commitmentEntities } from "../src/entities";
+import { entities } from "../src/entities";
 import { migrations } from "../src/migrations";
 
 export const cardanoOrmConfig = new DataSource({

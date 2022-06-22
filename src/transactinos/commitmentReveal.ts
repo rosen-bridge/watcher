@@ -78,23 +78,23 @@ export class commitmentReveal{
     job = async () => {
         // TODO: Query all observations check if it has commitmentBoxId and its valid or not?
         // TODO: Check if other commitments created the trigger event or not
-        const createdCommitments = await this._observationDataBase.getCreatedCommitments()
-        for (const commitment of createdCommitments) {
-            const observedCommitments = await this._commitmentDataBase.commitmentsByEventId(commitment.eventId)
-            if(observedCommitments.length >= commitmentLimit) {
-                const validCommitments = this.commitmentCheck(observedCommitments, commitment.observation)
-                if(validCommitments.length >= commitmentLimit){
-                    const commitmentBoxes = validCommitments.map(async(commitment) => {
-                        return await ErgoNetwork.boxById(commitment.commitmentBoxId)
-                    })
-                    Promise.all(commitmentBoxes).then(async(cBoxes) => {
-                        const WIDs: Array<Uint8Array> = observedCommitments.map(commitment => {
-                            return Buffer.from(commitment.WID)
-                        })
-                        await this.triggerEventCreationTx(cBoxes, commitment.observation, WIDs, await this._boxes.getUserPaymentBox(txFee))
-                    })
-                }
-            }
-        }
+        // const createdCommitments = []//await this._observationDataBase.getCreatedCommitments()
+        // for (const commitment of createdCommitments) {
+        //     const observedCommitments = await this._commitmentDataBase.commitmentsByEventId(commitment.eventId)
+        //     if(observedCommitments.length >= commitmentLimit) {
+        //         const validCommitments = this.commitmentCheck(observedCommitments, commitment.observation)
+        //         if(validCommitments.length >= commitmentLimit){
+        //             const commitmentBoxes = validCommitments.map(async(commitment) => {
+        //                 return await ErgoNetwork.boxById(commitment.commitmentBoxId)
+        //             })
+        //             Promise.all(commitmentBoxes).then(async(cBoxes) => {
+        //                 const WIDs: Array<Uint8Array> = observedCommitments.map(commitment => {
+        //                     return Buffer.from(commitment.WID)
+        //                 })
+        //                 await this.triggerEventCreationTx(cBoxes, commitment.observation, WIDs, await this._boxes.getUserPaymentBox(txFee))
+        //             })
+        //         }
+        //     }
+        // }
     }
 }

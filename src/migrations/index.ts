@@ -1,5 +1,5 @@
-import {networkModelMigration1653440901562} from "./1653440901562-networkModelMigration";
 import { commitmentModelMigration1655486422332 } from "./1655486422332-bridgeModelMigration";
+import { networkModelMigration1655909430982 } from "./1655909430982-networkModelMigration";
 
-export const migrations = [networkModelMigration1653440901562];
+export const migrations = [networkModelMigration1655909430982];
 export const commitmentMigrations = [commitmentModelMigration1655486422332];

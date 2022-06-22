@@ -91,12 +91,8 @@ export class commitmentCreation{
             const permits = await this._boxes.getPermits()
             const WIDBox = await this._boxes.getWIDBox()
             const txId = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox)
-            await this._dataBase.saveCommitment({
-                eventId: observation.requestId,
-                commitment: commitment.toString(),
-                commitmentBoxId: "",
-                WID: WID
-            }, txId, observation.id)
+            // TODO: Fix box id
+            await this._dataBase.updateObservation("", txId, observation.id)
         }
     }
 }
