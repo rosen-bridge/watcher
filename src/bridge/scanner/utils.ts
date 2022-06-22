@@ -90,37 +90,38 @@ export class CommitmentUtils{
         const permitErgoTree = Address.from_base58(permitAddress).to_ergo_tree().to_base16_bytes()
         const watcherErgoTree = Address.from_base58(watcherAddress).to_ergo_tree().to_base16_bytes()
         for (const tx of txs) {
-            // Adding new permit boxes
-            tx.outputs.filter(box => {
-                return box.ergoTree === permitErgoTree &&
+            tx.outputs.forEach(box => {
+                // Adding new permit boxes
+                if(box.ergoTree === permitErgoTree &&
                     box.assets.length > 0 &&
-                    box.assets[0].tokenId == ergoConfig.RWTId
-            }).forEach(permit => specialBoxes.push({
-                boxId: permit.boxId,
-                type: BoxType.PERMIT,
-                value: permit.value.toString(),
-                boxJson: JSON.stringify(permit)
-            }))
-            // Adding new WID boxes
-            const watcherBoxes = tx.outputs.filter(box => {return box.ergoTree === watcherErgoTree})
-            for(const box of watcherBoxes) {
-                if(box.assets.length > 0 && box.assets[0].tokenId == WID){
+                    box.assets[0].tokenId == ergoConfig.RWTId) {
                     specialBoxes.push({
                         boxId: box.boxId,
-                        type: BoxType.WID,
+                        type: BoxType.PERMIT,
                         value: box.value.toString(),
                         boxJson: JSON.stringify(box)
                     })
                 }
-                else{
-                    specialBoxes.push({
-                        boxId: box.boxId,
-                        type: BoxType.PLAIN,
-                        value: box.value.toString(),
-                        boxJson: JSON.stringify(box)
-                    })
+                if (box.ergoTree === watcherErgoTree) {
+                    // Adding new WID boxes
+                    if (box.assets.length > 0 && box.assets[0].tokenId == WID) {
+                        specialBoxes.push({
+                            boxId: box.boxId,
+                            type: BoxType.WID,
+                            value: box.value.toString(),
+                            boxJson: JSON.stringify(box)
+                        })
+                    } else {
+                        // Adding new plain boxes
+                        specialBoxes.push({
+                            boxId: box.boxId,
+                            type: BoxType.PLAIN,
+                            value: box.value.toString(),
+                            boxJson: JSON.stringify(box)
+                        })
+                    }
                 }
-            }
+            })
         }
         return specialBoxes;
     }
