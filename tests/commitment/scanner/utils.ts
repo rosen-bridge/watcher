@@ -52,7 +52,7 @@ describe("Commitment Scanner Utils test", () => {
                 ["cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"]
             );
             expect(data.length).to.be.equal(1);
-            expect(data[0]).to.eql("cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7")
+            expect(data[0].boxId).to.eql("cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7")
         });
     })
 

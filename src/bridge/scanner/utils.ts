@@ -1,4 +1,4 @@
-import { Commitment, SpecialBox } from "../../objects/interfaces";
+import { Commitment, SpecialBox, SpentBox } from "../../objects/interfaces";
 import { decodeCollColl, decodeStr } from "../../utils/utils";
 import { NodeOutputBox, NodeTransaction } from "../network/ergoApiModels";
 import { BridgeDataBase } from "../models/bridgeModel";
@@ -6,6 +6,7 @@ import { Address } from "ergo-lib-wasm-nodejs";
 import { rosenConfig } from "../../config/rosenConfig";
 import { ErgoConfig } from "../../config/config";
 import { BoxType } from "../../entities/BoxEntity";
+import { SpendReason } from "../../entities/ObservedCommitmentEntity";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -64,13 +65,16 @@ export class CommitmentUtils{
     static updatedCommitments = async (txs: Array<NodeTransaction>,
                                        database: BridgeDataBase,
                                        newCommitments: Array<string>) => {
-        let updatedCommitments: Array<string> = []
+        const eventTriggerErgoTree = Address.from_base58(rosenConfig.eventTriggerAddress).to_ergo_tree().to_base16_bytes()
+        let updatedCommitments: Array<SpentBox> = []
         for (const tx of txs) {
             const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
             const foundCommitments = (await database.findCommitmentsById(inputBoxIds)).map(commitment => commitment.commitmentBoxId)
             const newUpdatedCommitments = inputBoxIds.filter(boxId => newCommitments.includes(boxId))
-            updatedCommitments = updatedCommitments.concat(foundCommitments)
-            updatedCommitments = updatedCommitments.concat(newUpdatedCommitments)
+            let reason: SpendReason = SpendReason.REDEEM
+            if(tx.outputs[0].ergoTree.toString() === eventTriggerErgoTree) reason = SpendReason.MERGE
+            foundCommitments.forEach(box => updatedCommitments.push({boxId: box, spendReason: reason}))
+            newUpdatedCommitments.forEach(box => updatedCommitments.push({boxId: box, spendReason: reason}))
         }
         return updatedCommitments
     }

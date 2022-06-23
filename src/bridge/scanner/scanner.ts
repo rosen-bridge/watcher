@@ -1,7 +1,7 @@
 import { AbstractScanner } from "../../scanner/abstractScanner";
 import { BridgeDataBase } from "../models/bridgeModel";
 import config, { IConfig } from "config";
-import { Block, Commitment, SpecialBox } from "../../objects/interfaces";
+import { Block, Commitment, SpecialBox, SpentBox } from "../../objects/interfaces";
 import { commitmentOrmConfig } from "../../../config/commitmentOrmConfig";
 import { ErgoNetworkApi } from "../network/networkApi";
 import { BridgeBlockEntity } from "../../entities/BridgeBlockEntity";
@@ -13,7 +13,7 @@ const ergoConfig = ErgoConfig.getConfig();
 
 export type BridgeBlockInformation = {
     newCommitments: Array<Commitment>
-    updatedCommitments: Array<string>
+    updatedCommitments: Array<SpentBox>
     newBoxes: Array<SpecialBox>
     spentBoxes: Array<string>
 }
@@ -41,10 +41,9 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
         const txs = await this._networkAccess.getBlockTxs(block.hash);
         const newCommitments = (await CommitmentUtils.extractCommitments(txs))
         const updatedCommitments = await CommitmentUtils.updatedCommitments(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
-        // TODO: Add SpendReason to updated commitments
         // TODO: fix WID config
         const newBoxes = await CommitmentUtils.extractSpecialBoxes(txs, rosenConfig.watcherPermitAddress, ergoConfig.address, config.get?.("ergo.WID"))
-        const spentBoxes = await CommitmentUtils.spentSpecialBoxes(txs, this._dataBase, [])
+        const spentBoxes = await CommitmentUtils.spentSpecialBoxes(txs, this._dataBase, newBoxes.map(box => box.boxId))
         return {
             newCommitments: newCommitments,
             updatedCommitments: updatedCommitments,

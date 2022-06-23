@@ -4,6 +4,7 @@ import { BridgeDataBase } from "../../../src/bridge/models/bridgeModel";
 import { Commitment, SpecialBox } from "../../../src/objects/interfaces";
 import { expect } from "chai";
 import { BoxType } from "../../../src/entities/BoxEntity";
+import { SpendReason } from "../../../src/entities/ObservedCommitmentEntity";
 
 export const loadDataBase = async (name: string): Promise<BridgeDataBase> => {
     const ormConfig = new DataSource({
@@ -90,7 +91,10 @@ describe("Commitment Database functions", () => {
                 "3ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
                 {
                     newCommitments: [secondCommitment, thirdCommitment],
-                    updatedCommitments: ["1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117"],
+                    updatedCommitments: [{
+                        boxId: "1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
+                        spendReason: SpendReason.REDEEM
+                    }],
                     newBoxes: [secondPermitBox, secondWIDBox],
                     spentBoxes: [firstPermitBox.boxId, firstWIDBox.boxId]
                 }

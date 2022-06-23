@@ -1,4 +1,5 @@
 import { BoxType } from "../entities/BoxEntity";
+import { SpendReason } from "../entities/ObservedCommitmentEntity";
 
 export interface Block {
     hash: string,
@@ -32,6 +33,11 @@ export interface SpecialBox{
     type: BoxType,
     value: string,
     boxJson: string
+}
+
+export interface SpentBox{
+    boxId: string,
+    spendReason: SpendReason
 }
 
 export interface CommitmentSet{
