@@ -1,13 +1,23 @@
 import { Observation } from "../../src/objects/interfaces";
-import { commitmentFromObservation, contractHash, createChangeBox, extractBoxes } from "../../src/ergo/utils";
+import {
+    buildTxAndSign,
+    commitmentFromObservation,
+    contractHash,
+    createChangeBox,
+    extractBoxes
+} from "../../src/ergo/utils";
 import { expect } from "chai";
 import { uint8ArrayToHex } from "../../src/utils/utils";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoConfig } from "../../src/config/config";
 import { rosenConfig } from "../../src/config/rosenConfig";
 import { boxCreationError } from "../../src/errors/errors";
+import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
+import { Address } from "ergo-lib-wasm-nodejs";
+import { initMockedAxios } from "../ergo/objects/axios";
 
 const ergoConfig = ErgoConfig.getConfig();
+initMockedAxios()
 
 const observation: Observation = {
     fromChain: "ADA",
@@ -25,6 +35,8 @@ const observation: Observation = {
 const WID = "245341e0dda895feca93adbd2db9e643a74c50a1b3702db4c2535f23f1c72e6e"
 const tokenId = "0088eb2b6745ad637112b50a4c5e389881f910ebcf802b183d6633083c2b04fc"
 const boxesJson = require("./dataset/boxes.json")
+const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
+const userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from("7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2", "hex"))
 
 describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {
@@ -93,6 +105,53 @@ describe("Testing ergoUtils", () => {
             expect(res?.tokens().get(0).amount().as_i64().as_num()).to.eql(90)
         })
     })
+
+    describe("buildTxAndSign", () => {
+        /**
+         * the transaction should signed without error
+         */
+        it("should sign the transaction", async () => {
+            const outValue = BigInt(rosenConfig.minBoxValue + rosenConfig.fee);
+            const add = Address.from_base58(userAddress)
+            const transactionInput = await ErgoNetwork.getErgBox(
+                add,
+                outValue,
+            );
+            const inputBoxes = new wasm.ErgoBoxes(transactionInput[0]);
+            if (transactionInput.length > 1) {
+                for (let i = 0; i < transactionInput.length; i++) {
+                    inputBoxes.add(transactionInput[1]);
+                }
+            }
+
+            const height = await ErgoNetwork.getHeight();
+
+            const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
+                wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue.toString())),
+                wasm.Contract.pay_to_address(add),
+                height
+            );
+
+            const outBox = outBoxBuilder.build();
+            const txOutBox = new wasm.ErgoBoxCandidates(outBox);
+
+            const boxSelector = new wasm.SimpleBoxSelector();
+            const targetBalance = wasm.BoxValue.from_i64(wasm.I64.from_str(outValue.toString()));
+            const boxSelection = boxSelector.select(inputBoxes, targetBalance, new wasm.Tokens());
+            const builder = wasm.TxBuilder.new(
+                boxSelection,
+                txOutBox,
+                height,
+                wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee.toString())),
+                add,
+                wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue.toString())),
+            );
+
+            const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);
+            const signedTx = await buildTxAndSign(builder, userSecret, inputBoxes, tx_data_inputs);
+            expect(signedTx.id().to_str()).not.to.be.null;
+        });
+    });
 
     describe("contractHash", () => {
         it("tests the contract hash creation", () => {

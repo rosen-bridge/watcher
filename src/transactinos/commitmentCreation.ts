@@ -6,6 +6,7 @@ import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 import { databaseConnection } from "../ergo/databaseConnection";
+import { Buffer } from "buffer";
 
 const minBoxVal = parseInt(rosenConfig.minBoxValue)
 const txFee = parseInt(rosenConfig.fee)
@@ -52,7 +53,7 @@ export class commitmentCreation{
             console.log("Not enough RWT tokens to create a new commitment")
             return {}
         }
-        const outPermit = Boxes.createPermit(BigInt(minBoxVal), height, RWTCount - BigInt(1), WID)
+        const outPermit = this._boxes.createPermit(height, RWTCount - BigInt(1), Buffer.from(WID))
         const inputBoxes = new wasm.ErgoBoxes(permits[0]);
         inputBoxes.add(WIDBox)
         permits.slice(1).forEach(permit => inputBoxes.add(permit))
@@ -88,7 +89,7 @@ export class commitmentCreation{
         const observations = await this._dataBaseConnection.allReadyObservations()
         for (const observation of observations) {
             const commitment = commitmentFromObservation(observation, WID)
-            const permits = await this._boxes.getPermits()
+            const permits = await this._boxes.getPermits(BigInt(0))
             const WIDBox = await this._boxes.getWIDBox()
             const txInfo = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox)
             if(txInfo.commitmentBoxId !== undefined)

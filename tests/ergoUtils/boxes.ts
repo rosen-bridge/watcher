@@ -8,6 +8,9 @@ import { SpecialBox } from "../../src/objects/interfaces";
 import { BoxType } from "../../src/entities/BoxEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { NotEnoughFund } from "../../src/errors/errors";
+import { strToUint8Array } from "../../src/utils/utils";
+import { rosenConfig, tokens } from "../ergo/transactions/permit";
+import { initMockedAxios } from "../ergo/objects/axios";
 
 const chai = require("chai")
 const sinon = require("sinon");
@@ -15,6 +18,7 @@ const spies = require("chai-spies")
 const chaiPromise = require("chai-as-promised")
 chai.use(spies);
 chai.use(chaiPromise)
+initMockedAxios();
 
 const permitJson = JSON.stringify(require("./dataset/permitBox.json"))
 const WIDJson = JSON.stringify(require("./dataset/WIDBox.json"))
@@ -57,7 +61,7 @@ describe("Testing Box Creation", () => {
             mempoolTrack.onCall(1).returns(wasm.ErgoBox.from_json(WIDJson))
             mempoolTrack.onCall(2).returns(wasm.ErgoBox.from_json(plainJson))
             const boxes = new Boxes(DB)
-            const data = await boxes.getPermits()
+            const data = await boxes.getPermits(BigInt(0))
             expect(data).to.have.length(1)
             expect(data[0].box_id().to_str()).to.eq(permitBox.boxId)
         })
@@ -90,14 +94,102 @@ describe("Testing Box Creation", () => {
         })
     })
 
+    describe("getRepoBox", () => {
+        it("should return repoBox(with tracking mempool)", async () => {
+            const DB = await loadDataBase("commitments");
+            const boxes = new Boxes(DB)
+            const repoBox = await boxes.getRepoBox();
+            expect(repoBox.box_id().to_str()).to.be.equal("2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350");
+        });
+    });
+
+    describe('createRepo', () => {
+        it("checks repoBox tokens order and count", async () => {
+            const DB = await loadDataBase("commitments");
+            const boxes = new Boxes(DB)
+            const RWTCount = "100";
+            const RSNCount = "1";
+            const repoBox = await boxes.createRepo(
+                0,
+                RWTCount,
+                RSNCount,
+                [new Uint8Array([])],
+                [],
+                wasm.Constant.from_i64_str_array([]),
+                0
+            );
+
+            expect(repoBox.tokens().len()).to.be.equal(3);
+            expect(repoBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
+            expect(repoBox.tokens().get(1).amount().as_i64().to_str()).to.be.equal(RWTCount);
+            expect(repoBox.tokens().get(2).amount().as_i64().to_str()).to.be.equal(RSNCount);
+        });
+    });
+
+
     describe("createPermit", () => {
-        it("tests the permit box creation", () => {
-            const data = Boxes.createPermit(value, 10, BigInt(9), WID)
-            expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
-            expect(data.tokens().len()).to.eq(1)
-            expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(9)
-        })
-    })
+        it("checks permit box registers and tokens", async () => {
+            const DB = await loadDataBase("commitments");
+            const boxes = new Boxes(DB)
+            const WID = strToUint8Array("4198da878b927fdd33e884d7ed399a3dbd22cf9d855ff5a103a50301e70d89fc");
+            const RWTCount = BigInt(100)
+            const permitBox = await boxes.createPermit(
+                1,
+                RWTCount,
+                WID
+            );
+
+            expect(permitBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
+            expect(permitBox.tokens().len()).to.be.equal(1);
+            expect(permitBox.tokens().get(0).amount().as_i64().to_str()).to.be.equal(RWTCount.toString());
+            expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(rosenConfig.RWTId);
+            expect(permitBox.register_value(4)?.to_coll_coll_byte().length).to.be.equal(1);
+            expect(permitBox.register_value(4)?.to_coll_coll_byte()[0]).to.be.eql(WID);
+            expect(permitBox.register_value(5)?.to_byte_array()).to.be.eql(new Uint8Array([0]));
+
+        });
+    });
+
+    /**
+     * createUserBoxCandidate function tests
+     */
+    describe("createUserBoxCandidate", () => {
+        /**
+         * checks userChangeBox and erg amount is made correctly with respect to input tokens
+         */
+        it("checks userBox tokens and value", async () => {
+            const DB = await loadDataBase("commitments");
+            const boxes = new Boxes(DB)
+            const tokensAmount = ["100", "1", "8000", "999000"];
+            const amount = "11111111111"
+            const tokenId = tokens[0];
+            const tokenAmount = tokensAmount[0];
+            const changeTokens = new Map<string, string>();
+            for (let i = 1; i < 4; i++) {
+                changeTokens.set(tokens[i], tokensAmount[i]);
+            }
+
+            const userBoxCandidate = await boxes.createUserBoxCandidate(
+                1,
+                "",
+                amount,
+                wasm.TokenId.from_str(tokenId),
+                wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount)),
+                changeTokens,
+            );
+
+            expect(userBoxCandidate.value().as_i64().to_str()).to.be.equal(amount);
+            expect(userBoxCandidate.tokens().len()).to.be.equal(4);
+            let boxTokensId: Array<string> = [];
+            let boxTokensAmount: Array<string> = [];
+            for (let i = 0; i < 4; i++) {
+                boxTokensId.push(userBoxCandidate.tokens().get(i).id().to_str());
+                boxTokensAmount.push(userBoxCandidate.tokens().get(i).amount().as_i64().to_str());
+            }
+            expect(boxTokensId).to.be.eql(tokens);
+            expect(boxTokensAmount).to.be.eql(boxTokensAmount);
+        });
+    });
 
     describe("createCommitment", () => {
         it("tests the commitment box creation", () => {

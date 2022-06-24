@@ -95,17 +95,21 @@ export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.Er
 
 /**
  * signs the transaction by required secret
+ * @param builder
  * @param secret
- * @param tx
- * @param boxSelection
+ * @param inputs
  * @param dataInputs
  */
-const signTx = async (secret: wasm.SecretKey, tx: wasm.UnsignedTransaction, boxSelection: wasm.BoxSelection, dataInputs: wasm.ErgoBoxes) => {
+export const buildTxAndSign = async (builder: wasm.TxBuilder,
+                              secret: wasm.SecretKey,
+                              inputs: wasm.ErgoBoxes,
+                              dataInputs: wasm.ErgoBoxes = wasm.ErgoBoxes.from_boxes_json([])) => {
+    const tx = builder.build();
     const secrets = new wasm.SecretKeys()
     secrets.add(secret)
     const wallet = wasm.Wallet.from_secrets(secrets);
     const ctx = await ErgoNetwork.getErgoStateContext();
-    return wallet.sign_transaction(ctx, tx, boxSelection.boxes(), dataInputs)
+    return wallet.sign_transaction(ctx, tx, inputs, dataInputs)
 }
 
 /**
@@ -138,7 +142,7 @@ export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBo
         Array(dataInputs.len()).fill("").forEach((item, index) => txDataInputs.add(new wasm.DataInput(dataInputs.get(index).box_id())))
         txBuilder.set_data_inputs(txDataInputs)
     }
-    return signTx(secret, txBuilder.build(), boxSelection, dataInputs ? dataInputs : wasm.ErgoBoxes.from_boxes_json([]))
+    return buildTxAndSign(txBuilder, secret, boxes, dataInputs ? dataInputs : wasm.ErgoBoxes.from_boxes_json([]))
 }
 
 /**
