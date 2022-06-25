@@ -3,7 +3,7 @@ import { commitmentEntities } from "../../../src/entities";
 import { BridgeDataBase } from "../../../src/bridge/models/bridgeModel";
 import { Commitment, SpecialBox } from "../../../src/objects/interfaces";
 import { expect } from "chai";
-import { BoxType } from "../../../src/entities/watcher/commitment/BoxEntity";
+import { BoxType } from "../../../src/entities/watcher/bridge/BoxEntity";
 
 export const loadDataBase = async (name: string): Promise<BridgeDataBase> => {
     const ormConfig = new DataSource({
@@ -146,12 +146,12 @@ describe("Commitment Database functions", () => {
     describe("getUnspentSpecialBoxes", () => {
         it("should return one unspent permit box", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.getUnspentSpecialBoxes(BoxType.PERMIT)
+            const data = await DB.getUnspentSpecialBoxes(BoxType.PERMIT)
             expect(data).to.have.length(1)
         })
         it("should return one unspent WID box", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.getUnspentSpecialBoxes(BoxType.WID)
+            const data = await DB.getUnspentSpecialBoxes(BoxType.WID)
             expect(data).to.have.length(1)
         })
     })
@@ -159,7 +159,7 @@ describe("Commitment Database functions", () => {
     describe("findUnspentSpecialBoxesById", () => {
         it("should return two unspent special boxes by id", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.findUnspentSpecialBoxesById([secondWIDBox.boxId, secondPermitBox.boxId])
+            const data = await DB.findUnspentSpecialBoxesById([secondWIDBox.boxId, secondPermitBox.boxId])
             expect(data).to.have.length(2)
         })
     })

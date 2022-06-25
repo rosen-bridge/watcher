@@ -4,7 +4,7 @@ import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array} from "../utils/utils";
 import { BridgeDataBase } from "../bridge/models/bridgeModel";
-import { BoxType } from "../entities/watcher/commitment/BoxEntity";
+import { BoxType } from "../entities/watcher/bridge/BoxEntity";
 import { Observation } from "../objects/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { NotEnoughFund } from "../errors/errors";
@@ -37,7 +37,7 @@ export class Boxes {
 
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
         const boxes = await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT)
-        let selectedBoxes = []
+        const selectedBoxes = []
         let totalValue = BigInt(0)
         for(const box of boxes){
             totalValue = totalValue + BigInt(box.value)

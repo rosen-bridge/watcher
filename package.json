@@ -11,9 +11,9 @@
     "start:dev": "nodemon",
     "typeorm": "typeorm-ts-node-esm",
     "typeorm:generate": "npm run typeorm migration:generate src/migrations/watcher/cardano/networkModelMigration -- -d ./config/ormconfig.ts",
-    "typeorm:generate:commitment": "npm run typeorm migration:generate src/migrations/watcher/commitment/bridgeModelMigration -- -d ./config/commitmentOrmConfig.ts",
+    "typeorm:generate:bridge": "npm run typeorm migration:generate src/migrations/watcher/bridge/bridgeModelMigration -- -d ./config/bridgeOrmConfig.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d ./config/ormconfig.ts",
-    "typeorm:migrate:commitment": "npm run typeorm migration:run -- -d ./config/commitmentOrmConfig.ts"
+    "typeorm:migrate:bridge": "npm run typeorm migration:run -- -d ./config/bridgeOrmConfig.ts"
   },
   "repository": {
     "type": "git",

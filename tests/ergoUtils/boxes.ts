@@ -5,7 +5,7 @@ import { firstCommitment, loadDataBase } from "../commitment/models/commitmentMo
 import { contractHash } from "../../src/ergo/utils";
 import { firstObservations } from "../cardano/models/models";
 import { SpecialBox } from "../../src/objects/interfaces";
-import { BoxType } from "../../src/entities/watcher/commitment/BoxEntity";
+import { BoxType } from "../../src/entities/watcher/bridge/BoxEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { NotEnoughFund } from "../../src/errors/errors";
 import { JsonBI } from "../../src/network/parser";
