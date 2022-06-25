@@ -8,6 +8,8 @@ import { BridgeBlockEntity } from "../../entities/BridgeBlockEntity";
 import { CommitmentUtils } from "./utils";
 import { ErgoConfig } from "../../config/config";
 import { rosenConfig } from "../../config/rosenConfig";
+import { Transaction } from "../../api/Transaction";
+import { Boxes } from "../../ergo/boxes";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -23,13 +25,15 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
     _networkAccess: ErgoNetworkApi;
     _config: IConfig;
     _initialHeight: number;
+    _widApi: Transaction
 
-    constructor(db: BridgeDataBase, network: ErgoNetworkApi, config: IConfig) {
+    constructor(db: BridgeDataBase, network: ErgoNetworkApi, config: IConfig, api: Transaction) {
         super();
         this._dataBase = db;
         this._networkAccess = network;
         this._config = config;
         this._initialHeight = ergoConfig.commitmentInitialHeight;
+        this._widApi = api
     }
 
     /**
@@ -40,10 +44,22 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
     getBlockInformation = async (block: Block): Promise<BridgeBlockInformation> => {
         const txs = await this._networkAccess.getBlockTxs(block.hash);
         const newCommitments = (await CommitmentUtils.extractCommitments(txs))
-        const updatedCommitments = await CommitmentUtils.updatedCommitments(txs, this._dataBase, newCommitments.map(commitment => commitment.commitmentBoxId))
-        // TODO: fix WID config
-        const newBoxes = await CommitmentUtils.extractSpecialBoxes(txs, rosenConfig.watcherPermitAddress, ergoConfig.address, config.get?.("ergo.WID"))
-        const spentBoxes = await CommitmentUtils.spentSpecialBoxes(txs, this._dataBase, newBoxes.map(box => box.boxId))
+        const updatedCommitments = await CommitmentUtils.updatedCommitments(
+            txs,
+            this._dataBase,
+            newCommitments.map(commitment => commitment.commitmentBoxId)
+        )
+        const newBoxes = await CommitmentUtils.extractSpecialBoxes(
+            txs,
+            rosenConfig.watcherPermitAddress,
+            ergoConfig.address,
+            this._widApi.watcherWID!
+        )
+        const spentBoxes = await CommitmentUtils.spentSpecialBoxes(
+            txs,
+            this._dataBase,
+            newBoxes.map(box => box.boxId)
+        )
         return {
             newCommitments: newCommitments,
             updatedCommitments: updatedCommitments,
@@ -69,7 +85,9 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
 export const commitmentMain = async () => {
     const DB = await BridgeDataBase.init(commitmentOrmConfig);
     const apiNetwork = new ErgoNetworkApi();
-    const scanner = new Scanner(DB, apiNetwork, config);
+    const boxes: Boxes = new Boxes(DB)
+    const api: Transaction = new Transaction(rosenConfig, ergoConfig.address, ergoConfig.secretKey.toString(), boxes)
+    const scanner = new Scanner(DB, apiNetwork, config, api);
     setInterval(scanner.update, ergoConfig.commitmentInterval * 1000);
     setInterval(scanner.removeOldCommitments, ergoConfig.commitmentInterval * 1000);
 

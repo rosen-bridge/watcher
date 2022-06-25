@@ -5,6 +5,7 @@ import { rosenConfig } from "../config/rosenConfig";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 import { blake2b } from "blakejs";
+import { Boxes } from "./boxes";
 
 const txFee = parseInt(rosenConfig.fee)
 
@@ -175,4 +176,16 @@ export const contractHash = (contract: wasm.Contract): Buffer => {
     return Buffer.from(
         blake2b(Buffer.from(contract.ergo_tree().to_base16_bytes(), "hex"), undefined, 32)
     )
+}
+
+export const requiredCommitmentCount = async (boxes: Boxes): Promise<bigint> => {
+    const repo = await boxes.getRepoBox()
+    const r6: Array<string> = repo.register_value(6)?.to_i64_str_array()!
+    const r4 = repo.register_value(4)?.to_coll_coll_byte()!
+    const max = BigInt(r6[3])
+    const min = BigInt(r6[2])
+    const percentage = BigInt(r6[1])
+    const watcherCount = r4.length
+    const formula = min + percentage * BigInt(watcherCount - 1)
+    return max < formula? max: formula
 }

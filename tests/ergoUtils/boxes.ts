@@ -206,8 +206,10 @@ describe("Testing Box Creation", () => {
     })
 
     describe("createTriggerEvent", () => {
-        it("tests the event trigger box creation", () => {
-            const data = Boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservations[0])
+        it("tests the event trigger box creation", async () => {
+            const DB = await loadDataBase("commitments");
+            const boxes = new Boxes(DB)
+            const data = boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservations[0])
             expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(2)

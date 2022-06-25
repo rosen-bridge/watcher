@@ -1,19 +1,15 @@
-import { BridgeDataBase } from "../bridge/models/bridgeModel";
 import { Commitment, Observation } from "../objects/interfaces";
-import { NetworkDataBase } from "../models/networkModel";
 import config from "config";
-import { ObservedCommitmentEntity } from "../entities/ObservedCommitmentEntity";
-import { commitmentFromObservation, createAndSignTx } from "../ergo/utils";
+import { commitmentFromObservation, createAndSignTx, requiredCommitmentCount } from "../ergo/utils";
 import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 import { databaseConnection } from "../ergo/databaseConnection";
+import { rosenConfig } from "../config/rosenConfig";
 
-// TODO: fix config
-const commitmentLimit = parseInt(config.get?.('commitmentLimit'))
-const txFee = BigInt(config.get?.('ergo.txFee'))
+const txFee = BigInt(rosenConfig.fee)
 
 export class commitmentReveal{
     _databaseConnection: databaseConnection
@@ -38,7 +34,7 @@ export class commitmentReveal{
                                     feeBoxes: Array<wasm.ErgoBox>): Promise<string> => {
         const height = await ErgoNetwork.getHeight()
         const boxValues = commitmentBoxes.map(box => BigInt(box.value().as_i64().to_str())).reduce((a, b) =>  a + b, BigInt(0))
-        const triggerEvent = await Boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
+        const triggerEvent = await this._boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
         const inputBoxes = new wasm.ErgoBoxes(feeBoxes[0]);
         feeBoxes.slice(1, feeBoxes.length).forEach(box => inputBoxes.add(box))
         commitmentBoxes.forEach(box => inputBoxes.add(box))
@@ -80,7 +76,8 @@ export class commitmentReveal{
         const commitmentSets = await this._databaseConnection.allReadyCommitmentSets()
         for (const commitmentSet of commitmentSets) {
             const validCommitments = this.commitmentCheck(commitmentSet.commitments, commitmentSet.observation)
-            if(validCommitments.length >= commitmentLimit){
+            const requiredCommitments = await requiredCommitmentCount(this._boxes)
+            if(BigInt(validCommitments.length) >= requiredCommitments){
                 const commitmentBoxes = validCommitments.map(async(commitment) => {
                     return await ErgoNetwork.boxById(commitment.commitmentBoxId)
                 })

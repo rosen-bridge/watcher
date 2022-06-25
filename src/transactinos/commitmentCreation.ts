@@ -7,20 +7,19 @@ import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 import { databaseConnection } from "../ergo/databaseConnection";
 import { Buffer } from "buffer";
+import { Transaction } from "../api/Transaction";
 
-const minBoxVal = parseInt(rosenConfig.minBoxValue)
-const txFee = parseInt(rosenConfig.fee)
 const ergoConfig = ErgoConfig.getConfig();
-//TODO: hard coded should implemented later, fix config
-const WID: string = "906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82"
 
 export class commitmentCreation{
     _dataBaseConnection: databaseConnection
     _boxes: Boxes
+    _widApi: Transaction
 
-    constructor(db: databaseConnection, confirmation: number, boxes: Boxes) {
+    constructor(db: databaseConnection, confirmation: number, boxes: Boxes, api: Transaction) {
         this._dataBaseConnection = db
         this._boxes = boxes
+        this._widApi = api
     }
 
     /**
@@ -87,6 +86,7 @@ export class commitmentCreation{
      */
     job = async () => {
         const observations = await this._dataBaseConnection.allReadyObservations()
+        const WID = this._widApi.watcherWID!
         for (const observation of observations) {
             const commitment = commitmentFromObservation(observation, WID)
             const permits = await this._boxes.getPermits(BigInt(0))
