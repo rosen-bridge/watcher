@@ -67,9 +67,9 @@ const secondWIDBox: SpecialBox ={
 }
 
 
-describe("Commitment Database functions", () => {
+describe("Bridge Database functions", () => {
 
-    describe("commitment saveBlock", () => {
+    describe("bridge saveBlock", () => {
         it("should store the new commitment", async () => {
             const DB = await loadBridgeDataBase("commitments");
             let res = await DB.saveBlock(

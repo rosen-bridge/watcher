@@ -15,7 +15,7 @@ import { boxCreationError } from "../../src/errors/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../ergo/objects/axios";
-import { loadBridgeDataBase } from "../commitment/models/commitmentModel";
+import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
 import { Boxes } from "../../src/ergo/boxes";
 
 const ergoConfig = ErgoConfig.getConfig();

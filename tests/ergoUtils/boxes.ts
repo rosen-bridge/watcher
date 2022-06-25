@@ -1,7 +1,7 @@
 import { Boxes } from "../../src/ergo/boxes";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { firstCommitment, loadBridgeDataBase } from "../commitment/models/commitmentModel";
+import { firstCommitment, loadBridgeDataBase } from "../bridge/models/bridgeModel";
 import { contractHash } from "../../src/ergo/utils";
 import { firstObservations } from "../cardano/models/models";
 import { SpecialBox } from "../../src/objects/interfaces";

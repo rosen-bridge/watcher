@@ -3,7 +3,7 @@ import { strToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import { initMockedAxios } from "../objects/axios";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
-import { loadBridgeDataBase } from "../../commitment/models/commitmentModel";
+import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
 import { Boxes } from "../../../src/ergo/boxes";
 
 export const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";

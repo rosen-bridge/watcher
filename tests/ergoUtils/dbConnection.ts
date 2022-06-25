@@ -1,5 +1,5 @@
 import { loadDataBase } from "../cardano/models/models";
-import { loadBridgeDataBase } from "../commitment/models/commitmentModel";
+import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
 import { databaseConnection } from "../../src/ergo/databaseConnection";
 import { ObservationEntity } from "../../src/entities/ObservationEntity";
 import { expect } from "chai";
