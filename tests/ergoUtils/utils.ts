@@ -83,7 +83,9 @@ describe("Testing ergoUtils", () => {
             )
             builder.add_token(wasm.TokenId.from_str(tokenId),
                 wasm.TokenAmount.from_i64(wasm.I64.from_str("101")))
-            expect(function(){createChangeBox(boxes, [builder.build()], 10, secret)}).to.throw(boxCreationError)
+            expect(function () {
+                createChangeBox(boxes, [builder.build()], 10, secret)
+            }).to.throw(boxCreationError)
         })
         it("should return change box with all tokens", () => {
             const res = createChangeBox(boxes, [], 10, secret)
@@ -111,7 +113,8 @@ describe("Testing ergoUtils", () => {
          * the transaction should signed without error
          */
         it("should sign the transaction", async () => {
-            const outValue = BigInt(rosenConfig.minBoxValue + rosenConfig.fee);
+            initMockedAxios(0);
+            const outValue = BigInt(rosenConfig.minBoxValue) + BigInt(rosenConfig.fee);
             const add = Address.from_base58(userAddress)
             const transactionInput = await ErgoNetwork.getErgBox(
                 add,

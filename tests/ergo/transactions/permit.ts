@@ -101,6 +101,7 @@ describe("Watcher Permit Transactions", () => {
          * checks getPermit with correct inputs and state should be signed
          */
         it("checks get permit transaction is signed", async () => {
+            initMockedAxios(0);
             const DB = await loadDataBase("commitments");
             const boxes = new Boxes(DB)
             const secondTransaction = new Transaction(
@@ -139,7 +140,7 @@ describe("Watcher Permit Transactions", () => {
          *  should be signed without error
          */
         it("checks transaction is signed", async () => {
-            initMockedAxios();
+            initMockedAxios(0);
             const DB = await loadDataBase("commitments");
             const boxes = new Boxes(DB)
             const transaction = new Transaction(
@@ -149,6 +150,7 @@ describe("Watcher Permit Transactions", () => {
                 boxes
             );
             const res = await transaction.returnPermit(1n);
+            console.log(res)
             expect(res.response).to.be.equal("185ddc04cc26eab29aa6d903aaf36a6fe5e78faa58507cf618ff066d275fbfb6");
         });
 

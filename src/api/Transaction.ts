@@ -48,7 +48,7 @@ export class Transaction{
         this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
         this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
         this.userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from(userSecret, 'hex'));
-        this.userAddress = wasm.Address.from_base58(ergoConfig.address);
+        this.userAddress = wasm.Address.from_base58(userAddress);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
         this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);
         this.getWatcherState();
@@ -69,7 +69,6 @@ export class Transaction{
                 return false;
             }
         });
-
         for (const [i, userWID] of usersWID.entries()) {
             if (await userWID) {
                 return uint8ArrayToHex(users[i])
@@ -83,16 +82,20 @@ export class Transaction{
      * @param RWTCount
      */
     returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
+        console.log("im here")
         await this.getWatcherState();
+        console.log(this.watcherPermitState)
         if (!this.watcherPermitState) {
             return {response: "you doesn't have permit box", status: 500}
         }
         const WID = this.watcherWID!;
         const height = await ErgoNetwork.getHeight();
+        console.log("im at height")
 
         const permitBoxes = await this.boxes.getPermits(RWTCount)
+        console.log("permit boxes")
         const repoBox = await this.boxes.getRepoBox();
-
+        console.log(repoBox.to_json())
         const users = repoBox.register_value(4)?.to_coll_coll_byte()!;
 
         const widBox = await ErgoNetwork.getBoxWithToken(this.userAddress, WID)

@@ -96,9 +96,12 @@ describe("Testing Box Creation", () => {
 
     describe("getRepoBox", () => {
         it("should return repoBox(with tracking mempool)", async () => {
+            initMockedAxios(1)
             const DB = await loadDataBase("commitments");
             const boxes = new Boxes(DB)
             const repoBox = await boxes.getRepoBox();
+            console.log("*************8")
+            console.log(repoBox)
             expect(repoBox.box_id().to_str()).to.be.equal("2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350");
         });
     });
