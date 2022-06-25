@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ErgoNetworkApi, nodeApi } from "../../../src/commitments/network/networkApi"
+import { ErgoNetworkApi, nodeApi } from "../../../src/bridge/network/networkApi"
 import { describe } from "mocha";
 import MockAdapter from "axios-mock-adapter";
 

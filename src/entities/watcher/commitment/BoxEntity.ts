@@ -1,27 +1,36 @@
-import {Column, Entity, ManyToOne, PrimaryColumn, Relation} from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from "typeorm";
 import { BridgeBlockEntity } from "./BridgeBlockEntity";
 
+export enum BoxType {
+    PERMIT = 'permit',
+    WID = 'wid',
+    PLAIN = 'plain'
+}
+
 @Entity()
-export class ObservedCommitmentEntity {
+export class BoxEntity {
     @PrimaryColumn()
     id: number
 
     @Column()
-    eventId: string
+    boxId: string
+
+    @Column({type: 'bigint'})
+    value: string
+
+    @Column({
+        type: 'simple-enum',
+        enum: BoxType
+    })
+    type: BoxType
 
     @Column()
-    commitment: string
-
-    @Column()
-    WID: string
-
-    @Column()
-    commitmentBoxId: string
+    boxJson: string
 
     @ManyToOne(
         "BridgeBlockEntity",
         "height",
-        {onDelete: 'CASCADE',}
+        {onDelete: 'CASCADE'}
     )
     block: Relation<BridgeBlockEntity>
 
@@ -31,7 +40,4 @@ export class ObservedCommitmentEntity {
         {onDelete: 'SET NULL', nullable: true}
     )
     spendBlock: Relation<BridgeBlockEntity>
-
-    @Column({nullable: true})
-    eventTriggerBoxId: string
 }

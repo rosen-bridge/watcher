@@ -1,12 +1,5 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 
-export class boxCreationError extends Error {
-    constructor(message?: string) {
-        super(message)
-        this.name = "BoxCreationError"
-    }
-}
-
 export function notEmpty<T>(value: T | null | undefined): value is T {
     return value !== null && value !== undefined;
 }

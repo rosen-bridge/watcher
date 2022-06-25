@@ -126,7 +126,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
     }
 
     /**
-     * get commitments
+     * get bridge
      * @param eventId
      * @return Promise<string[]>
      */

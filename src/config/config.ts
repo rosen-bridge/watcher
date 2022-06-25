@@ -1,7 +1,6 @@
 import config from "config";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { SecretError } from "../errors/ConfigError";
-import { generateSK } from "../api/ergoUtils";
+import { SecretError } from "../errors/errors";
 import { uint8ArrayToHex } from "../utils/utils";
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
@@ -55,7 +54,7 @@ export class ErgoConfig{
             console.log(
                 "we generate a secret key for you can use this if you want:",
                 uint8ArrayToHex(
-                    generateSK().to_bytes()
+                    wasm.SecretKey.random_dlog().to_bytes()
                 )
             );
             throw new SecretError("Secret key doesn't set in config file");

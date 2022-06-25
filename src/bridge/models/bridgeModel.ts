@@ -1,20 +1,24 @@
 import { DataSource, DeleteResult, In, MoreThanOrEqual, Repository } from "typeorm";
-import { CBlockEntity } from "../../entities/watcher/commitment/CBlockEntity";
+import { BridgeBlockEntity } from "../../entities/watcher/commitment/BridgeBlockEntity";
 import { ObservedCommitmentEntity } from "../../entities/watcher/commitment/ObservedCommitmentEntity";
-import { Block } from "../../objects/interfaces";
+import { BoxEntity, BoxType } from "../../entities/watcher/commitment/BoxEntity";
+import { Block, SpecialBox } from "../../objects/interfaces";
 import { AbstractDataBase } from "../../models/abstractModel";
-import { CommitmentInformation } from "../scanner/scanner";
+import { BridgeBlockInformation } from "../scanner/scanner";
 
-export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, CommitmentInformation> {
-    dataSource: DataSource;
-    blockRepository: Repository<CBlockEntity>;
+
+export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBlockInformation> {
+    dataSource: DataSource
+    blockRepository: Repository<BridgeBlockEntity>
     commitmentRepository: Repository<ObservedCommitmentEntity>
+    boxesRepository: Repository<BoxEntity>
 
     private constructor(dataSource: DataSource) {
         super()
         this.dataSource = dataSource;
-        this.blockRepository = this.dataSource.getRepository(CBlockEntity);
+        this.blockRepository = this.dataSource.getRepository(BridgeBlockEntity);
         this.commitmentRepository = this.dataSource.getRepository(ObservedCommitmentEntity);
+        this.boxesRepository = this.dataSource.getRepository(BoxEntity);
     }
 
     /**
@@ -31,7 +35,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
             .catch((err) => {
                 console.error("Error during Data Source initialization:", err);
             });
-        return new CommitmentDataBase(dataSource);
+        return new BridgeDataBase(dataSource);
     }
 
     /**
@@ -68,10 +72,10 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
      * @param information
      * @return Promise<boolean>
      */
-    saveBlock = async (height: number, blockHash: string, information: CommitmentInformation): Promise<boolean> => {
+    saveBlock = async (height: number, blockHash: string, information: BridgeBlockInformation): Promise<boolean> => {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
-        const block = new CBlockEntity();
+        const block = new BridgeBlockEntity();
         block.height = height;
         block.hash = blockHash;
         const commitmentsEntity = information.newCommitments
@@ -85,20 +89,45 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
                 return commitmentEntity;
             });
 
+        const boxEntities = information.newBoxes
+            .map((box) => {
+                const boxEntity = new BoxEntity()
+                boxEntity.boxId = box.boxId
+                boxEntity.type = box.type
+                boxEntity.value = box.value
+                boxEntity.boxJson = box.boxJson
+                boxEntity.block = block
+                return boxEntity
+            })
+
         const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
         for (const boxId of information.updatedCommitments) {
             const oldCommitment = await this.commitmentRepository.findOne({
-                where: {commitmentBoxId: information.updatedCommitments[0]}
+                where: {commitmentBoxId: boxId}
             })
             const newCommitment = new ObservedCommitmentEntity()
             Object.assign(newCommitment, {
                 ...oldCommitment,
                 ...{
-                    commitmentBoxId: information.updatedCommitments[0],
                     spendBlock: block
                 }
             })
             updatedCommitmentEntities.push(newCommitment)
+        }
+
+        const spentBoxEntities: Array<BoxEntity> = []
+        for (const id of information.spentBoxes) {
+            const oldBox = await this.boxesRepository.findOne({
+                where: {boxId: id}
+            })
+            const newBox = new BoxEntity()
+            Object.assign(newBox, {
+                ...oldBox,
+                ...{
+                    spendBlock: block
+                }
+            })
+            spentBoxEntities.push(newBox)
         }
 
         let error = true;
@@ -106,7 +135,9 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
         try {
             await queryRunner.manager.save(block);
             await queryRunner.manager.save(commitmentsEntity);
+            await queryRunner.manager.save(boxEntities)
             await queryRunner.manager.save(updatedCommitmentEntities);
+            await queryRunner.manager.save(spentBoxEntities);
             await queryRunner.commitTransaction();
         } catch (err) {
             console.log(err)
@@ -135,17 +166,17 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
     }
 
     /**
-     * returns old spent commitments
+     * returns old spent bridge
      * @param height
      */
     getOldSpentCommitments = async (height: number): Promise<Array<ObservedCommitmentEntity>> => {
         return await this.commitmentRepository.createQueryBuilder("observed_commitment_entity")
             .where("observed_commitment_entity.spendBlock < :height", {height})
-            .execute()
+            .getMany()
     }
 
     /**
-     * delete commitments by their box ids
+     * delete bridge by their box ids
      * @param ids
      */
     deleteCommitments = async (ids: Array<string>) => {
@@ -153,7 +184,7 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
     }
 
     /**
-     * find commitments by their box ids
+     * find bridge by their box ids
      * @param ids
      */
     findCommitmentsById = async (ids: Array<string>): Promise<Array<ObservedCommitmentEntity>> => {
@@ -165,13 +196,38 @@ export class CommitmentDataBase extends AbstractDataBase<CBlockEntity, Commitmen
     }
 
     /**
-     * Returns all commitments related to a specific event
+     * Returns all bridge related to a specific event
      * @param eventId
      */
     commitmentsByEventId = async (eventId: string): Promise<Array<ObservedCommitmentEntity>> => {
         return await this.commitmentRepository.find({
             where: {
                 eventId: eventId
+            }
+        })
+    }
+
+    /**
+     * Returns unspent boxes with the specified type
+     * @param type
+     */
+    getUnspentSpecialBoxes = async (type: BoxType): Promise<Array<SpecialBox>> => {
+        return this.boxesRepository.createQueryBuilder("box_entity")
+            .leftJoin("box_entity.spendBlock", "c_block_entity")
+            .where("box_entity.type == 'permit'")
+            .andWhere("box_entity.spendBlock is null")
+            .getMany()
+    }
+
+    /**
+     * Finds unspent special boxes by their box id
+     * @param ids: Array of box ids
+     */
+    findUnspentSpecialBoxesById = async (ids: Array<string>): Promise<Array<BoxEntity>> => {
+        return await this.boxesRepository.find({
+            where: {
+                spendBlock: undefined,
+                boxId: In(ids)
             }
         })
     }

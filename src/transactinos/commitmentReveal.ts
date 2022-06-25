@@ -1,41 +1,44 @@
-import { CommitmentDataBase } from "../commitments/models/commitmentModel";
+import { BridgeDataBase } from "../bridge/models/bridgeModel";
 import { Observation } from "../objects/interfaces";
 import { NetworkDataBase } from "../models/networkModel";
-import { ErgoNetworkApi } from "../ergoUtils/networkApi";
 import config from "config";
 import { ObservedCommitmentEntity } from "../entities/ObservedCommitmentEntity";
-import { commitmentFromObservation, createAndSignTx } from "../ergoUtils/ergoUtils";
-import { boxes } from "../ergoUtils/boxes";
+import { commitmentFromObservation, createAndSignTx } from "../ergo/utils";
+import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { boxCreationError } from "../utils/utils";
+import { ErgoNetwork } from "../ergo/network/ergoNetwork";
+import { boxCreationError } from "../errors/errors";
 
 const commitmentLimit = parseInt(config.get?.('commitmentLimit'))
-const txFee = parseInt(config.get?.('ergo.txFee'))
+const txFee = BigInt(config.get?.('ergo.txFee'))
 
 export class commitmentReveal{
-    _commitmentDataBase: CommitmentDataBase
+    _commitmentDataBase: BridgeDataBase
     _observationDataBase: NetworkDataBase
     _secret: wasm.SecretKey
+    _boxes: Boxes
 
-    constructor(secret: wasm.SecretKey) {
+    constructor(secret: wasm.SecretKey, boxes: Boxes) {
         this._secret = secret
+        this._boxes = boxes
     }
     /**
      * creates and sends the trigger event transaction
      * @param commitmentBoxes
      * @param observation
      * @param WIDs
-     * @param feeBox
+     * @param feeBoxes
      */
     triggerEventCreationTx = async (commitmentBoxes: Array<wasm.ErgoBox>,
                                     observation: Observation,
                                     WIDs: Array<Uint8Array>,
-                                    feeBox: wasm.ErgoBox): Promise<string> => {
-        const height = await ErgoNetworkApi.getCurrentHeight()
+                                    feeBoxes: Array<wasm.ErgoBox>): Promise<string> => {
+        const height = await ErgoNetwork.getHeight()
         const boxValues = commitmentBoxes.map(box => BigInt(box.value().as_i64().to_str())).reduce((a, b) =>  a + b, BigInt(0))
-        const triggerEvent = await boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
-        const inputBoxes = new wasm.ErgoBoxes(feeBox);
+        const triggerEvent = await Boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
+        const inputBoxes = new wasm.ErgoBoxes(feeBoxes[0]);
+        feeBoxes.slice(1, feeBoxes.length).forEach(box => inputBoxes.add(box))
         commitmentBoxes.forEach(box => inputBoxes.add(box))
         try {
             const signed = await createAndSignTx(
@@ -44,7 +47,7 @@ export class commitmentReveal{
                 [triggerEvent],
                 height
             )
-            await ErgoNetworkApi.sendTx(signed.to_json())
+            await ErgoNetwork.sendTx(signed.to_json())
             return signed.id().to_str()
         } catch (e) {
             if (e instanceof boxCreationError) {
@@ -56,8 +59,8 @@ export class commitmentReveal{
     }
 
     /**
-     * Returns the valid commitments with the observation
-     * It reproduces the commitments with their WID and check to match the saved commitment
+     * Returns the valid bridge with the observation
+     * It reproduces the bridge with their WID and check to match the saved commitment
      * @param commitments
      * @param observation
      */
@@ -68,8 +71,8 @@ export class commitmentReveal{
     }
 
     /**
-     * Gets the created commitments and check if required number of commitments created in the network
-     * If the number of valid commitments are more than the required commitments it generates the trigger event
+     * Gets the created bridge and check if required number of bridge created in the network
+     * If the number of valid bridge are more than the required bridge it generates the trigger event
      */
     job = async () => {
         const createdCommitments = await this._observationDataBase.getCreatedCommitments()
@@ -79,13 +82,13 @@ export class commitmentReveal{
                 const validCommitments = this.commitmentCheck(observedCommitments, commitment.observation)
                 if(validCommitments.length >= commitmentLimit){
                     const commitmentBoxes = validCommitments.map(async(commitment) => {
-                        return await ErgoNetworkApi.boxById(commitment.commitmentBoxId)
+                        return await ErgoNetwork.boxById(commitment.commitmentBoxId)
                     })
                     Promise.all(commitmentBoxes).then(async(cBoxes) => {
                         const WIDs: Array<Uint8Array> = observedCommitments.map(commitment => {
                             return Buffer.from(commitment.WID)
                         })
-                        await this.triggerEventCreationTx(cBoxes, commitment.observation, WIDs, await boxes.getUserPaymentBox(txFee))
+                        await this.triggerEventCreationTx(cBoxes, commitment.observation, WIDs, await this._boxes.getUserPaymentBox(txFee))
                     })
                 }
             }

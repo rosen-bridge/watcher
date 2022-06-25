@@ -1,14 +1,11 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoNetworkApi } from "./networkApi";
 import { Observation } from "../objects/interfaces";
-import { bigIntToUint8Array, boxCreationError } from "../utils/utils";
+import { bigIntToUint8Array } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
+import { ErgoNetwork } from "./network/ergoNetwork";
+import { boxCreationError } from "../errors/errors";
 import { blake2b } from "blakejs";
 
-const ergoConfig = ErgoConfig.getConfig();
-
-const networkType: wasm.NetworkPrefix = ergoConfig.networkType;
 const txFee = parseInt(rosenConfig.fee)
 
 export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
@@ -22,7 +19,8 @@ export const extractTokens = (tokens: wasm.Tokens): Array<wasm.Token> => {
 export const ergoTreeToAddress = (ergoTree: wasm.ErgoTree): wasm.Address => {
     return wasm.Address.recreate_from_ergo_tree(ergoTree)
 }
-export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree): string => {
+export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree,
+                                        networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Mainnet): string => {
     return ergoTreeToAddress(ergoTree).to_base58(networkType)
 }
 export const decodeCollColl = async (str: string): Promise<Uint8Array[]> => {
@@ -33,6 +31,9 @@ export const decodeStr = async (str: string): Promise<string> => {
 }
 export const hexStrToUint8Array = (str: string): Uint8Array => {
     return new Uint8Array(Buffer.from(str, "hex"))
+}
+export const generateSK = (): wasm.SecretKey => {
+    return wasm.SecretKey.random_dlog();
 }
 
 /**
@@ -103,7 +104,7 @@ const signTx = async (secret: wasm.SecretKey, tx: wasm.UnsignedTransaction, boxS
     const secrets = new wasm.SecretKeys()
     secrets.add(secret)
     const wallet = wasm.Wallet.from_secrets(secrets);
-    const ctx = await ErgoNetworkApi.getErgoStateContext();
+    const ctx = await ErgoNetwork.getErgoStateContext();
     return wallet.sign_transaction(ctx, tx, boxSelection.boxes(), dataInputs)
 }
 
