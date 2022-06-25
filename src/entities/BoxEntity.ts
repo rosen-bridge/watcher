@@ -17,6 +17,7 @@ export class BoxEntity {
 
     @Column({type: 'bigint'})
     value: string
+    // TODO: store the rwt count
 
     @Column({
         type: 'simple-enum',

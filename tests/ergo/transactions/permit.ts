@@ -65,16 +65,6 @@ describe("Watcher Permit Transactions", () => {
     });
 
     /**
-     * buildTxAndSign function tests
-     */
-
-
-    /**
-     * getRepoBox function tests
-     */
-
-
-    /**
      * inputBoxesTokenMap function tests
      */
     describe("inputBoxesTokenMap", () => {

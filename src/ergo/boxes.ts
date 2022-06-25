@@ -42,7 +42,7 @@ export class Boxes {
     }
 
     getPermits = async (RWTCount: bigint): Promise<Array<wasm.ErgoBox>> => {
-        // TODO: Rewrite the function to return the required number of RWTs
+        // TODO: Rewrite the function to return the required number of RWTs after changing database
         const permits = await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT)
         const permitBoxes = permits.map(async (permit) => {
             const box = wasm.ErgoBox.from_json(permit.boxJson)
@@ -100,12 +100,11 @@ export class Boxes {
     createPermit = (height: number, RWTCount: bigint, WID: Uint8Array): wasm.ErgoBoxCandidate => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             this.minBoxValue,
-            wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.watcherPermitAddress)),
+            this.watcherPermitContract,
             height
         );
         if (RWTCount > 0) {
-            builder.add_token(wasm.TokenId.from_str(ergoConfig.RWTId),
-                wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString())))
+            builder.add_token(this.RWTTokenId, wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString())))
         }
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([WID]))
         builder.set_register_value(5, wasm.Constant.from_byte_array(new Uint8Array([0])))
@@ -121,15 +120,14 @@ export class Boxes {
      * @param eventDigest
      * @param permitScriptHash
      */
-    static createCommitment = (value: bigint, height: number, WID: string, requestId: string, eventDigest: Uint8Array, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
+    createCommitment = (height: number, WID: string, requestId: string, eventDigest: Uint8Array, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
         const contract = wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.commitmentAddress));
         const builder = new wasm.ErgoBoxCandidateBuilder(
-            wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
+            this.minBoxValue,
             contract,
             height
         );
-        builder.add_token(wasm.TokenId.from_str(ergoConfig.RWTId),
-            wasm.TokenAmount.from_i64(wasm.I64.from_str("1")))
+        builder.add_token(this.RWTTokenId, wasm.TokenAmount.from_i64(wasm.I64.from_str("1")))
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(WID)]))
         builder.set_register_value(5, wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(requestId)]))
         builder.set_register_value(6, wasm.Constant.from_byte_array(eventDigest))
@@ -146,51 +144,25 @@ export class Boxes {
      * @param tokenAmount
      * @param changeTokens other tokens in the input of transaction
      */
-    createUserBoxCandidate = async (
-        height: number,
-        address: string,
-        amount: string,
-        tokenId: wasm.TokenId,
-        tokenAmount: wasm.TokenAmount,
-        changeTokens: Map<string, string>,
-    ) => {
+    createUserBoxCandidate = async (height: number,
+                                    address: string,
+                                    amount: string,
+                                    tokenId: wasm.TokenId,
+                                    tokenAmount: wasm.TokenAmount,
+                                    changeTokens: Map<string, string>) => {
         const userBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(amount)),
             this.userAddressContract,
             height
         );
-        userBoxBuilder.add_token(
-            tokenId,
-            tokenAmount
-        );
-
+        userBoxBuilder.add_token(tokenId, tokenAmount);
         for (const [tokenId, tokenAmount] of changeTokens) {
             userBoxBuilder.add_token(
                 wasm.TokenId.from_str(tokenId),
                 wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount)),
             );
         }
-
         return userBoxBuilder.build();
-    }
-
-    /**
-     * creates user payment box, it should contain the WID token and collected rewards
-     * @param value
-     * @param height
-     * @param tokens
-     */
-    static createPayment = (value: bigint, height: number, tokens: Array<wasm.Token>): wasm.ErgoBoxCandidate => {
-        const address = wasm.SecretKey.dlog_from_bytes(hexStrToUint8Array(ergoConfig.secretKey)).get_address()
-        const builder = new wasm.ErgoBoxCandidateBuilder(
-            wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
-            wasm.Contract.pay_to_address(address),
-            height
-        );
-        tokens.forEach(token => {
-            builder.add_token(token.id(), token.amount())
-        })
-        return builder.build()
     }
 
     /**
@@ -200,14 +172,16 @@ export class Boxes {
      * @param WIDs
      * @param observation
      */
-    static createTriggerEvent = (value: bigint, height: number, WIDs: Array<Uint8Array>, observation: Observation) => {
+    createTriggerEvent = (value: bigint,
+                          height: number,
+                          WIDs: Array<Uint8Array>,
+                          observation: Observation) => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
             wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.eventTriggerAddress)),
             height
         );
-        builder.add_token(wasm.TokenId.from_str(ergoConfig.RWTId),
-            wasm.TokenAmount.from_i64(wasm.I64.from_str(WIDs.length.toString())))
+        builder.add_token(this.RWTTokenId, wasm.TokenAmount.from_i64(wasm.I64.from_str(WIDs.length.toString())))
         const eventData = [
             Buffer.from(observation.sourceTxId, "hex"),
             Buffer.from(observation.fromChain),
@@ -236,33 +210,21 @@ export class Boxes {
      * @param R6
      * @param R7
      */
-    createRepo = async (
-        height: number,
-        RWTCount: string,
-        RSNCount: string,
-        users: Array<Uint8Array>,
-        userRWT: Array<string>,
-        R6: wasm.Constant,
-        R7: number) => {
-
+    createRepo = async (height: number,
+                        RWTCount: string,
+                        RSNCount: string,
+                        users: Array<Uint8Array>,
+                        userRWT: Array<string>,
+                        R6: wasm.Constant,
+                        R7: number) => {
         const repoBuilder = new wasm.ErgoBoxCandidateBuilder(
             this.minBoxValue,
             this.repoAddressContract,
             height
         );
-
-        repoBuilder.add_token(
-            this.repoNFTId,
-            wasm.TokenAmount.from_i64(wasm.I64.from_str("1")),
-        );
-        repoBuilder.add_token(
-            this.RWTTokenId,
-            wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount)),
-        );
-        repoBuilder.add_token(
-            this.RSN,
-            wasm.TokenAmount.from_i64(wasm.I64.from_str(RSNCount)),
-        );
+        repoBuilder.add_token(this.repoNFTId, wasm.TokenAmount.from_i64(wasm.I64.from_str("1")),);
+        repoBuilder.add_token(this.RWTTokenId, wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount)),);
+        repoBuilder.add_token(this.RSN, wasm.TokenAmount.from_i64(wasm.I64.from_str(RSNCount)),);
 
         repoBuilder.set_register_value(4, wasm.Constant.from_coll_coll_byte(users));
         repoBuilder.set_register_value(5, wasm.Constant.from_i64_str_array(userRWT));

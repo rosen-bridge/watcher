@@ -192,28 +192,16 @@ describe("Testing Box Creation", () => {
     });
 
     describe("createCommitment", () => {
-        it("tests the commitment box creation", () => {
+        it("tests the commitment box creation", async () => {
+            const DB = await loadDataBase("commitments");
+            const boxes = new Boxes(DB)
             const permitHash = contractHash(wasm.Contract.pay_to_address(
-                wasm.Address.from_base58(
-                    permit
-                )
+                wasm.Address.from_base58(permit)
             ))
-            const data = Boxes.createCommitment(value, 10, WID, firstCommitment.eventId, Buffer.from(firstCommitment.commitment, 'hex'), permitHash)
-            expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
+            const data = boxes.createCommitment(10, WID, firstCommitment.eventId, Buffer.from(firstCommitment.commitment, 'hex'), permitHash)
+            expect(BigInt(data.value().as_i64().to_str())).to.eql(BigInt(rosenConfig.minBoxValue.toString()))
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(1)
-        })
-    })
-
-    describe("createPayment", () => {
-        it("tests the payment creation", () => {
-            const token = new wasm.Token(wasm.TokenId.from_str(tokenId),
-                wasm.TokenAmount.from_i64(wasm.I64.from_str("5")))
-            const data = Boxes.createPayment(value, 10, [token])
-            expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
-            expect(data.tokens().len()).to.eq(1)
-            expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(5)
-            expect(data.tokens().get(0).id().to_str()).to.eq(tokenId)
         })
     })
 

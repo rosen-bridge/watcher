@@ -44,7 +44,7 @@ export class commitmentCreation{
                 )
             )
         )
-        const outCommitment = Boxes.createCommitment(BigInt(minBoxVal), height, WID, requestId, eventDigest, permitHash)
+        const outCommitment = this._boxes.createCommitment(height, WID, requestId, eventDigest, permitHash)
         const RWTCount: bigint = permits.map(permit =>
             BigInt(permit.tokens().get(0).amount().as_i64().to_str()))
             .reduce((a, b) => a + b, BigInt(0))
