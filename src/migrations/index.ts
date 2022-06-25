@@ -1,5 +1,5 @@
-import {commitmentModelMigration1652985628914} from "./1652985628914-commitmentModelMigration";
-import {networkModelMigration1653440901562} from "./1653440901562-networkModelMigration";
+import {commitmentModelMigration1656074458609} from "./watcher/commitment/1656074458609-commitmentModelMigration";
+import {networkModelMigration1656073919399} from "./watcher/cardano/1656073919399-networkModelMigration";
 
-export const migrations = [networkModelMigration1653440901562];
-export const commitmentMigrations = [commitmentModelMigration1652985628914];
+export const migrations = [networkModelMigration1656073919399];
+export const commitmentMigrations = [commitmentModelMigration1656074458609];

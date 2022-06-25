@@ -13,8 +13,8 @@ export class CBlockEntity {
     hash: string
 
     @OneToMany(
-        () => ObservedCommitmentEntity,
-        (commitment) => commitment.block,
+        "ObservedCommitmentEntity",
+        "block",
         {cascade: true,}
     )
     commitments: ObservedCommitmentEntity[]

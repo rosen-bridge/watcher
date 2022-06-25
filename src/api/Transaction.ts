@@ -366,7 +366,7 @@ export class Transaction{
      * @param inputBoxes
      * @param offset
      */
-    inputBoxesTokenMap = (inputBoxes: wasm.ErgoBoxes, offset: number = 0): Map<string, string> => {
+    inputBoxesTokenMap = (inputBoxes: wasm.ErgoBoxes, offset = 0): Map<string, string> => {
         const changeTokens = new Map<string, string>();
         for (let i = offset; i < inputBoxes.len(); i++) {
             const boxTokens = inputBoxes.get(i).tokens();

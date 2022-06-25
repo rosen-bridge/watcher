@@ -1,5 +1,4 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoConfig } from "../config/config";
 
 export class boxCreationError extends Error {
     constructor(message?: string) {

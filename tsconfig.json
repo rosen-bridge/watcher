@@ -24,7 +24,8 @@
     "strict": true,
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "rootDir": "./"
   },
   "include": [
     "./**/*.ts"

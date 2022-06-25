@@ -1,6 +1,6 @@
 import { DataSource, DeleteResult, In, MoreThanOrEqual, Repository } from "typeorm";
-import { CBlockEntity } from "../../entities/CBlockEntity";
-import { ObservedCommitmentEntity } from "../../entities/ObservedCommitmentEntity";
+import { CBlockEntity } from "../../entities/watcher/commitment/CBlockEntity";
+import { ObservedCommitmentEntity } from "../../entities/watcher/commitment/ObservedCommitmentEntity";
 import { Block } from "../../objects/interfaces";
 import { AbstractDataBase } from "../../models/abstractModel";
 import { CommitmentInformation } from "../scanner/scanner";

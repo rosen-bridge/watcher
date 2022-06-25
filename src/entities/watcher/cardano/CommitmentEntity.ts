@@ -37,8 +37,8 @@ export class CommitmentEntity {
     // @OneToMany(type => Habit, habit => habit.author)
     // habits: Relation<Habit>[];
     @OneToOne(
-        type => ObservationEntity,
-        observation => observation.id
+        "ObservationEntity",
+        "id"
     )
     observation: Relation<ObservationEntity>
 }

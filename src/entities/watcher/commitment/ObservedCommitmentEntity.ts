@@ -19,15 +19,15 @@ export class ObservedCommitmentEntity {
     commitmentBoxId: string
 
     @ManyToOne(
-        () => CBlockEntity,
-        (block) => block.height,
+        "CBlockEntity",
+        "height",
         {onDelete: 'CASCADE',}
     )
     block: Relation<CBlockEntity>
 
     @ManyToOne(
-        () => CBlockEntity,
-        (block) => block.height,
+        "CBlockEntity",
+        "height",
         {onDelete: 'SET NULL', nullable: true}
     )
     spendBlock: Relation<CBlockEntity>

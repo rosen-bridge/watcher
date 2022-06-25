@@ -45,16 +45,16 @@ export class ObservationEntity {
     requestId: string
 
     @ManyToOne(
-        () => BlockEntity,
-        (block) => block.height,
+        "BlockEntity",
+        "height",
         {onDelete: 'CASCADE',}
     )
     block: Relation<BlockEntity>
 
     @OneToOne(
-        () => CommitmentEntity,
-        (commitment) => commitment.id,
+        "CommitmentEntity",
+        "id",
         {onDelete: "SET NULL", nullable: true}
     )
-    commitment: CommitmentEntity
+    commitment: Relation<CommitmentEntity>
 }

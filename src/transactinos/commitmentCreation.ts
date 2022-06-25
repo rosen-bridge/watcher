@@ -4,12 +4,11 @@ import { boxes } from "../ergoUtils/boxes";
 import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergoUtils/ergoUtils";
 import { NetworkDataBase } from "../models/networkModel";
 import { boxCreationError } from "../utils/utils";
-import { ObservationEntity } from "../entities/ObservationEntity";
+import { ObservationEntity } from "../entities/watcher/cardano/ObservationEntity";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 
 const minBoxVal = parseInt(rosenConfig.minBoxValue)
-const txFee = parseInt(rosenConfig.fee)
 const ergoConfig = ErgoConfig.getConfig();
 //TODO:hard coded should implemented later
 const WID = "906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82"

@@ -137,7 +137,7 @@ export class ErgoNetwork{
                         for (let j = 0; j < box.tokens().len(); j++) {
                             const tokenId = box.tokens().get(j).id().to_str();
                             const tokenAmount = BigInt(box.tokens().get(j).amount().as_i64().to_str());
-                            if (covering.hasOwnProperty(tokenId)) {
+                            if (Object.hasOwnProperty.call(covering, tokenId)) {
                                 covering[tokenId] -= tokenAmount;
                             }
                         }

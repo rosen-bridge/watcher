@@ -8,6 +8,7 @@ import spies from "chai-spies";
 
 import tx from "../dataset/tx.json"
 import commitmentTx from "../dataset/commitmentTx.json";
+import { NodeTransaction } from "../../../src/commitments/network/ergoApiModels";
 
 chai.use(spies);
 
@@ -16,12 +17,12 @@ const commitmentAddress = "EurZwDoNTXuraUu37sjKwpEPkoumCwXHrwk8jUZzRCVyrrDywfQsb
 describe("Commitment Scanner Utils test", () => {
     describe("checkTx", () => {
         it("should be undefined", async () => {
-            const commitment = await CommitmentUtils.checkTx(<any>tx, [commitmentAddress]);
+            const commitment = await CommitmentUtils.checkTx(<NodeTransaction><unknown>tx, [commitmentAddress]);
             expect(commitment).to.be.undefined
         });
         it("should be commitment", async () => {
             commitmentTx.outputs[1].assets[0].tokenId = ErgoConfig.getConfig().RWTId
-            const commitment = await CommitmentUtils.checkTx(<any>commitmentTx, [commitmentAddress]);
+            const commitment = await CommitmentUtils.checkTx(<NodeTransaction><unknown>commitmentTx, [commitmentAddress]);
             expect(commitment).to.not.be.undefined;
             expect(commitment?.WID).to.eql("f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b")
             expect(commitment?.eventId).to.eql("ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b")
@@ -33,7 +34,7 @@ describe("Commitment Scanner Utils test", () => {
         it("Should find one valid commitment", async () => {
             chai.spy.on(CommitmentUtils, 'checkTx', () => [{}])
             const commitments = await CommitmentUtils.commitmentsAtHeight(
-                [<any>commitmentTx]
+                [<NodeTransaction><unknown>commitmentTx]
             );
             expect(commitments.length).to.be.equal(1);
         });
@@ -44,7 +45,7 @@ describe("Commitment Scanner Utils test", () => {
             const DB = await CommitmentDataBase.init(commitmentOrmConfig);
             chai.spy.on(DB, 'findCommitmentsById', () => [])
             const data = await CommitmentUtils.updatedCommitmentsAtHeight(
-                [<any>commitmentTx],
+                [<NodeTransaction><unknown>commitmentTx],
                 DB,
                 ["cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"]
             );

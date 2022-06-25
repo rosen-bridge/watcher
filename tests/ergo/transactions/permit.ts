@@ -1,6 +1,6 @@
 import { Transaction } from "../../../src/api/Transaction";
 import { strToUint8Array } from "../../../src/utils/utils";
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../objects/axios";
 

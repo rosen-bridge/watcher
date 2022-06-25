@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryColumn, Relation } from "typeorm";
 import { ObservationEntity } from "./ObservationEntity";
 
 @Entity()
@@ -13,9 +13,9 @@ export class BlockEntity {
     hash: string
 
     @OneToMany(
-        () => ObservationEntity,
-        (observation) => observation.block,
+        "ObservationEntity",
+        "block",
         {cascade: true,}
     )
-    observations: ObservationEntity[]
+    observations: Relation<ObservationEntity>[]
 }
