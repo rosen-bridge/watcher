@@ -1,7 +1,7 @@
 import { Boxes } from "../../src/ergo/boxes";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { firstCommitment, loadDataBase } from "../commitment/models/commitmentModel";
+import { firstCommitment, loadBridgeDataBase } from "../commitment/models/commitmentModel";
 import { contractHash } from "../../src/ergo/utils";
 import { firstObservations } from "../cardano/models/models";
 import { SpecialBox } from "../../src/objects/interfaces";
@@ -54,7 +54,7 @@ describe("Testing Box Creation", () => {
 
     describe("getPermits", () => {
         it("returns all permits ready to merge", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [permitBox])
             const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool')
             mempoolTrack.onCall(0).returns(wasm.ErgoBox.from_json(permitJson))
@@ -69,7 +69,7 @@ describe("Testing Box Creation", () => {
 
     describe("getWIDBox", () => {
         it("returns all wids ready to merge", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [WIDBox])
             const boxes = new Boxes(DB)
             const data = await boxes.getWIDBox()
@@ -79,7 +79,7 @@ describe("Testing Box Creation", () => {
 
     describe("getUserPaymentBox", () => {
         it("returns a covering plain boxes", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [plainBox])
             const boxes = new Boxes(DB)
             const data = await boxes.getUserPaymentBox(value)
@@ -87,7 +87,7 @@ describe("Testing Box Creation", () => {
             expect(data[0].box_id().to_str()).to.eq(plainBox.boxId)
         })
         it("throws an error not covering the required amount", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [plainBox])
             const boxes = new Boxes(DB)
             await expect(boxes.getUserPaymentBox(value*BigInt(2))).to.rejectedWith(NotEnoughFund)
@@ -96,7 +96,7 @@ describe("Testing Box Creation", () => {
 
     describe("getRepoBox", () => {
         it("should return repoBox(with tracking mempool)", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const repoBox = await boxes.getRepoBox();
             expect(repoBox.box_id().to_str()).to.be.equal("2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350");
@@ -105,7 +105,7 @@ describe("Testing Box Creation", () => {
 
     describe('createRepo', () => {
         it("checks repoBox tokens order and count", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const RWTCount = "100";
             const RSNCount = "1";
@@ -129,7 +129,7 @@ describe("Testing Box Creation", () => {
 
     describe("createPermit", () => {
         it("checks permit box registers and tokens", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const WID = strToUint8Array("4198da878b927fdd33e884d7ed399a3dbd22cf9d855ff5a103a50301e70d89fc");
             const RWTCount = BigInt(100)
@@ -158,7 +158,7 @@ describe("Testing Box Creation", () => {
          * checks userChangeBox and erg amount is made correctly with respect to input tokens
          */
         it("checks userBox tokens and value", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const tokensAmount = ["100", "1", "8000", "999000"];
             const amount = "11111111111"
@@ -193,7 +193,7 @@ describe("Testing Box Creation", () => {
 
     describe("createCommitment", () => {
         it("tests the commitment box creation", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const permitHash = contractHash(wasm.Contract.pay_to_address(
                 wasm.Address.from_base58(permit)
@@ -207,7 +207,7 @@ describe("Testing Box Creation", () => {
 
     describe("createTriggerEvent", () => {
         it("tests the event trigger box creation", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const data = boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservations[0])
             expect(BigInt(data.value().as_i64().to_str())).to.eql(value)

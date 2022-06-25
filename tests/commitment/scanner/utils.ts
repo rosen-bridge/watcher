@@ -1,7 +1,7 @@
 import { CommitmentUtils } from "../../../src/bridge/scanner/utils";
 import { expect } from "chai";
 import { ErgoConfig } from "../../../src/config/config"
-import { loadDataBase } from "../models/commitmentModel";
+import { loadBridgeDataBase } from "../models/commitmentModel";
 import { BoxType } from "../../../src/entities/BoxEntity";
 
 const chai = require("chai")
@@ -44,7 +44,7 @@ describe("Commitment Scanner Utils test", () => {
 
     describe("updatedCommitmentsAtHeight", () => {
         it("should find 1 updated bridge", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'findCommitmentsById', () => [])
             const data = await CommitmentUtils.updatedCommitments(
                 [commitmentTx],
@@ -83,7 +83,7 @@ describe("Commitment Scanner Utils test", () => {
 
     describe("spentSpecialBoxesAtHeight", () => {
         it("should find 2 updated boxes", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'findUnspentSpecialBoxesById', () => [{boxId: "cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"}])
             const data = await CommitmentUtils.spentSpecialBoxes(
                 [commitmentTx],

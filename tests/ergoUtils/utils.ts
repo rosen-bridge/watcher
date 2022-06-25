@@ -4,7 +4,7 @@ import {
     commitmentFromObservation,
     contractHash,
     createChangeBox,
-    extractBoxes
+    extractBoxes, requiredCommitmentCount
 } from "../../src/ergo/utils";
 import { expect } from "chai";
 import { uint8ArrayToHex } from "../../src/utils/utils";
@@ -15,9 +15,15 @@ import { boxCreationError } from "../../src/errors/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../ergo/objects/axios";
+import { loadBridgeDataBase } from "../commitment/models/commitmentModel";
+import { Boxes } from "../../src/ergo/boxes";
 
 const ergoConfig = ErgoConfig.getConfig();
 initMockedAxios()
+
+const chai = require("chai")
+const spies = require("chai-spies")
+chai.use(spies);
 
 const observation: Observation = {
     fromChain: "ADA",
@@ -37,6 +43,7 @@ const tokenId = "0088eb2b6745ad637112b50a4c5e389881f910ebcf802b183d6633083c2b04f
 const boxesJson = require("./dataset/boxes.json")
 const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
 const userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from("7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2", "hex"))
+const repoBox = JSON.stringify(require("./dataset/repoBox.json"))
 
 describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {
@@ -158,6 +165,19 @@ describe("Testing ergoUtils", () => {
             const fraudAddress = "LFz5FPkW7nPVq2NA5YcZAdSTVwt2BDL1ixGkVvoU7mNY3B8PoX6ix4YiqUe9WMRPQNdPZD7BJESqWiXwvjHh2Fik3XxFz6JYJLCS5WKrgzzZeXDctKRHYydwLbxpqXjqQda7s7M6FzuZ4uCdKudW19Ku8caVcZY6kQfqb8PUiRMpRQPuqfYtcr9S2feShR3BicKV9m2upFVmjd7bzsV6sXZXdaSAuCYCCoNbSoasJ9Xxtg1NVE94d";
             const data = contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(fraudAddress)))
             expect(data.toString("base64")).to.eql("ZKVYGZQSUzUZtgTQ6rtiZDba9hT6mOuvpBHNXw7Z7ZY=")
+        })
+    })
+
+    describe("requiredCommitmentCount", () => {
+        it("should return formula number as the required commitment count", async () => {
+            // max commitments: 100
+            // formula: 51% * 7
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
+            console.log(wasm.ErgoBox.from_json(repoBox).box_id().to_str())
+            chai.spy.on(boxes, "getRepoBox", () => {return wasm.ErgoBox.from_json(repoBox)})
+            const data = await requiredCommitmentCount(boxes)
+            expect(data).to.eql(BigInt(3))
         })
     })
 })

@@ -4,7 +4,6 @@ import { entities } from "../../../src/entities";
 import { migrations } from "../../../src/migrations";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
-import { firstCommitment } from "../../commitment/models/commitmentModel";
 
 export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({

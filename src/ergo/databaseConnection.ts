@@ -10,6 +10,12 @@ export class databaseConnection{
     __networkDataBase: NetworkDataBase
     __observationConfirmation: number
 
+    constructor(networkDb: NetworkDataBase, bridgeDb: BridgeDataBase, confirmation: number) {
+        this.__networkDataBase = networkDb
+        this.__bridgeDataBase = bridgeDb
+        this.__observationConfirmation = confirmation
+    }
+
     /**
      * Check if a commitment is created form the observation or not
      * @param observation

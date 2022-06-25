@@ -3,7 +3,7 @@ import { strToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import { initMockedAxios } from "../objects/axios";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
-import { loadDataBase } from "../../commitment/models/commitmentModel";
+import { loadBridgeDataBase } from "../../commitment/models/commitmentModel";
 import { Boxes } from "../../../src/ergo/boxes";
 
 export const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
@@ -46,7 +46,7 @@ describe("Watcher Permit Transactions", () => {
          */
         it("checks is there any wid in the usersBoxes", async () => {
             const sampleWID = "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8";
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
@@ -72,7 +72,7 @@ describe("Watcher Permit Transactions", () => {
          * the token map of input and output should be the same
          */
         it('the token map of input and output should be the same', async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
@@ -101,7 +101,7 @@ describe("Watcher Permit Transactions", () => {
          * checks getPermit with correct inputs and state should be signed
          */
         it("checks get permit transaction is signed", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const secondTransaction = new Transaction(
                 rosenConfig,
@@ -117,7 +117,7 @@ describe("Watcher Permit Transactions", () => {
          * in the case of watcher have permit box in his/her address the getPermit should returns error
          */
         it("tests that if watcher have permit box should returns error", async () => {
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
@@ -140,7 +140,7 @@ describe("Watcher Permit Transactions", () => {
          */
         it("checks transaction is signed", async () => {
             initMockedAxios();
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
@@ -157,7 +157,7 @@ describe("Watcher Permit Transactions", () => {
          */
         it("it checks case that the return permit transaction have permit box in its output", async () => {
             initMockedAxios(1);
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
@@ -174,7 +174,7 @@ describe("Watcher Permit Transactions", () => {
          */
         it("tests that if watcher doesn't have permit box should returns error", async () => {
             initMockedAxios();
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const secondTransaction = new Transaction(
                 rosenConfig,
@@ -196,7 +196,7 @@ describe("Watcher Permit Transactions", () => {
          */
         it("should be true", async () => {
             initMockedAxios();
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
@@ -213,7 +213,7 @@ describe("Watcher Permit Transactions", () => {
          */
         it("should be false", async () => {
             initMockedAxios();
-            const DB = await loadDataBase("commitments");
+            const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             const secondTransaction = new Transaction(
                 rosenConfig,
