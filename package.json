@@ -47,7 +47,6 @@
     "typescript": "^4.7.2"
   },
   "dependencies": {
-    "@emurgo/cardano-serialization-lib-nodejs": "^10.2.0",
     "@emurgo/cip14-js": "^3.0.1",
     "axios": "^0.26.1",
     "blakejs": "^1.2.1",
