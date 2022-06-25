@@ -33,9 +33,9 @@ export class databaseConnection{
      * @param commitments
      */
     private isMergeHappened = (commitments: Array<ObservedCommitmentEntity>): Boolean => {
-        commitments.forEach(commitment => {
+        for(const commitment of commitments){
             if(commitment.spendReason! === SpendReason.MERGE) return true
-        })
+        }
         return false
     }
 
@@ -44,7 +44,8 @@ export class databaseConnection{
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
         const observations = await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation)
-        return observations.filter(observation => !this.isCommitmentCreated(observation))
+        return Promise.all(observations.map(async observation => !(await this.isCommitmentCreated(observation))))
+            .then(result => observations.filter((_v, index) => result[index]))
     }
 
     /**
@@ -52,13 +53,15 @@ export class databaseConnection{
      */
     allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
         let readyCommitments: Array<CommitmentSet> = []
-        const observations = (await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation))
-            .filter(observation => this.isCommitmentCreated(observation))
+        const observationEntities = (await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation))
+        const observations: Array<Observation> = await Promise.all(
+            observationEntities.map(async observation => await this.isCommitmentCreated(observation)))
+            .then(result => observationEntities.filter((_v, index) => result[index]))
         for(const observation of observations){
             const relatedCommitments = await this.__bridgeDataBase.commitmentsByEventId(observation.requestId)
             if(!this.isMergeHappened(relatedCommitments))
                 readyCommitments.push({
-                    commitments: relatedCommitments,
+                    commitments: relatedCommitments.filter(commitment => commitment.spendBlock === undefined),
                     observation: observation
                 })
         }

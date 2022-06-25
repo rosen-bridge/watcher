@@ -214,7 +214,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     getUnspentSpecialBoxes = async (type: BoxType): Promise<Array<SpecialBox>> => {
         return this.boxesRepository.createQueryBuilder("box_entity")
             .leftJoin("box_entity.spendBlock", "c_block_entity")
-            .where("box_entity.type == 'permit'")
+            .where("box_entity.type == :type", {type})
             .andWhere("box_entity.spendBlock is null")
             .getMany()
     }

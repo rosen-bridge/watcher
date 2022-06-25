@@ -152,11 +152,13 @@ describe("Commitment Database functions", () => {
             const DB = await loadBridgeDataBase("commitments");
             let data = await DB.getUnspentSpecialBoxes(BoxType.PERMIT)
             expect(data).to.have.length(1)
+            expect(data[0].type).to.eql(BoxType.PERMIT)
         })
         it("should return one unspent WID box", async() => {
             const DB = await loadBridgeDataBase("commitments");
             let data = await DB.getUnspentSpecialBoxes(BoxType.WID)
             expect(data).to.have.length(1)
+            expect(data[0].type).to.eql(BoxType.WID)
         })
     })
 
