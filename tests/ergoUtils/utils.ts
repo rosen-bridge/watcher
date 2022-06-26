@@ -7,7 +7,7 @@ import { ErgoConfig } from "../../src/config/config";
 import { rosenConfig } from "../../src/config/rosenConfig";
 import { boxCreationError } from "../../src/errors/errors";
 
-import boxesJson from "./dataset/boxes.json"
+import boxesJson from "./dataset/boxes.json" assert {type: "json"}
 
 const ergoConfig = ErgoConfig.getConfig();
 

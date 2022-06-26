@@ -3,9 +3,9 @@ import { ErgoNetworkApi, nodeApi } from "../../../src/bridge/network/networkApi"
 import { describe } from "mocha";
 import MockAdapter from "axios-mock-adapter";
 
-import blockAtHeight from "../dataset/blockAtHeight.json"
-import blockTxs from "../dataset/blockTxs.json"
-import info from "../dataset/info.json"
+import blockAtHeight from "../dataset/blockAtHeight.json" assert {type: "json"}
+import blockTxs from "../dataset/blockTxs.json" assert {type: "json"}
+import info from "../dataset/info.json" assert {type: "json"}
 
 const mockedAxios = new MockAdapter(nodeApi);
 const ergoNetwork = new ErgoNetworkApi();

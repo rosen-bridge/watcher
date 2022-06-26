@@ -8,8 +8,8 @@ import { NodeTransaction } from "../../../src/bridge/network/ergoApiModels";
 import chai from "chai";
 import spies from "chai-spies";
 
-import tx from "../dataset/tx.json"
-import commitmentTx from "../dataset/commitmentTx.json";
+import tx from "../dataset/tx.json" assert {type: "json"}
+import commitmentTx from "../dataset/commitmentTx.json" assert {type: "json"}
 
 chai.use(spies);
 

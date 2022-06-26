@@ -15,9 +15,9 @@ import spies from "chai-spies";
 import sinon from "sinon"
 import chaiPromise from "chai-as-promised"
 
-import permitObj from "./dataset/permitBox.json"
-import WIDObj from "./dataset/WIDBox.json"
-import plainObj from "./dataset/plainBox.json"
+import permitObj from "./dataset/permitBox.json" assert {type: "json"}
+import WIDObj from "./dataset/WIDBox.json" assert {type: "json"}
+import plainObj from "./dataset/plainBox.json" assert {type: "json"}
 
 const permitJson = JsonBI.stringify(permitObj)
 const WIDJson = JsonBI.stringify(WIDObj)
