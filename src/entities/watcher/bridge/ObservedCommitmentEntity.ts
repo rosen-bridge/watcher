@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import {Column, Entity, ManyToOne, PrimaryColumn, Relation} from "typeorm";
 import { BridgeBlockEntity } from "./BridgeBlockEntity";
 
 @Entity()
@@ -19,18 +19,18 @@ export class ObservedCommitmentEntity {
     commitmentBoxId: string
 
     @ManyToOne(
-        () => BridgeBlockEntity,
-        (block) => block.height,
+        "BridgeBlockEntity",
+        "height",
         {onDelete: 'CASCADE',}
     )
-    block: BridgeBlockEntity
+    block: Relation<BridgeBlockEntity>
 
     @ManyToOne(
-        () => BridgeBlockEntity,
-        (block) => block.height,
+        "BridgeBlockEntity",
+        "height",
         {onDelete: 'SET NULL', nullable: true}
     )
-    spendBlock: BridgeBlockEntity
+    spendBlock: Relation<BridgeBlockEntity>
 
     @Column({nullable: true})
     eventTriggerBoxId: string

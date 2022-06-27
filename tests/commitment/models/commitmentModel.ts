@@ -3,7 +3,7 @@ import { commitmentEntities } from "../../../src/entities";
 import { BridgeDataBase } from "../../../src/bridge/models/bridgeModel";
 import { Commitment, SpecialBox } from "../../../src/objects/interfaces";
 import { expect } from "chai";
-import { BoxType } from "../../../src/entities/BoxEntity";
+import { BoxType } from "../../../src/entities/watcher/bridge/BoxEntity";
 
 export const loadDataBase = async (name: string): Promise<BridgeDataBase> => {
     const ormConfig = new DataSource({
@@ -71,7 +71,7 @@ describe("Commitment Database functions", () => {
     describe("commitment saveBlock", () => {
         it("should store the new commitment", async () => {
             const DB = await loadDataBase("commitments");
-            let res = await DB.saveBlock(
+            const res = await DB.saveBlock(
                 3433333,
                 "26197be6579e09c7edec903239866fbe7ff6aee2e4ed4031c64d242e9dd1bff6",
                 {
@@ -85,7 +85,7 @@ describe("Commitment Database functions", () => {
         });
         it("should store the new commitment and update the existing one", async () => {
             const DB = await loadDataBase("commitments");
-            let res = await DB.saveBlock(
+            const res = await DB.saveBlock(
                 3433334,
                 "3ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117",
                 {
@@ -102,7 +102,7 @@ describe("Commitment Database functions", () => {
     describe("getBlockAtHeight", () => {
         it("should return a block", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.getBlockAtHeight(3433333)
+            const data = await DB.getBlockAtHeight(3433333)
             expect(data).to.haveOwnProperty("hash")
             expect(data).to.haveOwnProperty("block_height")
             expect(data?.block_height).to.eql(3433333);
@@ -112,7 +112,7 @@ describe("Commitment Database functions", () => {
     describe("getOldSpentCommitments", () => {
         it("should return an old commitment", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.getOldSpentCommitments(3433335)
+            const data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(1)
         })
     })
@@ -138,7 +138,7 @@ describe("Commitment Database functions", () => {
         it("should delete two bridge", async() => {
             const DB = await loadDataBase("commitments");
             await DB.deleteCommitments([firstCommitment.commitmentBoxId, secondCommitment.commitmentBoxId])
-            let data = await DB.getOldSpentCommitments(3433335)
+            const data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(0)
         })
     })
@@ -146,12 +146,12 @@ describe("Commitment Database functions", () => {
     describe("getUnspentSpecialBoxes", () => {
         it("should return one unspent permit box", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.getUnspentSpecialBoxes(BoxType.PERMIT)
+            const data = await DB.getUnspentSpecialBoxes(BoxType.PERMIT)
             expect(data).to.have.length(1)
         })
         it("should return one unspent WID box", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.getUnspentSpecialBoxes(BoxType.WID)
+            const data = await DB.getUnspentSpecialBoxes(BoxType.WID)
             expect(data).to.have.length(1)
         })
     })
@@ -159,7 +159,7 @@ describe("Commitment Database functions", () => {
     describe("findUnspentSpecialBoxesById", () => {
         it("should return two unspent special boxes by id", async() => {
             const DB = await loadDataBase("commitments");
-            let data = await DB.findUnspentSpecialBoxesById([secondWIDBox.boxId, secondPermitBox.boxId])
+            const data = await DB.findUnspentSpecialBoxesById([secondWIDBox.boxId, secondPermitBox.boxId])
             expect(data).to.have.length(2)
         })
     })

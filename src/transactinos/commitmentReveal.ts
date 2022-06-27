@@ -2,7 +2,7 @@ import { BridgeDataBase } from "../bridge/models/bridgeModel";
 import { Observation } from "../objects/interfaces";
 import { NetworkDataBase } from "../models/networkModel";
 import config from "config";
-import { ObservedCommitmentEntity } from "../entities/ObservedCommitmentEntity";
+import { ObservedCommitmentEntity } from "../entities/watcher/bridge/ObservedCommitmentEntity";
 import { commitmentFromObservation, createAndSignTx } from "../ergo/utils";
 import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";

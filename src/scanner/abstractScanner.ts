@@ -11,7 +11,7 @@ export abstract class AbstractScanner<BlockT, DataT> {
      * function that checks if fork is happen in the blockchain or not
      * @return Promise<Boolean>
      */
-    isForkHappen = async (): Promise<Boolean> => {
+    isForkHappen = async (): Promise<boolean> => {
         const lastSavedBlock = await this._dataBase.getLastSavedBlock();
         if (lastSavedBlock !== undefined) {
             const lastSavedBlockFromNetwork = await this._networkAccess.getBlockAtHeight(lastSavedBlock.block_height);
@@ -54,6 +54,7 @@ export abstract class AbstractScanner<BlockT, DataT> {
                     }
                 }
             } else {
+                // TODO: non-null assertion for lastSavedBlock
                 let forkPointer = lastSavedBlock!;
                 let blockFromNetwork = await this._networkAccess.getBlockAtHeight(forkPointer.block_height);
                 while (blockFromNetwork.hash !== forkPointer.hash) {

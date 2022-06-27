@@ -1,6 +1,6 @@
 import { Transaction } from "../../../src/api/Transaction";
 import { strToUint8Array } from "../../../src/utils/utils";
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../objects/axios";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
@@ -133,8 +133,8 @@ describe("Watcher Permit Transactions", () => {
 
             expect(userBoxCandidate.value().as_i64().to_str()).to.be.equal(amount);
             expect(userBoxCandidate.tokens().len()).to.be.equal(4);
-            let boxTokensId: Array<string> = [];
-            let boxTokensAmount: Array<string> = [];
+            const boxTokensId: Array<string> = [];
+            const boxTokensAmount: Array<string> = [];
             for (let i = 0; i < 4; i++) {
                 boxTokensId.push(userBoxCandidate.tokens().get(i).id().to_str());
                 boxTokensAmount.push(userBoxCandidate.tokens().get(i).amount().as_i64().to_str());
@@ -159,8 +159,8 @@ describe("Watcher Permit Transactions", () => {
                 "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
             );
             const usersHex = ["414441", sampleWID];
-            let users: Array<Uint8Array> = [];
-            for (let user of usersHex) {
+            const users: Array<Uint8Array> = [];
+            for (const user of usersHex) {
                 users.push(strToUint8Array(user));
             }
             const WID = await transaction.getWID(users);

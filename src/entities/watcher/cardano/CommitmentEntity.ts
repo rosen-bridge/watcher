@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, OneToOne, PrimaryColumn, Relation } from "typeorm";
 import { ObservationEntity } from "./ObservationEntity";
 
 export enum txStatus {
@@ -34,9 +34,11 @@ export class CommitmentEntity {
     })
     flag: txStatus
 
+    // @OneToMany(type => Habit, habit => habit.author)
+    // habits: Relation<Habit>[];
     @OneToOne(
-        () => ObservationEntity,
-        (observation) => observation.id,
+        "ObservationEntity",
+        "id"
     )
-    observation: ObservationEntity
+    observation: Relation<ObservationEntity>
 }

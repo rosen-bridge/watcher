@@ -15,7 +15,6 @@ export type ApiResponse = {
  * Transaction class used by watcher to generate transaction for ergo network
  */
 export class Transaction{
-
     RepoNFTId: wasm.TokenId;
     RWTTokenId: wasm.TokenId;
     RSN: wasm.TokenId;
@@ -135,6 +134,7 @@ export class Transaction{
      * @param users
      */
     getWID = async (users: Array<Uint8Array>): Promise<string> => {
+        // TODO: This function hasn't good performance
         const usersWID = users.map(async (id) => {
             const wid = uint8ArrayToHex(id);
             try {
@@ -213,12 +213,20 @@ export class Transaction{
         //TODO: permit box should grab from the network with respect to the value in the register
         const permitBox = await ErgoNetwork.getBoxWithToken(this.watcherPermitAddress, this.RWTTokenId.to_str());
         const repoBox = await this.getRepoBox();
+        const R4 = repoBox.register_value(4)
+        const R5 = repoBox.register_value(5)
+        const R6 = repoBox.register_value(6);
 
-        const users = repoBox.register_value(4)?.to_coll_coll_byte()!;
+        // This couldn't happen
+        if (!R4 || !R5 || !R6) {
+            return {response: "one of registers (4, 5, 6) of repo box is not set", status: 500}
+        }
+
+        const users = R4.to_coll_coll_byte();
 
         const widBox = await ErgoNetwork.getBoxWithToken(this.userAddress, WID)
 
-        const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array()!;
+        const usersCount: Array<string> | undefined = R5.to_i64_str_array();
 
         const widIndex = users.map(user => uint8ArrayToHex(user)).indexOf(WID);
         const inputRWTCount = BigInt(usersCount[widIndex]);
@@ -244,11 +252,6 @@ export class Transaction{
                 (RWTCount * (-BigInt("100"))).toString()
             )
         );
-
-        const R6 = repoBox.register_value(6);
-        if (R6 === undefined) {
-            return {response: "register 6 of repo box is not set", status: 500}
-        }
 
         const RSNRWTRatio = R6.to_i64_str_array()[0];
 
@@ -364,7 +367,7 @@ export class Transaction{
      * @param inputBoxes
      * @param offset
      */
-    inputBoxesTokenMap = (inputBoxes: wasm.ErgoBoxes, offset: number = 0): Map<string, string> => {
+    inputBoxesTokenMap = (inputBoxes: wasm.ErgoBoxes, offset = 0): Map<string, string> => {
         const changeTokens = new Map<string, string>();
         for (let i = offset; i < inputBoxes.len(); i++) {
             const boxTokens = inputBoxes.get(i).tokens();
@@ -404,20 +407,25 @@ export class Transaction{
         }
         const height = await ErgoNetwork.getHeight();
         const repoBox = await this.getRepoBox();
+        const R4 = repoBox.register_value(4)
+        const R5 = repoBox.register_value(5)
         const R6 = repoBox.register_value(6);
-        if (R6 === undefined) {
-            return {response: "register 6 of repo box is not set", status: 500};
+
+        // This couldn't happen
+        if (!R4 || !R5 || !R6) {
+            return {response: "one of registers (4, 5, 6) of repo box is not set", status: 500}
         }
+
         const RSNRWTRation = R6.to_i64_str_array()[0];
 
         const RWTCount = RSNCount / BigInt(R6.to_i64_str_array()[0]);
 
         const RSNInput = await ErgoNetwork.getBoxWithToken(this.userAddress, this.RSN.to_str())
 
-        const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte()!;
+        const users: Array<Uint8Array> = R4.to_coll_coll_byte();
         const repoBoxId = repoBox.box_id().as_bytes();
         users.push(repoBoxId);
-        const usersCount: Array<string> | undefined = repoBox.register_value(5)?.to_i64_str_array()!;
+        const usersCount: Array<string> = R5.to_i64_str_array();
 
         const count = RWTCount.toString();
         usersCount.push(count);
@@ -529,9 +537,12 @@ export class Transaction{
     getWatcherState = async () => {
         if (this.watcherPermitState === undefined) {
             const repoBox = await this.getRepoBox();
-            const users = repoBox.register_value(4)?.to_coll_coll_byte()!;
-            this.watcherWID = await this.getWID(users);
-            this.watcherPermitState = (this.watcherWID !== "");
+            const R4 = repoBox.register_value(4)
+            if(R4){
+                const users = R4.to_coll_coll_byte();
+                this.watcherWID = await this.getWID(users);
+                this.watcherPermitState = (this.watcherWID !== "");
+            }
         }
     }
 }

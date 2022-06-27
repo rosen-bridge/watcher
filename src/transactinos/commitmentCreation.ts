@@ -2,17 +2,16 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { Boxes } from "../ergo/boxes";
 import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergo/utils";
 import { NetworkDataBase } from "../models/networkModel";
-import { ObservationEntity } from "../entities/ObservationEntity";
+import { ObservationEntity } from "../entities/watcher/cardano/ObservationEntity";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 
 const minBoxVal = parseInt(rosenConfig.minBoxValue)
-const txFee = parseInt(rosenConfig.fee)
 const ergoConfig = ErgoConfig.getConfig();
 //TODO:hard coded should implemented later
-const WID: string = "906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82"
+const WID = "906d389a39c914a393cb06c0ab7557d04b58f7e9e73284aac520d08e7dd46a82"
 
 export class commitmentCreation{
     _dataBase: NetworkDataBase
