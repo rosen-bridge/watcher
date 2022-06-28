@@ -23,11 +23,14 @@ export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree,
                                         networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Mainnet): string => {
     return ergoTreeToAddress(ergoTree).to_base58(networkType)
 }
-export const decodeCollColl = async (str: string): Promise<Uint8Array[]> => {
+export const decodeCollColl = (str: string): Uint8Array[] => {
     return wasm.Constant.decode_from_base16(str).to_coll_coll_byte()
 }
 export const decodeStr = async (str: string): Promise<string> => {
     return Buffer.from(wasm.Constant.decode_from_base16(str).to_byte_array()).toString('hex')
+}
+export const decodeCollLong = (str: string): Array<BigInt> => {
+    return wasm.Constant.decode_from_base16(str).to_i64_str_array().map(cur => BigInt(cur))
 }
 export const hexStrToUint8Array = (str: string): Uint8Array => {
     return new Uint8Array(Buffer.from(str, "hex"))
