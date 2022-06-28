@@ -53,7 +53,7 @@ describe("Scanner test", () => {
             const scanner = new Scanner(DB, koiosNetwork, config);
             await scanner.update();
             const lastBlock = await DB.getLastSavedBlock();
-            expect(lastBlock?.block_height).to.be.equal(3433334);
+            expect(lastBlock?.block_height).to.be.equal(3433333);
         });
         it("scanner with fork", async () => {
             const DB = await loadDataBase("scanner-with-fork");

@@ -51,15 +51,15 @@ export const generateSK = (): wasm.SecretKey => {
 export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCandidate>, height: number, secret: wasm.SecretKey, contract?: wasm.Contract): wasm.ErgoBoxCandidate | null => {
     const processBox = (box: wasm.ErgoBox | wasm.ErgoBoxCandidate, tokens: { [id: string]: bigint; }, sign: number) => {
         extractTokens(box.tokens()).forEach(token => {
-            if (!tokens.hasOwnProperty(token.id().to_str())) {
+            if (!Object.hasOwnProperty.call(tokens, token.id().to_str())) {
                 tokens[token.id().to_str()] = BigInt(token.amount().as_i64().as_num() * sign)
             } else {
                 tokens[token.id().to_str()] += BigInt(token.amount().as_i64().as_num() * sign)
             }
         })
     }
-    let value: bigint = BigInt(0);
-    let tokens: { [id: string]: bigint; } = {}
+    let value = BigInt(0);
+    const tokens: { [id: string]: bigint; } = {}
     extractBoxes(boxes).forEach(box => {
         value += BigInt(box.value().as_i64().to_str())
         processBox(box, tokens, 1)

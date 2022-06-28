@@ -6,9 +6,7 @@ import {
     createChangeBox,
     extractBoxes, requiredCommitmentCount
 } from "../../src/ergo/utils";
-import { expect } from "chai";
 import { uint8ArrayToHex } from "../../src/utils/utils";
-import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoConfig } from "../../src/config/config";
 import { rosenConfig } from "../../src/config/rosenConfig";
 import { boxCreationError } from "../../src/errors/errors";
@@ -18,11 +16,15 @@ import { initMockedAxios } from "../ergo/objects/axios";
 import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
 import { Boxes } from "../../src/ergo/boxes";
 
+import * as wasm from "ergo-lib-wasm-nodejs";
+import { expect } from "chai";
+import chai from "chai";
+import spies from "chai-spies";
+
+import boxesJson from "./dataset/boxes.json" assert {type: "json"}
+
 const ergoConfig = ErgoConfig.getConfig();
 initMockedAxios()
-
-const chai = require("chai")
-const spies = require("chai-spies")
 chai.use(spies);
 
 const observation: Observation = {
@@ -41,10 +43,10 @@ const observation: Observation = {
 }
 const WID = "245341e0dda895feca93adbd2db9e643a74c50a1b3702db4c2535f23f1c72e6e"
 const tokenId = "0088eb2b6745ad637112b50a4c5e389881f910ebcf802b183d6633083c2b04fc"
-const boxesJson = require("./dataset/boxes.json")
 const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
 const userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from("7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2", "hex"))
-const repoBox = JSON.stringify(require("./dataset/repoBox.json"))
+import repoObj from "./dataset/permitBox.json" assert {type: "json"}
+const repoBox = JSON.stringify(repoObj)
 
 describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {

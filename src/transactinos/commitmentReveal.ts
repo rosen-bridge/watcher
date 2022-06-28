@@ -1,5 +1,4 @@
 import { Commitment, Observation } from "../objects/interfaces";
-import config from "config";
 import { commitmentFromObservation, createAndSignTx, requiredCommitmentCount } from "../ergo/utils";
 import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";

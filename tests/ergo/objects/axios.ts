@@ -6,7 +6,7 @@ const mockedExplorer = new MockAdapter(explorerApi);
 const mockedNodeClient = new MockAdapter(nodeClient);
 export const boxId = "95f1165089b39f91b096e1dec1d1d55acb4f7e821df0656f5ad3c633e370d065"
 
-export const initMockedAxios = (vector: number = 0) => {
+export const initMockedAxios = (vector = 0) => {
     mockedNodeClient.reset();
     mockedExplorer.reset();
     switch (vector) {

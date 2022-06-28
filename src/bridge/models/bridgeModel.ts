@@ -1,10 +1,11 @@
 import { DataSource, DeleteResult, In, MoreThanOrEqual, Repository } from "typeorm";
-import { BridgeBlockEntity } from "../../entities/BridgeBlockEntity";
-import { ObservedCommitmentEntity } from "../../entities/ObservedCommitmentEntity";
+import { BridgeBlockEntity } from "../../entities/watcher/bridge/BridgeBlockEntity";
+import { ObservedCommitmentEntity } from "../../entities/watcher/bridge/ObservedCommitmentEntity";
+import { BoxEntity, BoxType } from "../../entities/watcher/bridge/BoxEntity";
 import { Block, SpecialBox } from "../../objects/interfaces";
 import { AbstractDataBase } from "../../models/abstractModel";
 import { BridgeBlockInformation } from "../scanner/scanner";
-import { BoxEntity, BoxType } from "../../entities/BoxEntity";
+
 
 export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBlockInformation> {
     dataSource: DataSource

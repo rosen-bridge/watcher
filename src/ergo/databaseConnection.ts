@@ -1,8 +1,8 @@
 import { BridgeDataBase } from "../bridge/models/bridgeModel";
 import { NetworkDataBase } from "../models/networkModel";
 import { CommitmentSet, Observation } from "../objects/interfaces";
-import { ObservedCommitmentEntity, SpendReason } from "../entities/ObservedCommitmentEntity";
-import { ObservationEntity } from "../entities/ObservationEntity";
+import { ObservedCommitmentEntity, SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity";
+import { ObservationEntity } from "../entities/watcher/cardano/ObservationEntity";
 
 
 export class databaseConnection{

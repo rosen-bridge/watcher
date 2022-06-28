@@ -1,13 +1,13 @@
 import { loadDataBase } from "../cardano/models/models";
 import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
 import { databaseConnection } from "../../src/ergo/databaseConnection";
-import { ObservationEntity } from "../../src/entities/ObservationEntity";
-import { expect } from "chai";
-import { ObservedCommitmentEntity, SpendReason } from "../../src/entities/ObservedCommitmentEntity";
-import { BridgeBlockEntity } from "../../src/entities/BridgeBlockEntity";
+import { ObservationEntity } from "../../src/entities/watcher/cardano/ObservationEntity";
+import { ObservedCommitmentEntity, SpendReason } from "../../src/entities/watcher/bridge/ObservedCommitmentEntity";
+import { BridgeBlockEntity } from "../../src/entities/watcher/bridge/BridgeBlockEntity";
 
-const chai = require("chai")
-const spies = require("chai-spies")
+import { expect } from "chai";
+import chai from "chai";
+import spies from "chai-spies";
 chai.use(spies)
 
 const block = new BridgeBlockEntity()

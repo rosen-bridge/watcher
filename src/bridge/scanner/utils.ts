@@ -5,8 +5,8 @@ import { BridgeDataBase } from "../models/bridgeModel";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { rosenConfig } from "../../config/rosenConfig";
 import { ErgoConfig } from "../../config/config";
-import { BoxType } from "../../entities/BoxEntity";
-import { SpendReason } from "../../entities/ObservedCommitmentEntity";
+import { SpendReason } from "../../entities/watcher/bridge/ObservedCommitmentEntity";
+import { BoxType } from "../../entities/watcher/bridge/BoxEntity";
 
 const ergoConfig = ErgoConfig.getConfig();
 

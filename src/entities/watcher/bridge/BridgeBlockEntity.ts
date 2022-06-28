@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryColumn, Relation } from "typeorm";
 import { ObservedCommitmentEntity } from "./ObservedCommitmentEntity";
 import { BoxEntity } from "./BoxEntity";
 
@@ -14,16 +14,16 @@ export class BridgeBlockEntity {
     hash: string
 
     @OneToMany(
-        () => ObservedCommitmentEntity,
-        (commitment) => commitment.block,
+        "ObservedCommitmentEntity",
+        "block",
         {cascade: true,}
     )
-    commitments: ObservedCommitmentEntity[]
+    commitments: Relation<ObservedCommitmentEntity>[]
 
     @OneToMany(
-        () => BoxEntity,
-        (box) => box.block,
+        "BoxEntity",
+        "block",
         {cascade: true,}
     )
-    boxes: BoxEntity[]
+    boxes: Relation<BoxEntity>[]
 }

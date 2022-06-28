@@ -5,25 +5,31 @@ import { firstCommitment, loadBridgeDataBase } from "../bridge/models/bridgeMode
 import { contractHash } from "../../src/ergo/utils";
 import { firstObservations } from "../cardano/models/models";
 import { SpecialBox } from "../../src/objects/interfaces";
-import { BoxType } from "../../src/entities/BoxEntity";
+import { BoxType } from "../../src/entities/watcher/bridge/BoxEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { NotEnoughFund } from "../../src/errors/errors";
 import { strToUint8Array } from "../../src/utils/utils";
 import { rosenConfig, tokens } from "../ergo/transactions/permit";
 import { initMockedAxios } from "../ergo/objects/axios";
 import { boxesSample } from "../ergo/dataset/BoxesSample";
+import { JsonBI } from "../../src/network/parser";
 
-const chai = require("chai")
-const sinon = require("sinon");
-const spies = require("chai-spies")
-const chaiPromise = require("chai-as-promised")
+import chai from "chai";
+import spies from "chai-spies";
+import sinon from "sinon"
+import chaiPromise from "chai-as-promised"
+
+import permitObj from "./dataset/permitBox.json" assert {type: "json"}
+import WIDObj from "./dataset/WIDBox.json" assert {type: "json"}
+import plainObj from "./dataset/plainBox.json" assert {type: "json"}
+
+const permitJson = JsonBI.stringify(permitObj)
+const WIDJson = JsonBI.stringify(WIDObj)
+const plainJson = JsonBI.stringify(plainObj)
+
 chai.use(spies);
 chai.use(chaiPromise)
 initMockedAxios();
-
-const permitJson = JSON.stringify(require("./dataset/permitBox.json"))
-const WIDJson = JSON.stringify(require("./dataset/WIDBox.json"))
-const plainJson = JSON.stringify(require("./dataset/plainBox.json"))
 
 const permitBox: SpecialBox = {
     boxId: "6ba81a7de39dce3303d100516bf80228e8c03464c130d5b0f8ff6f78f66bcbc8",
@@ -58,9 +64,9 @@ describe("Testing Box Creation", () => {
             const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [permitBox])
             const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool')
-            mempoolTrack.onCall(0).returns(wasm.ErgoBox.from_json(permitJson))
-            mempoolTrack.onCall(1).returns(wasm.ErgoBox.from_json(WIDJson))
-            mempoolTrack.onCall(2).returns(wasm.ErgoBox.from_json(plainJson))
+            mempoolTrack.onCall(0).resolves(wasm.ErgoBox.from_json(permitJson))
+            mempoolTrack.onCall(1).resolves(wasm.ErgoBox.from_json(WIDJson))
+            mempoolTrack.onCall(2).resolves(wasm.ErgoBox.from_json(plainJson))
             const boxes = new Boxes(DB)
             const data = await boxes.getPermits(BigInt(0))
             expect(data).to.have.length(1)

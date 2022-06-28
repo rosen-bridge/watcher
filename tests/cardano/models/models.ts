@@ -10,8 +10,7 @@ export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: entities,
-        synchronize: false,
-        migrations: migrations,
+        synchronize: true,
         logging: false,
     });
     return await NetworkDataBase.init(ormConfig);

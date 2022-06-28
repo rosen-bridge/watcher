@@ -2,9 +2,9 @@ import { AbstractScanner } from "../../scanner/abstractScanner";
 import { BridgeDataBase } from "../models/bridgeModel";
 import config, { IConfig } from "config";
 import { Block, Commitment, SpecialBox, SpentBox } from "../../objects/interfaces";
-import { commitmentOrmConfig } from "../../../config/commitmentOrmConfig";
+import { bridgeOrmConfig } from "../../../config/bridgeOrmConfig";
 import { ErgoNetworkApi } from "../network/networkApi";
-import { BridgeBlockEntity } from "../../entities/BridgeBlockEntity";
+import { BridgeBlockEntity } from "../../entities/watcher/bridge/BridgeBlockEntity";
 import { CommitmentUtils } from "./utils";
 import { ErgoConfig } from "../../config/config";
 import { rosenConfig } from "../../config/rosenConfig";
@@ -83,7 +83,7 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
  * main function that runs every `SCANNER_INTERVAL` time that sets in the config
  */
 export const commitmentMain = async () => {
-    const DB = await BridgeDataBase.init(commitmentOrmConfig);
+    const DB = await BridgeDataBase.init(bridgeOrmConfig);
     const apiNetwork = new ErgoNetworkApi();
     const boxes: Boxes = new Boxes(DB)
     const api: Transaction = new Transaction(rosenConfig, ergoConfig.address, ergoConfig.secretKey.toString(), boxes)

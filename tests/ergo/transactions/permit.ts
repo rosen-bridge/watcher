@@ -8,9 +8,8 @@ import { Boxes } from "../../../src/ergo/boxes";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { boxesSample } from "../dataset/BoxesSample";
 
-
-const chai = require("chai")
-const spies = require("chai-spies")
+import chai from "chai";
+import spies from "chai-spies";
 chai.use(spies);
 
 
@@ -63,8 +62,8 @@ describe("Watcher Permit Transactions", () => {
                 boxes
             );
             const usersHex = ["414441", sampleWID];
-            let users: Array<Uint8Array> = [];
-            for (let user of usersHex) {
+            const users: Array<Uint8Array> = [];
+            for (const user of usersHex) {
                 users.push(strToUint8Array(user));
             }
             const WID = await transaction.getWID(users);

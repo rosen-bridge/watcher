@@ -5,11 +5,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const cardanoOrmConfig = new DataSource({
+export const bridgeOrmConfig = new DataSource({
     type: "sqlite",
-    database: __dirname + "/../sqlite/cardanoWatcher.sqlite",
-    entities: ['src/entities/watcher/cardano/*.ts'],
-    migrations: ['src/migrations/watcher/cardano/*.ts'],
+    database: __dirname + "/../sqlite/bridgeWatcher.sqlite",
+    entities: ['src/entities/watcher/bridge/*.ts'],
+    migrations: ['src/migrations/watcher/bridge/*.ts'],
     synchronize: false,
     logging: false,
 });
