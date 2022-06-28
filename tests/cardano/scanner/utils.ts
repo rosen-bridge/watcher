@@ -6,7 +6,8 @@ describe("Cardano Scanner Utils test", () => {
     const sampleObservation = {
         fromChain: 'CARDANO',
         toChain: 'ERGO',
-        fee: '10000',
+        bridgeFee: '10000',
+        networkFee: '10000',
         amount: '10',
         sourceChainTokenId: 'asset12y0ewmxggeglymjpmp9mjf5qzh4kgwj9chtkpv',
         targetChainTokenId: 'cardanoTokenId',
@@ -14,16 +15,15 @@ describe("Cardano Scanner Utils test", () => {
         sourceBlockId: '93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3',
         requestId: 'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa',
         toAddress: 'ergoAddress',
-        fromAddress: 'cardanoAddress',
+        fromAddress: 'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0',
     };
     describe("isRosenData", () => {
         it("should be Rosen Data", () => {
             const validData = {
                 "to": "ERGO",
-                "fee": "10000",
-                "from": "CARDANO",
+                "bridgeFee": "10000",
+                "networkFee": "100",
                 "toAddress": "ergoAddress",
-                "fromAddress": "cardanoAddress",
                 "targetChainTokenId": "cardanoTokenId",
             };
             expect(CardanoUtils.isRosenData(validData)).to.be.true;
@@ -31,8 +31,8 @@ describe("Cardano Scanner Utils test", () => {
         it("should not be Rosen Data", () => {
             const invalidData = {
                 "to": "ERGO",
-                "fee": "10000",
-                "from": "CARDANO",
+                "bridgeFee": "10000",
+                "networkFee": "100",
             };
             expect(CardanoUtils.isRosenData(invalidData)).to.be.false;
         });

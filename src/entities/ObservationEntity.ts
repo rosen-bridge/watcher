@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BlockEntity } from "./BlockEntity";
 
 @Entity()
-export class ObservationEntity {
+export class ObservationEntity{
     @PrimaryGeneratedColumn()
     id: number
 
@@ -26,7 +26,10 @@ export class ObservationEntity {
     amount: string
 
     @Column()
-    fee: string
+    networkFee: string
+
+    @Column()
+    bridgeFee: string
 
     @Column()
     sourceChainTokenId: string
@@ -50,6 +53,6 @@ export class ObservationEntity {
     )
     block: BlockEntity
 
-    @Column({ nullable: true})
+    @Column({nullable: true})
     commitmentBoxId: string
 }
