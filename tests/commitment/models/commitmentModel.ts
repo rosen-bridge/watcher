@@ -52,14 +52,14 @@ const secondPermitBox: SpecialBox = {
     boxJson: "fakeSample"
 }
 
-const firstWIDBox: SpecialBox ={
+const firstWIDBox: SpecialBox = {
     boxId: "cd0e9ad2ae564768bc6bf74a350934117040686fd267f313fce27d7df00fe549",
     type: BoxType.WID,
     value: "100000000",
     boxJson: "fakeSample"
 }
 
-const secondWIDBox: SpecialBox ={
+const secondWIDBox: SpecialBox = {
     boxId: "2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655",
     type: BoxType.WID,
     value: "10000000",
@@ -104,7 +104,7 @@ describe("Commitment Database functions", () => {
     });
 
     describe("getBlockAtHeight", () => {
-        it("should return a block", async() => {
+        it("should return a block", async () => {
             const DB = await loadDataBase("commitments");
             let data = await DB.getBlockAtHeight(3433333)
             expect(data).to.haveOwnProperty("hash")
@@ -114,7 +114,7 @@ describe("Commitment Database functions", () => {
     })
 
     describe("getOldSpentCommitments", () => {
-        it("should return an old commitment", async() => {
+        it("should return an old commitment", async () => {
             const DB = await loadDataBase("commitments");
             let data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(1)
@@ -132,14 +132,14 @@ describe("Commitment Database functions", () => {
     describe("findCommitmentsById", () => {
         it("should return exactly two bridge with the specified id", async () => {
             const DB = await loadDataBase("commitments");
-            const data  = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
+            const data = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
             expect(data).to.have.length(2)
             expect(data[0].commitment).to.eql(secondCommitment.commitment)
         })
     })
 
     describe("deleteCommitments", () => {
-        it("should delete two bridge", async() => {
+        it("should delete two bridge", async () => {
             const DB = await loadDataBase("commitments");
             await DB.deleteCommitments([firstCommitment.commitmentBoxId, secondCommitment.commitmentBoxId])
             let data = await DB.getOldSpentCommitments(3433335)
@@ -148,12 +148,12 @@ describe("Commitment Database functions", () => {
     })
 
     describe("getUnspentSpecialBoxes", () => {
-        it("should return one unspent permit box", async() => {
+        it("should return one unspent permit box", async () => {
             const DB = await loadDataBase("commitments");
             let data = await DB.getUnspentSpecialBoxes(BoxType.PERMIT)
             expect(data).to.have.length(1)
         })
-        it("should return one unspent WID box", async() => {
+        it("should return one unspent WID box", async () => {
             const DB = await loadDataBase("commitments");
             let data = await DB.getUnspentSpecialBoxes(BoxType.WID)
             expect(data).to.have.length(1)
@@ -161,7 +161,7 @@ describe("Commitment Database functions", () => {
     })
 
     describe("findUnspentSpecialBoxesById", () => {
-        it("should return two unspent special boxes by id", async() => {
+        it("should return two unspent special boxesSample by id", async () => {
             const DB = await loadDataBase("commitments");
             let data = await DB.findUnspentSpecialBoxesById([secondWIDBox.boxId, secondPermitBox.boxId])
             expect(data).to.have.length(2)

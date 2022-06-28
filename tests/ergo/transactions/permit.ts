@@ -5,6 +5,14 @@ import { initMockedAxios } from "../objects/axios";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 import { loadDataBase } from "../../commitment/models/commitmentModel";
 import { Boxes } from "../../../src/ergo/boxes";
+import * as wasm from "ergo-lib-wasm-nodejs";
+import { boxesSample } from "../dataset/BoxesSample";
+
+
+const chai = require("chai")
+const spies = require("chai-spies")
+chai.use(spies);
+
 
 export const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
 export const RWTRepoAddress = "N9nHZxAm7Z476Nbw6yF2X6BQEct7nNCm4SJeCK8DJEkERj6LXMJvKqG49WWSfNDufuuFEtN8msfWDd8UR4QUCmLEwFRWXC5hxEdk1XhdRSgiwuqyiPqpSTXtqUgGf67uCzEtHtN5nQKKuRYyr6xfFfV8YXKhms5JVqhmCM9869Nr4KzmLAdSLqwG6LswnFwRWwZZfC6Jf65RKV4xV5GTDqL5Ppc2QwnGDYFEUPPgLdskLbDAgwfDgE2mZnCfovUGmCjinh8UD1tW3AKfBPjFJbdF6eST8SB7EpDt162cZu7992Gaa3jNYwYnJKGKqU1izwb2WRVC3yXSHFQxr8GkTa3uQ9WAL1hyMSSNg7GqzF5a8GXFUTCw97zXUevKjtBAKxmjLQTfsmDdzYTe1oBNXEgffhVndtxhCfViYbnHVHUqEv8NQA8xiZaEzj9eCfrYyPepiq1sRruFwgjqhqhpetrQaKcSXmFjeFzCHnDR3aAV9dXQr6SyqAf7p7ML9H4rYNhLJAc4Usbuq8rVH8ysmTZPb7erhWmKXG8yFWqc6mE6tekXUuyvPhh3uXJWZgc6Z2RDbDNRvZNkxbUMDEDfb3iLtcNd3wGGLFndzryQNft8FZS4xwaskVZFQkFga3dfCgkMv3NAXrRTPmrDYD2WgurR8PfewJAJ2nu4GpMJadgTkkkLYvgrVxC8jp3w39dXzSCKAcQ7cGWyvYW6HK1s1VcG9QiogDf6YhM5mfroCCn6HweQ7hDdYtRvSyuDBVaZAJmhxKBffsGsApKocqPeZMjo8hsRr3bWgJA2xBhzxn42HCgDf2qULBH4b9HN5N3hyR7WURyVr9Y1vXwFTakEtMsr861X88mi2yUi7aqRh3XAFoN11Do9N34UPSzreELFk3SCxJT4uAdsKQrCm5yRo1zt5Mgh4tpHfgk4SsY7";
@@ -104,6 +112,9 @@ describe("Watcher Permit Transactions", () => {
             initMockedAxios(0);
             const DB = await loadDataBase("commitments");
             const boxes = new Boxes(DB)
+            chai.spy.on(boxes, "getRepoBox", () => {
+                return wasm.ErgoBox.from_json(boxesSample.secondRepoBox)
+            })
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
@@ -111,7 +122,7 @@ describe("Watcher Permit Transactions", () => {
                 boxes
             );
             const response = await secondTransaction.getPermit(100n);
-            expect(response.response).to.be.equal("e12a37d2a920e44c062ef278af174ea88acd93481428182618ed747217f00a12");
+            expect(response.response).to.be.equal("a748aa172d5d8c8fc70d8c20f59f643fe7adcadc9c8d5fd64cb46a2399cf11a8");
         });
 
         /**
@@ -140,9 +151,17 @@ describe("Watcher Permit Transactions", () => {
          *  should be signed without error
          */
         it("checks transaction is signed", async () => {
-            initMockedAxios(0);
             const DB = await loadDataBase("commitments");
             const boxes = new Boxes(DB)
+            initMockedAxios(0);
+            chai.spy.on(boxes, "getPermits", () => {
+                return [
+                    wasm.ErgoBox.from_json(boxesSample.firstWatcherPermitBox),
+                ]
+            })
+            chai.spy.on(boxes, "getRepoBox", () => {
+                return wasm.ErgoBox.from_json(boxesSample.secondRepoBox)
+            })
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -150,7 +169,6 @@ describe("Watcher Permit Transactions", () => {
                 boxes
             );
             const res = await transaction.returnPermit(1n);
-            console.log(res)
             expect(res.response).to.be.equal("185ddc04cc26eab29aa6d903aaf36a6fe5e78faa58507cf618ff066d275fbfb6");
         });
 
@@ -161,6 +179,14 @@ describe("Watcher Permit Transactions", () => {
             initMockedAxios(1);
             const DB = await loadDataBase("commitments");
             const boxes = new Boxes(DB)
+            chai.spy.on(boxes, "getPermits", () => {
+                return [
+                    wasm.ErgoBox.from_json(boxesSample.firstPermitBox)
+                ]
+            })
+            chai.spy.on(boxes, "getRepoBox", () => {
+                return wasm.ErgoBox.from_json(boxesSample.thirdRepoBox)
+            })
             const transaction = new Transaction(
                 rosenConfig,
                 "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9",
@@ -178,6 +204,14 @@ describe("Watcher Permit Transactions", () => {
             initMockedAxios();
             const DB = await loadDataBase("commitments");
             const boxes = new Boxes(DB)
+            chai.spy.on(boxes, "getPermits", () => {
+                return [
+                    wasm.ErgoBox.from_json(boxesSample.firstWatcherPermitBox),
+                ]
+            })
+            chai.spy.on(boxes, "getRepoBox", () => {
+                return wasm.ErgoBox.from_json(boxesSample.secondRepoBox)
+            })
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",

@@ -23,7 +23,7 @@ export class databaseConnection{
     }
 
     /**
-     * returns true if any commitment boxes had been spent to create event trigger
+     * returns true if any commitment boxesSample had been spent to create event trigger
      * @param commitments
      */
     private isMergeHappened = (commitments: Array<ObservedCommitmentEntity>): Boolean => {

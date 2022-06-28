@@ -11,6 +11,7 @@ import { NotEnoughFund } from "../../src/errors/errors";
 import { strToUint8Array } from "../../src/utils/utils";
 import { rosenConfig, tokens } from "../ergo/transactions/permit";
 import { initMockedAxios } from "../ergo/objects/axios";
+import { boxesSample } from "../ergo/dataset/BoxesSample";
 
 const chai = require("chai")
 const sinon = require("sinon");
@@ -78,7 +79,7 @@ describe("Testing Box Creation", () => {
     })
 
     describe("getUserPaymentBox", () => {
-        it("returns a covering plain boxes", async () => {
+        it("returns a covering plain boxesSample", async () => {
             const DB = await loadDataBase("commitments");
             chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [plainBox])
             const boxes = new Boxes(DB)
@@ -99,9 +100,10 @@ describe("Testing Box Creation", () => {
             initMockedAxios(1)
             const DB = await loadDataBase("commitments");
             const boxes = new Boxes(DB)
+            chai.spy.on(boxes, "getRepoBox", () => {
+                return wasm.ErgoBox.from_json(boxesSample.repoLastBox)
+            })
             const repoBox = await boxes.getRepoBox();
-            console.log("*************8")
-            console.log(repoBox)
             expect(repoBox.box_id().to_str()).to.be.equal("2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350");
         });
     });

@@ -82,7 +82,7 @@ describe("Commitment Scanner Utils test", () => {
     })
 
     describe("spentSpecialBoxesAtHeight", () => {
-        it("should find 2 updated boxes", async () => {
+        it("should find 2 updated boxesSample", async () => {
             const DB = await loadDataBase("commitments");
             chai.spy.on(DB, 'findUnspentSpecialBoxesById', () => [{boxId: "cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"}])
             const data = await CommitmentUtils.spentSpecialBoxes(

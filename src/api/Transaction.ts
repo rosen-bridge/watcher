@@ -82,20 +82,15 @@ export class Transaction{
      * @param RWTCount
      */
     returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
-        console.log("im here")
         await this.getWatcherState();
-        console.log(this.watcherPermitState)
         if (!this.watcherPermitState) {
             return {response: "you doesn't have permit box", status: 500}
         }
         const WID = this.watcherWID!;
         const height = await ErgoNetwork.getHeight();
-        console.log("im at height")
 
         const permitBoxes = await this.boxes.getPermits(RWTCount)
-        console.log("permit boxes")
         const repoBox = await this.boxes.getRepoBox();
-        console.log(repoBox.to_json())
         const users = repoBox.register_value(4)?.to_coll_coll_byte()!;
 
         const widBox = await ErgoNetwork.getBoxWithToken(this.userAddress, WID)
@@ -161,7 +156,7 @@ export class Transaction{
         const repoValue = BigInt(repoBox.value().as_i64().to_str());
         const permitValue = permitBoxes.map(permit =>
             BigInt(permit.value().as_i64().to_str()))
-            .reduce((a, b) => a + b, BigInt(0))
+            .reduce((a, b) => a + b, 0n)
         const widValue = BigInt(widBox.value().as_i64().to_str());
         const totalInputValue = repoValue + permitValue + widValue;
 
@@ -207,6 +202,7 @@ export class Transaction{
             outputBoxes.add(permitOut);
         }
         outputBoxes.add(userOutBox);
+
 
         const builder = wasm.TxBuilder.new(
             inputBoxSelection,
@@ -267,7 +263,6 @@ export class Transaction{
         const RWTCount = RSNCount / BigInt(R6.to_i64_str_array()[0]);
 
         const RSNInput = await ErgoNetwork.getBoxWithToken(this.userAddress, this.RSN.to_str())
-
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte()!;
         const repoBoxId = repoBox.box_id().as_bytes();
         users.push(repoBoxId);
