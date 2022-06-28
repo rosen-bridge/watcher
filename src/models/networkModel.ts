@@ -76,7 +76,8 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         const observationsEntity = observations
             .map((observation) => {
                 const observationEntity = new ObservationEntity();
-                observationEntity.fee = observation.fee;
+                observationEntity.networkFee = observation.networkFee;
+                observationEntity.bridgeFee = observation.bridgeFee;
                 observationEntity.sourceBlockId = observation.sourceBlockId;
                 observationEntity.amount = observation.amount;
                 observationEntity.fromChain = observation.fromChain;

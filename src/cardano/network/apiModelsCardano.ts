@@ -14,7 +14,8 @@ export interface Utxo {
 }
 
 export interface Tx {
-    utxos: Array<Utxo>
+    utxosOutput: Array<Utxo>
+    utxosInput: Array<Utxo>
 }
 
 export interface MetaData {
@@ -23,8 +24,8 @@ export interface MetaData {
 
 export interface RosenData {
     to: string,
-    from: string,
-    fee: string,
+    bridgeFee: string,
+    networkFee: string,
     targetChainTokenId: string,
     toAddress: string,
     fromAddress: string,

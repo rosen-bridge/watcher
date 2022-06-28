@@ -123,7 +123,7 @@ describe("Ergo Network(API)", () => {
      */
     describe("getCoveringErgAndTokenForAddress", () => {
         /**
-         * checks that function returns covering boxes(ERG) correctly with assertions
+         * checks that function returns covering boxesSample(ERG) correctly with assertions
          */
         it("test covering erg ", async () => {
             const res = await ErgoNetwork.getCoveringErgAndTokenForAddress(
@@ -135,7 +135,7 @@ describe("Ergo Network(API)", () => {
         });
 
         /**
-         * checks that function returns covering boxes(Token) correctly with assertions
+         * checks that function returns covering boxesSample(Token) correctly with assertions
          */
         it("test covering tokens", async () => {
             const res = await ErgoNetwork.getCoveringErgAndTokenForAddress(
@@ -169,7 +169,7 @@ describe("Ergo Network(API)", () => {
      */
     describe("getErgBox", () => {
         /**
-         * the function should return covering boxes with enough erg in it
+         * the function should return covering boxesSample with enough erg in it
          */
         it("get covering Erg without any covering token", async () => {
             const res = await ErgoNetwork.getErgBox(

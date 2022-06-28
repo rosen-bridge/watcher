@@ -80,7 +80,7 @@ export class CommitmentUtils{
     }
 
     /**
-     * Extracts new special boxes created in an array of transaction from a block
+     * Extracts new special boxesSample created in an array of transaction from a block
      * @param txs
      * @param permitAddress
      * @param watcherAddress
@@ -95,7 +95,7 @@ export class CommitmentUtils{
         const watcherErgoTree = Address.from_base58(watcherAddress).to_ergo_tree().to_base16_bytes()
         for (const tx of txs) {
             tx.outputs.forEach(box => {
-                // Adding new permit boxes
+                // Adding new permit boxesSample
                 if(box.ergoTree === permitErgoTree &&
                     box.assets.length > 0 &&
                     box.assets[0].tokenId == ergoConfig.RWTId) {
@@ -107,7 +107,7 @@ export class CommitmentUtils{
                     })
                 }
                 if (box.ergoTree === watcherErgoTree) {
-                    // Adding new WID boxes
+                    // Adding new WID boxesSample
                     if (box.assets.length > 0 && box.assets[0].tokenId == WID) {
                         specialBoxes.push({
                             boxId: box.boxId,
@@ -116,7 +116,7 @@ export class CommitmentUtils{
                             boxJson: JSON.stringify(box)
                         })
                     } else {
-                        // Adding new plain boxes
+                        // Adding new plain boxesSample
                         specialBoxes.push({
                             boxId: box.boxId,
                             type: BoxType.PLAIN,
@@ -131,7 +131,7 @@ export class CommitmentUtils{
     }
 
     /**
-     * Extract spent special boxes from the block transactions
+     * Extract spent special boxesSample from the block transactions
      * @param txs
      * @param database
      * @param newBoxes

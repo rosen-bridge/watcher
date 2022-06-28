@@ -686,8 +686,7 @@ export const mockedResponseBody = {
             }
         ],
         "total": 1
-    }
-`,
+    }`,
 
     watcherPermitLastBox:
         `{

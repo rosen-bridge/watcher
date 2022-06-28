@@ -48,7 +48,7 @@ export class Transaction{
         this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
         this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
         this.userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from(userSecret, 'hex'));
-        this.userAddress = wasm.Address.from_base58(ergoConfig.address);
+        this.userAddress = wasm.Address.from_base58(userAddress);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
         this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);
         this.getWatcherState();
@@ -69,7 +69,6 @@ export class Transaction{
                 return false;
             }
         });
-
         for (const [i, userWID] of usersWID.entries()) {
             if (await userWID) {
                 return uint8ArrayToHex(users[i])
@@ -92,7 +91,6 @@ export class Transaction{
 
         const permitBoxes = await this.boxes.getPermits(RWTCount)
         const repoBox = await this.boxes.getRepoBox();
-
         const users = repoBox.register_value(4)?.to_coll_coll_byte()!;
 
         const widBox = await ErgoNetwork.getBoxWithToken(this.userAddress, WID)
@@ -158,7 +156,7 @@ export class Transaction{
         const repoValue = BigInt(repoBox.value().as_i64().to_str());
         const permitValue = permitBoxes.map(permit =>
             BigInt(permit.value().as_i64().to_str()))
-            .reduce((a, b) => a + b, BigInt(0))
+            .reduce((a, b) => a + b, 0n)
         const widValue = BigInt(widBox.value().as_i64().to_str());
         const totalInputValue = repoValue + permitValue + widValue;
 
@@ -204,6 +202,7 @@ export class Transaction{
             outputBoxes.add(permitOut);
         }
         outputBoxes.add(userOutBox);
+
 
         const builder = wasm.TxBuilder.new(
             inputBoxSelection,
@@ -264,7 +263,6 @@ export class Transaction{
         const RWTCount = RSNCount / BigInt(R6.to_i64_str_array()[0]);
 
         const RSNInput = await ErgoNetwork.getBoxWithToken(this.userAddress, this.RSN.to_str())
-
         const users: Array<Uint8Array> | undefined = repoBox.register_value(4)?.to_coll_coll_byte()!;
         const repoBoxId = repoBox.box_id().as_bytes();
         users.push(repoBoxId);

@@ -189,7 +189,8 @@ export class Boxes {
             Buffer.from(observation.fromAddress),
             Buffer.from(observation.toAddress),
             bigIntToUint8Array(BigInt(observation.amount)),
-            bigIntToUint8Array(BigInt(observation.fee)),
+            bigIntToUint8Array(BigInt(observation.bridgeFee)),
+            bigIntToUint8Array(BigInt(observation.networkFee)),
             Buffer.from(observation.sourceChainTokenId, "hex"),
             Buffer.from(observation.targetChainTokenId, "hex"),
             Buffer.from(observation.sourceBlockId, "hex")]

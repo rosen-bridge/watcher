@@ -12,7 +12,8 @@ export interface Observation {
     fromAddress: string
     toAddress: string
     amount: string
-    fee: string
+    bridgeFee: string
+    networkFee: string
     sourceChainTokenId: string
     targetChainTokenId: string
     sourceTxId: string

@@ -208,7 +208,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * Returns unspent boxes with the specified type
+     * Returns unspent boxesSample with the specified type
      * @param type
      */
     getUnspentSpecialBoxes = async (type: BoxType): Promise<Array<SpecialBox>> => {
@@ -220,7 +220,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * Finds unspent special boxes by their box id
+     * Finds unspent special boxesSample by their box id
      * @param ids: Array of box ids
      */
     findUnspentSpecialBoxesById = async (ids: Array<string>): Promise<Array<BoxEntity>> => {

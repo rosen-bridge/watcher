@@ -38,8 +38,8 @@ export const generateSK = (): wasm.SecretKey => {
 }
 
 /**
- * Creates a change box from the input and output boxes
- * if output boxes have more assets than the inputs throws an exception
+ * Creates a change box from the input and output boxesSample
+ * if output boxesSample have more assets than the inputs throws an exception
  * if some input assets needs to be burnt throw exception
  * if all input assets were transferred to the outputs returns null
  * @param boxes
@@ -114,10 +114,10 @@ export const buildTxAndSign = async (builder: wasm.TxBuilder,
 }
 
 /**
- * Creates the transaction from input, data input and output boxes, then signs the created transaction with the secrets
+ * Creates the transaction from input, data input and output boxesSample, then signs the created transaction with the secrets
  * @param secret
- * @param boxes inout boxes
- * @param candidates output boxes
+ * @param boxes inout boxesSample
+ * @param candidates output boxesSample
  * @param height current network height
  * @param dataInputs
  * @param changeContract change contract if it is needed, unless use the secret's public address as the change address
@@ -159,7 +159,8 @@ export const commitmentFromObservation = (observation: Observation, WID: string)
         Buffer.from(observation.fromAddress),
         Buffer.from(observation.toAddress),
         bigIntToUint8Array(BigInt(observation.amount)),
-        bigIntToUint8Array(BigInt(observation.fee)),
+        bigIntToUint8Array(BigInt(observation.bridgeFee)),
+        bigIntToUint8Array(BigInt(observation.networkFee)),
         Buffer.from(observation.sourceChainTokenId, "hex"),
         Buffer.from(observation.targetChainTokenId, "hex"),
         Buffer.from(observation.sourceBlockId, "hex"),

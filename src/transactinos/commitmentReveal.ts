@@ -49,7 +49,7 @@ export class commitmentReveal{
             return signed.id().to_str()
         } catch (e) {
             if (e instanceof boxCreationError) {
-                console.log("Transaction input and output doesn't match. Input boxes assets must be more or equal to the outputs assets.")
+                console.log("Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets.")
             }
             console.log("Skipping the event trigger creation.")
             return ""

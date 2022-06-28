@@ -52,14 +52,14 @@ const secondPermitBox: SpecialBox = {
     boxJson: "fakeSample"
 }
 
-const firstWIDBox: SpecialBox ={
+const firstWIDBox: SpecialBox = {
     boxId: "cd0e9ad2ae564768bc6bf74a350934117040686fd267f313fce27d7df00fe549",
     type: BoxType.WID,
     value: "100000000",
     boxJson: "fakeSample"
 }
 
-const secondWIDBox: SpecialBox ={
+const secondWIDBox: SpecialBox = {
     boxId: "2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655",
     type: BoxType.WID,
     value: "10000000",
@@ -132,7 +132,7 @@ describe("Bridge Database functions", () => {
     describe("findCommitmentsById", () => {
         it("should return exactly two bridge with the specified id", async () => {
             const DB = await loadBridgeDataBase("commitments");
-            const data  = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
+            const data = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
             expect(data).to.have.length(2)
             expect(data[0].commitment).to.eql(secondCommitment.commitment)
         })

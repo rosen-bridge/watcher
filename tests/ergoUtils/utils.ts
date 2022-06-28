@@ -31,7 +31,8 @@ const observation: Observation = {
     fromAddress: "9i1Jy713XfahaB8oFFm2T9kpM7mzT1F4dMvMZKo7rJPB3U4vNVq",
     toAddress: "9hPZKvu48kKkPAwrhDukwVxmNrTAa1vXdSsbDijXVsEEYaUt3x5",
     amount: "100000",
-    fee: "2520",
+    bridgeFee: "2520",
+    networkFee: "10000000",
     sourceChainTokenId: "a5d0d1dd7c9faad78a662b065bf053d7e9b454af446fbd50c3bb2e3ba566e164",
     targetChainTokenId: "1db2acc8c356680e21d4d06ce345b83bdf61a89e6b0475768557e06aeb24709f",
     sourceTxId: "cb459f7f8189d3524e6b7361b55baa40c34a71ec5ac506628736096c7aa66f1a",
@@ -49,7 +50,7 @@ describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {
         it("should return the correct commitment", () => {
             const res = commitmentFromObservation(observation, WID)
-            expect(uint8ArrayToHex(res)).to.eql("e53f94b874427ddc736f0fd2e71bb0c7bff4dc18e8a07a1d9b2f84960ca97ccf")
+            expect(uint8ArrayToHex(res)).to.eql("188c1f6c228e07bd79fcbf198c5dbed51e0f6208feff9e868632b0b30ea5b4b0")
         })
     })
 
@@ -90,7 +91,9 @@ describe("Testing ergoUtils", () => {
             )
             builder.add_token(wasm.TokenId.from_str(tokenId),
                 wasm.TokenAmount.from_i64(wasm.I64.from_str("101")))
-            expect(function(){createChangeBox(boxes, [builder.build()], 10, secret)}).to.throw(boxCreationError)
+            expect(function () {
+                createChangeBox(boxes, [builder.build()], 10, secret)
+            }).to.throw(boxCreationError)
         })
         it("should return change box with all tokens", () => {
             const res = createChangeBox(boxes, [], 10, secret)
@@ -118,7 +121,8 @@ describe("Testing ergoUtils", () => {
          * the transaction should signed without error
          */
         it("should sign the transaction", async () => {
-            const outValue = BigInt(rosenConfig.minBoxValue + rosenConfig.fee);
+            initMockedAxios(0);
+            const outValue = BigInt(rosenConfig.minBoxValue) + BigInt(rosenConfig.fee);
             const add = Address.from_base58(userAddress)
             const transactionInput = await ErgoNetwork.getErgBox(
                 add,
@@ -174,7 +178,6 @@ describe("Testing ergoUtils", () => {
             // formula: 51% * 7
             const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
-            console.log(wasm.ErgoBox.from_json(repoBox).box_id().to_str())
             chai.spy.on(boxes, "getRepoBox", () => {return wasm.ErgoBox.from_json(repoBox)})
             const data = await requiredCommitmentCount(boxes)
             expect(data).to.eql(BigInt(3))
