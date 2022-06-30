@@ -125,6 +125,7 @@ describe("Bridge Database functions", () => {
         it("should return a commitment with specified event id", async () => {
             const DB = await loadBridgeDataBase("commitments");
             const data = await DB.commitmentsByEventId(firstCommitment.eventId)
+            console.log(data)
             expect(data).to.have.length(2)
         })
     })

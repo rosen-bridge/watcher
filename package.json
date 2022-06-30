@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "prebuild": "eslint --fix .",
-    "test": "mocha --slow 3000",
+    "test": "rm -rf ./sqlite && mocha --slow 3000 && rm -rf ./sqlite",
     "coverage": "c8 npm run test",
     "start:dev": "nodemon",
     "typeorm": "typeorm-ts-node-esm",

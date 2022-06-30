@@ -1,7 +1,6 @@
 import { DataSource } from "typeorm";
 import { expect } from "chai";
 import { entities } from "../../../src/entities";
-import { migrations } from "../../../src/migrations";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
 
