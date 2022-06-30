@@ -20,7 +20,7 @@ export class databaseConnection{
      * Check if a commitment is created form the observation or not
      * @param observation
      */
-    private isCommitmentCreated = async (observation: Observation): Promise<Boolean> => {
+    private isCommitmentCreated = async (observation: Observation): Promise<boolean> => {
         if(observation.commitmentBoxId === undefined){
             return false
         }
@@ -32,7 +32,7 @@ export class databaseConnection{
      * returns true if any commitment boxesSample had been spent to create event trigger
      * @param commitments
      */
-    private isMergeHappened = (commitments: Array<ObservedCommitmentEntity>): Boolean => {
+    private isMergeHappened = (commitments: Array<ObservedCommitmentEntity>): boolean => {
         for(const commitment of commitments){
             if(commitment.spendReason! === SpendReason.MERGE) return true
         }
@@ -52,7 +52,7 @@ export class databaseConnection{
      * Returns sets of commitments that are ready to be merged into event trigger
      */
     allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
-        let readyCommitments: Array<CommitmentSet> = []
+        const readyCommitments: Array<CommitmentSet> = []
         const observationEntities = (await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation))
         const observations: Array<Observation> = await Promise.all(
             observationEntities.map(async observation => await this.isCommitmentCreated(observation)))

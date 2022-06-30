@@ -114,7 +114,7 @@ describe("Ergo Network(API)", () => {
          * should return ErgoStateContext without error
          */
         it("should return ErgoStateContext without error", async () => {
-            const res = await ErgoNetwork.getErgoStateContext();
+            await ErgoNetwork.getErgoStateContext();
         });
     });
 

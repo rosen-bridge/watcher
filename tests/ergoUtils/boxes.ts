@@ -53,7 +53,6 @@ const plainBox: SpecialBox ={
 }
 
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
-const tokenId = "469255244f7b12ea7d375ec94ec8d2838a98be0779c8231ece3529ae69c421db"
 const permit = "EE7687i4URb4YuSGSQXPCb6iAFxAd5s8H1DLbUFQnSrJ8rED2KXdq8kUPQZ3pcPVFD97wQ32PATufWyvyhvit6sokNfLUNqp8wirq6L4H1WQSxYyL6gX7TeLTF2fRwqCvFDkcN6Z5StykpvKT4GrC9wa8DAu8nFre6VAnxMzE5DG3AVxir1pEWEKoLohsRCmKXGJu9jw58R1tE6Ff1LqqiaXbaAgkiyma9PA2Ktv41W6GutPKCmqSE6QzheE2i5c9uuUDRw3fr1kWefphpZVSmuCqNjuVU9fV73dtZE7jhHoXgTFRtHmGJS27DrHL9VvLyo7AP6bSgr4mAoYdF8UPTmcu4fFsMGFFJahLXm7V1qeqtsBXXEvRqQYEaSbMNRVmSZAe6jPhLVyqTBF9rLbYTCCjQXA6u7fu7JHn9xULHxsEjYdRuciVnnsk7RT5dDMM7YCC2yxnE7X8mZMekwceG3dj2triNPo7N6NbxNVSyw1jxaHJGHEza5PgUcieMqMvZyixuiu6PqA55GRCoCRek2pBcATifcyB2FJqtj"
 
 describe("Testing Box Creation", () => {
@@ -191,8 +190,8 @@ describe("Testing Box Creation", () => {
 
             expect(userBoxCandidate.value().as_i64().to_str()).to.be.equal(amount);
             expect(userBoxCandidate.tokens().len()).to.be.equal(4);
-            let boxTokensId: Array<string> = [];
-            let boxTokensAmount: Array<string> = [];
+            const boxTokensId: Array<string> = [];
+            const boxTokensAmount: Array<string> = [];
             for (let i = 0; i < 4; i++) {
                 boxTokensId.push(userBoxCandidate.tokens().get(i).id().to_str());
                 boxTokensAmount.push(userBoxCandidate.tokens().get(i).amount().as_i64().to_str());

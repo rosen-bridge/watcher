@@ -63,7 +63,7 @@ export class Transaction{
         const usersWID = users.map(async (id) => {
             const wid = uint8ArrayToHex(id);
             try {
-                const box = await ErgoNetwork.getBoxWithToken(this.userAddress, wid,);
+                await ErgoNetwork.getBoxWithToken(this.userAddress, wid,);
                 return true;
             } catch (error) {
                 return false;

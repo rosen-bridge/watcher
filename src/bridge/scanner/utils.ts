@@ -66,7 +66,7 @@ export class CommitmentUtils{
                                        database: BridgeDataBase,
                                        newCommitments: Array<string>) => {
         const eventTriggerErgoTree = Address.from_base58(rosenConfig.eventTriggerAddress).to_ergo_tree().to_base16_bytes()
-        let updatedCommitments: Array<SpentBox> = []
+        const updatedCommitments: Array<SpentBox> = []
         for (const tx of txs) {
             const inputBoxIds: string[] = tx.inputs.map(box => box.boxId)
             const foundCommitments = (await database.findCommitmentsById(inputBoxIds)).map(commitment => commitment.commitmentBoxId)

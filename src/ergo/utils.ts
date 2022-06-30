@@ -181,8 +181,11 @@ export const contractHash = (contract: wasm.Contract): Buffer => {
 
 export const requiredCommitmentCount = async (boxes: Boxes): Promise<bigint> => {
     const repo = await boxes.getRepoBox()
-    const r6: Array<string> = repo.register_value(6)?.to_i64_str_array()!
-    const r4 = repo.register_value(4)?.to_coll_coll_byte()!
+    const R6 = repo.register_value(6)
+    const R4 = repo.register_value(4)
+    if(!R6 || !R4) throw new Error("Bad Repo Box response")
+    const r6: Array<string> = R6.to_i64_str_array()!
+    const r4 = R4.to_coll_coll_byte()!
     const max = BigInt(r6[3])
     const min = BigInt(r6[2])
     const percentage = BigInt(r6[1])
