@@ -44,7 +44,7 @@ export class ErgoObservationEntity {
     requestId: string
 
     @ManyToOne(
-        "BlockEntity",
+        "ErgoBlockEntity",
         "height",
         {onDelete: 'CASCADE',}
     )

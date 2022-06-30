@@ -13,7 +13,7 @@ export class ErgoBlockEntity {
     hash: string
 
     @OneToMany(
-        "ObservationEntity",
+        "ErgoObservationEntity",
         "block",
         {cascade: true,}
     )

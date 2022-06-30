@@ -10,8 +10,9 @@
     "coverage": "c8 npm run test",
     "start:dev": "nodemon",
     "typeorm": "typeorm-ts-node-esm",
-    "typeorm:generate": "npm run typeorm migration:generate src/migrations/watcher/cardano/networkModelMigration -- -d ./config/ormconfig.ts",
+    "typeorm:generate:cardano": "npm run typeorm migration:generate src/migrations/watcher/cardano/cardanoModelMigration -- -d ./config/ormconfig.ts",
     "typeorm:generate:bridge": "npm run typeorm migration:generate src/migrations/watcher/bridge/bridgeModelMigration -- -d ./config/bridgeOrmConfig.ts",
+    "typeorm:generate:ergo": "npm run typeorm migration:generate src/migrations/watcher/ergo/ergoModelMigration -- -d ./config/ergoOrmConfig.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d ./config/ormconfig.ts",
     "typeorm:migrate:bridge": "npm run typeorm migration:run -- -d ./config/bridgeOrmConfig.ts"
   },
