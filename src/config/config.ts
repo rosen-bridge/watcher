@@ -2,6 +2,7 @@ import config from "config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { SecretError } from "../errors/errors";
 import { uint8ArrayToHex } from "../utils/utils";
+import { ErgoStateContext } from "ergo-lib-wasm-nodejs";
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
@@ -19,6 +20,8 @@ const REPO_NFT: string | undefined = config.get?.('ergo.repoNFT');
 const CARDANO_TIMEOUT: number | undefined = config.get?.('cardano.timeout');
 const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.('ergo.explorerTimeout');
 const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
+const ERGO_SCANNER_INTERVAL: number | undefined = config.get?.('ergo.scanner.interval');
+const ERGO_SCANNER_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scanner.initialBlockHeight');
 
 export class ErgoConfig{
     private static instance: ErgoConfig;
@@ -146,5 +149,30 @@ export class CardanoConfig{
             CardanoConfig.instance = new CardanoConfig();
         }
         return CardanoConfig.instance;
+    }
+}
+
+export class ErgoScannerConfig{
+    private static instance: ErgoScannerConfig;
+    interval: number;
+    initialHeight: number;
+
+    private constructor() {
+        if (ERGO_SCANNER_INTERVAL === undefined) {
+            throw new Error("Ergo Scanner interval is not set in the config file");
+        }
+        if (ERGO_SCANNER_INITIAL_HEIGHT === undefined) {
+            throw new Error("Ergo Scanner initial height is not set in the config file");
+        }
+
+        this.interval = ERGO_SCANNER_INTERVAL;
+        this.initialHeight = ERGO_SCANNER_INITIAL_HEIGHT;
+    }
+
+    static getConfig() {
+        if (!ErgoScannerConfig.instance) {
+            ErgoScannerConfig.instance = new ErgoScannerConfig();
+        }
+        return ErgoScannerConfig.instance;
     }
 }

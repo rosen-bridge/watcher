@@ -1,16 +1,14 @@
 import { AbstractScanner } from "../scanner/abstractScanner";
-import { BlockEntity } from "../entities/BlockEntity";
+import { BlockEntity } from "../entities/watcher/cardano/BlockEntity";
 import { Block, Observation } from "../objects/interfaces";
 import { NetworkDataBase } from "../models/networkModel";
 import config, { IConfig } from "config";
-import { ErgoConfig } from "../config/config";
+import { ErgoScannerConfig } from "../config/config";
 import { ErgoUtils } from "./utils";
 import { ErgoNetworkApi } from "../bridge/network/networkApi";
-import { cardanoOrmConfig } from "../../config/ormconfig";
-import { KoiosNetwork } from "../cardano/network/koios";
 import { ergoOrmConfig } from "../../config/ergoOrmConfig";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = ErgoScannerConfig.getConfig();
 
 export class Scanner extends AbstractScanner<BlockEntity, Array<Observation>> {
     _dataBase: NetworkDataBase;
