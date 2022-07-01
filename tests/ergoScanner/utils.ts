@@ -1,14 +1,15 @@
 import { ErgoNetworkApi } from "../../src/bridge/network/networkApi";
 import { ErgoUtils } from "../../src/ergoScanner/utils";
-import { expect } from "chai";
+import { NodeTransaction } from "../../src/bridge/network/ergoApiModels";
+import { rosenConfig } from "../../src/config/rosenConfig";
 
+import { expect } from "chai";
 import chai from "chai";
 import spies from "chai-spies";
 import sinon from "sinon"
-import { rosenConfig } from "../../src/config/rosenConfig";
 chai.use(spies)
 
-import permitObj from "./dataset/permitBox.json" assert {type: "json"}
+import tx from "./dataset/tx.json" assert {type: "json"}
 
 const sampleObservation = {
     fromChain: 'CARDANO',
@@ -46,7 +47,7 @@ describe("Ergo Scanner Utils", () => {
 
     describe("checkTx", () => {
         it("should return an observation", async () => {
-            const data = await ErgoUtils.checkTx("hash", tx, rosenConfig.lockAddress)
+            const data = await ErgoUtils.checkTx("hash", <NodeTransaction><unknown>tx, rosenConfig.lockAddress)
             console.log(data)
         })
     })
