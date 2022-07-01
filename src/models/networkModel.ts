@@ -1,21 +1,18 @@
 import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
 import { BlockEntity } from "../entities/watcher/cardano/BlockEntity";
-import { CommitmentEntity, txStatus } from "../entities/watcher/cardano/CommitmentEntity";
 import { ObservationEntity } from "../entities/watcher/cardano/ObservationEntity";
-import { Block, Commitment, Observation } from "../objects/interfaces";
+import { Block, Observation } from "../objects/interfaces";
 import { AbstractDataBase } from "./abstractModel";
 
 export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observation>> {
     dataSource: DataSource;
     blockRepository: Repository<BlockEntity>;
-    commitmentRepository: Repository<CommitmentEntity>;
     observationRepository: Repository<ObservationEntity>;
 
     private constructor(dataSource: DataSource) {
         super()
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(BlockEntity);
-        this.commitmentRepository = this.dataSource.getRepository(CommitmentEntity);
         this.observationRepository = this.dataSource.getRepository(ObservationEntity);
     }
 
@@ -79,7 +76,8 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         const observationsEntity = observations
             .map((observation) => {
                 const observationEntity = new ObservationEntity();
-                observationEntity.fee = observation.fee;
+                observationEntity.networkFee = observation.networkFee;
+                observationEntity.bridgeFee = observation.bridgeFee;
                 observationEntity.sourceBlockId = observation.sourceBlockId;
                 observationEntity.amount = observation.amount;
                 observationEntity.fromChain = observation.fromChain;
@@ -126,20 +124,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
     }
 
     /**
-     * get bridge
-     * @param eventId
-     * @return Promise<string[]>
-     */
-    getCommitments = async (eventId: string): Promise<string[]> => {
-        const commitments = await this.commitmentRepository.findBy({
-            eventId: eventId,
-        });
-        return commitments.map((commitment) => commitment.commitment);
-    }
-
-    /**
      * returns confirmed observation after required confirmation
-     * ignores unused observation where
      * @param confirmation
      */
     getConfirmedObservations = async (confirmation: number): Promise<Array<ObservationEntity>> => {
@@ -156,56 +141,18 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
 
     /**
      * Save a newly created commitment and updates the related observation
-     * @param commitment
-     * @param txId
-     * @param observationId
+     * @param commitmentBoxId
+     * @param observation
      */
-    saveCommitment = async (commitment: Commitment, txId: string, observationId: number) => {
-        const commitmentEntity = new CommitmentEntity();
-        commitmentEntity.eventId = commitment.eventId
-        commitmentEntity.commitment = commitment.commitment
-        commitmentEntity.WID = commitment.WID
-        commitmentEntity.commitmentBoxId = commitment.commitmentBoxId
-        commitmentEntity.commitmentTxId = txId
-        commitmentEntity.flag = txStatus.SENT
-
-        const oldObservation = await this.observationRepository.findOne({
-            where: {id: observationId}
-        })
+    updateObservation = async (commitmentBoxId: string, observation: ObservationEntity) => {
         const newObservation = new ObservationEntity()
         Object.assign(newObservation, {
-            ...oldObservation,
+            ...observation,
             ...{
-                commitment: commitmentEntity
+                commitmentBoxId: commitmentBoxId
             }
         })
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-
-        let error = true;
-        await queryRunner.startTransaction()
-        try {
-            await queryRunner.manager.save(commitmentEntity);
-            await queryRunner.manager.save(newObservation);
-            await queryRunner.commitTransaction();
-        } catch (err) {
-            await queryRunner.rollbackTransaction();
-            error = false;
-        } finally {
-            await queryRunner.release();
-        }
-        return error;
-    }
-
-    /**
-     * returns all created events by the watcher that are still valid
-     */
-    getCreatedCommitments = async (): Promise<Array<CommitmentEntity>> => {
-        return await this.commitmentRepository.find({
-            where: {
-                flag: txStatus.CREATED
-            }
-        })
+        return this.observationRepository.save(newObservation)
     }
 }
 

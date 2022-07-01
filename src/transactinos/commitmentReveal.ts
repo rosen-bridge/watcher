@@ -1,27 +1,24 @@
-import { BridgeDataBase } from "../bridge/models/bridgeModel";
-import { Observation } from "../objects/interfaces";
-import { NetworkDataBase } from "../models/networkModel";
-import config from "config";
-import { ObservedCommitmentEntity } from "../entities/watcher/bridge/ObservedCommitmentEntity";
-import { commitmentFromObservation, createAndSignTx } from "../ergo/utils";
+import { Commitment, Observation } from "../objects/interfaces";
+import { commitmentFromObservation, createAndSignTx, requiredCommitmentCount } from "../ergo/utils";
 import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
+import { databaseConnection } from "../ergo/databaseConnection";
+import { rosenConfig } from "../config/rosenConfig";
 
-const commitmentLimit = parseInt(config.get?.('commitmentLimit'))
-const txFee = BigInt(config.get?.('ergo.txFee'))
+const txFee = BigInt(rosenConfig.fee)
 
 export class commitmentReveal{
-    _commitmentDataBase: BridgeDataBase
-    _observationDataBase: NetworkDataBase
+    _databaseConnection: databaseConnection
     _secret: wasm.SecretKey
     _boxes: Boxes
 
-    constructor(secret: wasm.SecretKey, boxes: Boxes) {
+    constructor(secret: wasm.SecretKey, boxes: Boxes, db: databaseConnection) {
         this._secret = secret
         this._boxes = boxes
+        this._databaseConnection = db
     }
     /**
      * creates and sends the trigger event transaction
@@ -36,7 +33,7 @@ export class commitmentReveal{
                                     feeBoxes: Array<wasm.ErgoBox>): Promise<string> => {
         const height = await ErgoNetwork.getHeight()
         const boxValues = commitmentBoxes.map(box => BigInt(box.value().as_i64().to_str())).reduce((a, b) =>  a + b, BigInt(0))
-        const triggerEvent = await Boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
+        const triggerEvent = await this._boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
         const inputBoxes = new wasm.ErgoBoxes(feeBoxes[0]);
         feeBoxes.slice(1, feeBoxes.length).forEach(box => inputBoxes.add(box))
         commitmentBoxes.forEach(box => inputBoxes.add(box))
@@ -51,7 +48,7 @@ export class commitmentReveal{
             return signed.id().to_str()
         } catch (e) {
             if (e instanceof boxCreationError) {
-                console.log("Transaction input and output doesn't match. Input boxes assets must be more or equal to the outputs assets.")
+                console.log("Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets.")
             }
             console.log("Skipping the event trigger creation.")
             return ""
@@ -64,7 +61,7 @@ export class commitmentReveal{
      * @param commitments
      * @param observation
      */
-    commitmentCheck = (commitments: Array<ObservedCommitmentEntity>, observation: Observation): Array<ObservedCommitmentEntity> => {
+    commitmentCheck = (commitments: Array<Commitment>, observation: Observation): Array<Commitment> => {
         return commitments.filter(commitment => {
             return commitmentFromObservation(observation, commitment.WID).toString() === commitment.commitment
         })
@@ -75,22 +72,20 @@ export class commitmentReveal{
      * If the number of valid bridge are more than the required bridge it generates the trigger event
      */
     job = async () => {
-        const createdCommitments = await this._observationDataBase.getCreatedCommitments()
-        for (const commitment of createdCommitments) {
-            const observedCommitments = await this._commitmentDataBase.commitmentsByEventId(commitment.eventId)
-            if(observedCommitments.length >= commitmentLimit) {
-                const validCommitments = this.commitmentCheck(observedCommitments, commitment.observation)
-                if(validCommitments.length >= commitmentLimit){
-                    const commitmentBoxes = validCommitments.map(async(commitment) => {
-                        return await ErgoNetwork.boxById(commitment.commitmentBoxId)
+        const commitmentSets = await this._databaseConnection.allReadyCommitmentSets()
+        for (const commitmentSet of commitmentSets) {
+            const validCommitments = this.commitmentCheck(commitmentSet.commitments, commitmentSet.observation)
+            const requiredCommitments = await requiredCommitmentCount(this._boxes)
+            if(BigInt(validCommitments.length) >= requiredCommitments){
+                const commitmentBoxes = validCommitments.map(async(commitment) => {
+                    return await ErgoNetwork.boxById(commitment.commitmentBoxId)
+                })
+                Promise.all(commitmentBoxes).then(async(cBoxes) => {
+                    const WIDs: Array<Uint8Array> = validCommitments.map(commitment => {
+                        return Buffer.from(commitment.WID)
                     })
-                    Promise.all(commitmentBoxes).then(async(cBoxes) => {
-                        const WIDs: Array<Uint8Array> = observedCommitments.map(commitment => {
-                            return Buffer.from(commitment.WID)
-                        })
-                        await this.triggerEventCreationTx(cBoxes, commitment.observation, WIDs, await this._boxes.getUserPaymentBox(txFee))
-                    })
-                }
+                    await this.triggerEventCreationTx(cBoxes, commitmentSet.observation, WIDs, await this._boxes.getUserPaymentBox(txFee))
+                })
             }
         }
     }

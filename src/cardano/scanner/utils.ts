@@ -4,7 +4,7 @@ import { BANK } from "./bankAddress";
 import { Observation } from "../../objects/interfaces";
 import { KoiosNetwork } from "../network/koios";
 
-export class CardanoUtils {
+export class CardanoUtils{
 
     /**
      * check if the object is the rosen bridge data type or not
@@ -13,11 +13,10 @@ export class CardanoUtils {
      */
     static isRosenData(data: object): data is RosenData {
         return 'to' in data &&
-            'from' in data &&
-            'fee' in data &&
+            'bridgeFee' in data &&
+            'networkFee' in data &&
             'targetChainTokenId' in data &&
-            'toAddress' in data &&
-            'fromAddress' in data;
+            'toAddress' in data;
     }
 
     /**
@@ -40,7 +39,7 @@ export class CardanoUtils {
      */
     static checkTx = async (txHash: string, blockHash: string, bank: Array<string>, networkAccess: KoiosNetwork): Promise<Observation | undefined> => {
         const tx = (await networkAccess.getTxUtxos([txHash]))[0];
-        const utxos = tx.utxos.filter((utxo: Utxo) => {
+        const utxos = tx.utxosOutput.filter((utxo: Utxo) => {
             return bank.find(address => address === utxo.payment_addr.bech32) != undefined;
         });
         if (utxos.length !== 0) {
@@ -56,17 +55,18 @@ export class CardanoUtils {
                     const data = metaData["0"];
                     // TODO: Request id should be digest of tx id
                     return {
-                        fromChain: data.from,
+                        fromChain: 'CARDANO',
                         toChain: data.to,
-                        fee: data.fee,
                         amount: asset.quantity,
                         sourceChainTokenId: assetFingerprint.fingerprint(),
                         targetChainTokenId: data.targetChainTokenId,
                         sourceTxId: txHash,
+                        bridgeFee: data.bridgeFee,
+                        networkFee: data.networkFee,
                         sourceBlockId: blockHash,
                         requestId: txHash,
                         toAddress: data.toAddress,
-                        fromAddress: data.fromAddress,
+                        fromAddress: tx.utxosInput[0].payment_addr.bech32
                     }
                 }
             }

@@ -327,10 +327,9 @@ mockedAxios.onPost(
         "metadata": {
             "0": {
                 "to": "ERGO",
-                "fee": "10000",
-                "from": "CARDANO",
+                "bridgeFee": "10000",
+                "networkFee": "10000",
                 "toAddress": "ergoAddress",
-                "fromAddress": "cardanoAddress",
                 "targetChainTokenId": "cardanoTokenId"
             }
         }

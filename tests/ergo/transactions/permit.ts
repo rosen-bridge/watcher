@@ -1,22 +1,28 @@
 import { Transaction } from "../../../src/api/Transaction";
 import { strToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
-import * as wasm from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../objects/axios";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
+import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
+import { Boxes } from "../../../src/ergo/boxes";
+import * as wasm from "ergo-lib-wasm-nodejs";
+import { boxesSample } from "../dataset/BoxesSample";
+
+import chai from "chai";
+import spies from "chai-spies";
+chai.use(spies);
 
 
-const RWTId = "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267";
 export const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
 export const RWTRepoAddress = "N9nHZxAm7Z476Nbw6yF2X6BQEct7nNCm4SJeCK8DJEkERj6LXMJvKqG49WWSfNDufuuFEtN8msfWDd8UR4QUCmLEwFRWXC5hxEdk1XhdRSgiwuqyiPqpSTXtqUgGf67uCzEtHtN5nQKKuRYyr6xfFfV8YXKhms5JVqhmCM9869Nr4KzmLAdSLqwG6LswnFwRWwZZfC6Jf65RKV4xV5GTDqL5Ppc2QwnGDYFEUPPgLdskLbDAgwfDgE2mZnCfovUGmCjinh8UD1tW3AKfBPjFJbdF6eST8SB7EpDt162cZu7992Gaa3jNYwYnJKGKqU1izwb2WRVC3yXSHFQxr8GkTa3uQ9WAL1hyMSSNg7GqzF5a8GXFUTCw97zXUevKjtBAKxmjLQTfsmDdzYTe1oBNXEgffhVndtxhCfViYbnHVHUqEv8NQA8xiZaEzj9eCfrYyPepiq1sRruFwgjqhqhpetrQaKcSXmFjeFzCHnDR3aAV9dXQr6SyqAf7p7ML9H4rYNhLJAc4Usbuq8rVH8ysmTZPb7erhWmKXG8yFWqc6mE6tekXUuyvPhh3uXJWZgc6Z2RDbDNRvZNkxbUMDEDfb3iLtcNd3wGGLFndzryQNft8FZS4xwaskVZFQkFga3dfCgkMv3NAXrRTPmrDYD2WgurR8PfewJAJ2nu4GpMJadgTkkkLYvgrVxC8jp3w39dXzSCKAcQ7cGWyvYW6HK1s1VcG9QiogDf6YhM5mfroCCn6HweQ7hDdYtRvSyuDBVaZAJmhxKBffsGsApKocqPeZMjo8hsRr3bWgJA2xBhzxn42HCgDf2qULBH4b9HN5N3hyR7WURyVr9Y1vXwFTakEtMsr861X88mi2yUi7aqRh3XAFoN11Do9N34UPSzreELFk3SCxJT4uAdsKQrCm5yRo1zt5Mgh4tpHfgk4SsY7";
 
-const tokens = [
+export const tokens = [
     "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8",
     "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516",
     "34a217f1d2bc0f84607dad61c886de53f1ca919c389f184136f05a0de1d196f2",
     "2c966d5840c8725aff53414b3e60f494d4f1b79e642c9ef806e6536ec32f77f9",
 ];
-const rosenConfig = {
+export const rosenConfig = {
     RSN: "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516",
     minBoxValue: "1100000",
     fee: "1100000",
@@ -28,7 +34,8 @@ const rosenConfig = {
     fraudAddress: "LFz5FPkW7nPVq2NA5Ycb8gu5kAnbT4HuaiK2XJtJi1hZCL4ZtPaXqJZkhonpoVLW34mTrqwMCeW96tt7nyK5XTu6QmUAD9T22mLYa6opX3WdM1wpJC5ofhDUym8N4AB2Y7FnJ9ku512wGU8GJZ5xVgMQ3G5oHJJTQ1uBd72RphnWbfHUVjF49h2jgz4H9gBZQ8wFwZizTFjVh3CnMs76HP9mnnN4ngysoGzEZJqd2BREmGxPdPvBw",
     eventTriggerAddress: "LkY4RECaMvZiFwMrxpzB4uTr1ZqrKGFkZ5mUnoMPw7LEB5crVok7VueBVTS2NCMt5TYSaHRDiHnTezgGQvKcBMJUawkQEpGZWp87nLHHbaG3VaxxeQK94fxAj2zSzSU2svzA6DPrKR7JL4LZPLaW98cWBwk1YWQTqjWebTgvPkMvqYKsGgjn8Zk6uxEiXvRLzfDvGutVAmNRzcXwU9NjdBKSJrfpWFoFLMDY3chG2gcCSYiYjnqYW1sQNEcnDPJscNbcoFYEonUojtZ6m1zjwvWHXcH5UpKk9SEmxemgi7x1ezKnYJupbHsaiGEJEhtcAUWmMCSJH5iRQZQbKAud5qYDM7VX3MAqaAv9wB6uRaGKuoKShyzP",
     commitmentAddress: "EurZwDoNU1Y6ZDtRgb2ufgAGAnJ4oNyiFvr7VyoJeKW9r1W7NbbitXDiqMNzAh8vQRATLiFRXra42mHBogMxySorHXF4hwKcPNasRPBfwcEMbRMTp8Xo1gur26V561z8wit9BE8nvRztDstzKdMkXLwjh1GGpXuFHV8GKo5Sz4d2Rb4W7QiqbFbFdRVe3TRqmv7yy2VvF9kWhRr5xTLkmxAUpEmYQwVVLmdU52XyahV7Hnw15DY3faHne4SkYtMMKSH5rvtXFUNf7UDeU8U2mjmt8oZYpprCi2ZouQNcLrDXT9i6hJ3jcmwhMfF1whQjZRNooFvcM59bmnvG3U1dJupdVpjTqXwwmGT9BkJFnX2eWjmNQ2EEfpSyUPMf5mpXBp8484u7ibjfobHpe3Jw9bHGe5nqtuLdEVKt7pe5pp5Lpv8Lqw1h8kopx9kHGKfZrVoQCsJRjHGpGZEnFgqtk4p58mLvn1y86HQwfkMBcfeRiy1qimmwbaTrn4tHbz1WJ481z8H8VxSTrrsWSpDZf4CJaRzh6mmqMTw2SxgN3vsxxAyb21yVazMryAtPAr12hjBAVf2MTuZ8QTQp68VHHZg7ePXaitbS6qkV16T9cTbkYyCWqahQbq7LLp3xMQXywZa9XpnRvFEboLtQJjNBvLtTT1UV4N2Hqw3h8qHq1DFqd4dzkj9ycaazTMiDe67mq5avy3zmgjzXUZdTxPKHkxWJCSccwnp7d2wJU3gCfF7k3Z81ui6XBMh6pzgND2U2rGzpF3aUE5LftZMhkQ5d5dg7JHnBQ62jLj2UF",
-};
+    RWTId: "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267"
+}
 
 initMockedAxios();
 
@@ -36,113 +43,6 @@ initMockedAxios();
  * requirements: an object of Transaction class, rosenConfig, userAddress, userSecret
  */
 describe("Watcher Permit Transactions", () => {
-    /**
-     * createRepo function tests
-     */
-    describe('createRepo', () => {
-        /**
-         *  the token counts and order in the outputBox should follow the assertions
-         */
-        it("checks repoBox tokens order and count", async () => {
-            const transaction = new Transaction(
-                rosenConfig,
-                userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
-            );
-            const RWTCount = "100";
-            const RSNCount = "1";
-            const repoBox = await transaction.createRepo(
-                0,
-                RWTCount,
-                RSNCount,
-                [new Uint8Array([])],
-                [],
-                wasm.Constant.from_i64_str_array([]),
-                0
-            );
-
-            expect(repoBox.tokens().len()).to.be.equal(3);
-            expect(repoBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
-            expect(repoBox.tokens().get(1).amount().as_i64().to_str()).to.be.equal(RWTCount);
-            expect(repoBox.tokens().get(2).amount().as_i64().to_str()).to.be.equal(RSNCount);
-        });
-    });
-
-    /**
-     * createPermitBox function tests
-     */
-    describe("createPermitBox", () => {
-        /**
-         * the registers and tokens of permit box should follow the assertions bellow
-         */
-        it("checks permit box registers and tokens", async () => {
-            const transaction = new Transaction(
-                rosenConfig,
-                userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
-            );
-            const WID = strToUint8Array("4198da878b927fdd33e884d7ed399a3dbd22cf9d855ff5a103a50301e70d89fc");
-            const RWTCount = "100";
-            const permitBox = await transaction.createPermitBox(
-                1,
-                RWTCount,
-                WID
-            );
-
-            expect(permitBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
-            expect(permitBox.tokens().len()).to.be.equal(1);
-            expect(permitBox.tokens().get(0).amount().as_i64().to_str()).to.be.equal(RWTCount);
-            expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(RWTId);
-            expect(permitBox.register_value(4)?.to_coll_coll_byte().length).to.be.equal(1);
-            expect(permitBox.register_value(4)?.to_coll_coll_byte()[0]).to.be.eql(WID);
-            expect(permitBox.register_value(5)?.to_byte_array()).to.be.eql(new Uint8Array([0]));
-
-        });
-    });
-
-    /**
-     * createUserBoxCandidate function tests
-     */
-    describe("createUserBoxCandidate", () => {
-        /**
-         * checks userChangeBox and erg amount is made correctly with respect to input tokens
-         */
-        it("checks userBox tokens and value", async () => {
-            const transaction = new Transaction(
-                rosenConfig,
-                userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
-            );
-            const tokensAmount = ["100", "1", "8000", "999000"];
-            const amount = "11111111111"
-            const tokenId = tokens[0];
-            const tokenAmount = tokensAmount[0];
-            const changeTokens = new Map<string, string>();
-            for (let i = 1; i < 4; i++) {
-                changeTokens.set(tokens[i], tokensAmount[i]);
-            }
-
-            const userBoxCandidate = await transaction.createUserBoxCandidate(
-                1,
-                "",
-                amount,
-                wasm.TokenId.from_str(tokenId),
-                wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount)),
-                changeTokens,
-            );
-
-            expect(userBoxCandidate.value().as_i64().to_str()).to.be.equal(amount);
-            expect(userBoxCandidate.tokens().len()).to.be.equal(4);
-            const boxTokensId: Array<string> = [];
-            const boxTokensAmount: Array<string> = [];
-            for (let i = 0; i < 4; i++) {
-                boxTokensId.push(userBoxCandidate.tokens().get(i).id().to_str());
-                boxTokensAmount.push(userBoxCandidate.tokens().get(i).amount().as_i64().to_str());
-            }
-            expect(boxTokensId).to.be.eql(tokens);
-            expect(boxTokensAmount).to.be.eql(boxTokensAmount);
-        });
-    });
 
     /**
      * getWID functions tests
@@ -153,10 +53,13 @@ describe("Watcher Permit Transactions", () => {
          */
         it("checks is there any wid in the usersBoxes", async () => {
             const sampleWID = "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8";
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
+                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                boxes
             );
             const usersHex = ["414441", sampleWID];
             const users: Array<Uint8Array> = [];
@@ -169,78 +72,6 @@ describe("Watcher Permit Transactions", () => {
     });
 
     /**
-     * buildTxAndSign function tests
-     */
-    describe("buildTxAndSign", () => {
-        /**
-         * the transaction should signed without error
-         */
-        it("should sign the transaction", async () => {
-            const transaction = new Transaction(
-                rosenConfig,
-                userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
-            );
-            const outValue = BigInt(transaction.minBoxValue.as_i64().checked_add(transaction.fee.as_i64()).to_str());
-            const transactionInput = await ErgoNetwork.getErgBox(
-                transaction.userAddress,
-                outValue,
-            );
-            const inputBoxes = new wasm.ErgoBoxes(transactionInput[0]);
-            if (transactionInput.length > 1) {
-                for (let i = 0; i < transactionInput.length; i++) {
-                    inputBoxes.add(transactionInput[1]);
-                }
-            }
-
-            const height = await ErgoNetwork.getHeight();
-
-            const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
-                transaction.minBoxValue,
-                transaction.userAddressContract,
-                height
-            );
-
-            const outBox = outBoxBuilder.build();
-            const txOutBox = new wasm.ErgoBoxCandidates(outBox);
-
-            const boxSelector = new wasm.SimpleBoxSelector();
-            const targetBalance = wasm.BoxValue.from_i64(wasm.I64.from_str(outValue.toString()));
-            const boxSelection = boxSelector.select(inputBoxes, targetBalance, new wasm.Tokens());
-            const builder = wasm.TxBuilder.new(
-                boxSelection,
-                txOutBox,
-                height,
-                transaction.fee,
-                transaction.userAddress,
-                transaction.minBoxValue,
-            );
-
-            const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);
-            const signedTx = await transaction.buildTxAndSign(builder, inputBoxes, tx_data_inputs);
-            expect(signedTx.id().to_str()).not.to.be.null;
-        });
-    });
-
-    /**
-     * getRepoBox function tests
-     */
-    describe("getRepoBox", () => {
-        /**
-         * it should return repoBox id that is in output of transaction in mempool
-         */
-        it("should return repoBox(with tracking mempool)", async () => {
-            const transaction = new Transaction(
-                rosenConfig,
-                userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
-            );
-            const repoBox = await transaction.getRepoBox();
-            expect(repoBox.box_id().to_str()).to.be.equal("2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350");
-        });
-    });
-
-    /**
      * inputBoxesTokenMap function tests
      */
     describe("inputBoxesTokenMap", () => {
@@ -248,10 +79,13 @@ describe("Watcher Permit Transactions", () => {
          * the token map of input and output should be the same
          */
         it('the token map of input and output should be the same', async () => {
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
+                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                boxes
             );
             const ergoBoxes = await ErgoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
             let map = transaction.inputBoxesTokenMap(ergoBoxes, 0);
@@ -274,23 +108,33 @@ describe("Watcher Permit Transactions", () => {
          * checks getPermit with correct inputs and state should be signed
          */
         it("checks get permit transaction is signed", async () => {
+            initMockedAxios(0);
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
+            chai.spy.on(boxes, "getRepoBox", () => {
+                return wasm.ErgoBox.from_json(boxesSample.secondRepoBox)
+            })
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
-                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"
+                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e",
+                boxes
             );
             const response = await secondTransaction.getPermit(100n);
-            expect(response.response).to.be.equal("e12a37d2a920e44c062ef278af174ea88acd93481428182618ed747217f00a12");
+            expect(response.response).to.be.equal("a748aa172d5d8c8fc70d8c20f59f643fe7adcadc9c8d5fd64cb46a2399cf11a8");
         });
 
         /**
          * in the case of watcher have permit box in his/her address the getPermit should returns error
          */
         it("tests that if watcher have permit box should returns error", async () => {
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
+                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                boxes
             );
             const res = await transaction.getPermit(100n);
             expect(res.status).to.be.equal(500)
@@ -306,11 +150,22 @@ describe("Watcher Permit Transactions", () => {
          *  should be signed without error
          */
         it("checks transaction is signed", async () => {
-            initMockedAxios();
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
+            initMockedAxios(0);
+            chai.spy.on(boxes, "getPermits", () => {
+                return [
+                    wasm.ErgoBox.from_json(boxesSample.firstWatcherPermitBox),
+                ]
+            })
+            chai.spy.on(boxes, "getRepoBox", () => {
+                return wasm.ErgoBox.from_json(boxesSample.secondRepoBox)
+            })
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
+                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                boxes
             );
             const res = await transaction.returnPermit(1n);
             expect(res.response).to.be.equal("185ddc04cc26eab29aa6d903aaf36a6fe5e78faa58507cf618ff066d275fbfb6");
@@ -321,10 +176,21 @@ describe("Watcher Permit Transactions", () => {
          */
         it("it checks case that the return permit transaction have permit box in its output", async () => {
             initMockedAxios(1);
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
+            chai.spy.on(boxes, "getPermits", () => {
+                return [
+                    wasm.ErgoBox.from_json(boxesSample.firstPermitBox)
+                ]
+            })
+            chai.spy.on(boxes, "getRepoBox", () => {
+                return wasm.ErgoBox.from_json(boxesSample.thirdRepoBox)
+            })
             const transaction = new Transaction(
                 rosenConfig,
                 "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9",
-                "1111111111111111111111111111111111111111111111111111111111111111"
+                "1111111111111111111111111111111111111111111111111111111111111111",
+                boxes
             );
             const res = await transaction.returnPermit(1n);
             expect(res.response).to.be.equal("f734636700c599306c964709bb920776c5f180579046c704110fbf6cf57f40fe")
@@ -335,10 +201,21 @@ describe("Watcher Permit Transactions", () => {
          */
         it("tests that if watcher doesn't have permit box should returns error", async () => {
             initMockedAxios();
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
+            chai.spy.on(boxes, "getPermits", () => {
+                return [
+                    wasm.ErgoBox.from_json(boxesSample.firstWatcherPermitBox),
+                ]
+            })
+            chai.spy.on(boxes, "getRepoBox", () => {
+                return wasm.ErgoBox.from_json(boxesSample.secondRepoBox)
+            })
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
-                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"
+                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e",
+                boxes
             );
             const res = await secondTransaction.returnPermit(1n);
             expect(res.status).to.be.equal(500)
@@ -354,10 +231,13 @@ describe("Watcher Permit Transactions", () => {
          */
         it("should be true", async () => {
             initMockedAxios();
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2"
+                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                boxes
             );
             await transaction.getWatcherState();
             expect(transaction.watcherPermitState).to.be.true;
@@ -368,10 +248,13 @@ describe("Watcher Permit Transactions", () => {
          */
         it("should be false", async () => {
             initMockedAxios();
+            const DB = await loadBridgeDataBase("commitments");
+            const boxes = new Boxes(DB)
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
-                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e"
+                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e",
+                boxes
             );
             await secondTransaction.getWatcherState();
             expect(secondTransaction.watcherPermitState).to.be.false;

@@ -1,9 +1,9 @@
-import {Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, Relation} from "typeorm";
+
+import {Column, Entity, ManyToOne, PrimaryGeneratedColumn, Relation} from "typeorm";
 import { BlockEntity } from "./BlockEntity";
-import { CommitmentEntity } from "./CommitmentEntity";
 
 @Entity()
-export class ObservationEntity {
+export class ObservationEntity{
     @PrimaryGeneratedColumn()
     id: number
 
@@ -27,7 +27,10 @@ export class ObservationEntity {
     amount: string
 
     @Column()
-    fee: string
+    networkFee: string
+
+    @Column()
+    bridgeFee: string
 
     @Column()
     sourceChainTokenId: string
@@ -51,10 +54,6 @@ export class ObservationEntity {
     )
     block: Relation<BlockEntity>
 
-    @OneToOne(
-        "CommitmentEntity",
-        "id",
-        {onDelete: "SET NULL", nullable: true}
-    )
-    commitment: Relation<CommitmentEntity>
+    @Column({nullable: true})
+    commitmentBoxId: string
 }

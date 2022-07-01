@@ -55,7 +55,7 @@ describe("Scanner test", () => {
             const lastBlock = await DB.getLastSavedBlock();
             expect(lastBlock?.block_height).to.be.equal(3433333);
         });
-        it("scanner without fork", async () => {
+        it("scanner with fork", async () => {
             const DB = await loadDataBase("scanner-with-fork");
             await DB.removeForkedBlocks(3433333);
             await DB.saveBlock(
