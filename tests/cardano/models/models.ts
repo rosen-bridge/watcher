@@ -48,7 +48,7 @@ export const secondObservations: Array<Observation> = [{
 
 describe("Database functions",  () => {
     describe("saveBlock", () => {
-        it("should return true", async () => {
+        it("should save information and return true", async () => {
             const DB = await loadDataBase("dataBase");
             await DB.removeForkedBlocks(3433333);
             let res = await DB.saveBlock(
@@ -67,7 +67,7 @@ describe("Database functions",  () => {
     });
 
     describe("getConfirmedObservations", () => {
-        it("returns 1 row", async () => {
+        it("returns 1 confirmed observation", async () => {
             const DB = await loadDataBase("dataBase");
             const res = await DB.getConfirmedObservations(0);
             expect(res).to.have.length(1)
@@ -111,7 +111,7 @@ describe("Database functions",  () => {
     });
 
     describe("changeLastValidBlock", () => {
-        it("should affect 1 row", async () => {
+        it("should affect remove 2 rows due to a fork event", async () => {
             const DB = await loadDataBase("dataBase");
             const res = await DB.removeForkedBlocks(3433333);
             expect(res.affected).to.be.equal(2);

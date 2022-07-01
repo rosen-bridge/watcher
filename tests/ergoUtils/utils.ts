@@ -120,9 +120,9 @@ describe("Testing ergoUtils", () => {
 
     describe("buildTxAndSign", () => {
         /**
-         * the transaction should signed without error
+         * an arbitrary transaction should be signed without error
          */
-        it("should sign the transaction", async () => {
+        it("should sign an arbitrary transaction", async () => {
             initMockedAxios(0);
             const outValue = BigInt(rosenConfig.minBoxValue) + BigInt(rosenConfig.fee);
             const add = Address.from_base58(userAddress)
@@ -182,7 +182,7 @@ describe("Testing ergoUtils", () => {
             const boxes = new Boxes(DB)
             chai.spy.on(boxes, "getRepoBox", () => wasm.ErgoBox.from_json(repoBox))
             const data = await requiredCommitmentCount(boxes)
-            expect(data).to.eql(BigInt(3))
+            expect(data).to.eql(BigInt(4))
         })
     })
 })

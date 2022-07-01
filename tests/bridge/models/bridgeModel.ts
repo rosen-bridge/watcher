@@ -122,16 +122,15 @@ describe("Bridge Database functions", () => {
     })
 
     describe("commitmentsByEventId", () => {
-        it("should return a commitment with specified event id", async () => {
+        it("should return two commitments with specified event id", async () => {
             const DB = await loadBridgeDataBase("commitments");
             const data = await DB.commitmentsByEventId(firstCommitment.eventId)
-            console.log(data)
             expect(data).to.have.length(2)
         })
     })
 
     describe("findCommitmentsById", () => {
-        it("should return exactly two bridge with the specified id", async () => {
+        it("should return exactly two commitments with the specified box id", async () => {
             const DB = await loadBridgeDataBase("commitments");
             const data = await DB.findCommitmentsById([secondCommitment.commitmentBoxId, thirdCommitment.commitmentBoxId])
             expect(data).to.have.length(2)
@@ -140,7 +139,7 @@ describe("Bridge Database functions", () => {
     })
 
     describe("deleteCommitments", () => {
-        it("should delete two bridge", async() => {
+        it("should delete two commitments with specified ids", async() => {
             const DB = await loadBridgeDataBase("commitments");
             await DB.deleteCommitments([firstCommitment.commitmentBoxId, secondCommitment.commitmentBoxId])
             const data = await DB.getOldSpentCommitments(3433335)

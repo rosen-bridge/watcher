@@ -18,7 +18,7 @@ const permitAddress = "EE7687i4URb4YuSGSQXPCb6iAFxAd5s8H1DLbUFQnSrJ8rED2KXdq8kUP
 const watcherAddress = "9f5veZdZq1C15GCqm6uej3kpRPh3Eq1Mtk1TqWjQx3CzMEZHXNz"
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
 
-describe("Commitment Scanner Utils test", () => {
+describe("Bridge Scanner Utils test", () => {
     describe("checkTx", () => {
         it("should be undefined", async () => {
             const commitment = await CommitmentUtils.checkTx(<NodeTransaction><unknown>tx, [commitmentAddress]);
@@ -45,7 +45,7 @@ describe("Commitment Scanner Utils test", () => {
     })
 
     describe("updatedCommitmentsAtHeight", () => {
-        it("should find 1 updated bridge", async () => {
+        it("should find 1 updated commitment", async () => {
             const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'findCommitmentsById', () => [])
             const data = await CommitmentUtils.updatedCommitments(

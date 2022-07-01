@@ -188,8 +188,8 @@ export const requiredCommitmentCount = async (boxes: Boxes): Promise<bigint> => 
     const r4 = R4.to_coll_coll_byte()!
     const max = BigInt(r6[3])
     const min = BigInt(r6[2])
-    const percentage = BigInt(r6[1])
+    const percentage = parseInt(r6[1])
     const watcherCount = r4.length
-    const formula = min + percentage * BigInt(watcherCount - 1) / BigInt(100)
+    const formula = min + BigInt(Math.ceil(percentage * (watcherCount - 1) / (100)))
     return max < formula? max: formula
 }
