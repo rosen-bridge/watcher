@@ -5,6 +5,7 @@ import { rosenConfig } from "../config/rosenConfig";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 import { blake2b } from "blakejs";
+import { Boxes } from "./boxes";
 
 const txFee = parseInt(rosenConfig.fee)
 
@@ -40,8 +41,8 @@ export const generateSK = (): wasm.SecretKey => {
 }
 
 /**
- * Creates a change box from the input and output boxes
- * if output boxes have more assets than the inputs throws an exception
+ * Creates a change box from the input and output boxesSample
+ * if output boxesSample have more assets than the inputs throws an exception
  * if some input assets needs to be burnt throw exception
  * if all input assets were transferred to the outputs returns null
  * @param boxes
@@ -98,24 +99,28 @@ export const createChangeBox = (boxes: wasm.ErgoBoxes, candidates: Array<wasm.Er
 
 /**
  * signs the transaction by required secret
+ * @param builder
  * @param secret
- * @param tx
- * @param boxSelection
+ * @param inputs
  * @param dataInputs
  */
-const signTx = async (secret: wasm.SecretKey, tx: wasm.UnsignedTransaction, boxSelection: wasm.BoxSelection, dataInputs: wasm.ErgoBoxes) => {
+export const buildTxAndSign = async (builder: wasm.TxBuilder,
+                              secret: wasm.SecretKey,
+                              inputs: wasm.ErgoBoxes,
+                              dataInputs: wasm.ErgoBoxes = wasm.ErgoBoxes.from_boxes_json([])) => {
+    const tx = builder.build();
     const secrets = new wasm.SecretKeys()
     secrets.add(secret)
     const wallet = wasm.Wallet.from_secrets(secrets);
     const ctx = await ErgoNetwork.getErgoStateContext();
-    return wallet.sign_transaction(ctx, tx, boxSelection.boxes(), dataInputs)
+    return wallet.sign_transaction(ctx, tx, inputs, dataInputs)
 }
 
 /**
- * Creates the transaction from input, data input and output boxes, then signs the created transaction with the secrets
+ * Creates the transaction from input, data input and output boxesSample, then signs the created transaction with the secrets
  * @param secret
- * @param boxes inout boxes
- * @param candidates output boxes
+ * @param boxes inout boxesSample
+ * @param candidates output boxesSample
  * @param height current network height
  * @param dataInputs
  * @param changeContract change contract if it is needed, unless use the secret's public address as the change address
@@ -141,7 +146,7 @@ export const createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBo
         Array(dataInputs.len()).fill("").forEach((item, index) => txDataInputs.add(new wasm.DataInput(dataInputs.get(index).box_id())))
         txBuilder.set_data_inputs(txDataInputs)
     }
-    return signTx(secret, txBuilder.build(), boxSelection, dataInputs ? dataInputs : wasm.ErgoBoxes.from_boxes_json([]))
+    return buildTxAndSign(txBuilder, secret, boxes, dataInputs ? dataInputs : wasm.ErgoBoxes.from_boxes_json([]))
 }
 
 /**
@@ -157,7 +162,8 @@ export const commitmentFromObservation = (observation: Observation, WID: string)
         Buffer.from(observation.fromAddress),
         Buffer.from(observation.toAddress),
         bigIntToUint8Array(BigInt(observation.amount)),
-        bigIntToUint8Array(BigInt(observation.fee)),
+        bigIntToUint8Array(BigInt(observation.bridgeFee)),
+        bigIntToUint8Array(BigInt(observation.networkFee)),
         Buffer.from(observation.sourceChainTokenId, "hex"),
         Buffer.from(observation.targetChainTokenId, "hex"),
         Buffer.from(observation.sourceBlockId, "hex"),
@@ -174,4 +180,19 @@ export const contractHash = (contract: wasm.Contract): Buffer => {
     return Buffer.from(
         blake2b(Buffer.from(contract.ergo_tree().to_base16_bytes(), "hex"), undefined, 32)
     )
+}
+
+export const requiredCommitmentCount = async (boxes: Boxes): Promise<bigint> => {
+    const repo = await boxes.getRepoBox()
+    const R6 = repo.register_value(6)
+    const R4 = repo.register_value(4)
+    if(!R6 || !R4) throw new Error("Bad Repo Box response")
+    const r6: Array<string> = R6.to_i64_str_array()!
+    const r4 = R4.to_coll_coll_byte()!
+    const max = BigInt(r6[3])
+    const min = BigInt(r6[2])
+    const percentage = parseInt(r6[1])
+    const watcherCount = r4.length
+    const formula = min + BigInt(Math.ceil(percentage * (watcherCount - 1) / (100)))
+    return max < formula? max: formula
 }

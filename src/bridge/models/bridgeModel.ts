@@ -101,15 +101,16 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
             })
 
         const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
-        for (const boxId of information.updatedCommitments) {
+        for (const spentCommitment of information.updatedCommitments) {
             const oldCommitment = await this.commitmentRepository.findOne({
-                where: {commitmentBoxId: boxId}
+                where: {commitmentBoxId: spentCommitment.boxId}
             })
             const newCommitment = new ObservedCommitmentEntity()
             Object.assign(newCommitment, {
                 ...oldCommitment,
                 ...{
-                    spendBlock: block
+                    spendBlock: block,
+                    spendReason: spentCommitment.spendReason
                 }
             })
             updatedCommitmentEntities.push(newCommitment)
@@ -166,7 +167,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * returns old spent bridge
+     * returns old spent commitments
      * @param height
      */
     getOldSpentCommitments = async (height: number): Promise<Array<ObservedCommitmentEntity>> => {
@@ -176,7 +177,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * delete bridge by their box ids
+     * delete commitments by their box ids
      * @param ids
      */
     deleteCommitments = async (ids: Array<string>) => {
@@ -184,7 +185,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * find bridge by their box ids
+     * find commitments by their box ids
      * @param ids
      */
     findCommitmentsById = async (ids: Array<string>): Promise<Array<ObservedCommitmentEntity>> => {
@@ -196,7 +197,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * Returns all bridge related to a specific event
+     * Returns all commitments related to a specific event
      * @param eventId
      */
     commitmentsByEventId = async (eventId: string): Promise<Array<ObservedCommitmentEntity>> => {
@@ -208,19 +209,19 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
     }
 
     /**
-     * Returns unspent boxes with the specified type
+     * Returns unspent boxesSample with the specified type
      * @param type
      */
     getUnspentSpecialBoxes = async (type: BoxType): Promise<Array<SpecialBox>> => {
         return this.boxesRepository.createQueryBuilder("box_entity")
             .leftJoin("box_entity.spendBlock", "c_block_entity")
-            .where("box_entity.type == 'permit'")
+            .where("box_entity.type == :type", {type})
             .andWhere("box_entity.spendBlock is null")
             .getMany()
     }
 
     /**
-     * Finds unspent special boxes by their box id
+     * Finds unspent special boxesSample by their box id
      * @param ids: Array of box ids
      */
     findUnspentSpecialBoxesById = async (ids: Array<string>): Promise<Array<BoxEntity>> => {

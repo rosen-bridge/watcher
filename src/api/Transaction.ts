@@ -3,6 +3,9 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
+import { Boxes } from "../ergo/boxes";
+import { buildTxAndSign } from "../ergo/utils";
+import { Buffer } from "buffer";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -15,117 +18,39 @@ export type ApiResponse = {
  * Transaction class used by watcher to generate transaction for ergo network
  */
 export class Transaction{
-    RepoNFTId: wasm.TokenId;
-    RWTTokenId: wasm.TokenId;
-    RSN: wasm.TokenId;
-    watcherPermitContract: wasm.Contract;
-    watcherPermitAddress: wasm.Address;
-    minBoxValue: wasm.BoxValue;
-    fee: wasm.BoxValue;
-    userAddressContract: wasm.Contract;
-    userAddress: wasm.Address;
-    userSecret: string;
-    repoAddressContract: wasm.Contract;
-    repoAddress: wasm.Address;
     watcherPermitState?: boolean;
     watcherWID?: string;
+    boxes: Boxes
+    minBoxValue: wasm.BoxValue;
+    fee: wasm.BoxValue;
+    userSecret: wasm.SecretKey;
+    userAddress: wasm.Address;
+    userAddressContract: wasm.Contract;
+    RSN: wasm.TokenId;
 
     /**
      * constructor
      * @param rosenConfig hard coded Json of rosen config
      * @param userAddress string
      * @param userSecret  string
+     * @param boxes
      */
     constructor(
         rosenConfig: rosenConfig,
         userAddress: string,
         userSecret: string,
+        boxes: Boxes
     ) {
-        const watcherPermitAddress = rosenConfig.watcherPermitAddress;
-        const watcherRepoAddress = rosenConfig.RWTRepoAddress;
-        this.RepoNFTId = wasm.TokenId.from_str(ergoConfig.RepoNFT);
-        this.RWTTokenId = wasm.TokenId.from_str(ergoConfig.RWTId);
-        this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
-        this.watcherPermitAddress = wasm.Address.from_base58(watcherPermitAddress);
-        this.watcherPermitContract = wasm.Contract.pay_to_address(this.watcherPermitAddress);
-        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
-        this.userAddress = wasm.Address.from_base58(userAddress);
-        this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);
-        this.repoAddress = wasm.Address.from_base58(watcherRepoAddress);
-        this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
-        this.userSecret = userSecret;
-        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
         this.watcherPermitState = undefined;
         this.watcherWID = "";
+        this.boxes = boxes;
+        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
+        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
+        this.userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from(userSecret, 'hex'));
+        this.userAddress = wasm.Address.from_base58(userAddress);
+        this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
+        this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);
         this.getWatcherState();
-    }
-
-    /**
-     * generating permit box used in returning permit and getting permit
-     * @param height
-     * @param RWTCount
-     * @param WID
-     */
-    createPermitBox = async (
-        height: number,
-        RWTCount: string,
-        WID: Uint8Array
-    ) => {
-        const permitBuilder = new wasm.ErgoBoxCandidateBuilder(
-            this.minBoxValue,
-            this.watcherPermitContract,
-            height
-        );
-
-        const RWTTokenAmount = wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount));
-
-        permitBuilder.add_token(
-            this.RWTTokenId,
-            RWTTokenAmount
-        );
-
-        permitBuilder.set_register_value(4, wasm.Constant.from_coll_coll_byte([WID]));
-        permitBuilder.set_register_value(5, wasm.Constant.from_byte_array(new Uint8Array([0])));
-
-        return permitBuilder.build();
-
-    }
-
-    /**
-     * user output box used in getting permit transaction by watcher
-     * @param height
-     * @param address
-     * @param amount
-     * @param tokenId issued token for the getting permit transaction
-     * @param tokenAmount
-     * @param changeTokens other tokens in the input of transaction
-     */
-    createUserBoxCandidate = async (
-        height: number,
-        address: string,
-        amount: string,
-        tokenId: wasm.TokenId,
-        tokenAmount: wasm.TokenAmount,
-        changeTokens: Map<string, string>,
-    ) => {
-        const userBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
-            wasm.BoxValue.from_i64(wasm.I64.from_str(amount)),
-            this.userAddressContract,
-            height
-        );
-        userBoxBuilder.add_token(
-            tokenId,
-            tokenAmount
-        );
-
-        for (const [tokenId, tokenAmount] of changeTokens) {
-            userBoxBuilder.add_token(
-                wasm.TokenId.from_str(tokenId),
-                wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount)),
-            );
-        }
-
-        return userBoxBuilder.build();
     }
 
     /**
@@ -138,64 +63,18 @@ export class Transaction{
         const usersWID = users.map(async (id) => {
             const wid = uint8ArrayToHex(id);
             try {
-                const box = await ErgoNetwork.getBoxWithToken(this.userAddress, wid,);
+                await ErgoNetwork.getBoxWithToken(this.userAddress, wid,);
                 return true;
             } catch (error) {
                 return false;
             }
         });
-
         for (const [i, userWID] of usersWID.entries()) {
             if (await userWID) {
                 return uint8ArrayToHex(users[i])
             }
         }
         return "";
-    }
-
-    /**
-     * create repo box that used in output of permit transactions
-     * @param height
-     * @param RWTCount
-     * @param RSNCount
-     * @param users
-     * @param userRWT
-     * @param R6
-     * @param R7
-     */
-    createRepo = async (
-        height: number,
-        RWTCount: string,
-        RSNCount: string,
-        users: Array<Uint8Array>,
-        userRWT: Array<string>,
-        R6: wasm.Constant,
-        R7: number) => {
-
-        const repoBuilder = new wasm.ErgoBoxCandidateBuilder(
-            this.minBoxValue,
-            this.repoAddressContract,
-            height
-        );
-
-        repoBuilder.add_token(
-            this.RepoNFTId,
-            wasm.TokenAmount.from_i64(wasm.I64.from_str("1")),
-        );
-        repoBuilder.add_token(
-            this.RWTTokenId,
-            wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount)),
-        );
-        repoBuilder.add_token(
-            this.RSN,
-            wasm.TokenAmount.from_i64(wasm.I64.from_str(RSNCount)),
-        );
-
-        repoBuilder.set_register_value(4, wasm.Constant.from_coll_coll_byte(users));
-        repoBuilder.set_register_value(5, wasm.Constant.from_i64_str_array(userRWT));
-        repoBuilder.set_register_value(6, R6);
-        repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
-        return repoBuilder.build();
     }
 
     /**
@@ -210,9 +89,8 @@ export class Transaction{
         const WID = this.watcherWID!;
         const height = await ErgoNetwork.getHeight();
 
-        //TODO: permit box should grab from the network with respect to the value in the register
-        const permitBox = await ErgoNetwork.getBoxWithToken(this.watcherPermitAddress, this.RWTTokenId.to_str());
-        const repoBox = await this.getRepoBox();
+        const permitBoxes = await this.boxes.getPermits(RWTCount)
+        const repoBox = await this.boxes.getRepoBox();
         const R4 = repoBox.register_value(4)
         const R5 = repoBox.register_value(5)
         const R6 = repoBox.register_value(6);
@@ -255,7 +133,7 @@ export class Transaction{
 
         const RSNRWTRatio = R6.to_i64_str_array()[0];
 
-        const repoOut = await this.createRepo(
+        const repoOut = await this.boxes.createRepo(
             height,
             RepoRWTCount.to_str(),
             RSNTokenCount.to_str(),
@@ -266,7 +144,7 @@ export class Transaction{
         );
 
         const inputBoxes = new wasm.ErgoBoxes(repoBox);
-        inputBoxes.add(permitBox);
+        permitBoxes.forEach(box => inputBoxes.add(box))
         inputBoxes.add(widBox);
 
         const inputBoxSelection = new wasm.BoxSelection(inputBoxes, new wasm.ErgoBoxAssetsDataList());
@@ -280,7 +158,9 @@ export class Transaction{
         }
 
         const repoValue = BigInt(repoBox.value().as_i64().to_str());
-        const permitValue = BigInt(permitBox.value().as_i64().to_str());
+        const permitValue = permitBoxes.map(permit =>
+            BigInt(permit.value().as_i64().to_str()))
+            .reduce((a, b) => a + b, 0n)
         const widValue = BigInt(widBox.value().as_i64().to_str());
         const totalInputValue = repoValue + permitValue + widValue;
 
@@ -314,16 +194,19 @@ export class Transaction{
         }
         const userOutBox = userOutBoxBuilder.build();
         const outputBoxes = new wasm.ErgoBoxCandidates(repoOut);
-        const permitBoxRWTCount = BigInt(permitBox.tokens().get(0).amount().as_i64().to_str());
-        if (permitBoxRWTCount > RWTCount) {
-            const permitOut = await this.createPermitBox(
+        const permitsRWTCount: bigint = permitBoxes.map(permit =>
+            BigInt(permit.tokens().get(0).amount().as_i64().to_str()))
+            .reduce((a, b) => a + b, BigInt(0))
+        if (permitsRWTCount > RWTCount) {
+            const permitOut = this.boxes.createPermit(
                 height,
-                (permitBoxRWTCount - RWTCount).toString(),
+                permitsRWTCount - RWTCount,
                 strToUint8Array(WID)
             );
             outputBoxes.add(permitOut);
         }
         outputBoxes.add(userOutBox);
+
 
         const builder = wasm.TxBuilder.new(
             inputBoxSelection,
@@ -334,31 +217,11 @@ export class Transaction{
             this.minBoxValue,
         );
 
-        const signedTx = await this.buildTxAndSign(builder, inputBoxes);
+        const signedTx = await buildTxAndSign(builder, this.userSecret, inputBoxes);
         await ErgoNetwork.sendTx(signedTx.to_json());
         this.watcherPermitState = !this.watcherPermitState;
         this.watcherWID = "";
         return {response: signedTx.id().to_str(), status: 200}
-    }
-
-    /**
-     * get an unsigned transaction and sign it using watcher secret key
-     * @param builder
-     * @param inputBoxes
-     * @param dataInputs
-     */
-    buildTxAndSign = async (
-        builder: wasm.TxBuilder,
-        inputBoxes: wasm.ErgoBoxes,
-        dataInputs: wasm.ErgoBoxes = wasm.ErgoBoxes.from_boxes_json([])
-    ): Promise<wasm.Transaction> => {
-        const tx = builder.build();
-        const sks = new wasm.SecretKeys();
-        const sk = wasm.SecretKey.dlog_from_bytes(strToUint8Array(this.userSecret));
-        sks.add(sk);
-        const wallet = wasm.Wallet.from_secrets(sks);
-        const ctx = await ErgoNetwork.getErgoStateContext();
-        return wallet.sign_transaction(ctx, tx, inputBoxes, dataInputs);
     }
 
     /**
@@ -385,18 +248,6 @@ export class Transaction{
     }
 
     /**
-     * getting repoBox from network with tracking mempool transactions
-     */
-    getRepoBox = async (): Promise<wasm.ErgoBox> => {
-        return await ErgoNetwork.trackMemPool(
-            await ErgoNetwork.getBoxWithToken(
-                this.repoAddress,
-                this.RepoNFTId.to_str()
-            )
-        )
-    }
-
-    /**
      * getting watcher permit transaction
      * @param RSNCount
      */
@@ -406,7 +257,7 @@ export class Transaction{
             return {response: "you don't have locked any RSN", status: 500};
         }
         const height = await ErgoNetwork.getHeight();
-        const repoBox = await this.getRepoBox();
+        const repoBox = await this.boxes.getRepoBox();
         const R4 = repoBox.register_value(4)
         const R5 = repoBox.register_value(5)
         const R6 = repoBox.register_value(6);
@@ -421,7 +272,6 @@ export class Transaction{
         const RWTCount = RSNCount / BigInt(R6.to_i64_str_array()[0]);
 
         const RSNInput = await ErgoNetwork.getBoxWithToken(this.userAddress, this.RSN.to_str())
-
         const users: Array<Uint8Array> = R4.to_coll_coll_byte();
         const repoBoxId = repoBox.box_id().as_bytes();
         users.push(repoBoxId);
@@ -441,7 +291,7 @@ export class Transaction{
             )
         );
 
-        const repoOut = await this.createRepo(
+        const repoOut = await this.boxes.createRepo(
             height,
             RepoRWTCount.to_str(),
             RSNTokenCount.to_str(),
@@ -451,7 +301,7 @@ export class Transaction{
             0
         );
 
-        const permitOut = await this.createPermitBox(height, RWTCount.toString(), repoBox.box_id().as_bytes());
+        const permitOut = await this.boxes.createPermit(height, RWTCount, repoBox.box_id().as_bytes());
         const WIDToken = wasm.TokenId.from_str(repoBox.box_id().to_str());
         const WIDTokenAmount = wasm.TokenAmount.from_i64(wasm.I64.from_str("1"));
         const inputBoxes = new wasm.ErgoBoxes(repoBox);
@@ -500,10 +350,9 @@ export class Transaction{
 
         const changeBoxValue = (BigInt(totalInputValue.to_str()) - (outputValue)).toString();
 
-        const userOut = await this.createUserBoxCandidate(
+        const userOut = await this.boxes.createUserBoxCandidate(
             height,
-            //TODO:should change to read from config
-            this.userAddress.to_base58(wasm.NetworkPrefix.Mainnet),
+            this.userAddress.to_base58(ergoConfig.networkType),
             changeBoxValue,
             WIDToken,
             WIDTokenAmount,
@@ -524,7 +373,7 @@ export class Transaction{
             this.minBoxValue,
         );
 
-        const signedTx = await this.buildTxAndSign(builder, inputBoxes);
+        const signedTx = await buildTxAndSign(builder, this.userSecret, inputBoxes);
         await ErgoNetwork.sendTx(signedTx.to_json());
         this.watcherPermitState = !this.watcherPermitState;
         this.watcherWID = WIDToken.to_str();
@@ -536,7 +385,7 @@ export class Transaction{
      */
     getWatcherState = async () => {
         if (this.watcherPermitState === undefined) {
-            const repoBox = await this.getRepoBox();
+            const repoBox = await this.boxes.getRepoBox();
             const R4 = repoBox.register_value(4)
             if(R4){
                 const users = R4.to_coll_coll_byte();

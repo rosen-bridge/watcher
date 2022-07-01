@@ -44,12 +44,13 @@ export class KoiosNetwork extends AbstractNetworkConnector{
     }
 
     getTxUtxos = (txHashes: Array<string>): Promise<Array<Tx>> => {
-        return koios.post<Array<{ outputs: Array<Utxo> }>>(
+        return koios.post<Array<{ inputs: Array<Utxo>, outputs: Array<Utxo> }>>(
             '/tx_utxos', {"_tx_hashes": txHashes}
         ).then(res => {
-            return res.data.map((tx: { outputs: Array<Utxo> }) => {
+            return res.data.map((tx: { inputs: Array<Utxo>, outputs: Array<Utxo> }) => {
                 return {
-                    utxos: tx.outputs
+                    utxosOutput: tx.outputs,
+                    utxosInput: tx.inputs,
                 }
             });
         });

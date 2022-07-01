@@ -10,11 +10,13 @@ import sinon from "sinon"
 chai.use(spies)
 
 import tx from "./dataset/tx.json" assert {type: "json"}
+import { Observation } from "../../src/objects/interfaces";
 
-const sampleObservation = {
+const sampleObservation: Observation = {
     fromChain: 'CARDANO',
     toChain: 'ERGO',
-    fee: '10000',
+    networkFee: '10000',
+    bridgeFee: '10000',
     amount: '10',
     sourceChainTokenId: 'asset12y0ewmxggeglymjpmp9mjf5qzh4kgwj9chtkpv',
     targetChainTokenId: 'cardanoTokenId',

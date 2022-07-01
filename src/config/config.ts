@@ -27,6 +27,7 @@ export class ErgoConfig{
     private static instance: ErgoConfig;
     networkType: wasm.NetworkPrefix;
     secretKey: string;
+    address: string;
     explorerUrl: string;
     nodeUrl: string;
     nodeTimeout: number;
@@ -55,7 +56,7 @@ export class ErgoConfig{
 
         if (SECRET_KEY === undefined || SECRET_KEY === "") {
             console.log(
-                "we generate a secret key for you can use this if you want:",
+                "We generated a secret key for you can use this if you want:",
                 uint8ArrayToHex(
                     wasm.SecretKey.random_dlog().to_bytes()
                 )
@@ -92,9 +93,12 @@ export class ErgoConfig{
         if (ERGO_NODE_TIMEOUT === undefined) {
             throw new Error("Ergo node timeout doesn't set correctly");
         }
+        const watcherAddress: string = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
+            .get_address().to_base58(networkType)
 
         this.networkType = networkType;
         this.secretKey = SECRET_KEY;
+        this.address = watcherAddress;
         this.explorerUrl = EXPLORER_URL;
         this.nodeUrl = NODE_URL;
         this.explorerTimeout = ERGO_EXPLORER_TIMEOUT;

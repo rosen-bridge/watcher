@@ -43,7 +43,8 @@ export class ErgoUtils {
             return {
                 fromChain: "Ergo",
                 toChain: r4[0].toString(),
-                fee: r4[5].toString(),
+                networkFee: r4[2].toString(),
+                bridgeFee: r4[3].toString(),
                 amount: token.amount.toString(),
                 sourceChainTokenId: token.tokenId,
                 targetChainTokenId: this.mockedTokenMap(token.tokenId),

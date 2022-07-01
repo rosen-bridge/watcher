@@ -1,7 +1,7 @@
 import { CommitmentUtils } from "../../../src/bridge/scanner/utils";
 import { expect } from "chai";
 import { ErgoConfig } from "../../../src/config/config"
-import { loadDataBase } from "../models/commitmentModel";
+import { loadBridgeDataBase } from "../models/bridgeModel";
 import { BoxType } from "../../../src/entities/watcher/bridge/BoxEntity";
 import { NodeTransaction } from "../../../src/bridge/network/ergoApiModels";
 
@@ -18,7 +18,7 @@ const permitAddress = "EE7687i4URb4YuSGSQXPCb6iAFxAd5s8H1DLbUFQnSrJ8rED2KXdq8kUP
 const watcherAddress = "9f5veZdZq1C15GCqm6uej3kpRPh3Eq1Mtk1TqWjQx3CzMEZHXNz"
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
 
-describe("Commitment Scanner Utils test", () => {
+describe("Bridge Scanner Utils test", () => {
     describe("checkTx", () => {
         it("should be undefined", async () => {
             const commitment = await CommitmentUtils.checkTx(<NodeTransaction><unknown>tx, [commitmentAddress]);
@@ -45,8 +45,8 @@ describe("Commitment Scanner Utils test", () => {
     })
 
     describe("updatedCommitmentsAtHeight", () => {
-        it("should find 1 updated bridge", async () => {
-            const DB = await loadDataBase("commitments");
+        it("should find 1 updated commitment", async () => {
+            const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'findCommitmentsById', () => [])
             const data = await CommitmentUtils.updatedCommitments(
                 [<NodeTransaction><unknown>commitmentTx],
@@ -54,7 +54,7 @@ describe("Commitment Scanner Utils test", () => {
                 ["cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"]
             );
             expect(data.length).to.be.equal(1);
-            expect(data[0]).to.eql("cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7")
+            expect(data[0].boxId).to.eql("cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7")
         });
     })
 
@@ -84,8 +84,8 @@ describe("Commitment Scanner Utils test", () => {
     })
 
     describe("spentSpecialBoxesAtHeight", () => {
-        it("should find 2 updated boxes", async () => {
-            const DB = await loadDataBase("commitments");
+        it("should find 2 updated boxesSample", async () => {
+            const DB = await loadBridgeDataBase("commitments");
             chai.spy.on(DB, 'findUnspentSpecialBoxesById', () => [{boxId: "cea4dacf032e7e152ea0a5029fe6a84d685d22f42f7137ef2735ce90663192d7"}])
             const data = await CommitmentUtils.spentSpecialBoxes(
                 [<NodeTransaction><unknown>commitmentTx],

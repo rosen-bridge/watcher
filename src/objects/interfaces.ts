@@ -1,4 +1,5 @@
 import { BoxType } from "../entities/BoxEntity";
+import { SpendReason } from "../entities/ObservedCommitmentEntity";
 
 export interface Block {
     hash: string,
@@ -11,12 +12,14 @@ export interface Observation {
     fromAddress: string
     toAddress: string
     amount: string
-    fee: string
+    bridgeFee: string
+    networkFee: string
     sourceChainTokenId: string
     targetChainTokenId: string
     sourceTxId: string
     sourceBlockId: string
     requestId: string
+    commitmentBoxId?: string
 }
 
 export interface Commitment{
@@ -31,4 +34,14 @@ export interface SpecialBox{
     type: BoxType,
     value: string,
     boxJson: string
+}
+
+export interface SpentBox{
+    boxId: string,
+    spendReason: SpendReason
+}
+
+export interface CommitmentSet{
+    commitments: Array<Commitment>,
+    observation: Observation
 }
