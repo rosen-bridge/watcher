@@ -3,6 +3,8 @@ import { ErgoScanner } from "../../src/ergoScanner/scanner";
 import { NodeTransaction } from "../../src/bridge/network/ergoApiModels";
 import { Observation } from "../../src/objects/interfaces";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
+import { DataSource } from "typeorm";
+import { networkEntities } from "../../src/entities";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
@@ -14,6 +16,7 @@ chai.use(spies)
 import tx from "./dataset/tx.json" assert {type: "json"}
 import observationTx from "./dataset/observationTx.json" assert {type: "json"}
 import box from "./dataset/box.json" assert {type: "json"}
+import { NetworkDataBase } from "../../src/models/networkModel";
 
 const sampleObservation: Observation = {
     fromChain: 'CARDANO',
@@ -31,24 +34,39 @@ const sampleObservation: Observation = {
 };
 const lockAddress = "2CBjjwbY9Rokj7Ue9qT2pbMR2WhLDmdcL2V9pRgCEEMks9QRXiQ7K73wNANLAczY1XLimkNBu6Nt3hW1zACrk4zQxu"
 
+export const loadErgoDataBase = async (name: string): Promise<NetworkDataBase> => {
+    const ormConfig = new DataSource({
+        type: "sqlite",
+        database: `./sqlite/watcher-test-${name}.sqlite`,
+        entities: networkEntities,
+        synchronize: true,
+        logging: false,
+    });
+    return await NetworkDataBase.init(ormConfig);
+}
+
 describe("Ergo Scanner Tests", () => {
 
     describe("observationsAtHeight", () => {
         const networkApi = new ErgoNetworkApi()
         chai.spy.on(networkApi, "getBlockTxs", () => ["1", "2"])
         it("should return nothing", async () => {
+            const db = await loadErgoDataBase("ergoScanner")
+            const ergoScanner = new ErgoScanner(db ,networkApi)
             const checkTx = sinon.stub(ErgoScanner, 'checkTx')
             checkTx.onCall(0).resolves(undefined)
             checkTx.onCall(1).resolves(undefined)
-            const data = await ErgoScanner.blockObservations("hash", networkApi)
+            const data = await ergoScanner.getBlockInformation({block_height: 10, hash: "hash"})
             expect(data).to.have.length(0)
             sinon.restore()
         })
         it("should return two observations", async () => {
+            const db = await loadErgoDataBase("ergoScanner")
+            const ergoScanner = new ErgoScanner(db ,networkApi)
             const checkTx = sinon.stub(ErgoScanner, 'checkTx')
             checkTx.onCall(0).resolves(undefined)
             checkTx.onCall(1).resolves(sampleObservation)
-            const data = await ErgoScanner.blockObservations("hash", networkApi)
+            const data = await ergoScanner.getBlockInformation({block_height: 10, hash: "hash"})
             expect(data).to.have.length(1)
             sinon.restore()
         })

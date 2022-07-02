@@ -20,14 +20,12 @@ const ergoConfig = ErgoConfig.getConfig();
 export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>> {
     _dataBase: NetworkDataBase;
     _networkAccess: ErgoNetworkApi;
-    _config: IConfig;
     _initialHeight: number;
 
-    constructor(db: NetworkDataBase, network: ErgoNetworkApi, config: IConfig) {
+    constructor(db: NetworkDataBase, network: ErgoNetworkApi) {
         super();
         this._dataBase = db;
         this._networkAccess = network;
-        this._config = config;
         this._initialHeight = ergoScannerConfig.initialHeight;
     }
 
@@ -84,27 +82,18 @@ export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>
     }
 
     /**
-     * Returns all observations in a block
-     * @param blockHash
-     * @param networkApi
-     */
-    static blockObservations = async (blockHash: string, networkApi: ErgoNetworkApi): Promise<Array<Observation>> => {
-        let observations: Array<Observation> = []
-        const txs = await networkApi.getBlockTxs(blockHash)
-        for(const tx of txs) {
-            const observation = await this.checkTx(blockHash, tx, rosenConfig.lockAddress)
-            if(observation != undefined) observations.push(observation)
-        }
-        return observations
-    }
-
-    /**
      * getting block and extracting observations from the network
      * @param block
      * @return Promise<Array<Observation | undefined>>
      */
     getBlockInformation = async (block: Block): Promise<Array<Observation>> => {
-        return (await ErgoScanner.blockObservations(block.hash, this._networkAccess))
+        let observations: Array<Observation> = []
+        const txs = await this._networkAccess.getBlockTxs(block.hash)
+        for(const tx of txs) {
+            const observation = await ErgoScanner.checkTx(block.hash, tx, rosenConfig.lockAddress)
+            if(observation != undefined) observations.push(observation)
+        }
+        return observations
     }
 
 }
