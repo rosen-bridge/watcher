@@ -1,5 +1,5 @@
 import { ErgoNetworkApi } from "../../src/bridge/network/networkApi";
-import { ErgoUtils } from "../../src/ergoScanner/utils";
+import { ErgoScanner } from "../../src/ergoScanner/scanner";
 import { NodeTransaction } from "../../src/bridge/network/ergoApiModels";
 import { Observation } from "../../src/objects/interfaces";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
@@ -31,24 +31,24 @@ const sampleObservation: Observation = {
 };
 const lockAddress = "2CBjjwbY9Rokj7Ue9qT2pbMR2WhLDmdcL2V9pRgCEEMks9QRXiQ7K73wNANLAczY1XLimkNBu6Nt3hW1zACrk4zQxu"
 
-describe("Ergo Scanner Utils", () => {
+describe("Ergo Scanner Tests", () => {
 
     describe("observationsAtHeight", () => {
         const networkApi = new ErgoNetworkApi()
         chai.spy.on(networkApi, "getBlockTxs", () => ["1", "2"])
         it("should return nothing", async () => {
-            const checkTx = sinon.stub(ErgoUtils, 'checkTx')
+            const checkTx = sinon.stub(ErgoScanner, 'checkTx')
             checkTx.onCall(0).resolves(undefined)
             checkTx.onCall(1).resolves(undefined)
-            const data = await ErgoUtils.observationsAtHeight("hash", networkApi)
+            const data = await ErgoScanner.blockObservations("hash", networkApi)
             expect(data).to.have.length(0)
             sinon.restore()
         })
         it("should return two observations", async () => {
-            const checkTx = sinon.stub(ErgoUtils, 'checkTx')
+            const checkTx = sinon.stub(ErgoScanner, 'checkTx')
             checkTx.onCall(0).resolves(undefined)
             checkTx.onCall(1).resolves(sampleObservation)
-            const data = await ErgoUtils.observationsAtHeight("hash", networkApi)
+            const data = await ErgoScanner.blockObservations("hash", networkApi)
             expect(data).to.have.length(1)
             sinon.restore()
         })
@@ -56,12 +56,12 @@ describe("Ergo Scanner Utils", () => {
 
     describe("checkTx", () => {
         it("should return undefined", async () => {
-            const data = await ErgoUtils.checkTx("hash", <NodeTransaction><unknown>tx, lockAddress)
+            const data = await ErgoScanner.checkTx("hash", <NodeTransaction><unknown>tx, lockAddress)
             expect(data).to.be.undefined
         })
         it("should return an observation from the transaction data", async () => {
             chai.spy.on(ErgoNetwork, "boxById", () => wasm.ErgoBox.from_json(JSON.stringify(box)))
-            const data = await ErgoUtils.checkTx("hash", <NodeTransaction><unknown>observationTx, lockAddress)
+            const data = await ErgoScanner.checkTx("hash", <NodeTransaction><unknown>observationTx, lockAddress)
             expect(data).to.not.be.undefined
             expect(data?.amount).to.eql("4")
             expect(data?.sourceChainTokenId).to.eql("4444444444444444444444444444444444444444444444444444444444444444")
