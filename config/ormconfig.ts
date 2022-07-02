@@ -8,8 +8,8 @@ const __dirname = path.dirname(__filename);
 export const cardanoOrmConfig = new DataSource({
     type: "sqlite",
     database: __dirname + "/../sqlite/cardanoWatcher.sqlite",
-    entities: ['src/entities/watcher/cardano/*.ts'],
-    migrations: ['src/migrations/watcher/cardano/*.ts'],
+    entities: ['src/entities/watcher/network/*.ts'],
+    migrations: ['src/migrations/watcher/network/*.ts'],
     synchronize: false,
     logging: false,
 });

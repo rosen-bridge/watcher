@@ -182,6 +182,10 @@ export const contractHash = (contract: wasm.Contract): Buffer => {
     )
 }
 
+/**
+ * returns the required number of commitments to merge creating an event trigger
+ * @param boxes
+ */
 export const requiredCommitmentCount = async (boxes: Boxes): Promise<bigint> => {
     const repo = await boxes.getRepoBox()
     const R6 = repo.register_value(6)

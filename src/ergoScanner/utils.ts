@@ -6,6 +6,8 @@ import { Address } from "ergo-lib-wasm-nodejs";
 import { decodeCollColl, ergoTreeToAddress } from "../ergo/utils";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { ErgoConfig } from "../config/config";
+import { Buffer } from "buffer";
+import { TextDecoder } from "util";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -21,7 +23,7 @@ export class ErgoUtils {
      */
     static isRosenData = (box: NodeOutputBox) : Boolean => {
         const r4 = decodeCollColl(box.additionalRegisters['R4'])
-        return r4.length >= 6 && this.mockedTokenMap(box.assets[0].tokenId) != undefined
+        return r4.length >= 4 && this.mockedTokenMap(box.assets[0].tokenId) != undefined
     }
 
     /**
@@ -38,20 +40,21 @@ export class ErgoUtils {
         ).filter(box => box.assets.length > 0 && ErgoUtils.isRosenData(box))[0]
         if(observation != undefined) {
             const r4 = decodeCollColl(observation.additionalRegisters['R4'])
+            const decoder = new TextDecoder('utf8');
             const token = observation.assets[0]
             const inputAddress = ergoTreeToAddress((await ErgoNetwork.boxById(tx.inputs[0].boxId)).ergo_tree()).to_base58(ergoConfig.networkType)
             return {
                 fromChain: "Ergo",
-                toChain: r4[0].toString(),
-                networkFee: r4[2].toString(),
-                bridgeFee: r4[3].toString(),
+                toChain: Buffer.from(r4[0]).toString("base64"),
+                networkFee: Buffer.from(r4[2]).toString("base64"),
+                bridgeFee: Buffer.from(r4[3]).toString("base64"),
                 amount: token.amount.toString(),
                 sourceChainTokenId: token.tokenId,
                 targetChainTokenId: this.mockedTokenMap(token.tokenId),
                 sourceTxId: observation.transactionId,
                 sourceBlockId: blockHash,
                 requestId: observation.transactionId,
-                toAddress: r4[1].toString(),
+                toAddress: Buffer.from(r4[1]).toString("base64"),
                 fromAddress: inputAddress,
             }
         }

@@ -1,5 +1,5 @@
 import { AbstractScanner } from "../scanner/abstractScanner";
-import { BlockEntity } from "../entities/watcher/cardano/BlockEntity";
+import { BlockEntity } from "../entities/watcher/network/BlockEntity";
 import { Block, Observation } from "../objects/interfaces";
 import { NetworkDataBase } from "../models/networkModel";
 import config, { IConfig } from "config";
