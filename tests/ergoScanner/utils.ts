@@ -62,7 +62,6 @@ describe("Ergo Scanner Utils", () => {
         it("should return an observation from the transaction data", async () => {
             chai.spy.on(ErgoNetwork, "boxById", () => wasm.ErgoBox.from_json(JSON.stringify(box)))
             const data = await ErgoUtils.checkTx("hash", <NodeTransaction><unknown>observationTx, lockAddress)
-            console.log(data)
             expect(data).to.not.be.undefined
             expect(data?.amount).to.eql("4")
             expect(data?.sourceChainTokenId).to.eql("4444444444444444444444444444444444444444444444444444444444444444")

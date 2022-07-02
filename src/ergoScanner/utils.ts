@@ -40,21 +40,20 @@ export class ErgoUtils {
         ).filter(box => box.assets.length > 0 && ErgoUtils.isRosenData(box))[0]
         if(observation != undefined) {
             const r4 = decodeCollColl(observation.additionalRegisters['R4'])
-            const decoder = new TextDecoder('utf8');
             const token = observation.assets[0]
             const inputAddress = ergoTreeToAddress((await ErgoNetwork.boxById(tx.inputs[0].boxId)).ergo_tree()).to_base58(ergoConfig.networkType)
             return {
                 fromChain: "Ergo",
-                toChain: Buffer.from(r4[0]).toString("base64"),
-                networkFee: Buffer.from(r4[2]).toString("base64"),
-                bridgeFee: Buffer.from(r4[3]).toString("base64"),
+                toChain: Buffer.from(r4[0]).toString(),
+                networkFee: Buffer.from(r4[2]).toString(),
+                bridgeFee: Buffer.from(r4[3]).toString(),
                 amount: token.amount.toString(),
                 sourceChainTokenId: token.tokenId,
                 targetChainTokenId: this.mockedTokenMap(token.tokenId),
                 sourceTxId: observation.transactionId,
                 sourceBlockId: blockHash,
                 requestId: observation.transactionId,
-                toAddress: Buffer.from(r4[1]).toString("base64"),
+                toAddress: Buffer.from(r4[1]).toString(),
                 fromAddress: inputAddress,
             }
         }
