@@ -1,9 +1,9 @@
-import { BlockEntity } from "./watcher/cardano/BlockEntity";
-import { ObservationEntity } from "./watcher/cardano/ObservationEntity";
+import { BlockEntity } from "./watcher/network/BlockEntity";
+import { ObservationEntity } from "./watcher/network/ObservationEntity";
 import { BridgeBlockEntity } from "./watcher/bridge/BridgeBlockEntity";
 import { ObservedCommitmentEntity } from "./watcher/bridge/ObservedCommitmentEntity";
 import { BoxEntity } from "./watcher/bridge/BoxEntity";
 
 
-export const entities = [BlockEntity, ObservationEntity];
-export const commitmentEntities = [BridgeBlockEntity, ObservedCommitmentEntity, BoxEntity];
+export const networkEntities = [BlockEntity, ObservationEntity];
+export const bridgeEntities = [BridgeBlockEntity, ObservedCommitmentEntity, BoxEntity];

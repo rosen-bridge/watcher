@@ -1,5 +1,5 @@
 import { DataSource } from "typeorm";
-import { commitmentEntities } from "../../../src/entities";
+import { bridgeEntities } from "../../../src/entities";
 import { BridgeDataBase } from "../../../src/bridge/models/bridgeModel";
 import { Commitment, SpecialBox } from "../../../src/objects/interfaces";
 import { expect } from "chai";
@@ -10,7 +10,7 @@ export const loadBridgeDataBase = async (name: string): Promise<BridgeDataBase> 
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
-        entities: commitmentEntities,
+        entities: bridgeEntities,
         synchronize: true,
         logging: false,
     });

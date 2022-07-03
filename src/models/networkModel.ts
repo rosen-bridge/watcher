@@ -1,6 +1,6 @@
 import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
-import { BlockEntity } from "../entities/watcher/cardano/BlockEntity";
-import { ObservationEntity } from "../entities/watcher/cardano/ObservationEntity";
+import { BlockEntity } from "../entities/watcher/network/BlockEntity";
+import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
 import { Block, Observation } from "../objects/interfaces";
 import { AbstractDataBase } from "./abstractModel";
 

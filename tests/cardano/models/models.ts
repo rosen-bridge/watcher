@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm";
 import { expect } from "chai";
-import { entities } from "../../../src/entities";
+import { networkEntities } from "../../../src/entities";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
 
@@ -8,7 +8,7 @@ export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
-        entities: entities,
+        entities: networkEntities,
         synchronize: true,
         logging: false,
     });
