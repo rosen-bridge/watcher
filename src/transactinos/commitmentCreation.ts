@@ -1,6 +1,6 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Boxes } from "../ergo/boxes";
-import { commitmentFromObservation, contractHash, createAndSignTx } from "../ergo/utils";
+import { commitmentFromObservation, contractHash, createAndSignTx, hexStrToUint8Array } from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
@@ -52,7 +52,7 @@ export class commitmentCreation{
             console.log("Not enough RWT tokens to create a new commitment")
             return {}
         }
-        const outPermit = this._boxes.createPermit(height, RWTCount - BigInt(1), Buffer.from(WID))
+        const outPermit = this._boxes.createPermit(height, RWTCount - BigInt(1), hexStrToUint8Array(WID))
         const inputBoxes = new wasm.ErgoBoxes(permits[0]);
         inputBoxes.add(WIDBox)
         permits.slice(1).forEach(permit => inputBoxes.add(permit))
