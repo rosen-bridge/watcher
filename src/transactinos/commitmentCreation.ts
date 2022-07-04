@@ -1,6 +1,6 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Boxes } from "../ergo/boxes";
-import { commitmentFromObservation, contractHash, createAndSignTx, hexStrToUint8Array } from "../ergo/utils";
+import { ErgoUtils, hexStrToUint8Array } from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
@@ -38,7 +38,7 @@ export class commitmentCreation{
                                 WIDBox: wasm.ErgoBox,
                                 feeBoxes: Array<wasm.ErgoBox>): Promise<{txId?: string, commitmentBoxId?: string}> => {
         const height = await ErgoNetwork.getHeight()
-        const permitHash = contractHash(
+        const permitHash = ErgoUtils.contractHash(
             wasm.Contract.pay_to_address(
                 wasm.Address.from_base58(
                     rosenConfig.watcherPermitAddress
@@ -62,7 +62,7 @@ export class commitmentCreation{
         const s: string = ergoConfig.secretKey;
         const secret = wasm.SecretKey.dlog_from_bytes(Buffer.from(s, "hex"))
         try {
-            const signed = await createAndSignTx(
+            const signed = await ErgoUtils.createAndSignTx(
                 secret,
                 inputBoxes,
                 [outPermit, outCommitment],
@@ -91,7 +91,7 @@ export class commitmentCreation{
         const observations = await this._dataBaseConnection.allReadyObservations()
         const WID = this._widApi.watcherWID!
         for (const observation of observations) {
-            const commitment = commitmentFromObservation(observation, WID)
+            const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
             const permits = await this._boxes.getPermits(BigInt(0))
             const WIDBox = await this._boxes.getWIDBox()
             const totalValue: bigint = permits.map(permit =>

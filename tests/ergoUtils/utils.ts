@@ -1,11 +1,5 @@
 import { Observation } from "../../src/objects/interfaces";
-import {
-    buildTxAndSign,
-    commitmentFromObservation,
-    contractHash,
-    createChangeBox,
-    extractBoxes, requiredCommitmentCount
-} from "../../src/ergo/utils";
+import { ErgoUtils, extractBoxes } from "../../src/ergo/utils";
 import { uint8ArrayToHex } from "../../src/utils/utils";
 import { ErgoConfig } from "../../src/config/config";
 import { rosenConfig } from "../../src/config/rosenConfig";
@@ -51,7 +45,7 @@ const repoBox = JSON.stringify(repoObj)
 describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {
         it("should return the correct commitment", () => {
-            const res = commitmentFromObservation(observation, WID)
+            const res = ErgoUtils.commitmentFromObservation(observation, WID)
             expect(uint8ArrayToHex(res)).to.eql("188c1f6c228e07bd79fcbf198c5dbed51e0f6208feff9e868632b0b30ea5b4b0")
         })
     })
@@ -72,7 +66,7 @@ describe("Testing ergoUtils", () => {
             )
             builder.add_token(wasm.TokenId.from_str(tokenId),
                 wasm.TokenAmount.from_i64(wasm.I64.from_str("100")))
-            const res = createChangeBox(boxes, [builder.build()], 10, secret)
+            const res = ErgoUtils.createChangeBox(boxes, [builder.build()], 10, secret)
             expect(res).to.null
         })
         it("should return error because tokens are burning", () => {
@@ -82,7 +76,7 @@ describe("Testing ergoUtils", () => {
                 10
             ).build()]
             expect(function () {
-                createChangeBox(boxes, outputs, 10, secret)
+                ErgoUtils.createChangeBox(boxes, outputs, 10, secret)
             }).to.throw(boxCreationError)
         })
         it("should return error because output tokens are more", () => {
@@ -94,11 +88,11 @@ describe("Testing ergoUtils", () => {
             builder.add_token(wasm.TokenId.from_str(tokenId),
                 wasm.TokenAmount.from_i64(wasm.I64.from_str("101")))
             expect(function () {
-                createChangeBox(boxes, [builder.build()], 10, secret)
+                ErgoUtils.createChangeBox(boxes, [builder.build()], 10, secret)
             }).to.throw(boxCreationError)
         })
         it("should return change box with all tokens", () => {
-            const res = createChangeBox(boxes, [], 10, secret)
+            const res = ErgoUtils.createChangeBox(boxes, [], 10, secret)
             expect(res).to.not.null
             expect(res?.value().as_i64().as_num()).to.eql(totalValue - txFee)
             expect(res?.tokens().get(0).amount().as_i64().as_num()).to.eql(100)
@@ -111,7 +105,7 @@ describe("Testing ergoUtils", () => {
             )
             builder.add_token(wasm.TokenId.from_str(tokenId),
                 wasm.TokenAmount.from_i64(wasm.I64.from_str("10")))
-            const res = createChangeBox(boxes, [builder.build()], 10, secret)
+            const res = ErgoUtils.createChangeBox(boxes, [builder.build()], 10, secret)
             expect(res).to.not.null
             expect(res?.value().as_i64().as_num()).to.eql(totalValue - 2 * txFee)
             expect(res?.tokens().get(0).amount().as_i64().as_num()).to.eql(90)
@@ -161,7 +155,7 @@ describe("Testing ergoUtils", () => {
             );
 
             const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);
-            const signedTx = await buildTxAndSign(builder, userSecret, inputBoxes, tx_data_inputs);
+            const signedTx = await ErgoUtils.buildTxAndSign(builder, userSecret, inputBoxes, tx_data_inputs);
             expect(signedTx.id().to_str()).not.to.be.null;
         });
     });
@@ -169,7 +163,7 @@ describe("Testing ergoUtils", () => {
     describe("contractHash", () => {
         it("tests the contract hash creation", () => {
             const fraudAddress = "LFz5FPkW7nPVq2NA5YcZAdSTVwt2BDL1ixGkVvoU7mNY3B8PoX6ix4YiqUe9WMRPQNdPZD7BJESqWiXwvjHh2Fik3XxFz6JYJLCS5WKrgzzZeXDctKRHYydwLbxpqXjqQda7s7M6FzuZ4uCdKudW19Ku8caVcZY6kQfqb8PUiRMpRQPuqfYtcr9S2feShR3BicKV9m2upFVmjd7bzsV6sXZXdaSAuCYCCoNbSoasJ9Xxtg1NVE94d";
-            const data = contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(fraudAddress)))
+            const data = ErgoUtils.contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(fraudAddress)))
             expect(data.toString("base64")).to.eql("ZKVYGZQSUzUZtgTQ6rtiZDba9hT6mOuvpBHNXw7Z7ZY=")
         })
     })
@@ -181,7 +175,7 @@ describe("Testing ergoUtils", () => {
             const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
             chai.spy.on(boxes, "getRepoBox", () => wasm.ErgoBox.from_json(repoBox))
-            const data = await requiredCommitmentCount(boxes)
+            const data = await ErgoUtils.requiredCommitmentCount(boxes)
             expect(data).to.eql(BigInt(4))
         })
     })

@@ -2,7 +2,7 @@ import { Boxes } from "../../src/ergo/boxes";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { firstCommitment, loadBridgeDataBase } from "../bridge/models/bridgeModel";
-import { contractHash } from "../../src/ergo/utils";
+import { ErgoUtils } from "../../src/ergo/utils";
 import { firstObservations } from "../cardano/models/models";
 import { SpecialBox } from "../../src/objects/interfaces";
 import { BoxType } from "../../src/entities/watcher/bridge/BoxEntity";
@@ -205,7 +205,7 @@ describe("Testing Box Creation", () => {
         it("tests the commitment box creation", async () => {
             const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
-            const permitHash = contractHash(wasm.Contract.pay_to_address(
+            const permitHash = ErgoUtils.contractHash(wasm.Contract.pay_to_address(
                 wasm.Address.from_base58(permit)
             ))
             const data = boxes.createCommitment(10, WID, firstCommitment.eventId, Buffer.from(firstCommitment.commitment, 'hex'), permitHash)

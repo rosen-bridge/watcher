@@ -1,5 +1,5 @@
 import { Commitment, Observation } from "../objects/interfaces";
-import { commitmentFromObservation, createAndSignTx, requiredCommitmentCount } from "../ergo/utils";
+import { ErgoUtils } from "../ergo/utils";
 import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -38,7 +38,7 @@ export class commitmentReveal{
         feeBoxes.slice(1, feeBoxes.length).forEach(box => inputBoxes.add(box))
         commitmentBoxes.forEach(box => inputBoxes.add(box))
         try {
-            const signed = await createAndSignTx(
+            const signed = await ErgoUtils.createAndSignTx(
                 this._secret,
                 inputBoxes,
                 [triggerEvent],
@@ -63,7 +63,7 @@ export class commitmentReveal{
      */
     commitmentCheck = (commitments: Array<Commitment>, observation: Observation): Array<Commitment> => {
         return commitments.filter(commitment => {
-            return commitmentFromObservation(observation, commitment.WID).toString() === commitment.commitment
+            return ErgoUtils.commitmentFromObservation(observation, commitment.WID).toString() === commitment.commitment
         })
     }
 
@@ -75,7 +75,7 @@ export class commitmentReveal{
         const commitmentSets = await this._databaseConnection.allReadyCommitmentSets()
         for (const commitmentSet of commitmentSets) {
             const validCommitments = this.commitmentCheck(commitmentSet.commitments, commitmentSet.observation)
-            const requiredCommitments = await requiredCommitmentCount(this._boxes)
+            const requiredCommitments = await ErgoUtils.requiredCommitmentCount(this._boxes)
             if(BigInt(validCommitments.length) >= requiredCommitments){
                 const commitmentBoxes = validCommitments.map(async(commitment) => {
                     return await ErgoNetwork.boxById(commitment.commitmentBoxId)
