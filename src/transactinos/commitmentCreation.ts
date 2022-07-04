@@ -29,12 +29,14 @@ export class commitmentCreation{
      * @param eventDigest
      * @param permits
      * @param WIDBox
+     * @param feeBoxes
      */
     createCommitmentTx = async (WID: string,
                                 requestId: string,
                                 eventDigest: Uint8Array,
                                 permits: Array<wasm.ErgoBox>,
-                                WIDBox: wasm.ErgoBox): Promise<{txId?: string, commitmentBoxId?: string}> => {
+                                WIDBox: wasm.ErgoBox,
+                                feeBoxes: Array<wasm.ErgoBox>): Promise<{txId?: string, commitmentBoxId?: string}> => {
         const height = await ErgoNetwork.getHeight()
         const permitHash = contractHash(
             wasm.Contract.pay_to_address(
@@ -56,6 +58,7 @@ export class commitmentCreation{
         const inputBoxes = new wasm.ErgoBoxes(permits[0]);
         inputBoxes.add(WIDBox)
         permits.slice(1).forEach(permit => inputBoxes.add(permit))
+        feeBoxes.forEach(box => inputBoxes.add(box))
         const s: string = ergoConfig.secretKey;
         const secret = wasm.SecretKey.dlog_from_bytes(Buffer.from(s, "hex"))
         try {
@@ -91,7 +94,16 @@ export class commitmentCreation{
             const commitment = commitmentFromObservation(observation, WID)
             const permits = await this._boxes.getPermits(BigInt(0))
             const WIDBox = await this._boxes.getWIDBox()
-            const txInfo = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox)
+            const totalValue: bigint = permits.map(permit =>
+                BigInt(permit.value().as_i64().to_str()))
+                .reduce((a, b) => a + b, BigInt(0)) +
+                BigInt(WIDBox.value().as_i64().to_str())
+            const requiredValue = BigInt(rosenConfig.fee) + BigInt(rosenConfig.minBoxValue) * BigInt(3)
+            let feeBoxes: Array<wasm.ErgoBox> = []
+            if(totalValue < requiredValue) {
+                feeBoxes = await this._boxes.getUserPaymentBox(requiredValue - totalValue)
+            }
+            const txInfo = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, feeBoxes)
             if(txInfo.commitmentBoxId !== undefined)
                 await this._dataBaseConnection.updateObservation(txInfo.commitmentBoxId, observation)
         }
