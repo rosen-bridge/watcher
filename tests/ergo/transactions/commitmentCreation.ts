@@ -22,7 +22,6 @@ import WIDObj from "./dataset/WIDBox.json" assert {type: "json"}
 import WIDObj2 from "./dataset/WIDBox2.json" assert {type: "json"}
 import plainObj from "./dataset/plainBox.json" assert {type: "json"}
 import txObj from "./dataset/commitmentTx.json" assert {type: "json"}
-import { anything, verify } from "ts-mockito";
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -34,7 +33,7 @@ const userAddress = "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9"
 const userSecret = "1111111111111111111111111111111111111111111111111111111111111111"
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
 
-const observation: ObservationEntity = new ObservationEntity()
+export const observation: ObservationEntity = new ObservationEntity()
 observation.id = 33
 observation.fromChain = 'CARDANO'
 observation.toChain = 'ERGO'
@@ -63,16 +62,16 @@ describe("Commitment creation transaction tests", () => {
             chai.spy.on(boxes, "createPermit")
             const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
             const cc = new commitmentCreation(dbConnection, 1, boxes, tx)
-            chai.spy.on(ErgoNetwork, "getHeight", () => 111)
+            sinon.stub(ErgoNetwork, "getHeight").resolves(111)
             chai.spy.on(ErgoNetwork, "sendTx", () => {})
-            chai.spy.on(ErgoUtils, "createAndSignTx", () => signedTx)
+            sinon.stub(ErgoUtils, "createAndSignTx").resolves(signedTx)
             const txInfo = await cc.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, [])
             expect(txInfo.commitmentBoxId).to.eq("072a361668eab73113c01dc6d378828cfae16ca177c60907114e128a156f5186")
             expect(txInfo.txId).to.eq("26551bc56a0d70364bfd76a1832a94a046a1c01e98fd2bd7ff63e266f0227d5c")
             expect(boxes.createPermit).to.have.called.with(111, BigInt(97), hexStrToUint8Array(WID))
             expect(boxes.createCommitment).to.have.called.once
             expect(ErgoNetwork.sendTx).to.have.called.once
-            expect(ErgoUtils.createAndSignTx).to.have.called.once
+            sinon.restore()
         })
     })
 

@@ -80,7 +80,7 @@ export class commitmentReveal{
                 const commitmentBoxes = validCommitments.map(async(commitment) => {
                     return await ErgoNetwork.boxById(commitment.commitmentBoxId)
                 })
-                Promise.all(commitmentBoxes).then(async(cBoxes) => {
+                await Promise.all(commitmentBoxes).then(async(cBoxes) => {
                     const WIDs: Array<Uint8Array> = validCommitments.map(commitment => {
                         return Buffer.from(commitment.WID)
                     })
