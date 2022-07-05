@@ -6,6 +6,9 @@ import { commitmentCreation } from "../../../src/transactinos/commitmentCreation
 import { loadDataBase } from "../../cardano/models/models";
 import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
 import { JsonBI } from "../../../src/network/parser";
+import { ObservationEntity } from "../../../src/entities/watcher/network/ObservationEntity";
+import { ErgoUtils, hexStrToUint8Array } from "../../../src/ergo/utils";
+import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
@@ -18,18 +21,14 @@ import permitObj from "./dataset/permitBox.json" assert {type: "json"}
 import WIDObj from "./dataset/WIDBox.json" assert {type: "json"}
 import WIDObj2 from "./dataset/WIDBox2.json" assert {type: "json"}
 import plainObj from "./dataset/plainBox.json" assert {type: "json"}
-import { ObservationEntity } from "../../../src/entities/watcher/network/ObservationEntity";
-import { ErgoUtils, hexStrToUint8Array } from "../../../src/ergo/utils";
-import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
+import txObj from "./dataset/commitmentTx.json" assert {type: "json"}
+import { anything, verify } from "ts-mockito";
 
-const permitJson = JsonBI.stringify(permitObj)
-const WIDJson = JsonBI.stringify(WIDObj)
-const WIDJson2 = JsonBI.stringify(WIDObj2)
-const plainJson = JsonBI.stringify(plainObj)
-const permits = [wasm.ErgoBox.from_json(permitJson)]
-const WIDBox = wasm.ErgoBox.from_json(WIDJson)
-const WIDBox2 = wasm.ErgoBox.from_json(WIDJson2)
-const plainBox = [wasm.ErgoBox.from_json(plainJson)]
+const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
+const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
+const WIDBox2 = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2))
+const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))]
+const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj))
 
 const userAddress = "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9"
 const userSecret = "1111111111111111111111111111111111111111111111111111111111111111"
@@ -65,9 +64,15 @@ describe("Commitment creation transaction tests", () => {
             const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
             const cc = new commitmentCreation(dbConnection, 1, boxes, tx)
             chai.spy.on(ErgoNetwork, "getHeight", () => 111)
-            chai.spy.on(ErgoNetwork, "sentTx", () => {})
-            // await cc.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, [])
-            // expect(boxes.createPermit).to.have.called.with(111, 97, hexStrToUint8Array(WID))
+            chai.spy.on(ErgoNetwork, "sendTx", () => {})
+            chai.spy.on(ErgoUtils, "createAndSignTx", () => signedTx)
+            const txInfo = await cc.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, [])
+            expect(txInfo.commitmentBoxId).to.eq("072a361668eab73113c01dc6d378828cfae16ca177c60907114e128a156f5186")
+            expect(txInfo.txId).to.eq("26551bc56a0d70364bfd76a1832a94a046a1c01e98fd2bd7ff63e266f0227d5c")
+            expect(boxes.createPermit).to.have.called.with(111, BigInt(97), hexStrToUint8Array(WID))
+            expect(boxes.createCommitment).to.have.called.once
+            expect(ErgoNetwork.sendTx).to.have.called.once
+            expect(ErgoUtils.createAndSignTx).to.have.called.once
         })
     })
 
