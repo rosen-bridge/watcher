@@ -1,5 +1,5 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { contractHash, hexStrToUint8Array } from "./utils";
+import { ErgoUtils, hexStrToUint8Array } from "./utils";
 import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array} from "../utils/utils";
@@ -194,7 +194,7 @@ export class Boxes {
             Buffer.from(observation.sourceChainTokenId, "hex"),
             Buffer.from(observation.targetChainTokenId, "hex"),
             Buffer.from(observation.sourceBlockId, "hex")]
-        const permitHash = contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.watcherPermitAddress)))
+        const permitHash = ErgoUtils.contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.watcherPermitAddress)))
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte(WIDs))
         builder.set_register_value(5, wasm.Constant.from_coll_coll_byte(eventData))
         builder.set_register_value(6, wasm.Constant.from_byte_array(permitHash))

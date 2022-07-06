@@ -42,6 +42,10 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
      * @return Promise<Array<BridgeBlockInformation>>
      */
     getBlockInformation = async (block: Block): Promise<BridgeBlockInformation> => {
+        if(!this._widApi.watcherWID) {
+            console.log("Watcher WID is not set, can not run watcher tasks.")
+            throw new Error("WID not found")
+        }
         const txs = await this._networkAccess.getBlockTxs(block.hash);
         const newCommitments = (await CommitmentUtils.extractCommitments(txs))
         const updatedCommitments = await CommitmentUtils.updatedCommitments(
@@ -53,7 +57,7 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
             txs,
             rosenConfig.watcherPermitAddress,
             ergoConfig.address,
-            this._widApi.watcherWID!
+            this._widApi.watcherWID
         )
         const spentBoxes = await CommitmentUtils.spentSpecialBoxes(
             txs,

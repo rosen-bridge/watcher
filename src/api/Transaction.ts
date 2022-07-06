@@ -4,7 +4,7 @@ import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { Boxes } from "../ergo/boxes";
-import { buildTxAndSign } from "../ergo/utils";
+import { ErgoUtils } from "../ergo/utils";
 import { Buffer } from "buffer";
 
 const ergoConfig = ErgoConfig.getConfig();
@@ -84,7 +84,7 @@ export class Transaction{
     returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
         await this.getWatcherState();
         if (!this.watcherPermitState) {
-            return {response: "you doesn't have permit box", status: 500}
+            return {response: "you don't have permit box", status: 500}
         }
         const WID = this.watcherWID!;
         const height = await ErgoNetwork.getHeight();
@@ -217,7 +217,7 @@ export class Transaction{
             this.minBoxValue,
         );
 
-        const signedTx = await buildTxAndSign(builder, this.userSecret, inputBoxes);
+        const signedTx = await ErgoUtils.buildTxAndSign(builder, this.userSecret, inputBoxes);
         await ErgoNetwork.sendTx(signedTx.to_json());
         this.watcherPermitState = !this.watcherPermitState;
         this.watcherWID = "";
@@ -373,7 +373,7 @@ export class Transaction{
             this.minBoxValue,
         );
 
-        const signedTx = await buildTxAndSign(builder, this.userSecret, inputBoxes);
+        const signedTx = await ErgoUtils.buildTxAndSign(builder, this.userSecret, inputBoxes);
         await ErgoNetwork.sendTx(signedTx.to_json());
         this.watcherPermitState = !this.watcherPermitState;
         this.watcherWID = WIDToken.to_str();

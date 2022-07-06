@@ -34,7 +34,7 @@ export class databaseConnection{
      */
     private isMergeHappened = (commitments: Array<ObservedCommitmentEntity>): boolean => {
         for(const commitment of commitments){
-            if(commitment.spendReason! === SpendReason.MERGE) return true
+            if(commitment.spendReason && commitment.spendReason === SpendReason.MERGE) return true
         }
         return false
     }

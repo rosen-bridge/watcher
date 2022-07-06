@@ -1,5 +1,5 @@
-import { BoxType } from "../entities/BoxEntity";
-import { SpendReason } from "../entities/ObservedCommitmentEntity";
+import { BoxType } from "../entities/watcher/bridge/BoxEntity";
+import { SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity";
 
 export interface Block {
     hash: string,
