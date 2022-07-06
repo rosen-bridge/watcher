@@ -84,9 +84,9 @@ export class Transaction{
     returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
         await this.getWatcherState();
         if (!this.watcherPermitState) {
-            return {response: "you doesn't have permit box", status: 500}
+            return {response: "you don't have permit box", status: 500}
         }
-        const WID = this.watcherWID!;
+        const WID = this.watcherWID;
         const height = await ErgoNetwork.getHeight();
 
         const permitBoxes = await this.boxes.getPermits(RWTCount)

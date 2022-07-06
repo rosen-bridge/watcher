@@ -130,9 +130,10 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
     getConfirmedObservations = async (confirmation: number): Promise<Array<ObservationEntity>> => {
         const lastSavedBlock = await this.getLastSavedBlock()
         if(!lastSavedBlock){
-            return []
+            console.log("Error finding last saved block")
+            throw new Error("last block not found")
         }
-        const height: number = lastSavedBlock.block_height!
+        const height: number = lastSavedBlock.block_height
         const requiredHeight = height - confirmation
         return await this.observationRepository.createQueryBuilder("observation_entity")
             .where("observation_entity.block < :requiredHeight", {requiredHeight})

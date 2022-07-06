@@ -3,7 +3,7 @@ import { databaseConnection } from "../../../src/ergo/databaseConnection";
 import { loadDataBase } from "../../cardano/models/models";
 import { firstCommitment, loadBridgeDataBase, thirdCommitment } from "../../bridge/models/bridgeModel";
 import { JsonBI } from "../../../src/network/parser";
-import { ErgoUtils, hexStrToUint8Array } from "../../../src/ergo/utils";
+import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 import { commitmentReveal } from "../../../src/transactinos/commitmentReveal";
 import { Buffer } from "buffer";
@@ -27,12 +27,20 @@ const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))]
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj))
 
-const userAddress = "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9"
 const userSecret = "1111111111111111111111111111111111111111111111111111111111111111"
 const WIDs = [Buffer.from(firstCommitment.WID), Buffer.from(thirdCommitment.WID)]
 
 describe("Commitment reveal transaction tests", () => {
 
+    /**
+     * Target: testing triggerEventCreationTx
+     * Dependencies:
+     *    databaseConnection
+     *    Boxes
+     * Expected Output:
+     *    The function should construct a valid trigger event creation tx
+     *    It should also sign and send it successfully
+     */
     describe("triggerEventCreationTx", () => {
         it("Should create, sign and send a trigger event transaction", async() => {
             const networkDb = await loadDataBase("dataBase");
@@ -52,6 +60,14 @@ describe("Commitment reveal transaction tests", () => {
         })
     })
 
+    /**
+     * Target: testing triggerEventCreationTx
+     * Dependencies:
+     *    databaseConnection
+     *    Boxes
+     * Expected Output:
+     *    The function should check validness of commitments and return all valid commitments
+     */
     describe("commitmentCheck", () => {
         it("Should return empty array cause input is invalid", async () => {
             sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(thirdCommitment.commitment))
@@ -80,6 +96,15 @@ describe("Commitment reveal transaction tests", () => {
         })
     })
 
+    /**
+     * Target: testing triggerEventCreationTx
+     * Dependencies:
+     *    databaseConnection
+     *    Boxes
+     * Expected Output:
+     *    The function should collect all ready commitment sets and check the commitment validation
+     *    In case of enough valid commitments it should create the transaction
+     */
     describe("job", () => {
         it("Should collect ready commitments and reveals the commitment by creating trigger event", async() => {
             const networkDb = await loadDataBase("dataBase");

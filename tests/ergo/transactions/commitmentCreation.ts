@@ -52,6 +52,16 @@ const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
 
 describe("Commitment creation transaction tests", () => {
 
+    /**
+     * Target: testing createCommitmentTx
+     * Dependencies:
+     *    databaseConnection
+     *    Boxes
+     *    Transaction
+     * Expected Output:
+     *    The function should construct a valid commitment creation tx
+     *    It should also sign and send it successfully
+     */
     describe("createCommitmentTx", () => {
         it("Should create, sign and send a commitment transaction", async() => {
             const networkDb = await loadDataBase("dataBase");
@@ -63,7 +73,7 @@ describe("Commitment creation transaction tests", () => {
             const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
             const cc = new commitmentCreation(dbConnection, 1, boxes, tx)
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)
-            chai.spy.on(ErgoNetwork, "sendTx", () => {})
+            chai.spy.on(ErgoNetwork, "sendTx", () => {return})
             sinon.stub(ErgoUtils, "createAndSignTx").resolves(signedTx)
             const txInfo = await cc.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, [])
             expect(txInfo.commitmentBoxId).to.eq("072a361668eab73113c01dc6d378828cfae16ca177c60907114e128a156f5186")
@@ -75,13 +85,23 @@ describe("Commitment creation transaction tests", () => {
         })
     })
 
+    /**
+     * Target: testing job
+     * Dependencies:
+     *    databaseConnection
+     *    Boxes
+     *    Transaction
+     * Expected Output:
+     *    The function should collect all ready observations to create the commitment transaction
+     *    If the box values is not enough should use an excess fee box covering the tx fee
+     */
     describe("job", () => {
         it("Should collect ready observations and create commitments", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
-            chai.spy.on(dbConnection, "updateObservation", () => {})
+            chai.spy.on(dbConnection, "updateObservation", () => {return})
             const boxes = new Boxes(bridgeDb)
             chai.spy.on(boxes, "getPermits", () => permits)
             chai.spy.on(boxes, "getWIDBox", () => WIDBox)
@@ -102,7 +122,7 @@ describe("Commitment creation transaction tests", () => {
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
-            chai.spy.on(dbConnection, "updateObservation", () => {})
+            chai.spy.on(dbConnection, "updateObservation", () => {return})
             const boxes = new Boxes(bridgeDb)
             chai.spy.on(boxes, "getPermits", () => permits)
             chai.spy.on(boxes, "getWIDBox", () => WIDBox2)

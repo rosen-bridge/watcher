@@ -89,7 +89,11 @@ export class commitmentCreation{
      */
     job = async () => {
         const observations = await this._dataBaseConnection.allReadyObservations()
-        const WID = this._widApi.watcherWID!
+        if(!this._widApi.watcherWID) {
+            console.log("Watcher WID is not set, can not run commitment creation job.")
+            return
+        }
+        const WID = this._widApi.watcherWID
         for (const observation of observations) {
             const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
             const permits = await this._boxes.getPermits(BigInt(0))

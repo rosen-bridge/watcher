@@ -30,7 +30,7 @@ export const decodeCollColl = (str: string): Uint8Array[] => {
 export const decodeStr = async (str: string): Promise<string> => {
     return Buffer.from(wasm.Constant.decode_from_base16(str).to_byte_array()).toString('hex')
 }
-export const decodeCollLong = (str: string): Array<BigInt> => {
+export const decodeCollLong = (str: string): Array<bigint> => {
     return wasm.Constant.decode_from_base16(str).to_i64_str_array().map(cur => BigInt(cur))
 }
 export const hexStrToUint8Array = (str: string): Uint8Array => {
@@ -90,7 +90,7 @@ export class ErgoUtils {
         } else if (value < 0) {
             throw new boxCreationError
         } else {
-            Object.entries(tokens).forEach(([key, value]) => {
+            Object.entries(tokens).forEach(([, value]) => {
                 if (value !== BigInt(0)) {
                     throw new boxCreationError
                 }
@@ -127,7 +127,12 @@ export class ErgoUtils {
      * @param dataInputs
      * @param changeContract change contract if it is needed, unless use the secret's public address as the change address
      */
-    static createAndSignTx = async (secret: wasm.SecretKey, boxes: wasm.ErgoBoxes, candidates: Array<wasm.ErgoBoxCandidate>, height: number, dataInputs?: wasm.ErgoBoxes, changeContract?: wasm.Contract) => {
+    static createAndSignTx = async (secret: wasm.SecretKey,
+                                    boxes: wasm.ErgoBoxes,
+                                    candidates: Array<wasm.ErgoBoxCandidate>,
+                                    height: number,
+                                    dataInputs?: wasm.ErgoBoxes,
+                                    changeContract?: wasm.Contract): Promise<wasm.Transaction> => {
         const change = ErgoUtils.createChangeBox(boxes, candidates, height, secret, changeContract)
         const candidateBoxes = new wasm.ErgoBoxCandidates(candidates[0])
         candidates.slice(1).forEach(item => candidateBoxes.add(item))
@@ -193,8 +198,8 @@ export class ErgoUtils {
         const R6 = repo.register_value(6)
         const R4 = repo.register_value(4)
         if (!R6 || !R4) throw new Error("Bad Repo Box response")
-        const r6: Array<string> = R6.to_i64_str_array()!
-        const r4 = R4.to_coll_coll_byte()!
+        const r6: Array<string> = R6.to_i64_str_array()
+        const r4 = R4.to_coll_coll_byte()
         const max = BigInt(r6[3])
         const min = BigInt(r6[2])
         const percentage = parseInt(r6[1])
