@@ -7,6 +7,7 @@ import { ErgoConfig } from "./config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { strToUint8Array } from "./utils/utils";
 import { rosenConfig } from "./config/rosenConfig";
+import { Worker } from "worker_threads";
 
 export let watcherTransaction: Transaction;
 
@@ -20,7 +21,7 @@ const init = async () => {
         return new Transaction(
             rosenConfig,
             watcherAddress,
-            ergoConfig.secretKey
+            ergoConfig.secretKey,
         );
     }
 
@@ -38,10 +39,11 @@ const init = async () => {
         res => {
             watcherTransaction = res;
             initExpress();
+            const worker = new Worker('./CommitmentScanner.ts')
         }
     ).catch(e => {
         console.log(e)
     });
 }
 
-init();
+init().then(() => null);
