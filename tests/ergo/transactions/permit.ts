@@ -10,6 +10,7 @@ import { boxesSample } from "../dataset/BoxesSample";
 
 import chai from "chai";
 import spies from "chai-spies";
+import { Buffer } from "buffer";
 chai.use(spies);
 
 
@@ -37,6 +38,9 @@ export const rosenConfig = {
     lockAddress: "9iLfrEVYMEXeqt9tTJn2X4Mmp2QfaQuCeBwgdxpmNoZvaErgj2o",
     RWTId: "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267"
 }
+const secret1 = wasm.SecretKey.dlog_from_bytes(Buffer.from("7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2", "hex"))
+const secret2 = wasm.SecretKey.dlog_from_bytes(Buffer.from("3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e", "hex"))
+const secret3 = wasm.SecretKey.dlog_from_bytes(Buffer.from("1111111111111111111111111111111111111111111111111111111111111111", "hex"))
 
 initMockedAxios();
 
@@ -59,7 +63,7 @@ describe("Watcher Permit Transactions", () => {
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                secret1,
                 boxes
             );
             const usersHex = ["414441", sampleWID];
@@ -85,7 +89,7 @@ describe("Watcher Permit Transactions", () => {
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                secret1,
                 boxes
             );
             const ergoBoxes = await ErgoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
@@ -118,7 +122,7 @@ describe("Watcher Permit Transactions", () => {
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
-                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e",
+                secret2,
                 boxes
             );
             const response = await secondTransaction.getPermit(100n);
@@ -134,7 +138,7 @@ describe("Watcher Permit Transactions", () => {
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                secret1,
                 boxes
             );
             const res = await transaction.getPermit(100n);
@@ -165,7 +169,7 @@ describe("Watcher Permit Transactions", () => {
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                secret1,
                 boxes
             );
             const res = await transaction.returnPermit(1n);
@@ -190,7 +194,7 @@ describe("Watcher Permit Transactions", () => {
             const transaction = new Transaction(
                 rosenConfig,
                 "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9",
-                "1111111111111111111111111111111111111111111111111111111111111111",
+                secret3,
                 boxes
             );
             const res = await transaction.returnPermit(1n);
@@ -215,7 +219,7 @@ describe("Watcher Permit Transactions", () => {
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
-                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e",
+                secret2,
                 boxes
             );
             const res = await secondTransaction.returnPermit(1n);
@@ -237,7 +241,7 @@ describe("Watcher Permit Transactions", () => {
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
-                "7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2",
+                secret1,
                 boxes
             );
             await transaction.getWatcherState();
@@ -254,7 +258,7 @@ describe("Watcher Permit Transactions", () => {
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",
-                "3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e",
+                secret2,
                 boxes
             );
             await secondTransaction.getWatcherState();

@@ -5,7 +5,7 @@ import { ObservedCommitmentEntity, SpendReason } from "../entities/watcher/bridg
 import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
 
 
-export class databaseConnection{
+export class DatabaseConnection {
     __bridgeDataBase: BridgeDataBase
     __networkDataBase: NetworkDataBase
     __observationConfirmation: number

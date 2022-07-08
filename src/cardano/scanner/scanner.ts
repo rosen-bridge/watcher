@@ -1,7 +1,6 @@
 import { KoiosNetwork } from "../network/koios";
 import { CardanoUtils } from "./utils";
-import config, { IConfig } from "config";
-import { cardanoOrmConfig } from "../../../config/ormconfig";
+import { IConfig } from "config";
 import { AbstractScanner } from "../../scanner/abstractScanner";
 import { NetworkDataBase } from "../../models/networkModel";
 import { Block, Observation } from "../../objects/interfaces";
@@ -32,15 +31,5 @@ export class Scanner extends AbstractScanner<BlockEntity, Array<Observation>>{
     getBlockInformation = async (block: Block): Promise<Array<Observation>> => {
         return (await CardanoUtils.observationsAtHeight(block.hash, this._networkAccess))
     }
-
 }
 
-/**
- * main function that runs every `SCANNER_INTERVAL` time that sets in the config
- */
-export const main = async () => {
-    const DB = await NetworkDataBase.init(cardanoOrmConfig);
-    const koiosNetwork = new KoiosNetwork();
-    const scanner = new Scanner(DB, koiosNetwork, config);
-    setInterval(scanner.update, cardanoConfig.interval * 1000);
-}

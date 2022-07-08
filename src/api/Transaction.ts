@@ -38,7 +38,7 @@ export class Transaction{
     constructor(
         rosenConfig: rosenConfig,
         userAddress: string,
-        userSecret: string,
+        userSecret: wasm.SecretKey,
         boxes: Boxes
     ) {
         this.watcherPermitState = undefined;
@@ -46,7 +46,7 @@ export class Transaction{
         this.boxes = boxes;
         this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
         this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
-        this.userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from(userSecret, 'hex'));
+        this.userSecret = userSecret
         this.userAddress = wasm.Address.from_base58(userAddress);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
         this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);

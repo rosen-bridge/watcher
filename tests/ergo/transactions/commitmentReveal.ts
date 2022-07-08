@@ -1,11 +1,11 @@
 import { Boxes } from "../../../src/ergo/boxes";
-import { databaseConnection } from "../../../src/ergo/databaseConnection";
+import { DatabaseConnection } from "../../../src/ergo/databaseConnection";
 import { loadDataBase } from "../../cardano/models/models";
 import { firstCommitment, loadBridgeDataBase, thirdCommitment } from "../../bridge/models/bridgeModel";
 import { JsonBI } from "../../../src/network/parser";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
-import { commitmentReveal } from "../../../src/transactinos/commitmentReveal";
+import { CommitmentReveal } from "../../../src/transactinos/commitmentReveal";
 import { Buffer } from "buffer";
 import { CommitmentSet } from "../../../src/objects/interfaces";
 import { observation } from "./commitmentCreation";
@@ -45,11 +45,10 @@ describe("Commitment reveal transaction tests", () => {
         it("Should create, sign and send a trigger event transaction", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0)
             const boxes = new Boxes(bridgeDb)
             chai.spy.on(boxes, "createTriggerEvent")
-            const secret = wasm.SecretKey.dlog_from_bytes(Buffer.from(userSecret, "hex"))
-            const cr = new commitmentReveal(secret, boxes, dbConnection)
+            const cr = new CommitmentReveal(dbConnection, boxes)
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)
             sinon.stub(ErgoNetwork, "sendTx")
             sinon.stub(ErgoUtils, "createAndSignTx").resolves(signedTx)
@@ -73,10 +72,9 @@ describe("Commitment reveal transaction tests", () => {
             sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(thirdCommitment.commitment))
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0)
             const boxes = new Boxes(bridgeDb)
-            const secret = wasm.SecretKey.dlog_from_bytes(Buffer.from(userSecret, "hex"))
-            const cr = new commitmentReveal(secret, boxes, dbConnection)
+            const cr = new CommitmentReveal(dbConnection, boxes)
             const data = cr.commitmentCheck([firstCommitment], observation)
             expect(data).to.have.length(0)
             sinon.restore()
@@ -85,10 +83,9 @@ describe("Commitment reveal transaction tests", () => {
             sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(firstCommitment.commitment))
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0)
             const boxes = new Boxes(bridgeDb)
-            const secret = wasm.SecretKey.dlog_from_bytes(Buffer.from(userSecret, "hex"))
-            const cr = new commitmentReveal(secret, boxes, dbConnection)
+            const cr = new CommitmentReveal(dbConnection, boxes)
             const data = cr.commitmentCheck([firstCommitment], observation)
             expect(data).to.have.length(1)
             expect(data[0]).to.eq(firstCommitment)
@@ -109,7 +106,7 @@ describe("Commitment reveal transaction tests", () => {
         it("Should collect ready commitments and reveals the commitment by creating trigger event", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0)
             const commitmentSet: CommitmentSet = {
                 commitments: [firstCommitment, thirdCommitment],
                 observation: observation
@@ -119,8 +116,7 @@ describe("Commitment reveal transaction tests", () => {
             chai.spy.on(boxes, "getUserPaymentBox", () => plainBox)
             sinon.stub(ErgoNetwork, "boxById").resolves(WIDBox)
             sinon.stub(ErgoUtils, "requiredCommitmentCount").resolves(BigInt(2))
-            const secret = wasm.SecretKey.dlog_from_bytes(Buffer.from(userSecret, "hex"))
-            const cr = new commitmentReveal(secret, boxes, dbConnection)
+            const cr = new CommitmentReveal(dbConnection, boxes)
             chai.spy.on(cr, "triggerEventCreationTx", () => "txId")
             chai.spy.on(cr, "commitmentCheck", () => [firstCommitment, thirdCommitment])
             await cr.job()

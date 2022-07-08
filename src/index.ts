@@ -4,24 +4,40 @@ import generateAddress from "./api/showAddress";
 import lockRSN from "./api/permit";
 import { Transaction } from "./api/Transaction";
 import { ErgoConfig } from "./config/config";
-import * as wasm from "ergo-lib-wasm-nodejs";
-import { strToUint8Array } from "./utils/utils";
 import { rosenConfig } from "./config/rosenConfig";
 import { Worker } from "worker_threads";
+import { Boxes } from "./ergo/boxes";
+import { NetworkDataBase } from "./models/networkModel";
+import { BridgeDataBase } from "./bridge/models/bridgeModel";
+import { bridgeOrmConfig } from "../config/bridgeOrmConfig";
+import { ErgoNetworkApi } from "./bridge/network/networkApi";
+import { ergoOrmConfig } from "../config/ergoOrmConfig";
+import { cardanoOrmConfig } from "../config/ormconfig";
+import { DatabaseConnection } from "./ergo/databaseConnection";
+
+const ergoConfig = ErgoConfig.getConfig();
 
 export let watcherTransaction: Transaction;
+export let boxesObject: Boxes;
+export let ergoNetworkApi: ErgoNetworkApi;
+export let networkDatabase: NetworkDataBase;
+export let bridgeDatabase: BridgeDataBase;
+export let databaseConnection: DatabaseConnection;
+// TODO: Set this based on the scanning network config
+export let observationConfirmation: number = 2;
 
 const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
         const ergoConfig = ErgoConfig.getConfig();
-        const watcherAddress = wasm.SecretKey.dlog_from_bytes(
-            strToUint8Array(ergoConfig.secretKey)
-        ).get_address().to_base58(ergoConfig.networkType);
 
+        bridgeDatabase = await BridgeDataBase.init(bridgeOrmConfig);
+        boxesObject = new Boxes(bridgeDatabase)
+        ergoNetworkApi = new ErgoNetworkApi();
         return new Transaction(
             rosenConfig,
-            watcherAddress,
+            ergoConfig.address,
             ergoConfig.secretKey,
+            boxesObject,
         );
     }
 
@@ -36,10 +52,29 @@ const init = async () => {
     }
 
     generateTransactionObject().then(
-        res => {
+        async (res) => {
             watcherTransaction = res;
             initExpress();
-            const worker = new Worker('./CommitmentScanner.ts')
+            // Running bridge scanner thread
+            const worker = new Worker('./bridgeScanner.ts')
+            // Running network scanner thread
+            if(ergoConfig.networkWatcher == "Ergo") {
+                // Initializing database
+                networkDatabase = await NetworkDataBase.init(ergoOrmConfig)
+                // Running Ergo scanner
+                const worker = new Worker('./ergoScanner.ts')
+            } else if(ergoConfig.networkWatcher == "Cardano") {
+                // Initializing database
+                networkDatabase = await NetworkDataBase.init(cardanoOrmConfig)
+                // Running Cardano scanner
+                const worker = new Worker('./cardanoScanner.ts')
+            }
+
+            databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, observationConfirmation)
+            // Running commitment creation thread
+            new Worker('./commitmentCreation.ts')
+            // Running trigger event creation thread
+            new Worker('./commitmentReveal.ts')
         }
     ).catch(e => {
         console.log(e)

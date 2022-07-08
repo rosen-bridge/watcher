@@ -53,8 +53,7 @@ describe("Testing ergoUtils", () => {
     describe("createChangeBox", () => {
         const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson)
         const totalValue = extractBoxes(boxes).map(box => box.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
-        const secretHex: string = ergoConfig.secretKey;
-        const secret = wasm.SecretKey.dlog_from_bytes(Uint8Array.from(Buffer.from(secretHex, "hex")))
+        const secret = ergoConfig.secretKey
         const txFee = parseInt(rosenConfig.fee)
         const contract = wasm.Contract.pay_to_address(secret.get_address())
 

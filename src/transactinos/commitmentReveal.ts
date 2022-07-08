@@ -5,18 +5,18 @@ import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
-import { databaseConnection } from "../ergo/databaseConnection";
+import { DatabaseConnection } from "../ergo/databaseConnection";
 import { rosenConfig } from "../config/rosenConfig";
+import { ErgoConfig } from "../config/config";
 
 const txFee = BigInt(rosenConfig.fee)
+const ergoConfig = ErgoConfig.getConfig();
 
-export class commitmentReveal{
-    _databaseConnection: databaseConnection
-    _secret: wasm.SecretKey
+export class CommitmentReveal {
+    _databaseConnection: DatabaseConnection
     _boxes: Boxes
 
-    constructor(secret: wasm.SecretKey, boxes: Boxes, db: databaseConnection) {
-        this._secret = secret
+    constructor(db: DatabaseConnection, boxes: Boxes) {
         this._boxes = boxes
         this._databaseConnection = db
     }
@@ -39,7 +39,7 @@ export class commitmentReveal{
         commitmentBoxes.forEach(box => inputBoxes.add(box))
         try {
             const signed = await ErgoUtils.createAndSignTx(
-                this._secret,
+                ergoConfig.secretKey,
                 inputBoxes,
                 [triggerEvent],
                 height

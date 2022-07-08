@@ -5,18 +5,18 @@ import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
-import { databaseConnection } from "../ergo/databaseConnection";
+import { DatabaseConnection } from "../ergo/databaseConnection";
 import { Buffer } from "buffer";
 import { Transaction } from "../api/Transaction";
 
 const ergoConfig = ErgoConfig.getConfig();
 
-export class commitmentCreation{
-    _dataBaseConnection: databaseConnection
+export class CommitmentCreation {
+    _dataBaseConnection: DatabaseConnection
     _boxes: Boxes
     _widApi: Transaction
 
-    constructor(db: databaseConnection, confirmation: number, boxes: Boxes, api: Transaction) {
+    constructor(db: DatabaseConnection, boxes: Boxes, api: Transaction) {
         this._dataBaseConnection = db
         this._boxes = boxes
         this._widApi = api
@@ -59,11 +59,9 @@ export class commitmentCreation{
         inputBoxes.add(WIDBox)
         permits.slice(1).forEach(permit => inputBoxes.add(permit))
         feeBoxes.forEach(box => inputBoxes.add(box))
-        const s: string = ergoConfig.secretKey;
-        const secret = wasm.SecretKey.dlog_from_bytes(Buffer.from(s, "hex"))
         try {
             const signed = await ErgoUtils.createAndSignTx(
-                secret,
+                ergoConfig.secretKey,
                 inputBoxes,
                 [outPermit, outCommitment],
                 height

@@ -1,4 +1,5 @@
 {
+    "watcher": "Ergo",
     "cardano": {
         "interval": 10,
         "initialBlockHeight": 3471392,
@@ -19,9 +20,11 @@
         "scanner": {
             "interval": 1000,
             "initialBlockHeight": 239230
-        }
+        },
+        "commitmentCreationInterval": 1000,
+        "commitmentRevealInterval": 1000
     },
-    "commitmentScanner": {
+    "bridgeScanner": {
         "interval": 10,
         "initialBlockHeight": 208640,
         "heightLimit": 100,
