@@ -56,25 +56,25 @@ const init = async () => {
             watcherTransaction = res;
             initExpress();
             // Running bridge scanner thread
-            const worker = new Worker('./bridgeScanner.ts')
+            const worker = new Worker('./src/bridgeScanner.js')
             // Running network scanner thread
             if(ergoConfig.networkWatcher == "Ergo") {
                 // Initializing database
                 networkDatabase = await NetworkDataBase.init(ergoOrmConfig)
                 // Running Ergo scanner
-                const worker = new Worker('./ergoScanner.ts')
+                const worker = new Worker('./src/ergoScanner.ts')
             } else if(ergoConfig.networkWatcher == "Cardano") {
                 // Initializing database
                 networkDatabase = await NetworkDataBase.init(cardanoOrmConfig)
                 // Running Cardano scanner
-                const worker = new Worker('./cardanoScanner.ts')
+                const worker = new Worker('./src/cardanoScanner.ts')
             }
 
             databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, observationConfirmation)
             // Running commitment creation thread
-            new Worker('./commitmentCreation.ts')
+            new Worker('./src/commitmentCreation.ts')
             // Running trigger event creation thread
-            new Worker('./commitmentReveal.ts')
+            new Worker('./src/commitmentReveal.ts')
         }
     ).catch(e => {
         console.log(e)
