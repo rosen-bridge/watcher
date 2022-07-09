@@ -16,5 +16,3 @@ export const cardanoScanner = () => {
     scanner = new Scanner(networkDatabase, koiosNetwork, config);
     scanningJob()
 }
-
-cardanoScanner()

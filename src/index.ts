@@ -5,7 +5,6 @@ import lockRSN from "./api/permit";
 import { Transaction } from "./api/Transaction";
 import { ErgoConfig } from "./config/config";
 import { rosenConfig } from "./config/rosenConfig";
-import { Worker } from "worker_threads";
 import { Boxes } from "./ergo/boxes";
 import { NetworkDataBase } from "./models/networkModel";
 import { BridgeDataBase } from "./bridge/models/bridgeModel";
@@ -14,6 +13,11 @@ import { ErgoNetworkApi } from "./bridge/network/networkApi";
 import { ergoOrmConfig } from "../config/ergoOrmConfig";
 import { cardanoOrmConfig } from "../config/ormconfig";
 import { DatabaseConnection } from "./ergo/databaseConnection";
+import { bridgeScanner } from "./bridgeScanner";
+import { ergoScanner } from "./ergoScanner";
+import { cardanoScanner } from "./cardanoScanner";
+import { creation } from "./commitmentCreation";
+import { reveal } from "./commitmetnReveal";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -25,6 +29,10 @@ export let bridgeDatabase: BridgeDataBase;
 export let databaseConnection: DatabaseConnection;
 // TODO: Set this based on the scanning network config
 export let observationConfirmation: number = 2;
+
+function delay(time: number) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
 
 const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
@@ -56,25 +64,26 @@ const init = async () => {
             watcherTransaction = res;
             initExpress();
             // Running bridge scanner thread
-            const worker = new Worker('./src/bridgeScanner.js')
+            bridgeScanner()
             // Running network scanner thread
             if(ergoConfig.networkWatcher == "Ergo") {
                 // Initializing database
                 networkDatabase = await NetworkDataBase.init(ergoOrmConfig)
                 // Running Ergo scanner
-                const worker = new Worker('./src/ergoScanner.ts')
+                ergoScanner()
             } else if(ergoConfig.networkWatcher == "Cardano") {
                 // Initializing database
                 networkDatabase = await NetworkDataBase.init(cardanoOrmConfig)
                 // Running Cardano scanner
-                const worker = new Worker('./src/cardanoScanner.ts')
+                cardanoScanner()
             }
 
+            await delay(10000)
             databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, observationConfirmation)
             // Running commitment creation thread
-            new Worker('./src/commitmentCreation.ts')
+            creation()
             // Running trigger event creation thread
-            new Worker('./src/commitmentReveal.ts')
+            reveal()
         }
     ).catch(e => {
         console.log(e)

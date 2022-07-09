@@ -13,5 +13,3 @@ export const reveal = () => {
     commitmentRevealingObj = new CommitmentReveal(databaseConnection, boxesObject)
     revealJob()
 }
-
-reveal()

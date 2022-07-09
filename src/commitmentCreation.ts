@@ -13,5 +13,3 @@ export const creation = () => {
     commitmentCreatorObj = new CommitmentCreation(databaseConnection, boxesObject, watcherTransaction)
     creationJob()
 }
-
-creation()

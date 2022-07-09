@@ -4,7 +4,7 @@ import { ErgoConfig } from "./config/config";
 import { bridgeDatabase, ergoNetworkApi, watcherTransaction } from "./index";
 
 const ergoConfig = ErgoConfig.getConfig();
-let scanner;
+let scanner: Scanner;
 
 const scanningJob = () => {
     scanner.update().then(() => setTimeout(scanningJob, ergoConfig.bridgeScanInterval * 1000))
@@ -18,5 +18,3 @@ export const bridgeScanner = () => {
     scanningJob()
     removeOldCommitmentsJob()
 }
-
-bridgeScanner()

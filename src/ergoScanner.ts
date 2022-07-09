@@ -13,5 +13,3 @@ export const ergoScanner = () => {
     scanner = new ErgoScanner(networkDatabase, ergoNetworkApi);
     scanningJob()
 }
-
-ergoScanner()
