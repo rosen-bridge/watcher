@@ -4,9 +4,8 @@ import { ErgoUtils, hexStrToUint8Array } from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import { boxCreationError } from "../errors/errors";
+import { boxCreationError, NotEnoughFund } from "../errors/errors";
 import { DatabaseConnection } from "../ergo/databaseConnection";
-import { Buffer } from "buffer";
 import { Transaction } from "../api/Transaction";
 
 const ergoConfig = ErgoConfig.getConfig();
@@ -95,23 +94,29 @@ export class CommitmentCreation {
         const WID = this._widApi.watcherWID
         console.log("starting commitment creation job with ", observations.length, " number of ready observations")
         for (const observation of observations) {
-            const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
-            const permits = await this._boxes.getPermits(BigInt(0))
-            const WIDBox = await this._boxes.getWIDBox()
-            const totalValue: bigint = permits.map(permit =>
-                BigInt(permit.value().as_i64().to_str()))
-                .reduce((a, b) => a + b, BigInt(0)) +
-                BigInt(WIDBox.value().as_i64().to_str())
-            console.log("WID Box: ", WIDBox.box_id().to_str(), WIDBox.value().as_i64().to_str())
-            const requiredValue = BigInt(rosenConfig.fee) + BigInt(rosenConfig.minBoxValue) * BigInt(3)
-            let feeBoxes: Array<wasm.ErgoBox> = []
-            console.log("Total value is: ", totalValue, " Required value is: ", requiredValue)
-            if(totalValue < requiredValue) {
-                feeBoxes = await this._boxes.getUserPaymentBox(requiredValue - totalValue)
+            try {
+                const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
+                const permits = await this._boxes.getPermits(BigInt(0))
+                const WIDBox = await this._boxes.getWIDBox()
+                const totalValue: bigint = permits.map(permit =>
+                        BigInt(permit.value().as_i64().to_str()))
+                        .reduce((a, b) => a + b, BigInt(0)) +
+                    BigInt(WIDBox.value().as_i64().to_str())
+                console.log("WID Box: ", WIDBox.box_id().to_str(), WIDBox.value().as_i64().to_str())
+                const requiredValue = BigInt(rosenConfig.fee) + BigInt(rosenConfig.minBoxValue) * BigInt(3)
+                let feeBoxes: Array<wasm.ErgoBox> = []
+                console.log("Total value is: ", totalValue, " Required value is: ", requiredValue)
+                if (totalValue < requiredValue) {
+                    feeBoxes = await this._boxes.getUserPaymentBox(requiredValue - totalValue)
+                }
+                const txInfo = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, feeBoxes)
+                if (txInfo.commitmentBoxId !== undefined)
+                    await this._dataBaseConnection.updateObservation(txInfo.commitmentBoxId, observation)
+            } catch(e) {
+                if(!(e instanceof NotEnoughFund))
+                    console.log(e)
+                console.log("Skipping the commitment creation")
             }
-            const txInfo = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, feeBoxes)
-            if(txInfo.commitmentBoxId !== undefined)
-                await this._dataBaseConnection.updateObservation(txInfo.commitmentBoxId, observation)
         }
     }
 }

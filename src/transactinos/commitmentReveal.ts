@@ -4,7 +4,7 @@ import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import { boxCreationError } from "../errors/errors";
+import { boxCreationError, NotEnoughFund } from "../errors/errors";
 import { DatabaseConnection } from "../ergo/databaseConnection";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
@@ -45,6 +45,7 @@ export class CommitmentReveal {
                 height
             )
             await ErgoNetwork.sendTx(signed.to_json())
+            console.log("Trigger event created with tx id:", signed.to_json())
             return signed.id().to_str()
         } catch (e) {
             if (e instanceof boxCreationError) {
@@ -73,19 +74,27 @@ export class CommitmentReveal {
      */
     job = async () => {
         const commitmentSets = await this._databaseConnection.allReadyCommitmentSets()
+        console.log("Starting trigger event creation with", commitmentSets.length, "number of commitment sets")
         for (const commitmentSet of commitmentSets) {
-            const validCommitments = this.commitmentCheck(commitmentSet.commitments, commitmentSet.observation)
-            const requiredCommitments = await ErgoUtils.requiredCommitmentCount(this._boxes)
-            if(BigInt(validCommitments.length) >= requiredCommitments){
-                const commitmentBoxes = validCommitments.map(async(commitment) => {
-                    return await ErgoNetwork.boxById(commitment.commitmentBoxId)
-                })
-                await Promise.all(commitmentBoxes).then(async(cBoxes) => {
-                    const WIDs: Array<Uint8Array> = validCommitments.map(commitment => {
-                        return Buffer.from(commitment.WID)
+            try {
+                const validCommitments = this.commitmentCheck(commitmentSet.commitments, commitmentSet.observation)
+                const requiredCommitments = await ErgoUtils.requiredCommitmentCount(this._boxes)
+                console.log("required number of commitments is", requiredCommitments, "available valild commitments is:", validCommitments.length)
+                if (BigInt(validCommitments.length) >= requiredCommitments) {
+                    const commitmentBoxes = validCommitments.map(async (commitment) => {
+                        return await ErgoNetwork.boxById(commitment.commitmentBoxId)
                     })
-                    await this.triggerEventCreationTx(cBoxes, commitmentSet.observation, WIDs, await this._boxes.getUserPaymentBox(txFee))
-                })
+                    await Promise.all(commitmentBoxes).then(async (cBoxes) => {
+                        const WIDs: Array<Uint8Array> = validCommitments.map(commitment => {
+                            return Buffer.from(commitment.WID)
+                        })
+                        await this.triggerEventCreationTx(cBoxes, commitmentSet.observation, WIDs, await this._boxes.getUserPaymentBox(txFee))
+                    })
+                }
+            } catch(e) {
+                if(!(e instanceof NotEnoughFund))
+                    console.log(e)
+                console.log("Skipping the event trigger creation")
             }
         }
     }
