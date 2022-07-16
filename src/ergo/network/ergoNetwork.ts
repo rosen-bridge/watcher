@@ -206,7 +206,7 @@ export class ErgoNetwork{
      * @param box
      */
     static trackMemPool = async (box: wasm.ErgoBox): Promise<wasm.ErgoBox> => {
-        const address: string = ergoTreeToBase58Address(box.ergo_tree())
+        const address: string = ergoTreeToBase58Address(box.ergo_tree(), ergoConfig.networkType)
         const memPoolBoxesMap = new Map<string, wasm.ErgoBox>();
         const transactions = await this.getMemPoolTxForAddress(address).then(res => res.items);
         if (transactions !== undefined) {

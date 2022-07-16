@@ -67,6 +67,7 @@ export class CommitmentCreation {
                 height
             )
             await ErgoNetwork.sendTx(signed.to_json())
+            console.log("Commitment creation done with txId: ", signed.id().to_str())
             return {
                 txId: signed.id().to_str(),
                 commitmentBoxId: signed.outputs().get(1).box_id().to_str(),
@@ -92,6 +93,7 @@ export class CommitmentCreation {
             return
         }
         const WID = this._widApi.watcherWID
+        console.log("starting commitment creation job with ", observations.length, " number of ready observations")
         for (const observation of observations) {
             const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
             const permits = await this._boxes.getPermits(BigInt(0))
@@ -100,8 +102,10 @@ export class CommitmentCreation {
                 BigInt(permit.value().as_i64().to_str()))
                 .reduce((a, b) => a + b, BigInt(0)) +
                 BigInt(WIDBox.value().as_i64().to_str())
+            console.log("WID Box: ", WIDBox.box_id().to_str(), WIDBox.value().as_i64().to_str())
             const requiredValue = BigInt(rosenConfig.fee) + BigInt(rosenConfig.minBoxValue) * BigInt(3)
             let feeBoxes: Array<wasm.ErgoBox> = []
+            console.log("Total value is: ", totalValue, " Required value is: ", requiredValue)
             if(totalValue < requiredValue) {
                 feeBoxes = await this._boxes.getUserPaymentBox(requiredValue - totalValue)
             }

@@ -63,6 +63,7 @@ const init = async () => {
         async (res) => {
             watcherTransaction = res;
             initExpress();
+            await delay(10000)
             // Running bridge scanner thread
             bridgeScanner()
             // Running network scanner thread
@@ -78,7 +79,7 @@ const init = async () => {
                 cardanoScanner()
             }
 
-            await delay(10000)
+            await delay(30000)
             databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, observationConfirmation)
             // Running commitment creation thread
             creation()

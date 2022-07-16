@@ -56,7 +56,9 @@ export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>
             if (observation != undefined) {
                 const r4 = decodeCollColl(observation.additionalRegisters['R4'])
                 const token = observation.assets[0]
-                const inputAddress = ergoTreeToAddress((await ErgoNetwork.boxById(tx.inputs[0].boxId)).ergo_tree()).to_base58(ergoConfig.networkType)
+                const inputAddress = ""
+                // TODO: Fix the input address
+                //ergoTreeToAddress((await ErgoNetwork.boxById(tx.inputs[0].boxId)).ergo_tree()).to_base58(ergoConfig.networkType)
                 return {
                     fromChain: "Ergo",
                     toChain: Buffer.from(r4[0]).toString(),
@@ -74,7 +76,7 @@ export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>
             }
         } catch (e){
             console.log("Something went wrong during transaction checking")
-            console.log(e.getMessage())
+            console.log(e)
         }
         return undefined
     }
@@ -89,7 +91,11 @@ export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>
         const txs = await this._networkAccess.getBlockTxs(block.hash)
         for(const tx of txs) {
             const observation = await ErgoScanner.checkTx(block.hash, tx, rosenConfig.lockAddress)
-            if(observation != undefined) observations.push(observation)
+            if(observation != undefined) {
+                console.log("Found observation:")
+                console.log(observation)
+                observations.push(observation)
+            }
         }
         return observations
     }

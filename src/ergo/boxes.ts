@@ -52,7 +52,7 @@ export class Boxes {
     }
 
     getWIDBox = async (): Promise<wasm.ErgoBox> => {
-        const WID = (await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT))[0]
+        const WID = (await this._dataBase.getUnspentSpecialBoxes(BoxType.WID))[0]
         let WIDBox = wasm.ErgoBox.from_json(WID.boxJson)
         WIDBox = await ErgoNetwork.trackMemPool(WIDBox)
         return WIDBox
