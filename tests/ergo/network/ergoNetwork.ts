@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { JsonBI } from "../../../src/network/parser";
 import { RWTRepoAddress, userAddress } from "../transactions/permit";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { boxId, initMockedAxios } from "../objects/axios";
+import { boxId, confirmedTxId, initMockedAxios, unconfirmedTxId } from "../objects/axios";
 
 initMockedAxios();
 
@@ -216,6 +216,26 @@ describe("Ergo Network(API)", () => {
         it("should return a box", async () => {
             const res = await ErgoNetwork.boxById(boxId)
             expect(res.box_id().to_str()).to.eql(boxId)
+        })
+    })
+    
+    describe("txStatus", () => {
+        it("Tests mempool transaction status", async () => {
+            const confirmed = await ErgoNetwork.getConfirmedTx(unconfirmedTxId)
+            expect(confirmed).to.null
+            const unconfirmed = await ErgoNetwork.getUnconfirmedTx(unconfirmedTxId)
+            expect(unconfirmed).to.haveOwnProperty("id")
+            const confNum = await ErgoNetwork.getConfNum(unconfirmedTxId)
+            expect(confNum).to.eql(0)
+        })
+
+        it("Tests confirmed transaction status", async () => {
+            const confirmed = await ErgoNetwork.getConfirmedTx(confirmedTxId)
+            expect(confirmed).to.haveOwnProperty("id")
+            const unconfirmed = await ErgoNetwork.getUnconfirmedTx(confirmedTxId)
+            expect(unconfirmed).to.null
+            const confNum = await ErgoNetwork.getConfNum(confirmedTxId)
+            expect(confNum).to.eql(6539)
         })
     })
 

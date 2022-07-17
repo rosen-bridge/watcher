@@ -5,6 +5,7 @@ import { BoxEntity, BoxType } from "../../entities/watcher/bridge/BoxEntity";
 import { Block, SpecialBox } from "../../objects/interfaces";
 import { AbstractDataBase } from "../../models/abstractModel";
 import { BridgeBlockInformation } from "../scanner/scanner";
+import { TxEntity, TxType } from "../../entities/watcher/network/TransactionEntity";
 
 
 export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBlockInformation> {

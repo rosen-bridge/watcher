@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Info } from "../../objects/ergo";
-import { AddressBoxes, ErgoTx } from "./types";
+import { AddressBoxes, ErgoTx, ExplorerTransaction } from "./types";
 import { JsonBI } from "../../network/parser";
 import { ErgoConfig } from "../../config/config";
 import { ergoTreeToBase58Address } from "../utils";
@@ -245,6 +245,41 @@ export class ErgoNetwork{
                 return wasm.ErgoBox.from_json(JSON.stringify(res.data))
             }
         )
+    }
+
+    /**
+     * Searches for a confirmed tx with the specified txId
+     * @param txId, the requested txId
+     */
+    static getConfirmedTx = (txId: string): Promise<ExplorerTransaction | null> => {
+        return explorerApi.get(`/api/v1/transactions/${txId}`).then(res => {
+            return res.data
+        }).catch(e => null)
+    }
+
+    /**
+     * Searches for a unconfirmed tx with the specified txId
+     * @param txId, the requested txId
+     */
+    static getUnconfirmedTx = (txId: string): Promise<ExplorerTransaction | null> => {
+        return explorerApi.get(`/api/v0/transactions/unconfirmed/${txId}`).then(res => {
+            return res.data
+        }).catch(e => null)
+    }
+
+    /**
+     * Returns the confirmation count of a transaction
+     * @param txId, the requested txId
+     * @return -1: Doesn't exist, 0: In mempool, >1: confirmation count
+     */
+    static getConfNum = async (txId: string): Promise<number> => {
+        const tx = await ErgoNetwork.getUnconfirmedTx(txId)
+        if(tx !== null) return 0
+        else {
+            const confirmed = await ErgoNetwork.getConfirmedTx(txId)
+            if (confirmed != null && confirmed.hasOwnProperty('numConfirmations')) return confirmed.numConfirmations
+            else return -1
+        }
     }
 
 }

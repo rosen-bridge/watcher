@@ -1,6 +1,7 @@
 
-import {Column, Entity, ManyToOne, PrimaryGeneratedColumn, Relation} from "typeorm";
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, Relation } from "typeorm";
 import { BlockEntity } from "./BlockEntity";
+import { TxEntity } from "./TransactionEntity";
 
 @Entity()
 export class ObservationEntity{
@@ -54,6 +55,17 @@ export class ObservationEntity{
     )
     block: Relation<BlockEntity>
 
-    @Column({nullable: true})
-    commitmentBoxId: string
+    @OneToOne(
+        "TxEntity",
+        "txId",
+        {onDelete: 'SET NULL', nullable: true}
+    )
+    commitmentTx: Relation<TxEntity>
+
+    @OneToOne(
+        "TxEntity",
+        "txId",
+        {onDelete: 'SET NULL', nullable: true}
+    )
+    revealTx: Relation<TxEntity>
 }

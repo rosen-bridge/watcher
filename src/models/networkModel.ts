@@ -3,17 +3,20 @@ import { BlockEntity } from "../entities/watcher/network/BlockEntity";
 import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
 import { Block, Observation } from "../objects/interfaces";
 import { AbstractDataBase } from "./abstractModel";
+import { TxEntity, TxType } from "../entities/watcher/network/TransactionEntity";
 
 export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observation>> {
     dataSource: DataSource;
     blockRepository: Repository<BlockEntity>;
     observationRepository: Repository<ObservationEntity>;
+    txRepository: Repository<TxEntity>
 
     private constructor(dataSource: DataSource) {
         super()
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(BlockEntity);
         this.observationRepository = this.dataSource.getRepository(ObservationEntity);
+        this.txRepository = this.dataSource.getRepository(TxEntity);
     }
 
     /**
@@ -154,6 +157,39 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
             }
         })
         return this.observationRepository.save(newObservation)
+    }
+
+    /**
+     * Stores a transaction in tx queue, the queue will process the transaction automatically afterward
+     * @param tx
+     * @param requestId
+     * @param txId
+     * @param time
+     * @param type
+     */
+    submitTx = async (tx: string, requestId: string, txId: string, time: number, type: TxType) => {
+        const txEntity = new TxEntity()
+        txEntity.txId = txId
+        txEntity.txSerialized = tx
+        txEntity.creationTime = time
+        txEntity.requestId = requestId
+        txEntity.type = type
+        return await this.txRepository.save(txEntity)
+    }
+
+    /**
+     * Returns all stored transactions
+     */
+    getAllTxs = async (): Promise<Array<TxEntity>> => {
+        return await this.txRepository.find()
+    }
+
+    /**
+     * Removes one specified transaction
+     * @param id
+     */
+    removeTx = async (id: number) => {
+        await this.txRepository.delete({id: id})
     }
 }
 
