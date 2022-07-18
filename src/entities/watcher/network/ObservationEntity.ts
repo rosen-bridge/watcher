@@ -3,11 +3,12 @@ import { BlockEntity } from "./BlockEntity";
 import { TxEntity } from "./TransactionEntity";
 
 export enum TxStatus {
-    NOT_COMMITTED = 0,
-    COMMITMENT_SENT = 1,
-    COMMITTED = 2,
-    REVEAL_SENT = 3,
-    REVEALED = 4,
+    TIMED_OUT = 0,
+    NOT_COMMITTED = 1,
+    COMMITMENT_SENT = 2,
+    COMMITTED = 3,
+    REVEAL_SENT = 4,
+    REVEALED = 5,
 }
 
 @Entity()

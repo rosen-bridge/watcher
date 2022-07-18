@@ -25,19 +25,26 @@ export class databaseConnection{
      */
     isObservationValid = async (observation: ObservationEntity): Promise<boolean> => {
         const currentHeight = await ErgoNetwork.getHeight()
-        if(currentHeight - observation.block.height > this.__observationValidThreshold) return false
-        else if(await this.isMergeHappened(observation.requestId)) return false
+        if(currentHeight - observation.block.height > this.__observationValidThreshold) {
+            await this.__networkDataBase.updateObservationTxStatus(observation, TxStatus.TIMED_OUT)
+            return false
+        }
+        else if(await this.isMergeHappened(observation)) return false
         return true
     }
 
     /**
      * returns true if any commitment boxesSample had been spent to create event trigger
-     * @param requestId
+     * @param observation
      */
-    isMergeHappened = async (requestId: string): Promise<boolean> => {
-        const commitments = await this.__bridgeDataBase.commitmentsByEventId(requestId)
+    isMergeHappened = async (observation: ObservationEntity): Promise<boolean> => {
+        if(observation.status == TxStatus.REVEALED) return true
+        const commitments = await this.__bridgeDataBase.commitmentsByEventId(observation.requestId)
         for(const commitment of commitments){
-            if(commitment.spendReason && commitment.spendReason === SpendReason.MERGE) return true
+            if(commitment.spendReason && commitment.spendReason === SpendReason.MERGE) {
+                await this.__networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
+                return true
+            }
         }
         return false
     }
@@ -61,7 +68,7 @@ export class databaseConnection{
             .filter(observation => observation.status == TxStatus.COMMITTED)
         for(const observation of observations){
             const relatedCommitments = await this.__bridgeDataBase.commitmentsByEventId(observation.requestId)
-            if(!(await this.isMergeHappened(observation.requestId)))
+            if(!(await this.isMergeHappened(observation)))
                 readyCommitments.push({
                     commitments: relatedCommitments.filter(commitment => commitment.spendBlock === undefined),
                     observation: observation

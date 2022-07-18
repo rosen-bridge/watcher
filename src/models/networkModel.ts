@@ -240,5 +240,21 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         })
         return this.observationRepository.save(newObservation)
     }
+
+    /**
+     * Update the observation TxStatus to the specified new status
+     * @param observation
+     * @param status
+     */
+    updateObservationTxStatus = async (observation: ObservationEntity, status: TxStatus) => {
+        const newObservation = new ObservationEntity()
+        Object.assign(newObservation, {
+            ...observation,
+            ...{
+                status: status
+            }
+        })
+        return this.observationRepository.save(newObservation)
+    }
 }
 

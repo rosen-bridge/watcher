@@ -31,7 +31,7 @@ export class TransactionQueue {
                             !(await this._databaseConnection.isObservationValid(tx.observation))) ||
                         // trigger validation
                         (tx.type == TxType.TRIGGER &&
-                            (await this._databaseConnection.isMergeHappened(tx.observation.requestId))) ||
+                            (await this._databaseConnection.isMergeHappened(tx.observation))) ||
                         // transaction input validation
                         !(await ErgoNetwork.txInputsCheck(signedTx.inputs()))
                     ){

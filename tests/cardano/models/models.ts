@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { networkEntities } from "../../../src/entities";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
-import { TxEntity, TxType } from "../../../src/entities/watcher/network/TransactionEntity";
+import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
 import { TxStatus } from "../../../src/entities/watcher/network/ObservationEntity";
 
 export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
@@ -127,6 +127,15 @@ describe("Database functions",  () => {
             const obs = await DB.getConfirmedObservations(0);
             const res = await DB.downgradeObservationTxStatus(obs[0])
             expect(res.status).to.eql(TxStatus.NOT_COMMITTED)
+        });
+    })
+
+    describe("updateObservationTxStatus", () => {
+        it("should update the observation txStatus to revealed", async () => {
+            const DB = await loadDataBase("dataBase");
+            const obs = await DB.getConfirmedObservations(0);
+            const res = await DB.updateObservationTxStatus(obs[0], TxStatus.REVEALED)
+            expect(res.status).to.eql(TxStatus.REVEALED)
         });
     })
 
