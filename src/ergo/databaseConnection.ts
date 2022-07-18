@@ -46,7 +46,8 @@ export class databaseConnection{
      * Returns all confirmed observations to create new commitments
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
-        const observations = await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation)
+        const observations = (await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation))
+            .filter(observation => observation.status == TxStatus.NOT_COMMITTED)
         return Promise.all(observations.map(async observation => await this.isObservationValid(observation)))
             .then(result => observations.filter((_v, index) => result[index]))
     }

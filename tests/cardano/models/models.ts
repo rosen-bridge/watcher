@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { networkEntities } from "../../../src/entities";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
+import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
 
 export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -70,9 +71,18 @@ describe("Database functions",  () => {
         it("returns 1 confirmed observation", async () => {
             const DB = await loadDataBase("dataBase");
             const res = await DB.getConfirmedObservations(0);
+            console.log(res[0].requestId)
             expect(res).to.have.length(1)
         });
     });
+
+    describe("submitTx", () => {
+        it("should save a new transaction", async () => {
+            const DB = await loadDataBase("dataBase");
+            const res = await DB.submitTx("txSerialized", "reqId1", "txId", 100, TxType.COMMITMENT);
+            expect(res.id).to.be.equal(1);
+        })
+    })
 
     describe("getLastSavedBlock", () => {
         it("should return last saved block", async () => {

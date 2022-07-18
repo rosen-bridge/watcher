@@ -154,7 +154,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param type
      */
     submitTx = async (tx: string, requestId: string, txId: string, time: number, type: TxType) => {
-        const observation = (await this.observationRepository.findOne({
+        const observation: ObservationEntity | null = (await this.observationRepository.findOne({
             where: {requestId: requestId}
         }))
         if(!observation) throw new Error("Observation with this request id is not found")
