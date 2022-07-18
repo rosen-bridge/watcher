@@ -26,8 +26,8 @@ export class databaseConnection{
     isObservationValid = async (observation: ObservationEntity): Promise<boolean> => {
         const currentHeight = await ErgoNetwork.getHeight()
         if(currentHeight - observation.block.height > this.__observationValidThreshold) return false
-        else if(observation.status == TxStatus.NOT_COMMITTED || observation.status == TxStatus.COMMITMENT_SENT) return true
-        return false
+        else if(await this.isMergeHappened(observation.requestId)) return false
+        return true
     }
 
     /**
@@ -47,7 +47,7 @@ export class databaseConnection{
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
         const observations = await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation)
-        return Promise.all(observations.map(async observation => !(await this.isObservationValid(observation))))
+        return Promise.all(observations.map(async observation => await this.isObservationValid(observation)))
             .then(result => observations.filter((_v, index) => result[index]))
     }
 
@@ -67,14 +67,5 @@ export class databaseConnection{
                 })
         }
         return readyCommitments
-    }
-
-    /**
-     * Updates the observation after commitment creation
-     * @param commitmentBoxId
-     * @param observation
-     */
-    updateObservation = async (commitmentBoxId: string, observation: ObservationEntity) => {
-        await this.__networkDataBase.updateObservation(commitmentBoxId, observation)
     }
 }

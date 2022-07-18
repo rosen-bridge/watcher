@@ -3,6 +3,9 @@ import { ErgoNetwork } from "./network/ergoNetwork";
 import { NetworkDataBase } from "../models/networkModel";
 import { databaseConnection } from "./databaseConnection";
 import * as wasm from "ergo-lib-wasm-nodejs";
+import { ErgoConfig } from "../config/config";
+
+const ergoConfig = ErgoConfig.getConfig();
 
 export class TransactionQueue {
     _database: NetworkDataBase
@@ -26,13 +29,12 @@ export class TransactionQueue {
                         (tx.type == TxType.COMMITMENT &&
                             !(await this._databaseConnection.isObservationValid(tx.observation))) ||
                         // trigger validation
-                        (tx.type == TxType.COMMITMENT &&
+                        (tx.type == TxType.TRIGGER &&
                             !(await this._databaseConnection.isMergeHappened(tx.observation.requestId))) ||
                         // transaction input validation
                         !(await ErgoNetwork.txInputsCheck(signedTx.inputs()))
                     ){
-                        // TODO timeout config
-                        if(currentTime - tx.updateTime > 2345) {
+                        if(currentTime - tx.updateTime > ergoConfig.transactionRemovingTimeout) {
                             await this._database.downgradeObservationTxStatus(tx.observation)
                             await this._database.removeTx(tx)
                         }
@@ -41,8 +43,7 @@ export class TransactionQueue {
                     // resend the tx
                     await ErgoNetwork.sendTx(signedTx.to_json())
                     await this._database.updateTxTime(tx, currentTime)
-                } else if (txStatus > 10) {
-                    // TODO confirmation config
+                } else if (txStatus > ergoConfig.transactionConfirmation) {
                     await this._database.upgradeObservationTxStatus(tx.observation)
                     await this._database.removeTx(tx)
                 } else {

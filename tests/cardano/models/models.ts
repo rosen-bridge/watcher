@@ -74,17 +74,6 @@ describe("Database functions",  () => {
         });
     });
 
-    describe("saveCommitment", () => {
-        it("should save the commitment and update the observation", async () => {
-            const DB = await loadDataBase("dataBase");
-            const observation = (await DB.getConfirmedObservations(0))[0]
-            const res = await DB.updateObservation("txId", observation)
-            expect(res.commitmentBoxId).to.eql("txId")
-            const observation2 = (await DB.getConfirmedObservations(0))[0]
-            expect(observation2.commitmentBoxId).to.not.null
-        });
-    });
-
     describe("getLastSavedBlock", () => {
         it("should return last saved block", async () => {
             const DB = await loadDataBase("dataBase");

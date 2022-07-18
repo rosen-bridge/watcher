@@ -1,20 +1,26 @@
 import { loadDataBase } from "../cardano/models/models";
 import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
 import { databaseConnection } from "../../src/ergo/databaseConnection";
-import { ObservationEntity } from "../../src/entities/watcher/network/ObservationEntity";
+import { ObservationEntity, TxStatus } from "../../src/entities/watcher/network/ObservationEntity";
 import { ObservedCommitmentEntity, SpendReason } from "../../src/entities/watcher/bridge/ObservedCommitmentEntity";
 import { BridgeBlockEntity } from "../../src/entities/watcher/bridge/BridgeBlockEntity";
+import { BlockEntity } from "../../src/entities/watcher/network/BlockEntity";
+import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 
-import { expect } from "chai";
-import chai from "chai";
+import chai, { expect } from "chai";
 import spies from "chai-spies";
+import sinon from "sinon";
 chai.use(spies)
 
 const block = new BridgeBlockEntity()
 
+const blockEntity : BlockEntity = new BlockEntity()
+blockEntity.height = 11
 const firstObservation: ObservationEntity = new ObservationEntity()
-firstObservation.commitmentBoxId = "boxId";
+firstObservation.block = blockEntity
+firstObservation.status = TxStatus.COMMITTED
 const secondObservation: ObservationEntity = new ObservationEntity()
+secondObservation.block = blockEntity
 
 const unspentCommitment = new ObservedCommitmentEntity()
 const unspentCommitment2 = new ObservedCommitmentEntity()
@@ -31,28 +37,34 @@ describe("Testing the databaseConnection", () => {
         it("should return an observation", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            chai.spy.on(networkDb, "getConfirmedObservations", () => [secondObservation])
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation])
+            sinon.stub(ErgoNetwork, "getHeight").resolves(15)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            chai.spy.on(dbConnection, "isMergeHappened", () => false)
             const data = await dbConnection.allReadyObservations()
             expect(data).to.have.length(1)
+            sinon.restore()
+        })
+        it("should return two observations", async () => {
+            const networkDb = await loadDataBase("dataBase");
+            const bridgeDb = await loadBridgeDataBase("commitments");
+            sinon.stub(ErgoNetwork, "getHeight").resolves(15)
+            chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation, secondObservation])
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            chai.spy.on(dbConnection, "isMergeHappened", () => true)
+            const data = await dbConnection.allReadyObservations()
+            expect(data).to.have.length(0)
+            sinon.restore()
         })
         it("should return no observations", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation])
-            chai.spy.on(bridgeDb, "findCommitmentsById", () => [unspentCommitment])
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            sinon.stub(ErgoNetwork, "getHeight").resolves(215)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             const data = await dbConnection.allReadyObservations()
             expect(data).to.have.length(0)
-        })
-        it("should return two observations", async () => {
-            const networkDb = await loadDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation, secondObservation])
-            chai.spy.on(bridgeDb, "findCommitmentsById", () => [])
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
-            const data = await dbConnection.allReadyObservations()
-            expect(data).to.have.length(2)
+            sinon.restore()
         })
     })
 
@@ -61,7 +73,7 @@ describe("Testing the databaseConnection", () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [secondObservation])
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(data).to.have.length(0)
         })
@@ -69,9 +81,8 @@ describe("Testing the databaseConnection", () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation])
-            chai.spy.on(bridgeDb, "findCommitmentsById", () => [unspentCommitment])
             chai.spy.on(bridgeDb, "commitmentsByEventId", () => [unspentCommitment, unspentCommitment2, redeemedCommitment])
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(data).to.have.length(1)
             expect(data[0].commitments).to.have.length(2)
@@ -82,7 +93,7 @@ describe("Testing the databaseConnection", () => {
             chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation])
             chai.spy.on(bridgeDb, "findCommitmentsById", () => [unspentCommitment])
             chai.spy.on(bridgeDb, "commitmentsByEventId", () => [unspentCommitment, mergedCommitment, redeemedCommitment])
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(data).to.have.length(0)
         })

@@ -21,6 +21,8 @@ const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.('ergo.explorerTim
 const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
 const ERGO_SCANNER_INTERVAL: number | undefined = config.get?.('ergo.scanner.interval');
 const ERGO_SCANNER_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scanner.initialBlockHeight');
+const TRANSACTION_REMOVING_TIMEOUT: number | undefined = config.get?.('ergo.transactions.timeout');
+const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transactions.confirmation');
 
 export class ErgoConfig{
     private static instance: ErgoConfig;
@@ -95,6 +97,12 @@ export class ErgoConfig{
         if (ERGO_NODE_TIMEOUT === undefined) {
             throw new Error("Ergo node timeout doesn't set correctly");
         }
+        if (TRANSACTION_CONFIRMATION === undefined) {
+            throw new Error("Ergo transaction confirmation doesn't set correctly");
+        }
+        if (TRANSACTION_REMOVING_TIMEOUT === undefined) {
+            throw new Error("Ergo transaction timeout doesn't set correctly");
+        }
         const watcherAddress: string = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
             .get_address().to_base58(networkType)
 
@@ -111,6 +119,8 @@ export class ErgoConfig{
         this.commitmentInitialHeight = COMMITMENT_INITIAL_HEIGHT;
         this.commitmentHeightLimit = COMMITMENT_HEIGHT_LIMIT;
         this.cleanupConfirmation = CLEANUP_CONFIRMATION;
+        this.transactionConfirmation = TRANSACTION_CONFIRMATION;
+        this.transactionRemovingTimeout = TRANSACTION_REMOVING_TIMEOUT;
     }
 
     static getConfig() {

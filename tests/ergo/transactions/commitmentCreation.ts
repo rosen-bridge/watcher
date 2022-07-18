@@ -66,7 +66,7 @@ describe("Commitment creation transaction tests", () => {
         it("Should create, sign and send a commitment transaction", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             const boxes = new Boxes(bridgeDb)
             chai.spy.on(boxes, "createCommitment")
             chai.spy.on(boxes, "createPermit")
@@ -99,7 +99,7 @@ describe("Commitment creation transaction tests", () => {
         it("Should collect ready observations and create commitments", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
             chai.spy.on(dbConnection, "updateObservation", () => {return})
             const boxes = new Boxes(bridgeDb)
@@ -113,14 +113,13 @@ describe("Commitment creation transaction tests", () => {
             await cc.job()
             // Total value is enough should not call paymentBox
             expect(boxes.getUserPaymentBox).to.not.have.called()
-            expect(dbConnection.updateObservation).to.have.called.with("boxId", observation)
             expect(cc.createCommitmentTx).to.have.called.with(WID, observation.requestId, commitment, permits, WIDBox, [])
         })
 
         it("Should collect ready observations and create commitment with excess fee box", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
             chai.spy.on(dbConnection, "updateObservation", () => {return})
             const boxes = new Boxes(bridgeDb)
@@ -134,7 +133,6 @@ describe("Commitment creation transaction tests", () => {
             await cc.job()
             // Total value is not enough for the transaction
             expect(boxes.getUserPaymentBox).to.have.called.once
-            expect(dbConnection.updateObservation).to.have.called.with("boxId", observation)
             expect(cc.createCommitmentTx).to.have.called.with(WID, observation.requestId, commitment, permits, WIDBox2, plainBox)
         })
     })

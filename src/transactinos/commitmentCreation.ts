@@ -108,8 +108,6 @@ export class commitmentCreation{
                 feeBoxes = await this._boxes.getUserPaymentBox(requiredValue - totalValue)
             }
             const txInfo = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, feeBoxes)
-            if(txInfo.commitmentBoxId !== undefined)
-                await this._dataBaseConnection.updateObservation(txInfo.commitmentBoxId, observation)
         }
     }
 }

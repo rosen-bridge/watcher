@@ -19,6 +19,10 @@
         "scanner": {
             "interval": 1000,
             "initialBlockHeight": 239230
+        },
+        "transactions": {
+            "timeout": 10000,
+            "confirmation": 10
         }
     },
     "commitmentScanner": {

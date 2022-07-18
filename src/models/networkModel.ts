@@ -142,24 +142,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         const requiredHeight = height - confirmation
         return await this.observationRepository.createQueryBuilder("observation_entity")
             .where("observation_entity.block < :requiredHeight", {requiredHeight})
-            .andWhere("observation_entity.type == 'not-created'")
             .getMany()
-    }
-
-    /**
-     * Save a newly created commitment and updates the related observation
-     * @param commitmentBoxId
-     * @param observation
-     */
-    updateObservation = async (commitmentBoxId: string, observation: ObservationEntity) => {
-        const newObservation = new ObservationEntity()
-        Object.assign(newObservation, {
-            ...observation,
-            ...{
-                commitmentBoxId: commitmentBoxId
-            }
-        })
-        return this.observationRepository.save(newObservation)
     }
 
     /**
@@ -191,6 +174,11 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      */
     getAllTxs = async (): Promise<Array<TxEntity>> => {
         return await this.txRepository.find({
+            relations: [
+                "tx_entity",
+                "observation_entity",
+                "block_entity"
+            ],
             where: {
                 deleted: false
             }
