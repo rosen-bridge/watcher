@@ -4,6 +4,9 @@ import { CommitmentSet } from "../objects/interfaces";
 import { SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity";
 import { ObservationEntity, TxStatus } from "../entities/watcher/network/ObservationEntity";
 import { ErgoNetwork } from "./network/ergoNetwork";
+import { ErgoConfig } from "../config/config";
+
+const ergoConfig = ErgoConfig.getConfig();
 
 
 export class databaseConnection{
@@ -24,6 +27,7 @@ export class databaseConnection{
      * @param observation
      */
     isObservationValid = async (observation: ObservationEntity): Promise<boolean> => {
+        if(observation.status == TxStatus.TIMED_OUT) return false
         const currentHeight = await ErgoNetwork.getHeight()
         if(currentHeight - observation.block.height > this.__observationValidThreshold) {
             await this.__networkDataBase.updateObservationTxStatus(observation, TxStatus.TIMED_OUT)
@@ -41,8 +45,10 @@ export class databaseConnection{
         if(observation.status == TxStatus.REVEALED) return true
         const commitments = await this.__bridgeDataBase.commitmentsByEventId(observation.requestId)
         for(const commitment of commitments){
-            if(commitment.spendReason && commitment.spendReason === SpendReason.MERGE) {
-                await this.__networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
+            if(commitment.spendBlock && commitment.spendReason && commitment.spendReason === SpendReason.MERGE) {
+                const height = await ErgoNetwork.getHeight()
+                if(height - commitment.spendBlock.height > ergoConfig.transactionConfirmation)
+                    await this.__networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
                 return true
             }
         }

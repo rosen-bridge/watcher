@@ -13,6 +13,7 @@ import sinon from "sinon";
 chai.use(spies)
 
 const block = new BridgeBlockEntity()
+block.height = 111
 
 const blockEntity : BlockEntity = new BlockEntity()
 blockEntity.height = 11
@@ -97,6 +98,7 @@ describe("Testing the databaseConnection", () => {
             chai.spy.on(bridgeDb, "findCommitmentsById", () => [unspentCommitment])
             chai.spy.on(bridgeDb, "commitmentsByEventId", () => [unspentCommitment, mergedCommitment, redeemedCommitment])
             chai.spy.on(networkDb, "updateObservationTxStatus", () => undefined)
+            chai.spy.on(ErgoNetwork, "getHeight", () => 5000)
             const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(networkDb.updateObservationTxStatus).to.have.been.called.with(secondObservation, TxStatus.REVEALED)
