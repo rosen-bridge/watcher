@@ -3,7 +3,8 @@ import { expect } from "chai";
 import { networkEntities } from "../../../src/entities";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
-import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
+import { TxEntity, TxType } from "../../../src/entities/watcher/network/TransactionEntity";
+import { TxStatus } from "../../../src/entities/watcher/network/ObservationEntity";
 
 export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -71,17 +72,62 @@ describe("Database functions",  () => {
         it("returns 1 confirmed observation", async () => {
             const DB = await loadDataBase("dataBase");
             const res = await DB.getConfirmedObservations(0);
-            console.log(res[0].requestId)
             expect(res).to.have.length(1)
         });
     });
 
     describe("submitTx", () => {
-        it("should save a new transaction", async () => {
+        it("should save two new transaction without any errors", async () => {
             const DB = await loadDataBase("dataBase");
-            const res = await DB.submitTx("txSerialized", "reqId1", "txId", 100, TxType.COMMITMENT);
-            expect(res.id).to.be.equal(1);
+            await DB.submitTx("txSerialized", "reqId1", "txId", 100, TxType.COMMITMENT);
+            await DB.submitTx("txSerialized2", "reqId1", "txId2", 120, TxType.TRIGGER);
         })
+    })
+
+    describe("getAllTxs and removeTx", () => {
+        it("should return two available txs", async () => {
+            const DB = await loadDataBase("dataBase");
+            const data = await DB.getAllTxs()
+            expect(data).to.have.length(2)
+        })
+        it("should remove a tx", async () => {
+            const DB = await loadDataBase("dataBase");
+            const txs = await DB.getAllTxs()
+            const data = await DB.removeTx(txs[0])
+            expect(data.deleted).to.true
+        })
+        it("should return one available tx", async () => {
+            const DB = await loadDataBase("dataBase");
+            const data = await DB.getAllTxs()
+            expect(data).to.have.length(1)
+        })
+    })
+
+    describe("updateTxTime", () => {
+        it("should update the tx time", async () => {
+            const DB = await loadDataBase("dataBase");
+            const txs = await DB.getAllTxs()
+            const data = await DB.updateTxTime(txs[0], 150)
+            expect(data.updateTime).to.eql(150)
+        })
+    })
+
+    describe("upgradeObservationTxStatus", () => {
+        it("should upgrade the observation txStatus", async () => {
+            const DB = await loadDataBase("dataBase");
+            const obs = await DB.getConfirmedObservations(0);
+            const res = await DB.upgradeObservationTxStatus(obs[0])
+            expect(res.status).to.eql(TxStatus.COMMITMENT_SENT)
+        });
+    })
+
+    describe("downgradeObservationTxStatus", () => {
+        it("should upgrade the observation txStatus", async () => {
+            const DB = await loadDataBase("dataBase");
+            const obs = await DB.getConfirmedObservations(0);
+            const res = await DB.downgradeObservationTxStatus(obs[0])
+            expect(res.status).to.eql(TxStatus.NOT_COMMITTED)
+        });
     })
 
     describe("getLastSavedBlock", () => {

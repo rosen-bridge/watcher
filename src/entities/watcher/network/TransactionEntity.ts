@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, PrimaryColumn, Relation } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from "typeorm";
 import { ObservationEntity } from "./ObservationEntity";
 
 export enum TxType {
@@ -29,7 +29,7 @@ export class TxEntity {
     @Column()
     txSerialized: string
 
-    @OneToOne(
+    @ManyToOne(
         "ObservationEntity",
         "requestId",
         {onDelete: 'CASCADE'}

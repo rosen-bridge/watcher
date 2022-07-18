@@ -7,6 +7,10 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { boxId, confirmedTxId, initMockedAxios, unconfirmedTxId } from "../objects/axios";
 
 initMockedAxios();
+import txObj from "../transactions/dataset/commitmentTx.json" assert {type: "json"}
+const tx = wasm.Transaction.from_json(JSON.stringify(txObj))
+import txObj2 from "../dataset/tx.json" assert {type: "json"}
+const tx2 = wasm.Transaction.from_json(JSON.stringify(txObj2))
 
 /**
  * Ergo Network class tests
@@ -236,6 +240,17 @@ describe("Ergo Network(API)", () => {
             expect(unconfirmed).to.null
             const confNum = await ErgoNetwork.getConfNum(confirmedTxId)
             expect(confNum).to.eql(6539)
+        })
+    })
+
+    describe("txInputsCheck", () => {
+        it("Returns false because tx inputs are spent", async () =>{
+            const data = await ErgoNetwork.txInputsCheck(tx.inputs())
+            expect(data).to.false
+        })
+        it("Returns true because tx inputs are all unspent", async () =>{
+            const data = await ErgoNetwork.txInputsCheck(tx2.inputs())
+            expect(data).to.true
         })
     })
 

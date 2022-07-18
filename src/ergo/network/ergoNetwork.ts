@@ -289,7 +289,8 @@ export class ErgoNetwork{
             }))
             return true
         } catch (e) {
-            return false
+            if(e.response && e.response.status == 404) return false
+            throw Error("Connection problem")
         }
     }
 

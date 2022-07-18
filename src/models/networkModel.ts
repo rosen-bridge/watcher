@@ -173,16 +173,11 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * Returns all stored transactions with no deleted flag
      */
     getAllTxs = async (): Promise<Array<TxEntity>> => {
-        return await this.txRepository.find({
-            relations: [
-                "tx_entity",
-                "observation_entity",
-                "block_entity"
-            ],
-            where: {
-                deleted: false
-            }
-        })
+        return await this.txRepository.createQueryBuilder("tx_entity")
+            .leftJoinAndSelect("tx_entity.observation", "observation_entity")
+            .leftJoinAndSelect("observation_entity.block", "block_entity")
+            .where("tx_entity.deleted == false")
+            .getMany()
     }
 
     /**
@@ -197,7 +192,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
                 deleted: true
             }
         })
-        return this.observationRepository.save(newTx)
+        return this.txRepository.save(newTx)
     }
 
     /**
@@ -213,9 +208,13 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
                 updateTime: time
             }
         })
-        return this.observationRepository.save(newTx)
+        return this.txRepository.save(newTx)
     }
 
+    /**
+     * Upgrades the observation TxStatus, it means it had progressed creating transactions
+     * @param observation
+     */
     upgradeObservationTxStatus = async (observation: ObservationEntity) => {
         const newObservation = new ObservationEntity()
         Object.assign(newObservation, {
@@ -227,6 +226,10 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         return this.observationRepository.save(newObservation)
     }
 
+    /**
+     * Downgrades the observation TxStatus, it means it had problems creating or sending transactions
+     * @param observation
+     */
     downgradeObservationTxStatus = async (observation: ObservationEntity) => {
         const newObservation = new ObservationEntity()
         Object.assign(newObservation, {
