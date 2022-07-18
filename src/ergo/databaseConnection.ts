@@ -1,38 +1,41 @@
 import { BridgeDataBase } from "../bridge/models/bridgeModel";
 import { NetworkDataBase } from "../models/networkModel";
-import { CommitmentSet, Observation } from "../objects/interfaces";
-import { ObservedCommitmentEntity, SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity";
-import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
+import { CommitmentSet } from "../objects/interfaces";
+import { SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity";
+import { ObservationEntity, TxStatus } from "../entities/watcher/network/ObservationEntity";
+import { ErgoNetwork } from "./network/ergoNetwork";
 
 
 export class databaseConnection{
     __bridgeDataBase: BridgeDataBase
     __networkDataBase: NetworkDataBase
     __observationConfirmation: number
+    __observationValidThreshold: number
 
-    constructor(networkDb: NetworkDataBase, bridgeDb: BridgeDataBase, confirmation: number) {
+    constructor(networkDb: NetworkDataBase, bridgeDb: BridgeDataBase, confirmation: number, validThreshold: number) {
         this.__networkDataBase = networkDb
         this.__bridgeDataBase = bridgeDb
         this.__observationConfirmation = confirmation
+        this.__observationValidThreshold = validThreshold
     }
 
     /**
-     * Check if a commitment is created form the observation or not
+     * Checks if the observation is valid for commitment creation
      * @param observation
      */
-    private isCommitmentCreated = async (observation: Observation): Promise<boolean> => {
-        if(observation.commitmentBoxId === undefined){
-            return false
-        }
-        const commitment = await this.__bridgeDataBase.findCommitmentsById([observation.commitmentBoxId])
-        return commitment.length > 0;
+    isObservationValid = async (observation: ObservationEntity): Promise<boolean> => {
+        const currentHeight = await ErgoNetwork.getHeight()
+        if(currentHeight - observation.block.height > this.__observationValidThreshold) return false
+        else if(observation.status == TxStatus.NOT_COMMITTED || observation.status == TxStatus.COMMITMENT_SENT) return true
+        return false
     }
 
     /**
      * returns true if any commitment boxesSample had been spent to create event trigger
-     * @param commitments
+     * @param requestId
      */
-    private isMergeHappened = (commitments: Array<ObservedCommitmentEntity>): boolean => {
+    isMergeHappened = async (requestId: string): Promise<boolean> => {
+        const commitments = await this.__bridgeDataBase.commitmentsByEventId(requestId)
         for(const commitment of commitments){
             if(commitment.spendReason && commitment.spendReason === SpendReason.MERGE) return true
         }
@@ -44,7 +47,7 @@ export class databaseConnection{
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
         const observations = await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation)
-        return Promise.all(observations.map(async observation => !(await this.isCommitmentCreated(observation))))
+        return Promise.all(observations.map(async observation => !(await this.isObservationValid(observation))))
             .then(result => observations.filter((_v, index) => result[index]))
     }
 
@@ -53,13 +56,11 @@ export class databaseConnection{
      */
     allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
         const readyCommitments: Array<CommitmentSet> = []
-        const observationEntities = (await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation))
-        const observations: Array<Observation> = await Promise.all(
-            observationEntities.map(async observation => await this.isCommitmentCreated(observation)))
-            .then(result => observationEntities.filter((_v, index) => result[index]))
+        const observations = (await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation))
+            .filter(observation => observation.status == TxStatus.COMMITTED)
         for(const observation of observations){
             const relatedCommitments = await this.__bridgeDataBase.commitmentsByEventId(observation.requestId)
-            if(!this.isMergeHappened(relatedCommitments))
+            if(!(await this.isMergeHappened(observation.requestId)))
                 readyCommitments.push({
                     commitments: relatedCommitments.filter(commitment => commitment.spendBlock === undefined),
                     observation: observation

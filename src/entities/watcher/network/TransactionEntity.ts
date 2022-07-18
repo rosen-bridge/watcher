@@ -1,6 +1,11 @@
 import { Column, Entity, OneToOne, PrimaryColumn, Relation } from "typeorm";
 import { ObservationEntity } from "./ObservationEntity";
 
+export enum TxType {
+    COMMITMENT = 'commitment',
+    TRIGGER = 'trigger',
+}
+
 @Entity()
 export class TxEntity {
     @PrimaryColumn()
@@ -10,18 +15,27 @@ export class TxEntity {
     creationTime: number
 
     @Column()
-    txId: string
+    updateTime: number
+
+    @Column({
+        type: 'simple-enum',
+        enum: TxType
+    })
+    type: TxType
 
     @Column()
-    requestId: string
+    txId: string
 
     @Column()
     txSerialized: string
 
     @OneToOne(
         "ObservationEntity",
-        "??",
-        {onDelete: 'CASCADE', nullable: true}
+        "requestId",
+        {onDelete: 'CASCADE'}
     )
-    revealTx: Relation<ObservationEntity>
+    observation: Relation<ObservationEntity>
+
+    @Column()
+    deleted: boolean
 }

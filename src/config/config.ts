@@ -37,6 +37,9 @@ export class ErgoConfig{
     commitmentInitialHeight: number;
     commitmentHeightLimit: number;
     cleanupConfirmation: number;
+    transactionRemovingTimeout: number;
+    transactionConfirmation: number;
+
 
     private constructor() {
         let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;

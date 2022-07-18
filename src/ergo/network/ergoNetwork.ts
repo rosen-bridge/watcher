@@ -282,4 +282,15 @@ export class ErgoNetwork{
         }
     }
 
+    static txInputsCheck = async (inputs: wasm.Inputs) => {
+        try{
+            await Promise.all(Array(inputs.len()).fill("").map(async (item, index) => {
+                await ErgoNetwork.boxById(inputs.get(index).box_id().to_str())
+            }))
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
 }

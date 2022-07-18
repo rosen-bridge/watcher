@@ -1,5 +1,6 @@
 import { BoxType } from "../entities/watcher/bridge/BoxEntity";
 import { SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity";
+import { TxStatus } from "../entities/watcher/network/ObservationEntity";
 
 export interface Block {
     hash: string,
@@ -19,7 +20,7 @@ export interface Observation {
     sourceTxId: string
     sourceBlockId: string
     requestId: string
-    commitmentBoxId?: string
+    status: TxStatus
 }
 
 export interface Commitment{

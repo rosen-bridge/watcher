@@ -1,6 +1,6 @@
 import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
 import { BlockEntity } from "../entities/watcher/network/BlockEntity";
-import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
+import { ObservationEntity, TxStatus } from "../entities/watcher/network/ObservationEntity";
 import { Block, Observation } from "../objects/interfaces";
 import { AbstractDataBase } from "./abstractModel";
 import { TxEntity, TxType } from "../entities/watcher/network/TransactionEntity";
@@ -91,6 +91,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
                 observationEntity.fromAddress = observation.fromAddress;
                 observationEntity.toAddress = observation.toAddress;
                 observationEntity.targetChainTokenId = observation.targetChainTokenId;
+                observationEntity.status = TxStatus.NOT_COMMITTED;
                 observationEntity.block = block;
                 return observationEntity;
             });
@@ -128,6 +129,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
 
     /**
      * returns confirmed observation after required confirmation
+     * ignores observations which have created commitments
      * @param confirmation
      */
     getConfirmedObservations = async (confirmation: number): Promise<Array<ObservationEntity>> => {
@@ -140,6 +142,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         const requiredHeight = height - confirmation
         return await this.observationRepository.createQueryBuilder("observation_entity")
             .where("observation_entity.block < :requiredHeight", {requiredHeight})
+            .andWhere("observation_entity.type == 'not-created'")
             .getMany()
     }
 
@@ -168,28 +171,83 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param type
      */
     submitTx = async (tx: string, requestId: string, txId: string, time: number, type: TxType) => {
+        const observation = (await this.observationRepository.findOne({
+            where: {requestId: requestId}
+        }))
+        if(!observation) throw new Error("Observation with this request id is not found")
         const txEntity = new TxEntity()
         txEntity.txId = txId
         txEntity.txSerialized = tx
         txEntity.creationTime = time
-        txEntity.requestId = requestId
+        txEntity.updateTime = time
+        txEntity.observation = observation
         txEntity.type = type
+        txEntity.deleted = false
         return await this.txRepository.save(txEntity)
     }
 
     /**
-     * Returns all stored transactions
+     * Returns all stored transactions with no deleted flag
      */
     getAllTxs = async (): Promise<Array<TxEntity>> => {
-        return await this.txRepository.find()
+        return await this.txRepository.find({
+            where: {
+                deleted: false
+            }
+        })
     }
 
     /**
-     * Removes one specified transaction
-     * @param id
+     * Removes one specified transaction (Just toggles the removed flag)
+     * @param tx
      */
-    removeTx = async (id: number) => {
-        await this.txRepository.delete({id: id})
+    removeTx = async (tx: TxEntity) => {
+        const newTx = new ObservationEntity()
+        Object.assign(newTx, {
+            ...tx,
+            ...{
+                deleted: true
+            }
+        })
+        return this.observationRepository.save(newTx)
+    }
+
+    /**
+     * Updates the tx checking time
+     * @param tx
+     * @param time
+     */
+    updateTxTime = async (tx: TxEntity, time: number) => {
+        const newTx = new ObservationEntity()
+        Object.assign(newTx, {
+            ...tx,
+            ...{
+                updateTime: time
+            }
+        })
+        return this.observationRepository.save(newTx)
+    }
+
+    upgradeObservationTxStatus = async (observation: ObservationEntity) => {
+        const newObservation = new ObservationEntity()
+        Object.assign(newObservation, {
+            ...observation,
+            ...{
+                status: observation.status + 1
+            }
+        })
+        return this.observationRepository.save(newObservation)
+    }
+
+    downgradeObservationTxStatus = async (observation: ObservationEntity) => {
+        const newObservation = new ObservationEntity()
+        Object.assign(newObservation, {
+            ...observation,
+            ...{
+                status: observation.status - 1
+            }
+        })
+        return this.observationRepository.save(newObservation)
     }
 }
 
