@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "prebuild": "eslint --fix .",
-    "test": "rm -rf ./sqlite && mocha --slow 3000 && rm -rf ./sqlite",
+    "lint": "eslint .",
+    "test": "rm -rf ./sqlite && tsc --noEmit && npm run lint && mocha --slow 3000 && rm -rf ./sqlite",
     "coverage": "c8 npm run test",
     "start:dev": "nodemon src/index.ts",
     "typeorm": "typeorm-ts-node-esm",
