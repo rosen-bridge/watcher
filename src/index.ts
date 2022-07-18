@@ -5,7 +5,7 @@ import lockRSN from "./api/permit";
 import { Transaction } from "./api/Transaction";
 import { ErgoConfig } from "./config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { strToUint8Array } from "./utils/utils";
+import { hexStrToUint8Array } from "./utils/utils";
 import { rosenConfig } from "./config/rosenConfig";
 import { ErgoNetwork } from "./ergo/network/ergoNetwork";
 

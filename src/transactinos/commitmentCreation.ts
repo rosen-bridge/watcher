@@ -1,6 +1,6 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Boxes } from "../ergo/boxes";
-import { ErgoUtils, hexStrToUint8Array } from "../ergo/utils";
+import { ErgoUtils} from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
@@ -8,6 +8,7 @@ import { boxCreationError } from "../errors/errors";
 import { databaseConnection } from "../ergo/databaseConnection";
 import { Buffer } from "buffer";
 import { Transaction } from "../api/Transaction";
+import { hexStrToUint8Array } from "../utils/utils";
 
 const ergoConfig = ErgoConfig.getConfig();
 

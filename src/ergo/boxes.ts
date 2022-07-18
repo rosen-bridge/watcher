@@ -1,8 +1,8 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoUtils, hexStrToUint8Array } from "./utils";
+import { ErgoUtils} from "./utils";
 import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
-import { bigIntToUint8Array} from "../utils/utils";
+import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
 import { BridgeDataBase } from "../bridge/models/bridgeModel";
 import { BoxType } from "../entities/watcher/bridge/BoxEntity";
 import { Observation } from "../objects/interfaces";

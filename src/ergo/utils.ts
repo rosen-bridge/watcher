@@ -30,12 +30,6 @@ export const decodeCollColl = (str: string): Uint8Array[] => {
 export const decodeStr = async (str: string): Promise<string> => {
     return Buffer.from(wasm.Constant.decode_from_base16(str).to_byte_array()).toString('hex')
 }
-export const decodeCollLong = (str: string): Array<bigint> => {
-    return wasm.Constant.decode_from_base16(str).to_i64_str_array().map(cur => BigInt(cur))
-}
-export const hexStrToUint8Array = (str: string): Uint8Array => {
-    return new Uint8Array(Buffer.from(str, "hex"))
-}
 export const generateSK = (): wasm.SecretKey => {
     return wasm.SecretKey.random_dlog();
 }

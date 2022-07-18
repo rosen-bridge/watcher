@@ -7,7 +7,7 @@ import { loadDataBase } from "../../cardano/models/models";
 import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
 import { JsonBI } from "../../../src/network/parser";
 import { ObservationEntity } from "../../../src/entities/watcher/network/ObservationEntity";
-import { ErgoUtils, hexStrToUint8Array } from "../../../src/ergo/utils";
+import { ErgoUtils} from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -22,6 +22,7 @@ import WIDObj from "./dataset/WIDBox.json" assert {type: "json"}
 import WIDObj2 from "./dataset/WIDBox2.json" assert {type: "json"}
 import plainObj from "./dataset/plainBox.json" assert {type: "json"}
 import txObj from "./dataset/commitmentTx.json" assert {type: "json"}
+import { hexStrToUint8Array } from "../../../src/utils/utils";
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -82,6 +83,7 @@ describe("Commitment creation transaction tests", () => {
             expect(boxes.createCommitment).to.have.called.once
             expect(ErgoNetwork.sendTx).to.have.called.once
             sinon.restore()
+            chai.spy.restore(ErgoNetwork)
         })
     })
 

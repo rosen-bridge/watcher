@@ -4,6 +4,7 @@ import { NetworkDataBase } from "../models/networkModel";
 import { databaseConnection } from "./databaseConnection";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoConfig } from "../config/config";
+import { base64ToArrayBuffer } from "../utils/utils";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -23,14 +24,14 @@ export class TransactionQueue {
             try {
                 const txStatus = await ErgoNetwork.getConfNum(tx.txId)
                 if (txStatus === -1) {
-                    const signedTx = wasm.Transaction.sigma_parse_bytes(Buffer.from(tx.txSerialized))
+                    const signedTx = wasm.Transaction.sigma_parse_bytes(base64ToArrayBuffer(tx.txSerialized))
                     if(
                         // commitment validation
                         (tx.type == TxType.COMMITMENT &&
                             !(await this._databaseConnection.isObservationValid(tx.observation))) ||
                         // trigger validation
                         (tx.type == TxType.TRIGGER &&
-                            !(await this._databaseConnection.isMergeHappened(tx.observation.requestId))) ||
+                            (await this._databaseConnection.isMergeHappened(tx.observation.requestId))) ||
                         // transaction input validation
                         !(await ErgoNetwork.txInputsCheck(signedTx.inputs()))
                     ){

@@ -48,9 +48,10 @@ export const loadErgoDataBase = async (name: string): Promise<NetworkDataBase> =
 describe("Ergo Scanner Tests", () => {
 
     describe("observationsAtHeight", () => {
-        const networkApi = new ErgoNetworkApi()
-        chai.spy.on(networkApi, "getBlockTxs", () => ["1", "2"])
+
         it("should return nothing", async () => {
+            const networkApi = new ErgoNetworkApi()
+            chai.spy.on(networkApi, "getBlockTxs", () => ["1", "2"])
             const db = await loadErgoDataBase("ergoScanner")
             const ergoScanner = new ErgoScanner(db ,networkApi)
             const checkTx = sinon.stub(ErgoScanner, 'checkTx')
@@ -61,6 +62,8 @@ describe("Ergo Scanner Tests", () => {
             sinon.restore()
         })
         it("should return two observations", async () => {
+            const networkApi = new ErgoNetworkApi()
+            chai.spy.on(networkApi, "getBlockTxs", () => ["1", "2"])
             const db = await loadErgoDataBase("ergoScanner")
             const ergoScanner = new ErgoScanner(db ,networkApi)
             const checkTx = sinon.stub(ErgoScanner, 'checkTx')

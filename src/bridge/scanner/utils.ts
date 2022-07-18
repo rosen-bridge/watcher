@@ -1,5 +1,5 @@
 import { Commitment, SpecialBox, SpentBox } from "../../objects/interfaces";
-import { decodeCollColl, decodeStr } from "../../utils/utils";
+import { decodeCollColl, decodeStr } from "../../ergo/utils";
 import { NodeOutputBox, NodeTransaction } from "../network/ergoApiModels";
 import { BridgeDataBase } from "../models/bridgeModel";
 import { Address } from "ergo-lib-wasm-nodejs";

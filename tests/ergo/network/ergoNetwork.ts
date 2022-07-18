@@ -1,10 +1,11 @@
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 import { mockedResponseBody } from "../objects/mockedResponseBody";
+import { RWTRepoAddress, userAddress } from "../transactions/permit";
+import { boxId, confirmedTxId, initMockedAxios, unconfirmedTxId } from "../objects/axios";
+
+import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
 import { JsonBI } from "../../../src/network/parser";
-import { RWTRepoAddress, userAddress } from "../transactions/permit";
-import * as wasm from "ergo-lib-wasm-nodejs";
-import { boxId, confirmedTxId, initMockedAxios, unconfirmedTxId } from "../objects/axios";
 
 initMockedAxios();
 import txObj from "../transactions/dataset/commitmentTx.json" assert {type: "json"}
