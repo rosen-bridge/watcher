@@ -162,7 +162,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         txEntity.txId = txId
         txEntity.txSerialized = tx
         txEntity.creationTime = time
-        txEntity.updateTime = time
+        txEntity.updateBlock = time
         txEntity.observation = observation
         txEntity.type = type
         txEntity.deleted = false
@@ -185,14 +185,8 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param tx
      */
     removeTx = async (tx: TxEntity) => {
-        const newTx = new ObservationEntity()
-        Object.assign(newTx, {
-            ...tx,
-            ...{
-                deleted: true
-            }
-        })
-        return this.txRepository.save(newTx)
+        tx.deleted = true
+        return this.txRepository.save(tx)
     }
 
     /**
@@ -201,14 +195,8 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param time
      */
     updateTxTime = async (tx: TxEntity, time: number) => {
-        const newTx = new ObservationEntity()
-        Object.assign(newTx, {
-            ...tx,
-            ...{
-                updateTime: time
-            }
-        })
-        return this.txRepository.save(newTx)
+        tx.updateBlock = time
+        return this.txRepository.save(tx)
     }
 
     /**
@@ -216,14 +204,8 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param observation
      */
     upgradeObservationTxStatus = async (observation: ObservationEntity) => {
-        const newObservation = new ObservationEntity()
-        Object.assign(newObservation, {
-            ...observation,
-            ...{
-                status: observation.status + 1
-            }
-        })
-        return this.observationRepository.save(newObservation)
+       observation.status = observation.status + 1
+        return this.observationRepository.save(observation)
     }
 
     /**
@@ -231,14 +213,8 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param observation
      */
     downgradeObservationTxStatus = async (observation: ObservationEntity) => {
-        const newObservation = new ObservationEntity()
-        Object.assign(newObservation, {
-            ...observation,
-            ...{
-                status: observation.status - 1
-            }
-        })
-        return this.observationRepository.save(newObservation)
+        observation.status = observation.status - 1
+        return this.observationRepository.save(observation)
     }
 
     /**
@@ -247,14 +223,8 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param status
      */
     updateObservationTxStatus = async (observation: ObservationEntity, status: TxStatus) => {
-        const newObservation = new ObservationEntity()
-        Object.assign(newObservation, {
-            ...observation,
-            ...{
-                status: status
-            }
-        })
-        return this.observationRepository.save(newObservation)
+        observation.status = status
+        return this.observationRepository.save(observation)
     }
 }
 

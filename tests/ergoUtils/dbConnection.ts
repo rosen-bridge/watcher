@@ -103,6 +103,7 @@ describe("Testing the databaseConnection", () => {
             const data = await dbConnection.allReadyCommitmentSets()
             expect(networkDb.updateObservationTxStatus).to.have.been.called.with(secondObservation, TxStatus.REVEALED)
             expect(data).to.have.length(0)
+            chai.spy.restore(ErgoNetwork)
         })
     })
 })

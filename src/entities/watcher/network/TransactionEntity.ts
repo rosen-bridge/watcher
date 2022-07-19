@@ -15,7 +15,7 @@ export class TxEntity {
     creationTime: number
 
     @Column()
-    updateTime: number
+    updateBlock: number
 
     @Column({
         type: 'simple-enum',

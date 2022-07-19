@@ -1,7 +1,7 @@
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 import { mockedResponseBody } from "../objects/mockedResponseBody";
 import { RWTRepoAddress, userAddress } from "../transactions/permit";
-import { boxId, confirmedTxId, initMockedAxios, unconfirmedTxId } from "../objects/axios";
+import { boxId, confirmedTxId, initMockedAxios, unavailableTxId, unconfirmedTxId } from "../objects/axios";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
@@ -242,15 +242,20 @@ describe("Ergo Network(API)", () => {
             const confNum = await ErgoNetwork.getConfNum(confirmedTxId)
             expect(confNum).to.eql(6539)
         })
+
+        it("Tests unavailable transaction status", async () => {
+            const confNum = await ErgoNetwork.getConfNum(unavailableTxId)
+            expect(confNum).to.eql(-1)
+        })
     })
 
     describe("txInputsCheck", () => {
         it("Returns false because tx inputs are spent", async () =>{
-            const data = await ErgoNetwork.txInputsCheck(tx.inputs())
+            const data = await ErgoNetwork.checkTxInputs(tx.inputs())
             expect(data).to.false
         })
         it("Returns true because tx inputs are all unspent", async () =>{
-            const data = await ErgoNetwork.txInputsCheck(tx2.inputs())
+            const data = await ErgoNetwork.checkTxInputs(tx2.inputs())
             expect(data).to.true
         })
     })

@@ -108,7 +108,7 @@ describe("Database functions",  () => {
             const DB = await loadDataBase("dataBase");
             const txs = await DB.getAllTxs()
             const data = await DB.updateTxTime(txs[0], 150)
-            expect(data.updateTime).to.eql(150)
+            expect(data.updateBlock).to.eql(150)
         })
     })
 

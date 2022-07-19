@@ -19,7 +19,7 @@ export class TransactionQueue {
 
     job = async () => {
         const txs: Array<TxEntity> = await this._database.getAllTxs()
-        const currentTime: number = new Date().getTime()
+        const currentHeight = await ErgoNetwork.getHeight()
         for(const tx of txs) {
             try {
                 const txStatus = await ErgoNetwork.getConfNum(tx.txId)
@@ -33,9 +33,9 @@ export class TransactionQueue {
                         (tx.type == TxType.TRIGGER &&
                             (await this._databaseConnection.isMergeHappened(tx.observation))) ||
                         // transaction input validation
-                        !(await ErgoNetwork.txInputsCheck(signedTx.inputs()))
+                        !(await ErgoNetwork.checkTxInputs(signedTx.inputs()))
                     ){
-                        if(currentTime - tx.updateTime > ergoConfig.transactionRemovingTimeout) {
+                        if(currentHeight - tx.updateBlock > ergoConfig.transactionRemovingTimeout) {
                             await this._database.downgradeObservationTxStatus(tx.observation)
                             await this._database.removeTx(tx)
                         }
@@ -43,12 +43,12 @@ export class TransactionQueue {
                     }
                     // resend the tx
                     await ErgoNetwork.sendTx(signedTx.to_json())
-                    await this._database.updateTxTime(tx, currentTime)
+                    await this._database.updateTxTime(tx, currentHeight)
                 } else if (txStatus > ergoConfig.transactionConfirmation) {
                     await this._database.upgradeObservationTxStatus(tx.observation)
                     await this._database.removeTx(tx)
                 } else {
-                    await this._database.updateTxTime(tx, currentTime)
+                    await this._database.updateTxTime(tx, currentHeight)
                 }
             } catch (e) {
                 console.log(e)
