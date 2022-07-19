@@ -1,10 +1,14 @@
 import { DataSource } from "typeorm";
-import { expect } from "chai";
 import { networkEntities } from "../../../src/entities";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
 import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
 import { TxStatus } from "../../../src/entities/watcher/network/ObservationEntity";
+import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
+
+import chai, { expect } from "chai";
+import spies from "chai-spies";
+chai.use(spies)
 
 export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -79,8 +83,10 @@ describe("Database functions",  () => {
     describe("submitTx", () => {
         it("should save two new transaction without any errors", async () => {
             const DB = await loadDataBase("dataBase");
-            await DB.submitTx("txSerialized", "reqId1", "txId", 100, TxType.COMMITMENT);
-            await DB.submitTx("txSerialized2", "reqId1", "txId2", 120, TxType.TRIGGER);
+            chai.spy.on(ErgoNetwork, "getHeight", () => 100)
+            await DB.submitTx("txSerialized", "reqId1", "txId", TxType.COMMITMENT)
+            await DB.submitTx("txSerialized2", "reqId1", "txId2", TxType.TRIGGER)
+            chai.spy.restore(ErgoNetwork)
         })
     })
 
@@ -107,7 +113,7 @@ describe("Database functions",  () => {
         it("should update the tx time", async () => {
             const DB = await loadDataBase("dataBase");
             const txs = await DB.getAllTxs()
-            const data = await DB.updateTxTime(txs[0], 150)
+            const data = await DB.setTxUpdateHeight(txs[0], 150)
             expect(data.updateBlock).to.eql(150)
         })
     })

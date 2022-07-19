@@ -10,16 +10,16 @@ const ergoConfig = ErgoConfig.getConfig();
 
 
 export class databaseConnection{
-    __bridgeDataBase: BridgeDataBase
-    __networkDataBase: NetworkDataBase
-    __observationConfirmation: number
-    __observationValidThreshold: number
+    bridgeDataBase: BridgeDataBase
+    networkDataBase: NetworkDataBase
+    observationConfirmation: number
+    observationValidThreshold: number
 
     constructor(networkDb: NetworkDataBase, bridgeDb: BridgeDataBase, confirmation: number, validThreshold: number) {
-        this.__networkDataBase = networkDb
-        this.__bridgeDataBase = bridgeDb
-        this.__observationConfirmation = confirmation
-        this.__observationValidThreshold = validThreshold
+        this.networkDataBase = networkDb
+        this.bridgeDataBase = bridgeDb
+        this.observationConfirmation = confirmation
+        this.observationValidThreshold = validThreshold
     }
 
     /**
@@ -29,8 +29,8 @@ export class databaseConnection{
     isObservationValid = async (observation: ObservationEntity): Promise<boolean> => {
         if(observation.status == TxStatus.TIMED_OUT) return false
         const currentHeight = await ErgoNetwork.getHeight()
-        if(currentHeight - observation.block.height > this.__observationValidThreshold) {
-            await this.__networkDataBase.updateObservationTxStatus(observation, TxStatus.TIMED_OUT)
+        if(currentHeight - observation.block.height > this.observationValidThreshold) {
+            await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.TIMED_OUT)
             return false
         }
         else if(await this.isMergeHappened(observation)) return false
@@ -43,12 +43,12 @@ export class databaseConnection{
      */
     isMergeHappened = async (observation: ObservationEntity): Promise<boolean> => {
         if(observation.status == TxStatus.REVEALED) return true
-        const commitments = await this.__bridgeDataBase.commitmentsByEventId(observation.requestId)
+        const commitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
         for(const commitment of commitments){
             if(commitment.spendBlock && commitment.spendReason && commitment.spendReason === SpendReason.MERGE) {
                 const height = await ErgoNetwork.getHeight()
                 if(height - commitment.spendBlock.height > ergoConfig.transactionConfirmation)
-                    await this.__networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
+                    await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
                 return true
             }
         }
@@ -59,7 +59,7 @@ export class databaseConnection{
      * Returns all confirmed observations to create new commitments
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
-        const observations = (await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation))
+        const observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation))
             .filter(observation => observation.status == TxStatus.NOT_COMMITTED)
         return Promise.all(observations.map(async observation => await this.isObservationValid(observation)))
             .then(result => observations.filter((_v, index) => result[index]))
@@ -70,10 +70,10 @@ export class databaseConnection{
      */
     allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
         const readyCommitments: Array<CommitmentSet> = []
-        const observations = (await this.__networkDataBase.getConfirmedObservations(this.__observationConfirmation))
+        const observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation))
             .filter(observation => observation.status == TxStatus.COMMITTED)
         for(const observation of observations){
-            const relatedCommitments = await this.__bridgeDataBase.commitmentsByEventId(observation.requestId)
+            const relatedCommitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
             if(!(await this.isMergeHappened(observation)))
                 readyCommitments.push({
                     commitments: relatedCommitments.filter(commitment => commitment.spendBlock === undefined),

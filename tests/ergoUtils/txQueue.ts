@@ -35,7 +35,7 @@ describe("Transaction queue tests", () => {
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "updateTxTime", () => undefined)
+            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
@@ -43,7 +43,7 @@ describe("Transaction queue tests", () => {
             chai.spy.on(dbConnection, "isObservationValid", () => true)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.been.called.with(tx.to_json())
-            expect(networkDb.updateTxTime).have.been.called.once
+            expect(networkDb.setTxUpdateHeight).have.been.called.once
             chai.spy.restore(ErgoNetwork)
         })
 
@@ -54,7 +54,7 @@ describe("Transaction queue tests", () => {
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.TRIGGER
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "updateTxTime", () => undefined)
+            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
@@ -62,7 +62,7 @@ describe("Transaction queue tests", () => {
             chai.spy.on(dbConnection, "isMergeHappened", () => false)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.been.called.with(tx.to_json())
-            expect(networkDb.updateTxTime).have.been.called.once
+            expect(networkDb.setTxUpdateHeight).have.been.called.once
             chai.spy.restore(ErgoNetwork)
         })
 
@@ -73,14 +73,14 @@ describe("Transaction queue tests", () => {
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "updateTxTime", () => undefined)
+            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
             chai.spy.on(dbConnection, "isObservationValid", () => false)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.updateTxTime).have.not.been.called
+            expect(networkDb.setTxUpdateHeight).have.not.been.called
             chai.spy.restore(ErgoNetwork)
         })
 
@@ -91,14 +91,14 @@ describe("Transaction queue tests", () => {
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.TRIGGER
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "updateTxTime", () => undefined)
+            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
             chai.spy.on(dbConnection, "isMergeHappened", () => true)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.updateTxTime).have.not.been.called
+            expect(networkDb.setTxUpdateHeight).have.not.been.called
             chai.spy.restore(ErgoNetwork)
         })
 
@@ -109,7 +109,7 @@ describe("Transaction queue tests", () => {
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.TRIGGER
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "updateTxTime", () => undefined)
+            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
@@ -117,7 +117,7 @@ describe("Transaction queue tests", () => {
             chai.spy.on(dbConnection, "isMergeHappened", () => false)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.updateTxTime).have.not.been.called
+            expect(networkDb.setTxUpdateHeight).have.not.been.called
             chai.spy.restore(ErgoNetwork)
         })
 
@@ -128,13 +128,13 @@ describe("Transaction queue tests", () => {
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "updateTxTime", () => undefined)
+            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => 0)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.updateTxTime).have.been.called.once
+            expect(networkDb.setTxUpdateHeight).have.been.called.once
             chai.spy.restore(ErgoNetwork)
         })
 
@@ -145,7 +145,7 @@ describe("Transaction queue tests", () => {
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "updateTxTime", () => undefined)
+            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => 200)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")

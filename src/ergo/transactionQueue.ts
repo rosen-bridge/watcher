@@ -9,16 +9,16 @@ import { base64ToArrayBuffer } from "../utils/utils";
 const ergoConfig = ErgoConfig.getConfig();
 
 export class TransactionQueue {
-    _database: NetworkDataBase
-    _databaseConnection: databaseConnection
+    database: NetworkDataBase
+    databaseConnection: databaseConnection
 
     constructor(db: NetworkDataBase, dbConnection: databaseConnection) {
-        this._database = db
-        this._databaseConnection = dbConnection
+        this.database = db
+        this.databaseConnection = dbConnection
     }
 
     job = async () => {
-        const txs: Array<TxEntity> = await this._database.getAllTxs()
+        const txs: Array<TxEntity> = await this.database.getAllTxs()
         const currentHeight = await ErgoNetwork.getHeight()
         for(const tx of txs) {
             try {
@@ -28,27 +28,27 @@ export class TransactionQueue {
                     if(
                         // commitment validation
                         (tx.type == TxType.COMMITMENT &&
-                            !(await this._databaseConnection.isObservationValid(tx.observation))) ||
+                            !(await this.databaseConnection.isObservationValid(tx.observation))) ||
                         // trigger validation
                         (tx.type == TxType.TRIGGER &&
-                            (await this._databaseConnection.isMergeHappened(tx.observation))) ||
+                            (await this.databaseConnection.isMergeHappened(tx.observation))) ||
                         // transaction input validation
                         !(await ErgoNetwork.checkTxInputs(signedTx.inputs()))
                     ){
                         if(currentHeight - tx.updateBlock > ergoConfig.transactionRemovingTimeout) {
-                            await this._database.downgradeObservationTxStatus(tx.observation)
-                            await this._database.removeTx(tx)
+                            await this.database.downgradeObservationTxStatus(tx.observation)
+                            await this.database.removeTx(tx)
                         }
                         continue
                     }
                     // resend the tx
                     await ErgoNetwork.sendTx(signedTx.to_json())
-                    await this._database.updateTxTime(tx, currentHeight)
+                    await this.database.setTxUpdateHeight(tx, currentHeight)
                 } else if (txStatus > ergoConfig.transactionConfirmation) {
-                    await this._database.upgradeObservationTxStatus(tx.observation)
-                    await this._database.removeTx(tx)
+                    await this.database.upgradeObservationTxStatus(tx.observation)
+                    await this.database.removeTx(tx)
                 } else {
-                    await this._database.updateTxTime(tx, currentHeight)
+                    await this.database.setTxUpdateHeight(tx, currentHeight)
                 }
             } catch (e) {
                 console.log(e)

@@ -4,6 +4,7 @@ import { ObservationEntity, TxStatus } from "../entities/watcher/network/Observa
 import { Block, Observation } from "../objects/interfaces";
 import { AbstractDataBase } from "./abstractModel";
 import { TxEntity, TxType } from "../entities/watcher/network/TransactionEntity";
+import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 
 export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observation>> {
     dataSource: DataSource;
@@ -153,16 +154,18 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param time
      * @param type
      */
-    submitTx = async (tx: string, requestId: string, txId: string, time: number, type: TxType) => {
+    submitTx = async (tx: string, requestId: string, txId: string, type: TxType) => {
         const observation: ObservationEntity | null = (await this.observationRepository.findOne({
             where: {requestId: requestId}
         }))
+        const height = await ErgoNetwork.getHeight()
+        const time = new Date().getTime()
         if(!observation) throw new Error("Observation with this request id is not found")
         const txEntity = new TxEntity()
         txEntity.txId = txId
         txEntity.txSerialized = tx
         txEntity.creationTime = time
-        txEntity.updateBlock = time
+        txEntity.updateBlock = height
         txEntity.observation = observation
         txEntity.type = type
         txEntity.deleted = false
@@ -192,10 +195,10 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
     /**
      * Updates the tx checking time
      * @param tx
-     * @param time
+     * @param height
      */
-    updateTxTime = async (tx: TxEntity, time: number) => {
-        tx.updateBlock = time
+    setTxUpdateHeight = async (tx: TxEntity, height: number) => {
+        tx.updateBlock = height
         return this.txRepository.save(tx)
     }
 
