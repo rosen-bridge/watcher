@@ -53,6 +53,11 @@ export const secondObservations: Array<Observation> = [{
 
 
 describe("Database functions",  () => {
+    /**
+     * Target: testing saveBlock
+     * Expected Output:
+     *    The function should save two blocks along their related observations
+     */
     describe("saveBlock", () => {
         it("should save information and return true", async () => {
             const DB = await loadDataBase("dataBase");
@@ -72,6 +77,11 @@ describe("Database functions",  () => {
         });
     });
 
+    /**
+     * Target: testing getConfirmedObservations
+     * Expected Output:
+     *    The function should return all confirmed observations
+     */
     describe("getConfirmedObservations", () => {
         it("returns 1 confirmed observation", async () => {
             const DB = await loadDataBase("dataBase");
@@ -80,6 +90,11 @@ describe("Database functions",  () => {
         });
     });
 
+    /**
+     * Target: testing submitTx
+     * Expected Output:
+     *    The function should store two transactions in the database
+     */
     describe("submitTx", () => {
         it("should save two new transaction without any errors", async () => {
             const DB = await loadDataBase("dataBase");
@@ -90,6 +105,11 @@ describe("Database functions",  () => {
         })
     })
 
+    /**
+     * Target: testing getAllTxs & removeTx
+     * Expected Output:
+     *    The test should return two stored transactions then remove one and return one remaining transaction
+     */
     describe("getAllTxs and removeTx", () => {
         it("should return two available txs", async () => {
             const DB = await loadDataBase("dataBase");
@@ -109,6 +129,11 @@ describe("Database functions",  () => {
         })
     })
 
+    /**
+     * Target: testing updateTxTime
+     * Expected Output:
+     *    The function should set the update height
+     */
     describe("updateTxTime", () => {
         it("should update the tx time", async () => {
             const DB = await loadDataBase("dataBase");
@@ -118,6 +143,11 @@ describe("Database functions",  () => {
         })
     })
 
+    /**
+     * Target: testing upgradeObservationTxStatus
+     * Expected Output:
+     *    The function should upgrade the tx status to the commitment_sent status
+     */
     describe("upgradeObservationTxStatus", () => {
         it("should upgrade the observation txStatus", async () => {
             const DB = await loadDataBase("dataBase");
@@ -127,6 +157,11 @@ describe("Database functions",  () => {
         });
     })
 
+    /**
+     * Target: testing downgradeObservationTxStatus
+     * Expected Output:
+     *    The function should downgrade the tx status to the not_committed status
+     */
     describe("downgradeObservationTxStatus", () => {
         it("should upgrade the observation txStatus", async () => {
             const DB = await loadDataBase("dataBase");
@@ -136,6 +171,11 @@ describe("Database functions",  () => {
         });
     })
 
+    /**
+     * Target: testing updateObservationTxStatus
+     * Expected Output:
+     *    The function should update the tx status to the revealed status
+     */
     describe("updateObservationTxStatus", () => {
         it("should update the observation txStatus to revealed", async () => {
             const DB = await loadDataBase("dataBase");
@@ -145,6 +185,11 @@ describe("Database functions",  () => {
         });
     })
 
+    /**
+     * Target: testing getLastSavedBlock
+     * Expected Output:
+     *    The function should return the last saved block
+     */
     describe("getLastSavedBlock", () => {
         it("should return last saved block", async () => {
             const DB = await loadDataBase("dataBase");
@@ -157,6 +202,11 @@ describe("Database functions",  () => {
         });
     });
 
+    /**
+     * Target: testing getBlockAtHeight
+     * Expected Output:
+     *    The function should return the block hash at the specified height
+     */
     describe("getBlockAtHeight", () => {
         it("should return block Hash", async () => {
             const DB = await loadDataBase("dataBase");
@@ -170,6 +220,11 @@ describe("Database functions",  () => {
         });
     });
 
+    /**
+     * Target: testing changeLastValidBlock
+     * Expected Output:
+     *    The function should change the last valid block and remove 2 forked blocks
+     */
     describe("changeLastValidBlock", () => {
         it("should affect remove 2 rows due to a fork event", async () => {
             const DB = await loadDataBase("dataBase");

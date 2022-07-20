@@ -27,7 +27,20 @@ txEntity.updateBlock = height - 1
 
 describe("Transaction queue tests", () => {
 
+
+    /**
+     * Target: testing TransactionQueue job
+     * Dependencies:
+     *    networkDatabase
+     *    databaseConnection
+     *    ErgoNetwork
+     */
     describe("TransactionQueue job", () => {
+        /**
+         * Expected Output:
+         *    The function should resend the ready commitment transaction
+         *    Because its unavailable, but still valid
+         */
         it("should resend the commitment transaction", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
@@ -47,6 +60,11 @@ describe("Transaction queue tests", () => {
             chai.spy.restore(ErgoNetwork)
         })
 
+        /**
+         * Expected Output:
+         *    The function should resend the ready trigger transaction
+         *    Because its unavailable, but still valid
+         */
         it("should resend the trigger transaction", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
@@ -66,6 +84,11 @@ describe("Transaction queue tests", () => {
             chai.spy.restore(ErgoNetwork)
         })
 
+        /**
+         * Expected Output:
+         *    The function should wait for transaction removing
+         *    Because the observation is not still valid, but it may have change in a small period
+         */
         it("should just wait for commitment transaction status", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
@@ -84,6 +107,11 @@ describe("Transaction queue tests", () => {
             chai.spy.restore(ErgoNetwork)
         })
 
+        /**
+         * Expected Output:
+         *    The function should wait for transaction removing
+         *    Because the commitment has already merged, but it may have forked in a small period
+         */
         it("should just wait for trigger transaction status", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
@@ -102,6 +130,11 @@ describe("Transaction queue tests", () => {
             chai.spy.restore(ErgoNetwork)
         })
 
+        /**
+         * Expected Output:
+         *    The function should wait for transaction removing
+         *    Because the transaction inputs are spent, but it may have change in a small period
+         */
         it("should just wait for trigger transaction status because its inputs are spent", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
@@ -121,6 +154,11 @@ describe("Transaction queue tests", () => {
             chai.spy.restore(ErgoNetwork)
         })
 
+        /**
+         * Expected Output:
+         *    The function should update the transaction updateTime and wait for its status
+         *    Because the transaction is in mempool or is not confirmed enough
+         */
         it("should update the updateTime and wait more for tx status", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
@@ -138,6 +176,11 @@ describe("Transaction queue tests", () => {
             chai.spy.restore(ErgoNetwork)
         })
 
+        /**
+         * Expected Output:
+         *    The function should wait for transaction removing
+         *    Because the observation is not still valid, but it may have change in a small period
+         */
         it("should remove the tx from database because it get enough confirmation", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
@@ -158,6 +201,11 @@ describe("Transaction queue tests", () => {
             chai.spy.restore(ErgoNetwork)
         })
 
+        /**
+         * Expected Output:
+         *    The function should remove the transaction
+         *    Because the transaction inputs are spent, and the status is stabilized
+         */
         it("should remove the commitment transaction because its inputs are spent and it has passed the timeout", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");

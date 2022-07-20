@@ -217,14 +217,29 @@ describe("Ergo Network(API)", () => {
         });
     });
 
+    /**
+     * boxById function tests
+     */
     describe("boxById", () => {
+        /**
+         * should return the box with the specified id
+         */
         it("should return a box", async () => {
             const res = await ErgoNetwork.boxById(boxId)
             expect(res.box_id().to_str()).to.eql(boxId)
         })
     })
-    
+
+    /**
+     * txStatus function tests
+     */
     describe("txStatus", () => {
+        /**
+         * transaction is in mempool:
+         *  getConfirmedTx should return null
+         *  getUnconfirmedTx should return the transaction
+         *  and getConfNum should return 0
+         */
         it("Tests mempool transaction status", async () => {
             const confirmed = await ErgoNetwork.getConfirmedTx(unconfirmedTxId)
             expect(confirmed).to.null
@@ -234,6 +249,12 @@ describe("Ergo Network(API)", () => {
             expect(confNum).to.eql(0)
         })
 
+        /**
+         * transaction is in mempool:
+         *  getConfirmedTx should return the transaction
+         *  getUnconfirmedTx should return null
+         *  and getConfNum should return the confirmation count
+         */
         it("Tests confirmed transaction status", async () => {
             const confirmed = await ErgoNetwork.getConfirmedTx(confirmedTxId)
             expect(confirmed).to.haveOwnProperty("id")
@@ -243,17 +264,30 @@ describe("Ergo Network(API)", () => {
             expect(confNum).to.eql(6539)
         })
 
+        /**
+         * transaction is unavailable:
+         *  and getConfNum should return -1
+         */
         it("Tests unavailable transaction status", async () => {
             const confNum = await ErgoNetwork.getConfNum(unavailableTxId)
             expect(confNum).to.eql(-1)
         })
     })
 
+    /**
+     * txInputsCheck function tests
+     */
     describe("txInputsCheck", () => {
+        /**
+         * The function checks the inputs and return false if any of them is spent
+         */
         it("Returns false because tx inputs are spent", async () =>{
             const data = await ErgoNetwork.checkTxInputs(tx.inputs())
             expect(data).to.false
         })
+        /**
+         * The function should return true cause all inputs are unspent
+         */
         it("Returns true because tx inputs are all unspent", async () =>{
             const data = await ErgoNetwork.checkTxInputs(tx2.inputs())
             expect(data).to.true

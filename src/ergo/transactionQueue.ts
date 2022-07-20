@@ -17,6 +17,10 @@ export class TransactionQueue {
         this.databaseConnection = dbConnection
     }
 
+    /**
+     * Fetches all active transactions from the database and updates their status
+     * If the transaction doesn't exist in the network resends the transaction
+     */
     job = async () => {
         const txs: Array<TxEntity> = await this.database.getAllTxs()
         const currentHeight = await ErgoNetwork.getHeight()
