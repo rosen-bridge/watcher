@@ -1,6 +1,6 @@
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { strToUint8Array, uint8ArrayToHex } from "../utils/utils";
+import { hexStrToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { Boxes } from "../ergo/boxes";
@@ -201,7 +201,7 @@ export class Transaction{
             const permitOut = this.boxes.createPermit(
                 height,
                 permitsRWTCount - RWTCount,
-                strToUint8Array(WID)
+                hexStrToUint8Array(WID)
             );
             outputBoxes.add(permitOut);
         }

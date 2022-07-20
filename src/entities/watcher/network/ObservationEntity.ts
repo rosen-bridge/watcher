@@ -1,6 +1,15 @@
-
-import {Column, Entity, ManyToOne, PrimaryGeneratedColumn, Relation} from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Relation } from "typeorm";
 import { BlockEntity } from "./BlockEntity";
+import { TxEntity } from "./TransactionEntity";
+
+export enum TxStatus {
+    TIMED_OUT = 0,
+    NOT_COMMITTED = 1,
+    COMMITMENT_SENT = 2,
+    COMMITTED = 3,
+    REVEAL_SENT = 4,
+    REVEALED = 5,
+}
 
 @Entity()
 export class ObservationEntity{
@@ -54,6 +63,16 @@ export class ObservationEntity{
     )
     block: Relation<BlockEntity>
 
-    @Column({nullable: true})
-    commitmentBoxId: string
+    @OneToMany(
+        "TxEntity",
+        "txId",
+        {cascade: true,}
+    )
+    txs: Relation<TxEntity>
+
+    @Column({
+        type: 'simple-enum',
+        enum: TxStatus
+    })
+    status: TxStatus
 }

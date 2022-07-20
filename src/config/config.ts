@@ -24,6 +24,8 @@ const ERGO_SCANNER_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scann
 const NETWORK_WATCHER: string | undefined = config.get?.('watcher');
 const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.('ergo.commitmentCreationInterval')
 const COMMITMENT_REVEAL_INTERVAL: number | undefined = config.get?.('ergo.commitmentRevealInterval')
+const TRANSACTION_REMOVING_TIMEOUT: number | undefined = config.get?.('ergo.transactions.timeout');
+const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transactions.confirmation');
 
 const supportingBridges: Array<string> = ["Ergo", "Cardano"]
 
@@ -45,6 +47,9 @@ export class ErgoConfig{
     networkWatcher: string;
     commitmentCreationInterval: number;
     commitmentRevealInterval: number;
+    transactionRemovingTimeout: number;
+    transactionConfirmation: number;
+
 
     private constructor() {
         let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -109,8 +114,15 @@ export class ErgoConfig{
         if(!COMMITMENT_REVEAL_INTERVAL){
             throw new Error("Commitment reveal job interval is not set");
         }
+        if (TRANSACTION_CONFIRMATION === undefined) {
+            throw new Error("Ergo transaction confirmation doesn't set correctly");
+        }
+        if (TRANSACTION_REMOVING_TIMEOUT === undefined) {
+            throw new Error("Ergo transaction timeout doesn't set correctly");
+        }
         const secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
         const watcherAddress: string = secretKey.get_address().to_base58(networkType)
+
 
         this.networkType = networkType;
         this.secretKey = secretKey;
@@ -128,6 +140,8 @@ export class ErgoConfig{
         this.networkWatcher = NETWORK_WATCHER
         this.commitmentCreationInterval = COMMITMENT_CREATION_INTERVAL
         this.commitmentRevealInterval = COMMITMENT_REVEAL_INTERVAL
+        this.transactionConfirmation = TRANSACTION_CONFIRMATION;
+        this.transactionRemovingTimeout = TRANSACTION_REMOVING_TIMEOUT;
     }
 
     static getConfig() {

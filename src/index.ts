@@ -21,6 +21,7 @@ import { reveal } from "./commitmetnReveal";
 
 const ergoConfig = ErgoConfig.getConfig();
 
+
 export let watcherTransaction: Transaction;
 export let boxesObject: Boxes;
 export let ergoNetworkApi: ErgoNetworkApi;
@@ -28,11 +29,13 @@ export let networkDatabase: NetworkDataBase;
 export let bridgeDatabase: BridgeDataBase;
 export let databaseConnection: DatabaseConnection;
 // TODO: Set this based on the scanning network config
-export let observationConfirmation: number = 2;
+export const observationConfirmation = 2;
+export const observationValidThreshold = 200;
 
 function delay(time: number) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
+
 
 const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
@@ -80,7 +83,7 @@ const init = async () => {
             }
 
             await delay(30000)
-            databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, observationConfirmation)
+            databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, observationConfirmation, observationValidThreshold)
             // Running commitment creation thread
             creation()
             // Running trigger event creation thread

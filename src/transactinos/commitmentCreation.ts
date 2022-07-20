@@ -1,12 +1,13 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Boxes } from "../ergo/boxes";
-import { ErgoUtils, hexStrToUint8Array } from "../ergo/utils";
+import { ErgoUtils} from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError, NotEnoughFund } from "../errors/errors";
 import { DatabaseConnection } from "../ergo/databaseConnection";
 import { Transaction } from "../api/Transaction";
+import { hexStrToUint8Array } from "../utils/utils";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -110,8 +111,6 @@ export class CommitmentCreation {
                     feeBoxes = await this._boxes.getUserPaymentBox(requiredValue - totalValue)
                 }
                 const txInfo = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, feeBoxes)
-                if (txInfo.commitmentBoxId !== undefined)
-                    await this._dataBaseConnection.updateObservation(txInfo.commitmentBoxId, observation)
             } catch(e) {
                 if(!(e instanceof NotEnoughFund))
                     console.log(e)

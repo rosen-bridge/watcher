@@ -45,7 +45,7 @@ describe("Commitment reveal transaction tests", () => {
         it("Should create, sign and send a trigger event transaction", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const boxes = new Boxes(bridgeDb)
             chai.spy.on(boxes, "createTriggerEvent")
             const cr = new CommitmentReveal(dbConnection, boxes)
@@ -72,7 +72,7 @@ describe("Commitment reveal transaction tests", () => {
             sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(thirdCommitment.commitment))
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const boxes = new Boxes(bridgeDb)
             const cr = new CommitmentReveal(dbConnection, boxes)
             const data = cr.commitmentCheck([firstCommitment], observation)
@@ -83,7 +83,7 @@ describe("Commitment reveal transaction tests", () => {
             sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(firstCommitment.commitment))
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const boxes = new Boxes(bridgeDb)
             const cr = new CommitmentReveal(dbConnection, boxes)
             const data = cr.commitmentCheck([firstCommitment], observation)
@@ -106,7 +106,7 @@ describe("Commitment reveal transaction tests", () => {
         it("Should collect ready commitments and reveals the commitment by creating trigger event", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const commitmentSet: CommitmentSet = {
                 commitments: [firstCommitment, thirdCommitment],
                 observation: observation

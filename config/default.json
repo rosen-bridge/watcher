@@ -22,7 +22,11 @@
             "initialBlockHeight": 239230
         },
         "commitmentCreationInterval": 1000,
-        "commitmentRevealInterval": 1000
+        "commitmentRevealInterval": 1000,
+        "transactions": {
+            "timeout": 5,
+            "confirmation": 10
+        }
     },
     "bridgeScanner": {
         "interval": 10,

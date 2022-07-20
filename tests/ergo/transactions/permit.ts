@@ -1,5 +1,5 @@
 import { Transaction } from "../../../src/api/Transaction";
-import { strToUint8Array } from "../../../src/utils/utils";
+import { hexStrToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import { initMockedAxios } from "../objects/axios";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
@@ -69,7 +69,7 @@ describe("Watcher Permit Transactions", () => {
             const usersHex = ["414441", sampleWID];
             const users: Array<Uint8Array> = [];
             for (const user of usersHex) {
-                users.push(strToUint8Array(user));
+                users.push(hexStrToUint8Array(user));
             }
             const WID = await transaction.getWID(users);
             expect(WID).to.be.equal(sampleWID);

@@ -19,7 +19,6 @@ export interface Observation {
     sourceTxId: string
     sourceBlockId: string
     requestId: string
-    commitmentBoxId?: string
 }
 
 export interface Commitment{
