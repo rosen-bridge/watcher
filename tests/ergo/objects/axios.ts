@@ -5,6 +5,11 @@ import { mockedResponseBody } from "./mockedResponseBody";
 const mockedExplorer = new MockAdapter(explorerApi);
 const mockedNodeClient = new MockAdapter(nodeClient);
 export const boxId = "95f1165089b39f91b096e1dec1d1d55acb4f7e821df0656f5ad3c633e370d065"
+export const unconfirmedTxId = "ebb5aa196e64e28a04eda4f5e25ac9e2bf883af1f5a1e63b1429b2e14c6b0dcb"
+export const confirmedTxId = "55ba303658d4054cfa235320ee09193c8e1b6c96b3e5473f660dbb5f1b99c2b7"
+export const unavailableTxId = "8b7ae20a4acd23e3f1bf38671ce97103ad96d8f1c780b5e5e865e4873ae16337"
+export const spentBoxId = "87e570115b46cee9d02149aadbb34fddb0804c91f000149c3bba91a0f3f93d58"
+export const notSpentBoxId = "99d53115caf4d19b74275ac092f6a8fb68921af5d3dca15ec809e47fde10c36c"
 
 export const initMockedAxios = (vector = 0) => {
     mockedNodeClient.reset();
@@ -104,4 +109,28 @@ export const initMockedAxios = (vector = 0) => {
         '/api/v1/boxes/unspent/byErgoTree/0008cd03c29ad59831be2e5baded45a03ce9a7d4c2e83d683e11c79790e76f640d0d3e30',
         {params: {offset: 0, limit: 10}}
     ).reply(200, [mockedResponseBody.secondWatcherLast10UnspentBox]);
+
+    mockedExplorer.onGet(`/api/v0/transactions/unconfirmed/${unconfirmedTxId}`)
+        .reply(200, mockedResponseBody.unConfirmedTx)
+
+    mockedExplorer.onGet(`/api/v1/transactions/${unconfirmedTxId}`)
+        .reply(404, {"status": 404})
+
+    mockedExplorer.onGet(`/api/v0/transactions/unconfirmed/${confirmedTxId}`)
+        .reply(404, {"status": 404})
+
+    mockedExplorer.onGet(`/api/v1/transactions/${confirmedTxId}`)
+        .reply(200, mockedResponseBody.confirmedTx)
+
+    mockedExplorer.onGet(`/api/v0/transactions/unconfirmed/${unavailableTxId}`)
+        .reply(404, {"status": 404})
+
+    mockedExplorer.onGet(`/api/v1/transactions/${unavailableTxId}`)
+        .reply(404, {"status": 404})
+
+    mockedNodeClient.onGet(`utxo/byId/${spentBoxId}`)
+        .reply(404, {"status": 404, "reason": "not-found"})
+
+    mockedNodeClient.onGet(`utxo/byId/${notSpentBoxId}`)
+        .reply(200,  mockedResponseBody.utxo)
 }

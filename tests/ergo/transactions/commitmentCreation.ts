@@ -7,7 +7,7 @@ import { loadDataBase } from "../../cardano/models/models";
 import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
 import { JsonBI } from "../../../src/network/parser";
 import { ObservationEntity } from "../../../src/entities/watcher/network/ObservationEntity";
-import { ErgoUtils, hexStrToUint8Array } from "../../../src/ergo/utils";
+import { ErgoUtils} from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -22,6 +22,7 @@ import WIDObj from "./dataset/WIDBox.json" assert {type: "json"}
 import WIDObj2 from "./dataset/WIDBox2.json" assert {type: "json"}
 import plainObj from "./dataset/plainBox.json" assert {type: "json"}
 import txObj from "./dataset/commitmentTx.json" assert {type: "json"}
+import { hexStrToUint8Array } from "../../../src/utils/utils";
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -66,7 +67,7 @@ describe("Commitment creation transaction tests", () => {
         it("Should create, sign and send a commitment transaction", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             const boxes = new Boxes(bridgeDb)
             chai.spy.on(boxes, "createCommitment")
             chai.spy.on(boxes, "createPermit")
@@ -82,6 +83,7 @@ describe("Commitment creation transaction tests", () => {
             expect(boxes.createCommitment).to.have.called.once
             expect(ErgoNetwork.sendTx).to.have.called.once
             sinon.restore()
+            chai.spy.restore(ErgoNetwork)
         })
     })
 
@@ -99,7 +101,7 @@ describe("Commitment creation transaction tests", () => {
         it("Should collect ready observations and create commitments", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
             chai.spy.on(dbConnection, "updateObservation", () => {return})
             const boxes = new Boxes(bridgeDb)
@@ -113,14 +115,13 @@ describe("Commitment creation transaction tests", () => {
             await cc.job()
             // Total value is enough should not call paymentBox
             expect(boxes.getUserPaymentBox).to.not.have.called()
-            expect(dbConnection.updateObservation).to.have.called.with("boxId", observation)
             expect(cc.createCommitmentTx).to.have.called.with(WID, observation.requestId, commitment, permits, WIDBox, [])
         })
 
         it("Should collect ready observations and create commitment with excess fee box", async() => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0)
+            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
             chai.spy.on(dbConnection, "updateObservation", () => {return})
             const boxes = new Boxes(bridgeDb)
@@ -134,7 +135,6 @@ describe("Commitment creation transaction tests", () => {
             await cc.job()
             // Total value is not enough for the transaction
             expect(boxes.getUserPaymentBox).to.have.called.once
-            expect(dbConnection.updateObservation).to.have.called.with("boxId", observation)
             expect(cc.createCommitmentTx).to.have.called.with(WID, observation.requestId, commitment, permits, WIDBox2, plainBox)
         })
     })

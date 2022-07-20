@@ -1,19 +1,23 @@
 import { DataSource, DeleteResult, MoreThanOrEqual, Repository } from "typeorm";
 import { BlockEntity } from "../entities/watcher/network/BlockEntity";
-import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
+import { ObservationEntity, TxStatus } from "../entities/watcher/network/ObservationEntity";
 import { Block, Observation } from "../objects/interfaces";
 import { AbstractDataBase } from "./abstractModel";
+import { TxEntity, TxType } from "../entities/watcher/network/TransactionEntity";
+import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 
 export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observation>> {
     dataSource: DataSource;
     blockRepository: Repository<BlockEntity>;
     observationRepository: Repository<ObservationEntity>;
+    txRepository: Repository<TxEntity>
 
     private constructor(dataSource: DataSource) {
         super()
         this.dataSource = dataSource;
         this.blockRepository = this.dataSource.getRepository(BlockEntity);
         this.observationRepository = this.dataSource.getRepository(ObservationEntity);
+        this.txRepository = this.dataSource.getRepository(TxEntity);
     }
 
     /**
@@ -88,6 +92,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
                 observationEntity.fromAddress = observation.fromAddress;
                 observationEntity.toAddress = observation.toAddress;
                 observationEntity.targetChainTokenId = observation.targetChainTokenId;
+                observationEntity.status = TxStatus.NOT_COMMITTED;
                 observationEntity.block = block;
                 return observationEntity;
             });
@@ -125,6 +130,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
 
     /**
      * returns confirmed observation after required confirmation
+     * ignores observations which have created commitments
      * @param confirmation
      */
     getConfirmedObservations = async (confirmation: number): Promise<Array<ObservationEntity>> => {
@@ -141,19 +147,87 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
     }
 
     /**
-     * Save a newly created commitment and updates the related observation
-     * @param commitmentBoxId
+     * Stores a transaction in tx queue, the queue will process the transaction automatically afterward
+     * @param tx
+     * @param requestId
+     * @param txId
+     * @param time
+     * @param type
+     */
+    submitTx = async (tx: string, requestId: string, txId: string, type: TxType) => {
+        const observation: ObservationEntity | null = (await this.observationRepository.findOne({
+            where: {requestId: requestId}
+        }))
+        const height = await ErgoNetwork.getHeight()
+        const time = new Date().getTime()
+        if(!observation) throw new Error("Observation with this request id is not found")
+        const txEntity = new TxEntity()
+        txEntity.txId = txId
+        txEntity.txSerialized = tx
+        txEntity.creationTime = time
+        txEntity.updateBlock = height
+        txEntity.observation = observation
+        txEntity.type = type
+        txEntity.deleted = false
+        return await this.txRepository.save(txEntity)
+    }
+
+    /**
+     * Returns all stored transactions with no deleted flag
+     */
+    getAllTxs = async (): Promise<Array<TxEntity>> => {
+        return await this.txRepository.createQueryBuilder("tx_entity")
+            .leftJoinAndSelect("tx_entity.observation", "observation_entity")
+            .leftJoinAndSelect("observation_entity.block", "block_entity")
+            .where("tx_entity.deleted == false")
+            .getMany()
+    }
+
+    /**
+     * Removes one specified transaction (Just toggles the removed flag)
+     * @param tx
+     */
+    removeTx = async (tx: TxEntity) => {
+        tx.deleted = true
+        return this.txRepository.save(tx)
+    }
+
+    /**
+     * Updates the tx checking time
+     * @param tx
+     * @param height
+     */
+    setTxUpdateHeight = async (tx: TxEntity, height: number) => {
+        tx.updateBlock = height
+        return this.txRepository.save(tx)
+    }
+
+    /**
+     * Upgrades the observation TxStatus, it means it had progressed creating transactions
      * @param observation
      */
-    updateObservation = async (commitmentBoxId: string, observation: ObservationEntity) => {
-        const newObservation = new ObservationEntity()
-        Object.assign(newObservation, {
-            ...observation,
-            ...{
-                commitmentBoxId: commitmentBoxId
-            }
-        })
-        return this.observationRepository.save(newObservation)
+    upgradeObservationTxStatus = async (observation: ObservationEntity) => {
+       observation.status = observation.status + 1
+        return this.observationRepository.save(observation)
+    }
+
+    /**
+     * Downgrades the observation TxStatus, it means it had problems creating or sending transactions
+     * @param observation
+     */
+    downgradeObservationTxStatus = async (observation: ObservationEntity) => {
+        observation.status = observation.status - 1
+        return this.observationRepository.save(observation)
+    }
+
+    /**
+     * Update the observation TxStatus to the specified new status
+     * @param observation
+     * @param status
+     */
+    updateObservationTxStatus = async (observation: ObservationEntity, status: TxStatus) => {
+        observation.status = status
+        return this.observationRepository.save(observation)
     }
 }
 

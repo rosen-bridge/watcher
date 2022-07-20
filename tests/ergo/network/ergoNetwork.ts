@@ -1,12 +1,17 @@
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 import { mockedResponseBody } from "../objects/mockedResponseBody";
+import { RWTRepoAddress, userAddress } from "../transactions/permit";
+import { boxId, confirmedTxId, initMockedAxios, unavailableTxId, unconfirmedTxId } from "../objects/axios";
+
+import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
 import { JsonBI } from "../../../src/network/parser";
-import { RWTRepoAddress, userAddress } from "../transactions/permit";
-import * as wasm from "ergo-lib-wasm-nodejs";
-import { boxId, initMockedAxios } from "../objects/axios";
 
 initMockedAxios();
+import txObj from "../transactions/dataset/commitmentTx.json" assert {type: "json"}
+const tx = wasm.Transaction.from_json(JSON.stringify(txObj))
+import txObj2 from "../dataset/tx.json" assert {type: "json"}
+const tx2 = wasm.Transaction.from_json(JSON.stringify(txObj2))
 
 /**
  * Ergo Network class tests
@@ -212,10 +217,80 @@ describe("Ergo Network(API)", () => {
         });
     });
 
+    /**
+     * boxById function tests
+     */
     describe("boxById", () => {
+        /**
+         * should return the box with the specified id
+         */
         it("should return a box", async () => {
             const res = await ErgoNetwork.boxById(boxId)
             expect(res.box_id().to_str()).to.eql(boxId)
+        })
+    })
+
+    /**
+     * txStatus function tests
+     */
+    describe("txStatus", () => {
+        /**
+         * transaction is in mempool:
+         *  getConfirmedTx should return null
+         *  getUnconfirmedTx should return the transaction
+         *  and getConfNum should return 0
+         */
+        it("Tests mempool transaction status", async () => {
+            const confirmed = await ErgoNetwork.getConfirmedTx(unconfirmedTxId)
+            expect(confirmed).to.null
+            const unconfirmed = await ErgoNetwork.getUnconfirmedTx(unconfirmedTxId)
+            expect(unconfirmed).to.haveOwnProperty("id")
+            const confNum = await ErgoNetwork.getConfNum(unconfirmedTxId)
+            expect(confNum).to.eql(0)
+        })
+
+        /**
+         * transaction is in mempool:
+         *  getConfirmedTx should return the transaction
+         *  getUnconfirmedTx should return null
+         *  and getConfNum should return the confirmation count
+         */
+        it("Tests confirmed transaction status", async () => {
+            const confirmed = await ErgoNetwork.getConfirmedTx(confirmedTxId)
+            expect(confirmed).to.haveOwnProperty("id")
+            const unconfirmed = await ErgoNetwork.getUnconfirmedTx(confirmedTxId)
+            expect(unconfirmed).to.null
+            const confNum = await ErgoNetwork.getConfNum(confirmedTxId)
+            expect(confNum).to.eql(6539)
+        })
+
+        /**
+         * transaction is unavailable:
+         *  and getConfNum should return -1
+         */
+        it("Tests unavailable transaction status", async () => {
+            const confNum = await ErgoNetwork.getConfNum(unavailableTxId)
+            expect(confNum).to.eql(-1)
+        })
+    })
+
+    /**
+     * txInputsCheck function tests
+     */
+    describe("txInputsCheck", () => {
+        /**
+         * The function checks the inputs and return false if any of them is spent
+         */
+        it("Returns false because tx inputs are spent", async () =>{
+            const data = await ErgoNetwork.checkTxInputs(tx.inputs())
+            expect(data).to.false
+        })
+        /**
+         * The function should return true cause all inputs are unspent
+         */
+        it("Returns true because tx inputs are all unspent", async () =>{
+            const data = await ErgoNetwork.checkTxInputs(tx2.inputs())
+            expect(data).to.true
         })
     })
 

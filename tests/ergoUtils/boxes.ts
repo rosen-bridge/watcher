@@ -8,7 +8,7 @@ import { SpecialBox } from "../../src/objects/interfaces";
 import { BoxType } from "../../src/entities/watcher/bridge/BoxEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { NotEnoughFund } from "../../src/errors/errors";
-import { strToUint8Array } from "../../src/utils/utils";
+import { hexStrToUint8Array } from "../../src/utils/utils";
 import { rosenConfig, tokens } from "../ergo/transactions/permit";
 import { initMockedAxios } from "../ergo/objects/axios";
 import { boxesSample } from "../ergo/dataset/BoxesSample";
@@ -141,7 +141,7 @@ describe("Testing Box Creation", () => {
         it("checks permit box registers and tokens", async () => {
             const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(DB)
-            const WID = strToUint8Array("4198da878b927fdd33e884d7ed399a3dbd22cf9d855ff5a103a50301e70d89fc");
+            const WID = hexStrToUint8Array("4198da878b927fdd33e884d7ed399a3dbd22cf9d855ff5a103a50301e70d89fc");
             const RWTCount = BigInt(100)
             const permitBox = await boxes.createPermit(
                 1,

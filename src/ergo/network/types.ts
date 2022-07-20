@@ -30,3 +30,9 @@ export interface AddressBoxes  {
     items: Array<ErgoBoxJson>,
     total: number,
 }
+
+export interface ExplorerTransaction {
+    id: string,
+    creationTimestamp: number,
+    numConfirmations: number,
+}

@@ -1,8 +1,14 @@
 import { DataSource } from "typeorm";
-import { expect } from "chai";
 import { networkEntities } from "../../../src/entities";
 import { NetworkDataBase } from "../../../src/models/networkModel";
 import { Observation } from "../../../src/objects/interfaces";
+import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
+import { TxStatus } from "../../../src/entities/watcher/network/ObservationEntity";
+import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
+
+import chai, { expect } from "chai";
+import spies from "chai-spies";
+chai.use(spies)
 
 export const loadDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -47,6 +53,11 @@ export const secondObservations: Array<Observation> = [{
 
 
 describe("Database functions",  () => {
+    /**
+     * Target: testing saveBlock
+     * Expected Output:
+     *    The function should save two blocks along their related observations
+     */
     describe("saveBlock", () => {
         it("should save information and return true", async () => {
             const DB = await loadDataBase("dataBase");
@@ -66,6 +77,11 @@ describe("Database functions",  () => {
         });
     });
 
+    /**
+     * Target: testing getConfirmedObservations
+     * Expected Output:
+     *    The function should return all confirmed observations
+     */
     describe("getConfirmedObservations", () => {
         it("returns 1 confirmed observation", async () => {
             const DB = await loadDataBase("dataBase");
@@ -74,17 +90,106 @@ describe("Database functions",  () => {
         });
     });
 
-    describe("saveCommitment", () => {
-        it("should save the commitment and update the observation", async () => {
+    /**
+     * Target: testing submitTx
+     * Expected Output:
+     *    The function should store two transactions in the database
+     */
+    describe("submitTx", () => {
+        it("should save two new transaction without any errors", async () => {
             const DB = await loadDataBase("dataBase");
-            const observation = (await DB.getConfirmedObservations(0))[0]
-            const res = await DB.updateObservation("txId", observation)
-            expect(res.commitmentBoxId).to.eql("txId")
-            const observation2 = (await DB.getConfirmedObservations(0))[0]
-            expect(observation2.commitmentBoxId).to.not.null
-        });
-    });
+            chai.spy.on(ErgoNetwork, "getHeight", () => 100)
+            await DB.submitTx("txSerialized", "reqId1", "txId", TxType.COMMITMENT)
+            await DB.submitTx("txSerialized2", "reqId1", "txId2", TxType.TRIGGER)
+            chai.spy.restore(ErgoNetwork)
+        })
+    })
 
+    /**
+     * Target: testing getAllTxs & removeTx
+     * Expected Output:
+     *    The test should return two stored transactions then remove one and return one remaining transaction
+     */
+    describe("getAllTxs and removeTx", () => {
+        it("should return two available txs", async () => {
+            const DB = await loadDataBase("dataBase");
+            const data = await DB.getAllTxs()
+            expect(data).to.have.length(2)
+        })
+        it("should remove a tx", async () => {
+            const DB = await loadDataBase("dataBase");
+            const txs = await DB.getAllTxs()
+            const data = await DB.removeTx(txs[0])
+            expect(data.deleted).to.true
+        })
+        it("should return one available tx", async () => {
+            const DB = await loadDataBase("dataBase");
+            const data = await DB.getAllTxs()
+            expect(data).to.have.length(1)
+        })
+    })
+
+    /**
+     * Target: testing updateTxTime
+     * Expected Output:
+     *    The function should set the update height
+     */
+    describe("updateTxTime", () => {
+        it("should update the tx time", async () => {
+            const DB = await loadDataBase("dataBase");
+            const txs = await DB.getAllTxs()
+            const data = await DB.setTxUpdateHeight(txs[0], 150)
+            expect(data.updateBlock).to.eql(150)
+        })
+    })
+
+    /**
+     * Target: testing upgradeObservationTxStatus
+     * Expected Output:
+     *    The function should upgrade the tx status to the commitment_sent status
+     */
+    describe("upgradeObservationTxStatus", () => {
+        it("should upgrade the observation txStatus", async () => {
+            const DB = await loadDataBase("dataBase");
+            const obs = await DB.getConfirmedObservations(0);
+            const res = await DB.upgradeObservationTxStatus(obs[0])
+            expect(res.status).to.eql(TxStatus.COMMITMENT_SENT)
+        });
+    })
+
+    /**
+     * Target: testing downgradeObservationTxStatus
+     * Expected Output:
+     *    The function should downgrade the tx status to the not_committed status
+     */
+    describe("downgradeObservationTxStatus", () => {
+        it("should upgrade the observation txStatus", async () => {
+            const DB = await loadDataBase("dataBase");
+            const obs = await DB.getConfirmedObservations(0);
+            const res = await DB.downgradeObservationTxStatus(obs[0])
+            expect(res.status).to.eql(TxStatus.NOT_COMMITTED)
+        });
+    })
+
+    /**
+     * Target: testing updateObservationTxStatus
+     * Expected Output:
+     *    The function should update the tx status to the revealed status
+     */
+    describe("updateObservationTxStatus", () => {
+        it("should update the observation txStatus to revealed", async () => {
+            const DB = await loadDataBase("dataBase");
+            const obs = await DB.getConfirmedObservations(0);
+            const res = await DB.updateObservationTxStatus(obs[0], TxStatus.REVEALED)
+            expect(res.status).to.eql(TxStatus.REVEALED)
+        });
+    })
+
+    /**
+     * Target: testing getLastSavedBlock
+     * Expected Output:
+     *    The function should return the last saved block
+     */
     describe("getLastSavedBlock", () => {
         it("should return last saved block", async () => {
             const DB = await loadDataBase("dataBase");
@@ -97,6 +202,11 @@ describe("Database functions",  () => {
         });
     });
 
+    /**
+     * Target: testing getBlockAtHeight
+     * Expected Output:
+     *    The function should return the block hash at the specified height
+     */
     describe("getBlockAtHeight", () => {
         it("should return block Hash", async () => {
             const DB = await loadDataBase("dataBase");
@@ -110,6 +220,11 @@ describe("Database functions",  () => {
         });
     });
 
+    /**
+     * Target: testing changeLastValidBlock
+     * Expected Output:
+     *    The function should change the last valid block and remove 2 forked blocks
+     */
     describe("changeLastValidBlock", () => {
         it("should affect remove 2 rows due to a fork event", async () => {
             const DB = await loadDataBase("dataBase");
