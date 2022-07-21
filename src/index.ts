@@ -18,6 +18,8 @@ import { ergoScanner } from "./ergoScanner";
 import { cardanoScanner } from "./cardanoScanner";
 import { creation } from "./commitmentCreation";
 import { reveal } from "./commitmetnReveal";
+import { TransactionQueue } from "./ergo/transactionQueue";
+import { transactionQueueJob } from "./transactionQueue";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -29,7 +31,7 @@ export let networkDatabase: NetworkDataBase;
 export let bridgeDatabase: BridgeDataBase;
 export let databaseConnection: DatabaseConnection;
 // TODO: Set this based on the scanning network config
-export const observationConfirmation = 2;
+export const observationConfirmation = 1;
 export const observationValidThreshold = 200;
 
 function delay(time: number) {
@@ -84,6 +86,8 @@ const init = async () => {
 
             await delay(30000)
             databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, observationConfirmation, observationValidThreshold)
+            // Running transaction checking thread
+            transactionQueueJob()
             // Running commitment creation thread
             creation()
             // Running trigger event creation thread

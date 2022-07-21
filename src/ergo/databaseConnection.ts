@@ -7,6 +7,7 @@ import { ErgoNetwork } from "./network/ergoNetwork";
 import { ErgoConfig } from "../config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { TxType } from "../entities/watcher/network/TransactionEntity";
+import { Buffer } from "buffer";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -86,12 +87,18 @@ export class DatabaseConnection {
     }
 
     /**
-     * submits a new transaction
+     * submits a new transaction and updates the observation tx status
      * @param tx
-     * @param requestId
+     * @param observation
      * @param type
      */
-    submitTransaction = async (tx: wasm.Transaction, requestId: string, type: TxType) => {
-        return await this.networkDataBase.submitTx(tx.to_json(), requestId, tx.id().to_str(), type)
+    submitTransaction = async (tx: wasm.Transaction, observation: ObservationEntity, type: TxType) => {
+        await this.networkDataBase.submitTx(
+            Buffer.from(tx.sigma_serialize_bytes()).toString("base64"),
+            observation.requestId,
+            tx.id().to_str(),
+            type
+        )
+        await this.networkDataBase.upgradeObservationTxStatus(observation)
     }
 }

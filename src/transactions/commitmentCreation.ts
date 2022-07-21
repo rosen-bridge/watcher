@@ -9,6 +9,7 @@ import { DatabaseConnection } from "../ergo/databaseConnection";
 import { Transaction } from "../api/Transaction";
 import { hexStrToUint8Array } from "../utils/utils";
 import { TxType } from "../entities/watcher/network/TransactionEntity";
+import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -33,7 +34,7 @@ export class CommitmentCreation {
      * @param feeBoxes
      */
     createCommitmentTx = async (WID: string,
-                                requestId: string,
+                                observation: ObservationEntity,
                                 eventDigest: Uint8Array,
                                 permits: Array<wasm.ErgoBox>,
                                 WIDBox: wasm.ErgoBox,
@@ -46,7 +47,7 @@ export class CommitmentCreation {
                 )
             )
         )
-        const outCommitment = this.boxes.createCommitment(height, WID, requestId, eventDigest, permitHash)
+        const outCommitment = this.boxes.createCommitment(height, WID, observation.requestId, eventDigest, permitHash)
         const RWTCount: bigint = permits.map(permit =>
             BigInt(permit.tokens().get(0).amount().as_i64().to_str()))
             .reduce((a, b) => a + b, BigInt(0))
@@ -67,8 +68,8 @@ export class CommitmentCreation {
                 [outPermit, outCommitment],
                 height
             )
-            await this.dataBaseConnection.submitTransaction(signed, requestId, TxType.COMMITMENT)
-            console.log("Commitment creation done with txId: ", signed.id().to_str())
+            await this.dataBaseConnection.submitTransaction(signed, observation, TxType.COMMITMENT)
+            console.log("Commitment tx submitted to the queue with txId: ", signed.id().to_str())
         } catch (e) {
             console.log(e)
             if (e instanceof boxCreationError) {
@@ -89,7 +90,7 @@ export class CommitmentCreation {
             return
         }
         const WID = this.widApi.watcherWID
-        console.log("starting commitment creation job with ", observations.length, " number of ready observations")
+        console.log("starting commitment creation job with", observations.length, "number of ready observations")
         for (const observation of observations) {
             try {
                 const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
@@ -106,7 +107,7 @@ export class CommitmentCreation {
                 if (totalValue < requiredValue) {
                     feeBoxes = await this.boxes.getUserPaymentBox(requiredValue - totalValue)
                 }
-                await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, feeBoxes)
+                await this.createCommitmentTx(WID, observation, commitment, permits, WIDBox, feeBoxes)
             } catch(e) {
                 if(!(e instanceof NotEnoughFund))
                     console.log(e)

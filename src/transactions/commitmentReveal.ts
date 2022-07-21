@@ -9,6 +9,7 @@ import { DatabaseConnection } from "../ergo/databaseConnection";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { TxType } from "../entities/watcher/network/TransactionEntity";
+import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
 
 const txFee = BigInt(rosenConfig.fee)
 const ergoConfig = ErgoConfig.getConfig();
@@ -29,7 +30,7 @@ export class CommitmentReveal {
      * @param feeBoxes
      */
     triggerEventCreationTx = async (commitmentBoxes: Array<wasm.ErgoBox>,
-                                    observation: Observation,
+                                    observation: ObservationEntity,
                                     WIDs: Array<Uint8Array>,
                                     feeBoxes: Array<wasm.ErgoBox>) => {
         const height = await ErgoNetwork.getHeight()
@@ -45,7 +46,7 @@ export class CommitmentReveal {
                 [triggerEvent],
                 height
             )
-            await this.databaseConnection.submitTransaction(signed, observation.requestId, TxType.TRIGGER)
+            await this.databaseConnection.submitTransaction(signed, observation, TxType.TRIGGER)
             console.log("Trigger event created with tx id:", signed.id().to_str())
         } catch (e) {
             if (e instanceof boxCreationError) {

@@ -59,7 +59,7 @@ export class Boxes {
     }
 
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
-        const boxes = await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT)
+        const boxes = await this._dataBase.getUnspentSpecialBoxes(BoxType.PLAIN)
         const selectedBoxes = []
         let totalValue = BigInt(0)
         for(const box of boxes){

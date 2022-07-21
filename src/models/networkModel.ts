@@ -142,6 +142,7 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
         const height: number = lastSavedBlock.block_height
         const requiredHeight = height - confirmation
         return await this.observationRepository.createQueryBuilder("observation_entity")
+            .leftJoinAndSelect("observation_entity.block", "block_entity")
             .where("observation_entity.block < :requiredHeight", {requiredHeight})
             .getMany()
     }
@@ -151,7 +152,6 @@ export class NetworkDataBase extends AbstractDataBase<BlockEntity, Array<Observa
      * @param tx
      * @param requestId
      * @param txId
-     * @param time
      * @param type
      */
     submitTx = async (tx: string, requestId: string, txId: string, type: TxType) => {
