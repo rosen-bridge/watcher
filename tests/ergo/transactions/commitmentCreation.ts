@@ -2,7 +2,7 @@ import { Boxes } from "../../../src/ergo/boxes";
 import { Transaction } from "../../../src/api/Transaction";
 import { rosenConfig } from "./permit";
 import { DatabaseConnection } from "../../../src/ergo/databaseConnection";
-import { CommitmentCreation } from "../../../src/transactinos/commitmentCreation";
+import { CommitmentCreation } from "../../../src/transactions/commitmentCreation";
 import { loadDataBase } from "../../cardano/models/models";
 import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
 import { JsonBI } from "../../../src/network/parser";
@@ -23,6 +23,7 @@ import WIDObj2 from "./dataset/WIDBox2.json" assert {type: "json"}
 import plainObj from "./dataset/plainBox.json" assert {type: "json"}
 import txObj from "./dataset/commitmentTx.json" assert {type: "json"}
 import { hexStrToUint8Array } from "../../../src/utils/utils";
+import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -68,22 +69,19 @@ describe("Commitment creation transaction tests", () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
+            chai.spy.on(dbConnection, "submitTransaction", () => null)
             const boxes = new Boxes(bridgeDb)
             chai.spy.on(boxes, "createCommitment")
             chai.spy.on(boxes, "createPermit")
             const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
             const cc = new CommitmentCreation(dbConnection, boxes, tx)
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)
-            chai.spy.on(ErgoNetwork, "sendTx", () => {return})
             sinon.stub(ErgoUtils, "createAndSignTx").resolves(signedTx)
-            const txInfo = await cc.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, [])
-            expect(txInfo.commitmentBoxId).to.eq("072a361668eab73113c01dc6d378828cfae16ca177c60907114e128a156f5186")
-            expect(txInfo.txId).to.eq("26551bc56a0d70364bfd76a1832a94a046a1c01e98fd2bd7ff63e266f0227d5c")
+            await cc.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, [])
             expect(boxes.createPermit).to.have.called.with(111, BigInt(97), hexStrToUint8Array(WID))
             expect(boxes.createCommitment).to.have.called.once
-            expect(ErgoNetwork.sendTx).to.have.called.once
+            expect(dbConnection.submitTransaction).to.have.been.called.with(signedTx, observation.requestId, TxType.COMMITMENT)
             sinon.restore()
-            chai.spy.restore(ErgoNetwork)
         })
     })
 

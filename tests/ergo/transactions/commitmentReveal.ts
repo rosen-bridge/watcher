@@ -5,7 +5,7 @@ import { firstCommitment, loadBridgeDataBase, thirdCommitment } from "../../brid
 import { JsonBI } from "../../../src/network/parser";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
-import { CommitmentReveal } from "../../../src/transactinos/commitmentReveal";
+import { CommitmentReveal } from "../../../src/transactions/commitmentReveal";
 import { Buffer } from "buffer";
 import { CommitmentSet } from "../../../src/objects/interfaces";
 import { observation } from "./commitmentCreation";
@@ -21,6 +21,7 @@ import commitmentObj from "./dataset/commitmentBox.json" assert {type: "json"}
 import WIDObj from "./dataset/WIDBox.json" assert {type: "json"}
 import plainObj from "./dataset/plainBox.json" assert {type: "json"}
 import txObj from "./dataset/commitmentTx.json" assert {type: "json"}
+import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -46,15 +47,15 @@ describe("Commitment reveal transaction tests", () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
+            chai.spy.on(dbConnection, "submitTransaction", () => null)
             const boxes = new Boxes(bridgeDb)
             chai.spy.on(boxes, "createTriggerEvent")
             const cr = new CommitmentReveal(dbConnection, boxes)
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)
-            sinon.stub(ErgoNetwork, "sendTx")
             sinon.stub(ErgoUtils, "createAndSignTx").resolves(signedTx)
-            const data = await cr.triggerEventCreationTx(commitments, observation, WIDs, plainBox)
-            expect(data).to.eq("26551bc56a0d70364bfd76a1832a94a046a1c01e98fd2bd7ff63e266f0227d5c")
+            await cr.triggerEventCreationTx(commitments, observation, WIDs, plainBox)
             expect(boxes.createTriggerEvent).to.have.called.with(BigInt("1100000"), 111, WIDs, observation)
+            expect(dbConnection.submitTransaction).to.have.been.called.with(signedTx, observation.requestId, TxType.TRIGGER)
             sinon.restore()
         })
     })

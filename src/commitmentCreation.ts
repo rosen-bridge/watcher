@@ -1,6 +1,6 @@
 import { ErgoConfig } from "./config/config";
 import { boxesObject, databaseConnection, watcherTransaction } from "./index";
-import { CommitmentCreation } from "./transactinos/commitmentCreation";
+import { CommitmentCreation } from "./transactions/commitmentCreation";
 
 const ergoConfig = ErgoConfig.getConfig();
 let commitmentCreatorObj: CommitmentCreation

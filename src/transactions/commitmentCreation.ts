@@ -1,6 +1,6 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Boxes } from "../ergo/boxes";
-import { ErgoUtils} from "../ergo/utils";
+import { ErgoUtils } from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
@@ -8,22 +8,23 @@ import { boxCreationError, NotEnoughFund } from "../errors/errors";
 import { DatabaseConnection } from "../ergo/databaseConnection";
 import { Transaction } from "../api/Transaction";
 import { hexStrToUint8Array } from "../utils/utils";
+import { TxType } from "../entities/watcher/network/TransactionEntity";
 
 const ergoConfig = ErgoConfig.getConfig();
 
 export class CommitmentCreation {
-    _dataBaseConnection: DatabaseConnection
-    _boxes: Boxes
-    _widApi: Transaction
+    dataBaseConnection: DatabaseConnection
+    boxes: Boxes
+    widApi: Transaction
 
     constructor(db: DatabaseConnection, boxes: Boxes, api: Transaction) {
-        this._dataBaseConnection = db
-        this._boxes = boxes
-        this._widApi = api
+        this.dataBaseConnection = db
+        this.boxes = boxes
+        this.widApi = api
     }
 
     /**
-     * creates the commitment transaction and sends it to the network
+     * creates the commitment transaction and submits to the transactionQueue
      * @param WID
      * @param requestId
      * @param eventDigest
@@ -36,7 +37,7 @@ export class CommitmentCreation {
                                 eventDigest: Uint8Array,
                                 permits: Array<wasm.ErgoBox>,
                                 WIDBox: wasm.ErgoBox,
-                                feeBoxes: Array<wasm.ErgoBox>): Promise<{txId?: string, commitmentBoxId?: string}> => {
+                                feeBoxes: Array<wasm.ErgoBox>) => {
         const height = await ErgoNetwork.getHeight()
         const permitHash = ErgoUtils.contractHash(
             wasm.Contract.pay_to_address(
@@ -45,7 +46,7 @@ export class CommitmentCreation {
                 )
             )
         )
-        const outCommitment = this._boxes.createCommitment(height, WID, requestId, eventDigest, permitHash)
+        const outCommitment = this.boxes.createCommitment(height, WID, requestId, eventDigest, permitHash)
         const RWTCount: bigint = permits.map(permit =>
             BigInt(permit.tokens().get(0).amount().as_i64().to_str()))
             .reduce((a, b) => a + b, BigInt(0))
@@ -54,7 +55,7 @@ export class CommitmentCreation {
             console.log("Not enough RWT tokens to create a new commitment")
             return {}
         }
-        const outPermit = this._boxes.createPermit(height, RWTCount - BigInt(1), hexStrToUint8Array(WID))
+        const outPermit = this.boxes.createPermit(height, RWTCount - BigInt(1), hexStrToUint8Array(WID))
         const inputBoxes = new wasm.ErgoBoxes(permits[0]);
         inputBoxes.add(WIDBox)
         permits.slice(1).forEach(permit => inputBoxes.add(permit))
@@ -66,19 +67,14 @@ export class CommitmentCreation {
                 [outPermit, outCommitment],
                 height
             )
-            await ErgoNetwork.sendTx(signed.to_json())
+            await this.dataBaseConnection.submitTransaction(signed, requestId, TxType.COMMITMENT)
             console.log("Commitment creation done with txId: ", signed.id().to_str())
-            return {
-                txId: signed.id().to_str(),
-                commitmentBoxId: signed.outputs().get(1).box_id().to_str(),
-            }
         } catch (e) {
             console.log(e)
             if (e instanceof boxCreationError) {
                 console.log("Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets.")
             }
             console.log("Skipping the commitment creation.")
-            return {}
         }
     }
 
@@ -87,18 +83,18 @@ export class CommitmentCreation {
      * Finally saves the created commitment in the database
      */
     job = async () => {
-        const observations = await this._dataBaseConnection.allReadyObservations()
-        if(!this._widApi.watcherWID) {
+        const observations = await this.dataBaseConnection.allReadyObservations()
+        if(!this.widApi.watcherWID) {
             console.log("Watcher WID is not set, can not run commitment creation job.")
             return
         }
-        const WID = this._widApi.watcherWID
+        const WID = this.widApi.watcherWID
         console.log("starting commitment creation job with ", observations.length, " number of ready observations")
         for (const observation of observations) {
             try {
                 const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
-                const permits = await this._boxes.getPermits(BigInt(0))
-                const WIDBox = await this._boxes.getWIDBox()
+                const permits = await this.boxes.getPermits(BigInt(0))
+                const WIDBox = await this.boxes.getWIDBox()
                 const totalValue: bigint = permits.map(permit =>
                         BigInt(permit.value().as_i64().to_str()))
                         .reduce((a, b) => a + b, BigInt(0)) +
@@ -108,9 +104,9 @@ export class CommitmentCreation {
                 let feeBoxes: Array<wasm.ErgoBox> = []
                 console.log("Total value is: ", totalValue, " Required value is: ", requiredValue)
                 if (totalValue < requiredValue) {
-                    feeBoxes = await this._boxes.getUserPaymentBox(requiredValue - totalValue)
+                    feeBoxes = await this.boxes.getUserPaymentBox(requiredValue - totalValue)
                 }
-                const txInfo = await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, feeBoxes)
+                await this.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, feeBoxes)
             } catch(e) {
                 if(!(e instanceof NotEnoughFund))
                     console.log(e)

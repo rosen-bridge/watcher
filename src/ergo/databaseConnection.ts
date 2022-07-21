@@ -5,6 +5,8 @@ import { SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity
 import { ObservationEntity, TxStatus } from "../entities/watcher/network/ObservationEntity";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { ErgoConfig } from "../config/config";
+import * as wasm from "ergo-lib-wasm-nodejs";
+import { TxType } from "../entities/watcher/network/TransactionEntity";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -81,5 +83,15 @@ export class DatabaseConnection {
                 })
         }
         return readyCommitments
+    }
+
+    /**
+     * submits a new transaction
+     * @param tx
+     * @param requestId
+     * @param type
+     */
+    submitTransaction = async (tx: wasm.Transaction, requestId: string, type: TxType) => {
+        return await this.networkDataBase.submitTx(tx.to_json(), requestId, tx.id().to_str(), type)
     }
 }
