@@ -28,8 +28,7 @@ const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))]
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj))
 
-const userSecret = "1111111111111111111111111111111111111111111111111111111111111111"
-const WIDs = [Buffer.from(firstCommitment.WID), Buffer.from(thirdCommitment.WID)]
+const WIDs = [Buffer.from(firstCommitment.WID, "hex"), Buffer.from(thirdCommitment.WID, "hex")]
 
 describe("Commitment reveal transaction tests", () => {
 
@@ -50,12 +49,13 @@ describe("Commitment reveal transaction tests", () => {
             chai.spy.on(dbConnection, "submitTransaction", () => null)
             const boxes = new Boxes(bridgeDb)
             chai.spy.on(boxes, "createTriggerEvent")
+            chai.spy.on(boxes, "getRepoBox", () => WIDBox)
             const cr = new CommitmentReveal(dbConnection, boxes)
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)
             sinon.stub(ErgoUtils, "createAndSignTx").resolves(signedTx)
             await cr.triggerEventCreationTx(commitments, observation, WIDs, plainBox)
             expect(boxes.createTriggerEvent).to.have.called.with(BigInt("1100000"), 111, WIDs, observation)
-            expect(dbConnection.submitTransaction).to.have.been.called.with(signedTx, observation.requestId, TxType.TRIGGER)
+            expect(dbConnection.submitTransaction).to.have.been.called.with(signedTx, observation, TxType.TRIGGER)
             sinon.restore()
         })
     })
@@ -81,7 +81,7 @@ describe("Commitment reveal transaction tests", () => {
             sinon.restore()
         })
         it("Should return one valid commitment", async () => {
-            sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(firstCommitment.commitment))
+            sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(firstCommitment.commitment, "hex"))
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)

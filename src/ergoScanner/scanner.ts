@@ -2,18 +2,16 @@ import { AbstractScanner } from "../scanner/abstractScanner";
 import { BlockEntity } from "../entities/watcher/network/BlockEntity";
 import { Block, Observation } from "../objects/interfaces";
 import { NetworkDataBase } from "../models/networkModel";
-import { ErgoConfig, ErgoScannerConfig } from "../config/config";
+import { ErgoScannerConfig } from "../config/config";
 import { ErgoNetworkApi } from "../bridge/network/networkApi";
 import { NodeOutputBox, NodeTransaction } from "../bridge/network/ergoApiModels";
-import { decodeCollColl, ergoTreeToAddress } from "../ergo/utils";
+import { decodeCollColl } from "../ergo/utils";
 import { Address } from "ergo-lib-wasm-nodejs";
-import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { Buffer } from "buffer";
 import { rosenConfig } from "../config/rosenConfig";
+import { blake2b } from "blakejs";
 
 const ergoScannerConfig = ErgoScannerConfig.getConfig();
-const ergoConfig = ErgoConfig.getConfig();
-
 
 export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>> {
     _dataBase: NetworkDataBase;
@@ -27,8 +25,12 @@ export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>
         this._initialHeight = ergoScannerConfig.initialHeight;
     }
 
+    /**
+     * Should return the target token hex string id
+     * @param tokenId
+     */
     static mockedTokenMap = (tokenId: string): string =>{
-        return "targetTokenId"
+        return "f6a69529b12a7e2326acffee8383e0c44408f87a872886fadf410fe8498006d3"
     }
 
     /**
@@ -56,7 +58,8 @@ export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>
             if (observation != undefined) {
                 const r4 = decodeCollColl(observation.additionalRegisters['R4'])
                 const token = observation.assets[0]
-                const inputAddress = ""
+                const inputAddress = "fromAddress"
+                const requestId = Buffer.from(blake2b(Buffer.from(observation.transactionId, "hex"), undefined, 32)).toString("hex")
                 // TODO: Fix the input address
                 //ergoTreeToAddress((await ErgoNetwork.boxById(tx.inputs[0].boxId)).ergo_tree()).to_base58(ergoConfig.networkType)
                 return {
@@ -69,7 +72,7 @@ export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>
                     targetChainTokenId: this.mockedTokenMap(token.tokenId),
                     sourceTxId: observation.transactionId,
                     sourceBlockId: blockHash,
-                    requestId: observation.transactionId,
+                    requestId: requestId,
                     toAddress: Buffer.from(r4[1]).toString(),
                     fromAddress: inputAddress,
                 }

@@ -18,7 +18,6 @@ import { ergoScanner } from "./ergoScanner";
 import { cardanoScanner } from "./cardanoScanner";
 import { creation } from "./commitmentCreation";
 import { reveal } from "./commitmetnReveal";
-import { TransactionQueue } from "./ergo/transactionQueue";
 import { transactionQueueJob } from "./transactionQueue";
 
 const ergoConfig = ErgoConfig.getConfig();

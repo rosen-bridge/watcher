@@ -77,10 +77,10 @@ describe("Commitment creation transaction tests", () => {
             const cc = new CommitmentCreation(dbConnection, boxes, tx)
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)
             sinon.stub(ErgoUtils, "createAndSignTx").resolves(signedTx)
-            await cc.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, [])
+            await cc.createCommitmentTx(WID, observation, commitment, permits, WIDBox, [])
             expect(boxes.createPermit).to.have.called.with(111, BigInt(97), hexStrToUint8Array(WID))
             expect(boxes.createCommitment).to.have.called.once
-            expect(dbConnection.submitTransaction).to.have.been.called.with(signedTx, observation.requestId, TxType.COMMITMENT)
+            expect(dbConnection.submitTransaction).to.have.been.called.with(signedTx, observation, TxType.COMMITMENT)
             sinon.restore()
         })
     })
@@ -113,7 +113,7 @@ describe("Commitment creation transaction tests", () => {
             await cc.job()
             // Total value is enough should not call paymentBox
             expect(boxes.getUserPaymentBox).to.not.have.called()
-            expect(cc.createCommitmentTx).to.have.called.with(WID, observation.requestId, commitment, permits, WIDBox, [])
+            expect(cc.createCommitmentTx).to.have.called.with(WID, observation, commitment, permits, WIDBox, [])
         })
 
         it("Should collect ready observations and create commitment with excess fee box", async() => {
@@ -133,7 +133,7 @@ describe("Commitment creation transaction tests", () => {
             await cc.job()
             // Total value is not enough for the transaction
             expect(boxes.getUserPaymentBox).to.have.called.once
-            expect(cc.createCommitmentTx).to.have.called.with(WID, observation.requestId, commitment, permits, WIDBox2, plainBox)
+            expect(cc.createCommitmentTx).to.have.called.with(WID, observation, commitment, permits, WIDBox2, plainBox)
         })
     })
 })

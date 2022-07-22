@@ -36,22 +36,24 @@ export class CommitmentReveal {
         const height = await ErgoNetwork.getHeight()
         const boxValues = commitmentBoxes.map(box => BigInt(box.value().as_i64().to_str())).reduce((a, b) =>  a + b, BigInt(0))
         const triggerEvent = await this.boxes.createTriggerEvent(BigInt(boxValues), height, WIDs, observation)
-        const inputBoxes = new wasm.ErgoBoxes(feeBoxes[0]);
-        feeBoxes.slice(1, feeBoxes.length).forEach(box => inputBoxes.add(box))
-        commitmentBoxes.forEach(box => inputBoxes.add(box))
+        const inputBoxes = new wasm.ErgoBoxes(commitmentBoxes[0]);
+        commitmentBoxes.slice(1, commitmentBoxes.length).forEach(box => inputBoxes.add(box))
+        feeBoxes.forEach(box => inputBoxes.add(box))
+        const repoBox = await this.boxes.getRepoBox()
         try {
             const signed = await ErgoUtils.createAndSignTx(
                 ergoConfig.secretKey,
                 inputBoxes,
                 [triggerEvent],
-                height
+                height,
+                new wasm.ErgoBoxes(repoBox)
             )
             await this.databaseConnection.submitTransaction(signed, observation, TxType.TRIGGER)
             console.log("Trigger event created with tx id:", signed.id().to_str())
         } catch (e) {
             if (e instanceof boxCreationError) {
                 console.log("Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets.")
-            }
+            } else console.log(e)
             console.log("Skipping the event trigger creation.")
         }
     }
@@ -64,7 +66,7 @@ export class CommitmentReveal {
      */
     commitmentCheck = (commitments: Array<Commitment>, observation: Observation): Array<Commitment> => {
         return commitments.filter(commitment => {
-            return ErgoUtils.commitmentFromObservation(observation, commitment.WID).toString() === commitment.commitment
+            return Buffer.from(ErgoUtils.commitmentFromObservation(observation, commitment.WID)).toString("hex") === commitment.commitment
         })
     }
 
@@ -86,7 +88,7 @@ export class CommitmentReveal {
                     })
                     await Promise.all(commitmentBoxes).then(async (cBoxes) => {
                         const WIDs: Array<Uint8Array> = validCommitments.map(commitment => {
-                            return Buffer.from(commitment.WID)
+                            return Buffer.from(commitment.WID, "hex")
                         })
                         await this.triggerEventCreationTx(cBoxes, commitmentSet.observation, WIDs, await this.boxes.getUserPaymentBox(txFee))
                     })
