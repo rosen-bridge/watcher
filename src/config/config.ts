@@ -24,6 +24,7 @@ const ERGO_SCANNER_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scann
 const NETWORK_WATCHER: string | undefined = config.get?.('watcher');
 const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.('ergo.commitmentCreationInterval')
 const COMMITMENT_REVEAL_INTERVAL: number | undefined = config.get?.('ergo.commitmentRevealInterval')
+const TRANSACTION_CHECK_INTERVAL: number | undefined = config.get?.('ergo.transactions.interval')
 const TRANSACTION_REMOVING_TIMEOUT: number | undefined = config.get?.('ergo.transactions.timeout');
 const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transactions.confirmation');
 
@@ -49,7 +50,7 @@ export class ErgoConfig{
     commitmentRevealInterval: number;
     transactionRemovingTimeout: number;
     transactionConfirmation: number;
-
+    transactionCheckingInterval: number;
 
     private constructor() {
         let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -114,10 +115,13 @@ export class ErgoConfig{
         if(!COMMITMENT_REVEAL_INTERVAL){
             throw new Error("Commitment reveal job interval is not set");
         }
-        if (TRANSACTION_CONFIRMATION === undefined) {
+        if(!TRANSACTION_CHECK_INTERVAL){
+            throw new Error("Transaction checking job interval is not set");
+        }
+        if (!TRANSACTION_CONFIRMATION) {
             throw new Error("Ergo transaction confirmation doesn't set correctly");
         }
-        if (TRANSACTION_REMOVING_TIMEOUT === undefined) {
+        if (!TRANSACTION_REMOVING_TIMEOUT) {
             throw new Error("Ergo transaction timeout doesn't set correctly");
         }
         const secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
@@ -140,6 +144,7 @@ export class ErgoConfig{
         this.networkWatcher = NETWORK_WATCHER
         this.commitmentCreationInterval = COMMITMENT_CREATION_INTERVAL
         this.commitmentRevealInterval = COMMITMENT_REVEAL_INTERVAL
+        this.transactionCheckingInterval = TRANSACTION_CHECK_INTERVAL
         this.transactionConfirmation = TRANSACTION_CONFIRMATION;
         this.transactionRemovingTimeout = TRANSACTION_REMOVING_TIMEOUT;
     }
