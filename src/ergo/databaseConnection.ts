@@ -90,14 +90,14 @@ export class DatabaseConnection {
      * submits a new transaction and updates the observation tx status
      * @param tx
      * @param observation
-     * @param type
+     * @param txType
      */
-    submitTransaction = async (tx: wasm.Transaction, observation: ObservationEntity, type: TxType) => {
+    submitTransaction = async (tx: wasm.Transaction, observation: ObservationEntity, txType: TxType) => {
         await this.networkDataBase.submitTx(
             Buffer.from(tx.sigma_serialize_bytes()).toString("base64"),
             observation.requestId,
             tx.id().to_str(),
-            type
+            txType
         )
         await this.networkDataBase.upgradeObservationTxStatus(observation)
     }

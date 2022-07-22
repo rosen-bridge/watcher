@@ -45,9 +45,7 @@ export class TransactionQueue {
                             await this.database.downgradeObservationTxStatus(tx.observation)
                             await this.database.removeTx(tx)
                         }
-                        // console.log(signedTx.to_json())
                         console.log(currentHeight, tx.updateBlock)
-                        // console.log(await ErgoNetwork.checkTxInputs(signedTx.inputs()))
                         console.log("Skipping")
                         continue
                     }
