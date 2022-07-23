@@ -43,7 +43,7 @@ const init = async () => {
         const ergoConfig = ErgoConfig.getConfig();
 
         bridgeDatabase = await BridgeDataBase.init(bridgeOrmConfig);
-        boxesObject = new Boxes(bridgeDatabase)
+        boxesObject = new Boxes(rosenConfig, bridgeDatabase)
         ergoNetworkApi = new ErgoNetworkApi();
         return new Transaction(
             rosenConfig,
@@ -71,12 +71,12 @@ const init = async () => {
             // Running bridge scanner thread
             bridgeScanner()
             // Running network scanner thread
-            if(ergoConfig.networkWatcher == "Ergo") {
+            if (ergoConfig.networkWatcher == "Ergo") {
                 // Initializing database
                 networkDatabase = await NetworkDataBase.init(ergoOrmConfig)
                 // Running Ergo scanner
                 ergoScanner()
-            } else if(ergoConfig.networkWatcher == "Cardano") {
+            } else if (ergoConfig.networkWatcher == "Cardano") {
                 // Initializing database
                 networkDatabase = await NetworkDataBase.init(cardanoOrmConfig)
                 // Running Cardano scanner

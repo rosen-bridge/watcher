@@ -11,6 +11,7 @@ import { boxesSample } from "../dataset/BoxesSample";
 import chai from "chai";
 import spies from "chai-spies";
 import { Buffer } from "buffer";
+
 chai.use(spies);
 
 
@@ -59,7 +60,7 @@ describe("Watcher Permit Transactions", () => {
         it("checks is there any wid in the usersBoxes", async () => {
             const sampleWID = "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8";
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -85,7 +86,7 @@ describe("Watcher Permit Transactions", () => {
          */
         it('the token map of input and output should be the same', async () => {
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -115,7 +116,7 @@ describe("Watcher Permit Transactions", () => {
         it("checks get permit transaction is signed", async () => {
             initMockedAxios(0);
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getRepoBox", () => {
                 return wasm.ErgoBox.from_json(boxesSample.secondRepoBox)
             })
@@ -134,7 +135,7 @@ describe("Watcher Permit Transactions", () => {
          */
         it("tests that if watcher have permit box should returns error", async () => {
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -156,7 +157,7 @@ describe("Watcher Permit Transactions", () => {
          */
         it("checks transaction is signed", async () => {
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             initMockedAxios(0);
             chai.spy.on(boxes, "getPermits", () => {
                 return [
@@ -182,7 +183,7 @@ describe("Watcher Permit Transactions", () => {
         it("it checks case that the return permit transaction have permit box in its output", async () => {
             initMockedAxios(1);
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getPermits", () => {
                 return [
                     wasm.ErgoBox.from_json(boxesSample.firstPermitBox)
@@ -207,7 +208,7 @@ describe("Watcher Permit Transactions", () => {
         it("tests that if watcher doesn't have permit box should returns error", async () => {
             initMockedAxios();
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getPermits", () => {
                 return [
                     wasm.ErgoBox.from_json(boxesSample.firstWatcherPermitBox),
@@ -237,7 +238,7 @@ describe("Watcher Permit Transactions", () => {
         it("should be true", async () => {
             initMockedAxios();
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -254,7 +255,7 @@ describe("Watcher Permit Transactions", () => {
         it("should be false", async () => {
             initMockedAxios();
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",

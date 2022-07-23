@@ -15,13 +15,15 @@ import { expect } from "chai";
 import chai from "chai";
 import spies from "chai-spies";
 import sinon from "sinon"
+
 chai.use(spies)
 
-import commitmentObj from "./dataset/commitmentBox.json" assert {type: "json"}
-import WIDObj from "./dataset/WIDBox.json" assert {type: "json"}
-import plainObj from "./dataset/plainBox.json" assert {type: "json"}
-import txObj from "./dataset/commitmentTx.json" assert {type: "json"}
+import commitmentObj from "./dataset/commitmentBox.json" assert { type: "json" }
+import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
+import plainObj from "./dataset/plainBox.json" assert { type: "json" }
+import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
 import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
+import { rosenConfig } from "./permit";
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -42,12 +44,12 @@ describe("Commitment reveal transaction tests", () => {
      *    It should also sign and send it successfully
      */
     describe("triggerEventCreationTx", () => {
-        it("Should create, sign and send a trigger event transaction", async() => {
+        it("Should create, sign and send a trigger event transaction", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "submitTransaction", () => null)
-            const boxes = new Boxes(bridgeDb)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
             chai.spy.on(boxes, "createTriggerEvent")
             chai.spy.on(boxes, "getRepoBox", () => WIDBox)
             const cr = new CommitmentReveal(dbConnection, boxes)
@@ -74,7 +76,7 @@ describe("Commitment reveal transaction tests", () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
-            const boxes = new Boxes(bridgeDb)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
             const cr = new CommitmentReveal(dbConnection, boxes)
             const data = cr.commitmentCheck([firstCommitment], observation)
             expect(data).to.have.length(0)
@@ -85,7 +87,7 @@ describe("Commitment reveal transaction tests", () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
-            const boxes = new Boxes(bridgeDb)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
             const cr = new CommitmentReveal(dbConnection, boxes)
             const data = cr.commitmentCheck([firstCommitment], observation)
             expect(data).to.have.length(1)
@@ -104,7 +106,7 @@ describe("Commitment reveal transaction tests", () => {
      *    In case of enough valid commitments it should create the transaction
      */
     describe("job", () => {
-        it("Should collect ready commitments and reveals the commitment by creating trigger event", async() => {
+        it("Should collect ready commitments and reveals the commitment by creating trigger event", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
@@ -113,7 +115,7 @@ describe("Commitment reveal transaction tests", () => {
                 observation: observation
             }
             chai.spy.on(dbConnection, "allReadyCommitmentSets", () => [commitmentSet])
-            const boxes = new Boxes(bridgeDb)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
             chai.spy.on(boxes, "getUserPaymentBox", () => plainBox)
             sinon.stub(ErgoNetwork, "boxById").resolves(WIDBox)
             sinon.stub(ErgoUtils, "requiredCommitmentCount").resolves(BigInt(2))
