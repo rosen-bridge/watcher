@@ -63,7 +63,7 @@ export class ErgoScanner extends AbstractScanner<BlockEntity, Array<Observation>
                 // TODO: Fix the input address
                 //ergoTreeToAddress((await ErgoNetwork.boxById(tx.inputs[0].boxId)).ergo_tree()).to_base58(ergoConfig.networkType)
                 return {
-                    fromChain: "Ergo",
+                    fromChain: ergoScannerConfig.nameConstant,
                     toChain: Buffer.from(r4[0]).toString(),
                     networkFee: Buffer.from(r4[2]).toString(),
                     bridgeFee: Buffer.from(r4[3]).toString(),

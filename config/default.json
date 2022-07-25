@@ -1,12 +1,19 @@
 {
-    "watcher": "Ergo",
+    "watcher": {
+        "network": "Ergo",
+        "observation" : {
+            "confirmation": 2,
+            "validThreshold": 100
+        }
+    },
     "cardano": {
         "interval": 10,
         "initialBlockHeight": 3471392,
         "timeout": 10000,
         "node": {
             "URL": "https://testnet.koios.rest/api/v0"
-        }
+        },
+        "name": "Cardano"
     },
     "ergo": {
         "explorerUrl": "change",
@@ -27,7 +34,8 @@
             "timeout": 3,
             "confirmation": 1,
             "interval": 30
-        }
+        },
+        "name": "Ergo"
     },
     "bridgeScanner": {
         "interval": 10,

@@ -30,9 +30,6 @@ export let ergoNetworkApi: ErgoNetworkApi;
 export let networkDatabase: NetworkDataBase;
 export let bridgeDatabase: BridgeDataBase;
 export let databaseConnection: DatabaseConnection;
-// TODO: Set this based on the scanning network config
-export const observationConfirmation = 1;
-export const observationValidThreshold = 200;
 
 
 const init = async () => {
@@ -81,7 +78,7 @@ const init = async () => {
             }
 
             await delay(30000)
-            databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, observationConfirmation, observationValidThreshold)
+            databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, ergoConfig.observationConfirmation, ergoConfig.observationValidThreshold)
             // Running transaction checking thread
             transactionQueueJob()
             // Running commitment creation thread

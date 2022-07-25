@@ -1,6 +1,6 @@
 import { CardanoConfig } from "./config/config";
 import { Scanner } from "./cardano/scanner/scanner";
-import { networkDatabase, observationConfirmation } from "./index";
+import { networkDatabase } from "./index";
 import { KoiosNetwork } from "./cardano/network/koios";
 import config from "config";
 
