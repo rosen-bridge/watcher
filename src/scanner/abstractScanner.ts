@@ -43,6 +43,7 @@ export abstract class AbstractScanner<BlockT, DataT> {
                     height = this._initialHeight;
                 }
                 for (height; height <= lastBlockHeight; height++) {
+                    console.log("Getting block information at height: ", height)
                     const block = await this._networkAccess.getBlockAtHeight(height);
                     const info = await this.getBlockInformation(block);
                     if (!await this.isForkHappen()) {
@@ -66,6 +67,7 @@ export abstract class AbstractScanner<BlockT, DataT> {
                     }
                     blockFromNetwork = await this._networkAccess.getBlockAtHeight(blockFromNetwork.block_height - 1);
                 }
+                console.log("Fork happened in network at height: ", forkPointer.block_height)
                 await this._dataBase.removeForkedBlocks(forkPointer.block_height);
             }
         } catch (e) {

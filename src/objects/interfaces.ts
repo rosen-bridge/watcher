@@ -1,5 +1,6 @@
 import { BoxType } from "../entities/watcher/bridge/BoxEntity";
 import { SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity";
+import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
 
 export interface Block {
     hash: string,
@@ -42,5 +43,5 @@ export interface SpentBox{
 
 export interface CommitmentSet{
     commitments: Array<Commitment>,
-    observation: Observation
+    observation: ObservationEntity
 }

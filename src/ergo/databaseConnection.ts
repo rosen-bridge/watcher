@@ -5,11 +5,14 @@ import { SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity
 import { ObservationEntity, TxStatus } from "../entities/watcher/network/ObservationEntity";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { ErgoConfig } from "../config/config";
+import * as wasm from "ergo-lib-wasm-nodejs";
+import { TxType } from "../entities/watcher/network/TransactionEntity";
+import { Buffer } from "buffer";
 
 const ergoConfig = ErgoConfig.getConfig();
 
 
-export class databaseConnection{
+export class DatabaseConnection {
     bridgeDataBase: BridgeDataBase
     networkDataBase: NetworkDataBase
     observationConfirmation: number
@@ -81,5 +84,21 @@ export class databaseConnection{
                 })
         }
         return readyCommitments
+    }
+
+    /**
+     * submits a new transaction and updates the observation tx status
+     * @param tx
+     * @param observation
+     * @param txType
+     */
+    submitTransaction = async (tx: wasm.Transaction, observation: ObservationEntity, txType: TxType) => {
+        await this.networkDataBase.submitTx(
+            Buffer.from(tx.sigma_serialize_bytes()).toString("base64"),
+            observation.requestId,
+            tx.id().to_str(),
+            txType
+        )
+        await this.networkDataBase.upgradeObservationTxStatus(observation)
     }
 }

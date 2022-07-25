@@ -86,7 +86,7 @@ describe("Ergo Scanner Tests", () => {
             expect(data).to.not.be.undefined
             expect(data?.amount).to.eql("4")
             expect(data?.sourceChainTokenId).to.eql("4444444444444444444444444444444444444444444444444444444444444444")
-            expect(data?.fromAddress).to.eql("2ciPouLcYzCvFkdcwR3RXGfcYdb11j5iYyaDmgiQtYbtxBRz1CaT1R8Rd5138vZ2yJXUC4TghjXccvX")
+            expect(data?.fromAddress).to.eql("fromAddress")
             expect(data?.toChain).to.eql("Cardano")
             expect(data?.toAddress).to.eql("9f5veZdZq1C15GCqm6uej3kpRPh3Eq1Mtk1TqWjQx3CzMEZHXNz")
             expect(data?.networkFee).to.eql("100000")

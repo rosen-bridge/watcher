@@ -38,7 +38,7 @@ export class Transaction{
     constructor(
         rosenConfig: rosenConfig,
         userAddress: string,
-        userSecret: string,
+        userSecret: wasm.SecretKey,
         boxes: Boxes
     ) {
         this.watcherPermitState = undefined;
@@ -46,7 +46,7 @@ export class Transaction{
         this.boxes = boxes;
         this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
         this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
-        this.userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from(userSecret, 'hex'));
+        this.userSecret = userSecret
         this.userAddress = wasm.Address.from_base58(userAddress);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
         this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);
@@ -384,12 +384,15 @@ export class Transaction{
      * updating watcher state(permitState and WID if exist)
      */
     getWatcherState = async () => {
+        console.log("Getting watcher status")
         if (this.watcherPermitState === undefined) {
             const repoBox = await this.boxes.getRepoBox();
             const R4 = repoBox.register_value(4)
+            console.log("Repo box id is: ", repoBox.box_id().to_str())
             if(R4){
                 const users = R4.to_coll_coll_byte();
                 this.watcherWID = await this.getWID(users);
+                console.log("Watcher WID is set to: ", this.watcherWID)
                 this.watcherPermitState = (this.watcherWID !== "");
             }
         }

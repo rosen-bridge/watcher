@@ -100,6 +100,19 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
                 return boxEntity
             })
 
+        await queryRunner.startTransaction()
+        try {
+            await queryRunner.manager.save(block);
+            await queryRunner.manager.save(commitmentsEntity);
+            await queryRunner.manager.save(boxEntities)
+            await queryRunner.commitTransaction();
+        } catch (err) {
+            console.log(err)
+            await queryRunner.rollbackTransaction();
+            await queryRunner.release();
+            return false
+        }
+
         const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
         for (const spentCommitment of information.updatedCommitments) {
             const oldCommitment = await this.commitmentRepository.findOne({
@@ -131,23 +144,20 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
             spentBoxEntities.push(newBox)
         }
 
-        let error = true;
+        let success = true;
         await queryRunner.startTransaction()
         try {
-            await queryRunner.manager.save(block);
-            await queryRunner.manager.save(commitmentsEntity);
-            await queryRunner.manager.save(boxEntities)
             await queryRunner.manager.save(updatedCommitmentEntities);
             await queryRunner.manager.save(spentBoxEntities);
             await queryRunner.commitTransaction();
         } catch (err) {
             console.log(err)
             await queryRunner.rollbackTransaction();
-            error = false;
+            success = false;
         } finally {
             await queryRunner.release();
         }
-        return error;
+        return success
     }
 
     /**

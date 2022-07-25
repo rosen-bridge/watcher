@@ -1,15 +1,12 @@
 import { AbstractScanner } from "../../scanner/abstractScanner";
 import { BridgeDataBase } from "../models/bridgeModel";
-import config, { IConfig } from "config";
 import { Block, Commitment, SpecialBox, SpentBox } from "../../objects/interfaces";
-import { bridgeOrmConfig } from "../../../config/bridgeOrmConfig";
 import { ErgoNetworkApi } from "../network/networkApi";
 import { BridgeBlockEntity } from "../../entities/watcher/bridge/BridgeBlockEntity";
 import { CommitmentUtils } from "./utils";
 import { ErgoConfig } from "../../config/config";
 import { rosenConfig } from "../../config/rosenConfig";
 import { Transaction } from "../../api/Transaction";
-import { Boxes } from "../../ergo/boxes";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -23,15 +20,13 @@ export type BridgeBlockInformation = {
 export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInformation>{
     _dataBase: BridgeDataBase;
     _networkAccess: ErgoNetworkApi;
-    _config: IConfig;
     _initialHeight: number;
     _widApi: Transaction
 
-    constructor(db: BridgeDataBase, network: ErgoNetworkApi, config: IConfig, api: Transaction) {
+    constructor(db: BridgeDataBase, network: ErgoNetworkApi, api: Transaction) {
         super();
         this._dataBase = db;
         this._networkAccess = network;
-        this._config = config;
         this._initialHeight = ergoConfig.commitmentInitialHeight;
         this._widApi = api
     }
@@ -83,16 +78,3 @@ export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInfor
     }
 }
 
-/**
- * main function that runs every `SCANNER_INTERVAL` time that sets in the config
- */
-export const commitmentMain = async () => {
-    const DB = await BridgeDataBase.init(bridgeOrmConfig);
-    const apiNetwork = new ErgoNetworkApi();
-    const boxes: Boxes = new Boxes(DB)
-    const api: Transaction = new Transaction(rosenConfig, ergoConfig.address, ergoConfig.secretKey.toString(), boxes)
-    const scanner = new Scanner(DB, apiNetwork, config, api);
-    setInterval(scanner.update, ergoConfig.commitmentInterval * 1000);
-    setInterval(scanner.removeOldCommitments, ergoConfig.commitmentInterval * 1000);
-
-}

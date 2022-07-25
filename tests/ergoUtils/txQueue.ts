@@ -1,6 +1,6 @@
 import { loadDataBase } from "../cardano/models/models";
 import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
-import { databaseConnection } from "../../src/ergo/databaseConnection";
+import { DatabaseConnection } from "../../src/ergo/databaseConnection";
 import { TransactionQueue } from "../../src/ergo/transactionQueue";
 import { TxEntity, TxType } from "../../src/entities/watcher/network/TransactionEntity";
 import { ObservationEntity } from "../../src/entities/watcher/network/ObservationEntity";
@@ -32,7 +32,7 @@ describe("Transaction queue tests", () => {
      * Target: testing TransactionQueue job
      * Dependencies:
      *    networkDatabase
-     *    databaseConnection
+     *    DatabaseConnection
      *    ErgoNetwork
      */
     describe("TransactionQueue job", () => {
@@ -44,7 +44,7 @@ describe("Transaction queue tests", () => {
         it("should resend the commitment transaction", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
@@ -68,7 +68,7 @@ describe("Transaction queue tests", () => {
         it("should resend the trigger transaction", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.TRIGGER
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
@@ -92,7 +92,7 @@ describe("Transaction queue tests", () => {
         it("should just wait for commitment transaction status", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
@@ -115,7 +115,7 @@ describe("Transaction queue tests", () => {
         it("should just wait for trigger transaction status", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.TRIGGER
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
@@ -138,7 +138,7 @@ describe("Transaction queue tests", () => {
         it("should just wait for trigger transaction status because its inputs are spent", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.TRIGGER
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
@@ -162,7 +162,7 @@ describe("Transaction queue tests", () => {
         it("should update the updateTime and wait more for tx status", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
@@ -184,7 +184,7 @@ describe("Transaction queue tests", () => {
         it("should remove the tx from database because it get enough confirmation", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
@@ -209,7 +209,7 @@ describe("Transaction queue tests", () => {
         it("should remove the commitment transaction because its inputs are spent and it has passed the timeout", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
             chai.spy.on(networkDb, "getAllTxs", () => [txEntity])

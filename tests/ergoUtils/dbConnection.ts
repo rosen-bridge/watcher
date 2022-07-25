@@ -1,6 +1,6 @@
 import { loadDataBase } from "../cardano/models/models";
 import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
-import { databaseConnection } from "../../src/ergo/databaseConnection";
+import { DatabaseConnection } from "../../src/ergo/databaseConnection";
 import { ObservationEntity, TxStatus } from "../../src/entities/watcher/network/ObservationEntity";
 import { ObservedCommitmentEntity, SpendReason } from "../../src/entities/watcher/bridge/ObservedCommitmentEntity";
 import { BridgeBlockEntity } from "../../src/entities/watcher/bridge/BridgeBlockEntity";
@@ -34,14 +34,14 @@ mergedCommitment.spendReason = SpendReason.MERGE
 mergedCommitment.spendBlock = block
 
 
-describe("Testing the databaseConnection", () => {
+describe("Testing the DatabaseConnection", () => {
     describe("allReadyObservations", () => {
         it("should return an observation", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation])
             sinon.stub(ErgoNetwork, "getHeight").resolves(15)
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "isMergeHappened", () => false)
             const data = await dbConnection.allReadyObservations()
             expect(data).to.have.length(1)
@@ -52,7 +52,7 @@ describe("Testing the databaseConnection", () => {
             const bridgeDb = await loadBridgeDataBase("commitments");
             sinon.stub(ErgoNetwork, "getHeight").resolves(15)
             chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation, secondObservation])
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "isMergeHappened", () => true)
             const data = await dbConnection.allReadyObservations()
             expect(data).to.have.length(0)
@@ -64,7 +64,7 @@ describe("Testing the databaseConnection", () => {
             chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation])
             chai.spy.on(networkDb, "updateObservationTxStatus", () => undefined)
             sinon.stub(ErgoNetwork, "getHeight").resolves(215)
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const data = await dbConnection.allReadyObservations()
             expect(data).to.have.length(0)
             expect(networkDb.updateObservationTxStatus).to.have.been.called.with(firstObservation, TxStatus.TIMED_OUT)
@@ -77,7 +77,7 @@ describe("Testing the databaseConnection", () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [firstObservation])
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(data).to.have.length(0)
         })
@@ -86,7 +86,7 @@ describe("Testing the databaseConnection", () => {
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [secondObservation])
             chai.spy.on(bridgeDb, "commitmentsByEventId", () => [unspentCommitment, unspentCommitment2, redeemedCommitment])
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(data).to.have.length(1)
             expect(data[0].commitments).to.have.length(2)
@@ -99,7 +99,7 @@ describe("Testing the databaseConnection", () => {
             chai.spy.on(bridgeDb, "commitmentsByEventId", () => [unspentCommitment, mergedCommitment, redeemedCommitment])
             chai.spy.on(networkDb, "updateObservationTxStatus", () => undefined)
             chai.spy.on(ErgoNetwork, "getHeight", () => 5000)
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(networkDb.updateObservationTxStatus).to.have.been.called.with(secondObservation, TxStatus.REVEALED)
             expect(data).to.have.length(0)

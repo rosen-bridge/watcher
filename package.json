@@ -8,11 +8,10 @@
     "lint": "eslint .",
     "test": "rm -rf ./sqlite && tsc --noEmit && npm run lint && mocha --slow 3000 && rm -rf ./sqlite",
     "coverage": "c8 npm run test",
-    "start:dev": "nodemon",
+    "start:dev": "nodemon src/index.ts",
     "typeorm": "typeorm-ts-node-esm",
-    "typeorm:generate:cardano": "npm run typeorm migration:generate src/migrations/watcher/network/cardanoModelMigration -- -d ./config/ormconfig.ts",
+    "typeorm:generate:network": "npm run typeorm migration:generate src/migrations/watcher/network/networkModelMigration -- -d ./config/ormconfig.ts",
     "typeorm:generate:bridge": "npm run typeorm migration:generate src/migrations/watcher/bridge/bridgeModelMigration -- -d ./config/bridgeOrmConfig.ts",
-    "typeorm:generate:ergo": "npm run typeorm migration:generate src/migrations/watcher/ergo/ergoModelMigration -- -d ./config/ergoOrmConfig.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d ./config/ormconfig.ts",
     "typeorm:migrate:bridge": "npm run typeorm migration:run -- -d ./config/bridgeOrmConfig.ts"
   },

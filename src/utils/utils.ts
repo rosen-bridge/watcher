@@ -21,3 +21,7 @@ export const base64ToArrayBuffer = (base64: string): Uint8Array => {
     }
     return bytes;
 };
+
+export function delay(time: number) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}

@@ -1,5 +1,5 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoUtils} from "./utils";
+import { ErgoUtils } from "./utils";
 import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
@@ -12,7 +12,7 @@ import { NotEnoughFund } from "../errors/errors";
 const ergoConfig = ErgoConfig.getConfig();
 
 
-export class Boxes {
+export class Boxes{
     _dataBase: BridgeDataBase
     repoNFTId: wasm.TokenId;
     RWTTokenId: wasm.TokenId;
@@ -25,8 +25,9 @@ export class Boxes {
     userAddress: wasm.Address;
     repoAddressContract: wasm.Contract;
     repoAddress: wasm.Address;
+    rosenConfig: rosenConfig;
 
-    constructor(db: BridgeDataBase) {
+    constructor(rosenConfig: rosenConfig, db: BridgeDataBase) {
         this._dataBase = db
         this.repoNFTId = wasm.TokenId.from_str(ergoConfig.RepoNFT);
         this.RWTTokenId = wasm.TokenId.from_str(ergoConfig.RWTId);
@@ -39,6 +40,7 @@ export class Boxes {
         this.repoAddress = wasm.Address.from_base58(rosenConfig.RWTRepoAddress);
         this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
         this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
+        this.rosenConfig = rosenConfig;
     }
 
     getPermits = async (RWTCount: bigint): Promise<Array<wasm.ErgoBox>> => {
@@ -52,22 +54,22 @@ export class Boxes {
     }
 
     getWIDBox = async (): Promise<wasm.ErgoBox> => {
-        const WID = (await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT))[0]
+        const WID = (await this._dataBase.getUnspentSpecialBoxes(BoxType.WID))[0]
         let WIDBox = wasm.ErgoBox.from_json(WID.boxJson)
         WIDBox = await ErgoNetwork.trackMemPool(WIDBox)
         return WIDBox
     }
 
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
-        const boxes = await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT)
+        const boxes = await this._dataBase.getUnspentSpecialBoxes(BoxType.PLAIN)
         const selectedBoxes = []
         let totalValue = BigInt(0)
-        for(const box of boxes){
+        for (const box of boxes) {
             totalValue = totalValue + BigInt(box.value)
             selectedBoxes.push(box)
-            if(totalValue > requiredValue) break
+            if (totalValue > requiredValue) break
         }
-        if(totalValue < requiredValue){
+        if (totalValue < requiredValue) {
             console.log("ERROR: Not enough fund to create the transaction")
             throw new NotEnoughFund
         }
@@ -121,7 +123,7 @@ export class Boxes {
      * @param permitScriptHash
      */
     createCommitment = (height: number, WID: string, requestId: string, eventDigest: Uint8Array, permitScriptHash: Uint8Array): wasm.ErgoBoxCandidate => {
-        const contract = wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.commitmentAddress));
+        const contract = wasm.Contract.pay_to_address(wasm.Address.from_base58(this.rosenConfig.commitmentAddress));
         const builder = new wasm.ErgoBoxCandidateBuilder(
             this.minBoxValue,
             contract,
@@ -178,7 +180,7 @@ export class Boxes {
                           observation: Observation) => {
         const builder = new wasm.ErgoBoxCandidateBuilder(
             wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
-            wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.eventTriggerAddress)),
+            wasm.Contract.pay_to_address(wasm.Address.from_base58(this.rosenConfig.eventTriggerAddress)),
             height
         );
         builder.add_token(this.RWTTokenId, wasm.TokenAmount.from_i64(wasm.I64.from_str(WIDs.length.toString())))
@@ -194,7 +196,7 @@ export class Boxes {
             Buffer.from(observation.sourceChainTokenId, "hex"),
             Buffer.from(observation.targetChainTokenId, "hex"),
             Buffer.from(observation.sourceBlockId, "hex")]
-        const permitHash = ErgoUtils.contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(rosenConfig.watcherPermitAddress)))
+        const permitHash = ErgoUtils.contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(this.rosenConfig.watcherPermitAddress)))
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte(WIDs))
         builder.set_register_value(5, wasm.Constant.from_coll_coll_byte(eventData))
         builder.set_register_value(6, wasm.Constant.from_byte_array(permitHash))

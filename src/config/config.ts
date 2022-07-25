@@ -8,10 +8,10 @@ const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
 const URL: string | undefined = config.get?.('cardano.node.URL');
 const INTERVAL: number | undefined = config.get?.('cardano.interval');
 const INITIAL_HEIGHT: number | undefined = config.get?.('cardano.initialBlockHeight');
-const COMMITMENT_INTERVAL: number | undefined = config.get?.('commitmentScanner.interval');
-const COMMITMENT_INITIAL_HEIGHT: number | undefined = config.get?.('commitmentScanner.initialBlockHeight');
-const COMMITMENT_HEIGHT_LIMIT: number | undefined = config.get?.('commitmentScanner.heightLimit');
-const CLEANUP_CONFIRMATION: number | undefined = config.get?.('commitmentScanner.cleanupConfirmation');
+const BRIDGE_SCAN_INTERVAL: number | undefined = config.get?.('bridgeScanner.interval');
+const COMMITMENT_INITIAL_HEIGHT: number | undefined = config.get?.('bridgeScanner.initialBlockHeight');
+const COMMITMENT_HEIGHT_LIMIT: number | undefined = config.get?.('bridgeScanner.heightLimit');
+const CLEANUP_CONFIRMATION: number | undefined = config.get?.('bridgeScanner.cleanupConfirmation');
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
 const RWT_ID: string | undefined = config.get?.('ergo.RWTId');
@@ -21,13 +21,23 @@ const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.('ergo.explorerTim
 const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
 const ERGO_SCANNER_INTERVAL: number | undefined = config.get?.('ergo.scanner.interval');
 const ERGO_SCANNER_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scanner.initialBlockHeight');
+const NETWORK_WATCHER: string | undefined = config.get?.('watcher.network');
+const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.('ergo.commitmentCreationInterval')
+const COMMITMENT_REVEAL_INTERVAL: number | undefined = config.get?.('ergo.commitmentRevealInterval')
+const TRANSACTION_CHECK_INTERVAL: number | undefined = config.get?.('ergo.transactions.interval')
 const TRANSACTION_REMOVING_TIMEOUT: number | undefined = config.get?.('ergo.transactions.timeout');
 const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transactions.confirmation');
+const OBSERVATION_CONFIRMATION: number | undefined = config.get?.('watcher.observation.confirmation');
+const OBSERVATION_VALID_THRESH: number | undefined = config.get?.('watcher.observation.validThreshold');
+const ERGO_NAME_CONSTANT: string = config.get?.('ergo.name');
+const CARDANO_NAME_CONSTANT: string = config.get?.('cardano.name');
+
+const supportingBridges: Array<string> = ["Ergo", "Cardano"]
 
 export class ErgoConfig{
     private static instance: ErgoConfig;
     networkType: wasm.NetworkPrefix;
-    secretKey: string;
+    secretKey: wasm.SecretKey;
     address: string;
     explorerUrl: string;
     nodeUrl: string;
@@ -35,13 +45,19 @@ export class ErgoConfig{
     explorerTimeout: number;
     RWTId: string;
     RepoNFT: string;
-    commitmentInterval: number;
+    bridgeScanInterval: number;
     commitmentInitialHeight: number;
     commitmentHeightLimit: number;
     cleanupConfirmation: number;
+    networkWatcher: string;
+    commitmentCreationInterval: number;
+    commitmentRevealInterval: number;
     transactionRemovingTimeout: number;
     transactionConfirmation: number;
-
+    transactionCheckingInterval: number;
+    observationConfirmation: number;
+    observationValidThreshold: number;
+    cardanoNameConstant: string
 
     private constructor() {
         let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -79,7 +95,7 @@ export class ErgoConfig{
         if (REPO_NFT === undefined) {
             throw new Error("Repo NFT doesn't set in config file");
         }
-        if (COMMITMENT_INTERVAL === undefined) {
+        if (BRIDGE_SCAN_INTERVAL === undefined) {
             throw new Error("Commitment scanner interval doesn't set correctly");
         }
         if (COMMITMENT_INITIAL_HEIGHT === undefined) {
@@ -97,17 +113,37 @@ export class ErgoConfig{
         if (ERGO_NODE_TIMEOUT === undefined) {
             throw new Error("Ergo node timeout doesn't set correctly");
         }
-        if (TRANSACTION_CONFIRMATION === undefined) {
+        if (!NETWORK_WATCHER || !supportingBridges.includes(NETWORK_WATCHER)) {
+            throw new Error("Watching Bridge is not set correctly");
+        }
+        if(!COMMITMENT_CREATION_INTERVAL){
+            throw new Error("Commitment creation job interval is not set");
+        }
+        if(!COMMITMENT_REVEAL_INTERVAL){
+            throw new Error("Commitment reveal job interval is not set");
+        }
+        if(!TRANSACTION_CHECK_INTERVAL){
+            throw new Error("Transaction checking job interval is not set");
+        }
+        if (!TRANSACTION_CONFIRMATION) {
             throw new Error("Ergo transaction confirmation doesn't set correctly");
         }
-        if (TRANSACTION_REMOVING_TIMEOUT === undefined) {
+        if (!TRANSACTION_REMOVING_TIMEOUT) {
             throw new Error("Ergo transaction timeout doesn't set correctly");
         }
-        const watcherAddress: string = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
-            .get_address().to_base58(networkType)
+        if (!OBSERVATION_CONFIRMATION) {
+            throw new Error("Watcher observation confirmation doesn't set correctly");
+        }
+        if (!OBSERVATION_VALID_THRESH) {
+            throw new Error("Watcher observation valid thresh doesn't set correctly");
+        }
+
+        const secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
+        const watcherAddress: string = secretKey.get_address().to_base58(networkType)
+
 
         this.networkType = networkType;
-        this.secretKey = SECRET_KEY;
+        this.secretKey = secretKey;
         this.address = watcherAddress;
         this.explorerUrl = EXPLORER_URL;
         this.nodeUrl = NODE_URL;
@@ -115,12 +151,18 @@ export class ErgoConfig{
         this.nodeTimeout = ERGO_NODE_TIMEOUT;
         this.RWTId = RWT_ID;
         this.RepoNFT = REPO_NFT;
-        this.commitmentInterval = COMMITMENT_INTERVAL;
+        this.bridgeScanInterval = BRIDGE_SCAN_INTERVAL;
         this.commitmentInitialHeight = COMMITMENT_INITIAL_HEIGHT;
         this.commitmentHeightLimit = COMMITMENT_HEIGHT_LIMIT;
         this.cleanupConfirmation = CLEANUP_CONFIRMATION;
+        this.networkWatcher = NETWORK_WATCHER
+        this.commitmentCreationInterval = COMMITMENT_CREATION_INTERVAL
+        this.commitmentRevealInterval = COMMITMENT_REVEAL_INTERVAL
+        this.transactionCheckingInterval = TRANSACTION_CHECK_INTERVAL
         this.transactionConfirmation = TRANSACTION_CONFIRMATION;
         this.transactionRemovingTimeout = TRANSACTION_REMOVING_TIMEOUT;
+        this.observationConfirmation = OBSERVATION_CONFIRMATION
+        this.observationValidThreshold = OBSERVATION_VALID_THRESH
     }
 
     static getConfig() {
@@ -137,6 +179,7 @@ export class CardanoConfig{
     interval: number;
     timeout: number;
     initialHeight: number;
+    nameConstant: string
 
     private constructor() {
 
@@ -152,12 +195,15 @@ export class CardanoConfig{
         if (CARDANO_TIMEOUT === undefined) {
             throw new Error("Cardano network timeout doesn't set correctly");
         }
+        if (!CARDANO_NAME_CONSTANT) {
+            throw new Error("Cardano name doesn't set correctly");
+        }
 
         this.koiosURL = URL;
         this.interval = INTERVAL;
         this.timeout = CARDANO_TIMEOUT;
         this.initialHeight = INITIAL_HEIGHT;
-
+        this.nameConstant = CARDANO_NAME_CONSTANT
     }
 
     static getConfig() {
@@ -172,6 +218,8 @@ export class ErgoScannerConfig{
     private static instance: ErgoScannerConfig;
     interval: number;
     initialHeight: number;
+    nameConstant: string
+
 
     private constructor() {
         if (ERGO_SCANNER_INTERVAL === undefined) {
@@ -180,9 +228,13 @@ export class ErgoScannerConfig{
         if (ERGO_SCANNER_INITIAL_HEIGHT === undefined) {
             throw new Error("Ergo Scanner initial height is not set in the config file");
         }
+        if (!ERGO_NAME_CONSTANT) {
+            throw new Error("Ergo name doesn't set correctly");
+        }
 
         this.interval = ERGO_SCANNER_INTERVAL;
         this.initialHeight = ERGO_SCANNER_INITIAL_HEIGHT;
+        this.nameConstant = ERGO_NAME_CONSTANT
     }
 
     static getConfig() {

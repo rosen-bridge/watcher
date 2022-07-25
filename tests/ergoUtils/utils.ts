@@ -15,7 +15,7 @@ import { expect } from "chai";
 import chai from "chai";
 import spies from "chai-spies";
 
-import boxesJson from "./dataset/boxes.json" assert {type: "json"}
+import boxesJson from "./dataset/boxes.json" assert { type: "json" }
 
 const ergoConfig = ErgoConfig.getConfig();
 initMockedAxios()
@@ -39,7 +39,8 @@ const WID = "245341e0dda895feca93adbd2db9e643a74c50a1b3702db4c2535f23f1c72e6e"
 const tokenId = "0088eb2b6745ad637112b50a4c5e389881f910ebcf802b183d6633083c2b04fc"
 const userAddress = "9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT";
 const userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from("7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2", "hex"))
-import repoObj from "./dataset/repoBox.json" assert {type: "json"}
+import repoObj from "./dataset/repoBox.json" assert { type: "json" }
+
 const repoBox = JSON.stringify(repoObj)
 
 describe("Testing ergoUtils", () => {
@@ -53,8 +54,7 @@ describe("Testing ergoUtils", () => {
     describe("createChangeBox", () => {
         const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson)
         const totalValue = extractBoxes(boxes).map(box => box.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
-        const secretHex: string = ergoConfig.secretKey;
-        const secret = wasm.SecretKey.dlog_from_bytes(Uint8Array.from(Buffer.from(secretHex, "hex")))
+        const secret = ergoConfig.secretKey
         const txFee = parseInt(rosenConfig.fee)
         const contract = wasm.Contract.pay_to_address(secret.get_address())
 
@@ -173,7 +173,7 @@ describe("Testing ergoUtils", () => {
             // max commitments: 100
             // formula: 51% * 7
             const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(DB)
+            const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getRepoBox", () => wasm.ErgoBox.from_json(repoBox))
             const data = await ErgoUtils.requiredCommitmentCount(boxes)
             expect(data).to.eql(BigInt(4))

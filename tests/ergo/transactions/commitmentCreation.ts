@@ -1,13 +1,13 @@
 import { Boxes } from "../../../src/ergo/boxes";
 import { Transaction } from "../../../src/api/Transaction";
 import { rosenConfig } from "./permit";
-import { databaseConnection } from "../../../src/ergo/databaseConnection";
-import { commitmentCreation } from "../../../src/transactinos/commitmentCreation";
+import { DatabaseConnection } from "../../../src/ergo/databaseConnection";
+import { CommitmentCreation } from "../../../src/transactions/commitmentCreation";
 import { loadDataBase } from "../../cardano/models/models";
 import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
 import { JsonBI } from "../../../src/network/parser";
 import { ObservationEntity } from "../../../src/entities/watcher/network/ObservationEntity";
-import { ErgoUtils} from "../../../src/ergo/utils";
+import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -15,14 +15,16 @@ import { expect } from "chai";
 import chai from "chai";
 import spies from "chai-spies";
 import sinon from "sinon"
+
 chai.use(spies)
 
-import permitObj from "./dataset/permitBox.json" assert {type: "json"}
-import WIDObj from "./dataset/WIDBox.json" assert {type: "json"}
-import WIDObj2 from "./dataset/WIDBox2.json" assert {type: "json"}
-import plainObj from "./dataset/plainBox.json" assert {type: "json"}
-import txObj from "./dataset/commitmentTx.json" assert {type: "json"}
+import permitObj from "./dataset/permitBox.json" assert { type: "json" }
+import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
+import WIDObj2 from "./dataset/WIDBox2.json" assert { type: "json" }
+import plainObj from "./dataset/plainBox.json" assert { type: "json" }
+import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
 import { hexStrToUint8Array } from "../../../src/utils/utils";
+import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -31,7 +33,7 @@ const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))]
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj))
 
 const userAddress = "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9"
-const userSecret = "1111111111111111111111111111111111111111111111111111111111111111"
+const userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from("1111111111111111111111111111111111111111111111111111111111111111", "hex"))
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
 
 export const observation: ObservationEntity = new ObservationEntity()
@@ -64,26 +66,23 @@ describe("Commitment creation transaction tests", () => {
      *    It should also sign and send it successfully
      */
     describe("createCommitmentTx", () => {
-        it("Should create, sign and send a commitment transaction", async() => {
+        it("Should create, sign and send a commitment transaction", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
-            const boxes = new Boxes(bridgeDb)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
+            chai.spy.on(dbConnection, "submitTransaction", () => null)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
             chai.spy.on(boxes, "createCommitment")
             chai.spy.on(boxes, "createPermit")
             const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
-            const cc = new commitmentCreation(dbConnection, 1, boxes, tx)
+            const cc = new CommitmentCreation(dbConnection, boxes, tx)
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)
-            chai.spy.on(ErgoNetwork, "sendTx", () => {return})
             sinon.stub(ErgoUtils, "createAndSignTx").resolves(signedTx)
-            const txInfo = await cc.createCommitmentTx(WID, observation.requestId, commitment, permits, WIDBox, [])
-            expect(txInfo.commitmentBoxId).to.eq("072a361668eab73113c01dc6d378828cfae16ca177c60907114e128a156f5186")
-            expect(txInfo.txId).to.eq("26551bc56a0d70364bfd76a1832a94a046a1c01e98fd2bd7ff63e266f0227d5c")
+            await cc.createCommitmentTx(WID, observation, commitment, permits, WIDBox, [])
             expect(boxes.createPermit).to.have.called.with(111, BigInt(97), hexStrToUint8Array(WID))
             expect(boxes.createCommitment).to.have.called.once
-            expect(ErgoNetwork.sendTx).to.have.called.once
+            expect(dbConnection.submitTransaction).to.have.been.called.with(signedTx, observation, TxType.COMMITMENT)
             sinon.restore()
-            chai.spy.restore(ErgoNetwork)
         })
     })
 
@@ -98,44 +97,52 @@ describe("Commitment creation transaction tests", () => {
      *    If the box values is not enough should use an excess fee box covering the tx fee
      */
     describe("job", () => {
-        it("Should collect ready observations and create commitments", async() => {
+        it("Should collect ready observations and create commitments", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
-            chai.spy.on(dbConnection, "updateObservation", () => {return})
-            const boxes = new Boxes(bridgeDb)
+            chai.spy.on(dbConnection, "updateObservation", () => {
+                return
+            })
+            const boxes = new Boxes(rosenConfig, bridgeDb)
             chai.spy.on(boxes, "getPermits", () => permits)
             chai.spy.on(boxes, "getWIDBox", () => WIDBox)
             chai.spy.on(boxes, "getUserPaymentBox")
             const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
             sinon.stub(tx, 'watcherWID').value(WID)
-            const cc = new commitmentCreation(dbConnection, 1, boxes, tx)
-            chai.spy.on(cc, "createCommitmentTx", () => {return {txId: "txId", commitmentBoxId: "boxId"}})
+            const cc = new CommitmentCreation(dbConnection, boxes, tx)
+            chai.spy.on(cc, "createCommitmentTx", () => {
+                return {txId: "txId", commitmentBoxId: "boxId"}
+            })
             await cc.job()
             // Total value is enough should not call paymentBox
             expect(boxes.getUserPaymentBox).to.not.have.called()
-            expect(cc.createCommitmentTx).to.have.called.with(WID, observation.requestId, commitment, permits, WIDBox, [])
+            expect(cc.createCommitmentTx).to.have.called.with(WID, observation, commitment, permits, WIDBox, [])
         })
 
-        it("Should collect ready observations and create commitment with excess fee box", async() => {
+        it("Should collect ready observations and create commitment with excess fee box", async () => {
             const networkDb = await loadDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new databaseConnection(networkDb, bridgeDb, 0, 100)
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
-            chai.spy.on(dbConnection, "updateObservation", () => {return})
-            const boxes = new Boxes(bridgeDb)
+            chai.spy.on(dbConnection, "updateObservation", () => {
+                return
+            })
+            const boxes = new Boxes(rosenConfig, bridgeDb)
             chai.spy.on(boxes, "getPermits", () => permits)
             chai.spy.on(boxes, "getWIDBox", () => WIDBox2)
             chai.spy.on(boxes, "getUserPaymentBox", () => plainBox)
             const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
             sinon.stub(tx, 'watcherWID').value(WID)
-            const cc = new commitmentCreation(dbConnection, 1, boxes, tx)
-            chai.spy.on(cc, "createCommitmentTx", () => {return {txId: "txId", commitmentBoxId: "boxId"}})
+            const cc = new CommitmentCreation(dbConnection, boxes, tx)
+            chai.spy.on(cc, "createCommitmentTx", () => {
+                return {txId: "txId", commitmentBoxId: "boxId"}
+            })
             await cc.job()
             // Total value is not enough for the transaction
             expect(boxes.getUserPaymentBox).to.have.called.once
-            expect(cc.createCommitmentTx).to.have.called.with(WID, observation.requestId, commitment, permits, WIDBox2, plainBox)
+            expect(cc.createCommitmentTx).to.have.called.with(WID, observation, commitment, permits, WIDBox2, plainBox)
         })
     })
 })

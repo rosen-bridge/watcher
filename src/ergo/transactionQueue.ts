@@ -1,7 +1,7 @@
 import { TxEntity, TxType } from "../entities/watcher/network/TransactionEntity";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { NetworkDataBase } from "../models/networkModel";
-import { databaseConnection } from "./databaseConnection";
+import { DatabaseConnection } from "./databaseConnection";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoConfig } from "../config/config";
 import { base64ToArrayBuffer } from "../utils/utils";
@@ -10,9 +10,9 @@ const ergoConfig = ErgoConfig.getConfig();
 
 export class TransactionQueue {
     database: NetworkDataBase
-    databaseConnection: databaseConnection
+    databaseConnection: DatabaseConnection
 
-    constructor(db: NetworkDataBase, dbConnection: databaseConnection) {
+    constructor(db: NetworkDataBase, dbConnection: DatabaseConnection) {
         this.database = db
         this.databaseConnection = dbConnection
     }
@@ -24,9 +24,11 @@ export class TransactionQueue {
     job = async () => {
         const txs: Array<TxEntity> = await this.database.getAllTxs()
         const currentHeight = await ErgoNetwork.getHeight()
+        console.log("Starting Transaction checking with", txs.length, "total number of transactions")
         for(const tx of txs) {
             try {
                 const txStatus = await ErgoNetwork.getConfNum(tx.txId)
+                console.log("Tx", tx.txId, "status is", txStatus)
                 if (txStatus === -1) {
                     const signedTx = wasm.Transaction.sigma_parse_bytes(base64ToArrayBuffer(tx.txSerialized))
                     if(
@@ -43,12 +45,16 @@ export class TransactionQueue {
                             await this.database.downgradeObservationTxStatus(tx.observation)
                             await this.database.removeTx(tx)
                         }
+                        console.log(currentHeight, tx.updateBlock)
+                        console.log("Skipping")
                         continue
                     }
                     // resend the tx
+                    console.log("Sending the", tx.type, "transaction with txId", tx.txId)
                     await ErgoNetwork.sendTx(signedTx.to_json())
                     await this.database.setTxUpdateHeight(tx, currentHeight)
                 } else if (txStatus > ergoConfig.transactionConfirmation) {
+                    console.log("The", tx.type, "transaction with txId", tx.txId, "is confirmed, removing the tx from txQueue")
                     await this.database.upgradeObservationTxStatus(tx.observation)
                     await this.database.removeTx(tx)
                 } else {
@@ -56,7 +62,7 @@ export class TransactionQueue {
                 }
             } catch (e) {
                 console.log(e)
-                console.log("Skipping transaction checking with txId:", tx.txId)
+                console.log("Something went wrong, Skipping transaction checking with txId:", tx.txId)
             }
         }
     }

@@ -3,6 +3,11 @@ import AssetFingerprint from "@emurgo/cip14-js";
 import { BANK } from "./bankAddress";
 import { Observation } from "../../objects/interfaces";
 import { KoiosNetwork } from "../network/koios";
+import { blake2b } from "blakejs";
+import { Buffer } from "buffer";
+import { CardanoConfig } from "../../config/config";
+
+export const cardanoConfig = CardanoConfig.getConfig()
 
 export class CardanoUtils{
 
@@ -53,9 +58,9 @@ export class CardanoUtils{
                         Buffer.from(asset.asset_name, 'hex'),
                     );
                     const data = metaData["0"];
-                    // TODO: Request id should be digest of tx id
+                    const requestId = Buffer.from(blake2b(txHash, undefined, 32)).toString("hex")
                     return {
-                        fromChain: 'CARDANO',
+                        fromChain: cardanoConfig.nameConstant,
                         toChain: data.to,
                         amount: asset.quantity,
                         sourceChainTokenId: assetFingerprint.fingerprint(),
@@ -64,7 +69,7 @@ export class CardanoUtils{
                         bridgeFee: data.bridgeFee,
                         networkFee: data.networkFee,
                         sourceBlockId: blockHash,
-                        requestId: txHash,
+                        requestId: requestId,
                         toAddress: data.toAddress,
                         fromAddress: tx.utxosInput[0].payment_addr.bech32
                     }
