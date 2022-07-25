@@ -1,6 +1,5 @@
 import { AbstractScanner } from "../../scanner/abstractScanner";
 import { BridgeDataBase } from "../models/bridgeModel";
-import { IConfig } from "config";
 import { Block, Commitment, SpecialBox, SpentBox } from "../../objects/interfaces";
 import { ErgoNetworkApi } from "../network/networkApi";
 import { BridgeBlockEntity } from "../../entities/watcher/bridge/BridgeBlockEntity";
@@ -21,15 +20,13 @@ export type BridgeBlockInformation = {
 export class Scanner extends AbstractScanner<BridgeBlockEntity, BridgeBlockInformation>{
     _dataBase: BridgeDataBase;
     _networkAccess: ErgoNetworkApi;
-    _config: IConfig;
     _initialHeight: number;
     _widApi: Transaction
 
-    constructor(db: BridgeDataBase, network: ErgoNetworkApi, config: IConfig, api: Transaction) {
+    constructor(db: BridgeDataBase, network: ErgoNetworkApi, api: Transaction) {
         super();
         this._dataBase = db;
         this._networkAccess = network;
-        this._config = config;
         this._initialHeight = ergoConfig.commitmentInitialHeight;
         this._widApi = api
     }

@@ -14,7 +14,7 @@ const removeOldCommitmentsJob = () => {
 }
 
 export const bridgeScanner = () => {
-    scanner = new Scanner(bridgeDatabase, ergoNetworkApi, config, watcherTransaction);
+    scanner = new Scanner(bridgeDatabase, ergoNetworkApi, watcherTransaction);
     scanningJob()
     removeOldCommitmentsJob()
 }

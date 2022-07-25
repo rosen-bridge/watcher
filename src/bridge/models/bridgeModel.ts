@@ -100,7 +100,6 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
                 return boxEntity
             })
 
-        let success = true;
         await queryRunner.startTransaction()
         try {
             await queryRunner.manager.save(block);
@@ -110,9 +109,9 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
         } catch (err) {
             console.log(err)
             await queryRunner.rollbackTransaction();
-            success = false;
+            await queryRunner.release();
+            return false
         }
-        if (!success) return false
 
         const updatedCommitmentEntities: Array<ObservedCommitmentEntity> = []
         for (const spentCommitment of information.updatedCommitments) {
@@ -145,7 +144,7 @@ export class BridgeDataBase extends AbstractDataBase<BridgeBlockEntity, BridgeBl
             spentBoxEntities.push(newBox)
         }
 
-        success = true;
+        let success = true;
         await queryRunner.startTransaction()
         try {
             await queryRunner.manager.save(updatedCommitmentEntities);

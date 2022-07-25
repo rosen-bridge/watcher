@@ -19,6 +19,7 @@ import { cardanoScanner } from "./cardanoScanner";
 import { creation } from "./commitmentCreation";
 import { reveal } from "./commitmetnReveal";
 import { transactionQueueJob } from "./transactionQueue";
+import { delay } from "./utils/utils";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -32,10 +33,6 @@ export let databaseConnection: DatabaseConnection;
 // TODO: Set this based on the scanning network config
 export const observationConfirmation = 1;
 export const observationValidThreshold = 200;
-
-function delay(time: number) {
-    return new Promise(resolve => setTimeout(resolve, time));
-}
 
 
 const init = async () => {
