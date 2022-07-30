@@ -3,6 +3,7 @@ import { Scanner } from "../../../src/cardano/scanner/scanner";
 import { firstObservations, loadDataBase } from "../models/models";
 import { KoiosNetwork } from "../../../src/cardano/network/koios";
 import config from "config";
+import tokens from '../../../src/config/tokens.json' assert { type: "json" };
 
 describe("Scanner test", () => {
     describe("isForkHappen", () => {
@@ -15,7 +16,7 @@ describe("Scanner test", () => {
                 firstObservations
             );
             const koiosNetwork = new KoiosNetwork();
-            const scanner = new Scanner(DB, koiosNetwork, config);
+            const scanner = new Scanner(DB, koiosNetwork, config, tokens);
             expect(await scanner.isForkHappen()).to.equal(false);
         });
 
@@ -28,14 +29,14 @@ describe("Scanner test", () => {
                 firstObservations
             );
             const koiosNetwork = new KoiosNetwork();
-            const scanner = new Scanner(DB, koiosNetwork, config);
+            const scanner = new Scanner(DB, koiosNetwork, config, tokens);
             expect(await scanner.isForkHappen()).to.be.true;
         });
 
         it("is undefined", async () => {
             const DB = await loadDataBase("scanner-empty");
             const koiosNetwork = new KoiosNetwork();
-            const scanner = new Scanner(DB, koiosNetwork, config);
+            const scanner = new Scanner(DB, koiosNetwork, config, tokens);
             expect(await scanner.isForkHappen()).to.be.false;
         });
 
@@ -50,10 +51,10 @@ describe("Scanner test", () => {
                 firstObservations
             );
             const koiosNetwork = new KoiosNetwork();
-            const scanner = new Scanner(DB, koiosNetwork, config);
+            const scanner = new Scanner(DB, koiosNetwork, config, tokens);
             await scanner.update();
             const lastBlock = await DB.getLastSavedBlock();
-            expect(lastBlock?.block_height).to.be.equal(3433333);
+            expect(lastBlock?.block_height).to.be.equal(3433334);
         });
         it("scanner with fork", async () => {
             const DB = await loadDataBase("scanner-with-fork");
@@ -64,7 +65,7 @@ describe("Scanner test", () => {
                 firstObservations
             );
             const koiosNetwork = new KoiosNetwork();
-            const scanner = new Scanner(DB, koiosNetwork, config);
+            const scanner = new Scanner(DB, koiosNetwork, config, tokens);
             await scanner.update();
             const lastBlock = await DB.getLastSavedBlock();
             expect(lastBlock).to.be.undefined;

@@ -59,6 +59,7 @@
     "reflect-metadata": "^0.1.13",
     "sleep-promise": "^9.1.0",
     "sqlite3": "^5.0.2",
+    "tokens": "file:../tokens",
     "tsconfig-paths": "^4.0.0",
     "typeorm": "^0.3.6"
   }

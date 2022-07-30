@@ -1,22 +1,28 @@
 import { MetaData, RosenData, Utxo } from "../network/apiModelsCardano";
-import AssetFingerprint from "@emurgo/cip14-js";
 import { BANK } from "./bankAddress";
 import { Observation } from "../../objects/interfaces";
 import { KoiosNetwork } from "../network/koios";
 import { blake2b } from "blakejs";
 import { Buffer } from "buffer";
 import { CardanoConfig } from "../../config/config";
+import { TokenMap } from "../../../../tokens/dist/lib";
+import { TokensMap } from "../../../../tokens/dist/lib/TokenMap/types";
 
 export const cardanoConfig = CardanoConfig.getConfig()
 
 export class CardanoUtils{
+    tokenMap: TokenMap;
+
+    constructor(tokensMap: TokensMap) {
+        this.tokenMap = new TokenMap(tokensMap);
+    }
 
     /**
      * check if the object is the rosen bridge data type or not
      * @param data
      * @return boolean
      */
-    static isRosenData(data: object): data is RosenData {
+    isRosenData(data: object): data is RosenData {
         return 'to' in data &&
             'bridgeFee' in data &&
             'networkFee' in data &&
@@ -29,7 +35,7 @@ export class CardanoUtils{
      * @param metaData
      * @return boolean
      */
-    static isRosenMetaData(metaData: object): metaData is MetaData {
+    isRosenMetaData(metaData: object): metaData is MetaData {
         return "0" in metaData;
     }
 
@@ -42,7 +48,7 @@ export class CardanoUtils{
      * @param networkAccess
      * @return Promise<observation|undefined>
      */
-    static checkTx = async (txHash: string, blockHash: string, bank: Array<string>, networkAccess: KoiosNetwork): Promise<Observation | undefined> => {
+    checkTx = async (txHash: string, blockHash: string, bank: Array<string>, networkAccess: KoiosNetwork): Promise<Observation | undefined> => {
         const tx = (await networkAccess.getTxUtxos([txHash]))[0];
         const utxos = tx.utxosOutput.filter((utxo: Utxo) => {
             return bank.find(address => address === utxo.payment_addr.bech32) != undefined;
@@ -53,17 +59,23 @@ export class CardanoUtils{
             if (this.isRosenMetaData(metaData) && this.isRosenData(metaData["0"])) {
                 if (utxos[0].asset_list.length !== 0) {
                     const asset = utxos[0].asset_list[0];
-                    const assetFingerprint = AssetFingerprint.fromParts(
-                        Buffer.from(asset.policy_id, 'hex'),
-                        Buffer.from(asset.asset_name, 'hex'),
-                    );
+                    const token = this.tokenMap.search(
+                        'cardano',
+                        {
+                            policyID: asset.policy_id,
+                            assetID: asset.asset_name
+                        });
+                    if (token.length === 0) {
+                        return undefined;
+                    }
+                    const assetFingerprint = token[0]['cardano']['fingerprint'];
                     const data = metaData["0"];
                     const requestId = Buffer.from(blake2b(txHash, undefined, 32)).toString("hex")
                     return {
                         fromChain: cardanoConfig.nameConstant,
                         toChain: data.to,
                         amount: asset.quantity,
-                        sourceChainTokenId: assetFingerprint.fingerprint(),
+                        sourceChainTokenId: assetFingerprint,
                         targetChainTokenId: data.targetChainTokenId,
                         sourceTxId: txHash,
                         bridgeFee: data.bridgeFee,
@@ -85,8 +97,8 @@ export class CardanoUtils{
      * @param networkAccess
      * @return Promise<Array<(Observation | undefined)>>
      */
-    static observationsAtHeight = async (blockHash: string,
-                                         networkAccess: KoiosNetwork): Promise<Array<Observation>> => {
+    observationsAtHeight = async (blockHash: string,
+                                  networkAccess: KoiosNetwork): Promise<Array<Observation>> => {
         const txs = await networkAccess.getBlockTxs(blockHash);
         const observations: Array<Observation> = []
         for (let i = 0; i < txs.length; i++) {
