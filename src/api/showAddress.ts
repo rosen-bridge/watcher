@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express";
 import { ErgoConfig } from "../config/config";
-import { watcherTransaction } from "../index";
 import { validationResult } from "express-validator";
 import { generateSK } from "../utils/utils";
 
