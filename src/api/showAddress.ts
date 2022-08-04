@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { ErgoConfig } from "../config/config";
 import { watcherTransaction } from "../index";
-import { body, validationResult } from "express-validator";
+import { validationResult } from "express-validator";
 
 const addressRouter = express.Router();
 
@@ -12,8 +12,8 @@ addressRouter.get("/show",
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }
-            let ergoConfig: ErgoConfig = ErgoConfig.getConfig();
-            let address: string = watcherTransaction.userAddress.to_base58(ergoConfig.networkType);
+            const ergoConfig: ErgoConfig = ErgoConfig.getConfig();
+            const address: string = watcherTransaction.userAddress.to_base58(ergoConfig.networkType);
             res.status(200).json({address: address});
         } catch (e) {
             console.warn(e)

@@ -38,7 +38,7 @@ permitRouter.post("/return",
                 return res.status(400).json({ errors: errors.array() });
             }
             const RWTCount = req.body.count;
-            let response: ApiResponse = await watcherTransaction.returnPermit(BigInt(RWTCount));
+            const response: ApiResponse = await watcherTransaction.returnPermit(BigInt(RWTCount));
             if (response.status === 200) {
                 res.status(200).send({txId: response.response})
             } else {
