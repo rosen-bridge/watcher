@@ -1,5 +1,4 @@
 import { Scanner } from "./bridge/scanner/scanner";
-import config from "config";
 import { ErgoConfig } from "./config/config";
 import { bridgeDatabase, ergoNetworkApi, watcherTransaction } from "./index";
 

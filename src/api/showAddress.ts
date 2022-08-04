@@ -1,20 +1,24 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import { ErgoConfig } from "../config/config";
 import { watcherTransaction } from "../index";
+import { body, validationResult } from "express-validator";
 
-const router = express.Router();
+const addressRouter = express.Router();
 
-router.get("/show", (req, res) => {
-    let address: string;
-    let ergoConfig: ErgoConfig;
-    try {
-        ergoConfig = ErgoConfig.getConfig();
-        address = watcherTransaction.userAddress.to_base58(ergoConfig.networkType);
-    } catch (e) {
-        res.status(500).send({message: e});
-        return;
-    }
-    res.status(200).json({address: address});
+addressRouter.get("/show",
+    async (req: Request, res: Response) => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+            let ergoConfig: ErgoConfig = ErgoConfig.getConfig();
+            let address: string = watcherTransaction.userAddress.to_base58(ergoConfig.networkType);
+            res.status(200).json({address: address});
+        } catch (e) {
+            console.warn(e)
+            res.status(500).send({message: e.message});
+        }
 });
 
-export default router;
+export default addressRouter;
