@@ -1,4 +1,3 @@
-import { SecretKey } from "ergo-lib-wasm-nodejs";
 import * as ergoLib from "ergo-lib-wasm-nodejs";
 import { ErgoConfig } from "../config/config";
 
