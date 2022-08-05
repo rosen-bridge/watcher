@@ -10,8 +10,7 @@ import sinon from "sinon"
 import { Scanner } from "../../../src/bridge/scanner/scanner";
 import { ErgoNetworkApi } from "../../../src/bridge/network/networkApi";
 import { CommitmentUtils } from "../../../src/bridge/scanner/utils";
-import { NotEnoughFund } from "../../../src/errors/errors";
-import { ErgoConfig } from "../../../src/config/config";
+
 chai.use(spies)
 
 

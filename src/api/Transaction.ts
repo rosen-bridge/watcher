@@ -5,7 +5,6 @@ import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { Boxes } from "../ergo/boxes";
 import { ErgoUtils } from "../ergo/utils";
-import { Buffer } from "buffer";
 
 const ergoConfig = ErgoConfig.getConfig();
 
