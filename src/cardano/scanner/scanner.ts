@@ -6,7 +6,7 @@ import { NetworkDataBase } from "../../models/networkModel";
 import { Block, Observation } from "../../objects/interfaces";
 import { BlockEntity } from "../../entities/watcher/network/BlockEntity";
 import { CardanoConfig } from "../../config/config";
-import { TokensMap } from "../../../../tokens/dist/lib/TokenMap/types";
+import { RosenTokens } from "@rosen-bridge/tokens";
 
 const cardanoConfig = CardanoConfig.getConfig();
 
@@ -17,7 +17,7 @@ export class Scanner extends AbstractScanner<BlockEntity, Array<Observation>>{
     _initialHeight: number;
     _cardanoUtils: CardanoUtils;
 
-    constructor(db: NetworkDataBase, network: KoiosNetwork, config: IConfig, tokensMap: TokensMap) {
+    constructor(db: NetworkDataBase, network: KoiosNetwork, config: IConfig, tokensMap: RosenTokens) {
         super();
         this._dataBase = db;
         this._networkAccess = network;

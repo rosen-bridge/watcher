@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { CardanoUtils } from "../../../src/cardano/scanner/utils";
 import { KoiosNetwork } from "../../../src/cardano/network/koios";
-import tokens from '../../../src/config/tokens.json' assert { type: "json" };
+import tokens from '../../../src/config/tokens.mock.json' assert { type: "json" };
 import sampleTokens from './tokensSample.json' assert { type: "json" };
 
 describe("Cardano Scanner Utils test", () => {

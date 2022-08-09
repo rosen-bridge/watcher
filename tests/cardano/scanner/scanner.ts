@@ -3,7 +3,7 @@ import { Scanner } from "../../../src/cardano/scanner/scanner";
 import { firstObservations, loadDataBase } from "../models/models";
 import { KoiosNetwork } from "../../../src/cardano/network/koios";
 import config from "config";
-import tokens from '../../../src/config/tokens.json' assert { type: "json" };
+import tokens from '../../../src/config/tokens.mock.json' assert { type: "json" };
 
 describe("Scanner test", () => {
     describe("isForkHappen", () => {

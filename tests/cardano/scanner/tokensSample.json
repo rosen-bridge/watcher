@@ -1,4 +1,8 @@
 {
+  "idKeys": {
+    "ergo": "tokenId",
+    "cardano": "fingerprint"
+  },
   "tokens": [
     {
       "ergo": {

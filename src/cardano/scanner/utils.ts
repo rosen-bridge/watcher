@@ -5,15 +5,14 @@ import { KoiosNetwork } from "../network/koios";
 import { blake2b } from "blakejs";
 import { Buffer } from "buffer";
 import { CardanoConfig } from "../../config/config";
-import { TokenMap } from "../../../../tokens/dist/lib";
-import { TokensMap } from "../../../../tokens/dist/lib/TokenMap/types";
+import { RosenTokens, TokenMap } from "@rosen-bridge/tokens";
 
 export const cardanoConfig = CardanoConfig.getConfig()
 
 export class CardanoUtils{
     tokenMap: TokenMap;
 
-    constructor(tokensMap: TokensMap) {
+    constructor(tokensMap: RosenTokens) {
         this.tokenMap = new TokenMap(tokensMap);
     }
 
@@ -68,14 +67,14 @@ export class CardanoUtils{
                     if (token.length === 0) {
                         return undefined;
                     }
-                    const assetFingerprint = token[0]['cardano']['fingerprint'];
+                    const tokenId = this.tokenMap.getID(token[0], 'cardano');
                     const data = metaData["0"];
                     const requestId = Buffer.from(blake2b(txHash, undefined, 32)).toString("hex")
                     return {
                         fromChain: cardanoConfig.nameConstant,
                         toChain: data.to,
                         amount: asset.quantity,
-                        sourceChainTokenId: assetFingerprint,
+                        sourceChainTokenId: tokenId,
                         targetChainTokenId: data.targetChainTokenId,
                         sourceTxId: txHash,
                         bridgeFee: data.bridgeFee,

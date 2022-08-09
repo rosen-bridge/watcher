@@ -3,7 +3,7 @@ import { Scanner } from "./cardano/scanner/scanner";
 import { networkDatabase } from "./index";
 import { KoiosNetwork } from "./cardano/network/koios";
 import config from "config";
-import tokens from './config/tokens.json' assert { type: "json" };
+import tokens from './config/tokens.mock.json' assert { type: "json" };
 
 export const cardanoConfig = CardanoConfig.getConfig();
 let scanner: Scanner;
