@@ -2,6 +2,7 @@ import "reflect-metadata";
 import express, { Router } from "express";
 import addressRouter from "./api/showAddress";
 import permitRouter from "./api/permit";
+import statisticRouter from "./api/statistic/brief"
 import { Transaction } from "./api/Transaction";
 import { ErgoConfig } from "./config/config";
 import { rosenConfig } from "./config/rosenConfig";
@@ -54,7 +55,7 @@ const init = async () => {
         const router = Router();
         router.use('/address', addressRouter);
         router.use('/permit', permitRouter);
-
+        router.use('/statistic', statisticRouter);
         app.use(router)
         const port = process.env.PORT || 3000;
 

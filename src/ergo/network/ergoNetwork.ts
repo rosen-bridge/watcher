@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Info } from "../../objects/ergo";
-import { AddressBoxes, ErgoTx, ExplorerTransaction } from "./types";
+import { AddressBoxes, Balance, ErgoTx, ExplorerTransaction } from "./types";
 import { JsonBI } from "../../network/parser";
 import { ErgoConfig } from "../../config/config";
 import { ergoTreeToBase58Address } from "../utils";
@@ -39,6 +39,21 @@ export class ErgoNetwork{
             `/api/v1/boxes/unspent/byErgoTree/${tree}`,
             {
                 params: {offset: offset, limit: limit},
+                transformResponse: data => JsonBI.parse(data)
+            }
+        ).then(
+            res => res.data
+        );
+    }
+
+    /**
+     * gets address confirmed Ergs and tokens
+     * @param address
+     */
+    static getAddressBalanceConfirmed = async (address: string) => {
+        return explorerApi.get<Balance>(
+            `/api/v1/addresses/${address}/balance/confirmed`,
+            {
                 transformResponse: data => JsonBI.parse(data)
             }
         ).then(
@@ -274,7 +289,7 @@ export class ErgoNetwork{
      */
     static getConfNum = async (txId: string): Promise<number> => {
         const tx = await ErgoNetwork.getUnconfirmedTx(txId)
-        if(tx !== null) return 0
+        if (tx !== null) return 0
         else {
             const confirmed = await ErgoNetwork.getConfirmedTx(txId)
             if (confirmed != null && Object.prototype.hasOwnProperty.call(confirmed, 'numConfirmations'))
@@ -284,13 +299,13 @@ export class ErgoNetwork{
     }
 
     static checkTxInputs = async (inputs: wasm.Inputs) => {
-        try{
+        try {
             await Promise.all(Array(inputs.len()).fill("").map(async (item, index) => {
                 await ErgoNetwork.boxById(inputs.get(index).box_id().to_str())
             }))
             return true
         } catch (e) {
-            if(e.response && e.response.status == 404) return false
+            if (e.response && e.response.status == 404) return false
             throw Error("Connection problem")
         }
     }

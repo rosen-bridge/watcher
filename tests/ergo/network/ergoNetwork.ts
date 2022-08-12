@@ -67,6 +67,12 @@ describe("Ergo Network(API)", () => {
         });
     });
 
+    describe('getAddressBalanceConfirmed',()=>{
+        it('',async ()=>{
+
+        })
+    })
+
     /**
      * getBoxesByAddress function tests
      */

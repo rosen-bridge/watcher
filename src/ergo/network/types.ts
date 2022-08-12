@@ -19,20 +19,33 @@ type Asset = {
     name: string,
 }
 
-export interface ErgoBoxJson  {
+export interface ErgoBoxJson{
     boxId: string,
     address: string,
     value: bigint,
     assets?: Array<Asset>,
 }
 
-export interface AddressBoxes  {
+export interface AddressBoxes{
     items: Array<ErgoBoxJson>,
     total: number,
 }
 
-export interface ExplorerTransaction {
+export interface ExplorerTransaction{
     id: string,
     creationTimestamp: number,
     numConfirmations: number,
+}
+
+export interface Token{
+    tokenId: string,
+    amount: bigint,
+    decimals: number,
+    name: string,
+    tokenType: string,
+}
+
+export interface Balance{
+    nanoErgs: bigint,
+    tokens: Array<Token>
 }
