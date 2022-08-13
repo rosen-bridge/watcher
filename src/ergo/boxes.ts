@@ -4,10 +4,8 @@ import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
 import { BridgeDataBase } from "../bridge/models/bridgeModel";
-import { BoxType } from "../entities/watcher/bridge/BoxEntity";
 import { Observation } from "../objects/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
-import { NotEnoughFund } from "../errors/errors";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -45,7 +43,7 @@ export class Boxes{
 
     getPermits = async (RWTCount: bigint): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Rewrite the function to return the required number of RWTs after changing database
-        const permits = await this._dataBase.getUnspentSpecialBoxes(BoxType.PERMIT)
+        const permits = await this._dataBase.getUnspentPermitBoxes()
         const permitBoxes = permits.map(async (permit) => {
             const box = wasm.ErgoBox.from_json(permit.boxJson)
             return await ErgoNetwork.trackMemPool(box)
@@ -54,26 +52,27 @@ export class Boxes{
     }
 
     getWIDBox = async (): Promise<wasm.ErgoBox> => {
-        const WID = (await this._dataBase.getUnspentSpecialBoxes(BoxType.WID))[0]
+        const WID = (await this._dataBase.getUnspentWIDBoxes())[0]
         let WIDBox = wasm.ErgoBox.from_json(WID.boxJson)
         WIDBox = await ErgoNetwork.trackMemPool(WIDBox)
         return WIDBox
     }
 
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
-        const boxes = await this._dataBase.getUnspentSpecialBoxes(BoxType.PLAIN)
-        const selectedBoxes = []
-        let totalValue = BigInt(0)
-        for (const box of boxes) {
-            totalValue = totalValue + BigInt(box.value)
-            selectedBoxes.push(box)
-            if (totalValue > requiredValue) break
-        }
-        if (totalValue < requiredValue) {
-            console.log("ERROR: Not enough fund to create the transaction")
-            throw new NotEnoughFund
-        }
-        const outBoxes = selectedBoxes.map(async (fund) => {
+        const boxes = await this._dataBase.getUnspentPlainBoxes()
+        // TODO: Improvement on selecting the plain boxes
+        // const selectedBoxes = []
+        // let totalValue = BigInt(0)
+        // for (const box of boxes) {
+        //     totalValue = totalValue + BigInt(box.value)
+        //     selectedBoxes.push(box)
+        //     if (totalValue > requiredValue) break
+        // }
+        // if (totalValue < requiredValue) {
+        //     console.log("ERROR: Not enough fund to create the transaction")
+        //     throw new NotEnoughFund
+        // }
+        const outBoxes = boxes.map(async (fund) => {
             const box = wasm.ErgoBox.from_json(fund.boxJson)
             return await ErgoNetwork.trackMemPool(box)
         })

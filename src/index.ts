@@ -37,7 +37,7 @@ const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
         const ergoConfig = ErgoConfig.getConfig();
 
-        bridgeDatabase = await BridgeDataBase.init(bridgeOrmConfig);
+        bridgeDatabase = new BridgeDataBase()
         boxesObject = new Boxes(rosenConfig, bridgeDatabase)
         ergoNetworkApi = new ErgoNetworkApi();
         return new Transaction(

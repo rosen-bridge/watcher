@@ -2,23 +2,16 @@ import { ErgoConfig } from "./config/config";
 import { DataSource, In, Repository } from "typeorm";
 import { fileURLToPath } from "url";
 import path from "path";
-// import { BlockEntity, ErgoScanner, migrations, CardanoKoiosScanner } from "@rosen-bridge/scanner";
 import { BlockEntity, ErgoScanner, migrations, CardanoKoiosScanner } from "@rosen-bridge/scanner";
-// import { CardanoObservationExtractor, ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { CardanoObservationExtractor, ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { migrations as observationMigration } from "@rosen-bridge/observation-extractor";
 import tokens from './config/tokens.test.json' assert { type: "json" };
-import { TxEntity, TxType } from "./entities/watcher/network/TransactionEntity";
 import { ErgoNetwork } from "./ergo/network/ergoNetwork";
 import { TxEntityTemp, TxTypeTemp } from "./transactionEntityTemp";
-import { TxStatus } from "./entities/watcher/network/ObservationEntity";
-import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "rosen-commitment-extractor";
-import { migrations as rosenMigration } from "rosen-commitment-extractor";
-import { ObservedCommitmentEntity } from "./entities/watcher/bridge/ObservedCommitmentEntity";
-import { SpecialBox } from "./objects/interfaces";
+import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
+import { migrations as rosenMigration } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { migrations as addressMigration } from "@rosen-bridge/address-extractor";
-import Permit from "./api/permit";
 
 
 enum BoxTypeTemp{
@@ -131,122 +124,122 @@ const cardanoScannerJob = async () => {
     await cardanoScanner.update().then(() => setTimeout(cardanoScannerJob, 10 * 1000))
 }
 
-// class CardanoDataBase{
-//     private blockDataSource: DataSource;
-//     private observationDataSource: DataSource;
-//     private txDataSource: DataSource;
-//     private observationRepository: Repository<ObservationEntity>;
-//     private txRepository: Repository<TxEntityTemp>;
-//
-//
-//     constructor(blockDataSource: DataSource, observationDataSource: DataSource, txDataSource: DataSource) {
-//         this.blockDataSource = blockDataSource;
-//         this.observationDataSource = observationDataSource;
-//         this.observationRepository = observationDataSource.getRepository(ObservationEntity);
-//         this.txDataSource = txDataSource;
-//         this.txRepository = txDataSource.getRepository(TxEntityTemp);
-//     }
-//
-//     /**
-//      * returns confirmed observation after required confirmation
-//      * ignores observations which have created commitments
-//      * @param confirmation
-//      */
-//     getConfirmedObservation = async (confirmation: number) => {
-//         const lastSavedBlock = await cardanoScanner.getLastSavedBlock();
-//         if (!lastSavedBlock) {
-//             console.log("Error finding last saved block")
-//             throw new Error("last block not found")
-//         }
-//         const height: number = lastSavedBlock.height;
-//         const requiredHeight = height - confirmation;
-//         return await this.observationRepository.createQueryBuilder('observation_entity')
-//             .where('observation_entity.height < :requiredHeight', {requiredHeight})
-//             .getMany()
-//     }
-//
-//     /**
-//      * Stores a transaction in tx queue, the queue will process the transaction automatically afterward
-//      * @param tx
-//      * @param requestId
-//      * @param txId
-//      * @param txType
-//      */
-//     submitTx = async (tx: string, requestId: string, txId: string, txType: TxTypeTemp) => {
-//         const observation: ObservationEntity | null = (await this.observationRepository.findOne({
-//             where: {requestId: requestId}
-//         }));
-//         const height = await ErgoNetwork.getHeight();
-//         const time = new Date().getTime();
-//         if (!observation) throw new Error("Observation with this request id is not found");
-//         const txEntity = new TxEntityTemp();
-//         txEntity.txId = txId;
-//         txEntity.txSerialized = tx;
-//         txEntity.creationTime = time;
-//         txEntity.updateBlock = height;
-//         txEntity.observation = observation;
-//         txEntity.type = txType;
-//         txEntity.deleted = false;
-//         return await this.txRepository.save(txEntity);
-//     }
-//
-//     /**
-//      * Returns all stored transactions with no deleted flag
-//      */
-//     getAllTxs = async () => {
-//         return await this.txRepository.createQueryBuilder("tx_entity")
-//             .where("tx_entity.deleted == false")
-//             .getMany()
-//     }
-//
-//     /**
-//      * Removes one specified transaction (Just toggles the removed flag)
-//      * @param tx
-//      */
-//     removeTx = async (tx: TxEntityTemp) => {
-//         tx.deleted = true
-//         return this.txRepository.save(tx)
-//     }
-//
-//     /**
-//      * Updates the tx checking time
-//      * @param tx
-//      * @param height
-//      */
-//     setTxUpdateHeight = async (tx: TxEntityTemp, height: number) => {
-//         tx.updateBlock = height
-//         return this.txRepository.save(tx)
-//     }
-//
-//     // /**
-//     //  * Upgrades the observation TxStatus, it means it had progressed creating transactions
-//     //  * @param observation
-//     //  */
-//     // upgradeObservationTxStatus = async (observation: ObservationEntity) => {
-//     //     observation.status = observation.status + 1
-//     //     return this.observationRepository.save(observation)
-//     // }
-//
-//     // /**
-//     //  * Downgrades the observation TxStatus, it means it had problems creating or sending transactions
-//     //  * @param observation
-//     //  */
-//     // downgradeObservationTxStatus = async (observation: ObservationEntity) => {
-//     //     observation.status = observation.status - 1
-//     //     return this.observationRepository.save(observation)
-//     // }
-//
-//     // /**
-//     //  * Update the observation TxStatus to the specified new status
-//     //  * @param observation
-//     //  * @param status
-//     //  */
-//     // updateObservationTxStatus = async (observation: ObservationEntity, status: TxStatus) => {
-//     //     observation.status = status
-//     //     return this.observationRepository.save(observation)
-//     // }
-// }
-//
+class CardanoDataBase{
+    private blockDataSource: DataSource;
+    private observationDataSource: DataSource;
+    private txDataSource: DataSource;
+    private observationRepository: Repository<ObservationEntity>;
+    private txRepository: Repository<TxEntityTemp>;
+
+
+    constructor(blockDataSource: DataSource, observationDataSource: DataSource, txDataSource: DataSource) {
+        this.blockDataSource = blockDataSource;
+        this.observationDataSource = observationDataSource;
+        this.observationRepository = observationDataSource.getRepository(ObservationEntity);
+        this.txDataSource = txDataSource;
+        this.txRepository = txDataSource.getRepository(TxEntityTemp);
+    }
+
+    /**
+     * returns confirmed observation after required confirmation
+     * ignores observations which have created commitments
+     * @param confirmation
+     */
+    getConfirmedObservation = async (confirmation: number) => {
+        const lastSavedBlock = await cardanoScanner.getLastSavedBlock();
+        if (!lastSavedBlock) {
+            console.log("Error finding last saved block")
+            throw new Error("last block not found")
+        }
+        const height: number = lastSavedBlock.height;
+        const requiredHeight = height - confirmation;
+        return await this.observationRepository.createQueryBuilder('observation_entity')
+            .where('observation_entity.height < :requiredHeight', {requiredHeight})
+            .getMany()
+    }
+
+    /**
+     * Stores a transaction in tx queue, the queue will process the transaction automatically afterward
+     * @param tx
+     * @param requestId
+     * @param txId
+     * @param txType
+     */
+    submitTx = async (tx: string, requestId: string, txId: string, txType: TxTypeTemp) => {
+        const observation: ObservationEntity | null = (await this.observationRepository.findOne({
+            where: {requestId: requestId}
+        }));
+        const height = await ErgoNetwork.getHeight();
+        const time = new Date().getTime();
+        if (!observation) throw new Error("Observation with this request id is not found");
+        const txEntity = new TxEntityTemp();
+        txEntity.txId = txId;
+        txEntity.txSerialized = tx;
+        txEntity.creationTime = time;
+        txEntity.updateBlock = height;
+        txEntity.observation = observation;
+        txEntity.type = txType;
+        txEntity.deleted = false;
+        return await this.txRepository.save(txEntity);
+    }
+
+    /**
+     * Returns all stored transactions with no deleted flag
+     */
+    getAllTxs = async () => {
+        return await this.txRepository.createQueryBuilder("tx_entity")
+            .where("tx_entity.deleted == false")
+            .getMany()
+    }
+
+    /**
+     * Removes one specified transaction (Just toggles the removed flag)
+     * @param tx
+     */
+    removeTx = async (tx: TxEntityTemp) => {
+        tx.deleted = true
+        return this.txRepository.save(tx)
+    }
+
+    /**
+     * Updates the tx checking time
+     * @param tx
+     * @param height
+     */
+    setTxUpdateHeight = async (tx: TxEntityTemp, height: number) => {
+        tx.updateBlock = height
+        return this.txRepository.save(tx)
+    }
+
+    // /**
+    //  * Upgrades the observation TxStatus, it means it had progressed creating transactions
+    //  * @param observation
+    //  */
+    // upgradeObservationTxStatus = async (observation: ObservationEntity) => {
+    //     observation.status = observation.status + 1
+    //     return this.observationRepository.save(observation)
+    // }
+
+    // /**
+    //  * Downgrades the observation TxStatus, it means it had problems creating or sending transactions
+    //  * @param observation
+    //  */
+    // downgradeObservationTxStatus = async (observation: ObservationEntity) => {
+    //     observation.status = observation.status - 1
+    //     return this.observationRepository.save(observation)
+    // }
+
+    // /**
+    //  * Update the observation TxStatus to the specified new status
+    //  * @param observation
+    //  * @param status
+    //  */
+    // updateObservationTxStatus = async (observation: ObservationEntity, status: TxStatus) => {
+    //     observation.status = status
+    //     return this.observationRepository.save(observation)
+    // }
+}
+
 class cardanoBridgeDataBase{
     private rosenDataSource: DataSource;
     private commitmentRepository: Repository<CommitmentEntity>;

@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from "typeorm";
-import { ObservationEntity } from "./ObservationEntity";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor"
 
 export enum TxType {
     COMMITMENT = 'commitment',
