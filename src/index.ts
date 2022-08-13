@@ -20,6 +20,7 @@ import { creation } from "./commitmentCreation";
 import { reveal } from "./commitmetnReveal";
 import { transactionQueueJob } from "./transactionQueue";
 import { delay } from "./utils/utils";
+import { cardanoScannerJob, ergoScannerJob } from "./ergoScannerTemp";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -95,4 +96,7 @@ const init = async () => {
     });
 }
 
-init().then(() => null);
+// init().then(() => null);
+
+// ergoScannerJob()
+cardanoScannerJob()

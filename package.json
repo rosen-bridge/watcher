@@ -48,6 +48,9 @@
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
+    "@rosen-bridge/observation-extractor": "^0.1.2-alpha",
+    "@rosen-bridge/scanner": "file:../scanner/dist",
+    "@rosen-bridge/watcher-data-extractor": "^0.1.0-alpha",
     "axios": "^0.26.1",
     "blakejs": "^1.2.1",
     "chai-spies": "^1.0.0",
