@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from "typeorm";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 export enum TxTypeTemp {
     COMMITMENT = 'commitment',
@@ -20,7 +21,7 @@ export class TxEntityTemp {
         type: 'simple-enum',
         enum: TxTypeTemp
     })
-    type: TxType
+    type: TxTypeTemp
 
     @Column()
     txId: string
@@ -28,9 +29,12 @@ export class TxEntityTemp {
     @Column()
     txSerialized: string
 
-    @Column()
-    requestId:string
-
+    @ManyToOne(
+        "ObservationEntity",
+        "requestId",
+        {onDelete: 'CASCADE'}
+    )
+    observation: Relation<ObservationEntity>
 
     @Column()
     deleted: boolean
