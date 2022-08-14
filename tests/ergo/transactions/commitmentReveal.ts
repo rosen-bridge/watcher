@@ -1,13 +1,13 @@
 import { Boxes } from "../../../src/ergo/boxes";
-import { DatabaseConnection } from "../../../src/ergo/databaseConnection";
+import { DatabaseConnection } from "../../../src/database/databaseConnection";
 import { loadDataBase } from "../../cardano/models/models";
 import { firstCommitment, loadBridgeDataBase, thirdCommitment } from "../../bridge/models/bridgeModel";
-import { JsonBI } from "../../../src/network/parser";
+import { JsonBI } from "../../../src/ergo/network/parser";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 import { CommitmentReveal } from "../../../src/transactions/commitmentReveal";
 import { Buffer } from "buffer";
-import { CommitmentSet } from "../../../src/objects/interfaces";
+import { CommitmentSet } from "../../../src/utils/interfaces";
 import { observation } from "./commitmentCreation";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -22,7 +22,7 @@ import commitmentObj from "./dataset/commitmentBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
-import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
+import { TxType } from "../../../src/database/entities/watcher/TransactionEntity";
 import { rosenConfig } from "./permit";
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))]

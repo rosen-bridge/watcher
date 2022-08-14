@@ -1,6 +1,6 @@
 import config from "config";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { SecretError } from "../errors/errors";
+import { SecretError } from "../utils/errors";
 import { uint8ArrayToHex } from "../utils/utils";
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');

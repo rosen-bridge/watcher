@@ -3,16 +3,14 @@ import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { PermitEntity, CommitmentEntity } from "@rosen-bridge/watcher-data-extractor";
 
 export class BridgeDataBase{
-    private rosenDataSource: DataSource;
     private commitmentRepository: Repository<CommitmentEntity>;
     private permitRepository: Repository<PermitEntity>;
     private boxRepository: Repository<BoxEntity>;
 
-    constructor(rosenDataSource: DataSource, addressDataSource: DataSource) {
-        this.rosenDataSource = rosenDataSource;
-        this.commitmentRepository = rosenDataSource.getRepository(CommitmentEntity);
-        this.permitRepository = rosenDataSource.getRepository(PermitEntity);
-        this.boxRepository = addressDataSource.getRepository(BoxEntity);
+    constructor(dataSource: DataSource) {
+        this.commitmentRepository = dataSource.getRepository(CommitmentEntity);
+        this.permitRepository = dataSource.getRepository(PermitEntity);
+        this.boxRepository = dataSource.getRepository(BoxEntity);
     }
 
     /**

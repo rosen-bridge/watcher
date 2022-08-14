@@ -1,8 +1,7 @@
 import axios from "axios";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { Info } from "../../objects/ergo";
 import { AddressBoxes, ErgoTx, ExplorerTransaction } from "./types";
-import { JsonBI } from "../../network/parser";
+import { JsonBI } from "./parser";
 import { ErgoConfig } from "../../config/config";
 import { ergoTreeToBase58Address } from "../utils";
 
@@ -25,7 +24,7 @@ export class ErgoNetwork{
      * gets last block height
      */
     static getHeight = async (): Promise<number> => {
-        return nodeClient.get<Info>("/info").then(res => res.data.fullHeight);
+        return nodeClient.get<{fullHeight: number}>("/info").then(res => res.data.fullHeight);
     }
 
     /**

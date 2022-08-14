@@ -1,12 +1,12 @@
-import { BridgeDataBase } from "../bridge/models/bridgeModel";
-import { NetworkDataBase } from "../models/networkModel";
-import { CommitmentSet } from "../objects/interfaces";
-import { ErgoNetwork } from "./network/ergoNetwork";
+import { BridgeDataBase } from "./models/bridgeModel";
+import { NetworkDataBase } from "./models/networkModel";
+import { CommitmentSet } from "../utils/interfaces";
+import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { ErgoConfig } from "../config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Buffer } from "buffer";
 import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
-import { TxType } from "../entities/watcher/network/TransactionEntity";
+import { TxType } from "./entities/watcher/TransactionEntity";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -47,12 +47,12 @@ export class DatabaseConnection {
         if(observation.status == TxStatus.REVEALED) return true
         const commitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
         for(const commitment of commitments){
-            if(commitment.spendBlock && commitment.spendReason && commitment.spendReason === SpendReason.MERGE) {
-                const height = await ErgoNetwork.getHeight()
-                if(height - commitment.spendBlock.height > ergoConfig.transactionConfirmation)
-                    await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
-                return true
-            }
+            // if(commitment.spendBlock && commitment.spendReason && commitment.spendReason === SpendReason.MERGE) {
+            //     const height = await ErgoNetwork.getHeight()
+            //     if(height - commitment.spendBlock.height > ergoConfig.transactionConfirmation)
+            //         await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
+            //     return true
+            // }
         }
         return false
     }

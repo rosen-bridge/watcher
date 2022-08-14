@@ -1,22 +1,16 @@
 import { DataSource, Repository } from "typeorm";
-import { ErgoNetwork } from "../ergo/network/ergoNetwork";
+import { ErgoNetwork } from "../../ergo/network/ergoNetwork";
 import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
-import { TxEntity, TxType } from "../entities/watcher/network/TransactionEntity";
+import { TxEntity, TxType } from "../entities/watcher/TransactionEntity";
 
 
 export class NetworkDataBase {
-    private blockDataSource: DataSource;
-    private observationDataSource: DataSource;
-    private txDataSource: DataSource;
     private observationRepository: Repository<ObservationEntity>;
     private txRepository: Repository<TxEntity>;
 
-    constructor(blockDataSource: DataSource, observationDataSource: DataSource, txDataSource: DataSource) {
-        this.blockDataSource = blockDataSource;
-        this.observationDataSource = observationDataSource;
-        this.observationRepository = observationDataSource.getRepository(ObservationEntity);
-        this.txDataSource = txDataSource;
-        this.txRepository = txDataSource.getRepository(TxEntity);
+    constructor(dataSource: DataSource) {
+        this.observationRepository = dataSource.getRepository(ObservationEntity);
+        this.txRepository = dataSource.getRepository(TxEntity);
     }
 
     /**

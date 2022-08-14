@@ -10,9 +10,9 @@
     "coverage": "c8 npm run test",
     "start:dev": "nodemon src/index.ts",
     "typeorm": "typeorm-ts-node-esm",
-    "typeorm:generate:network": "npm run typeorm migration:generate src/migrations/watcher/network/networkModelMigration -- -d ./config/ormconfig.ts",
-    "typeorm:generate:bridge": "npm run typeorm migration:generate src/migrations/watcher/bridge/bridgeModelMigration -- -d ./config/bridgeOrmConfig.ts",
-    "typeorm:migrate": "npm run typeorm migration:run -- -d ./config/ormconfig.ts",
+    "typeorm:generate:network": "npm run typeorm migration:generate src/database/migrations/watcher/network/networkModelMigration -- -d config/dataSource.ts",
+    "typeorm:generate:bridge": "npm run typeorm migration:generate src/database/migrations/watcher/bridge/bridgeModelMigration -- -d ./config/bridgeOrmConfig.ts",
+    "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
     "typeorm:migrate:bridge": "npm run typeorm migration:run -- -d ./config/bridgeOrmConfig.ts"
   },
   "repository": {
@@ -51,7 +51,7 @@
     "@rosen-bridge/address-extractor": "^0.1.3-alpha",
     "@rosen-bridge/observation-extractor": "file:../observation-extractor/dist",
     "@rosen-bridge/watcher-data-extractor": "file:../watcher-data-extractor/dist",
-    "@rosen-bridge/scanner": "file:../scanner/dist",
+    "@rosen-bridge/scanner": "^0.1.6",
     "axios": "^0.26.1",
     "blakejs": "^1.2.1",
     "chai-spies": "^1.0.0",

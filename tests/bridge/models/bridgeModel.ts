@@ -1,10 +1,10 @@
 import { DataSource } from "typeorm";
-import { bridgeEntities } from "../../../src/entities";
-import { BridgeDataBase } from "../../../src/bridge/models/bridgeModel";
-import { Commitment, SpecialBox } from "../../../src/objects/interfaces";
+import { bridgeEntities } from "../../../src/database/entities";
+import { BridgeDataBase } from "../../../src/database/models/bridgeModel";
+import { Commitment, SpecialBox } from "../../../src/utils/interfaces";
 import { expect } from "chai";
-import { SpendReason } from "../../../src/entities/watcher/bridge/ObservedCommitmentEntity";
-import { BoxType } from "../../../src/entities/watcher/bridge/BoxEntity";
+import { SpendReason } from "../../../src/database/entities/watcher/bridge/ObservedCommitmentEntity";
+import { BoxType } from "../../../src/database/entities/watcher/bridge/BoxEntity";
 
 export const loadBridgeDataBase = async (name: string): Promise<BridgeDataBase> => {
     const ormConfig = new DataSource({

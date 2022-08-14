@@ -1,10 +1,10 @@
 import { ErgoNetworkApi } from "../../src/bridge/network/networkApi";
 import { ErgoScanner } from "../../src/ergoScanner/scanner";
 import { NodeTransaction } from "../../src/bridge/network/ergoApiModels";
-import { Observation } from "../../src/objects/interfaces";
+import { Observation } from "../../src/utils/interfaces";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { DataSource } from "typeorm";
-import { networkEntities } from "../../src/entities";
+import { networkEntities } from "../../src/database/entities";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
@@ -16,7 +16,7 @@ chai.use(spies)
 import tx from "./dataset/tx.json" assert {type: "json"}
 import observationTx from "./dataset/observationTx.json" assert {type: "json"}
 import box from "./dataset/box.json" assert {type: "json"}
-import { NetworkDataBase } from "../../src/models/networkModel";
+import { NetworkDataBase } from "../../src/database/models/networkModel";
 
 const sampleObservation: Observation = {
     fromChain: 'CARDANO',

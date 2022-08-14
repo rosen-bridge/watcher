@@ -5,7 +5,7 @@ import { boxId, confirmedTxId, initMockedAxios, unavailableTxId, unconfirmedTxId
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
-import { JsonBI } from "../../../src/network/parser";
+import { JsonBI } from "../../../src/ergo/network/parser";
 
 initMockedAxios();
 import txObj from "../transactions/dataset/commitmentTx.json" assert {type: "json"}

@@ -4,12 +4,12 @@ import { ErgoUtils } from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoConfig } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import { boxCreationError, NotEnoughFund } from "../errors/errors";
-import { DatabaseConnection } from "../ergo/databaseConnection";
+import { boxCreationError, NotEnoughFund } from "../utils/errors";
+import { DatabaseConnection } from "../database/databaseConnection";
 import { Transaction } from "../api/Transaction";
 import { hexStrToUint8Array } from "../utils/utils";
-import { TxType } from "../entities/watcher/network/TransactionEntity";
-import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
+import { TxType } from "../database/entities/watcher/TransactionEntity";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 const ergoConfig = ErgoConfig.getConfig();
 

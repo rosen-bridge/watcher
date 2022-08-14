@@ -1,11 +1,12 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { Observation } from "../objects/interfaces";
-import { bigIntToUint8Array } from "../utils/utils";
+import { Observation } from "../utils/interfaces";
+import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoNetwork } from "./network/ergoNetwork";
-import { boxCreationError } from "../errors/errors";
+import { boxCreationError } from "../utils/errors";
 import { blake2b } from "blakejs";
 import { Boxes } from "./boxes";
+import { Buffer } from "buffer";
 
 const txFee = parseInt(rosenConfig.fee)
 
@@ -32,6 +33,9 @@ export const decodeStr = async (str: string): Promise<string> => {
 }
 export const generateSK = (): wasm.SecretKey => {
     return wasm.SecretKey.random_dlog();
+}
+export const decodeSerializedBox = (boxSerialized: string) => {
+    return wasm.ErgoBox.sigma_parse_bytes(new Uint8Array(Buffer.from(boxSerialized, "base64")))
 }
 
 

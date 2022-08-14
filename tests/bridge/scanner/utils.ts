@@ -2,7 +2,7 @@ import { CommitmentUtils } from "../../../src/bridge/scanner/utils";
 import { expect } from "chai";
 import { ErgoConfig } from "../../../src/config/config"
 import { loadBridgeDataBase } from "../models/bridgeModel";
-import { BoxType } from "../../../src/entities/watcher/bridge/BoxEntity";
+import { BoxType } from "../../../src/database/entities/watcher/bridge/BoxEntity";
 import { NodeTransaction } from "../../../src/bridge/network/ergoApiModels";
 
 import chai from "chai";

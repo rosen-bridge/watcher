@@ -1,10 +1,10 @@
 import { loadDataBase } from "../cardano/models/models";
 import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
-import { DatabaseConnection } from "../../src/ergo/databaseConnection";
-import { ObservationEntity, TxStatus } from "../../src/entities/watcher/network/ObservationEntity";
-import { ObservedCommitmentEntity, SpendReason } from "../../src/entities/watcher/bridge/ObservedCommitmentEntity";
-import { BridgeBlockEntity } from "../../src/entities/watcher/bridge/BridgeBlockEntity";
-import { BlockEntity } from "../../src/entities/watcher/network/BlockEntity";
+import { DatabaseConnection } from "../../src/database/databaseConnection";
+import { ObservationEntity, TxStatus } from "../../src/database/entities/watcher/network/ObservationEntity";
+import { ObservedCommitmentEntity, SpendReason } from "../../src/database/entities/watcher/bridge/ObservedCommitmentEntity";
+import { BridgeBlockEntity } from "../../src/database/entities/watcher/bridge/BridgeBlockEntity";
+import { BlockEntity } from "../../src/database/entities/watcher/network/BlockEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 
 import chai, { expect } from "chai";

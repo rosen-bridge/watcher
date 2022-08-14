@@ -1,12 +1,12 @@
 import { Boxes } from "../../../src/ergo/boxes";
 import { Transaction } from "../../../src/api/Transaction";
 import { rosenConfig } from "./permit";
-import { DatabaseConnection } from "../../../src/ergo/databaseConnection";
+import { DatabaseConnection } from "../../../src/database/databaseConnection";
 import { CommitmentCreation } from "../../../src/transactions/commitmentCreation";
 import { loadDataBase } from "../../cardano/models/models";
 import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
-import { JsonBI } from "../../../src/network/parser";
-import { ObservationEntity } from "../../../src/entities/watcher/network/ObservationEntity";
+import { JsonBI } from "../../../src/ergo/network/parser";
+import { ObservationEntity } from "../../../src/database/entities/watcher/network/ObservationEntity";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 
@@ -24,7 +24,7 @@ import WIDObj2 from "./dataset/WIDBox2.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
 import { hexStrToUint8Array } from "../../../src/utils/utils";
-import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
+import { TxType } from "../../../src/database/entities/watcher/TransactionEntity";
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))

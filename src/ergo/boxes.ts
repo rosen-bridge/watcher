@@ -1,11 +1,12 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoUtils } from "./utils";
+import { decodeSerializedBox, ErgoUtils } from "./utils";
 import { ErgoConfig } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
-import { BridgeDataBase } from "../bridge/models/bridgeModel";
-import { Observation } from "../objects/interfaces";
+import { BridgeDataBase } from "../database/models/bridgeModel";
+import { Observation } from "../utils/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
+import { Buffer } from "buffer";
 
 const ergoConfig = ErgoConfig.getConfig();
 
@@ -45,17 +46,14 @@ export class Boxes{
         // TODO: Rewrite the function to return the required number of RWTs after changing database
         const permits = await this._dataBase.getUnspentPermitBoxes()
         const permitBoxes = permits.map(async (permit) => {
-            const box = wasm.ErgoBox.from_json(permit.boxJson)
-            return await ErgoNetwork.trackMemPool(box)
+            return await ErgoNetwork.trackMemPool(decodeSerializedBox(permit.boxSerialized))
         })
         return Promise.all(permitBoxes)
     }
 
     getWIDBox = async (): Promise<wasm.ErgoBox> => {
         const WID = (await this._dataBase.getUnspentWIDBoxes())[0]
-        let WIDBox = wasm.ErgoBox.from_json(WID.boxJson)
-        WIDBox = await ErgoNetwork.trackMemPool(WIDBox)
-        return WIDBox
+        return await ErgoNetwork.trackMemPool(decodeSerializedBox(WID.serialized))
     }
 
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
@@ -73,8 +71,7 @@ export class Boxes{
         //     throw new NotEnoughFund
         // }
         const outBoxes = boxes.map(async (fund) => {
-            const box = wasm.ErgoBox.from_json(fund.boxJson)
-            return await ErgoNetwork.trackMemPool(box)
+            return await ErgoNetwork.trackMemPool(decodeSerializedBox(fund.serialized))
         })
         return Promise.all(outBoxes)
     }

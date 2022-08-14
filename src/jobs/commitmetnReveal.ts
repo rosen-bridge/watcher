@@ -1,6 +1,6 @@
-import { ErgoConfig } from "./config/config";
-import { boxesObject, databaseConnection } from "./index";
-import { CommitmentReveal } from "./transactions/commitmentReveal";
+import { ErgoConfig } from "../config/config";
+import { boxesObject, databaseConnection } from "../index";
+import { CommitmentReveal } from "../transactions/commitmentReveal";
 
 const ergoConfig = ErgoConfig.getConfig();
 let commitmentRevealingObj: CommitmentReveal

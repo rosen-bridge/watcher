@@ -1,9 +1,9 @@
 import { loadDataBase } from "../cardano/models/models";
 import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
-import { DatabaseConnection } from "../../src/ergo/databaseConnection";
+import { DatabaseConnection } from "../../src/database/databaseConnection";
 import { TransactionQueue } from "../../src/ergo/transactionQueue";
-import { TxEntity, TxType } from "../../src/entities/watcher/network/TransactionEntity";
-import { ObservationEntity } from "../../src/entities/watcher/network/ObservationEntity";
+import { TxEntity, TxType } from "../../src/database/entities/watcher/TransactionEntity";
+import { ObservationEntity } from "../../src/database/entities/watcher/network/ObservationEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 
 

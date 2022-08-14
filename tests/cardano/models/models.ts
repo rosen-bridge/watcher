@@ -1,9 +1,9 @@
 import { DataSource } from "typeorm";
-import { networkEntities } from "../../../src/entities";
-import { NetworkDataBase } from "../../../src/models/networkModel";
-import { Observation } from "../../../src/objects/interfaces";
-import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
-import { TxStatus } from "../../../src/entities/watcher/network/ObservationEntity";
+import { networkEntities } from "../../../src/database/entities";
+import { NetworkDataBase } from "../../../src/database/models/networkModel";
+import { Observation } from "../../../src/utils/interfaces";
+import { TxType } from "../../../src/database/entities/watcher/TransactionEntity";
+import { TxStatus } from "../../../src/database/entities/watcher/network/ObservationEntity";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
 
 import chai, { expect } from "chai";

@@ -1,6 +1,4 @@
-import { BoxType } from "../entities/watcher/bridge/BoxEntity";
-import { SpendReason } from "../entities/watcher/bridge/ObservedCommitmentEntity";
-import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor"
 
 export interface Block {
     hash: string,
@@ -27,18 +25,6 @@ export interface Commitment{
     commitment: string,
     WID: string,
     commitmentBoxId: string
-}
-
-export interface SpecialBox{
-    boxId: string,
-    type: BoxType,
-    value: string,
-    boxJson: string
-}
-
-export interface SpentBox{
-    boxId: string,
-    spendReason: SpendReason
 }
 
 export interface CommitmentSet{
