@@ -1,7 +1,7 @@
 import { DataSource, In, Repository } from "typeorm";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { PermitEntity, CommitmentEntity } from "@rosen-bridge/watcher-data-extractor";
-import { EventTriggerEntity } from "../../../../watcher-data-extractor";
+import { EventTriggerEntity } from "@rosen-bridge/watcher-data-extractor";
 
 export class BridgeDataBase{
     private commitmentRepository: Repository<CommitmentEntity>;
