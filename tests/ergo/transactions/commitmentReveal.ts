@@ -1,7 +1,7 @@
 import { Boxes } from "../../../src/ergo/boxes";
 import { DatabaseConnection } from "../../../src/database/databaseConnection";
-import { loadDataBase } from "../../cardano/models/models";
-import { firstCommitment, loadBridgeDataBase, thirdCommitment } from "../../bridge/models/bridgeModel";
+import { loadNetworkDataBase } from "../../database/networkDatabase";
+import { loadBridgeDataBase } from "../../database/bridgeDatabase";
 import { JsonBI } from "../../../src/ergo/network/parser";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
@@ -9,6 +9,8 @@ import { CommitmentReveal } from "../../../src/transactions/commitmentReveal";
 import { Buffer } from "buffer";
 import { CommitmentSet } from "../../../src/utils/interfaces";
 import { observation } from "./commitmentCreation";
+import { TxType } from "../../../src/database/entities/watcher/TxEntity";
+import { rosenConfig } from "./permit";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
@@ -22,8 +24,7 @@ import commitmentObj from "./dataset/commitmentBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
-import { TxType } from "../../../src/database/entities/watcher/TransactionEntity";
-import { rosenConfig } from "./permit";
+import { firstCommitment, thirdCommitment } from "../../database/mockedData";
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -45,7 +46,7 @@ describe("Commitment reveal transaction tests", () => {
      */
     describe("triggerEventCreationTx", () => {
         it("Should create, sign and send a trigger event transaction", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "submitTransaction", () => null)
@@ -73,7 +74,7 @@ describe("Commitment reveal transaction tests", () => {
     describe("commitmentCheck", () => {
         it("Should return empty array cause input is invalid", async () => {
             sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(thirdCommitment.commitment))
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const boxes = new Boxes(rosenConfig, bridgeDb)
@@ -84,7 +85,7 @@ describe("Commitment reveal transaction tests", () => {
         })
         it("Should return one valid commitment", async () => {
             sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(firstCommitment.commitment, "hex"))
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const boxes = new Boxes(rosenConfig, bridgeDb)
@@ -107,7 +108,7 @@ describe("Commitment reveal transaction tests", () => {
      */
     describe("job", () => {
         it("Should collect ready commitments and reveals the commitment by creating trigger event", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const commitmentSet: CommitmentSet = {

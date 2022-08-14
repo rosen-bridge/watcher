@@ -1,4 +1,4 @@
-import { TxEntity } from "./watcher/TransactionEntity";
+import { TxEntity } from "./watcher/TxEntity";
 
 
 export const Entities = [TxEntity];

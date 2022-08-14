@@ -1,7 +1,6 @@
 import { DataSource, In, Repository } from "typeorm";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
-import { PermitEntity, CommitmentEntity } from "@rosen-bridge/watcher-data-extractor";
-import { EventTriggerEntity } from "../../../../watcher-data-extractor";
+import { PermitEntity, CommitmentEntity, EventTriggerEntity } from "@rosen-bridge/watcher-data-extractor";
 import { Config } from "../../config/config";
 
 const config = Config.getConfig()
@@ -66,7 +65,7 @@ export class BridgeDataBase{
      */
     getUnspentPermitBoxes = async (): Promise<Array<PermitEntity>> => {
         return this.permitRepository.createQueryBuilder("permit_entity")
-            .where("spendBlock is null")
+            .where("spendBlockHash is null")
             .getMany()
     }
 
@@ -90,19 +89,6 @@ export class BridgeDataBase{
                 "extractor": config.widExtractorName
             })
             .getMany()
-    }
-
-    /**
-     * Finds unspent special boxesSample by their box id
-     * @param ids: Array of box ids
-     */
-    findUnspentSpecialBoxesById = async (ids: Array<string>): Promise<Array<BoxEntity>> => {
-        return await this.boxRepository.find({
-            where: {
-                spendBlock: undefined,
-                boxId: In(ids)
-            }
-        })
     }
 
     /**

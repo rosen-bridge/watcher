@@ -6,7 +6,7 @@ import { Config } from "../config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Buffer } from "buffer";
 import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
-import { TxType } from "./entities/watcher/TransactionEntity";
+import { TxType } from "./entities/watcher/TxEntity";
 
 const ergoConfig = Config.getConfig();
 

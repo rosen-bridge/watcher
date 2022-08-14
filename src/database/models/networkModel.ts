@@ -1,7 +1,7 @@
 import { DataSource, Repository } from "typeorm";
 import { ErgoNetwork } from "../../ergo/network/ergoNetwork";
 import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
-import { TxEntity, TxType } from "../entities/watcher/TransactionEntity";
+import { TxEntity, TxType } from "../entities/watcher/TxEntity";
 
 
 export class NetworkDataBase {
