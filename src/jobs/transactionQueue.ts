@@ -1,8 +1,8 @@
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { databaseConnection, networkDatabase } from "../index";
 import { TransactionQueue } from "../ergo/transactionQueue";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 let transactionQueue: TransactionQueue
 
 const transactionCheck = () => {

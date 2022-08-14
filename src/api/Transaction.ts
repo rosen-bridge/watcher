@@ -2,11 +2,12 @@ import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { hexStrToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { Boxes } from "../ergo/boxes";
 import { ErgoUtils } from "../ergo/utils";
+import { addWidExtractor } from "../jobs/Scanner";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 export type ApiResponse = {
     response: string;
@@ -376,6 +377,7 @@ export class Transaction{
         await ErgoNetwork.sendTx(signedTx.to_json());
         this.watcherPermitState = !this.watcherPermitState;
         this.watcherWID = WIDToken.to_str();
+        addWidExtractor(WIDToken.to_str())
         return {response: signedTx.id().to_str(), status: 200};
     }
 

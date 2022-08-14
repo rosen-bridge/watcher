@@ -2,7 +2,7 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { Boxes } from "../ergo/boxes";
 import { ErgoUtils } from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError, NotEnoughFund } from "../utils/errors";
 import { DatabaseConnection } from "../database/databaseConnection";
@@ -11,7 +11,7 @@ import { hexStrToUint8Array } from "../utils/utils";
 import { TxType } from "../database/entities/watcher/TransactionEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 export class CommitmentCreation {
     dataBaseConnection: DatabaseConnection

@@ -2,10 +2,10 @@ import axios from "axios";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { AddressBoxes, ErgoTx, ExplorerTransaction } from "./types";
 import { JsonBI } from "./parser";
-import { ErgoConfig } from "../../config/config";
+import { Config } from "../../config/config";
 import { ergoTreeToBase58Address } from "../utils";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 export const explorerApi = axios.create({
     baseURL: ergoConfig.explorerUrl,
@@ -42,22 +42,6 @@ export class ErgoNetwork{
             }
         ).then(
             res => res.data
-        );
-    }
-
-    /**
-     * get unspent boxes for and specific address
-     * @param address
-     */
-    static getBoxesByAddress = (address: string): Promise<wasm.ErgoBoxes> => {
-        return explorerApi.get<AddressBoxes>(
-            `/api/v1/boxes/unspent/byAddress/${address}`,
-            {transformResponse: data => JsonBI.parse(data)}
-        ).then((res) => {
-                const boxes: Array<string> = [];
-                res.data.items.forEach(box => boxes.push(JsonBI.stringify(box)));
-                return wasm.ErgoBoxes.from_boxes_json(boxes)
-            }
         );
     }
 
@@ -282,6 +266,10 @@ export class ErgoNetwork{
         }
     }
 
+    /**
+     * Checks all tx inputs are still unspent
+     * @param inputs
+     */
     static checkTxInputs = async (inputs: wasm.Inputs) => {
         try{
             await Promise.all(Array(inputs.len()).fill("").map(async (item, index) => {

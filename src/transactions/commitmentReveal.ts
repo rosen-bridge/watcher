@@ -7,12 +7,12 @@ import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError, NotEnoughFund } from "../utils/errors";
 import { DatabaseConnection } from "../database/databaseConnection";
 import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { TxType } from "../database/entities/watcher/TransactionEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 const txFee = BigInt(rosenConfig.fee)
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 export class CommitmentReveal {
     databaseConnection: DatabaseConnection

@@ -1,6 +1,6 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { decodeSerializedBox, ErgoUtils } from "./utils";
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
 import { BridgeDataBase } from "../database/models/bridgeModel";
@@ -8,7 +8,7 @@ import { Observation } from "../utils/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { Buffer } from "buffer";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 
 export class Boxes{

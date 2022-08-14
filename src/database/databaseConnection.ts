@@ -2,13 +2,13 @@ import { BridgeDataBase } from "./models/bridgeModel";
 import { NetworkDataBase } from "./models/networkModel";
 import { CommitmentSet } from "../utils/interfaces";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Buffer } from "buffer";
 import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
 import { TxType } from "./entities/watcher/TransactionEntity";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 
 export class DatabaseConnection {

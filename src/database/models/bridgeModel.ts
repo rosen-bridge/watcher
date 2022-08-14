@@ -2,6 +2,9 @@ import { DataSource, In, Repository } from "typeorm";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { PermitEntity, CommitmentEntity } from "@rosen-bridge/watcher-data-extractor";
 import { EventTriggerEntity } from "../../../../watcher-data-extractor";
+import { Config } from "../../config/config";
+
+const config = Config.getConfig()
 
 export class BridgeDataBase{
     private commitmentRepository: Repository<CommitmentEntity>;
@@ -61,7 +64,7 @@ export class BridgeDataBase{
     /**
      * Returns all unspent permit boxes
      */
-    getUnspentPermitBoxes = async () => {
+    getUnspentPermitBoxes = async (): Promise<Array<PermitEntity>> => {
         return this.permitRepository.createQueryBuilder("permit_entity")
             .where("spendBlock is null")
             .getMany()
@@ -70,10 +73,10 @@ export class BridgeDataBase{
     /**
      * Returns all unspent plain boxes
      */
-    getUnspentPlainBoxes = async () => {
+    getUnspentPlainBoxes = async (): Promise<Array<BoxEntity>> => {
         return this.boxRepository.createQueryBuilder("box_entity")
             .where("extractor = :extractor AND spendBlock is null", {
-                "extractor": "plainBoxExtractor"
+                "extractor": config.plainExtractorName
             })
             .getMany()
     }
@@ -81,10 +84,10 @@ export class BridgeDataBase{
     /**
      * Returns all unspent wid boxes
      */
-    getUnspentWIDBoxes = async () => {
+    getUnspentWIDBoxes = async (): Promise<Array<BoxEntity>> => {
         return this.boxRepository.createQueryBuilder("box_entity")
             .where("extractor = :extractor AND spendBlock is null", {
-                "extractor": "WIDBoxExtractor"
+                "extractor": config.widExtractorName
             })
             .getMany()
     }

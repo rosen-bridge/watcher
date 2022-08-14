@@ -3,10 +3,10 @@ import { ErgoNetwork } from "./network/ergoNetwork";
 import { NetworkDataBase } from "../database/models/networkModel";
 import { DatabaseConnection } from "../database/databaseConnection";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { base64ToArrayBuffer } from "../utils/utils";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 export class TransactionQueue {
     database: NetworkDataBase

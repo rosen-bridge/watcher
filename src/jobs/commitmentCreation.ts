@@ -1,8 +1,8 @@
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { boxesObject, databaseConnection, watcherTransaction } from "../index";
 import { CommitmentCreation } from "../transactions/commitmentCreation";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 let commitmentCreatorObj: CommitmentCreation
 
 const creationJob = () => {

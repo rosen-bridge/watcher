@@ -1,5 +1,5 @@
 import * as ergoLib from "ergo-lib-wasm-nodejs";
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 
 export const hexStrToUint8Array = (str: string): Uint8Array => {
     return new Uint8Array(Buffer.from(str, "hex"))
@@ -29,7 +29,7 @@ export function delay(time: number) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
-export const generateSK = (ergoConfig: ErgoConfig): { address: string, secret: string} => {
+export const generateSK = (ergoConfig: Config): { address: string, secret: string} => {
     const secretKey= ergoLib.SecretKey.random_dlog();
     return {
         address: secretKey.get_address().to_base58(ergoConfig.networkType),

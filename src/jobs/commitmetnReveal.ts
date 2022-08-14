@@ -1,8 +1,8 @@
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { boxesObject, databaseConnection } from "../index";
 import { CommitmentReveal } from "../transactions/commitmentReveal";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 let commitmentRevealingObj: CommitmentReveal
 
 const revealJob = () => {

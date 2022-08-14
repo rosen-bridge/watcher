@@ -3,7 +3,7 @@ import express, { Router } from "express";
 import addressRouter from "./api/showAddress";
 import permitRouter from "./api/permit";
 import { Transaction } from "./api/Transaction";
-import { ErgoConfig } from "./config/config";
+import { Config } from "./config/config";
 import { rosenConfig } from "./config/rosenConfig";
 import { Boxes } from "./ergo/boxes";
 import { NetworkDataBase } from "./database/models/networkModel";
@@ -17,7 +17,7 @@ import { transactionQueueJob } from "./jobs/transactionQueue";
 import { delay } from "./utils/utils";
 import { ErgoScanner } from "@rosen-bridge/scanner";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 
 export let watcherTransaction: Transaction;
@@ -29,7 +29,7 @@ export let ergoScanner: ErgoScanner
 
 const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
-        const ergoConfig = ErgoConfig.getConfig();
+        const ergoConfig = Config.getConfig();
 
         await dataSource.initialize();
         await dataSource.runMigrations();
@@ -65,7 +65,7 @@ const init = async () => {
             // Initializing database
             networkDatabase = new NetworkDataBase(dataSource)
             // Running network scanner thread
-            scannerInit()
+            scannerInit(watcherTransaction.watcherWID)
 
             await delay(30000)
             databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, ergoConfig.observationConfirmation, ergoConfig.observationValidThreshold)
