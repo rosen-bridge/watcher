@@ -40,19 +40,17 @@ export class DatabaseConnection {
     }
 
     /**
-     * returns true if any commitment boxesSample had been spent to create event trigger
+     * returns true if the event trigger for the event have been created
      * @param observation
      */
     isMergeHappened = async (observation: ObservationEntity): Promise<boolean> => {
         if(observation.status == TxStatus.REVEALED) return true
-        const commitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
-        for(const commitment of commitments){
-            // if(commitment.spendBlock && commitment.spendReason && commitment.spendReason === SpendReason.MERGE) {
-            //     const height = await ErgoNetwork.getHeight()
-            //     if(height - commitment.spendBlock.height > ergoConfig.transactionConfirmation)
-            //         await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
-            //     return true
-            // }
+        const eventTrigger = await this.bridgeDataBase.eventTriggerBySourceTxId(observation.sourceTxId)
+        if(eventTrigger){
+            const height = await ErgoNetwork.getHeight()
+            if(height - eventTrigger.height > ergoConfig.transactionConfirmation)
+                await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
+            return true
         }
         return false
     }

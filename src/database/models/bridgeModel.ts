@@ -1,16 +1,19 @@
 import { DataSource, In, Repository } from "typeorm";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { PermitEntity, CommitmentEntity } from "@rosen-bridge/watcher-data-extractor";
+import { EventTriggerEntity } from "../../../../watcher-data-extractor";
 
 export class BridgeDataBase{
     private commitmentRepository: Repository<CommitmentEntity>;
     private permitRepository: Repository<PermitEntity>;
     private boxRepository: Repository<BoxEntity>;
+    private eventTriggerRepository: Repository<EventTriggerEntity>
 
     constructor(dataSource: DataSource) {
         this.commitmentRepository = dataSource.getRepository(CommitmentEntity);
         this.permitRepository = dataSource.getRepository(PermitEntity);
         this.boxRepository = dataSource.getRepository(BoxEntity);
+        this.eventTriggerRepository = dataSource.getRepository(EventTriggerEntity)
     }
 
     /**
@@ -55,13 +58,18 @@ export class BridgeDataBase{
         })
     }
 
-
+    /**
+     * Returns all unspent permit boxes
+     */
     getUnspentPermitBoxes = async () => {
         return this.permitRepository.createQueryBuilder("permit_entity")
             .where("spendBlock is null")
             .getMany()
     }
 
+    /**
+     * Returns all unspent plain boxes
+     */
     getUnspentPlainBoxes = async () => {
         return this.boxRepository.createQueryBuilder("box_entity")
             .where("extractor = :extractor AND spendBlock is null", {
@@ -70,6 +78,9 @@ export class BridgeDataBase{
             .getMany()
     }
 
+    /**
+     * Returns all unspent wid boxes
+     */
     getUnspentWIDBoxes = async () => {
         return this.boxRepository.createQueryBuilder("box_entity")
             .where("extractor = :extractor AND spendBlock is null", {
@@ -77,7 +88,6 @@ export class BridgeDataBase{
             })
             .getMany()
     }
-
 
     /**
      * Finds unspent special boxesSample by their box id
@@ -88,6 +98,18 @@ export class BridgeDataBase{
             where: {
                 spendBlock: undefined,
                 boxId: In(ids)
+            }
+        })
+    }
+
+    /**
+     * Returns an eventTriggerEntity with the specified sourceTxId
+     * @param sourceTxId
+     */
+    eventTriggerBySourceTxId = async (sourceTxId: string): Promise<EventTriggerEntity| null> => {
+        return await this.eventTriggerRepository.findOne({
+            where: {
+                sourceTxId: sourceTxId
             }
         })
     }
