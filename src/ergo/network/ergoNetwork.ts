@@ -159,6 +159,7 @@ export class ErgoNetwork{
      * @param tokenId
      */
     static getBoxWithToken = async (address: wasm.Address, tokenId: string): Promise<wasm.ErgoBox> => {
+        console.log("get box with token############")
         const box = await this.getCoveringErgAndTokenForAddress(
             address.to_ergo_tree().to_base16_bytes(),
             0n,
@@ -174,6 +175,7 @@ export class ErgoNetwork{
                 return found
             }
         )
+        console.log("after getting box with token")
         if (!box.covered) {
             throw Error("box with Token:" + tokenId + " not found")
         }
@@ -273,7 +275,7 @@ export class ErgoNetwork{
      */
     static getConfNum = async (txId: string): Promise<number> => {
         const tx = await ErgoNetwork.getUnconfirmedTx(txId)
-        if(tx !== null) return 0
+        if (tx !== null) return 0
         else {
             const confirmed = await ErgoNetwork.getConfirmedTx(txId)
             if (confirmed != null && Object.prototype.hasOwnProperty.call(confirmed, 'numConfirmations'))
@@ -283,13 +285,13 @@ export class ErgoNetwork{
     }
 
     static checkTxInputs = async (inputs: wasm.Inputs) => {
-        try{
+        try {
             await Promise.all(Array(inputs.len()).fill("").map(async (item, index) => {
                 await ErgoNetwork.boxById(inputs.get(index).box_id().to_str())
             }))
             return true
         } catch (e) {
-            if(e.response && e.response.status == 404) return false
+            if (e.response && e.response.status == 404) return false
             throw Error("Connection problem")
         }
     }
