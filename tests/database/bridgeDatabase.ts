@@ -50,7 +50,7 @@ describe("BridgeDatabase tests", () => {
     })
 
     describe("getOldSpentCommitments", () => {
-        it("should return an old commitment", async() => {
+        it("should return an old commitment", async () => {
             const DB = await loadBridgeDataBase("bridge");
             const data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(1)
@@ -76,7 +76,7 @@ describe("BridgeDatabase tests", () => {
     })
 
     describe("deleteCommitments", () => {
-        it("should delete two commitments with specified ids", async() => {
+        it("should delete two commitments with specified ids", async () => {
             const DB = await loadBridgeDataBase("bridge");
             await DB.deleteCommitments([commitmentEntity.commitmentBoxId, spentCommitmentEntity.commitmentBoxId])
             const data = await DB.getOldSpentCommitments(3433335)
@@ -85,7 +85,7 @@ describe("BridgeDatabase tests", () => {
     })
 
     describe("getUnspentPermitBoxes", () => {
-        it("should find one unspent permit box", async() => {
+        it("should find one unspent permit box", async () => {
             const DB = await loadBridgeDataBase("bridge");
             const data = await DB.getUnspentPermitBoxes()
             expect(data).to.have.length(1)
@@ -94,7 +94,7 @@ describe("BridgeDatabase tests", () => {
     })
 
     describe("getUnspentPlainBoxes", () => {
-        it("should find one unspent plain box", async() => {
+        it("should find one unspent plain box", async () => {
             const DB = await loadBridgeDataBase("bridge");
             const data = await DB.getUnspentPlainBoxes()
             expect(data).to.have.length(1)
@@ -102,8 +102,17 @@ describe("BridgeDatabase tests", () => {
         })
     })
 
+    describe("getUnspentWIDBoxes", () => {
+        it("should find one unspent WID box", async () => {
+            const DB = await loadBridgeDataBase("bridge");
+            const data = await DB.getUnspentWIDBoxes()
+            expect(data).to.have.length(1)
+            expect(data[0]).to.eql(WIDBox)
+        })
+    })
+
     describe("eventTriggerBySourceTxId", () => {
-        it("should find one unspent WID box", async() => {
+        it("should find one unspent event trigger box", async () => {
             const DB = await loadBridgeDataBase("bridge");
             const data = await DB.eventTriggerBySourceTxId(eventTriggerEntity.sourceTxId)
             expect(data).to.eql(eventTriggerEntity)
