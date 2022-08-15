@@ -1,15 +1,15 @@
 {
   "idKeys": {
-    "ergo": "tokenID",
-    "cardano": "fingerprint"
+    "ergo": "tokenId",
+    "ADA": "fingerprint"
   },
   "tokens": [
     {
       "ergo": {
-        "tokenID": "0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95",
+        "tokenId": "0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95",
         "tokenName": "test token3"
       },
-      "cardano": {
+      "ADA": {
         "fingerprint": "asset1nl0puwxmhas8fawxp8nx4e2q3wekg969n2auw3",
         "policyID": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
         "assetID": "7369676d61",

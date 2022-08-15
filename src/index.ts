@@ -16,6 +16,8 @@ import { reveal } from "./jobs/commitmetnReveal";
 import { transactionQueueJob } from "./jobs/transactionQueue";
 import { delay } from "./utils/utils";
 import { ErgoScanner } from "@rosen-bridge/scanner";
+import * as wasm from "ergo-lib-wasm-nodejs";
+
 
 const ergoConfig = Config.getConfig();
 
@@ -35,12 +37,15 @@ const init = async () => {
         await dataSource.runMigrations();
         bridgeDatabase = new BridgeDataBase(dataSource)
         boxesObject = new Boxes(rosenConfig, bridgeDatabase)
-        return new Transaction(
+
+        const temp = new Transaction(
             rosenConfig,
             ergoConfig.address,
             ergoConfig.secretKey,
             boxesObject,
         );
+        // console.log("ready to return",temp)
+        return temp;
     }
 
     const initExpress = () => {
@@ -60,8 +65,8 @@ const init = async () => {
     generateTransactionObject().then(
         async (res) => {
             watcherTransaction = res;
-            initExpress();
-            await delay(10000)
+            // initExpress();
+            // await delay(10000)
             // Initializing database
             networkDatabase = new NetworkDataBase(dataSource)
             // Running network scanner thread
@@ -82,4 +87,9 @@ const init = async () => {
 }
 
 init().then(() => null);
+
+
+// const box = "4JFDEAkEAAQADiCEtdpdKps3QAFVb/1SWSUSoKYy8tywbKgA9fZGLBtTHQQCBAAOIKwMFs7oyu/QgUxVaKnVC+pR/siOirvTrINHuU0FShtlBAIEAA4gpqw4Hm+pmSn9FHezupSZeQp3XpHUwUxaqG6aEY36yFPYBdYB5ManBBrWArFyAdYDtKVzAHIC1gTCsqVzAQDWBctyBNGWgwMBk3ICsXIDr9wMHXIBAXID2QEGPA5j2AHWCIxyBgLtk4MBDoxyBgHkxnIIBBqTwnIIcgSVk3IFcwKWgwIBk4yy22MIsqRzAwBzBAABcwWSo4zHpwGWgwIBk4yy22MIsqRzBgBzBwABcwiTcgXkxqcGDqy8DwFJcoe5oe/2Q3kSd3RKdLfVmLg03GE/LryXLjN2fGGsKwEDGgEgBkxY6jlNQfraB0o8VgoTJGet9MoVEsQJwBTGJcooXpwaCyDQT8k9wVooofDlCw//yU82ADfc7d2vii4lkFqJLNSDeARFcmdvA0FEQQtmcm9tQWRkcmVzcwp0b0FkZHJlc3M0CAAAAAAAAAACCAAAAAAAAAnECAAAAAAAAYagIAA0xE8Mejj4MxkNRBJf+bOg3Z27iROBYBgqkwvFIduVIPamlSmxKn4jJqz/7oOD4MRECPh6hyiG+t9BD+hJgAbTIG50SZFx2CjuUSZtO2UBHPlYr+VRznoNdOX2q6kCmukMDiBHgZ/0LwrDy5LhPRuqopbabUhuhmdv+++/hoKnq0cQMg4RCXL+Rs++D8wKHDZw7PGnAFrdLhLAA7T1tCr5Lj8NAA==";
+// const dec = new Uint8Array(Buffer.from(box, 'base64'))
+// console.log(wasm.ErgoBox.sigma_parse_bytes(dec).to_json())
 

@@ -9,15 +9,11 @@ import { JsonBI } from "../../../src/ergo/network/parser";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
-
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
 import chai from "chai";
 import spies from "chai-spies";
 import sinon from "sinon"
-
-chai.use(spies)
-
 import permitObj from "./dataset/permitBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import WIDObj2 from "./dataset/WIDBox2.json" assert { type: "json" }
@@ -25,6 +21,8 @@ import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
 import { hexStrToUint8Array } from "../../../src/utils/utils";
 import { TxType } from "../../../src/database/entities/watcher/TxEntity";
+
+chai.use(spies)
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))

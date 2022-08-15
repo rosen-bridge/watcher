@@ -257,7 +257,7 @@ export class ErgoNetwork{
      */
     static getConfNum = async (txId: string): Promise<number> => {
         const tx = await ErgoNetwork.getUnconfirmedTx(txId)
-        if(tx !== null) return 0
+        if (tx !== null) return 0
         else {
             const confirmed = await ErgoNetwork.getConfirmedTx(txId)
             if (confirmed != null && Object.prototype.hasOwnProperty.call(confirmed, 'numConfirmations'))
@@ -271,13 +271,13 @@ export class ErgoNetwork{
      * @param inputs
      */
     static checkTxInputs = async (inputs: wasm.Inputs) => {
-        try{
+        try {
             await Promise.all(Array(inputs.len()).fill("").map(async (item, index) => {
                 await ErgoNetwork.boxById(inputs.get(index).box_id().to_str())
             }))
             return true
         } catch (e) {
-            if(e.response && e.response.status == 404) return false
+            if (e.response && e.response.status == 404) return false
             throw Error("Connection problem")
         }
     }

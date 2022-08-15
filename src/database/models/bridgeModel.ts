@@ -5,7 +5,7 @@ import { Config } from "../../config/config";
 
 const config = Config.getConfig()
 
-export class BridgeDataBase{
+class BridgeDataBase{
     private commitmentRepository: Repository<CommitmentEntity>;
     private permitRepository: Repository<PermitEntity>;
     private boxRepository: Repository<BoxEntity>;
@@ -95,7 +95,7 @@ export class BridgeDataBase{
      * Returns an eventTriggerEntity with the specified sourceTxId
      * @param sourceTxId
      */
-    eventTriggerBySourceTxId = async (sourceTxId: string): Promise<EventTriggerEntity| null> => {
+    eventTriggerBySourceTxId = async (sourceTxId: string): Promise<EventTriggerEntity | null> => {
         return await this.eventTriggerRepository.findOne({
             where: {
                 sourceTxId: sourceTxId
@@ -103,3 +103,5 @@ export class BridgeDataBase{
         })
     }
 }
+
+export { BridgeDataBase }

@@ -24,11 +24,13 @@ export const scannerInit = (WID?: string) => {
     const ergoScannerConfig = {
         nodeUrl: ergoConfig.nodeUrl,
         timeout: ergoConfig.nodeTimeout,
-        initialHeight: 10000,
+        initialHeight: 	253477,
         dataSource: dataSource,
     }
     scanner = new ErgoScanner(ergoScannerConfig);
     ergoScanningJob()
+    console.log("after ergo scanning job")
+    console.log(ergoConfig.networkWatcher)
     if (ergoConfig.networkWatcher == "Ergo") {
         const observationExtractor = new ErgoObservationExtractor(dataSource, tokens)
         scanner.registerExtractor(observationExtractor)
@@ -45,6 +47,7 @@ export const scannerInit = (WID?: string) => {
         const observationExtractor = new CardanoObservationExtractor(dataSource, tokens)
         cardanoScanner.registerExtractor(observationExtractor)
     }
+    console.log("after if")
     const commitmentExtractor = new CommitmentExtractor("watcher-commitment", [rosenConfig.commitmentAddress], ergoConfig.RWTId, dataSource)
     const permitExtractor = new PermitExtractor("watcher-permit", dataSource, rosenConfig.watcherPermitAddress, ergoConfig.RWTId)
     const eventTriggerExtractor = new EventTriggerExtractor("watcher-trigger", dataSource, rosenConfig.eventTriggerAddress, ergoConfig.RWTId)

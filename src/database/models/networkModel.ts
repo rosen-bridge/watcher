@@ -4,7 +4,7 @@ import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor
 import { TxEntity, TxType } from "../entities/watcher/TxEntity";
 
 
-export class NetworkDataBase {
+class NetworkDataBase{
     private observationRepository: Repository<ObservationEntity>;
     private txRepository: Repository<TxEntity>;
 
@@ -108,3 +108,4 @@ export class NetworkDataBase {
     }
 }
 
+export { NetworkDataBase }
