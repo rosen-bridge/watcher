@@ -1,13 +1,13 @@
 import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from "typeorm";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor"
 
-export enum TxType {
+export enum TxType{
     COMMITMENT = 'commitment',
     TRIGGER = 'trigger',
 }
 
 @Entity()
-export class TxEntity {
+export class TxEntity{
     @PrimaryColumn()
     id: number
 

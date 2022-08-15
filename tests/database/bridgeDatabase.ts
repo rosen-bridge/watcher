@@ -22,14 +22,14 @@ export const loadBridgeDataBase = async (name: string): Promise<BridgeDataBase> 
         database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: [
             'src/database/entities/watcher/*.ts',
-            'node_modules/@rosen-bridge/scanner/dist/entities/*.js',
-            'node_modules/@rosen-bridge/watcher-data-extractor/dist/entities/*.js',
-            'node_modules/@rosen-bridge/observation-extractor/dist/entities/*.js',
+            'node_modules/@rosen-bridge/scanner/entities/*.js',
+            'node_modules/@rosen-bridge/watcher-data-extractor/entities/*.js',
+            'node_modules/@rosen-bridge/observation-extractor/entities/*.js',
             'node_modules/@rosen-bridge/address-extractor/dist/entities/*.js'
         ],
         migrations: ['src/database/migrations/watcher/*.ts'],
         synchronize: false,
-        logging: true,
+        logging: false,
     });
     await ormConfig.initialize()
     await ormConfig.runMigrations()

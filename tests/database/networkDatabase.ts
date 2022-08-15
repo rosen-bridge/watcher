@@ -1,4 +1,4 @@
-import { DataSource } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
 import { NetworkDataBase } from "../../src/database/models/networkModel";
 import { describe } from "mocha";
@@ -6,6 +6,9 @@ import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { TxType } from "../../src/database/entities/watcher/TxEntity";
 
 import chai, { expect } from "chai";
+import { observationEntity1 } from "./mockedData";
+
+let observationRepo: Repository<ObservationEntity>;
 
 export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -13,19 +16,27 @@ export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase
         database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: [
             'src/database/entities/watcher/*.ts',
-            'node_modules/@rosen-bridge/scanner/dist/entities/*.js',
-            'node_modules/@rosen-bridge/watcher-data-extractor/dist/entities/*.js',
-            'node_modules/@rosen-bridge/observation-extractor/dist/entities/*.js',
+            'node_modules/@rosen-bridge/scanner/entities/*.js',
+            'node_modules/@rosen-bridge/watcher-data-extractor/entities/*.js',
+            'node_modules/@rosen-bridge/observation-extractor/entities/*.js',
             'node_modules/@rosen-bridge/address-extractor/dist/entities/*.js'
         ],
         migrations: ['src/database/migrations/watcher/*.ts'],
         synchronize: false,
         logging: false,
     });
+    await ormConfig.initialize();
+    await ormConfig.runMigrations();
+    observationRepo = ormConfig.getRepository(ObservationEntity);
     return new NetworkDataBase(ormConfig);
 }
 
 describe("NetworkModel tests", () => {
+    before("",async ()=>{
+        const DB=await loadNetworkDataBase("dataBase");
+        await observationRepo.save([observationEntity1]);
+    })
+
 
     /**
      * Target: testing submitTx

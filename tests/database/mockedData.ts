@@ -2,6 +2,7 @@ import { Commitment } from "../../src/utils/interfaces";
 import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { Config } from "../../src/config/config";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 const config = Config.getConfig()
 
@@ -31,6 +32,7 @@ commitmentEntity.eventId = "eventId"
 commitmentEntity.blockId = "blockId"
 commitmentEntity.extractor = "extractor"
 commitmentEntity.height = 105
+commitmentEntity.boxSerialized = "222"
 
 export const spentCommitmentEntity = new CommitmentEntity()
 spentCommitmentEntity.commitment = "commitment"
@@ -42,6 +44,7 @@ spentCommitmentEntity.blockId = "blockId2"
 spentCommitmentEntity.extractor = "extractor"
 spentCommitmentEntity.height = 100
 spentCommitmentEntity.spendBlockHeight = 110
+spentCommitmentEntity.boxSerialized = "222"
 
 export const permitEntity = new PermitEntity()
 permitEntity.WID = "WID"
@@ -150,4 +153,22 @@ newEventTriggerEntity.sourceChainTokenId = "tokenId"
 newEventTriggerEntity.targetChainTokenId = "targetTokenId"
 newEventTriggerEntity.WIDs = "1,2,3"
 newEventTriggerEntity.sourceBlockId = "blockId"
+
+export const observationEntity1 = new ObservationEntity()
+observationEntity1.height = 1;
+observationEntity1.amount = "10";
+observationEntity1.extractor = "observation-extractor";
+observationEntity1.bridgeFee = "100";
+observationEntity1.fromAddress = "fromAddress";
+observationEntity1.block = "blockHash";
+observationEntity1.fromChain = "ergo";
+observationEntity1.networkFee = "1000";
+observationEntity1.sourceBlockId = "blockId";
+observationEntity1.sourceTxId = "txId";
+observationEntity1.sourceChainTokenId = "sourceToken";
+observationEntity1.status = 1;
+observationEntity1.toAddress = "addr1";
+observationEntity1.targetChainTokenId = "targetToken";
+observationEntity1.toChain = "cardano";
+observationEntity1.requestId = "reqId1";
 
