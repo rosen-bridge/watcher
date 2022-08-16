@@ -2,15 +2,18 @@ import { DataSource, Repository } from "typeorm";
 import { ErgoNetwork } from "../../ergo/network/ergoNetwork";
 import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
 import { TxEntity, TxType } from "../entities/watcher/TxEntity";
+import { ObservationStatusEntity } from "../entities/watcher/ObservationStatusEntity";
 
 
 class NetworkDataBase{
     private observationRepository: Repository<ObservationEntity>;
     private txRepository: Repository<TxEntity>;
+    private observationStatusRepository: Repository<ObservationStatusEntity>;
 
     constructor(dataSource: DataSource) {
         this.observationRepository = dataSource.getRepository(ObservationEntity);
         this.txRepository = dataSource.getRepository(TxEntity);
+        this.observationStatusRepository = dataSource.getRepository(ObservationStatusEntity);
     }
 
     /**
@@ -40,6 +43,10 @@ class NetworkDataBase{
         const height = await ErgoNetwork.getHeight();
         const time = new Date().getTime();
         if (!observation) throw new Error("Observation with this request id is not found");
+        const txStatus = new ObservationStatusEntity();
+        txStatus.observation = observation;
+        txStatus.status = TxStatus.NOT_COMMITTED;
+        await this.observationStatusRepository.save(txStatus);
         const txEntity = new TxEntity();
         txEntity.txId = txId;
         txEntity.txSerialized = tx;
@@ -48,6 +55,7 @@ class NetworkDataBase{
         txEntity.observation = observation;
         txEntity.type = txType;
         txEntity.deleted = false;
+        txEntity.status = txStatus;
         return await this.txRepository.save(txEntity);
     }
 
