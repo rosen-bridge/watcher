@@ -17,5 +17,5 @@ export const dataSource = new DataSource({
     ],
     migrations: ['src/database/migrations/watcher/*.ts'],
     synchronize: false,
-    logging: false,
+    logging: true,
 });
