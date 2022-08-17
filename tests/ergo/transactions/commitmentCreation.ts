@@ -20,7 +20,7 @@ import WIDObj2 from "./dataset/WIDBox2.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
 import { hexStrToUint8Array } from "../../../src/utils/utils";
-import { TxType } from "../../../src/database/entities/watcher/TxEntity";
+import { TxType } from "../../../src/database/entities/TxEntity";
 
 chai.use(spies)
 

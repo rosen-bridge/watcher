@@ -1,12 +1,13 @@
 import { DataSource, Repository } from "typeorm";
-import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { NetworkDataBase } from "../../src/database/models/networkModel";
 import { describe } from "mocha";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
-import { TxType } from "../../src/database/entities/watcher/TxEntity";
+import { TxType } from "../../src/database/entities/TxEntity";
 
 import chai, { expect } from "chai";
-import { observationEntity1 } from "./mockedData";
+import { observationEntity1, observationEntity2 } from "./mockedData";
+import { TxStatus } from "../../src/database/entities/ObservationStatusEntity";
 
 let observationRepo: Repository<ObservationEntity>;
 
@@ -15,10 +16,10 @@ export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: [
-            'src/database/entities/watcher/*.ts',
+            'src/database/entities/*.ts',
             'node_modules/@rosen-bridge/scanner/dist/entities/*.js',
             'node_modules/@rosen-bridge/watcher-data-extractor/dist/entities/*.js',
-            'node_modules/@rosen-bridge/observation-extractor/dist/entities/*.js',
+            'node_modules/@rosen-bridge/observation-extractor/entities/*.js',
             'node_modules/@rosen-bridge/address-extractor/dist/entities/*.js'
         ],
         migrations: ['src/database/migrations/watcher/*.ts'],
@@ -34,7 +35,9 @@ export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase
 describe("NetworkModel tests", () => {
     before("",async ()=>{
         const DB=await loadNetworkDataBase("dataBase");
-        await observationRepo.save([observationEntity1]);
+        // await observationRepo.save([observationEntity2]);
+        await DB.observationRepository.save([observationEntity2])
+
     })
 
 

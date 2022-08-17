@@ -1,4 +1,4 @@
-import { TxEntity } from "./watcher/TxEntity";
-
-
-export const Entities = [TxEntity];
+// import { TxEntity } from "./TxEntity";
+//
+//
+// export const Entities = [TxEntity];

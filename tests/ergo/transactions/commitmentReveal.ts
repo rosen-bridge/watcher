@@ -9,7 +9,7 @@ import { CommitmentReveal } from "../../../src/transactions/commitmentReveal";
 import { Buffer } from "buffer";
 import { CommitmentSet } from "../../../src/utils/interfaces";
 import { observation } from "./commitmentCreation";
-import { TxType } from "../../../src/database/entities/watcher/TxEntity";
+import { TxType } from "../../../src/database/entities/TxEntity";
 import { rosenConfig } from "./permit";
 
 import * as wasm from "ergo-lib-wasm-nodejs";

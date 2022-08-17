@@ -154,6 +154,7 @@ newEventTriggerEntity.targetChainTokenId = "targetTokenId"
 newEventTriggerEntity.WIDs = "1,2,3"
 newEventTriggerEntity.sourceBlockId = "blockId"
 
+
 export const observationEntity1 = new ObservationEntity()
 observationEntity1.height = 1;
 observationEntity1.amount = "10";
@@ -166,9 +167,28 @@ observationEntity1.networkFee = "1000";
 observationEntity1.sourceBlockId = "blockId";
 observationEntity1.sourceTxId = "txId";
 observationEntity1.sourceChainTokenId = "sourceToken";
-observationEntity1.status = 1;
 observationEntity1.toAddress = "addr1";
 observationEntity1.targetChainTokenId = "targetToken";
 observationEntity1.toChain = "cardano";
-observationEntity1.requestId = "reqId1";
+observationEntity1.requestId = "reqId2";
+
+
+export const observationEntity2 = new ObservationEntity()
+observationEntity2.height = 1;
+observationEntity2.amount = "10";
+observationEntity2.extractor = "observation-extractor";
+observationEntity2.bridgeFee = "100";
+observationEntity2.fromAddress = "fromAddress";
+observationEntity2.block = "hash";
+observationEntity2.fromChain = "ergo";
+observationEntity2.networkFee = "1000";
+observationEntity2.sourceBlockId = "blockId";
+observationEntity2.sourceTxId = "txId";
+observationEntity2.sourceChainTokenId = "sourceToken";
+observationEntity2.toAddress = "addr1";
+observationEntity2.targetChainTokenId = "targetToken";
+observationEntity2.toChain = "cardano";
+observationEntity2.requestId = "reqId1";
+
+
 

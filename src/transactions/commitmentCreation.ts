@@ -8,7 +8,7 @@ import { boxCreationError, NotEnoughFund } from "../utils/errors";
 import { DatabaseConnection } from "../database/databaseConnection";
 import { Transaction } from "../api/Transaction";
 import { hexStrToUint8Array } from "../utils/utils";
-import { TxType } from "../database/entities/watcher/TxEntity";
+import { TxType } from "../database/entities/TxEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 const ergoConfig = Config.getConfig();

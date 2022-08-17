@@ -2,7 +2,7 @@ import { loadNetworkDataBase } from "../database/networkDatabase";
 import { loadBridgeDataBase } from "../database/bridgeDatabase";
 import { DatabaseConnection } from "../../src/database/databaseConnection";
 import { TransactionQueue } from "../../src/ergo/transactionQueue";
-import { TxEntity, TxType } from "../../src/database/entities/watcher/TxEntity";
+import { TxEntity, TxType } from "../../src/database/entities/TxEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 

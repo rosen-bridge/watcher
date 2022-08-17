@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, Relation, PrimaryGeneratedColumn, JoinColumn } from "typeorm";
+import { Column, Entity, OneToOne, Relation, PrimaryGeneratedColumn, JoinColumn, PrimaryColumn } from "typeorm";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 enum TxStatus{

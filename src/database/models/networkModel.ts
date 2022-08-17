@@ -1,19 +1,19 @@
 import { DataSource, Repository } from "typeorm";
 import { ErgoNetwork } from "../../ergo/network/ergoNetwork";
-import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
-import { TxEntity, TxType } from "../entities/watcher/TxEntity";
-import { ObservationStatusEntity } from "../entities/watcher/ObservationStatusEntity";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { TxEntity, TxType } from "../entities/TxEntity";
+import { ObservationStatusEntity, TxStatus } from "../entities/ObservationStatusEntity";
 
 
 class NetworkDataBase{
-    private observationRepository: Repository<ObservationEntity>;
+    observationRepository: Repository<ObservationEntity>;
     private txRepository: Repository<TxEntity>;
-    private observationStatusRepository: Repository<ObservationStatusEntity>;
+    observationStatusEntity: Repository<ObservationStatusEntity>;
 
     constructor(dataSource: DataSource) {
         this.observationRepository = dataSource.getRepository(ObservationEntity);
         this.txRepository = dataSource.getRepository(TxEntity);
-        this.observationStatusRepository = dataSource.getRepository(ObservationStatusEntity);
+        this.observationStatusEntity = dataSource.getRepository(ObservationStatusEntity);
     }
 
     /**
@@ -30,6 +30,29 @@ class NetworkDataBase{
     }
 
     /**
+     * setting NOT_COMMITTED status for observations that doesn't have status and return last status
+     * @param observation
+     */
+    setStatusForObservations = async (observation: ObservationEntity, status: TxStatus = TxStatus.NOT_COMMITTED): Promise<ObservationStatusEntity> => {
+        const observationStatus = await this.observationStatusEntity.findOne(
+            {
+                where: {
+                    observation: observation
+                }
+            });
+        if (!observationStatus) {
+            return await this.observationStatusEntity.save({
+                observation: observation,
+                status: status
+            });
+
+        } else {
+            return observationStatus
+        }
+
+    }
+
+    /**
      * Stores a transaction in tx queue, the queue will process the transaction automatically afterward
      * @param tx
      * @param requestId
@@ -40,23 +63,19 @@ class NetworkDataBase{
         const observation: ObservationEntity | null = (await this.observationRepository.findOne({
             where: {requestId: requestId}
         }));
+        if (!observation) throw new Error("Observation with this request id is not found");
+        await this.setStatusForObservations(observation);
         const height = await ErgoNetwork.getHeight();
         const time = new Date().getTime();
-        if (!observation) throw new Error("Observation with this request id is not found");
-        const txStatus = new ObservationStatusEntity();
-        txStatus.observation = observation;
-        txStatus.status = TxStatus.NOT_COMMITTED;
-        await this.observationStatusRepository.save(txStatus);
-        const txEntity = new TxEntity();
-        txEntity.txId = txId;
-        txEntity.txSerialized = tx;
-        txEntity.creationTime = time;
-        txEntity.updateBlock = height;
-        txEntity.observation = observation;
-        txEntity.type = txType;
-        txEntity.deleted = false;
-        txEntity.status = txStatus;
-        return await this.txRepository.save(txEntity);
+        return await this.txRepository.insert({
+            txId: txId,
+            txSerialized: tx,
+            creationTime: time,
+            updateBlock: height,
+            observation: observation,
+            type: txType,
+            deleted: false
+        });
     }
 
     /**
@@ -92,8 +111,11 @@ class NetworkDataBase{
      * @param observation
      */
     upgradeObservationTxStatus = async (observation: ObservationEntity) => {
-        observation.status = observation.status + 1
-        return this.observationRepository.save(observation)
+        const observationStatus = await this.setStatusForObservations(observation);
+        return this.observationStatusEntity.save({
+            id: observationStatus.id,
+            status: observationStatus.status + 1
+        });
     }
 
     /**
@@ -101,8 +123,12 @@ class NetworkDataBase{
      * @param observation
      */
     downgradeObservationTxStatus = async (observation: ObservationEntity) => {
-        observation.status = observation.status - 1
-        return this.observationRepository.save(observation)
+        const observationStatus = await this.setStatusForObservations(observation);
+        return this.observationStatusEntity.save({
+            id: observationStatus.id,
+            status: observationStatus.status - 1
+        });
+
     }
 
     /**
@@ -111,8 +137,11 @@ class NetworkDataBase{
      * @param status
      */
     updateObservationTxStatus = async (observation: ObservationEntity, status: TxStatus) => {
-        observation.status = status
-        return this.observationRepository.save(observation)
+        const observationStatus = await this.setStatusForObservations(observation);
+        return this.observationStatusEntity.save({
+            id: observationStatus.id,
+            status: status
+        });
     }
 }
 

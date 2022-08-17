@@ -8,7 +8,7 @@ import { boxCreationError, NotEnoughFund } from "../utils/errors";
 import { DatabaseConnection } from "../database/databaseConnection";
 import { rosenConfig } from "../config/rosenConfig";
 import { Config } from "../config/config";
-import { TxType } from "../database/entities/watcher/TxEntity";
+import { TxType } from "../database/entities/TxEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 const txFee = BigInt(rosenConfig.fee)

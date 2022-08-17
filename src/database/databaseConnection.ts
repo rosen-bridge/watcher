@@ -5,13 +5,14 @@ import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { Config } from "../config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Buffer } from "buffer";
-import { ObservationEntity, TxStatus } from "@rosen-bridge/observation-extractor";
-import { TxType } from "./entities/watcher/TxEntity";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { TxType } from "./entities/TxEntity";
+import { TxStatus } from "./entities/ObservationStatusEntity";
 
 const ergoConfig = Config.getConfig();
 
 
-export class DatabaseConnection {
+export class DatabaseConnection{
     bridgeDataBase: BridgeDataBase
     networkDataBase: NetworkDataBase
     observationConfirmation: number
@@ -29,13 +30,13 @@ export class DatabaseConnection {
      * @param observation
      */
     isObservationValid = async (observation: ObservationEntity): Promise<boolean> => {
-        if(observation.status == TxStatus.TIMED_OUT) return false
+        const observationStatus = await this.networkDataBase.setStatusForObservations(observation);
+        if (observationStatus.status == TxStatus.TIMED_OUT) return false
         const currentHeight = await ErgoNetwork.getHeight()
-        if(currentHeight - observation.height > this.observationValidThreshold) {
+        if (currentHeight - observation.height > this.observationValidThreshold) {
             await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.TIMED_OUT)
             return false
-        }
-        else if(await this.isMergeHappened(observation)) return false
+        } else if (await this.isMergeHappened(observation)) return false
         return true
     }
 
@@ -44,11 +45,12 @@ export class DatabaseConnection {
      * @param observation
      */
     isMergeHappened = async (observation: ObservationEntity): Promise<boolean> => {
-        if(observation.status == TxStatus.REVEALED) return true
+        const observationStatus = await this.networkDataBase.setStatusForObservations(observation);
+        if (observationStatus.status == TxStatus.REVEALED) return true
         const eventTrigger = await this.bridgeDataBase.eventTriggerBySourceTxId(observation.sourceTxId)
-        if(eventTrigger){
+        if (eventTrigger) {
             const height = await ErgoNetwork.getHeight()
-            if(height - eventTrigger.height > ergoConfig.transactionConfirmation)
+            if (height - eventTrigger.height > ergoConfig.transactionConfirmation)
                 await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
             return true
         }
@@ -60,8 +62,13 @@ export class DatabaseConnection {
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
         const height = await ErgoNetwork.getHeight()
-        const observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height))
-            .filter(observation => observation.status == TxStatus.NOT_COMMITTED)
+        let observations = await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height);
+        const observationsStatus = await Promise.all(observations.map(async observation => {
+            return await this.networkDataBase.setStatusForObservations(observation)
+        }))
+        observations = (observationsStatus)
+            .filter((observation) => observation.status === TxStatus.NOT_COMMITTED)
+            .map(observationStatus => observationStatus.observation)
         return Promise.all(observations.map(async observation => await this.isObservationValid(observation)))
             .then(result => observations.filter((_v, index) => result[index]))
     }
@@ -72,11 +79,16 @@ export class DatabaseConnection {
     allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
         const readyCommitments: Array<CommitmentSet> = []
         const height = await ErgoNetwork.getHeight()
-        const observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height))
-            .filter(observation => observation.status == TxStatus.COMMITTED)
-        for(const observation of observations){
+        let observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height));
+        const observationsStatus = await Promise.all(observations.map(async observation => {
+            const observationStatus = await this.networkDataBase.setStatusForObservations(observation);
+            return observationStatus.status;
+        }))
+        observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height))
+            .filter((observation, index) => observationsStatus[index] == TxStatus.COMMITTED)
+        for (const observation of observations) {
             const relatedCommitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
-            if(!(await this.isMergeHappened(observation)))
+            if (!(await this.isMergeHappened(observation)))
                 readyCommitments.push({
                     commitments: relatedCommitments.filter(commitment => commitment.spendBlockHash === undefined),
                     observation: observation

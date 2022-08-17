@@ -33,15 +33,9 @@ export class TxEntity{
     @ManyToOne(
         "ObservationEntity",
         "requestId",
+        {cascade: true}
     )
     observation: Relation<ObservationEntity>
-
-    @OneToOne(
-        "ObservationStatusEntity",
-        "id",
-        {onDelete: 'CASCADE'}
-    )
-    status: Relation<ObservationStatusEntity>
 
     @Column()
     deleted: boolean

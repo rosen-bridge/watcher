@@ -1,4 +1,4 @@
-import { TxEntity, TxType } from "../database/entities/watcher/TxEntity";
+import { TxEntity, TxType } from "../database/entities/TxEntity";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { NetworkDataBase } from "../database/models/networkModel";
 import { DatabaseConnection } from "../database/databaseConnection";

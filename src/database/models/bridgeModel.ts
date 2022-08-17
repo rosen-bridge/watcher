@@ -6,10 +6,10 @@ import { Config } from "../../config/config";
 const config = Config.getConfig()
 
 class BridgeDataBase{
-    private commitmentRepository: Repository<CommitmentEntity>;
-    private permitRepository: Repository<PermitEntity>;
-    private boxRepository: Repository<BoxEntity>;
-    private eventTriggerRepository: Repository<EventTriggerEntity>
+    commitmentRepository: Repository<CommitmentEntity>;
+    permitRepository: Repository<PermitEntity>;
+    boxRepository: Repository<BoxEntity>;
+    eventTriggerRepository: Repository<EventTriggerEntity>
 
     constructor(dataSource: DataSource) {
         this.commitmentRepository = dataSource.getRepository(CommitmentEntity);
