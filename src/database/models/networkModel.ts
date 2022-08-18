@@ -41,8 +41,6 @@ class NetworkDataBase{
         const temp = await this.observationRepository.createQueryBuilder('observation_entity')
             .where('observation_entity.height < :requiredHeight', {requiredHeight})
             .getMany()
-        console.log("********************")
-        console.log(temp)
         return temp;
     }
 
