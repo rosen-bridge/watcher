@@ -7,9 +7,9 @@ const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
 const URL: string | undefined = config.get?.('cardano.node.URL');
 const INTERVAL: number | undefined = config.get?.('cardano.interval');
-const INITIAL_HEIGHT: number | undefined = config.get?.('cardano.initialBlockHeight');
+const CARDANO_INITIAL_HEIGHT: number | undefined = config.get?.('cardano.initialBlockHeight');
 const BRIDGE_SCAN_INTERVAL: number | undefined = config.get?.('bridgeScanner.interval');
-const COMMITMENT_INITIAL_HEIGHT: number | undefined = config.get?.('bridgeScanner.initialBlockHeight');
+const ERGO_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scanner.initialBlockHeight');
 const COMMITMENT_HEIGHT_LIMIT: number | undefined = config.get?.('bridgeScanner.heightLimit');
 const CLEANUP_CONFIRMATION: number | undefined = config.get?.('bridgeScanner.cleanupConfirmation');
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
@@ -43,8 +43,7 @@ export class Config {
     RWTId: string;
     RepoNFT: string;
     bridgeScanInterval: number;
-    commitmentInitialHeight: number;
-    commitmentHeightLimit: number;
+    ergoInitialHeight: number
     cleanupConfirmation: number;
     networkWatcher: string;
     commitmentCreationInterval: number;
@@ -96,8 +95,8 @@ export class Config {
         if (BRIDGE_SCAN_INTERVAL === undefined) {
             throw new Error("Commitment scanner interval doesn't set correctly");
         }
-        if (COMMITMENT_INITIAL_HEIGHT === undefined) {
-            throw new Error("Commitment scanner initial height doesn't set correctly");
+        if (ERGO_INITIAL_HEIGHT === undefined) {
+            throw new Error("Ergo scanner initial height doesn't set correctly");
         }
         if (COMMITMENT_HEIGHT_LIMIT === undefined) {
             throw new Error("Commitment scanner height limit doesn't set correctly");
@@ -150,8 +149,6 @@ export class Config {
         this.RWTId = RWT_ID;
         this.RepoNFT = REPO_NFT;
         this.bridgeScanInterval = BRIDGE_SCAN_INTERVAL;
-        this.commitmentInitialHeight = COMMITMENT_INITIAL_HEIGHT;
-        this.commitmentHeightLimit = COMMITMENT_HEIGHT_LIMIT;
         this.cleanupConfirmation = CLEANUP_CONFIRMATION;
         this.networkWatcher = NETWORK_WATCHER
         this.commitmentCreationInterval = COMMITMENT_CREATION_INTERVAL
@@ -161,6 +158,7 @@ export class Config {
         this.transactionRemovingTimeout = TRANSACTION_REMOVING_TIMEOUT;
         this.observationConfirmation = OBSERVATION_CONFIRMATION
         this.observationValidThreshold = OBSERVATION_VALID_THRESH
+        this.ergoInitialHeight = ERGO_INITIAL_HEIGHT
         this.plainExtractorName = "plainBoxExtractor"
         this.widExtractorName = "WIDBoxExtractor"
     }
@@ -189,7 +187,7 @@ export class CardanoConfig{
         if (INTERVAL === undefined) {
             throw new Error("Cardano Scanner interval is not set in the config file");
         }
-        if (INITIAL_HEIGHT === undefined) {
+        if (CARDANO_INITIAL_HEIGHT === undefined) {
             throw new Error("Cardano Scanner initial height is not set in the config file");
         }
         if (CARDANO_TIMEOUT === undefined) {
@@ -202,7 +200,7 @@ export class CardanoConfig{
         this.koiosURL = URL;
         this.interval = INTERVAL;
         this.timeout = CARDANO_TIMEOUT;
-        this.initialHeight = INITIAL_HEIGHT;
+        this.initialHeight = CARDANO_INITIAL_HEIGHT;
         this.nameConstant = CARDANO_NAME_CONSTANT
     }
 

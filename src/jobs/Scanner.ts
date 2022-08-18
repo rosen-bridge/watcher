@@ -24,7 +24,7 @@ export const scannerInit = (WID?: string) => {
     const ergoScannerConfig = {
         nodeUrl: ergoConfig.nodeUrl,
         timeout: ergoConfig.nodeTimeout,
-        initialHeight: 	253477,
+        initialHeight: 	ergoConfig.ergoInitialHeight,
         dataSource: dataSource,
     }
     scanner = new ErgoScanner(ergoScannerConfig);
