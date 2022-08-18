@@ -34,7 +34,7 @@ describe("Testing the DatabaseConnection", () => {
     describe("allReadyObservations", () => {
         it("should return an observation", async () => {
             const networkDb = await loadNetworkDataBase("dataBase-1");
-            await networkDb.observationRepository.save([observationEntity2])
+            await networkDb.getObservationRepository().save([observationEntity2])
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity2])
             sinon.stub(ErgoNetwork, "getHeight").resolves(15)
@@ -46,7 +46,7 @@ describe("Testing the DatabaseConnection", () => {
         })
         it("should return zero observations", async () => {
             const networkDb = await loadNetworkDataBase("dataBase-2");
-            await networkDb.observationRepository.save([observationEntity2])
+            await networkDb.getObservationRepository().save([observationEntity2])
             const bridgeDb = await loadBridgeDataBase("commitments");
             sinon.stub(ErgoNetwork, "getHeight").resolves(15)
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity2])
@@ -58,7 +58,7 @@ describe("Testing the DatabaseConnection", () => {
         })
         it("should return no observations", async () => {
             const networkDb = await loadNetworkDataBase("dataBase-3");
-            await networkDb.observationRepository.save([observationEntity1])
+            await networkDb.getObservationRepository().save([observationEntity1])
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity1])
             chai.spy.on(networkDb, "updateObservationTxStatus", () => undefined)
@@ -74,7 +74,7 @@ describe("Testing the DatabaseConnection", () => {
     describe("allReadyCommitmentSets", () => {
         it("should not return commitment set", async () => {
             const networkDb = await loadNetworkDataBase("dataBase-commitment-1");
-            await networkDb.observationRepository.save([observationEntity2])
+            await networkDb.getObservationRepository().save([observationEntity2])
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity2])
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
@@ -83,8 +83,8 @@ describe("Testing the DatabaseConnection", () => {
         })
         it("should return one commitment set with two unspent commitments", async () => {
             const networkDb = await loadNetworkDataBase("dataBase-commitment-2");
-            await networkDb.observationRepository.save([observationEntity2])
-            await networkDb.observationStatusEntity.insert({
+            await networkDb.getObservationRepository().save([observationEntity2])
+            await networkDb.getObservationStatusEntity().insert({
                 observation: observationEntity2,
                 status: TxStatus.COMMITTED
             })
@@ -99,8 +99,8 @@ describe("Testing the DatabaseConnection", () => {
         })
         it("should not return any commitment set because one of them is merged", async () => {
             const networkDb = await loadNetworkDataBase("dataBase-commitment-3");
-            await networkDb.observationRepository.save([observationEntity2])
-            await networkDb.observationStatusEntity.insert({
+            await networkDb.getObservationRepository().save([observationEntity2])
+            await networkDb.getObservationStatusEntity().insert({
                 observation: observationEntity2,
                 status: TxStatus.COMMITTED
             })

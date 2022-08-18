@@ -6,10 +6,8 @@ import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { TxType } from "../../src/database/entities/TxEntity";
 
 import chai, { expect } from "chai";
-import { observationEntity1, observationEntity2 } from "./mockedData";
+import { observationEntity2 } from "./mockedData";
 import { TxStatus } from "../../src/database/entities/ObservationStatusEntity";
-
-let observationRepo: Repository<ObservationEntity>;
 
 export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -28,16 +26,13 @@ export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase
     });
     await ormConfig.initialize();
     await ormConfig.runMigrations();
-    observationRepo = ormConfig.getRepository(ObservationEntity);
     return new NetworkDataBase(ormConfig);
 }
 
 describe("NetworkModel tests", () => {
-    before("",async ()=>{
-        const DB=await loadNetworkDataBase("dataBase");
-        // await observationRepo.save([observationEntity2]);
-        await DB.observationRepository.save([observationEntity2])
-
+    before("inserting into database", async () => {
+        const DB = await loadNetworkDataBase("dataBase");
+        await DB.getObservationRepository().save([observationEntity2])
     })
 
 

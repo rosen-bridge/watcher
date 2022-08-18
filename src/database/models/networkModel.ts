@@ -6,14 +6,28 @@ import { ObservationStatusEntity, TxStatus } from "../entities/ObservationStatus
 
 
 class NetworkDataBase{
-    observationRepository: Repository<ObservationEntity>;
-    private txRepository: Repository<TxEntity>;
-    observationStatusEntity: Repository<ObservationStatusEntity>;
+    private readonly observationRepository: Repository<ObservationEntity>;
+    private readonly txRepository: Repository<TxEntity>;
+    private readonly observationStatusEntity: Repository<ObservationStatusEntity>;
 
     constructor(dataSource: DataSource) {
         this.observationRepository = dataSource.getRepository(ObservationEntity);
         this.txRepository = dataSource.getRepository(TxEntity);
         this.observationStatusEntity = dataSource.getRepository(ObservationStatusEntity);
+    }
+
+    /**
+     * getter function for observationRepository
+     */
+    getObservationRepository = () => {
+        return this.observationRepository;
+    }
+
+    /**
+     * getter function for observationStatusEntity
+     */
+    getObservationStatusEntity = () => {
+        return this.observationStatusEntity;
     }
 
     /**
