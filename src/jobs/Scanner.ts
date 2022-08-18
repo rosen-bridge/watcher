@@ -33,6 +33,7 @@ export const scannerInit = (WID?: string) => {
         const observationExtractor = new ErgoObservationExtractor(dataSource, tokens)
         scanner.registerExtractor(observationExtractor)
     } else if (ergoConfig.networkWatcher == "Cardano") {
+        console.log("***********************CARDANO************************")
         const cardanoConfig = CardanoConfig.getConfig()
         const cardanoScannerConfig = {
             koiosUrl: cardanoConfig.koiosURL,
@@ -48,11 +49,11 @@ export const scannerInit = (WID?: string) => {
     const commitmentExtractor = new CommitmentExtractor("watcher-commitment", [rosenConfig.commitmentAddress], ergoConfig.RWTId, dataSource)
     const permitExtractor = new PermitExtractor("watcher-permit", dataSource, rosenConfig.watcherPermitAddress, ergoConfig.RWTId)
     const eventTriggerExtractor = new EventTriggerExtractor("watcher-trigger", dataSource, rosenConfig.eventTriggerAddress, ergoConfig.RWTId)
-    const plainExtractor = new ErgoUTXOExtractor(dataSource, ergoConfig.plainExtractorName, ergoConfig.networkType, ergoConfig.address)
+    // const plainExtractor = new ErgoUTXOExtractor(dataSource, ergoConfig.plainExtractorName, ergoConfig.networkType, ergoConfig.address)
     scanner.registerExtractor(commitmentExtractor)
     scanner.registerExtractor(permitExtractor)
     scanner.registerExtractor(eventTriggerExtractor)
-    scanner.registerExtractor(plainExtractor)
+    // scanner.registerExtractor(plainExtractor)
     if(WID) addWidExtractor(WID)
 
     // TODO: Add commitment cleanup job

@@ -89,7 +89,3 @@ const init = async () => {
 init().then(() => null);
 
 
-// const box = "4JFDEAkEAAQADiCEtdpdKps3QAFVb/1SWSUSoKYy8tywbKgA9fZGLBtTHQQCBAAOIKwMFs7oyu/QgUxVaKnVC+pR/siOirvTrINHuU0FShtlBAIEAA4gpqw4Hm+pmSn9FHezupSZeQp3XpHUwUxaqG6aEY36yFPYBdYB5ManBBrWArFyAdYDtKVzAHIC1gTCsqVzAQDWBctyBNGWgwMBk3ICsXIDr9wMHXIBAXID2QEGPA5j2AHWCIxyBgLtk4MBDoxyBgHkxnIIBBqTwnIIcgSVk3IFcwKWgwIBk4yy22MIsqRzAwBzBAABcwWSo4zHpwGWgwIBk4yy22MIsqRzBgBzBwABcwiTcgXkxqcGDqy8DwFJcoe5oe/2Q3kSd3RKdLfVmLg03GE/LryXLjN2fGGsKwEDGgEgBkxY6jlNQfraB0o8VgoTJGet9MoVEsQJwBTGJcooXpwaCyDQT8k9wVooofDlCw//yU82ADfc7d2vii4lkFqJLNSDeARFcmdvA0FEQQtmcm9tQWRkcmVzcwp0b0FkZHJlc3M0CAAAAAAAAAACCAAAAAAAAAnECAAAAAAAAYagIAA0xE8Mejj4MxkNRBJf+bOg3Z27iROBYBgqkwvFIduVIPamlSmxKn4jJqz/7oOD4MRECPh6hyiG+t9BD+hJgAbTIG50SZFx2CjuUSZtO2UBHPlYr+VRznoNdOX2q6kCmukMDiBHgZ/0LwrDy5LhPRuqopbabUhuhmdv+++/hoKnq0cQMg4RCXL+Rs++D8wKHDZw7PGnAFrdLhLAA7T1tCr5Lj8NAA==";
-// const dec = new Uint8Array(Buffer.from(box, 'base64'))
-// console.log(wasm.ErgoBox.sigma_parse_bytes(dec).to_json())
-
