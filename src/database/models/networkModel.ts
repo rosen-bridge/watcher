@@ -55,13 +55,16 @@ class NetworkDataBase{
                 observation: observation,
                 status: status
             });
-
         } else {
             return observationStatus
         }
     }
 
-    getStatusForObservations = async (observation: ObservationEntity) => {
+    /**
+     * Checking that if observation has status in observationStatus table or not
+     * @param observation
+     */
+    getStatusForObservations = async (observation: ObservationEntity): Promise<ObservationStatusEntity | null> => {
         return await this.observationStatusEntity.findOne(
             {
                 where: {

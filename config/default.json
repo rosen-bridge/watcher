@@ -13,20 +13,20 @@
         "node": {
             "URL": "https://testnet.koios.rest/api/v0"
         },
-        "name": "cardano"
+        "name": "Cardano"
     },
     "ergo": {
-        "explorerUrl": "http://10.10.9.3:7000",
-        "nodeUrl": "http://10.10.9.3:9065",
+        "explorerUrl": "change",
+        "nodeUrl": "change",
         "explorerTimeout": 10000,
         "nodeTimeout": 10000,
         "networkType": "Mainnet",
-        "watcherSecretKey": "ed5242e13db8161b2079d4cb49cb9553d87e90b0898e44bc10b9b5d309dbac65",
-        "RWTId": "497287b9a1eff643791277744a74b7d598b834dc613f2ebc972e33767c61ac2b",
-        "repoNFT": "89d73d2e029efeb5d8d5343a8589c255d359fc9a1856ecf9f45e9bdfe9d9b5bd",
+        "watcherSecretKey": "1111111111111111111111111111111111111111111111111111111111111111",
+        "RWTId": "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267",
+        "repoNFT": "a40b86c663fbbfefa243c9c6ebbc5690fc4e385f15b44c49ba469c91c5af0f48",
         "scanner": {
             "interval": 10,
-            "initialBlockHeight": 267226
+            "initialBlockHeight": 252765
         },
         "commitmentCreationInterval": 180,
         "commitmentRevealInterval": 180,
@@ -35,7 +35,7 @@
             "confirmation": 1,
             "interval": 30
         },
-        "name": "ergo"
+        "name": "Ergo"
     },
     "bridgeScanner": {
         "interval": 10,

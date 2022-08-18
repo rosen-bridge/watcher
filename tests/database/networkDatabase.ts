@@ -5,8 +5,10 @@ import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { TxType } from "../../src/database/entities/TxEntity";
 
 import chai, { expect } from "chai";
-import { observationEntity2 } from "./mockedData";
-import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/ObservationStatusEntity";
+import { observationEntity1, observationEntity2 } from "./mockedData";
+import { TxStatus } from "../../src/database/entities/ObservationStatusEntity";
+
+const observation2Status = {observation: observationEntity2, status: TxStatus.NOT_COMMITTED};
 
 export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -32,9 +34,63 @@ describe("NetworkModel tests", () => {
     before("inserting into database", async () => {
         const DB = await loadNetworkDataBase("dataBase");
         await DB.getObservationRepository().save([observationEntity2])
-        await DB.getObservationStatusEntity().save([{observation:observationEntity2,status:TxStatus.NOT_COMMITTED}]);
+        await DB.getObservationStatusEntity().save([{observation: observationEntity2, status: TxStatus.NOT_COMMITTED}]);
     })
 
+    describe("setStatusForObservations", () => {
+
+        /**
+         * Target: testing setStatusForObservations
+         * Expected Output:
+         *    The function should return one observation
+         */
+        it("should return one observation", async () => {
+            const DB = await loadNetworkDataBase("dataBase");
+            const res = await DB.getStatusForObservations(observationEntity2);
+            expect(res).not.to.be.null;
+            if (res !== null) {
+                expect(res.status).to.be.eql(observation2Status.status);
+            }
+        })
+
+        /**
+         * Target: testing setStatusForObservations
+         * Expected Output:
+         *    The function should return zero observation
+         */
+        it("should return zero observation", async () => {
+            const DB = await loadNetworkDataBase("dataBase");
+            const res = await DB.getStatusForObservations(observationEntity1);
+            expect(res).to.be.null;
+        })
+    })
+
+
+    describe("setStatusForObservations", () => {
+
+        /**
+         * Target: testing setStatusForObservations
+         * Expected Output:
+         *    The function should return status for observation that exist
+         */
+        it("should return status for observation that exist", async () => {
+            const DB = await loadNetworkDataBase("dataBase");
+            const res = await DB.setStatusForObservations(observationEntity2);
+            expect(res.status).to.be.eql(1);
+        })
+
+        /**
+         * Target: testing setStatusForObservations
+         * Expected Output:
+         *    The function should set status for observation that is not exist
+         */
+        it("should set status for observation that is not exist", async () => {
+            const DB = await loadNetworkDataBase("dataBase-setStatusForObservation");
+            await DB.getObservationRepository().insert([observationEntity1])
+            const res = await DB.setStatusForObservations(observationEntity1);
+            expect(res.status).to.be.eql(1);
+        })
+    })
 
     /**
      * Target: testing submitTx

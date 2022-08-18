@@ -25,7 +25,7 @@ export const loadBridgeDataBase = async (name: string): Promise<BridgeDataBase> 
             'node_modules/@rosen-bridge/scanner/dist/entities/*.js',
             'node_modules/@rosen-bridge/watcher-data-extractor/dist/entities/*.js',
             'node_modules/@rosen-bridge/observation-extractor/entities/*.js',
-            'node_modules/@rosen-bridge/address-extractor/dist/entities/*.js'
+            'node_modules/@rosen-bridge/address-extractor/entities/*.js'
         ],
         migrations: ['src/database/migrations/watcher/*.ts'],
         synchronize: false,
@@ -41,8 +41,8 @@ export const loadBridgeDataBase = async (name: string): Promise<BridgeDataBase> 
 }
 
 describe("BridgeDatabase tests", () => {
-    before("", async () => {
-        const DB = await loadBridgeDataBase("bridge");
+    before("loading database", async () => {
+        await loadBridgeDataBase("bridge");
         await commitmentRepo.save([commitmentEntity, spentCommitmentEntity])
         await permitRepo.save([permitEntity, spentPermitEntity])
         await boxRepo.save([plainBox, spentPlainBox, fakePlainBox, WIDBox, spentWIDBox, fakeWIDBox])
