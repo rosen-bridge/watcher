@@ -74,7 +74,8 @@ describe("Testing the DatabaseConnection", () => {
     describe("allReadyCommitmentSets", () => {
         it("should not return commitment set", async () => {
             const networkDb = await loadNetworkDataBase("dataBase-commitment-1");
-            await networkDb.getObservationRepository().save([observationEntity2])
+            await networkDb.getObservationRepository().save([observationEntity2]);
+            await networkDb.getObservationStatusEntity().save([{observation:observationEntity2,status:TxStatus.NOT_COMMITTED}]);
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity2])
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)

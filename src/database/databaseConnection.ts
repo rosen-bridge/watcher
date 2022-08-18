@@ -30,7 +30,9 @@ export class DatabaseConnection{
      * @param observation
      */
     isObservationValid = async (observation: ObservationEntity): Promise<boolean> => {
-        const observationStatus = await this.networkDataBase.setStatusForObservations(observation);
+        const observationStatus = await this.networkDataBase.getStatusForObservations(observation);
+        if (observationStatus === null)
+            throw new Error(`observation with requestId ${observation.requestId} has no status`)
         if (observationStatus.status == TxStatus.TIMED_OUT) return false
         const currentHeight = await ErgoNetwork.getHeight()
         if (currentHeight - observation.height > this.observationValidThreshold) {
@@ -45,7 +47,9 @@ export class DatabaseConnection{
      * @param observation
      */
     isMergeHappened = async (observation: ObservationEntity): Promise<boolean> => {
-        const observationStatus = await this.networkDataBase.setStatusForObservations(observation);
+        const observationStatus = await this.networkDataBase.getStatusForObservations(observation);
+        if (observationStatus === null)
+            throw new Error(`observation with requestId ${observation.requestId} has no status`)
         if (observationStatus.status == TxStatus.REVEALED) return true
         const eventTrigger = await this.bridgeDataBase.eventTriggerBySourceTxId(observation.sourceTxId)
         if (eventTrigger) {
