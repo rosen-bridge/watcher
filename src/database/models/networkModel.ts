@@ -38,10 +38,9 @@ class NetworkDataBase{
      */
     getConfirmedObservations = async (confirmation: number, height: number) => {
         const requiredHeight = height - confirmation;
-        const temp = await this.observationRepository.createQueryBuilder('observation_entity')
+        return await this.observationRepository.createQueryBuilder('observation_entity')
             .where('observation_entity.height < :requiredHeight', {requiredHeight})
             .getMany()
-        return temp;
     }
 
     /**
