@@ -81,11 +81,13 @@ export class DatabaseConnection{
         const height = await ErgoNetwork.getHeight()
         let observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height));
         const observationsStatus = await Promise.all(observations.map(async observation => {
-            const observationStatus = await this.networkDataBase.setStatusForObservations(observation);
-            return observationStatus.status;
+            const observationStatus = await this.networkDataBase.getStatusForObservations(observation);
+            if (observationStatus === null)
+                return null
+            else return observationStatus.status;
         }))
-        observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height))
-            .filter((observation, index) => observationsStatus[index] == TxStatus.COMMITTED)
+        observations = (observations)
+            .filter((observation, index) => observationsStatus[index] == null || observationsStatus[index] == TxStatus.COMMITTED)
         for (const observation of observations) {
             const relatedCommitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
             if (!(await this.isMergeHappened(observation)))

@@ -1,5 +1,4 @@
-import { DataSource, Repository } from "typeorm";
-import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { DataSource } from "typeorm";
 import { NetworkDataBase } from "../../src/database/models/networkModel";
 import { describe } from "mocha";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
@@ -7,7 +6,7 @@ import { TxType } from "../../src/database/entities/TxEntity";
 
 import chai, { expect } from "chai";
 import { observationEntity2 } from "./mockedData";
-import { TxStatus } from "../../src/database/entities/ObservationStatusEntity";
+import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/ObservationStatusEntity";
 
 export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -33,6 +32,7 @@ describe("NetworkModel tests", () => {
     before("inserting into database", async () => {
         const DB = await loadNetworkDataBase("dataBase");
         await DB.getObservationRepository().save([observationEntity2])
+        await DB.getObservationStatusEntity().save([{observation:observationEntity2,status:TxStatus.NOT_COMMITTED}]);
     })
 
 

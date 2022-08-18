@@ -38,22 +38,21 @@ class NetworkDataBase{
      */
     getConfirmedObservations = async (confirmation: number, height: number) => {
         const requiredHeight = height - confirmation;
-        return await this.observationRepository.createQueryBuilder('observation_entity')
+        const temp = await this.observationRepository.createQueryBuilder('observation_entity')
             .where('observation_entity.height < :requiredHeight', {requiredHeight})
             .getMany()
+        console.log("********************")
+        console.log(temp)
+        return temp;
     }
 
     /**
      * setting NOT_COMMITTED status for observations that doesn't have status and return last status
      * @param observation
+     * @param status
      */
     setStatusForObservations = async (observation: ObservationEntity, status: TxStatus = TxStatus.NOT_COMMITTED): Promise<ObservationStatusEntity> => {
-        const observationStatus = await this.observationStatusEntity.findOne(
-            {
-                where: {
-                    observation: observation
-                }
-            });
+        const observationStatus = await this.getStatusForObservations(observation);
         if (!observationStatus) {
             return await this.observationStatusEntity.save({
                 observation: observation,
@@ -63,7 +62,15 @@ class NetworkDataBase{
         } else {
             return observationStatus
         }
+    }
 
+    getStatusForObservations = async (observation: ObservationEntity) => {
+        return await this.observationStatusEntity.findOne(
+            {
+                where: {
+                    observation: observation
+                }
+            });
     }
 
     /**
@@ -78,7 +85,9 @@ class NetworkDataBase{
             where: {requestId: requestId}
         }));
         if (!observation) throw new Error("Observation with this request id is not found");
-        await this.setStatusForObservations(observation);
+        const observationStatus = await this.getStatusForObservations(observation);
+        if (observationStatus === null)
+            throw new Error(`observation with requestId ${observation.requestId} has no status`)
         const height = await ErgoNetwork.getHeight();
         const time = new Date().getTime();
         return await this.txRepository.insert({
@@ -125,7 +134,9 @@ class NetworkDataBase{
      * @param observation
      */
     upgradeObservationTxStatus = async (observation: ObservationEntity) => {
-        const observationStatus = await this.setStatusForObservations(observation);
+        const observationStatus = await this.getStatusForObservations(observation);
+        if (observationStatus === null)
+            throw new Error(`observation with requestId ${observation.requestId} has no status`)
         return this.observationStatusEntity.save({
             id: observationStatus.id,
             status: observationStatus.status + 1
@@ -137,7 +148,9 @@ class NetworkDataBase{
      * @param observation
      */
     downgradeObservationTxStatus = async (observation: ObservationEntity) => {
-        const observationStatus = await this.setStatusForObservations(observation);
+        const observationStatus = await this.getStatusForObservations(observation);
+        if (observationStatus === null)
+            throw new Error(`observation with requestId ${observation.requestId} has no status`)
         return this.observationStatusEntity.save({
             id: observationStatus.id,
             status: observationStatus.status - 1
@@ -151,7 +164,9 @@ class NetworkDataBase{
      * @param status
      */
     updateObservationTxStatus = async (observation: ObservationEntity, status: TxStatus) => {
-        const observationStatus = await this.setStatusForObservations(observation);
+        const observationStatus = await this.getStatusForObservations(observation);
+        if (observationStatus === null)
+            throw new Error(`observation with requestId ${observation.requestId} has no status`)
         return this.observationStatusEntity.save({
             id: observationStatus.id,
             status: status
