@@ -91,12 +91,12 @@ export class DatabaseConnection{
             else return observationStatus.status;
         }))
         observations = (observations)
-            .filter((observation, index) => observationsStatus[index] == null || observationsStatus[index] == TxStatus.COMMITTED)
+            .filter((observation, index) => observationsStatus[index] == TxStatus.COMMITTED)
         for (const observation of observations) {
             const relatedCommitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
             if (!(await this.isMergeHappened(observation)))
                 readyCommitments.push({
-                    commitments: relatedCommitments.filter(commitment => commitment.spendBlockHash === undefined),
+                    commitments: relatedCommitments.filter(commitment => commitment.spendBlockHash === null),
                     observation: observation
                 })
         }

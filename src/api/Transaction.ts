@@ -89,7 +89,7 @@ export class Transaction{
         const WID = this.watcherWID!;
         const height = await ErgoNetwork.getHeight();
 
-        const permitBoxes = await this.boxes.getPermits(RWTCount)
+        const permitBoxes = await this.boxes.getPermits(WID, RWTCount)
         const repoBox = await this.boxes.getRepoBox();
         const R4 = repoBox.register_value(4)
         const R5 = repoBox.register_value(5)
@@ -377,7 +377,6 @@ export class Transaction{
         await ErgoNetwork.sendTx(signedTx.to_json());
         this.watcherPermitState = !this.watcherPermitState;
         this.watcherWID = WIDToken.to_str();
-        addWidExtractor(WIDToken.to_str())
         return {response: signedTx.id().to_str(), status: 200};
     }
 

@@ -3,7 +3,7 @@
         "network": "Ergo",
         "observation" : {
             "confirmation": 2,
-            "validThreshold": 100
+            "validThreshold": 1000
         }
     },
     "cardano": {
@@ -21,12 +21,12 @@
         "explorerTimeout": 10000,
         "nodeTimeout": 10000,
         "networkType": "Mainnet",
-        "watcherSecretKey": "ed5242e13db8161b2079d4cb49cb9553d87e90b0898e44bc10b9b5d309dbac65",
+        "watcherSecretKey": "08891ecaac6a8318ce59987534652b90c44e33060469d136cac9dc345db6068f",
         "RWTId": "497287b9a1eff643791277744a74b7d598b834dc613f2ebc972e33767c61ac2b",
         "repoNFT": "89d73d2e029efeb5d8d5343a8589c255d359fc9a1856ecf9f45e9bdfe9d9b5bd",
         "scanner": {
             "interval": 10,
-            "initialBlockHeight": 267226
+            "initialBlockHeight": 267544
         },
         "commitmentCreationInterval": 180,
         "commitmentRevealInterval": 180,

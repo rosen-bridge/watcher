@@ -55,19 +55,16 @@ class NetworkDataBase{
                 observation: observation,
                 status: status
             });
-
         } else {
             return observationStatus
         }
     }
 
     getStatusForObservations = async (observation: ObservationEntity) => {
-        return await this.observationStatusEntity.findOne(
-            {
-                where: {
-                    observation: observation
-                }
-            });
+        return await this.observationStatusEntity.createQueryBuilder("observation_status_entity")
+            .leftJoinAndSelect("observation_status_entity.observation", "observation_entity")
+            .where("observation_entity.id == :observationId", {observationId: observation.id})
+            .getOne()
     }
 
     /**
@@ -103,6 +100,7 @@ class NetworkDataBase{
      */
     getAllTxs = async () => {
         return await this.txRepository.createQueryBuilder("tx_entity")
+            .leftJoinAndSelect("tx_entity.observation", "observation_entity")
             .where("tx_entity.deleted == false")
             .getMany()
     }

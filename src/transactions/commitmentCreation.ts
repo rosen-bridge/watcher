@@ -4,7 +4,7 @@ import { ErgoUtils } from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { Config } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import { boxCreationError, NotEnoughFund } from "../utils/errors";
+import { boxCreationError, NotEnoughFund, NoWID } from "../utils/errors";
 import { DatabaseConnection } from "../database/databaseConnection";
 import { Transaction } from "../api/Transaction";
 import { hexStrToUint8Array } from "../utils/utils";
@@ -27,7 +27,7 @@ export class CommitmentCreation {
     /**
      * creates the commitment transaction and submits to the transactionQueue
      * @param WID
-     * @param requestId
+     * @param observation
      * @param eventDigest
      * @param permits
      * @param WIDBox
@@ -94,8 +94,9 @@ export class CommitmentCreation {
         for (const observation of observations) {
             try {
                 const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
-                const permits = await this.boxes.getPermits(BigInt(0))
-                const WIDBox = await this.boxes.getWIDBox()
+                const permits = await this.boxes.getPermits(WID)
+                const WIDBox = await this.boxes.getWIDBox(WID)
+                console.log("found boxes")
                 const totalValue: bigint = permits.map(permit =>
                         BigInt(permit.value().as_i64().to_str()))
                         .reduce((a, b) => a + b, BigInt(0)) +
@@ -109,7 +110,7 @@ export class CommitmentCreation {
                 }
                 await this.createCommitmentTx(WID, observation, commitment, permits, WIDBox, feeBoxes)
             } catch(e) {
-                if(!(e instanceof NotEnoughFund))
+                if(!(e instanceof NotEnoughFund) || !(e instanceof NoWID))
                     console.log(e)
                 console.log("Skipping the commitment creation")
             }

@@ -7,6 +7,7 @@ import { boxCreationError } from "../utils/errors";
 import { blake2b } from "blakejs";
 import { Boxes } from "./boxes";
 import { Buffer } from "buffer";
+import { ErgoBox } from "ergo-lib-wasm-nodejs";
 
 const txFee = parseInt(rosenConfig.fee)
 
@@ -36,6 +37,9 @@ export const generateSK = (): wasm.SecretKey => {
 }
 export const decodeSerializedBox = (boxSerialized: string) => {
     return wasm.ErgoBox.sigma_parse_bytes(new Uint8Array(Buffer.from(boxSerialized, "base64")))
+}
+export const boxHaveAsset = (box: ErgoBox, asset: string) => {
+    return extractTokens(box.tokens()).map(token => token.id().to_str()).includes(asset)
 }
 
 

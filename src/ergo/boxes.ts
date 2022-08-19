@@ -1,5 +1,5 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { decodeSerializedBox, ErgoUtils } from "./utils";
+import { boxHaveAsset, decodeSerializedBox, ErgoUtils } from "./utils";
 import { Config } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
@@ -7,57 +7,70 @@ import { BridgeDataBase } from "../database/models/bridgeModel";
 import { Observation } from "../utils/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { Buffer } from "buffer";
+import { BoxEntity } from "../../../address-extractor";
+import { NoWID } from "../utils/errors";
 
 const ergoConfig = Config.getConfig();
 
 
-export class Boxes{
-    _dataBase: BridgeDataBase
+export class Boxes {
+    dataBase: BridgeDataBase
     repoNFTId: wasm.TokenId;
     RWTTokenId: wasm.TokenId;
     RSN: wasm.TokenId;
     watcherPermitContract: wasm.Contract;
-    watcherPermitAddress: wasm.Address;
     minBoxValue: wasm.BoxValue;
     fee: wasm.BoxValue;
     userAddressContract: wasm.Contract;
-    userAddress: wasm.Address;
     repoAddressContract: wasm.Contract;
     repoAddress: wasm.Address;
     rosenConfig: rosenConfig;
 
     constructor(rosenConfig: rosenConfig, db: BridgeDataBase) {
-        this._dataBase = db
+        this.dataBase = db
         this.repoNFTId = wasm.TokenId.from_str(ergoConfig.RepoNFT);
         this.RWTTokenId = wasm.TokenId.from_str(ergoConfig.RWTId);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
-        this.watcherPermitAddress = wasm.Address.from_base58(rosenConfig.watcherPermitAddress);
-        this.watcherPermitContract = wasm.Contract.pay_to_address(this.watcherPermitAddress);
+        const watcherPermitAddress = wasm.Address.from_base58(rosenConfig.watcherPermitAddress);
+        this.watcherPermitContract = wasm.Contract.pay_to_address(watcherPermitAddress);
         this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
-        this.userAddress = wasm.Address.from_base58(ergoConfig.address);
-        this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);
+        const userAddress = wasm.Address.from_base58(ergoConfig.address);
+        this.userAddressContract = wasm.Contract.pay_to_address(userAddress);
         this.repoAddress = wasm.Address.from_base58(rosenConfig.RWTRepoAddress);
         this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
         this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
         this.rosenConfig = rosenConfig;
     }
 
-    getPermits = async (RWTCount: bigint): Promise<Array<wasm.ErgoBox>> => {
+    getPermits = async (wid: string, RWTCount?: bigint): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Rewrite the function to return the required number of RWTs after changing database
-        const permits = await this._dataBase.getUnspentPermitBoxes()
+        const permits = await this.dataBase.getUnspentPermitBoxes(wid)
         const permitBoxes = permits.map(async (permit) => {
             return await ErgoNetwork.trackMemPool(decodeSerializedBox(permit.boxSerialized))
         })
         return Promise.all(permitBoxes)
     }
 
-    getWIDBox = async (): Promise<wasm.ErgoBox> => {
-        const WID = (await this._dataBase.getUnspentWIDBoxes())[0]
-        return await ErgoNetwork.trackMemPool(decodeSerializedBox(WID.serialized))
+    getWIDBox = async (wid?: string): Promise<wasm.ErgoBox> => {
+        if (wid) {
+            console.log("here")
+            const WID = (await this.dataBase.getUnspentAddressBoxes())
+                .map((box: BoxEntity) => { return decodeSerializedBox(box.serialized) })
+                .filter((box: wasm.ErgoBox) => box.tokens().len() > 0 && boxHaveAsset(box, wid))[0]
+            console.log(WID)
+            if (!WID) {
+                console.log("WID box is not found, can not sign the transaction. Please check the box containing the WID is created after the scanner initial height.")
+                throw NoWID
+            }
+            return await ErgoNetwork.trackMemPool(WID)
+        } else {
+            console.log("Watcher WID is not set, can not sign the transaction.")
+            throw NoWID
+        }
     }
 
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
-        const boxes = await this._dataBase.getUnspentPlainBoxes()
+        const boxes = await this.dataBase.getUnspentAddressBoxes()
         // TODO: Improvement on selecting the plain boxes
         // const selectedBoxes = []
         // let totalValue = BigInt(0)
@@ -90,7 +103,6 @@ export class Boxes{
 
     /**
      * creates a new permit box with required data
-     * @param value
      * @param height
      * @param RWTCount
      * @param WID
@@ -111,7 +123,6 @@ export class Boxes{
 
     /**
      * creates a new commitment box with the required information on registers
-     * @param value
      * @param height
      * @param WID
      * @param requestId

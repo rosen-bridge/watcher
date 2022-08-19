@@ -23,3 +23,10 @@ export class NotEnoughFund extends Error {
         this.name = "NotEnoughFund"
     }
 }
+
+export class NoWID extends Error {
+    constructor(message?: string) {
+        super(message)
+        this.name = "Watcher WID is not set"
+    }
+}

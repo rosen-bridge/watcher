@@ -75,7 +75,7 @@ describe("Testing Box Creation", () => {
             mempoolTrack.onCall(1).resolves(wasm.ErgoBox.from_json(WIDJson))
             mempoolTrack.onCall(2).resolves(wasm.ErgoBox.from_json(plainJson))
             const boxes = new Boxes(rosenConfig, DB)
-            const data = await boxes.getPermits(BigInt(0))
+            const data = await boxes.getPermits(WID)
             expect(data).to.have.length(1)
             expect(data[0].box_id().to_str()).to.eq(permitBox.boxId)
         })
