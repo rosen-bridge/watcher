@@ -17,7 +17,7 @@ class ObservationStatusEntity{
 
     @OneToOne(
         "ObservationEntity",
-        "requestId"
+        "id"
     )
     @JoinColumn()
     observation: Relation<ObservationEntity>

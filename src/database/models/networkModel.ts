@@ -51,10 +51,16 @@ class NetworkDataBase{
     setStatusForObservations = async (observation: ObservationEntity, status: TxStatus = TxStatus.NOT_COMMITTED): Promise<ObservationStatusEntity> => {
         const observationStatus = await this.getStatusForObservations(observation);
         if (!observationStatus) {
-            return await this.observationStatusEntity.save({
+            await this.observationStatusEntity.insert({
                 observation: observation,
                 status: status
             });
+            const insertedStatus = await this.getStatusForObservations(observation);
+            if (insertedStatus === null) {
+                throw new Error(`observation status with requestId ${observation.requestId} doesn't inserted in the dataBase`);
+            } else {
+                return insertedStatus
+            }
         } else {
             return observationStatus
         }
@@ -137,10 +143,18 @@ class NetworkDataBase{
         const observationStatus = await this.getStatusForObservations(observation);
         if (observationStatus === null)
             throw new Error(`observation with requestId ${observation.requestId} has no status`)
-        return this.observationStatusEntity.save({
-            id: observationStatus.id,
-            status: observationStatus.status + 1
-        });
+        await this.observationStatusEntity.update({
+                id: observationStatus.id
+            }, {
+                status: observationStatus.status + 1
+            }
+        )
+        const updatedStatus = await this.getStatusForObservations(observation);
+        if (updatedStatus === null) {
+            throw new Error(`observation status with requestId ${observation.requestId} doesn't inserted in the dataBase`);
+        } else {
+            return updatedStatus
+        }
     }
 
     /**
@@ -151,10 +165,18 @@ class NetworkDataBase{
         const observationStatus = await this.getStatusForObservations(observation);
         if (observationStatus === null)
             throw new Error(`observation with requestId ${observation.requestId} has no status`)
-        return this.observationStatusEntity.save({
-            id: observationStatus.id,
-            status: observationStatus.status - 1
-        });
+        await this.observationStatusEntity.update({
+                id: observationStatus.id
+            }, {
+                status: observationStatus.status - 1
+            }
+        )
+        const updatedStatus = await this.getStatusForObservations(observation);
+        if (updatedStatus === null) {
+            throw new Error(`observation status with requestId ${observation.requestId} doesn't inserted in the dataBase`);
+        } else {
+            return updatedStatus
+        }
 
     }
 
@@ -167,10 +189,18 @@ class NetworkDataBase{
         const observationStatus = await this.getStatusForObservations(observation);
         if (observationStatus === null)
             throw new Error(`observation with requestId ${observation.requestId} has no status`)
-        return this.observationStatusEntity.save({
-            id: observationStatus.id,
-            status: status
-        });
+        await this.observationStatusEntity.update({
+                id: observationStatus.id
+            }, {
+                status: status
+            }
+        )
+        const updatedStatus = await this.getStatusForObservations(observation);
+        if (updatedStatus === null) {
+            throw new Error(`observation status with requestId ${observation.requestId} doesn't inserted in the dataBase`);
+        } else {
+            return updatedStatus
+        }
     }
 }
 

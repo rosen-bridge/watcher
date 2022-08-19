@@ -66,15 +66,17 @@ export class DatabaseConnection{
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
         const height = await ErgoNetwork.getHeight()
-        let observations = await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height);
-        const observationsStatus = await Promise.all(observations.map(async observation => {
-            return await this.networkDataBase.setStatusForObservations(observation)
-        }))
-        observations = (observationsStatus)
-            .filter((observation) => observation.status === TxStatus.NOT_COMMITTED)
-            .map(observationStatus => observationStatus.observation)
-        return Promise.all(observations.map(async observation => await this.isObservationValid(observation)))
-            .then(result => observations.filter((_v, index) => result[index]))
+        const observations = await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height);
+        const validObservations: Array<ObservationEntity> = [];
+        for (const observation of observations) {
+            const observationStatus = await this.networkDataBase.setStatusForObservations(observation);
+            if (observationStatus.status === TxStatus.NOT_COMMITTED) {
+                if (await this.isObservationValid(observation)) {
+                    validObservations.push(observation);
+                }
+            }
+        }
+        return validObservations
     }
 
     /**
@@ -83,22 +85,18 @@ export class DatabaseConnection{
     allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
         const readyCommitments: Array<CommitmentSet> = []
         const height = await ErgoNetwork.getHeight()
-        let observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height));
-        const observationsStatus = await Promise.all(observations.map(async observation => {
-            const observationStatus = await this.networkDataBase.getStatusForObservations(observation);
-            if (observationStatus === null)
-                return null
-            else return observationStatus.status;
-        }))
-        observations = (observations)
-            .filter((observation, index) => observationsStatus[index] == null || observationsStatus[index] == TxStatus.COMMITTED)
+        const observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height));
         for (const observation of observations) {
-            const relatedCommitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
-            if (!(await this.isMergeHappened(observation)))
-                readyCommitments.push({
-                    commitments: relatedCommitments.filter(commitment => commitment.spendBlockHash === undefined),
-                    observation: observation
-                })
+            const observationStatus = await this.networkDataBase.getStatusForObservations(observation);
+            if (observationStatus !== null && observationStatus.status === TxStatus.COMMITTED) {
+                const relatedCommitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
+                if (!(await this.isMergeHappened(observation))) {
+                    readyCommitments.push({
+                        commitments: relatedCommitments.filter(commitment => commitment.spendBlockHash === undefined),
+                        observation: observation
+                    })
+                }
+            }
         }
         return readyCommitments
     }

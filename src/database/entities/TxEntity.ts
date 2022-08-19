@@ -1,6 +1,5 @@
 import { Column, Entity, ManyToOne, OneToOne, PrimaryColumn, Relation } from "typeorm";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor"
-import { ObservationStatusEntity } from "./ObservationStatusEntity";
 
 export enum TxType{
     COMMITMENT = 'commitment',
@@ -32,8 +31,7 @@ export class TxEntity{
 
     @ManyToOne(
         "ObservationEntity",
-        "requestId",
-        {cascade: true}
+        "id",
     )
     observation: Relation<ObservationEntity>
 
