@@ -16,7 +16,6 @@ import { reveal } from "./jobs/commitmetnReveal";
 import { transactionQueueJob } from "./jobs/transactionQueue";
 import { delay } from "./utils/utils";
 import { ErgoScanner } from "@rosen-bridge/scanner";
-import * as wasm from "ergo-lib-wasm-nodejs";
 
 
 const ergoConfig = Config.getConfig();
@@ -72,7 +71,7 @@ const init = async () => {
             // Running network scanner thread
             scannerInit(watcherTransaction.watcherWID)
 
-            await delay(30000)
+            await delay(10000)
             databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, ergoConfig.observationConfirmation, ergoConfig.observationValidThreshold)
             // Running transaction checking thread
             transactionQueueJob()

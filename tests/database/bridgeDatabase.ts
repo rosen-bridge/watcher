@@ -87,7 +87,7 @@ describe("BridgeDatabase tests", () => {
     describe("getUnspentPermitBoxes", () => {
         it("should find one unspent permit box", async () => {
             const DB = await loadBridgeDataBase("bridge");
-            const data = await DB.getUnspentPermitBoxes()
+            const data = await DB.getUnspentPermitBoxes("WID")
             expect(data).to.have.length(1)
             expect(data[0]).to.eql(permitEntity)
         })
@@ -96,18 +96,9 @@ describe("BridgeDatabase tests", () => {
     describe("getUnspentPlainBoxes", () => {
         it("should find one unspent plain box", async () => {
             const DB = await loadBridgeDataBase("bridge");
-            const data = await DB.getUnspentPlainBoxes()
+            const data = await DB.getUnspentAddressBoxes()
             expect(data).to.have.length(1)
             expect(data[0]).to.eql(plainBox)
-        })
-    })
-
-    describe("getUnspentWIDBoxes", () => {
-        it("should find one unspent WID box", async () => {
-            const DB = await loadBridgeDataBase("bridge");
-            const data = await DB.getUnspentWIDBoxes()
-            expect(data).to.have.length(1)
-            expect(data[0]).to.eql(WIDBox)
         })
     })
 

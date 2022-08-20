@@ -76,7 +76,7 @@ class NetworkDataBase{
                 where: {
                     observation: observation
                 }
-            });
+            })
     }
 
     /**
@@ -112,6 +112,7 @@ class NetworkDataBase{
      */
     getAllTxs = async () => {
         return await this.txRepository.createQueryBuilder("tx_entity")
+            .leftJoinAndSelect("tx_entity.observation", "observation_entity")
             .where("tx_entity.deleted == false")
             .getMany()
     }

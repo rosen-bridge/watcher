@@ -63,31 +63,19 @@ class BridgeDataBase{
     /**
      * Returns all unspent permit boxes
      */
-    getUnspentPermitBoxes = async (): Promise<Array<PermitEntity>> => {
+    getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
         return this.permitRepository.createQueryBuilder("permit_entity")
-            .where("spendBlockHash is null")
+            .where("WID == :wid", {wid})
+            .andWhere("spendBlockHash is null")
             .getMany()
     }
 
     /**
      * Returns all unspent plain boxes
      */
-    getUnspentPlainBoxes = async (): Promise<Array<BoxEntity>> => {
+    getUnspentAddressBoxes = async (): Promise<Array<BoxEntity>> => {
         return this.boxRepository.createQueryBuilder("box_entity")
-            .where("extractor = :extractor AND spendBlock is null", {
-                "extractor": config.plainExtractorName
-            })
-            .getMany()
-    }
-
-    /**
-     * Returns all unspent wid boxes
-     */
-    getUnspentWIDBoxes = async (): Promise<Array<BoxEntity>> => {
-        return this.boxRepository.createQueryBuilder("box_entity")
-            .where("extractor = :extractor AND spendBlock is null", {
-                "extractor": config.widExtractorName
-            })
+            .where("spendBlock is null", )
             .getMany()
     }
 
