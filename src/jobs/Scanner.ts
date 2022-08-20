@@ -53,12 +53,6 @@ export const scannerInit = (WID?: string) => {
     scanner.registerExtractor(permitExtractor)
     scanner.registerExtractor(eventTriggerExtractor)
     scanner.registerExtractor(plainExtractor)
-    if(WID) addWidExtractor(WID)
 
     // TODO: Add commitment cleanup job
-}
-
-export const addWidExtractor = (WID: string) => {
-    const widExtractor = new ErgoUTXOExtractor(dataSource, ergoConfig.widExtractorName, ergoConfig.networkType, ergoConfig.address, [WID])
-    scanner.registerExtractor(widExtractor)
 }

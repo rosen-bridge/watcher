@@ -113,6 +113,7 @@ export class ErgoUtils {
                             inputs: wasm.ErgoBoxes,
                             dataInputs: wasm.ErgoBoxes = wasm.ErgoBoxes.from_boxes_json([])) => {
         const tx = builder.build();
+        console.log(tx.to_json())
         const secrets = new wasm.SecretKeys()
         secrets.add(secret)
         const wallet = wasm.Wallet.from_secrets(secrets);
@@ -165,7 +166,7 @@ export class ErgoUtils {
      */
     static commitmentFromObservation = (observation: Observation, WID: string): Uint8Array => {
         const content = Buffer.concat([
-            Buffer.from(observation.sourceTxId, "hex"),
+            Buffer.from(observation.sourceTxId),
             Buffer.from(observation.fromChain),
             Buffer.from(observation.toChain),
             Buffer.from(observation.fromAddress),
@@ -173,9 +174,9 @@ export class ErgoUtils {
             bigIntToUint8Array(BigInt(observation.amount)),
             bigIntToUint8Array(BigInt(observation.bridgeFee)),
             bigIntToUint8Array(BigInt(observation.networkFee)),
-            Buffer.from(observation.sourceChainTokenId, "hex"),
-            Buffer.from(observation.targetChainTokenId, "hex"),
-            Buffer.from(observation.sourceBlockId, "hex"),
+            Buffer.from(observation.sourceChainTokenId),
+            Buffer.from(observation.targetChainTokenId),
+            Buffer.from(observation.sourceBlockId),
             Buffer.from(WID, "hex"),
         ])
         return blake2b(content, undefined, 32)

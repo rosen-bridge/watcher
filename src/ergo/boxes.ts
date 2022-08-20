@@ -192,7 +192,7 @@ export class Boxes {
         );
         builder.add_token(this.RWTTokenId, wasm.TokenAmount.from_i64(wasm.I64.from_str(WIDs.length.toString())))
         const eventData = [
-            Buffer.from(observation.sourceTxId, "hex"),
+            Buffer.from(observation.sourceTxId),
             Buffer.from(observation.fromChain),
             Buffer.from(observation.toChain),
             Buffer.from(observation.fromAddress),
@@ -200,9 +200,9 @@ export class Boxes {
             bigIntToUint8Array(BigInt(observation.amount)),
             bigIntToUint8Array(BigInt(observation.bridgeFee)),
             bigIntToUint8Array(BigInt(observation.networkFee)),
-            Buffer.from(observation.sourceChainTokenId, "hex"),
-            Buffer.from(observation.targetChainTokenId, "hex"),
-            Buffer.from(observation.sourceBlockId, "hex")]
+            Buffer.from(observation.sourceChainTokenId),
+            Buffer.from(observation.targetChainTokenId),
+            Buffer.from(observation.sourceBlockId)]
         const permitHash = ErgoUtils.contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(this.rosenConfig.watcherPermitAddress)))
         builder.set_register_value(4, wasm.Constant.from_coll_coll_byte(WIDs))
         builder.set_register_value(5, wasm.Constant.from_coll_coll_byte(eventData))

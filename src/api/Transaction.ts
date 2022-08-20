@@ -5,7 +5,6 @@ import { rosenConfig } from "../config/rosenConfig";
 import { Config } from "../config/config";
 import { Boxes } from "../ergo/boxes";
 import { ErgoUtils } from "../ergo/utils";
-import { addWidExtractor } from "../jobs/Scanner";
 
 const ergoConfig = Config.getConfig();
 
