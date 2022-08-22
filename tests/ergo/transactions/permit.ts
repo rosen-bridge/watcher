@@ -6,14 +6,10 @@ import { loadBridgeDataBase } from "../../database/bridgeDatabase";
 import { Boxes } from "../../../src/ergo/boxes";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { boxesSample } from "../dataset/BoxesSample";
-import * as x from "../../../src/jobs/Scanner"
 
 import chai from "chai";
 import spies from "chai-spies";
 import { Buffer } from "buffer";
-import sinon from "sinon";
-import { addWidExtractor } from "../../../src/jobs/Scanner";
-import exp from "constants";
 
 chai.use(spies);
 

@@ -11,7 +11,7 @@ import sinon from "sinon";
 import { TxStatus } from "../../src/database/entities/ObservationStatusEntity";
 import {
     observationEntity1,
-    observationEntity2,
+    observationEntity2, observationStatus,
 } from "../database/mockedData";
 
 
@@ -84,13 +84,9 @@ describe("Testing the DatabaseConnection", () => {
         })
         it("should return one commitment set with two unspent commitments", async () => {
             const networkDb = await loadNetworkDataBase("dataBase-commitment-2");
-            await networkDb.getObservationRepository().save([observationEntity2])
-            await networkDb.getObservationStatusEntity().insert({
-                observation: observationEntity2,
-                status: TxStatus.COMMITTED
-            })
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity2])
+            chai.spy.on(networkDb, "getStatusForObservations", () => observationStatus)
             chai.spy.on(bridgeDb, "commitmentsByEventId", () => [unspentCommitment, unspentCommitment2, redeemedCommitment])
             chai.spy.on(bridgeDb, "eventTriggerBySourceTxId", () => null)
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
@@ -100,13 +96,9 @@ describe("Testing the DatabaseConnection", () => {
         })
         it("should not return any commitment set because one of them is merged", async () => {
             const networkDb = await loadNetworkDataBase("dataBase-commitment-3");
-            await networkDb.getObservationRepository().save([observationEntity2])
-            await networkDb.getObservationStatusEntity().insert({
-                observation: observationEntity2,
-                status: TxStatus.COMMITTED
-            })
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity2])
+            chai.spy.on(networkDb, "getStatusForObservations", () => observationStatus)
             chai.spy.on(bridgeDb, "commitmentsByEventId", () => [unspentCommitment, mergedCommitment, redeemedCommitment])
             chai.spy.on(bridgeDb, "eventTriggerBySourceTxId", () => eventTrigger)
             chai.spy.on(networkDb, "updateObservationTxStatus", () => undefined)

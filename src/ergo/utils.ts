@@ -113,7 +113,6 @@ export class ErgoUtils {
                             inputs: wasm.ErgoBoxes,
                             dataInputs: wasm.ErgoBoxes = wasm.ErgoBoxes.from_boxes_json([])) => {
         const tx = builder.build();
-        console.log(tx.to_json())
         const secrets = new wasm.SecretKeys()
         secrets.add(secret)
         const wallet = wasm.Wallet.from_secrets(secrets);

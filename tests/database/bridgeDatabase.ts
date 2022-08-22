@@ -4,10 +4,10 @@ import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridg
 import { describe } from "mocha";
 import { expect } from "chai";
 import {
-    commitmentEntity, eventTriggerEntity, fakePlainBox, fakeWIDBox, newEventTriggerEntity,
+    commitmentEntity, eventTriggerEntity, newEventTriggerEntity,
     permitEntity, plainBox,
     spentCommitmentEntity,
-    spentPermitEntity, spentPlainBox, spentWIDBox, WIDBox
+    spentPermitEntity, spentPlainBox
 } from "./mockedData";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 
@@ -45,7 +45,7 @@ describe("BridgeDatabase tests", () => {
         await loadBridgeDataBase("bridge");
         await commitmentRepo.save([commitmentEntity, spentCommitmentEntity])
         await permitRepo.save([permitEntity, spentPermitEntity])
-        await boxRepo.save([plainBox, spentPlainBox, fakePlainBox, WIDBox, spentWIDBox, fakeWIDBox])
+        await boxRepo.save([plainBox, spentPlainBox])
         await eventTriggerRepo.save([eventTriggerEntity, newEventTriggerEntity])
     })
 

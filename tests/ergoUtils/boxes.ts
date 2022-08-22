@@ -17,7 +17,7 @@ import { Observation } from "../../src/utils/interfaces";
 
 import chai from "chai";
 import spies from "chai-spies";
-import sinon from "sinon"
+import sinon, { resetBehavior } from "sinon"
 import chaiPromise from "chai-as-promised"
 
 import permitObj from "./dataset/permitBox.json" assert { type: "json" }
@@ -84,9 +84,9 @@ describe("Testing Box Creation", () => {
     describe("getWIDBox", () => {
         it("returns all wids ready to merge", async () => {
             const DB = await loadBridgeDataBase("commitments");
-            chai.spy.on(DB, 'getUnspentWIDBoxes', () => [WIDBox])
+            chai.spy.on(DB, 'getUnspentAddressBoxes', () => [WIDBox])
             const boxes = new Boxes(rosenConfig, DB)
-            const data = await boxes.getWIDBox()
+            const data = await boxes.getWIDBox("f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b")
             expect(data.box_id().to_str()).to.eq(WIDBox.boxId)
         })
     })
@@ -94,7 +94,7 @@ describe("Testing Box Creation", () => {
     describe("getUserPaymentBox", () => {
         it("returns a covering plain boxesSample", async () => {
             const DB = await loadBridgeDataBase("commitments");
-            chai.spy.on(DB, 'getUnspentPlainBoxes', () => [plainBox])
+            chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox])
             const boxes = new Boxes(rosenConfig, DB)
             const data = await boxes.getUserPaymentBox(value)
             expect(data).to.have.length(1)

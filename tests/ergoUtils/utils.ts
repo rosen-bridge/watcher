@@ -47,7 +47,7 @@ describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {
         it("should return the correct commitment", () => {
             const res = ErgoUtils.commitmentFromObservation(observation, WID)
-            expect(uint8ArrayToHex(res)).to.eql("188c1f6c228e07bd79fcbf198c5dbed51e0f6208feff9e868632b0b30ea5b4b0")
+            expect(uint8ArrayToHex(res)).to.eql("1e00562af2a1c57b7b4495286f7122c12c78fb3665381fd240e60d9ad45a53bb")
         })
     })
 

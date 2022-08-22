@@ -13,7 +13,7 @@ import { NoWID } from "../utils/errors";
 const ergoConfig = Config.getConfig();
 
 
-export class Boxes {
+export class Boxes{
     dataBase: BridgeDataBase
     repoNFTId: wasm.TokenId;
     RWTTokenId: wasm.TokenId;
@@ -53,11 +53,11 @@ export class Boxes {
 
     getWIDBox = async (wid?: string): Promise<wasm.ErgoBox> => {
         if (wid) {
-            console.log("here")
             const WID = (await this.dataBase.getUnspentAddressBoxes())
-                .map((box: BoxEntity) => { return decodeSerializedBox(box.serialized) })
+                .map((box: BoxEntity) => {
+                    return decodeSerializedBox(box.serialized)
+                })
                 .filter((box: wasm.ErgoBox) => box.tokens().len() > 0 && boxHaveAsset(box, wid))[0]
-            console.log(WID)
             if (!WID) {
                 console.log("WID box is not found, can not sign the transaction. Please check the box containing the WID is created after the scanner initial height.")
                 throw NoWID

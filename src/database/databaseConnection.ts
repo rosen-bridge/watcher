@@ -92,7 +92,7 @@ export class DatabaseConnection{
                 const relatedCommitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
                 if (!(await this.isMergeHappened(observation))) {
                     readyCommitments.push({
-                        commitments: relatedCommitments.filter(commitment => commitment.spendBlockHash === null),
+                        commitments: relatedCommitments.filter(commitment => commitment.spendBlockHash == null),
                         observation: observation
                     })
                 }

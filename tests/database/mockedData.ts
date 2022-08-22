@@ -3,6 +3,7 @@ import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridg
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { Config } from "../../src/config/config";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/ObservationStatusEntity";
 
 const config = Config.getConfig()
 
@@ -81,39 +82,6 @@ spentPlainBox.boxId = "boxId2"
 spentPlainBox.serialized = "box2"
 spentPlainBox.spendBlock = "blockHash"
 
-export const fakePlainBox = new BoxEntity()
-fakePlainBox.address = "address"
-fakePlainBox.createBlock = "blockID"
-fakePlainBox.creationHeight = 100
-fakePlainBox.extractor = "fakeExtractor"
-fakePlainBox.boxId = "boxId"
-fakePlainBox.serialized = "box"
-
-export const WIDBox = new BoxEntity()
-WIDBox.address = "address"
-WIDBox.createBlock = "blockID"
-WIDBox.creationHeight = 100
-WIDBox.extractor = config.widExtractorName
-WIDBox.boxId = "boxId"
-WIDBox.serialized = "box"
-
-export const spentWIDBox = new BoxEntity()
-spentWIDBox.address = "address2"
-spentWIDBox.createBlock = "blockID2"
-spentWIDBox.creationHeight = 100
-spentWIDBox.extractor = config.widExtractorName
-spentWIDBox.boxId = "boxId"
-spentWIDBox.serialized = "box2"
-spentWIDBox.spendBlock = "blockHash"
-
-export const fakeWIDBox = new BoxEntity()
-fakeWIDBox.address = "address"
-fakeWIDBox.createBlock = "blockID"
-fakeWIDBox.creationHeight = 100
-fakeWIDBox.extractor = "fakeExtractor"
-fakeWIDBox.boxId = "boxId"
-fakeWIDBox.serialized = "box"
-fakeWIDBox.spendBlock = "blockHash"
 
 export const eventTriggerEntity = new EventTriggerEntity()
 eventTriggerEntity.sourceTxId = "txId"
@@ -190,5 +158,6 @@ observationEntity2.targetChainTokenId = "targetToken";
 observationEntity2.toChain = "cardano";
 observationEntity2.requestId = "reqId1";
 
-
+export const observationStatus = new ObservationStatusEntity()
+observationStatus.status = TxStatus.COMMITTED
 
