@@ -1,0 +1,20 @@
+{
+  "idKeys": {
+    "ergo": "tokenId",
+    "cardano": "fingerprint"
+  },
+  "tokens": [
+    {
+      "ergo": {
+        "tokenId": "0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95",
+        "tokenName": "test token3"
+      },
+      "cardano": {
+        "fingerprint": "asset1ycg2zvfj5x7zt4md3zkd0j5tekxs52kmwxpw05",
+        "policy_id": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
+        "asset_name": "646f6765",
+        "unit": "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc37e"
+      }
+    }
+  ]
+}

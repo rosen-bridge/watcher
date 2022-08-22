@@ -2,11 +2,11 @@ import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { hexStrToUint8Array, uint8ArrayToHex } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { Boxes } from "../ergo/boxes";
 import { ErgoUtils } from "../ergo/utils";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 export type ApiResponse = {
     response: string;
@@ -88,7 +88,7 @@ export class Transaction{
         const WID = this.watcherWID!;
         const height = await ErgoNetwork.getHeight();
 
-        const permitBoxes = await this.boxes.getPermits(RWTCount)
+        const permitBoxes = await this.boxes.getPermits(WID, RWTCount)
         const repoBox = await this.boxes.getRepoBox();
         const R4 = repoBox.register_value(4)
         const R5 = repoBox.register_value(5)

@@ -1,27 +1,29 @@
 import { Boxes } from "../../src/ergo/boxes";
 import { expect } from "chai";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { firstCommitment, loadBridgeDataBase } from "../bridge/models/bridgeModel";
+import { loadBridgeDataBase } from "../database/bridgeDatabase";
 import { ErgoUtils } from "../../src/ergo/utils";
-import { firstObservations } from "../cardano/models/models";
-import { SpecialBox } from "../../src/objects/interfaces";
-import { BoxType } from "../../src/entities/watcher/bridge/BoxEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
-import { NotEnoughFund } from "../../src/errors/errors";
+import { NotEnoughFund } from "../../src/utils/errors";
 import { hexStrToUint8Array } from "../../src/utils/utils";
 import { rosenConfig, tokens } from "../ergo/transactions/permit";
 import { initMockedAxios } from "../ergo/objects/axios";
 import { boxesSample } from "../ergo/dataset/BoxesSample";
-import { JsonBI } from "../../src/network/parser";
+import { JsonBI } from "../../src/ergo/network/parser";
+import { PermitEntity } from "@rosen-bridge/watcher-data-extractor";
+import { BoxEntity } from "@rosen-bridge/address-extractor";
+import { Buffer } from "buffer";
+import { Observation } from "../../src/utils/interfaces";
 
 import chai from "chai";
 import spies from "chai-spies";
-import sinon from "sinon"
+import sinon, { resetBehavior } from "sinon"
 import chaiPromise from "chai-as-promised"
 
 import permitObj from "./dataset/permitBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
+import { firstCommitment } from "../database/mockedData";
 
 const permitJson = JsonBI.stringify(permitObj)
 const WIDJson = JsonBI.stringify(WIDObj)
@@ -31,29 +33,35 @@ chai.use(spies);
 chai.use(chaiPromise)
 initMockedAxios();
 
-const permitBox: SpecialBox = {
-    boxId: "6ba81a7de39dce3303d100516bf80228e8c03464c130d5b0f8ff6f78f66bcbc8",
-    type: BoxType.PERMIT,
-    value: "10000000",
-    boxJson: permitJson
-}
+const permitBox: PermitEntity = new PermitEntity()
+permitBox.boxSerialized = Buffer.from(wasm.ErgoBox.from_json(permitJson).sigma_serialize_bytes()).toString("base64")
+permitBox.boxId = "6ba81a7de39dce3303d100516bf80228e8c03464c130d5b0f8ff6f78f66bcbc8"
 
-const WIDBox: SpecialBox = {
-    boxId: "2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655",
-    type: BoxType.WID,
-    value: "10000000",
-    boxJson: WIDJson
-}
+const WIDBox: BoxEntity = new BoxEntity()
+WIDBox.serialized = Buffer.from(wasm.ErgoBox.from_json(WIDJson).sigma_serialize_bytes()).toString("base64")
+WIDBox.boxId = "2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655"
 
-const plainBox: SpecialBox = {
-    boxId: "57dc591ecba4c90f9116740bf49ffea2c7b73625f259e60ec0c23add86b14f47",
-    type: BoxType.PLAIN,
-    value: "10000000",
-    boxJson: WIDJson
-}
+const plainBox: BoxEntity = new BoxEntity()
+plainBox.serialized = Buffer.from(wasm.ErgoBox.from_json(plainJson).sigma_serialize_bytes()).toString("base64")
+plainBox.boxId = "57dc591ecba4c90f9116740bf49ffea2c7b73625f259e60ec0c23add86b14f47"
 
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
 const permit = "EE7687i4URb4YuSGSQXPCb6iAFxAd5s8H1DLbUFQnSrJ8rED2KXdq8kUPQZ3pcPVFD97wQ32PATufWyvyhvit6sokNfLUNqp8wirq6L4H1WQSxYyL6gX7TeLTF2fRwqCvFDkcN6Z5StykpvKT4GrC9wa8DAu8nFre6VAnxMzE5DG3AVxir1pEWEKoLohsRCmKXGJu9jw58R1tE6Ff1LqqiaXbaAgkiyma9PA2Ktv41W6GutPKCmqSE6QzheE2i5c9uuUDRw3fr1kWefphpZVSmuCqNjuVU9fV73dtZE7jhHoXgTFRtHmGJS27DrHL9VvLyo7AP6bSgr4mAoYdF8UPTmcu4fFsMGFFJahLXm7V1qeqtsBXXEvRqQYEaSbMNRVmSZAe6jPhLVyqTBF9rLbYTCCjQXA6u7fu7JHn9xULHxsEjYdRuciVnnsk7RT5dDMM7YCC2yxnE7X8mZMekwceG3dj2triNPo7N6NbxNVSyw1jxaHJGHEza5PgUcieMqMvZyixuiu6PqA55GRCoCRek2pBcATifcyB2FJqtj"
+
+export const firstObservation: Observation = {
+    fromChain: "erg",
+    toChain: "cardano",
+    fromAddress: "ErgoAddress",
+    toAddress: "cardanoAddress",
+    amount: "1000000000",
+    bridgeFee: "1000000",
+    networkFee: "1000000",
+    sourceChainTokenId: "ergoTokenId",
+    targetChainTokenId: "cardanoTokenId",
+    sourceTxId: "ergoTxId1",
+    sourceBlockId: "ergoBlockId",
+    requestId: "reqId1",
+}
 
 describe("Testing Box Creation", () => {
     const value = BigInt(10000000)
@@ -61,13 +69,13 @@ describe("Testing Box Creation", () => {
     describe("getPermits", () => {
         it("returns all permits ready to merge", async () => {
             const DB = await loadBridgeDataBase("commitments");
-            chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [permitBox])
+            chai.spy.on(DB, 'getUnspentPermitBoxes', () => [permitBox])
             const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool')
             mempoolTrack.onCall(0).resolves(wasm.ErgoBox.from_json(permitJson))
             mempoolTrack.onCall(1).resolves(wasm.ErgoBox.from_json(WIDJson))
             mempoolTrack.onCall(2).resolves(wasm.ErgoBox.from_json(plainJson))
             const boxes = new Boxes(rosenConfig, DB)
-            const data = await boxes.getPermits(BigInt(0))
+            const data = await boxes.getPermits(WID)
             expect(data).to.have.length(1)
             expect(data[0].box_id().to_str()).to.eq(permitBox.boxId)
         })
@@ -76,9 +84,9 @@ describe("Testing Box Creation", () => {
     describe("getWIDBox", () => {
         it("returns all wids ready to merge", async () => {
             const DB = await loadBridgeDataBase("commitments");
-            chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [WIDBox])
+            chai.spy.on(DB, 'getUnspentAddressBoxes', () => [WIDBox])
             const boxes = new Boxes(rosenConfig, DB)
-            const data = await boxes.getWIDBox()
+            const data = await boxes.getWIDBox("f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b")
             expect(data.box_id().to_str()).to.eq(WIDBox.boxId)
         })
     })
@@ -86,18 +94,19 @@ describe("Testing Box Creation", () => {
     describe("getUserPaymentBox", () => {
         it("returns a covering plain boxesSample", async () => {
             const DB = await loadBridgeDataBase("commitments");
-            chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [plainBox])
+            chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox])
             const boxes = new Boxes(rosenConfig, DB)
             const data = await boxes.getUserPaymentBox(value)
             expect(data).to.have.length(1)
             expect(data[0].box_id().to_str()).to.eq(plainBox.boxId)
         })
-        it("throws an error not covering the required amount", async () => {
-            const DB = await loadBridgeDataBase("commitments");
-            chai.spy.on(DB, 'getUnspentSpecialBoxes', () => [plainBox])
-            const boxes = new Boxes(rosenConfig, DB)
-            await expect(boxes.getUserPaymentBox(value * BigInt(2))).to.rejectedWith(NotEnoughFund)
-        })
+        // TODO: after the improvement
+        // it("throws an error not covering the required amount", async () => {
+        //     const DB = await loadBridgeDataBase("commitments");
+        //     chai.spy.on(DB, 'getUnspentPlainBoxes', () => [plainBox])
+        //     const boxes = new Boxes(rosenConfig, DB)
+        //     await expect(boxes.getUserPaymentBox(value * BigInt(2))).to.rejectedWith(NotEnoughFund)
+        // })
     })
 
     describe("getRepoBox", () => {
@@ -219,7 +228,7 @@ describe("Testing Box Creation", () => {
         it("tests the event trigger box creation", async () => {
             const DB = await loadBridgeDataBase("commitments");
             const boxes = new Boxes(rosenConfig, DB)
-            const data = boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservations[0])
+            const data = boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservation)
             expect(BigInt(data.value().as_i64().to_str())).to.eql(value)
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(2)

@@ -1,18 +1,18 @@
-import { Commitment, Observation } from "../objects/interfaces";
+import { Commitment, Observation } from "../utils/interfaces";
 import { ErgoUtils } from "../ergo/utils";
 import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import { boxCreationError, NotEnoughFund } from "../errors/errors";
-import { DatabaseConnection } from "../ergo/databaseConnection";
+import { boxCreationError, NotEnoughFund } from "../utils/errors";
+import { DatabaseConnection } from "../database/databaseConnection";
 import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
-import { TxType } from "../entities/watcher/network/TransactionEntity";
-import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
+import { Config } from "../config/config";
+import { TxType } from "../database/entities/TxEntity";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 const txFee = BigInt(rosenConfig.fee)
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 export class CommitmentReveal {
     databaseConnection: DatabaseConnection

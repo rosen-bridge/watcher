@@ -3,7 +3,7 @@
         "network": "Ergo",
         "observation" : {
             "confirmation": 2,
-            "validThreshold": 100
+            "validThreshold": 1000
         }
     },
     "cardano": {
@@ -13,7 +13,7 @@
         "node": {
             "URL": "https://testnet.koios.rest/api/v0"
         },
-        "name": "Cardano"
+        "name": "cardano"
     },
     "ergo": {
         "explorerUrl": "change",
@@ -35,7 +35,7 @@
             "confirmation": 1,
             "interval": 30
         },
-        "name": "Ergo"
+        "name": "ergo"
     },
     "bridgeScanner": {
         "interval": 10,

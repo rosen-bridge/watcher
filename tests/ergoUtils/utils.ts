@@ -1,13 +1,13 @@
-import { Observation } from "../../src/objects/interfaces";
+import { Observation } from "../../src/utils/interfaces";
 import { ErgoUtils, extractBoxes } from "../../src/ergo/utils";
 import { uint8ArrayToHex } from "../../src/utils/utils";
-import { ErgoConfig } from "../../src/config/config";
+import { Config } from "../../src/config/config";
 import { rosenConfig } from "../../src/config/rosenConfig";
-import { boxCreationError } from "../../src/errors/errors";
+import { boxCreationError } from "../../src/utils/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../ergo/objects/axios";
-import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
+import { loadBridgeDataBase } from "../database/bridgeDatabase";
 import { Boxes } from "../../src/ergo/boxes";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -17,7 +17,7 @@ import spies from "chai-spies";
 
 import boxesJson from "./dataset/boxes.json" assert { type: "json" }
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 initMockedAxios()
 chai.use(spies);
 
@@ -47,7 +47,7 @@ describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {
         it("should return the correct commitment", () => {
             const res = ErgoUtils.commitmentFromObservation(observation, WID)
-            expect(uint8ArrayToHex(res)).to.eql("188c1f6c228e07bd79fcbf198c5dbed51e0f6208feff9e868632b0b30ea5b4b0")
+            expect(uint8ArrayToHex(res)).to.eql("1e00562af2a1c57b7b4495286f7122c12c78fb3665381fd240e60d9ad45a53bb")
         })
     })
 

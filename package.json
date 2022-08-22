@@ -6,14 +6,13 @@
   "type": "module",
   "scripts": {
     "lint": "eslint .",
-    "test": "rm -rf ./sqlite && tsc --noEmit && npm run lint && mocha --slow 3000 && rm -rf ./sqlite",
+    "test": "rm -rf ./sqlite && tsc --noEmit && npm run lint && mocha --slow 3000; rm -rf ./sqlite",
     "coverage": "c8 npm run test",
     "start:dev": "nodemon src/index.ts",
     "start": "ts-node --experimental-specifier-resolution=node ./src/index.ts",
     "typeorm": "typeorm-ts-node-esm",
-    "typeorm:generate:network": "npm run typeorm migration:generate src/migrations/watcher/network/networkModelMigration -- -d ./config/ormconfig.ts",
-    "typeorm:generate:bridge": "npm run typeorm migration:generate src/migrations/watcher/bridge/bridgeModelMigration -- -d ./config/bridgeOrmConfig.ts",
-    "typeorm:migrate": "npm run typeorm migration:run -- -d ./config/ormconfig.ts",
+    "typeorm:generate": "npm run typeorm migration:generate src/database/migrations/watcher/networkModelMigration -- -d config/dataSource.ts",
+    "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
     "typeorm:migrate:bridge": "npm run typeorm migration:run -- -d ./config/bridgeOrmConfig.ts"
   },
   "repository": {
@@ -49,6 +48,10 @@
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
+    "@rosen-bridge/watcher-data-extractor": "^0.1.0-alpha-4",
+    "@rosen-bridge/address-extractor": "file:../address-extractor/dist",
+    "@rosen-bridge/observation-extractor": "file:../observation-extractor/dist",
+    "@rosen-bridge/scanner": "^0.1.7-alpha-2",
     "axios": "^0.26.1",
     "blakejs": "^1.2.1",
     "chai-spies": "^1.0.0",

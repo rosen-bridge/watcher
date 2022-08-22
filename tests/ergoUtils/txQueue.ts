@@ -1,11 +1,10 @@
-import { loadDataBase } from "../cardano/models/models";
-import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
-import { DatabaseConnection } from "../../src/ergo/databaseConnection";
+import { loadNetworkDataBase } from "../database/networkDatabase";
+import { loadBridgeDataBase } from "../database/bridgeDatabase";
+import { DatabaseConnection } from "../../src/database/databaseConnection";
 import { TransactionQueue } from "../../src/ergo/transactionQueue";
-import { TxEntity, TxType } from "../../src/entities/watcher/network/TransactionEntity";
-import { ObservationEntity } from "../../src/entities/watcher/network/ObservationEntity";
+import { TxEntity, TxType } from "../../src/database/entities/TxEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
-
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -42,7 +41,7 @@ describe("Transaction queue tests", () => {
          *    Because its unavailable, but still valid
          */
         it("should resend the commitment transaction", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
@@ -66,7 +65,7 @@ describe("Transaction queue tests", () => {
          *    Because its unavailable, but still valid
          */
         it("should resend the trigger transaction", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
@@ -90,7 +89,7 @@ describe("Transaction queue tests", () => {
          *    Because the observation is not still valid, but it may have change in a small period
          */
         it("should just wait for commitment transaction status", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
@@ -113,7 +112,7 @@ describe("Transaction queue tests", () => {
          *    Because the commitment has already merged, but it may have forked in a small period
          */
         it("should just wait for trigger transaction status", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
@@ -136,7 +135,7 @@ describe("Transaction queue tests", () => {
          *    Because the transaction inputs are spent, but it may have change in a small period
          */
         it("should just wait for trigger transaction status because its inputs are spent", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
@@ -160,7 +159,7 @@ describe("Transaction queue tests", () => {
          *    Because the transaction is in mempool or is not confirmed enough
          */
         it("should update the updateTime and wait more for tx status", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
@@ -182,7 +181,7 @@ describe("Transaction queue tests", () => {
          *    Because the observation is not still valid, but it may have change in a small period
          */
         it("should remove the tx from database because it get enough confirmation", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)
@@ -207,7 +206,7 @@ describe("Transaction queue tests", () => {
          *    Because the transaction inputs are spent, and the status is stabilized
          */
         it("should remove the commitment transaction because its inputs are spent and it has passed the timeout", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             const txQueue = new TransactionQueue(networkDb, dbConnection)

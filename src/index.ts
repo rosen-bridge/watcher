@@ -3,48 +3,48 @@ import express, { Router } from "express";
 import addressRouter from "./api/showAddress";
 import permitRouter from "./api/permit";
 import { Transaction } from "./api/Transaction";
-import { ErgoConfig } from "./config/config";
+import { Config } from "./config/config";
 import { rosenConfig } from "./config/rosenConfig";
 import { Boxes } from "./ergo/boxes";
-import { NetworkDataBase } from "./models/networkModel";
-import { BridgeDataBase } from "./bridge/models/bridgeModel";
-import { bridgeOrmConfig } from "../config/bridgeOrmConfig";
-import { ErgoNetworkApi } from "./bridge/network/networkApi";
-import { ergoOrmConfig } from "../config/ergoOrmConfig";
-import { cardanoOrmConfig } from "../config/ormconfig";
-import { DatabaseConnection } from "./ergo/databaseConnection";
-import { bridgeScanner } from "./bridgeScanner";
-import { ergoScanner } from "./ergoScanner";
-import { cardanoScanner } from "./cardanoScanner";
-import { creation } from "./commitmentCreation";
-import { reveal } from "./commitmetnReveal";
-import { transactionQueueJob } from "./transactionQueue";
+import { NetworkDataBase } from "./database/models/networkModel";
+import { BridgeDataBase } from "./database/models/bridgeModel";
+import { dataSource } from "../config/dataSource";
+import { DatabaseConnection } from "./database/databaseConnection";
+import { scannerInit } from "./jobs/Scanner";
+import { creation } from "./jobs/commitmentCreation";
+import { reveal } from "./jobs/commitmetnReveal";
+import { transactionQueueJob } from "./jobs/transactionQueue";
 import { delay } from "./utils/utils";
+import { ErgoScanner } from "@rosen-bridge/scanner";
 
-const ergoConfig = ErgoConfig.getConfig();
+
+const ergoConfig = Config.getConfig();
 
 
 export let watcherTransaction: Transaction;
 export let boxesObject: Boxes;
-export let ergoNetworkApi: ErgoNetworkApi;
 export let networkDatabase: NetworkDataBase;
 export let bridgeDatabase: BridgeDataBase;
 export let databaseConnection: DatabaseConnection;
-
+export let ergoScanner: ErgoScanner
 
 const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
-        const ergoConfig = ErgoConfig.getConfig();
+        const ergoConfig = Config.getConfig();
 
-        bridgeDatabase = await BridgeDataBase.init(bridgeOrmConfig);
+        await dataSource.initialize();
+        await dataSource.runMigrations();
+        bridgeDatabase = new BridgeDataBase(dataSource)
         boxesObject = new Boxes(rosenConfig, bridgeDatabase)
-        ergoNetworkApi = new ErgoNetworkApi();
-        return new Transaction(
+
+        const temp = new Transaction(
             rosenConfig,
             ergoConfig.address,
             ergoConfig.secretKey,
             boxesObject,
         );
+        // console.log("ready to return",temp)
+        return temp;
     }
 
     const initExpress = () => {
@@ -64,24 +64,14 @@ const init = async () => {
     generateTransactionObject().then(
         async (res) => {
             watcherTransaction = res;
-            initExpress();
-            await delay(10000)
-            // Running bridge scanner thread
-            bridgeScanner()
+            // initExpress();
+            // await delay(10000)
+            // Initializing database
+            networkDatabase = new NetworkDataBase(dataSource)
             // Running network scanner thread
-            if (ergoConfig.networkWatcher == "Ergo") {
-                // Initializing database
-                networkDatabase = await NetworkDataBase.init(ergoOrmConfig)
-                // Running Ergo scanner
-                ergoScanner()
-            } else if (ergoConfig.networkWatcher == "Cardano") {
-                // Initializing database
-                networkDatabase = await NetworkDataBase.init(cardanoOrmConfig)
-                // Running Cardano scanner
-                cardanoScanner()
-            }
+            scannerInit(watcherTransaction.watcherWID)
 
-            await delay(30000)
+            await delay(10000)
             databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, ergoConfig.observationConfirmation, ergoConfig.observationValidThreshold)
             // Running transaction checking thread
             transactionQueueJob()

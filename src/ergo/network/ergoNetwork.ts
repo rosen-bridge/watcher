@@ -1,12 +1,11 @@
 import axios from "axios";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { Info } from "../../objects/ergo";
 import { AddressBoxes, ErgoTx, ExplorerTransaction } from "./types";
-import { JsonBI } from "../../network/parser";
-import { ErgoConfig } from "../../config/config";
+import { JsonBI } from "./parser";
+import { Config } from "../../config/config";
 import { ergoTreeToBase58Address } from "../utils";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
 export const explorerApi = axios.create({
     baseURL: ergoConfig.explorerUrl,
@@ -25,7 +24,7 @@ export class ErgoNetwork{
      * gets last block height
      */
     static getHeight = async (): Promise<number> => {
-        return nodeClient.get<Info>("/info").then(res => res.data.fullHeight);
+        return nodeClient.get<{fullHeight: number}>("/info").then(res => res.data.fullHeight);
     }
 
     /**
@@ -43,22 +42,6 @@ export class ErgoNetwork{
             }
         ).then(
             res => res.data
-        );
-    }
-
-    /**
-     * get unspent boxes for and specific address
-     * @param address
-     */
-    static getBoxesByAddress = (address: string): Promise<wasm.ErgoBoxes> => {
-        return explorerApi.get<AddressBoxes>(
-            `/api/v1/boxes/unspent/byAddress/${address}`,
-            {transformResponse: data => JsonBI.parse(data)}
-        ).then((res) => {
-                const boxes: Array<string> = [];
-                res.data.items.forEach(box => boxes.push(JsonBI.stringify(box)));
-                return wasm.ErgoBoxes.from_boxes_json(boxes)
-            }
         );
     }
 
@@ -274,7 +257,7 @@ export class ErgoNetwork{
      */
     static getConfNum = async (txId: string): Promise<number> => {
         const tx = await ErgoNetwork.getUnconfirmedTx(txId)
-        if(tx !== null) return 0
+        if (tx !== null) return 0
         else {
             const confirmed = await ErgoNetwork.getConfirmedTx(txId)
             if (confirmed != null && Object.prototype.hasOwnProperty.call(confirmed, 'numConfirmations'))
@@ -283,14 +266,18 @@ export class ErgoNetwork{
         }
     }
 
+    /**
+     * Checks all tx inputs are still unspent
+     * @param inputs
+     */
     static checkTxInputs = async (inputs: wasm.Inputs) => {
-        try{
+        try {
             await Promise.all(Array(inputs.len()).fill("").map(async (item, index) => {
                 await ErgoNetwork.boxById(inputs.get(index).box_id().to_str())
             }))
             return true
         } catch (e) {
-            if(e.response && e.response.status == 404) return false
+            if (e.response && e.response.status == 404) return false
             throw Error("Connection problem")
         }
     }

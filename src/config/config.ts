@@ -1,15 +1,15 @@
 import config from "config";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { SecretError } from "../errors/errors";
+import { SecretError } from "../utils/errors";
 import { uint8ArrayToHex } from "../utils/utils";
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
 const URL: string | undefined = config.get?.('cardano.node.URL');
 const INTERVAL: number | undefined = config.get?.('cardano.interval');
-const INITIAL_HEIGHT: number | undefined = config.get?.('cardano.initialBlockHeight');
+const CARDANO_INITIAL_HEIGHT: number | undefined = config.get?.('cardano.initialBlockHeight');
 const BRIDGE_SCAN_INTERVAL: number | undefined = config.get?.('bridgeScanner.interval');
-const COMMITMENT_INITIAL_HEIGHT: number | undefined = config.get?.('bridgeScanner.initialBlockHeight');
+const ERGO_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scanner.initialBlockHeight');
 const COMMITMENT_HEIGHT_LIMIT: number | undefined = config.get?.('bridgeScanner.heightLimit');
 const CLEANUP_CONFIRMATION: number | undefined = config.get?.('bridgeScanner.cleanupConfirmation');
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
@@ -19,8 +19,6 @@ const REPO_NFT: string | undefined = config.get?.('ergo.repoNFT');
 const CARDANO_TIMEOUT: number | undefined = config.get?.('cardano.timeout');
 const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.('ergo.explorerTimeout');
 const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
-const ERGO_SCANNER_INTERVAL: number | undefined = config.get?.('ergo.scanner.interval');
-const ERGO_SCANNER_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scanner.initialBlockHeight');
 const NETWORK_WATCHER: string | undefined = config.get?.('watcher.network');
 const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.('ergo.commitmentCreationInterval')
 const COMMITMENT_REVEAL_INTERVAL: number | undefined = config.get?.('ergo.commitmentRevealInterval')
@@ -29,13 +27,12 @@ const TRANSACTION_REMOVING_TIMEOUT: number | undefined = config.get?.('ergo.tran
 const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transactions.confirmation');
 const OBSERVATION_CONFIRMATION: number | undefined = config.get?.('watcher.observation.confirmation');
 const OBSERVATION_VALID_THRESH: number | undefined = config.get?.('watcher.observation.validThreshold');
-const ERGO_NAME_CONSTANT: string = config.get?.('ergo.name');
 const CARDANO_NAME_CONSTANT: string = config.get?.('cardano.name');
 
 const supportingBridges: Array<string> = ["Ergo", "Cardano"]
 
-export class ErgoConfig{
-    private static instance: ErgoConfig;
+export class Config {
+    private static instance: Config;
     networkType: wasm.NetworkPrefix;
     secretKey: wasm.SecretKey;
     address: string;
@@ -46,8 +43,7 @@ export class ErgoConfig{
     RWTId: string;
     RepoNFT: string;
     bridgeScanInterval: number;
-    commitmentInitialHeight: number;
-    commitmentHeightLimit: number;
+    ergoInitialHeight: number
     cleanupConfirmation: number;
     networkWatcher: string;
     commitmentCreationInterval: number;
@@ -57,7 +53,8 @@ export class ErgoConfig{
     transactionCheckingInterval: number;
     observationConfirmation: number;
     observationValidThreshold: number;
-    cardanoNameConstant: string
+    plainExtractorName: string;
+    widExtractorName: string
 
     private constructor() {
         let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -98,8 +95,8 @@ export class ErgoConfig{
         if (BRIDGE_SCAN_INTERVAL === undefined) {
             throw new Error("Commitment scanner interval doesn't set correctly");
         }
-        if (COMMITMENT_INITIAL_HEIGHT === undefined) {
-            throw new Error("Commitment scanner initial height doesn't set correctly");
+        if (ERGO_INITIAL_HEIGHT === undefined) {
+            throw new Error("Ergo scanner initial height doesn't set correctly");
         }
         if (COMMITMENT_HEIGHT_LIMIT === undefined) {
             throw new Error("Commitment scanner height limit doesn't set correctly");
@@ -152,8 +149,6 @@ export class ErgoConfig{
         this.RWTId = RWT_ID;
         this.RepoNFT = REPO_NFT;
         this.bridgeScanInterval = BRIDGE_SCAN_INTERVAL;
-        this.commitmentInitialHeight = COMMITMENT_INITIAL_HEIGHT;
-        this.commitmentHeightLimit = COMMITMENT_HEIGHT_LIMIT;
         this.cleanupConfirmation = CLEANUP_CONFIRMATION;
         this.networkWatcher = NETWORK_WATCHER
         this.commitmentCreationInterval = COMMITMENT_CREATION_INTERVAL
@@ -163,13 +158,16 @@ export class ErgoConfig{
         this.transactionRemovingTimeout = TRANSACTION_REMOVING_TIMEOUT;
         this.observationConfirmation = OBSERVATION_CONFIRMATION
         this.observationValidThreshold = OBSERVATION_VALID_THRESH
+        this.ergoInitialHeight = ERGO_INITIAL_HEIGHT
+        this.plainExtractorName = "plainBoxExtractor"
+        this.widExtractorName = "WIDBoxExtractor"
     }
 
     static getConfig() {
-        if (!ErgoConfig.instance) {
-            ErgoConfig.instance = new ErgoConfig();
+        if (!Config.instance) {
+            Config.instance = new Config();
         }
-        return ErgoConfig.instance;
+        return Config.instance;
     }
 }
 
@@ -189,7 +187,7 @@ export class CardanoConfig{
         if (INTERVAL === undefined) {
             throw new Error("Cardano Scanner interval is not set in the config file");
         }
-        if (INITIAL_HEIGHT === undefined) {
+        if (CARDANO_INITIAL_HEIGHT === undefined) {
             throw new Error("Cardano Scanner initial height is not set in the config file");
         }
         if (CARDANO_TIMEOUT === undefined) {
@@ -202,7 +200,7 @@ export class CardanoConfig{
         this.koiosURL = URL;
         this.interval = INTERVAL;
         this.timeout = CARDANO_TIMEOUT;
-        this.initialHeight = INITIAL_HEIGHT;
+        this.initialHeight = CARDANO_INITIAL_HEIGHT;
         this.nameConstant = CARDANO_NAME_CONSTANT
     }
 
@@ -211,36 +209,5 @@ export class CardanoConfig{
             CardanoConfig.instance = new CardanoConfig();
         }
         return CardanoConfig.instance;
-    }
-}
-
-export class ErgoScannerConfig{
-    private static instance: ErgoScannerConfig;
-    interval: number;
-    initialHeight: number;
-    nameConstant: string
-
-
-    private constructor() {
-        if (ERGO_SCANNER_INTERVAL === undefined) {
-            throw new Error("Ergo Scanner interval is not set in the config file");
-        }
-        if (ERGO_SCANNER_INITIAL_HEIGHT === undefined) {
-            throw new Error("Ergo Scanner initial height is not set in the config file");
-        }
-        if (!ERGO_NAME_CONSTANT) {
-            throw new Error("Ergo name doesn't set correctly");
-        }
-
-        this.interval = ERGO_SCANNER_INTERVAL;
-        this.initialHeight = ERGO_SCANNER_INITIAL_HEIGHT;
-        this.nameConstant = ERGO_NAME_CONSTANT
-    }
-
-    static getConfig() {
-        if (!ErgoScannerConfig.instance) {
-            ErgoScannerConfig.instance = new ErgoScannerConfig();
-        }
-        return ErgoScannerConfig.instance;
     }
 }

@@ -1,30 +1,28 @@
 import { Boxes } from "../../../src/ergo/boxes";
 import { Transaction } from "../../../src/api/Transaction";
 import { rosenConfig } from "./permit";
-import { DatabaseConnection } from "../../../src/ergo/databaseConnection";
+import { DatabaseConnection } from "../../../src/database/databaseConnection";
 import { CommitmentCreation } from "../../../src/transactions/commitmentCreation";
-import { loadDataBase } from "../../cardano/models/models";
-import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
-import { JsonBI } from "../../../src/network/parser";
-import { ObservationEntity } from "../../../src/entities/watcher/network/ObservationEntity";
+import { loadNetworkDataBase } from "../../database/networkDatabase";
+import { loadBridgeDataBase } from "../../database/bridgeDatabase"
+import { JsonBI } from "../../../src/ergo/network/parser";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
-
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
 import chai from "chai";
 import spies from "chai-spies";
 import sinon from "sinon"
-
-chai.use(spies)
-
 import permitObj from "./dataset/permitBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import WIDObj2 from "./dataset/WIDBox2.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
 import { hexStrToUint8Array } from "../../../src/utils/utils";
-import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
+import { TxType } from "../../../src/database/entities/TxEntity";
+
+chai.use(spies)
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -67,7 +65,7 @@ describe("Commitment creation transaction tests", () => {
      */
     describe("createCommitmentTx", () => {
         it("Should create, sign and send a commitment transaction", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "submitTransaction", () => null)
@@ -98,7 +96,7 @@ describe("Commitment creation transaction tests", () => {
      */
     describe("job", () => {
         it("Should collect ready observations and create commitments", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
@@ -122,7 +120,7 @@ describe("Commitment creation transaction tests", () => {
         })
 
         it("Should collect ready observations and create commitment with excess fee box", async () => {
-            const networkDb = await loadDataBase("dataBase");
+            const networkDb = await loadNetworkDataBase("dataBase");
             const bridgeDb = await loadBridgeDataBase("commitments");
             const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
             chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
