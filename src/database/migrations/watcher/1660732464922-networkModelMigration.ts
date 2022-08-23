@@ -25,9 +25,10 @@ export class networkModelMigration1660732464922 implements MigrationInterface{
                     "WID" varchar NOT NULL,
                     "blockId" varchar NOT NULL,
                     "height" integer NOT NULL,
-                    "spendBlockHash" varchar,
-                     "spendBlockHeight" integer
-                     )`
+                    "spendBlock" varchar,
+                    "spendHeight" integer,
+                    CONSTRAINT "UQ_d3226602b909b64bcaeadc39c3c" UNIQUE ("boxId", "extractor")
+                    )`
         );
         await queryRunner.query(
             `CREATE TABLE "event_trigger_entity" (
@@ -48,12 +49,14 @@ export class networkModelMigration1660732464922 implements MigrationInterface{
                     "targetChainTokenId" varchar NOT NULL,
                     "sourceTxId" varchar NOT NULL,
                     "sourceBlockId" varchar NOT NULL,
-                    "WIDs" varchar NOT NULL
+                    "WIDs" varchar NOT NULL,
+                    CONSTRAINT "UQ_c905f221a1b6271ca4405dbbe5f" UNIQUE ("boxId", "extractor")
                     )`);
         await queryRunner.query(
             `CREATE TABLE "commitment_entity" (
                     "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
                     "extractor" varchar NOT NULL,
+                    "boxId" varchar NOT NULL,
                     "eventId" varchar NOT NULL,
                     "commitment" varchar NOT NULL,
                     "WID" varchar NOT NULL,
@@ -61,8 +64,9 @@ export class networkModelMigration1660732464922 implements MigrationInterface{
                     "blockId" varchar NOT NULL,
                     "height" integer NOT NULL,
                     "boxSerialized" varchar NOT NULL,
-                    "spendBlockHash" varchar,
-                    "spendBlockHeight" integer
+                    "spendBlock" varchar,
+                    "spendHeight" integer,
+                    CONSTRAINT "UQ_cc294fc304a66f8f194840f1ece" UNIQUE ("boxId", "extractor")
                     )`);
         await queryRunner.query(
             `CREATE TABLE "box_entity" (

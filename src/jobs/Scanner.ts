@@ -30,7 +30,7 @@ export const scannerInit = (WID?: string) => {
     scanner = new ErgoScanner(ergoScannerConfig);
     ergoScanningJob()
     if (ergoConfig.networkWatcher == "Ergo") {
-        const observationExtractor = new ErgoObservationExtractor(dataSource, tokens)
+        const observationExtractor = new ErgoObservationExtractor(dataSource, tokens, "")
         scanner.registerExtractor(observationExtractor)
     } else if (ergoConfig.networkWatcher == "Cardano") {
         const cardanoConfig = CardanoConfig.getConfig()
@@ -42,8 +42,12 @@ export const scannerInit = (WID?: string) => {
         }
         cardanoScanner = new CardanoKoiosScanner(cardanoScannerConfig)
         cardanoScanningJob(cardanoConfig.interval)
-        const observationExtractor = new CardanoObservationExtractor(dataSource, tokens)
+        const observationExtractor = new CardanoObservationExtractor(dataSource, tokens, "addr_test1qrkftvmr8lhpce4qjedp58xzuu8gpretehx9w2val78au4757ccfm9ejlzq2fussp6r87rs8ph2h6vt24v3mq77k3z2qsgj3tu")
         cardanoScanner.registerExtractor(observationExtractor)
+    }
+    else {
+        console.log("The observing network is not supported")
+        throw new Error("source network not found")
     }
     const commitmentExtractor = new CommitmentExtractor("watcher-commitment", [rosenConfig.commitmentAddress], ergoConfig.RWTId, dataSource)
     const permitExtractor = new PermitExtractor("watcher-permit", dataSource, rosenConfig.watcherPermitAddress, ergoConfig.RWTId)

@@ -66,7 +66,7 @@ class BridgeDataBase{
     getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
         return this.permitRepository.createQueryBuilder("permit_entity")
             .where("WID == :wid", {wid})
-            .andWhere("spendBlockHash is null")
+            .andWhere("spendBlock is null")
             .getMany()
     }
 

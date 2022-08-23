@@ -21,9 +21,9 @@ chai.use(spies)
 const unspentCommitment = new CommitmentEntity()
 const unspentCommitment2 = new CommitmentEntity()
 const redeemedCommitment = new CommitmentEntity()
-redeemedCommitment.spendBlockHash = "hash"
+redeemedCommitment.spendBlock = "hash"
 const mergedCommitment = new CommitmentEntity()
-mergedCommitment.spendBlockHash = "hash"
+mergedCommitment.spendBlock = "hash"
 
 const eventTrigger = new EventTriggerEntity()
 eventTrigger.id = 1

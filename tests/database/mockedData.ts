@@ -40,11 +40,11 @@ spentCommitmentEntity.commitment = "commitment"
 spentCommitmentEntity.commitmentBoxId = "boxId2"
 spentCommitmentEntity.WID = "WID2"
 spentCommitmentEntity.eventId = "eventId"
-spentCommitmentEntity.spendBlockHash = "spendBlockHash"
+spentCommitmentEntity.spendBlock = "spendBlockHash"
 spentCommitmentEntity.blockId = "blockId2"
 spentCommitmentEntity.extractor = "extractor"
 spentCommitmentEntity.height = 100
-spentCommitmentEntity.spendBlockHeight = 110
+spentCommitmentEntity.spendHeight = 110
 spentCommitmentEntity.boxSerialized = "222"
 
 export const permitEntity = new PermitEntity()
@@ -62,8 +62,8 @@ spentPermitEntity.height = 100
 spentPermitEntity.extractor = "extractor"
 spentPermitEntity.boxId = "boxId2"
 spentPermitEntity.boxSerialized = "box2"
-spentPermitEntity.spendBlockHash = "blockHash2"
-spentPermitEntity.spendBlockHeight = 110
+spentPermitEntity.spendBlock = "blockHash2"
+spentPermitEntity.spendHeight = 110
 
 export const plainBox = new BoxEntity()
 plainBox.address = "address"
