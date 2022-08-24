@@ -1,6 +1,6 @@
 {
     "watcher": {
-        "network": "Ergo",
+        "network": "Cardano",
         "observation" : {
             "confirmation": 2,
             "validThreshold": 1000
@@ -8,7 +8,7 @@
     },
     "cardano": {
         "interval": 10,
-        "initialBlockHeight": 3471392,
+        "initialBlockHeight": 3797267,
         "timeout": 10000,
         "node": {
             "URL": "https://testnet.koios.rest/api/v0"
@@ -19,7 +19,7 @@
         "explorerUrl": "http://10.10.9.3:7000/",
         "nodeUrl": "http://10.10.9.3:9065/",
         "explorerTimeout": 20000,
-        "nodeTimeout": 10000,
+        "nodeTimeout": 100000,
         "networkType": "Mainnet",
         "watcherSecretKey": "30ec2689d8920095a34193de5b313dc84b178fd827d568be96f85bba12b69db0",
         "RWTId": "8cdd008b37615dabd8b60ada8e56703ef21a486548358f0737ac3413c2871adf",

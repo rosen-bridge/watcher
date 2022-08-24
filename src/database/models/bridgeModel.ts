@@ -33,7 +33,7 @@ class BridgeDataBase{
      * @param ids
      */
     deleteCommitments = async (ids: Array<string>) => {
-        await this.commitmentRepository.delete({commitmentBoxId: In(ids)})
+        await this.commitmentRepository.delete({boxId: In(ids)})
     }
 
     /**
@@ -43,7 +43,7 @@ class BridgeDataBase{
     findCommitmentsById = async (ids: Array<string>): Promise<Array<CommitmentEntity>> => {
         return await this.commitmentRepository.find({
             where: {
-                commitmentBoxId: In(ids)
+                boxId: In(ids)
             }
         })
     }

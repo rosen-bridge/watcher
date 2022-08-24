@@ -50,7 +50,7 @@
     "@rosen-bridge/watcher-data-extractor": "file:../watcher-data-extractor/dist",
     "@rosen-bridge/address-extractor": "file:../address-extractor/dist",
     "@rosen-bridge/observation-extractor": "file:../observation-extractor/dist",
-    "@rosen-bridge/scanner": "^0.1.7-alpha-2",
+    "@rosen-bridge/scanner": "file:../scanner/dist",
     "axios": "^0.26.1",
     "blakejs": "^1.2.1",
     "chai-spies": "^1.0.0",

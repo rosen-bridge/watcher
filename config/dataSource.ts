@@ -10,12 +10,12 @@ export const dataSource = new DataSource({
     database: __dirname + "/../sqlite/watcher.sqlite",
     entities: [
         'src/database/entities/*.ts',
-        'node_modules/@rosen-bridge/scanner/dist/entities/*.js',
+        'node_modules/@rosen-bridge/scanner/entities/*.js',
         'node_modules/@rosen-bridge/watcher-data-extractor/entities/*.js',
         'node_modules/@rosen-bridge/observation-extractor/entities/*.js',
         'node_modules/@rosen-bridge/address-extractor/entities/*.js'
     ],
     migrations: ['src/database/migrations/watcher/*.ts'],
     synchronize: false,
-    logging: false,
+    logging: true,
 });

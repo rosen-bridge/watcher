@@ -24,7 +24,7 @@ export interface Commitment{
     eventId: string,
     commitment: string,
     WID: string,
-    commitmentBoxId: string
+    boxId: string
 }
 
 export interface CommitmentSet{

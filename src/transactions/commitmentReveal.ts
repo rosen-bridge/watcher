@@ -84,7 +84,7 @@ export class CommitmentReveal {
                 console.log("required number of commitments is", requiredCommitments, "available valild commitments is:", validCommitments.length)
                 if (BigInt(validCommitments.length) >= requiredCommitments) {
                     const commitmentBoxes = validCommitments.map(async (commitment) => {
-                        return await ErgoNetwork.boxById(commitment.commitmentBoxId)
+                        return await ErgoNetwork.boxById(commitment.boxId)
                     })
                     await Promise.all(commitmentBoxes).then(async (cBoxes) => {
                         const WIDs: Array<Uint8Array> = validCommitments.map(commitment => {

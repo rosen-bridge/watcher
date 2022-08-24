@@ -17,14 +17,14 @@ const ergoScanningJob = () => {
 }
 
 const cardanoScanningJob = (interval: number) => {
-    scanner.update().then(() => setTimeout(() => cardanoScanningJob(interval), interval * 1000))
+    cardanoScanner.update().then(() => setTimeout(() => cardanoScanningJob(interval), interval * 1000))
 }
 
 export const scannerInit = (WID?: string) => {
     const ergoScannerConfig = {
         nodeUrl: ergoConfig.nodeUrl,
         timeout: ergoConfig.nodeTimeout,
-        initialHeight: 	ergoConfig.ergoInitialHeight,
+        initialHeight: 	268657,
         dataSource: dataSource,
     }
     scanner = new ErgoScanner(ergoScannerConfig);
@@ -37,12 +37,12 @@ export const scannerInit = (WID?: string) => {
         const cardanoScannerConfig = {
             koiosUrl: cardanoConfig.koiosURL,
             timeout: cardanoConfig.timeout,
-            initialHeight: cardanoConfig.initialHeight,
+            initialHeight: 3798699,
             dataSource: dataSource,
         }
         cardanoScanner = new CardanoKoiosScanner(cardanoScannerConfig)
         cardanoScanningJob(cardanoConfig.interval)
-        const observationExtractor = new CardanoObservationExtractor(dataSource, tokens, "addr_test1qrkftvmr8lhpce4qjedp58xzuu8gpretehx9w2val78au4757ccfm9ejlzq2fussp6r87rs8ph2h6vt24v3mq77k3z2qsgj3tu")
+        const observationExtractor = new CardanoObservationExtractor(dataSource, tokens, "addr_test1qpr7wrk7t0tgxuysdqn7gnkrghxp8fxur8sg2hs907x637qs75e4g7y6af54ew972jmen04rhapzcp65e34zd2afes8s4fvph3")
         cardanoScanner.registerExtractor(observationExtractor)
     }
     else {
