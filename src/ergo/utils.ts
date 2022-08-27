@@ -26,15 +26,6 @@ export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree,
                                         networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Mainnet): string => {
     return ergoTreeToAddress(ergoTree).to_base58(networkType)
 }
-export const decodeCollColl = (str: string): Uint8Array[] => {
-    return wasm.Constant.decode_from_base16(str).to_coll_coll_byte()
-}
-export const decodeStr = async (str: string): Promise<string> => {
-    return Buffer.from(wasm.Constant.decode_from_base16(str).to_byte_array()).toString('hex')
-}
-export const generateSK = (): wasm.SecretKey => {
-    return wasm.SecretKey.random_dlog();
-}
 export const decodeSerializedBox = (boxSerialized: string) => {
     return wasm.ErgoBox.sigma_parse_bytes(new Uint8Array(Buffer.from(boxSerialized, "base64")))
 }

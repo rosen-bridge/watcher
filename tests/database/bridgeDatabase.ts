@@ -22,8 +22,8 @@ export const loadBridgeDataBase = async (name: string): Promise<BridgeDataBase> 
         database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: [
             'src/database/entities/*.ts',
-            'node_modules/@rosen-bridge/scanner/dist/entities/*.js',
-            'node_modules/@rosen-bridge/watcher-data-extractor/dist/entities/*.js',
+            'node_modules/@rosen-bridge/scanner/entities/*.js',
+            'node_modules/@rosen-bridge/watcher-data-extractor/entities/*.js',
             'node_modules/@rosen-bridge/observation-extractor/entities/*.js',
             'node_modules/@rosen-bridge/address-extractor/entities/*.js'
         ],
@@ -41,8 +41,9 @@ export const loadBridgeDataBase = async (name: string): Promise<BridgeDataBase> 
 }
 
 describe("BridgeDatabase tests", () => {
+    let DB: BridgeDataBase
     before("loading database", async () => {
-        await loadBridgeDataBase("bridge");
+        DB = await loadBridgeDataBase("bridgeDataBase");
         await commitmentRepo.save([commitmentEntity, spentCommitmentEntity])
         await permitRepo.save([permitEntity, spentPermitEntity])
         await boxRepo.save([plainBox, spentPlainBox])
@@ -51,7 +52,6 @@ describe("BridgeDatabase tests", () => {
 
     describe("getOldSpentCommitments", () => {
         it("should return an old commitment", async () => {
-            const DB = await loadBridgeDataBase("bridge");
             const data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(1)
         })
@@ -59,7 +59,6 @@ describe("BridgeDatabase tests", () => {
 
     describe("commitmentsByEventId", () => {
         it("should return two commitments with specified event id", async () => {
-            const DB = await loadBridgeDataBase("bridge");
             const data = await DB.commitmentsByEventId("eventId")
             expect(data).to.have.length(2)
         })
@@ -67,7 +66,6 @@ describe("BridgeDatabase tests", () => {
 
     describe("findCommitmentsById", () => {
         it("should return exactly two commitments with the specified box id", async () => {
-            const DB = await loadBridgeDataBase("bridge");
             const data = await DB.findCommitmentsById([commitmentEntity.boxId, spentCommitmentEntity.boxId])
             expect(data).to.have.length(2)
             expect(data[0]).to.eql(commitmentEntity)
@@ -77,7 +75,6 @@ describe("BridgeDatabase tests", () => {
 
     describe("deleteCommitments", () => {
         it("should delete two commitments with specified ids", async () => {
-            const DB = await loadBridgeDataBase("bridge");
             await DB.deleteCommitments([commitmentEntity.boxId, spentCommitmentEntity.boxId])
             const data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(0)
@@ -86,7 +83,6 @@ describe("BridgeDatabase tests", () => {
 
     describe("getUnspentPermitBoxes", () => {
         it("should find one unspent permit box", async () => {
-            const DB = await loadBridgeDataBase("bridge");
             const data = await DB.getUnspentPermitBoxes("WID")
             expect(data).to.have.length(1)
             expect(data[0]).to.eql(permitEntity)
@@ -95,7 +91,6 @@ describe("BridgeDatabase tests", () => {
 
     describe("getUnspentPlainBoxes", () => {
         it("should find one unspent plain box", async () => {
-            const DB = await loadBridgeDataBase("bridge");
             const data = await DB.getUnspentAddressBoxes()
             expect(data).to.have.length(1)
             expect(data[0]).to.eql(plainBox)
@@ -104,7 +99,6 @@ describe("BridgeDatabase tests", () => {
 
     describe("eventTriggerBySourceTxId", () => {
         it("should find one unspent event trigger box", async () => {
-            const DB = await loadBridgeDataBase("bridge");
             const data = await DB.eventTriggerBySourceTxId(eventTriggerEntity.sourceTxId)
             expect(data).to.eql(eventTriggerEntity)
         })

@@ -9,6 +9,7 @@ import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { TxType } from "./entities/TxEntity";
 import { TxStatus } from "./entities/ObservationStatusEntity";
 import { Transaction } from "../api/Transaction";
+import { NoObservationStatus } from "../utils/errors";
 
 const ergoConfig = Config.getConfig();
 
@@ -35,10 +36,10 @@ export class DatabaseConnection{
     isObservationValid = async (observation: ObservationEntity): Promise<boolean> => {
         const observationStatus = await this.networkDataBase.getStatusForObservations(observation);
         if (observationStatus === null)
-            throw new Error(`observation with requestId ${observation.requestId} has no status`)
+            throw new NoObservationStatus(`observation with requestId ${observation.requestId} has no status`)
         // Check observation time out
         if (observationStatus.status == TxStatus.TIMED_OUT) return false
-        const currentHeight = await ErgoNetwork.getHeight()
+        const currentHeight = await this.networkDataBase.getLastBlockHeight(ergoConfig.networkWatcher)
         if (currentHeight - observation.height > this.observationValidThreshold) {
             await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.TIMED_OUT)
             return false
@@ -58,7 +59,7 @@ export class DatabaseConnection{
     isMergeHappened = async (observation: ObservationEntity): Promise<boolean> => {
         const observationStatus = await this.networkDataBase.getStatusForObservations(observation);
         if (observationStatus === null)
-            throw new Error(`observation with requestId ${observation.requestId} has no status`)
+            throw new NoObservationStatus(`observation with requestId ${observation.requestId} has no status`)
         if (observationStatus.status == TxStatus.REVEALED) return true
         const eventTrigger = await this.bridgeDataBase.eventTriggerBySourceTxId(observation.sourceTxId)
         if (eventTrigger) {
@@ -74,7 +75,7 @@ export class DatabaseConnection{
      * Returns all confirmed observations to create new commitments
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
-        const height = await this.networkDataBase.getLastBlockHeight()
+        const height = await this.networkDataBase.getLastBlockHeight(ergoConfig.networkWatcher)
         const observations = await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height);
         const validObservations: Array<ObservationEntity> = [];
         for (const observation of observations) {
@@ -93,7 +94,7 @@ export class DatabaseConnection{
      */
     allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
         const readyCommitments: Array<CommitmentSet> = []
-        const height = await this.networkDataBase.getLastBlockHeight()
+        const height = await this.networkDataBase.getLastBlockHeight(ergoConfig.networkWatcher)
         const observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height));
         for (const observation of observations) {
             const observationStatus = await this.networkDataBase.getStatusForObservations(observation);

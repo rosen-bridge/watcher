@@ -23,23 +23,12 @@ class NetworkDataBase{
     }
 
     /**
-     * getter function for observationRepository
+     * returns the last saved block height based on the observing network
      */
-    getObservationRepository = () => {
-        return this.observationRepository;
-    }
-
-    /**
-     * getter function for observationStatusEntity
-     */
-    getObservationStatusEntity = () => {
-        return this.observationStatusEntity;
-    }
-
-    getLastBlockHeight = async (): Promise<number> => {
+    getLastBlockHeight = async (network: string): Promise<number> => {
         let scanner
-        if(config.networkWatcher == "Cardano") scanner = "cardano-koios"
-        else if(config.networkWatcher == "Ergo") scanner = "ergo-node"
+        if(network == "Cardano") scanner = "cardano-koios"
+        else if(network == "Ergo") scanner = "ergo-node"
         else throw new Error("Network unrecognized")
         const lastBlock = await this.blockRepository.find({
             where: { status: PROCEED, scanner: scanner },
@@ -200,7 +189,6 @@ class NetworkDataBase{
         } else {
             return updatedStatus
         }
-
     }
 
     /**

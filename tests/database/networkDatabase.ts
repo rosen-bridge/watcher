@@ -1,14 +1,19 @@
-import { DataSource } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { NetworkDataBase } from "../../src/database/models/networkModel";
 import { describe } from "mocha";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { TxType } from "../../src/database/entities/TxEntity";
 
 import chai, { expect } from "chai";
-import { observationEntity1, observationEntity2 } from "./mockedData";
-import { TxStatus } from "../../src/database/entities/ObservationStatusEntity";
+import { cardanoBlockEntity, ergoBlockEntity, observationEntity1, observationEntity2 } from "./mockedData";
+import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/ObservationStatusEntity";
+import { BlockEntity } from "@rosen-bridge/scanner";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 const observation2Status = {observation: observationEntity2, status: TxStatus.NOT_COMMITTED};
+let blockRepo: Repository<BlockEntity>
+let observationRepo: Repository<ObservationEntity>
+let observationStatusRepo: Repository<ObservationStatusEntity>
 
 export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase> => {
     const ormConfig = new DataSource({
@@ -16,10 +21,10 @@ export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase
         database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: [
             'src/database/entities/*.ts',
-            'node_modules/@rosen-bridge/scanner/dist/entities/*.js',
-            'node_modules/@rosen-bridge/watcher-data-extractor/dist/entities/*.js',
+            'node_modules/@rosen-bridge/scanner/entities/*.js',
+            'node_modules/@rosen-bridge/watcher-data-extractor/entities/*.js',
             'node_modules/@rosen-bridge/observation-extractor/entities/*.js',
-            'node_modules/@rosen-bridge/address-extractor/dist/entities/*.js'
+            'node_modules/@rosen-bridge/address-extractor/entities/*.js'
         ],
         migrations: ['src/database/migrations/watcher/*.ts'],
         synchronize: false,
@@ -27,14 +32,60 @@ export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase
     });
     await ormConfig.initialize();
     await ormConfig.runMigrations();
+    blockRepo = ormConfig.getRepository(BlockEntity)
+    observationRepo = ormConfig.getRepository(ObservationEntity)
+    observationStatusRepo = ormConfig.getRepository(ObservationStatusEntity)
     return new NetworkDataBase(ormConfig);
 }
 
 describe("NetworkModel tests", () => {
+    let DB: NetworkDataBase
     before("inserting into database", async () => {
-        const DB = await loadNetworkDataBase("dataBase");
-        await DB.getObservationRepository().save([observationEntity2])
-        await DB.getObservationStatusEntity().save([{observation: observationEntity2, status: TxStatus.NOT_COMMITTED}]);
+        DB = await loadNetworkDataBase("networkDataBase");
+        await blockRepo.save([ergoBlockEntity, cardanoBlockEntity])
+        await observationRepo.save([observationEntity2])
+        await observationStatusRepo.save([{observation: observationEntity2, status: TxStatus.NOT_COMMITTED}]);
+    })
+
+    describe("getLastBlockHeight", () => {
+        /**
+         * Target: testing getLastBlockHeight
+         * Expected Output:
+         *    The function should return the ergo chain last block height
+         */
+        it("Should return the last block height on ergo", async () => {
+            const res = await DB.getLastBlockHeight("Ergo");
+            expect(res).to.eql(ergoBlockEntity.height)
+        })
+
+        /**
+         * Target: testing getLastBlockHeight
+         * Expected Output:
+         *    The function should return the cardano chain last block height
+         */
+        it("Should return the last block height on cardano", async () => {
+            const res = await DB.getLastBlockHeight("Cardano");
+            expect(res).to.eql(cardanoBlockEntity.height)
+        })
+
+        /**
+         * Target: testing getLastBlockHeight
+         * Expected Output:
+         *    The function should throw an error since the config is not correct
+         */
+        it("Should throw an error since network name is wrong", async () => {
+            await expect(DB.getLastBlockHeight("WrongNet")).to.rejectedWith(Error)
+        })
+
+        /**
+         * Target: testing getLastBlockHeight
+         * Expected Output:
+         *    The function should throw an error since the database has a problem
+         */
+        it("Should throw error since no block is saved on ergo", async () => {
+            await blockRepo.clear()
+            await expect(DB.getLastBlockHeight("Ergo")).to.rejectedWith(Error)
+        })
     })
 
     describe("setStatusForObservations", () => {
@@ -45,7 +96,6 @@ describe("NetworkModel tests", () => {
          *    The function should return one observation
          */
         it("should return one observation", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const res = await DB.getStatusForObservations(observationEntity2);
             expect(res).not.to.be.null;
             if (res !== null) {
@@ -59,7 +109,6 @@ describe("NetworkModel tests", () => {
          *    The function should return zero observation
          */
         it("should return zero observation", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const res = await DB.getStatusForObservations(observationEntity1);
             expect(res).to.be.null;
         })
@@ -74,7 +123,6 @@ describe("NetworkModel tests", () => {
          *    The function should return status for observation that exist
          */
         it("should return status for observation that exist", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const res = await DB.setStatusForObservations(observationEntity2);
             expect(res.status).to.be.eql(1);
         })
@@ -85,8 +133,7 @@ describe("NetworkModel tests", () => {
          *    The function should set status for observation that is not exist
          */
         it("should set status for observation that is not exist", async () => {
-            const DB = await loadNetworkDataBase("dataBase-setStatusForObservation");
-            await DB.getObservationRepository().insert([observationEntity1])
+            await observationRepo.insert([observationEntity1])
             const res = await DB.setStatusForObservations(observationEntity1);
             expect(res.status).to.be.eql(1);
         })
@@ -99,7 +146,6 @@ describe("NetworkModel tests", () => {
      */
     describe("submitTx", () => {
         it("should save two new transaction without any errors", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             chai.spy.on(ErgoNetwork, "getHeight", () => 100)
             await DB.submitTx("txSerialized", "reqId1", "txId", TxType.COMMITMENT)
             await DB.submitTx("txSerialized2", "reqId1", "txId2", TxType.TRIGGER)
@@ -114,18 +160,15 @@ describe("NetworkModel tests", () => {
      */
     describe("getAllTxs and removeTx", () => {
         it("should return two available txs", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const data = await DB.getAllTxs()
             expect(data).to.have.length(2)
         })
         it("should remove a tx", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const txs = await DB.getAllTxs()
             const data = await DB.removeTx(txs[0])
             expect(data.deleted).to.true
         })
         it("should return one available tx", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const data = await DB.getAllTxs()
             expect(data).to.have.length(1)
         })
@@ -138,7 +181,6 @@ describe("NetworkModel tests", () => {
      */
     describe("updateTxTime", () => {
         it("should update the tx time", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const txs = await DB.getAllTxs()
             const data = await DB.setTxUpdateHeight(txs[0], 150)
             expect(data.updateBlock).to.eql(150)
@@ -152,7 +194,6 @@ describe("NetworkModel tests", () => {
      */
     describe("upgradeObservationTxStatus", () => {
         it("should upgrade the observation txStatus", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const obs = await DB.getConfirmedObservations(0, 100);
             const res = await DB.upgradeObservationTxStatus(obs[0])
             expect(res.status).to.eql(TxStatus.COMMITMENT_SENT)
@@ -166,7 +207,6 @@ describe("NetworkModel tests", () => {
      */
     describe("downgradeObservationTxStatus", () => {
         it("should upgrade the observation txStatus", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const obs = await DB.getConfirmedObservations(0, 100);
             const res = await DB.downgradeObservationTxStatus(obs[0])
             expect(res.status).to.eql(TxStatus.NOT_COMMITTED)
@@ -180,7 +220,6 @@ describe("NetworkModel tests", () => {
      */
     describe("updateObservationTxStatus", () => {
         it("should update the observation txStatus to revealed", async () => {
-            const DB = await loadNetworkDataBase("dataBase");
             const obs = await DB.getConfirmedObservations(0, 100);
             const res = await DB.updateObservationTxStatus(obs[0], TxStatus.REVEALED)
             expect(res.status).to.eql(TxStatus.REVEALED)

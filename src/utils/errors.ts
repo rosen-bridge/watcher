@@ -30,3 +30,10 @@ export class NoWID extends Error {
         this.name = "Watcher WID is not set"
     }
 }
+
+export class NoObservationStatus extends Error {
+    constructor(message?: string) {
+        super(message)
+        this.name = "The observation doesn't have a status"
+    }
+}

@@ -4,8 +4,26 @@ import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { Config } from "../../src/config/config";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/ObservationStatusEntity";
+import { BlockEntity } from "@rosen-bridge/scanner";
+import { PROCEED } from "@rosen-bridge/scanner/entities/blockEntity";
 
 const config = Config.getConfig()
+
+export const ergoBlockEntity = new BlockEntity()
+ergoBlockEntity.scanner = "ergo-node"
+ergoBlockEntity.id = 1
+ergoBlockEntity.hash = "blockHash"
+ergoBlockEntity.height = 1111
+ergoBlockEntity.parentHash = "parentHash"
+ergoBlockEntity.status = PROCEED
+
+export const cardanoBlockEntity = new BlockEntity()
+cardanoBlockEntity.scanner = "cardano-koios"
+cardanoBlockEntity.id = 2
+cardanoBlockEntity.hash = "blockHash2"
+cardanoBlockEntity.height = 2222
+cardanoBlockEntity.parentHash = "parentHash2"
+cardanoBlockEntity.status = PROCEED
 
 export const firstCommitment: Commitment = {
     WID: "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b",
@@ -158,6 +176,22 @@ observationEntity2.targetChainTokenId = "targetToken";
 observationEntity2.toChain = "cardano";
 observationEntity2.requestId = "reqId1";
 
-export const observationStatus = new ObservationStatusEntity()
-observationStatus.status = TxStatus.COMMITTED
+export const observationStatusTimedOut = new ObservationStatusEntity()
+observationStatusTimedOut.status = TxStatus.TIMED_OUT
+export const observationStatusNotCommitted = new ObservationStatusEntity()
+observationStatusNotCommitted.status = TxStatus.NOT_COMMITTED
+export const observationStatusCommitted = new ObservationStatusEntity()
+observationStatusCommitted.status = TxStatus.COMMITTED
+export const observationStatusRevealed = new ObservationStatusEntity()
+observationStatusRevealed.status = TxStatus.REVEALED
+
+export const unspentCommitment = new CommitmentEntity()
+export const unspentCommitment2 = new CommitmentEntity()
+export const redeemedCommitment = new CommitmentEntity()
+redeemedCommitment.spendBlock = "hash"
+
+const eventTrigger = new EventTriggerEntity()
+eventTrigger.id = 1
+eventTrigger.height = 111
+
 

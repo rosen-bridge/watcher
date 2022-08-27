@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "lint": "eslint .",
-    "test": "rm -rf ./sqlite && tsc --noEmit && npm run lint && mocha --slow 3000; rm -rf ./sqlite",
+    "test": "rm -rf ./sqlite && tsc --noEmit && npm run lint && NODE_ENV=\"test\" mocha --slow 3000; rm -rf ./sqlite",
     "coverage": "c8 npm run test",
     "start:dev": "nodemon src/index.ts",
     "typeorm": "typeorm-ts-node-esm",

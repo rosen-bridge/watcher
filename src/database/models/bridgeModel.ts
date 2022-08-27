@@ -24,7 +24,7 @@ class BridgeDataBase{
      */
     getOldSpentCommitments = async (height: number) => {
         return await this.commitmentRepository.createQueryBuilder("commitment_entity")
-            .where("commitment_entity.spendBlockHeight < :height", {height})
+            .where("commitment_entity.spendHeight < :height", {height})
             .getMany()
     }
 
