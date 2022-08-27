@@ -21,10 +21,10 @@ export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase
         database: `./sqlite/watcher-test-${name}.sqlite`,
         entities: [
             'src/database/entities/*.ts',
-            'node_modules/@rosen-bridge/scanner/entities/*.js',
-            'node_modules/@rosen-bridge/watcher-data-extractor/entities/*.js',
-            'node_modules/@rosen-bridge/observation-extractor/entities/*.js',
-            'node_modules/@rosen-bridge/address-extractor/entities/*.js'
+            'node_modules/@rosen-bridge/scanner/dist/entities/*.js',
+            'node_modules/@rosen-bridge/watcher-data-extractor/dist/entities/*.js',
+            'node_modules/@rosen-bridge/observation-extractor/dist/entities/*.js',
+            'node_modules/@rosen-bridge/address-extractor/dist/entities/*.js'
         ],
         migrations: ['src/database/migrations/watcher/*.ts'],
         synchronize: false,

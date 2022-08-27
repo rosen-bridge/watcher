@@ -26,7 +26,6 @@ export let boxesObject: Boxes;
 export let networkDatabase: NetworkDataBase;
 export let bridgeDatabase: BridgeDataBase;
 export let databaseConnection: DatabaseConnection;
-export let ergoScanner: ErgoScanner
 
 const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
@@ -64,12 +63,11 @@ const init = async () => {
     generateTransactionObject().then(
         async (res) => {
             watcherTransaction = res;
-            // initExpress();
-            // await delay(10000)
+            initExpress();
             // Initializing database
             networkDatabase = new NetworkDataBase(dataSource)
             // Running network scanner thread
-            scannerInit(watcherTransaction.watcherWID)
+            scannerInit()
 
             await delay(10000)
             databaseConnection = new DatabaseConnection(

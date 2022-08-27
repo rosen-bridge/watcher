@@ -5,7 +5,7 @@ import { TxEntity, TxType } from "../entities/TxEntity";
 import { ObservationStatusEntity, TxStatus } from "../entities/ObservationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
 import { Config } from "../../config/config";
-import { PROCEED } from "@rosen-bridge/scanner/entities/blockEntity";
+import { PROCEED } from "@rosen-bridge/scanner/dist/entities/blockEntity";
 
 const config = Config.getConfig()
 
