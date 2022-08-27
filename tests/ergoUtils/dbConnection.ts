@@ -2,18 +2,19 @@ import { loadNetworkDataBase } from "../database/networkDatabase";
 import { loadBridgeDataBase } from "../database/bridgeDatabase";
 import { DatabaseConnection } from "../../src/database/databaseConnection";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
-import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { CommitmentEntity, EventTriggerEntity } from "@rosen-bridge/watcher-data-extractor";
-
-import chai, { expect } from "chai";
-import spies from "chai-spies";
-import sinon from "sinon";
 import { TxStatus } from "../../src/database/entities/ObservationStatusEntity";
 import {
     observationEntity1,
     observationEntity2, observationStatus,
 } from "../database/mockedData";
+import { Boxes } from "../../src/ergo/boxes";
+import { rosenConfig, secret1, userAddress } from "../ergo/transactions/permit";
+import { Transaction } from "../../src/api/Transaction";
 
+import chai, { expect } from "chai";
+import spies from "chai-spies";
+import sinon from "sinon";
 
 chai.use(spies)
 
@@ -38,7 +39,9 @@ describe("Testing the DatabaseConnection", () => {
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity2])
             sinon.stub(ErgoNetwork, "getHeight").resolves(15)
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
+            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
             chai.spy.on(dbConnection, "isMergeHappened", () => false)
             const data = await dbConnection.allReadyObservations()
             expect(data).to.have.length(1)
@@ -50,7 +53,9 @@ describe("Testing the DatabaseConnection", () => {
             const bridgeDb = await loadBridgeDataBase("commitments");
             sinon.stub(ErgoNetwork, "getHeight").resolves(15)
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity2])
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
+            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
             chai.spy.on(dbConnection, "isMergeHappened", () => true)
             const data = await dbConnection.allReadyObservations()
             expect(data).to.have.length(0)
@@ -63,7 +68,9 @@ describe("Testing the DatabaseConnection", () => {
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity1])
             chai.spy.on(networkDb, "updateObservationTxStatus", () => undefined)
             sinon.stub(ErgoNetwork, "getHeight").resolves(215)
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
+            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
             const data = await dbConnection.allReadyObservations()
             expect(data).to.have.length(0)
             expect(networkDb.updateObservationTxStatus).to.have.been.called.with(observationEntity1, TxStatus.TIMED_OUT)
@@ -78,7 +85,9 @@ describe("Testing the DatabaseConnection", () => {
             await networkDb.getObservationStatusEntity().save([{observation:observationEntity2,status:TxStatus.NOT_COMMITTED}]);
             const bridgeDb = await loadBridgeDataBase("commitments");
             chai.spy.on(networkDb, "getConfirmedObservations", () => [observationEntity2])
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
+            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(data).to.have.length(0)
         })
@@ -89,7 +98,9 @@ describe("Testing the DatabaseConnection", () => {
             chai.spy.on(networkDb, "getStatusForObservations", () => observationStatus)
             chai.spy.on(bridgeDb, "commitmentsByEventId", () => [unspentCommitment, unspentCommitment2, redeemedCommitment])
             chai.spy.on(bridgeDb, "eventTriggerBySourceTxId", () => null)
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
+            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(data).to.have.length(1)
             expect(data[0].commitments).to.have.length(2)
@@ -103,7 +114,9 @@ describe("Testing the DatabaseConnection", () => {
             chai.spy.on(bridgeDb, "eventTriggerBySourceTxId", () => eventTrigger)
             chai.spy.on(networkDb, "updateObservationTxStatus", () => undefined)
             chai.spy.on(ErgoNetwork, "getHeight", () => 5000)
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
+            const boxes = new Boxes(rosenConfig, bridgeDb)
+            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
             const data = await dbConnection.allReadyCommitmentSets()
             expect(networkDb.updateObservationTxStatus).to.have.been.called.with(observationEntity2, TxStatus.REVEALED)
             expect(data).to.have.length(0)

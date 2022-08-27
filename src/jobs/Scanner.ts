@@ -24,10 +24,11 @@ export const scannerInit = (WID?: string) => {
     const ergoScannerConfig = {
         nodeUrl: ergoConfig.nodeUrl,
         timeout: ergoConfig.nodeTimeout,
-        initialHeight: 	268657,
+        initialHeight: ergoConfig.ergoInitialHeight,
         dataSource: dataSource,
     }
     scanner = new ErgoScanner(ergoScannerConfig);
+    scanner.getLastSavedBlock
     ergoScanningJob()
     if (ergoConfig.networkWatcher == "Ergo") {
         const observationExtractor = new ErgoObservationExtractor(dataSource, tokens, "")
@@ -37,7 +38,7 @@ export const scannerInit = (WID?: string) => {
         const cardanoScannerConfig = {
             koiosUrl: cardanoConfig.koiosURL,
             timeout: cardanoConfig.timeout,
-            initialHeight: 3798699,
+            initialHeight: cardanoConfig.initialHeight,
             dataSource: dataSource,
         }
         cardanoScanner = new CardanoKoiosScanner(cardanoScannerConfig)

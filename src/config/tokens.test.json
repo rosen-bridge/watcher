@@ -11,8 +11,8 @@
       },
       "cardano": {
         "fingerprint": "asset1ycg2zvfj5x7zt4md3zkd0j5tekxs52kmwxpw05",
-        "policy_id": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
-        "asset_name": "646f6765",
+        "policyId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
+        "assetName": "646f6765",
         "unit": "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc37e"
       }
     },
@@ -23,8 +23,8 @@
       },
       "cardano": {
         "fingerprint": "asset12y0ewmxggeglymjpmp9mjf5qzh4kgwj9chtkpv",
-        "policy_id": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
-        "asset_name": "7369676d61",
+        "policyId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
+        "assetName": "7369676d61",
         "unit": "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc37e"
       }
     }

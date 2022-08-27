@@ -72,7 +72,13 @@ const init = async () => {
             scannerInit(watcherTransaction.watcherWID)
 
             await delay(10000)
-            databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, ergoConfig.observationConfirmation, ergoConfig.observationValidThreshold)
+            databaseConnection = new DatabaseConnection(
+                networkDatabase,
+                bridgeDatabase,
+                watcherTransaction,
+                ergoConfig.observationConfirmation,
+                ergoConfig.observationValidThreshold
+            )
             // Running transaction checking thread
             transactionQueueJob()
             // Running commitment creation thread

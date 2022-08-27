@@ -8,6 +8,7 @@ import { Buffer } from "buffer";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { TxType } from "./entities/TxEntity";
 import { TxStatus } from "./entities/ObservationStatusEntity";
+import { Transaction } from "../api/Transaction";
 
 const ergoConfig = Config.getConfig();
 
@@ -15,12 +16,14 @@ const ergoConfig = Config.getConfig();
 export class DatabaseConnection{
     bridgeDataBase: BridgeDataBase
     networkDataBase: NetworkDataBase
+    api: Transaction
     observationConfirmation: number
     observationValidThreshold: number
 
-    constructor(networkDb: NetworkDataBase, bridgeDb: BridgeDataBase, confirmation: number, validThreshold: number) {
+    constructor(networkDb: NetworkDataBase, bridgeDb: BridgeDataBase, api: Transaction, confirmation: number, validThreshold: number) {
         this.networkDataBase = networkDb
         this.bridgeDataBase = bridgeDb
+        this.api = api
         this.observationConfirmation = confirmation
         this.observationValidThreshold = validThreshold
     }
@@ -33,12 +36,18 @@ export class DatabaseConnection{
         const observationStatus = await this.networkDataBase.getStatusForObservations(observation);
         if (observationStatus === null)
             throw new Error(`observation with requestId ${observation.requestId} has no status`)
+        // Check observation time out
         if (observationStatus.status == TxStatus.TIMED_OUT) return false
         const currentHeight = await ErgoNetwork.getHeight()
         if (currentHeight - observation.height > this.observationValidThreshold) {
             await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.TIMED_OUT)
             return false
-        } else if (await this.isMergeHappened(observation)) return false
+        }
+        // check observation trigger created
+        if (await this.isMergeHappened(observation)) return false
+        // check this watcher have created the commitment lately
+        const relatedCommitments = await this.bridgeDataBase.commitmentsByEventId(observation.requestId)
+        if (relatedCommitments.filter(commitment => commitment.WID === this.api.watcherWID).length > 0) return false
         return true
     }
 
@@ -65,7 +74,7 @@ export class DatabaseConnection{
      * Returns all confirmed observations to create new commitments
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
-        const height = await ErgoNetwork.getHeight()
+        const height = await this.networkDataBase.getLastBlockHeight()
         const observations = await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height);
         const validObservations: Array<ObservationEntity> = [];
         for (const observation of observations) {
@@ -84,7 +93,7 @@ export class DatabaseConnection{
      */
     allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
         const readyCommitments: Array<CommitmentSet> = []
-        const height = await ErgoNetwork.getHeight()
+        const height = await this.networkDataBase.getLastBlockHeight()
         const observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height));
         for (const observation of observations) {
             const observationStatus = await this.networkDataBase.getStatusForObservations(observation);

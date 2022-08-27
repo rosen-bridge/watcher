@@ -60,7 +60,6 @@ export class networkModelMigration1660732464922 implements MigrationInterface{
                     "eventId" varchar NOT NULL,
                     "commitment" varchar NOT NULL,
                     "WID" varchar NOT NULL,
-                    "commitmentBoxId" varchar NOT NULL,
                     "block" varchar NOT NULL,
                     "height" integer NOT NULL,
                     "boxSerialized" varchar NOT NULL,

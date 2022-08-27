@@ -68,7 +68,7 @@ describe("BridgeDatabase tests", () => {
     describe("findCommitmentsById", () => {
         it("should return exactly two commitments with the specified box id", async () => {
             const DB = await loadBridgeDataBase("bridge");
-            const data = await DB.findCommitmentsById([commitmentEntity.commitmentBoxId, spentCommitmentEntity.commitmentBoxId])
+            const data = await DB.findCommitmentsById([commitmentEntity.boxId, spentCommitmentEntity.boxId])
             expect(data).to.have.length(2)
             expect(data[0]).to.eql(commitmentEntity)
             expect(data[1]).to.eql(spentCommitmentEntity)
@@ -78,7 +78,7 @@ describe("BridgeDatabase tests", () => {
     describe("deleteCommitments", () => {
         it("should delete two commitments with specified ids", async () => {
             const DB = await loadBridgeDataBase("bridge");
-            await DB.deleteCommitments([commitmentEntity.commitmentBoxId, spentCommitmentEntity.commitmentBoxId])
+            await DB.deleteCommitments([commitmentEntity.boxId, spentCommitmentEntity.boxId])
             const data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(0)
         })

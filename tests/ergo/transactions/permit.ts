@@ -38,7 +38,7 @@ export const rosenConfig = {
     lockAddress: "9iLfrEVYMEXeqt9tTJn2X4Mmp2QfaQuCeBwgdxpmNoZvaErgj2o",
     RWTId: "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267"
 }
-const secret1 = wasm.SecretKey.dlog_from_bytes(Buffer.from("7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2", "hex"))
+export const secret1 = wasm.SecretKey.dlog_from_bytes(Buffer.from("7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2", "hex"))
 const secret2 = wasm.SecretKey.dlog_from_bytes(Buffer.from("3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e", "hex"))
 const secret3 = wasm.SecretKey.dlog_from_bytes(Buffer.from("1111111111111111111111111111111111111111111111111111111111111111", "hex"))
 

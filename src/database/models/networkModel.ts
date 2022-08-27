@@ -3,14 +3,20 @@ import { ErgoNetwork } from "../../ergo/network/ergoNetwork";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { TxEntity, TxType } from "../entities/TxEntity";
 import { ObservationStatusEntity, TxStatus } from "../entities/ObservationStatusEntity";
+import { BlockEntity } from "@rosen-bridge/scanner";
+import { Config } from "../../config/config";
+import { PROCEED } from "@rosen-bridge/scanner/entities/blockEntity";
 
+const config = Config.getConfig()
 
 class NetworkDataBase{
+    private readonly blockRepository: Repository<BlockEntity>
     private readonly observationRepository: Repository<ObservationEntity>;
     private readonly txRepository: Repository<TxEntity>;
     private readonly observationStatusEntity: Repository<ObservationStatusEntity>;
 
     constructor(dataSource: DataSource) {
+        this.blockRepository = dataSource.getRepository(BlockEntity)
         this.observationRepository = dataSource.getRepository(ObservationEntity);
         this.txRepository = dataSource.getRepository(TxEntity);
         this.observationStatusEntity = dataSource.getRepository(ObservationStatusEntity);
@@ -28,6 +34,22 @@ class NetworkDataBase{
      */
     getObservationStatusEntity = () => {
         return this.observationStatusEntity;
+    }
+
+    getLastBlockHeight = async (): Promise<number> => {
+        let scanner
+        if(config.networkWatcher == "Cardano") scanner = "cardano-koios"
+        else if(config.networkWatcher == "Ergo") scanner = "ergo-node"
+        else throw new Error("Network unrecognized")
+        const lastBlock = await this.blockRepository.find({
+            where: { status: PROCEED, scanner: scanner },
+            order: { height: 'DESC' },
+            take: 1
+        });
+        if (lastBlock.length !== 0) {
+            return lastBlock[0].height;
+        }
+        throw new Error("No block found or error in database connection")
     }
 
     /**
