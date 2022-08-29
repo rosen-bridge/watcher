@@ -12,13 +12,12 @@ import {
 import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { Constants } from "../../src/config/config";
 
 import { expect } from "chai";
-import { Config } from "../../src/config/config";
 import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 
-const config = Config.getConfig()
 const observation2Status = {observation: observationEntity2, status: TxStatus.NOT_COMMITTED};
 let blockRepo: Repository<BlockEntity>
 let observationRepo: Repository<ObservationEntity>
@@ -76,7 +75,7 @@ describe("NetworkModel tests", () => {
          *    The function should return the ergo chain last block height
          */
         it("Should return the last block height on ergo", async () => {
-            const res = await DB.getLastBlockHeight(config.ergoNameConstant);
+            const res = await DB.getLastBlockHeight(Constants.ergoNode);
             expect(res).to.eql(ergoBlockEntity.height)
         })
 
@@ -86,7 +85,7 @@ describe("NetworkModel tests", () => {
          *    The function should return the cardano chain last block height
          */
         it("Should return the last block height on cardano", async () => {
-            const res = await DB.getLastBlockHeight(config.cardanoNameConstant);
+            const res = await DB.getLastBlockHeight(Constants.cardanoKoios);
             expect(res).to.eql(cardanoBlockEntity.height)
         })
 

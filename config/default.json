@@ -1,18 +1,8 @@
 {
-    "watcher": {
-        "network": "cardano",
-        "observation" : {
-            "confirmation": 2,
-            "validThreshold": 1000
-        },
-        "supportedNetworks": {
-            "ergo": "ergo",
-            "cardano": "cardano"
-        },
-        "scannerConstants": {
-            "ergo": "ergo-node",
-            "cardano": "cardano-koios"
-        }
+    "network": "cardano",
+    "observation" : {
+        "confirmation": 2,
+        "validThreshold": 1000
     },
     "cardano": {
         "interval": 10,

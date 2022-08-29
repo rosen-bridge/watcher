@@ -8,7 +8,7 @@ import { Observation } from "../utils/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { Buffer } from "buffer";
 import { BoxEntity } from "../../../address-extractor";
-import { NoWID } from "../utils/errors";
+import { NoWID } from "../errors/errors";
 
 const config = Config.getConfig();
 

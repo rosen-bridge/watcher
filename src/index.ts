@@ -8,20 +8,18 @@ import { rosenConfig } from "./config/rosenConfig";
 import { Boxes } from "./ergo/boxes";
 import { WatcherDataBase } from "./database/models/watcherModel";
 import { dataSource } from "../config/dataSource";
-import { DatabaseConnection } from "./database/databaseConnection";
 import { scannerInit } from "./jobs/scanner";
 import { creation } from "./jobs/commitmentCreation";
 import { reveal } from "./jobs/commitmetnReveal";
 import { transactionQueueJob } from "./jobs/transactionQueue";
-import { delay } from "./utils/utils";
+import { WatcherUtils, delay, TransactionUtils } from "./utils/utils";
 
 const config = Config.getConfig();
 
-
 export let watcherTransaction: Transaction;
-export let boxesObject: Boxes;
-export let watcherDatabase: WatcherDataBase;
-export let databaseConnection: DatabaseConnection;
+let boxesObject: Boxes;
+let watcherDatabase: WatcherDataBase;
+let watcherUtils: WatcherUtils;
 
 const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
@@ -63,18 +61,19 @@ const init = async () => {
             scannerInit()
 
             await delay(10000)
-            databaseConnection = new DatabaseConnection(
+            watcherUtils = new WatcherUtils(
                 watcherDatabase,
                 watcherTransaction,
                 config.observationConfirmation,
                 config.observationValidThreshold
             )
+            const txUtils = new TransactionUtils(watcherDatabase)
             // Running transaction checking thread
-            transactionQueueJob()
+            transactionQueueJob(watcherDatabase, watcherUtils)
             // Running commitment creation thread
-            creation()
+            creation(watcherUtils, txUtils, boxesObject, watcherTransaction)
             // Running trigger event creation thread
-            reveal()
+            reveal(watcherUtils, txUtils, boxesObject)
         }
     ).catch(e => {
         console.log(e)

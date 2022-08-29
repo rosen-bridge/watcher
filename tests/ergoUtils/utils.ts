@@ -3,7 +3,7 @@ import { ErgoUtils, extractBoxes } from "../../src/ergo/utils";
 import { uint8ArrayToHex } from "../../src/utils/utils";
 import { Config } from "../../src/config/config";
 import { rosenConfig } from "../../src/config/rosenConfig";
-import { boxCreationError } from "../../src/utils/errors";
+import { boxCreationError } from "../../src/errors/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../ergo/objects/axios";

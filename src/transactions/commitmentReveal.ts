@@ -4,23 +4,25 @@ import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import { boxCreationError, NotEnoughFund } from "../utils/errors";
-import { DatabaseConnection } from "../database/databaseConnection";
+import { boxCreationError, NotEnoughFund } from "../errors/errors";
 import { rosenConfig } from "../config/rosenConfig";
 import { Config } from "../config/config";
 import { TxType } from "../database/entities/txEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { TransactionUtils, WatcherUtils } from "../utils/utils";
 
 const txFee = BigInt(rosenConfig.fee)
 const config = Config.getConfig();
 
 export class CommitmentReveal {
-    databaseConnection: DatabaseConnection
+    watcherUtils: WatcherUtils
+    txUtils: TransactionUtils
     boxes: Boxes
 
-    constructor(db: DatabaseConnection, boxes: Boxes) {
+    constructor(watcherUtils: WatcherUtils, txUtils: TransactionUtils, boxes: Boxes) {
         this.boxes = boxes
-        this.databaseConnection = db
+        this.watcherUtils = watcherUtils
+        this.txUtils = txUtils
     }
     /**
      * creates the trigger event transaction and submits to the transactionQueue
@@ -48,7 +50,7 @@ export class CommitmentReveal {
                 height,
                 new wasm.ErgoBoxes(repoBox)
             )
-            await this.databaseConnection.submitTransaction(signed, observation, TxType.TRIGGER)
+            await this.txUtils.submitTransaction(signed, observation, TxType.TRIGGER)
             console.log("Trigger event created with tx id:", signed.id().to_str())
         } catch (e) {
             if (e instanceof boxCreationError) {
@@ -75,7 +77,7 @@ export class CommitmentReveal {
      * If the number of valid bridge are more than the required bridge it generates the trigger event
      */
     job = async () => {
-        const commitmentSets = await this.databaseConnection.allReadyCommitmentSets()
+        const commitmentSets = await this.watcherUtils.allReadyCommitmentSets()
         console.log("Starting trigger event creation with", commitmentSets.length, "number of commitment sets")
         for (const commitmentSet of commitmentSets) {
             try {

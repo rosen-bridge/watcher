@@ -3,7 +3,7 @@ import { Observation } from "../utils/interfaces";
 import { bigIntToUint8Array } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoNetwork } from "./network/ergoNetwork";
-import { boxCreationError } from "../utils/errors";
+import { boxCreationError } from "../errors/errors";
 import { blake2b } from "blakejs";
 import { Boxes } from "./boxes";
 import { Buffer } from "buffer";

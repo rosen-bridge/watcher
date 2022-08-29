@@ -1,5 +1,4 @@
 import { loadDataBase } from "../database/watcherDatabase";
-import { DatabaseConnection } from "../../src/database/databaseConnection";
 import { TxStatus } from "../../src/database/entities/observationStatusEntity";
 import {
     commitmentEntity,
@@ -24,21 +23,22 @@ import { TxType } from "../../src/database/entities/txEntity";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import chai, { expect } from "chai";
 import spies from "chai-spies";
-import chaiPromise from "chai-as-promised"
-import { NoObservationStatus } from "../../src/utils/errors";
+import { NoObservationStatus } from "../../src/errors/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
+import { TransactionUtils, WatcherUtils } from "../../src/utils/utils";
 
 chai.use(spies)
 
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj))
 
-describe("Testing the DatabaseConnection", () => {
-    let dataBase: WatcherDataBase, boxes: Boxes, transaction: Transaction, dbConnection: DatabaseConnection
+describe("Testing the WatcherUtils & TransactionUtils", () => {
+    let dataBase: WatcherDataBase, boxes: Boxes, transaction: Transaction, watcherUtils: WatcherUtils, txUtils: TransactionUtils
     beforeEach(async () => {
-        dataBase = await loadDataBase("network-dbConnection");
+        dataBase = await loadDataBase("network-watcherUtils");
         boxes = new Boxes(rosenConfig, dataBase)
         transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-        dbConnection = new DatabaseConnection(dataBase, transaction, 0, 100)
+        watcherUtils = new WatcherUtils(dataBase, transaction, 0, 100)
+        txUtils = new TransactionUtils(dataBase)
     })
 
     describe("allReadyObservations", () => {
@@ -46,16 +46,16 @@ describe("Testing the DatabaseConnection", () => {
             chai.spy.on(dataBase, "getConfirmedObservations", () => [observationEntity1])
             chai.spy.on(dataBase, "getLastBlockHeight", () => 15)
             chai.spy.on(dataBase, "getStatusForObservations", () => observationStatusNotCommitted)
-            chai.spy.on(dbConnection, "isMergeHappened", () => false)
-            const data = await dbConnection.allReadyObservations()
+            chai.spy.on(watcherUtils, "isMergeHappened", () => false)
+            const data = await watcherUtils.allReadyObservations()
             expect(data).to.have.length(1)
         })
         it("should return zero observations", async () => {
             chai.spy.on(dataBase, "getLastBlockHeight", () => 15)
             chai.spy.on(dataBase, "getConfirmedObservations", () => [observationEntity1])
             chai.spy.on(dataBase, "getStatusForObservations", () => observationStatusNotCommitted)
-            chai.spy.on(dbConnection, "isMergeHappened", () => true)
-            const data = await dbConnection.allReadyObservations()
+            chai.spy.on(watcherUtils, "isMergeHappened", () => true)
+            const data = await watcherUtils.allReadyObservations()
             expect(data).to.have.length(0)
         })
         it("should return no observations", async () => {
@@ -63,7 +63,7 @@ describe("Testing the DatabaseConnection", () => {
             chai.spy.on(dataBase, "updateObservationTxStatus", () => undefined)
             chai.spy.on(dataBase, "getLastBlockHeight", () => 215)
             chai.spy.on(dataBase, "getStatusForObservations", () => observationStatusNotCommitted)
-            const data = await dbConnection.allReadyObservations()
+            const data = await watcherUtils.allReadyObservations()
             expect(data).to.have.length(0)
             expect(dataBase.updateObservationTxStatus).to.have.been.called.with(observationEntity1, TxStatus.TIMED_OUT)
         })
@@ -73,7 +73,7 @@ describe("Testing the DatabaseConnection", () => {
         it("should not return commitment set", async () => {
             chai.spy.on(dataBase, "getLastBlockHeight", () => 15)
             chai.spy.on(dataBase, "getConfirmedObservations", () => [observationEntity1])
-            const data = await dbConnection.allReadyCommitmentSets()
+            const data = await watcherUtils.allReadyCommitmentSets()
             expect(data).to.have.length(0)
         })
         it("should return one commitment set with two unspent commitments", async () => {
@@ -82,7 +82,7 @@ describe("Testing the DatabaseConnection", () => {
             chai.spy.on(dataBase, "getStatusForObservations", () => observationStatusCommitted)
             chai.spy.on(dataBase, "commitmentsByEventId", () => [unspentCommitment, unspentCommitment2, redeemedCommitment])
             chai.spy.on(dataBase, "eventTriggerBySourceTxId", () => null)
-            const data = await dbConnection.allReadyCommitmentSets()
+            const data = await watcherUtils.allReadyCommitmentSets()
             expect(data).to.have.length(1)
             expect(data[0].commitments).to.have.length(2)
         })
@@ -93,7 +93,7 @@ describe("Testing the DatabaseConnection", () => {
             chai.spy.on(dataBase, "commitmentsByEventId", () => [unspentCommitment, redeemedCommitment])
             chai.spy.on(dataBase, "eventTriggerBySourceTxId", () => eventTriggerEntity)
             chai.spy.on(dataBase, "updateObservationTxStatus", () => undefined)
-            const data = await dbConnection.allReadyCommitmentSets()
+            const data = await watcherUtils.allReadyCommitmentSets()
             expect(dataBase.updateObservationTxStatus).to.have.been.called.with(observationEntity1, TxStatus.REVEALED)
             expect(data).to.have.length(0)
         })
@@ -102,7 +102,7 @@ describe("Testing the DatabaseConnection", () => {
     describe("isObservationValid", () => {
         it("should return false since the status is timeout", async () => {
             chai.spy.on(dataBase, "getStatusForObservations", () => observationStatusTimedOut)
-            const data = await dbConnection.isObservationValid(observationEntity1)
+            const data = await watcherUtils.isObservationValid(observationEntity1)
             expect(data).to.be.false
         })
         it("should return false since this watcher have created this commitment beforehand", async () => {
@@ -110,23 +110,23 @@ describe("Testing the DatabaseConnection", () => {
             chai.spy.on(dataBase, "getStatusForObservations", () => observationStatusNotCommitted)
             chai.spy.on(dataBase, "getLastBlockHeight", () => 15)
             chai.spy.on(dataBase, "commitmentsByEventId", () => [commitmentEntity])
-            const data = await dbConnection.isObservationValid(observationEntity1)
+            const data = await watcherUtils.isObservationValid(observationEntity1)
             expect(data).to.be.false
         })
         it("should return error due to status problem", async () => {
             chai.spy.on(dataBase, "getStatusForObservations", () => null)
-            await expect(dbConnection.isObservationValid(observationEntity1)).to.rejectedWith(NoObservationStatus)
+            await expect(watcherUtils.isObservationValid(observationEntity1)).to.rejectedWith(NoObservationStatus)
         })
     })
 
     describe("isMergedHappened", () => {
         it("should return error due to status problem", async () => {
             chai.spy.on(dataBase, "getStatusForObservations", () => null)
-            await expect(dbConnection.isMergeHappened(observationEntity1)).to.rejectedWith(NoObservationStatus)
+            await expect(watcherUtils.isMergeHappened(observationEntity1)).to.rejectedWith(NoObservationStatus)
         })
         it("should return false since the status is timeout", async () => {
             chai.spy.on(dataBase, "getStatusForObservations", () => observationStatusRevealed)
-            const data = await dbConnection.isMergeHappened(observationEntity1)
+            const data = await watcherUtils.isMergeHappened(observationEntity1)
             expect(data).to.be.true
         })
     })
@@ -136,7 +136,7 @@ describe("Testing the DatabaseConnection", () => {
             chai.spy.on(ErgoNetwork, "getHeight", () => 100)
             chai.spy.on(dataBase, "upgradeObservationTxStatus", () => undefined)
             chai.spy.on(dataBase, "submitTx", () => undefined)
-            await dbConnection.submitTransaction(signedTx, observationEntity1, TxType.COMMITMENT)
+            await txUtils.submitTransaction(signedTx, observationEntity1, TxType.COMMITMENT)
             expect(dataBase.submitTx).to.have.been.called.with(
                 Buffer.from(signedTx.sigma_serialize_bytes()).toString("base64"),
                 observationEntity1.requestId,

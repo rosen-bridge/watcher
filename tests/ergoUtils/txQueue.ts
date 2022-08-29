@@ -1,5 +1,4 @@
 import { loadDataBase } from "../database/watcherDatabase";
-import { DatabaseConnection } from "../../src/database/databaseConnection";
 import { TransactionQueue } from "../../src/ergo/transactionQueue";
 import { TxEntity, TxType } from "../../src/database/entities/txEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
@@ -8,7 +7,6 @@ import { Boxes } from "../../src/ergo/boxes";
 import { rosenConfig, secret1, userAddress } from "../ergo/transactions/permit";
 import { Transaction } from "../../src/api/Transaction";
 import { WatcherDataBase } from "../../src/database/models/watcherModel";
-import { watcherDatabase } from "../../src";
 
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -17,6 +15,7 @@ import spies from "chai-spies";
 chai.use(spies)
 
 import txObj from "../ergo/dataset/tx.json" assert { type: "json" }
+import { WatcherUtils } from "../../src/utils/utils";
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj))
 
@@ -30,13 +29,13 @@ txEntity.txSerialized = Buffer.from(tx.sigma_serialize_bytes()).toString("base64
 txEntity.updateBlock = height - 1
 
 describe("Transaction queue tests", () => {
-    let dataBase: WatcherDataBase, boxes: Boxes, transaction: Transaction, dbConnection: DatabaseConnection
+    let dataBase: WatcherDataBase, boxes: Boxes, transaction: Transaction, dbConnection: WatcherUtils
     let txQueue: TransactionQueue
     before(async () => {
         dataBase = await loadDataBase("commitmentReveal");
-        boxes = new Boxes(rosenConfig, watcherDatabase)
+        boxes = new Boxes(rosenConfig, dataBase)
         transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-        dbConnection = new DatabaseConnection(dataBase, transaction, 0, 100)
+        dbConnection = new WatcherUtils(dataBase, transaction, 0, 100)
         txQueue = new TransactionQueue(dataBase, dbConnection)
     })
 

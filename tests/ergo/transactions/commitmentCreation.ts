@@ -1,12 +1,16 @@
 import { Boxes } from "../../../src/ergo/boxes";
 import { Transaction } from "../../../src/api/Transaction";
 import { rosenConfig, secret1 } from "./permit";
-import { DatabaseConnection } from "../../../src/database/databaseConnection";
 import { CommitmentCreation } from "../../../src/transactions/commitmentCreation";
 import { JsonBI } from "../../../src/ergo/network/parser";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
+import { WatcherUtils, hexStrToUint8Array, TransactionUtils } from "../../../src/utils/utils";
+import { TxType } from "../../../src/database/entities/txEntity";
+import { WatcherDataBase } from "../../../src/database/models/watcherModel";
+import { loadDataBase } from "../../database/watcherDatabase";
+
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
 import chai from "chai";
@@ -17,10 +21,7 @@ import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import WIDObj2 from "./dataset/WIDBox2.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
-import { hexStrToUint8Array } from "../../../src/utils/utils";
-import { TxType } from "../../../src/database/entities/txEntity";
-import { WatcherDataBase } from "../../../src/database/models/watcherModel";
-import { loadDataBase } from "../../database/watcherDatabase";
+
 
 chai.use(spies)
 
@@ -52,17 +53,18 @@ observation.fromAddress = 'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
 
 describe("Commitment creation transaction tests", () => {
-    let watcherDb: WatcherDataBase, boxes: Boxes, transaction: Transaction, dbConnection: DatabaseConnection
+    let watcherDb: WatcherDataBase, txUtils: TransactionUtils, boxes: Boxes, transaction: Transaction, watcherUtils: WatcherUtils
     let cc: CommitmentCreation
     before(async () => {
         watcherDb = await loadDataBase("commitmentCreation");
         boxes = new Boxes(rosenConfig, watcherDb)
         transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-        dbConnection = new DatabaseConnection(watcherDb, transaction, 0, 100)
-        cc = new CommitmentCreation(dbConnection, boxes, transaction)
+        watcherUtils = new WatcherUtils(watcherDb, transaction, 0, 100)
+        txUtils = new TransactionUtils(watcherDb)
+        cc = new CommitmentCreation(watcherUtils, txUtils, boxes, transaction)
     })
     afterEach(() => {
-        chai.spy.restore(dbConnection)
+        chai.spy.restore(watcherUtils)
     })
 
     /**
@@ -77,7 +79,7 @@ describe("Commitment creation transaction tests", () => {
      */
     describe("createCommitmentTx", () => {
         it("Should create, sign and send a commitment transaction", async () => {
-            chai.spy.on(dbConnection, "submitTransaction", () => null)
+            chai.spy.on(watcherUtils, "submitTransaction", () => null)
             chai.spy.on(boxes, "createCommitment")
             chai.spy.on(boxes, "createPermit")
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)
@@ -85,7 +87,7 @@ describe("Commitment creation transaction tests", () => {
             await cc.createCommitmentTx(WID, observation, commitment, permits, WIDBox, [])
             expect(boxes.createPermit).to.have.called.with(111, BigInt(97), hexStrToUint8Array(WID))
             expect(boxes.createCommitment).to.have.called.once
-            expect(dbConnection.submitTransaction).to.have.been.called.with(signedTx, observation, TxType.COMMITMENT)
+            expect(txUtils.submitTransaction).to.have.been.called.with(signedTx, observation, TxType.COMMITMENT)
             sinon.restore()
         })
     })
@@ -102,8 +104,8 @@ describe("Commitment creation transaction tests", () => {
      */
     describe("job", () => {
         it("Should collect ready observations and create commitments", async () => {
-            chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
-            chai.spy.on(dbConnection, "updateObservation", () => {
+            chai.spy.on(watcherUtils, "allReadyObservations", () => [observation])
+            chai.spy.on(watcherUtils, "updateObservation", () => {
                 return
             })
             chai.spy.on(boxes, "getPermits", () => permits)
@@ -120,8 +122,8 @@ describe("Commitment creation transaction tests", () => {
         })
 
         it("Should collect ready observations and create commitment with excess fee box", async () => {
-            chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
-            chai.spy.on(dbConnection, "updateObservation", () => {
+            chai.spy.on(watcherUtils, "allReadyObservations", () => [observation])
+            chai.spy.on(watcherUtils, "updateObservation", () => {
                 return
             })
             chai.spy.on(boxes, "getPermits", () => permits)

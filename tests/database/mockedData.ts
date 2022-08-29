@@ -1,16 +1,14 @@
 import { Commitment } from "../../src/utils/interfaces";
 import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
-import { Config } from "../../src/config/config";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
 import { PROCEED } from "@rosen-bridge/scanner/dist/entities/blockEntity";
-
-const config = Config.getConfig()
+import { Constants } from "../../src/config/config";
 
 export const ergoBlockEntity = new BlockEntity()
-ergoBlockEntity.scanner = config.ergoScannerConstant
+ergoBlockEntity.scanner = Constants.ergoNode
 ergoBlockEntity.id = 1
 ergoBlockEntity.hash = "blockHash"
 ergoBlockEntity.height = 1111
@@ -18,7 +16,7 @@ ergoBlockEntity.parentHash = "parentHash"
 ergoBlockEntity.status = PROCEED
 
 export const cardanoBlockEntity = new BlockEntity()
-cardanoBlockEntity.scanner = config.cardanoScannerConstant
+cardanoBlockEntity.scanner = Constants.cardanoKoios
 cardanoBlockEntity.id = 2
 cardanoBlockEntity.hash = "blockHash2"
 cardanoBlockEntity.height = 2222
@@ -87,7 +85,7 @@ export const plainBox = new BoxEntity()
 plainBox.address = "address"
 plainBox.createBlock = "blockID"
 plainBox.creationHeight = 100
-plainBox.extractor = config.addressExtractorName
+plainBox.extractor = Constants.addressExtractorName
 plainBox.boxId = "boxId"
 plainBox.serialized = "box"
 
@@ -95,7 +93,7 @@ export const spentPlainBox = new BoxEntity()
 spentPlainBox.address = "address"
 spentPlainBox.createBlock = "blockID"
 spentPlainBox.creationHeight = 100
-spentPlainBox.extractor = config.addressExtractorName
+spentPlainBox.extractor = Constants.addressExtractorName
 spentPlainBox.boxId = "boxId2"
 spentPlainBox.serialized = "box2"
 spentPlainBox.spendBlock = "blockHash"

@@ -1,6 +1,6 @@
 import config from "config";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { SecretError } from "../utils/errors";
+import { SecretError } from "../errors/errors";
 import { uint8ArrayToHex } from "../utils/utils";
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
@@ -19,20 +19,18 @@ const REPO_NFT: string | undefined = config.get?.('ergo.repoNFT');
 const CARDANO_TIMEOUT: number | undefined = config.get?.('cardano.timeout');
 const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.('ergo.explorerTimeout');
 const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
-const NETWORK_WATCHER: string | undefined = config.get?.('watcher.network');
+const NETWORK_WATCHER: string | undefined = config.get?.('network');
 const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.('ergo.commitmentCreationInterval')
 const COMMITMENT_REVEAL_INTERVAL: number | undefined = config.get?.('ergo.commitmentRevealInterval')
 const TRANSACTION_CHECK_INTERVAL: number | undefined = config.get?.('ergo.transactions.interval')
 const TRANSACTION_REMOVING_TIMEOUT: number | undefined = config.get?.('ergo.transactions.timeout');
 const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transactions.confirmation');
-const OBSERVATION_CONFIRMATION: number | undefined = config.get?.('watcher.observation.confirmation');
-const OBSERVATION_VALID_THRESH: number | undefined = config.get?.('watcher.observation.validThreshold');
-const CARDANO_NAME_CONSTANT: string = config.get?.('watcher.supportedNetworks.cardano');
-const ERGO_NAME_CONSTANT: string = config.get?.('watcher.supportedNetworks.ergo');
-const CARDANO_SCANNER_CONSTANT: string = config.get?.('watcher.scannerConstants.cardano');
-const ERGO_SCANNER_CONSTANT: string = config.get?.('watcher.scannerConstants.ergo');
+const OBSERVATION_CONFIRMATION: number | undefined = config.get?.('observation.confirmation');
+const OBSERVATION_VALID_THRESH: number | undefined = config.get?.('observation.validThreshold');
 
-export class Config {
+const supportedNetworks: Array<string> = ['ergo-node', 'cardano-koios']
+
+class Config {
     private static instance: Config;
     networkType: wasm.NetworkPrefix;
     secretKey: wasm.SecretKey;
@@ -54,14 +52,6 @@ export class Config {
     transactionCheckingInterval: number;
     observationConfirmation: number;
     observationValidThreshold: number;
-    addressExtractorName: string;
-    permitExtractorName: string;
-    commitmentExtractorName: string;
-    triggerExtractorName: string;
-    ergoNameConstant: string
-    cardanoNameConstant: string
-    ergoScannerConstant: string
-    cardanoScannerConstant: string
 
     private constructor() {
         let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -87,13 +77,6 @@ export class Config {
             );
             throw new SecretError("Secret key doesn't set in config file");
         }
-        if (CARDANO_NAME_CONSTANT === undefined) {
-            throw new Error("Cardano Constant Name is not set in the config");
-        }
-        if (ERGO_NAME_CONSTANT === undefined) {
-            throw new Error("Ergo Constant Name is not set in the config");
-        }
-        const supportingBridges = [ERGO_NAME_CONSTANT, CARDANO_NAME_CONSTANT]
         if (EXPLORER_URL === undefined) {
             throw new Error("Ergo Explorer Url is not set in the config");
         }
@@ -124,16 +107,16 @@ export class Config {
         if (ERGO_NODE_TIMEOUT === undefined) {
             throw new Error("Ergo node timeout doesn't set correctly");
         }
-        if (!NETWORK_WATCHER || !supportingBridges.includes(NETWORK_WATCHER)) {
+        if (!NETWORK_WATCHER || !supportedNetworks.includes(NETWORK_WATCHER)) {
             throw new Error("Watching Bridge is not set correctly");
         }
-        if(!COMMITMENT_CREATION_INTERVAL){
+        if (!COMMITMENT_CREATION_INTERVAL) {
             throw new Error("Commitment creation job interval is not set");
         }
-        if(!COMMITMENT_REVEAL_INTERVAL){
+        if (!COMMITMENT_REVEAL_INTERVAL) {
             throw new Error("Commitment reveal job interval is not set");
         }
-        if(!TRANSACTION_CHECK_INTERVAL){
+        if (!TRANSACTION_CHECK_INTERVAL) {
             throw new Error("Transaction checking job interval is not set");
         }
         if (!TRANSACTION_CONFIRMATION) {
@@ -147,12 +130,6 @@ export class Config {
         }
         if (!OBSERVATION_VALID_THRESH) {
             throw new Error("Watcher observation valid thresh doesn't set correctly");
-        }
-        if (!CARDANO_SCANNER_CONSTANT) {
-            throw new Error("Cardano Scanner Name Constant is not set in the config");
-        }
-        if (!ERGO_SCANNER_CONSTANT) {
-            throw new Error("Ergo Scanner Name Constant is not set in the config");
         }
 
         const secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
@@ -179,14 +156,6 @@ export class Config {
         this.observationConfirmation = OBSERVATION_CONFIRMATION
         this.observationValidThreshold = OBSERVATION_VALID_THRESH
         this.ergoInitialHeight = ERGO_INITIAL_HEIGHT
-        this.ergoNameConstant = ERGO_NAME_CONSTANT
-        this.cardanoNameConstant = CARDANO_NAME_CONSTANT
-        this.ergoScannerConstant = ERGO_SCANNER_CONSTANT
-        this.cardanoScannerConstant = CARDANO_SCANNER_CONSTANT
-        this.addressExtractorName = "watcher-address-extractor"
-        this.permitExtractorName = "watcher-permit-extractor"
-        this.commitmentExtractorName = "watcher-commitment-extractor"
-        this.permitExtractorName = "watcher-trigger-extractor"
     }
 
     static getConfig() {
@@ -197,7 +166,7 @@ export class Config {
     }
 }
 
-export class CardanoConfig{
+class CardanoConfig {
     private static instance: CardanoConfig;
     koiosURL: string;
     interval: number;
@@ -218,9 +187,6 @@ export class CardanoConfig{
         if (CARDANO_TIMEOUT === undefined) {
             throw new Error("Cardano network timeout doesn't set correctly");
         }
-        if (!CARDANO_NAME_CONSTANT) {
-            throw new Error("Cardano name doesn't set correctly");
-        }
 
         this.koiosURL = URL;
         this.interval = INTERVAL;
@@ -235,3 +201,14 @@ export class CardanoConfig{
         return CardanoConfig.instance;
     }
 }
+
+const Constants = {
+    ergoNode : 'ergo-node',
+    cardanoKoios : 'cardano-koios',
+    addressExtractorName : "watcher-address-extractor",
+    permitExtractorName : "watcher-permit-extractor",
+    commitmentExtractorName : "watcher-commitment-extractor",
+    triggerExtractorName : "watcher-trigger-extractor"
+}
+
+export { Config, CardanoConfig, Constants}

@@ -3,7 +3,7 @@ import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { TxEntity, TxType } from "../entities/txEntity";
 import { ObservationStatusEntity, TxStatus } from "../entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
-import { Config } from "../../config/config";
+import { Config, Constants } from "../../config/config";
 import { PROCEED } from "@rosen-bridge/scanner/dist/entities/blockEntity";
 import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
@@ -35,10 +35,7 @@ class WatcherDataBase {
      * returns the last saved block height based on the observing network
      */
     getLastBlockHeight = async (network: string): Promise<number> => {
-        let scanner
-        if(network == config.cardanoNameConstant) scanner = config.cardanoScannerConstant
-        else if(network == config.ergoNameConstant) scanner = config.ergoScannerConstant
-        else throw new Error("Network unrecognized")
+        const scanner = config.networkWatcher
         const lastBlock = await this.blockRepository.find({
             where: { status: PROCEED, scanner: scanner },
             order: { height: 'DESC' },

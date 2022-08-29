@@ -4,22 +4,23 @@ import { ErgoUtils } from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { Config } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import { boxCreationError, NotEnoughFund, NoWID } from "../utils/errors";
-import { DatabaseConnection } from "../database/databaseConnection";
+import { boxCreationError, NotEnoughFund, NoWID } from "../errors/errors";
 import { Transaction } from "../api/Transaction";
-import { hexStrToUint8Array } from "../utils/utils";
+import { WatcherUtils, hexStrToUint8Array, TransactionUtils } from "../utils/utils";
 import { TxType } from "../database/entities/txEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 const config = Config.getConfig();
 
 export class CommitmentCreation {
-    dataBaseConnection: DatabaseConnection
+    watcherUtils: WatcherUtils
+    txUtils: TransactionUtils
     boxes: Boxes
     widApi: Transaction
 
-    constructor(db: DatabaseConnection, boxes: Boxes, api: Transaction) {
-        this.dataBaseConnection = db
+    constructor(watcherUtils: WatcherUtils, txUtils: TransactionUtils, boxes: Boxes, api: Transaction) {
+        this.watcherUtils = watcherUtils
+        this.txUtils = txUtils
         this.boxes = boxes
         this.widApi = api
     }
@@ -68,7 +69,7 @@ export class CommitmentCreation {
                 [outPermit, outCommitment],
                 height
             )
-            await this.dataBaseConnection.submitTransaction(signed, observation, TxType.COMMITMENT)
+            await this.txUtils.submitTransaction(signed, observation, TxType.COMMITMENT)
             console.log("Commitment tx submitted to the queue with txId: ", signed.id().to_str())
         } catch (e) {
             console.log(e)
@@ -84,7 +85,7 @@ export class CommitmentCreation {
      * Finally saves the created commitment in the database
      */
     job = async () => {
-        const observations = await this.dataBaseConnection.allReadyObservations()
+        const observations = await this.watcherUtils.allReadyObservations()
         if(!this.widApi.watcherWID) {
             console.log("Watcher WID is not set, can not run commitment creation job.")
             return
