@@ -1,5 +1,5 @@
 {
-    "network": "cardano",
+    "network": "cardano-koios",
     "observation" : {
         "confirmation": 2,
         "validThreshold": 1000

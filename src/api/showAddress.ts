@@ -13,7 +13,7 @@ addressRouter.get("/generate",
                 return res.status(400).json({ errors: errors.array() });
             }
             const config: Config = Config.getConfig();
-            res.status(200).json(generateSK(config));
+            res.status(200).json(generateSK(config.networkType));
         } catch (e) {
             console.warn(e)
             res.status(500).send({message: e.message});

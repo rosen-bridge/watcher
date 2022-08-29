@@ -15,7 +15,7 @@ import spies from "chai-spies";
 chai.use(spies)
 
 import txObj from "../ergo/dataset/tx.json" assert { type: "json" }
-import { WatcherUtils } from "../../src/utils/utils";
+import { WatcherUtils } from "../../src/utils/watcherUtils";
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj))
 

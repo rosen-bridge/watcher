@@ -55,7 +55,7 @@ export const loadDataBase = async (name: string): Promise<WatcherDataBase> => {
     return new WatcherDataBase(ormConfig)
 }
 
-describe("NetworkModel tests", () => {
+describe("WatcherModel tests", () => {
     let DB: WatcherDataBase
     before("inserting into database", async () => {
         DB = await loadDataBase("networkDataBase")

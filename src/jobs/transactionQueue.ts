@@ -1,7 +1,7 @@
 import { Config } from "../config/config";
 import { TransactionQueue } from "../ergo/transactionQueue";
 import { WatcherDataBase } from "../database/models/watcherModel";
-import { WatcherUtils } from "../utils/utils";
+import { WatcherUtils } from "../utils/watcherUtils";
 
 const config = Config.getConfig();
 let transactionQueue: TransactionQueue

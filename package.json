@@ -12,7 +12,8 @@
     "typeorm": "typeorm-ts-node-esm",
     "typeorm:generate": "npm run typeorm migration:generate src/database/migrations/watcher/networkModelMigration -- -d config/dataSource.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
-    "typeorm:migrate:bridge": "npm run typeorm migration:run -- -d ./config/bridgeOrmConfig.ts"
+    "typeorm:migrate:bridge": "npm run typeorm migration:run -- -d ./config/bridgeOrmConfig.ts",
+    "madge": "npx madge --circular --extensions ts ./"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,7 @@
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "eslint": "^8.16.0",
+    "madge": "^5.0.1",
     "mocha": "^9.2.2",
     "nodemon": "^2.0.15",
     "sinon": "^14.0.0",
@@ -47,10 +49,10 @@
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
-    "@rosen-bridge/watcher-data-extractor": "0.1.0-alpha-5",
     "@rosen-bridge/address-extractor": "0.1.4-alpha",
     "@rosen-bridge/observation-extractor": "0.1.2-alpha-6",
     "@rosen-bridge/scanner": "0.1.7-alpha-2",
+    "@rosen-bridge/watcher-data-extractor": "0.1.0-alpha-5",
     "axios": "^0.26.1",
     "blakejs": "^1.2.1",
     "chai-spies": "^1.0.0",

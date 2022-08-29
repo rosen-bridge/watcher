@@ -3,7 +3,8 @@ import { ErgoNetwork } from "./network/ergoNetwork";
 import { WatcherDataBase } from "../database/models/watcherModel";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Config } from "../config/config";
-import { base64ToArrayBuffer, WatcherUtils } from "../utils/utils";
+import { base64ToArrayBuffer} from "../utils/utils";
+import { WatcherUtils } from "../utils/watcherUtils";
 
 const config = Config.getConfig();
 

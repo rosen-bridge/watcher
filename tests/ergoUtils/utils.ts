@@ -172,10 +172,7 @@ describe("Testing ergoUtils", () => {
         it("should return formula number as the required commitment count", async () => {
             // max commitments: 100
             // formula: 51% * 7
-            const DB = await loadDataBase("commitment");
-            const boxes = new Boxes(rosenConfig, DB)
-            chai.spy.on(boxes, "getRepoBox", () => wasm.ErgoBox.from_json(repoBox))
-            const data = await ErgoUtils.requiredCommitmentCount(boxes)
+            const data = ErgoUtils.requiredCommitmentCount(wasm.ErgoBox.from_json(repoBox))
             expect(data).to.eql(BigInt(4))
         })
     })

@@ -6,9 +6,10 @@ import { Config } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError, NotEnoughFund, NoWID } from "../errors/errors";
 import { Transaction } from "../api/Transaction";
-import { WatcherUtils, hexStrToUint8Array, TransactionUtils } from "../utils/utils";
+import { hexStrToUint8Array} from "../utils/utils";
 import { TxType } from "../database/entities/txEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { TransactionUtils, WatcherUtils } from "../utils/watcherUtils";
 
 const config = Config.getConfig();
 

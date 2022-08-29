@@ -1,7 +1,7 @@
 import { Config } from "../config/config";
 import { CommitmentReveal } from "../transactions/commitmentReveal";
 import { Boxes } from "../ergo/boxes";
-import { TransactionUtils, WatcherUtils } from "../utils/utils";
+import { TransactionUtils, WatcherUtils } from "../utils/watcherUtils";
 
 const config = Config.getConfig();
 let commitmentRevealingObj: CommitmentReveal

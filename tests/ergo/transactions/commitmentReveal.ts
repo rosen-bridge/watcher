@@ -10,7 +10,6 @@ import { CommitmentSet } from "../../../src/utils/interfaces";
 import { observation } from "./commitmentCreation";
 import { TxType } from "../../../src/database/entities/txEntity";
 import { Transaction } from "../../../src/api/Transaction";
-import { TransactionUtils, WatcherUtils } from "../../../src/utils/utils";
 import { rosenConfig, secret1, userAddress } from "./permit";
 import { firstCommitment, thirdCommitment } from "../../database/mockedData";
 
@@ -26,6 +25,7 @@ import commitmentObj from "./dataset/commitmentBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
+import { TransactionUtils, WatcherUtils } from "../../../src/utils/watcherUtils";
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -57,7 +57,7 @@ describe("Commitment reveal transaction tests", () => {
      */
     describe("triggerEventCreationTx", () => {
         it("Should create, sign and send a trigger event transaction", async () => {
-            chai.spy.on(watcherUtils, "submitTransaction", () => null)
+            chai.spy.on(txUtils, "submitTransaction", () => null)
             chai.spy.on(boxes, "createTriggerEvent")
             chai.spy.on(boxes, "getRepoBox", () => WIDBox)
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)

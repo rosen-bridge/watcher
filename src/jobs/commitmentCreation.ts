@@ -2,7 +2,7 @@ import { Config } from "../config/config";
 import { CommitmentCreation } from "../transactions/commitmentCreation";
 import { Boxes } from "../ergo/boxes";
 import { Transaction } from "../api/Transaction";
-import { TransactionUtils, WatcherUtils } from "../utils/utils";
+import { TransactionUtils, WatcherUtils } from "../utils/watcherUtils";
 
 const config = Config.getConfig();
 let commitmentCreatorObj: CommitmentCreation

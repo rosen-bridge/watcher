@@ -6,10 +6,11 @@ import { JsonBI } from "../../../src/ergo/network/parser";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
-import { WatcherUtils, hexStrToUint8Array, TransactionUtils } from "../../../src/utils/utils";
+import { hexStrToUint8Array} from "../../../src/utils/utils";
 import { TxType } from "../../../src/database/entities/txEntity";
 import { WatcherDataBase } from "../../../src/database/models/watcherModel";
 import { loadDataBase } from "../../database/watcherDatabase";
+import { TransactionUtils, WatcherUtils } from "../../../src/utils/watcherUtils";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
@@ -79,7 +80,7 @@ describe("Commitment creation transaction tests", () => {
      */
     describe("createCommitmentTx", () => {
         it("Should create, sign and send a commitment transaction", async () => {
-            chai.spy.on(watcherUtils, "submitTransaction", () => null)
+            chai.spy.on(txUtils, "submitTransaction", () => null)
             chai.spy.on(boxes, "createCommitment")
             chai.spy.on(boxes, "createPermit")
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)

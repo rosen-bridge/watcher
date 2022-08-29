@@ -3,7 +3,7 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { AddressBoxes, ErgoTx, ExplorerTransaction } from "./types";
 import { JsonBI } from "./parser";
 import { Config } from "../../config/config";
-import { ergoTreeToBase58Address } from "../utils";
+import { ergoTreeToBase58Address } from "../../utils/utils";
 
 const config = Config.getConfig();
 

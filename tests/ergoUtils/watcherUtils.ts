@@ -25,7 +25,7 @@ import chai, { expect } from "chai";
 import spies from "chai-spies";
 import { NoObservationStatus } from "../../src/errors/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
-import { TransactionUtils, WatcherUtils } from "../../src/utils/utils";
+import { TransactionUtils, WatcherUtils } from "../../src/utils/watcherUtils";
 
 chai.use(spies)
 

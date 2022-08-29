@@ -12,7 +12,8 @@ import { scannerInit } from "./jobs/scanner";
 import { creation } from "./jobs/commitmentCreation";
 import { reveal } from "./jobs/commitmetnReveal";
 import { transactionQueueJob } from "./jobs/transactionQueue";
-import { WatcherUtils, delay, TransactionUtils } from "./utils/utils";
+import { delay} from "./utils/utils";
+import { TransactionUtils, WatcherUtils } from "./utils/watcherUtils";
 
 const config = Config.getConfig();
 

@@ -1,13 +1,12 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
+import { ErgoBox } from "ergo-lib-wasm-nodejs";
 import { Observation } from "../utils/interfaces";
 import { bigIntToUint8Array } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 import { blake2b } from "blakejs";
-import { Boxes } from "./boxes";
 import { Buffer } from "buffer";
-import { ErgoBox } from "ergo-lib-wasm-nodejs";
 
 const txFee = parseInt(rosenConfig.fee)
 
@@ -18,13 +17,6 @@ export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
 export const extractTokens = (tokens: wasm.Tokens): Array<wasm.Token> => {
     return Array(tokens.len()).fill("")
         .map((item, index) => tokens.get(index))
-}
-export const ergoTreeToAddress = (ergoTree: wasm.ErgoTree): wasm.Address => {
-    return wasm.Address.recreate_from_ergo_tree(ergoTree)
-}
-export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree,
-                                        networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Mainnet): string => {
-    return ergoTreeToAddress(ergoTree).to_base58(networkType)
 }
 export const decodeSerializedBox = (boxSerialized: string) => {
     return wasm.ErgoBox.sigma_parse_bytes(new Uint8Array(Buffer.from(boxSerialized, "base64")))
@@ -184,10 +176,9 @@ export class ErgoUtils {
 
     /**
      * returns the required number of commitments to merge creating an event trigger
-     * @param boxes
+     * @param repo
      */
-    static requiredCommitmentCount = async (boxes: Boxes): Promise<bigint> => {
-        const repo = await boxes.getRepoBox()
+    static requiredCommitmentCount = (repo: wasm.ErgoBox): bigint => {
         const R6 = repo.register_value(6)
         const R4 = repo.register_value(4)
         if (!R6 || !R4) throw new Error("Bad Repo Box response")

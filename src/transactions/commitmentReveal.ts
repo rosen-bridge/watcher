@@ -9,7 +9,7 @@ import { rosenConfig } from "../config/rosenConfig";
 import { Config } from "../config/config";
 import { TxType } from "../database/entities/txEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
-import { TransactionUtils, WatcherUtils } from "../utils/utils";
+import { TransactionUtils, WatcherUtils } from "../utils/watcherUtils";
 
 const txFee = BigInt(rosenConfig.fee)
 const config = Config.getConfig();
@@ -82,7 +82,7 @@ export class CommitmentReveal {
         for (const commitmentSet of commitmentSets) {
             try {
                 const validCommitments = this.commitmentCheck(commitmentSet.commitments, commitmentSet.observation)
-                const requiredCommitments = await ErgoUtils.requiredCommitmentCount(this.boxes)
+                const requiredCommitments = await ErgoUtils.requiredCommitmentCount(await this.boxes.getRepoBox())
                 console.log("required number of commitments is", requiredCommitments, "available valild commitments is:", validCommitments.length)
                 if (BigInt(validCommitments.length) >= requiredCommitments) {
                     const commitmentBoxes = validCommitments.map(async (commitment) => {
