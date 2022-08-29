@@ -1,24 +1,34 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { TxEntity, TxType } from "../entities/txEntity";
 import { ObservationStatusEntity, TxStatus } from "../entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
 import { Config } from "../../config/config";
 import { PROCEED } from "@rosen-bridge/scanner/dist/entities/blockEntity";
+import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
+import { BoxEntity } from "@rosen-bridge/address-extractor";
 
 const config = Config.getConfig()
 
-class NetworkDataBase{
+class WatcherDataBase {
     private readonly blockRepository: Repository<BlockEntity>
-    private readonly observationRepository: Repository<ObservationEntity>;
-    private readonly txRepository: Repository<TxEntity>;
-    private readonly observationStatusEntity: Repository<ObservationStatusEntity>;
+    private readonly observationRepository: Repository<ObservationEntity>
+    private readonly txRepository: Repository<TxEntity>
+    private readonly observationStatusEntity: Repository<ObservationStatusEntity>
+    private readonly commitmentRepository: Repository<CommitmentEntity>
+    private readonly permitRepository: Repository<PermitEntity>
+    private readonly boxRepository: Repository<BoxEntity>
+    private readonly eventTriggerRepository: Repository<EventTriggerEntity>
 
     constructor(dataSource: DataSource) {
         this.blockRepository = dataSource.getRepository(BlockEntity)
-        this.observationRepository = dataSource.getRepository(ObservationEntity);
-        this.txRepository = dataSource.getRepository(TxEntity);
-        this.observationStatusEntity = dataSource.getRepository(ObservationStatusEntity);
+        this.observationRepository = dataSource.getRepository(ObservationEntity)
+        this.txRepository = dataSource.getRepository(TxEntity)
+        this.observationStatusEntity = dataSource.getRepository(ObservationStatusEntity)
+        this.commitmentRepository = dataSource.getRepository(CommitmentEntity)
+        this.permitRepository = dataSource.getRepository(PermitEntity)
+        this.boxRepository = dataSource.getRepository(BoxEntity)
+        this.eventTriggerRepository = dataSource.getRepository(EventTriggerEntity)
     }
 
     /**
@@ -211,6 +221,79 @@ class NetworkDataBase{
             return updatedStatus
         }
     }
+
+    /**
+     * returns old spent commitments
+     * @param height
+     */
+    getOldSpentCommitments = async (height: number) => {
+        return await this.commitmentRepository.createQueryBuilder("commitment_entity")
+            .where("commitment_entity.spendHeight < :height", {height})
+            .getMany()
+    }
+
+    /**
+     * delete commitments by their box ids
+     * @param ids
+     */
+    deleteCommitments = async (ids: Array<string>) => {
+        await this.commitmentRepository.delete({boxId: In(ids)})
+    }
+
+    /**
+     * find commitments by their box ids
+     * @param ids
+     */
+    findCommitmentsById = async (ids: Array<string>): Promise<Array<CommitmentEntity>> => {
+        return await this.commitmentRepository.find({
+            where: {
+                boxId: In(ids)
+            }
+        })
+    }
+
+    /**
+     * Returns all commitments related to a specific event
+     * @param eventId
+     */
+    commitmentsByEventId = async (eventId: string): Promise<Array<CommitmentEntity>> => {
+        return await this.commitmentRepository.find({
+            where: {
+                eventId: eventId
+            }
+        })
+    }
+
+    /**
+     * Returns all unspent permit boxes
+     */
+    getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
+        return this.permitRepository.createQueryBuilder("permit_entity")
+            .where("WID == :wid", {wid})
+            .andWhere("spendBlock is null")
+            .getMany()
+    }
+
+    /**
+     * Returns all unspent plain boxes
+     */
+    getUnspentAddressBoxes = async (): Promise<Array<BoxEntity>> => {
+        return this.boxRepository.createQueryBuilder("box_entity")
+            .where("spendBlock is null", )
+            .getMany()
+    }
+
+    /**
+     * Returns an eventTriggerEntity with the specified sourceTxId
+     * @param sourceTxId
+     */
+    eventTriggerBySourceTxId = async (sourceTxId: string): Promise<EventTriggerEntity | null> => {
+        return await this.eventTriggerRepository.findOne({
+            where: {
+                sourceTxId: sourceTxId
+            }
+        })
+    }
 }
 
-export { NetworkDataBase }
+export { WatcherDataBase }

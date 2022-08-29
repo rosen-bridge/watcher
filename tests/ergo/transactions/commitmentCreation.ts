@@ -3,8 +3,6 @@ import { Transaction } from "../../../src/api/Transaction";
 import { rosenConfig, secret1 } from "./permit";
 import { DatabaseConnection } from "../../../src/database/databaseConnection";
 import { CommitmentCreation } from "../../../src/transactions/commitmentCreation";
-import { loadNetworkDataBase } from "../../database/networkDatabase";
-import { loadBridgeDataBase } from "../../database/bridgeDatabase"
 import { JsonBI } from "../../../src/ergo/network/parser";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ErgoUtils } from "../../../src/ergo/utils";
@@ -21,9 +19,8 @@ import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
 import { hexStrToUint8Array } from "../../../src/utils/utils";
 import { TxType } from "../../../src/database/entities/txEntity";
-import { NetworkDataBase } from "../../../src/database/models/networkModel";
-import { BridgeDataBase } from "../../../src/database/models/bridgeModel";
-import { CommitmentReveal } from "../../../src/transactions/commitmentReveal";
+import { WatcherDataBase } from "../../../src/database/models/watcherModel";
+import { loadDataBase } from "../../database/watcherDatabase";
 
 chai.use(spies)
 
@@ -55,14 +52,13 @@ observation.fromAddress = 'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
 
 describe("Commitment creation transaction tests", () => {
-    let networkDb: NetworkDataBase, bridgeDb: BridgeDataBase, boxes: Boxes, transaction: Transaction, dbConnection: DatabaseConnection
+    let watcherDb: WatcherDataBase, boxes: Boxes, transaction: Transaction, dbConnection: DatabaseConnection
     let cc: CommitmentCreation
     before(async () => {
-        networkDb = await loadNetworkDataBase("network-commitmentCreation");
-        bridgeDb = await loadBridgeDataBase("bridge-commitmentCreation");
-        boxes = new Boxes(rosenConfig, bridgeDb)
+        watcherDb = await loadDataBase("commitmentCreation");
+        boxes = new Boxes(rosenConfig, watcherDb)
         transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-        dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
+        dbConnection = new DatabaseConnection(watcherDb, transaction, 0, 100)
         cc = new CommitmentCreation(dbConnection, boxes, transaction)
     })
     afterEach(() => {

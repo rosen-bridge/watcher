@@ -6,8 +6,7 @@ import { Transaction } from "./api/Transaction";
 import { Config } from "./config/config";
 import { rosenConfig } from "./config/rosenConfig";
 import { Boxes } from "./ergo/boxes";
-import { NetworkDataBase } from "./database/models/networkModel";
-import { BridgeDataBase } from "./database/models/bridgeModel";
+import { WatcherDataBase } from "./database/models/watcherModel";
 import { dataSource } from "../config/dataSource";
 import { DatabaseConnection } from "./database/databaseConnection";
 import { scannerInit } from "./jobs/scanner";
@@ -21,8 +20,7 @@ const config = Config.getConfig();
 
 export let watcherTransaction: Transaction;
 export let boxesObject: Boxes;
-export let networkDatabase: NetworkDataBase;
-export let bridgeDatabase: BridgeDataBase;
+export let watcherDatabase: WatcherDataBase;
 export let databaseConnection: DatabaseConnection;
 
 const init = async () => {
@@ -30,8 +28,8 @@ const init = async () => {
 
         await dataSource.initialize();
         await dataSource.runMigrations();
-        bridgeDatabase = new BridgeDataBase(dataSource)
-        boxesObject = new Boxes(rosenConfig, bridgeDatabase)
+        watcherDatabase = new WatcherDataBase(dataSource)
+        boxesObject = new Boxes(rosenConfig, watcherDatabase)
 
         return new Transaction(
             rosenConfig,
@@ -60,14 +58,13 @@ const init = async () => {
             watcherTransaction = res;
             initExpress();
             // Initializing database
-            networkDatabase = new NetworkDataBase(dataSource)
+            watcherDatabase = new WatcherDataBase(dataSource)
             // Running network scanner thread
             scannerInit()
 
             await delay(10000)
             databaseConnection = new DatabaseConnection(
-                networkDatabase,
-                bridgeDatabase,
+                watcherDatabase,
                 watcherTransaction,
                 config.observationConfirmation,
                 config.observationValidThreshold

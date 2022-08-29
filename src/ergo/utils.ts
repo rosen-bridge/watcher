@@ -1,6 +1,6 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Observation } from "../utils/interfaces";
-import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
+import { bigIntToUint8Array } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { boxCreationError } from "../utils/errors";

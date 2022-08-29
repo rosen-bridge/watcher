@@ -1,22 +1,34 @@
 import { DataSource, Repository } from "typeorm";
-import { NetworkDataBase } from "../../src/database/models/networkModel";
+import { WatcherDataBase } from "../../src/database/models/watcherModel";
 import { describe } from "mocha";
 import { TxType } from "../../src/database/entities/txEntity";
-import { cardanoBlockEntity, ergoBlockEntity, observationEntity1, observationEntity2 } from "./mockedData";
+import {
+    cardanoBlockEntity,
+    commitmentEntity,
+    ergoBlockEntity, eventTriggerEntity, newEventTriggerEntity,
+    observationEntity1,
+    observationEntity2, permitEntity, plainBox, spentCommitmentEntity, spentPermitEntity, spentPlainBox
+} from "./mockedData";
 import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 import { expect } from "chai";
 import { Config } from "../../src/config/config";
+import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
+import { BoxEntity } from "@rosen-bridge/address-extractor";
 
 const config = Config.getConfig()
 const observation2Status = {observation: observationEntity2, status: TxStatus.NOT_COMMITTED};
 let blockRepo: Repository<BlockEntity>
 let observationRepo: Repository<ObservationEntity>
 let observationStatusRepo: Repository<ObservationStatusEntity>
+let commitmentRepo: Repository<CommitmentEntity>
+let permitRepo: Repository<PermitEntity>
+let boxRepo: Repository<BoxEntity>
+let eventTriggerRepo: Repository<EventTriggerEntity>
 
-export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase> => {
+export const loadDataBase = async (name: string): Promise<WatcherDataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
@@ -30,22 +42,31 @@ export const loadNetworkDataBase = async (name: string): Promise<NetworkDataBase
         migrations: ['src/database/migrations/watcher/*.ts'],
         synchronize: false,
         logging: false,
-    });
-    await ormConfig.initialize();
-    await ormConfig.runMigrations();
+    })
+
+    await ormConfig.initialize()
+    await ormConfig.runMigrations()
     blockRepo = ormConfig.getRepository(BlockEntity)
     observationRepo = ormConfig.getRepository(ObservationEntity)
     observationStatusRepo = ormConfig.getRepository(ObservationStatusEntity)
-    return new NetworkDataBase(ormConfig);
+    commitmentRepo = ormConfig.getRepository(CommitmentEntity)
+    permitRepo = ormConfig.getRepository(PermitEntity)
+    boxRepo = ormConfig.getRepository(BoxEntity)
+    eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity)
+    return new WatcherDataBase(ormConfig)
 }
 
 describe("NetworkModel tests", () => {
-    let DB: NetworkDataBase
+    let DB: WatcherDataBase
     before("inserting into database", async () => {
-        DB = await loadNetworkDataBase("networkDataBase");
+        DB = await loadDataBase("networkDataBase")
         await blockRepo.save([ergoBlockEntity, cardanoBlockEntity])
         await observationRepo.save([observationEntity2])
-        await observationStatusRepo.save([{observation: observationEntity2, status: TxStatus.NOT_COMMITTED}]);
+        await observationStatusRepo.save([{observation: observationEntity2, status: TxStatus.NOT_COMMITTED}])
+        await commitmentRepo.save([commitmentEntity, spentCommitmentEntity])
+        await permitRepo.save([permitEntity, spentPermitEntity])
+        await boxRepo.save([plainBox, spentPlainBox])
+        await eventTriggerRepo.save([eventTriggerEntity, newEventTriggerEntity])
     })
 
     describe("getLastBlockHeight", () => {
@@ -196,7 +217,7 @@ describe("NetworkModel tests", () => {
             const obs = await DB.getConfirmedObservations(0, 100);
             const res = await DB.upgradeObservationTxStatus(obs[0])
             expect(res.status).to.eql(TxStatus.COMMITMENT_SENT)
-        });
+        })
     })
 
     /**
@@ -209,7 +230,7 @@ describe("NetworkModel tests", () => {
             const obs = await DB.getConfirmedObservations(0, 100);
             const res = await DB.downgradeObservationTxStatus(obs[0])
             expect(res.status).to.eql(TxStatus.NOT_COMMITTED)
-        });
+        })
     })
 
     /**
@@ -223,5 +244,59 @@ describe("NetworkModel tests", () => {
             const res = await DB.updateObservationTxStatus(obs[0], TxStatus.REVEALED)
             expect(res.status).to.eql(TxStatus.REVEALED)
         });
+    })
+
+    describe("getOldSpentCommitments", () => {
+        it("should return an old commitment", async () => {
+            const data = await DB.getOldSpentCommitments(3433335)
+            expect(data).to.have.length(1)
+        })
+    })
+
+    describe("commitmentsByEventId", () => {
+        it("should return two commitments with specified event id", async () => {
+            const data = await DB.commitmentsByEventId("eventId")
+            expect(data).to.have.length(2)
+        })
+    })
+
+    describe("findCommitmentsById", () => {
+        it("should return exactly two commitments with the specified box id", async () => {
+            const data = await DB.findCommitmentsById([commitmentEntity.boxId, spentCommitmentEntity.boxId])
+            expect(data).to.have.length(2)
+            expect(data[0]).to.eql(commitmentEntity)
+            expect(data[1]).to.eql(spentCommitmentEntity)
+        })
+    })
+
+    describe("deleteCommitments", () => {
+        it("should delete two commitments with specified ids", async () => {
+            await DB.deleteCommitments([commitmentEntity.boxId, spentCommitmentEntity.boxId])
+            const data = await DB.getOldSpentCommitments(3433335)
+            expect(data).to.have.length(0)
+        })
+    })
+
+    describe("getUnspentPermitBoxes", () => {
+        it("should find one unspent permit box", async () => {
+            const data = await DB.getUnspentPermitBoxes("WID")
+            expect(data).to.have.length(1)
+            expect(data[0]).to.eql(permitEntity)
+        })
+    })
+
+    describe("getUnspentPlainBoxes", () => {
+        it("should find one unspent plain box", async () => {
+            const data = await DB.getUnspentAddressBoxes()
+            expect(data).to.have.length(1)
+            expect(data[0]).to.eql(plainBox)
+        })
+    })
+
+    describe("eventTriggerBySourceTxId", () => {
+        it("should find one unspent event trigger box", async () => {
+            const data = await DB.eventTriggerBySourceTxId(eventTriggerEntity.sourceTxId)
+            expect(data).to.eql(eventTriggerEntity)
+        })
     })
 })

@@ -96,7 +96,6 @@ export class CommitmentCreation {
                 const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
                 const permits = await this.boxes.getPermits(WID)
                 const WIDBox = await this.boxes.getWIDBox(WID)
-                console.log("found boxes")
                 const totalValue: bigint = permits.map(permit =>
                         BigInt(permit.value().as_i64().to_str()))
                         .reduce((a, b) => a + b, BigInt(0)) +

@@ -3,7 +3,7 @@ import { boxHaveAsset, decodeSerializedBox, ErgoUtils } from "./utils";
 import { Config } from "../config/config";
 import { rosenConfig } from "../config/rosenConfig";
 import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
-import { BridgeDataBase } from "../database/models/bridgeModel";
+import { WatcherDataBase } from "../database/models/watcherModel";
 import { Observation } from "../utils/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { Buffer } from "buffer";
@@ -14,7 +14,7 @@ const config = Config.getConfig();
 
 
 export class Boxes{
-    dataBase: BridgeDataBase
+    dataBase: WatcherDataBase
     repoNFTId: wasm.TokenId;
     RWTTokenId: wasm.TokenId;
     RSN: wasm.TokenId;
@@ -26,7 +26,7 @@ export class Boxes{
     repoAddress: wasm.Address;
     rosenConfig: rosenConfig;
 
-    constructor(rosenConfig: rosenConfig, db: BridgeDataBase) {
+    constructor(rosenConfig: rosenConfig, db: WatcherDataBase) {
         this.dataBase = db
         this.repoNFTId = wasm.TokenId.from_str(config.RepoNFT);
         this.RWTTokenId = wasm.TokenId.from_str(config.RWTId);

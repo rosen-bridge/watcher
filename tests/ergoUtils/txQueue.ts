@@ -1,10 +1,14 @@
-import { loadNetworkDataBase } from "../database/networkDatabase";
-import { loadBridgeDataBase } from "../database/bridgeDatabase";
+import { loadDataBase } from "../database/watcherDatabase";
 import { DatabaseConnection } from "../../src/database/databaseConnection";
 import { TransactionQueue } from "../../src/ergo/transactionQueue";
 import { TxEntity, TxType } from "../../src/database/entities/txEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { Boxes } from "../../src/ergo/boxes";
+import { rosenConfig, secret1, userAddress } from "../ergo/transactions/permit";
+import { Transaction } from "../../src/api/Transaction";
+import { WatcherDataBase } from "../../src/database/models/watcherModel";
+import { watcherDatabase } from "../../src";
 
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -13,9 +17,7 @@ import spies from "chai-spies";
 chai.use(spies)
 
 import txObj from "../ergo/dataset/tx.json" assert { type: "json" }
-import { Boxes } from "../../src/ergo/boxes";
-import { rosenConfig, secret1, userAddress } from "../ergo/transactions/permit";
-import { Transaction } from "../../src/api/Transaction";
+
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj))
 
 const height = 1000
@@ -28,8 +30,20 @@ txEntity.txSerialized = Buffer.from(tx.sigma_serialize_bytes()).toString("base64
 txEntity.updateBlock = height - 1
 
 describe("Transaction queue tests", () => {
+    let dataBase: WatcherDataBase, boxes: Boxes, transaction: Transaction, dbConnection: DatabaseConnection
+    let txQueue: TransactionQueue
+    before(async () => {
+        dataBase = await loadDataBase("commitmentReveal");
+        boxes = new Boxes(rosenConfig, watcherDatabase)
+        transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+        dbConnection = new DatabaseConnection(dataBase, transaction, 0, 100)
+        txQueue = new TransactionQueue(dataBase, dbConnection)
+    })
 
-
+    afterEach(() => {
+        chai.spy.restore(ErgoNetwork)
+    })
+    
     /**
      * Target: testing TransactionQueue job
      * Dependencies:
@@ -44,15 +58,9 @@ describe("Transaction queue tests", () => {
          *    Because its unavailable, but still valid
          */
         it("should resend the commitment transaction", async () => {
-            const networkDb = await loadNetworkDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, bridgeDb)
-            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
-            const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
-            chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
+            chai.spy.on(dataBase, "getAllTxs", () => [txEntity])
+            chai.spy.on(dataBase, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
@@ -60,8 +68,7 @@ describe("Transaction queue tests", () => {
             chai.spy.on(dbConnection, "isObservationValid", () => true)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.been.called.with(tx.to_json())
-            expect(networkDb.setTxUpdateHeight).have.been.called.once
-            chai.spy.restore(ErgoNetwork)
+            expect(dataBase.setTxUpdateHeight).have.been.called.once
         })
 
         /**
@@ -70,15 +77,9 @@ describe("Transaction queue tests", () => {
          *    Because its unavailable, but still valid
          */
         it("should resend the trigger transaction", async () => {
-            const networkDb = await loadNetworkDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, bridgeDb)
-            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
-            const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.TRIGGER
-            chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
+            chai.spy.on(dataBase, "getAllTxs", () => [txEntity])
+            chai.spy.on(dataBase, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
@@ -86,8 +87,7 @@ describe("Transaction queue tests", () => {
             chai.spy.on(dbConnection, "isMergeHappened", () => false)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.been.called.with(tx.to_json())
-            expect(networkDb.setTxUpdateHeight).have.been.called.once
-            chai.spy.restore(ErgoNetwork)
+            expect(dataBase.setTxUpdateHeight).have.been.called.once
         })
 
         /**
@@ -96,23 +96,16 @@ describe("Transaction queue tests", () => {
          *    Because the observation is not still valid, but it may have change in a small period
          */
         it("should just wait for commitment transaction status", async () => {
-            const networkDb = await loadNetworkDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, bridgeDb)
-            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
-            const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
-            chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
+            chai.spy.on(dataBase, "getAllTxs", () => [txEntity])
+            chai.spy.on(dataBase, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
             chai.spy.on(dbConnection, "isObservationValid", () => false)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.setTxUpdateHeight).have.not.been.called
-            chai.spy.restore(ErgoNetwork)
+            expect(dataBase.setTxUpdateHeight).have.not.been.called
         })
 
         /**
@@ -121,23 +114,16 @@ describe("Transaction queue tests", () => {
          *    Because the commitment has already merged, but it may have forked in a small period
          */
         it("should just wait for trigger transaction status", async () => {
-            const networkDb = await loadNetworkDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, bridgeDb)
-            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
-            const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.TRIGGER
-            chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
+            chai.spy.on(dataBase, "getAllTxs", () => [txEntity])
+            chai.spy.on(dataBase, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
             chai.spy.on(dbConnection, "isMergeHappened", () => true)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.setTxUpdateHeight).have.not.been.called
-            chai.spy.restore(ErgoNetwork)
+            expect(dataBase.setTxUpdateHeight).have.not.been.called
         })
 
         /**
@@ -146,15 +132,9 @@ describe("Transaction queue tests", () => {
          *    Because the transaction inputs are spent, but it may have change in a small period
          */
         it("should just wait for trigger transaction status because its inputs are spent", async () => {
-            const networkDb = await loadNetworkDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, bridgeDb)
-            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
-            const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.TRIGGER
-            chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
+            chai.spy.on(dataBase, "getAllTxs", () => [txEntity])
+            chai.spy.on(dataBase, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
@@ -162,8 +142,7 @@ describe("Transaction queue tests", () => {
             chai.spy.on(dbConnection, "isMergeHappened", () => false)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.setTxUpdateHeight).have.not.been.called
-            chai.spy.restore(ErgoNetwork)
+            expect(dataBase.setTxUpdateHeight).have.not.been.called
         })
 
         /**
@@ -172,22 +151,15 @@ describe("Transaction queue tests", () => {
          *    Because the transaction is in mempool or is not confirmed enough
          */
         it("should update the updateTime and wait more for tx status", async () => {
-            const networkDb = await loadNetworkDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, bridgeDb)
-            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
-            const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
-            chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
+            chai.spy.on(dataBase, "getAllTxs", () => [txEntity])
+            chai.spy.on(dataBase, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => 0)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.setTxUpdateHeight).have.been.called.once
-            chai.spy.restore(ErgoNetwork)
+            expect(dataBase.setTxUpdateHeight).have.been.called.once
         })
 
         /**
@@ -196,25 +168,18 @@ describe("Transaction queue tests", () => {
          *    Because the observation is not still valid, but it may have change in a small period
          */
         it("should remove the tx from database because it get enough confirmation", async () => {
-            const networkDb = await loadNetworkDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, bridgeDb)
-            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
-            const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
-            chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "setTxUpdateHeight", () => undefined)
+            chai.spy.on(dataBase, "getAllTxs", () => [txEntity])
+            chai.spy.on(dataBase, "setTxUpdateHeight", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => 200)
             chai.spy.on(ErgoNetwork, "getHeight", () => height)
             chai.spy.on(ErgoNetwork, "sendTx")
-            chai.spy.on(networkDb, "upgradeObservationTxStatus", () => undefined)
-            chai.spy.on(networkDb, "removeTx", () => undefined)
+            chai.spy.on(dataBase, "upgradeObservationTxStatus", () => undefined)
+            chai.spy.on(dataBase, "removeTx", () => undefined)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.upgradeObservationTxStatus).have.been.called.with(observation)
-            expect(networkDb.removeTx).have.been.called.with(txEntity)
-            chai.spy.restore(ErgoNetwork)
+            expect(dataBase.upgradeObservationTxStatus).have.been.called.with(observation)
+            expect(dataBase.removeTx).have.been.called.with(txEntity)
         })
 
         /**
@@ -223,16 +188,10 @@ describe("Transaction queue tests", () => {
          *    Because the transaction inputs are spent, and the status is stabilized
          */
         it("should remove the commitment transaction because its inputs are spent and it has passed the timeout", async () => {
-            const networkDb = await loadNetworkDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, bridgeDb)
-            const transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
-            const txQueue = new TransactionQueue(networkDb, dbConnection)
             txEntity.type = TxType.COMMITMENT
-            chai.spy.on(networkDb, "getAllTxs", () => [txEntity])
-            chai.spy.on(networkDb, "downgradeObservationTxStatus", () => undefined)
-            chai.spy.on(networkDb, "removeTx", () => undefined)
+            chai.spy.on(dataBase, "getAllTxs", () => [txEntity])
+            chai.spy.on(dataBase, "downgradeObservationTxStatus", () => undefined)
+            chai.spy.on(dataBase, "removeTx", () => undefined)
             chai.spy.on(ErgoNetwork, "getConfNum", () => -1)
             chai.spy.on(ErgoNetwork, "getHeight", () => height + 1000)
             chai.spy.on(ErgoNetwork, "sendTx")
@@ -240,9 +199,8 @@ describe("Transaction queue tests", () => {
             chai.spy.on(dbConnection, "isObservationValid", () => true)
             await txQueue.job()
             expect(ErgoNetwork.sendTx).have.not.been.called
-            expect(networkDb.downgradeObservationTxStatus).have.been.called.with(observation)
-            expect(networkDb.removeTx).have.been.called.with(txEntity)
-            chai.spy.restore(ErgoNetwork)
+            expect(dataBase.downgradeObservationTxStatus).have.been.called.with(observation)
+            expect(dataBase.removeTx).have.been.called.with(txEntity)
         })
     })
 })

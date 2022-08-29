@@ -7,7 +7,7 @@ import { boxCreationError } from "../../src/utils/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../ergo/objects/axios";
-import { loadBridgeDataBase } from "../database/bridgeDatabase";
+import { loadDataBase } from "../database/watcherDatabase";
 import { Boxes } from "../../src/ergo/boxes";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -172,7 +172,7 @@ describe("Testing ergoUtils", () => {
         it("should return formula number as the required commitment count", async () => {
             // max commitments: 100
             // formula: 51% * 7
-            const DB = await loadBridgeDataBase("commitments");
+            const DB = await loadDataBase("commitment");
             const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getRepoBox", () => wasm.ErgoBox.from_json(repoBox))
             const data = await ErgoUtils.requiredCommitmentCount(boxes)

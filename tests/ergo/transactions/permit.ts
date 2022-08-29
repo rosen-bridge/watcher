@@ -2,7 +2,7 @@ import { Transaction } from "../../../src/api/Transaction";
 import { hexStrToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import { initMockedAxios } from "../objects/axios";
-import { loadBridgeDataBase } from "../../database/bridgeDatabase";
+import { loadDataBase } from "../../database/watcherDatabase";
 import { Boxes } from "../../../src/ergo/boxes";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { boxesSample } from "../dataset/BoxesSample";
@@ -10,6 +10,7 @@ import { boxesSample } from "../dataset/BoxesSample";
 import chai from "chai";
 import spies from "chai-spies";
 import { Buffer } from "buffer";
+import { WatcherDataBase } from "../../../src/database/models/watcherModel";
 
 chai.use(spies);
 
@@ -48,6 +49,15 @@ initMockedAxios();
  * requirements: an object of Transaction class, rosenConfig, userAddress, userSecret
  */
 describe("Watcher Permit Transactions", () => {
+    let DB: WatcherDataBase, boxes: Boxes
+    before(async () => {
+        DB = await loadDataBase("permit");
+        boxes = new Boxes(rosenConfig, DB)
+    })
+
+    afterEach(() => {
+        chai.spy.restore(boxes)
+    })
 
     /**
      * getWID functions tests
@@ -58,8 +68,6 @@ describe("Watcher Permit Transactions", () => {
          */
         it("checks is there any wid in the usersBoxes", async () => {
             const sampleWID = "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8";
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -84,8 +92,6 @@ describe("Watcher Permit Transactions", () => {
          * the token map of input and output should be the same
          */
         it('the token map of input and output should be the same', async () => {
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -134,8 +140,6 @@ describe("Watcher Permit Transactions", () => {
          * in the case of watcher have permit box in his/her address the getPermit should returns error
          */
         it("tests that if watcher have permit box should returns error", async () => {
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -156,8 +160,6 @@ describe("Watcher Permit Transactions", () => {
          *  should be signed without error
          */
         it("checks transaction is signed", async () => {
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             initMockedAxios(0);
             chai.spy.on(boxes, "getPermits", () => {
                 return [
@@ -182,8 +184,6 @@ describe("Watcher Permit Transactions", () => {
          */
         it("it checks case that the return permit transaction have permit box in its output", async () => {
             initMockedAxios(1);
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getPermits", () => {
                 return [
                     wasm.ErgoBox.from_json(boxesSample.firstPermitBox)
@@ -207,8 +207,6 @@ describe("Watcher Permit Transactions", () => {
          */
         it("tests that if watcher doesn't have permit box should returns error", async () => {
             initMockedAxios();
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getPermits", () => {
                 return [
                     wasm.ErgoBox.from_json(boxesSample.firstWatcherPermitBox),
@@ -237,8 +235,6 @@ describe("Watcher Permit Transactions", () => {
          */
         it("should be true", async () => {
             initMockedAxios();
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -254,8 +250,6 @@ describe("Watcher Permit Transactions", () => {
          */
         it("should be false", async () => {
             initMockedAxios();
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",

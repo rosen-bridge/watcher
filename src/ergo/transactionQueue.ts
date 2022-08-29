@@ -1,6 +1,6 @@
 import { TxEntity, TxType } from "../database/entities/txEntity";
 import { ErgoNetwork } from "./network/ergoNetwork";
-import { NetworkDataBase } from "../database/models/networkModel";
+import { WatcherDataBase } from "../database/models/watcherModel";
 import { DatabaseConnection } from "../database/databaseConnection";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Config } from "../config/config";
@@ -9,10 +9,10 @@ import { base64ToArrayBuffer } from "../utils/utils";
 const config = Config.getConfig();
 
 export class TransactionQueue {
-    database: NetworkDataBase
+    database: WatcherDataBase
     databaseConnection: DatabaseConnection
 
-    constructor(db: NetworkDataBase, dbConnection: DatabaseConnection) {
+    constructor(db: WatcherDataBase, dbConnection: DatabaseConnection) {
         this.database = db
         this.databaseConnection = dbConnection
     }

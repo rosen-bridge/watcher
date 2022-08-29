@@ -1,7 +1,7 @@
 import { Boxes } from "../../../src/ergo/boxes";
 import { DatabaseConnection } from "../../../src/database/databaseConnection";
-import { loadNetworkDataBase } from "../../database/networkDatabase";
-import { loadBridgeDataBase } from "../../database/bridgeDatabase";
+import { WatcherDataBase } from "../../../src/database/models/watcherModel";
+import { loadDataBase } from "../../database/watcherDatabase";
 import { JsonBI } from "../../../src/ergo/network/parser";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
@@ -26,8 +26,7 @@ import commitmentObj from "./dataset/commitmentBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
-import { NetworkDataBase } from "../../../src/database/models/networkModel";
-import { BridgeDataBase } from "../../../src/database/models/bridgeModel";
+import { watcherDatabase } from "../../../src";
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -37,14 +36,13 @@ const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj))
 const WIDs = [Buffer.from(firstCommitment.WID, "hex"), Buffer.from(thirdCommitment.WID, "hex")]
 
 describe("Commitment reveal transaction tests", () => {
-    let networkDb: NetworkDataBase, bridgeDb: BridgeDataBase, boxes: Boxes, transaction: Transaction, dbConnection: DatabaseConnection
+    let dataBase: WatcherDataBase, boxes: Boxes, transaction: Transaction, dbConnection: DatabaseConnection
     let cr: CommitmentReveal
     before(async () => {
-        networkDb = await loadNetworkDataBase("network-commitmentReveal");
-        bridgeDb = await loadBridgeDataBase("bridge-commitmentReveal");
-        boxes = new Boxes(rosenConfig, bridgeDb)
+        dataBase = await loadDataBase("commitmentReveal");
+        boxes = new Boxes(rosenConfig, watcherDatabase)
         transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-        dbConnection = new DatabaseConnection(networkDb, bridgeDb, transaction, 0, 100)
+        dbConnection = new DatabaseConnection(dataBase, transaction, 0, 100)
         cr = new CommitmentReveal(dbConnection, boxes)
     })
 

@@ -1,5 +1,5 @@
 import { Config } from "../config/config";
-import { databaseConnection, networkDatabase } from "../index";
+import { databaseConnection, watcherDatabase } from "../index";
 import { TransactionQueue } from "../ergo/transactionQueue";
 
 const config = Config.getConfig();
@@ -10,6 +10,6 @@ const transactionCheck = () => {
 }
 
 export const transactionQueueJob = () => {
-    transactionQueue = new TransactionQueue(networkDatabase, databaseConnection)
+    transactionQueue = new TransactionQueue(watcherDatabase, databaseConnection)
     transactionCheck()
 }
