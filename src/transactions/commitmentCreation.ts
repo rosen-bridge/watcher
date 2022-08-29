@@ -8,10 +8,10 @@ import { boxCreationError, NotEnoughFund, NoWID } from "../utils/errors";
 import { DatabaseConnection } from "../database/databaseConnection";
 import { Transaction } from "../api/Transaction";
 import { hexStrToUint8Array } from "../utils/utils";
-import { TxType } from "../database/entities/TxEntity";
+import { TxType } from "../database/entities/txEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
-const ergoConfig = Config.getConfig();
+const config = Config.getConfig();
 
 export class CommitmentCreation {
     dataBaseConnection: DatabaseConnection
@@ -63,7 +63,7 @@ export class CommitmentCreation {
         feeBoxes.forEach(box => inputBoxes.add(box))
         try {
             const signed = await ErgoUtils.createAndSignTx(
-                ergoConfig.secretKey,
+                config.secretKey,
                 inputBoxes,
                 [outPermit, outCommitment],
                 height

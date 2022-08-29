@@ -1,8 +1,7 @@
 import { DataSource, Repository } from "typeorm";
-import { ErgoNetwork } from "../../ergo/network/ergoNetwork";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
-import { TxEntity, TxType } from "../entities/TxEntity";
-import { ObservationStatusEntity, TxStatus } from "../entities/ObservationStatusEntity";
+import { TxEntity, TxType } from "../entities/txEntity";
+import { ObservationStatusEntity, TxStatus } from "../entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
 import { Config } from "../../config/config";
 import { PROCEED } from "@rosen-bridge/scanner/dist/entities/blockEntity";
@@ -27,8 +26,8 @@ class NetworkDataBase{
      */
     getLastBlockHeight = async (network: string): Promise<number> => {
         let scanner
-        if(network == "Cardano") scanner = "cardano-koios"
-        else if(network == "Ergo") scanner = "ergo-node"
+        if(network == config.cardanoNameConstant) scanner = config.cardanoScannerConstant
+        else if(network == config.ergoNameConstant) scanner = config.ergoScannerConstant
         else throw new Error("Network unrecognized")
         const lastBlock = await this.blockRepository.find({
             where: { status: PROCEED, scanner: scanner },
@@ -48,23 +47,22 @@ class NetworkDataBase{
      * @param height
      */
     getConfirmedObservations = async (confirmation: number, height: number) => {
-        const requiredHeight = height - confirmation;
+        const maxHeight = height - confirmation;
         return await this.observationRepository.createQueryBuilder('observation_entity')
-            .where('observation_entity.height < :requiredHeight', {requiredHeight})
+            .where('observation_entity.height < :maxHeight', {maxHeight})
             .getMany()
     }
 
     /**
-     * setting NOT_COMMITTED status for observations that doesn't have status and return last status
+     * setting NOT_COMMITTED status for new observations that doesn't have status and return last status
      * @param observation
-     * @param status
      */
-    setStatusForObservations = async (observation: ObservationEntity, status: TxStatus = TxStatus.NOT_COMMITTED): Promise<ObservationStatusEntity> => {
+    checkNewObservation = async (observation: ObservationEntity): Promise<ObservationStatusEntity> => {
         const observationStatus = await this.getStatusForObservations(observation);
         if (!observationStatus) {
             await this.observationStatusEntity.insert({
                 observation: observation,
-                status: status
+                status: TxStatus.NOT_COMMITTED
             });
             const insertedStatus = await this.getStatusForObservations(observation);
             if (insertedStatus === null) {
@@ -96,8 +94,9 @@ class NetworkDataBase{
      * @param requestId
      * @param txId
      * @param txType
+     * @param height
      */
-    submitTx = async (tx: string, requestId: string, txId: string, txType: TxType) => {
+    submitTx = async (tx: string, requestId: string, txId: string, txType: TxType, height: number) => {
         const observation: ObservationEntity | null = (await this.observationRepository.findOne({
             where: {requestId: requestId}
         }));
@@ -105,7 +104,6 @@ class NetworkDataBase{
         const observationStatus = await this.getStatusForObservations(observation);
         if (observationStatus === null)
             throw new Error(`observation with requestId ${observation.requestId} has no status`)
-        const height = await ErgoNetwork.getHeight();
         const time = new Date().getTime();
         return await this.txRepository.insert({
             txId: txId,

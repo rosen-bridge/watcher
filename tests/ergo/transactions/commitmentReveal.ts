@@ -9,7 +9,7 @@ import { CommitmentReveal } from "../../../src/transactions/commitmentReveal";
 import { Buffer } from "buffer";
 import { CommitmentSet } from "../../../src/utils/interfaces";
 import { observation } from "./commitmentCreation";
-import { TxType } from "../../../src/database/entities/TxEntity";
+import { TxType } from "../../../src/database/entities/txEntity";
 import { Transaction } from "../../../src/api/Transaction";
 import { rosenConfig, secret1, userAddress } from "./permit";
 import { firstCommitment, thirdCommitment } from "../../database/mockedData";

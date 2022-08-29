@@ -1,15 +1,16 @@
 import { DataSource, Repository } from "typeorm";
 import { NetworkDataBase } from "../../src/database/models/networkModel";
 import { describe } from "mocha";
-import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
-import { TxType } from "../../src/database/entities/TxEntity";
-
-import chai, { expect } from "chai";
+import { TxType } from "../../src/database/entities/txEntity";
 import { cardanoBlockEntity, ergoBlockEntity, observationEntity1, observationEntity2 } from "./mockedData";
-import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/ObservationStatusEntity";
+import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
+import { expect } from "chai";
+import { Config } from "../../src/config/config";
+
+const config = Config.getConfig()
 const observation2Status = {observation: observationEntity2, status: TxStatus.NOT_COMMITTED};
 let blockRepo: Repository<BlockEntity>
 let observationRepo: Repository<ObservationEntity>
@@ -54,7 +55,7 @@ describe("NetworkModel tests", () => {
          *    The function should return the ergo chain last block height
          */
         it("Should return the last block height on ergo", async () => {
-            const res = await DB.getLastBlockHeight("Ergo");
+            const res = await DB.getLastBlockHeight(config.ergoNameConstant);
             expect(res).to.eql(ergoBlockEntity.height)
         })
 
@@ -64,7 +65,7 @@ describe("NetworkModel tests", () => {
          *    The function should return the cardano chain last block height
          */
         it("Should return the last block height on cardano", async () => {
-            const res = await DB.getLastBlockHeight("Cardano");
+            const res = await DB.getLastBlockHeight(config.cardanoNameConstant);
             expect(res).to.eql(cardanoBlockEntity.height)
         })
 
@@ -123,7 +124,7 @@ describe("NetworkModel tests", () => {
          *    The function should return status for observation that exist
          */
         it("should return status for observation that exist", async () => {
-            const res = await DB.setStatusForObservations(observationEntity2);
+            const res = await DB.checkNewObservation(observationEntity2);
             expect(res.status).to.be.eql(1);
         })
 
@@ -134,7 +135,7 @@ describe("NetworkModel tests", () => {
          */
         it("should set status for observation that is not exist", async () => {
             await observationRepo.insert([observationEntity1])
-            const res = await DB.setStatusForObservations(observationEntity1);
+            const res = await DB.checkNewObservation(observationEntity1);
             expect(res.status).to.be.eql(1);
         })
     })
@@ -146,10 +147,8 @@ describe("NetworkModel tests", () => {
      */
     describe("submitTx", () => {
         it("should save two new transaction without any errors", async () => {
-            chai.spy.on(ErgoNetwork, "getHeight", () => 100)
-            await DB.submitTx("txSerialized", "reqId1", "txId", TxType.COMMITMENT)
-            await DB.submitTx("txSerialized2", "reqId1", "txId2", TxType.TRIGGER)
-            chai.spy.restore(ErgoNetwork)
+            await DB.submitTx("txSerialized", "reqId1", "txId", TxType.COMMITMENT, 1000)
+            await DB.submitTx("txSerialized2", "reqId1", "txId2", TxType.TRIGGER, 1000)
         })
     })
 

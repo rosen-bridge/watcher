@@ -8,12 +8,12 @@ import { CommitmentExtractor, PermitExtractor, EventTriggerExtractor } from "@ro
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoUTXOExtractor } from "@rosen-bridge/address-extractor";
 
-const ergoConfig = Config.getConfig()
+const config = Config.getConfig()
 let scanner: ErgoScanner;
 let cardanoScanner: CardanoKoiosScanner;
 
 const ergoScanningJob = () => {
-    scanner.update().then(() => setTimeout(ergoScanningJob, ergoConfig.bridgeScanInterval * 1000))
+    scanner.update().then(() => setTimeout(ergoScanningJob, config.bridgeScanInterval * 1000))
 }
 
 const cardanoScanningJob = (interval: number) => {
@@ -22,17 +22,17 @@ const cardanoScanningJob = (interval: number) => {
 
 export const scannerInit = () => {
     const ergoScannerConfig = {
-        nodeUrl: ergoConfig.nodeUrl,
-        timeout: ergoConfig.nodeTimeout,
-        initialHeight: ergoConfig.ergoInitialHeight,
+        nodeUrl: config.nodeUrl,
+        timeout: config.nodeTimeout,
+        initialHeight: config.ergoInitialHeight,
         dataSource: dataSource,
     }
     scanner = new ErgoScanner(ergoScannerConfig);
     ergoScanningJob()
-    if (ergoConfig.networkWatcher == "Ergo") {
+    if (config.networkWatcher == config.ergoNameConstant) {
         const observationExtractor = new ErgoObservationExtractor(dataSource, tokens)
         scanner.registerExtractor(observationExtractor)
-    } else if (ergoConfig.networkWatcher == "Cardano") {
+    } else if (config.networkWatcher == config.cardanoNameConstant) {
         const cardanoConfig = CardanoConfig.getConfig()
         const cardanoScannerConfig = {
             koiosUrl: cardanoConfig.koiosURL,
@@ -49,10 +49,10 @@ export const scannerInit = () => {
         console.log("The observing network is not supported")
         throw new Error("source network not found")
     }
-    const commitmentExtractor = new CommitmentExtractor("watcher-commitment", [rosenConfig.commitmentAddress], ergoConfig.RWTId, dataSource)
-    const permitExtractor = new PermitExtractor("watcher-permit", dataSource, rosenConfig.watcherPermitAddress, ergoConfig.RWTId)
-    const eventTriggerExtractor = new EventTriggerExtractor("watcher-trigger", dataSource, rosenConfig.eventTriggerAddress, ergoConfig.RWTId)
-    const plainExtractor = new ErgoUTXOExtractor(dataSource, ergoConfig.plainExtractorName, ergoConfig.networkType, ergoConfig.address)
+    const commitmentExtractor = new CommitmentExtractor(config.commitmentExtractorName, [rosenConfig.commitmentAddress], config.RWTId, dataSource)
+    const permitExtractor = new PermitExtractor(config.permitExtractorName, dataSource, rosenConfig.watcherPermitAddress, config.RWTId)
+    const eventTriggerExtractor = new EventTriggerExtractor(config.triggerExtractorName, dataSource, rosenConfig.eventTriggerAddress, config.RWTId)
+    const plainExtractor = new ErgoUTXOExtractor(dataSource, config.addressExtractorName, config.networkType, config.address)
     scanner.registerExtractor(commitmentExtractor)
     scanner.registerExtractor(permitExtractor)
     scanner.registerExtractor(eventTriggerExtractor)

@@ -10,7 +10,7 @@ import { Buffer } from "buffer";
 import { BoxEntity } from "../../../address-extractor";
 import { NoWID } from "../utils/errors";
 
-const ergoConfig = Config.getConfig();
+const config = Config.getConfig();
 
 
 export class Boxes{
@@ -28,13 +28,13 @@ export class Boxes{
 
     constructor(rosenConfig: rosenConfig, db: BridgeDataBase) {
         this.dataBase = db
-        this.repoNFTId = wasm.TokenId.from_str(ergoConfig.RepoNFT);
-        this.RWTTokenId = wasm.TokenId.from_str(ergoConfig.RWTId);
+        this.repoNFTId = wasm.TokenId.from_str(config.RepoNFT);
+        this.RWTTokenId = wasm.TokenId.from_str(config.RWTId);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
         const watcherPermitAddress = wasm.Address.from_base58(rosenConfig.watcherPermitAddress);
         this.watcherPermitContract = wasm.Contract.pay_to_address(watcherPermitAddress);
         this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
-        const userAddress = wasm.Address.from_base58(ergoConfig.address);
+        const userAddress = wasm.Address.from_base58(config.address);
         this.userAddressContract = wasm.Contract.pay_to_address(userAddress);
         this.repoAddress = wasm.Address.from_base58(rosenConfig.RWTRepoAddress);
         this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);

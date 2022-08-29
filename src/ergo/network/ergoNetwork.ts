@@ -5,16 +5,16 @@ import { JsonBI } from "./parser";
 import { Config } from "../../config/config";
 import { ergoTreeToBase58Address } from "../utils";
 
-const ergoConfig = Config.getConfig();
+const config = Config.getConfig();
 
 export const explorerApi = axios.create({
-    baseURL: ergoConfig.explorerUrl,
-    timeout: ergoConfig.nodeTimeout,
+    baseURL: config.explorerUrl,
+    timeout: config.nodeTimeout,
 });
 
 export const nodeClient = axios.create({
-    baseURL: ergoConfig.nodeUrl,
-    timeout: ergoConfig.explorerTimeout,
+    baseURL: config.nodeUrl,
+    timeout: config.explorerTimeout,
     headers: {"Content-Type": "application/json"}
 });
 
@@ -189,7 +189,7 @@ export class ErgoNetwork{
      * @param box
      */
     static trackMemPool = async (box: wasm.ErgoBox): Promise<wasm.ErgoBox> => {
-        const address: string = ergoTreeToBase58Address(box.ergo_tree(), ergoConfig.networkType)
+        const address: string = ergoTreeToBase58Address(box.ergo_tree(), config.networkType)
         const memPoolBoxesMap = new Map<string, wasm.ErgoBox>();
         const transactions = await this.getMemPoolTxForAddress(address).then(res => res.items);
         if (transactions !== undefined) {

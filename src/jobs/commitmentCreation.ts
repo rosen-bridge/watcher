@@ -2,11 +2,11 @@ import { Config } from "../config/config";
 import { boxesObject, databaseConnection, watcherTransaction } from "../index";
 import { CommitmentCreation } from "../transactions/commitmentCreation";
 
-const ergoConfig = Config.getConfig();
+const config = Config.getConfig();
 let commitmentCreatorObj: CommitmentCreation
 
 const creationJob = () => {
-    commitmentCreatorObj.job().then(() => setTimeout(creationJob, ergoConfig.commitmentCreationInterval * 1000))
+    commitmentCreatorObj.job().then(() => setTimeout(creationJob, config.commitmentCreationInterval * 1000))
 }
 
 export const creation = () => {

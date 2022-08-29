@@ -8,11 +8,11 @@ import { boxCreationError, NotEnoughFund } from "../utils/errors";
 import { DatabaseConnection } from "../database/databaseConnection";
 import { rosenConfig } from "../config/rosenConfig";
 import { Config } from "../config/config";
-import { TxType } from "../database/entities/TxEntity";
+import { TxType } from "../database/entities/txEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 
 const txFee = BigInt(rosenConfig.fee)
-const ergoConfig = Config.getConfig();
+const config = Config.getConfig();
 
 export class CommitmentReveal {
     databaseConnection: DatabaseConnection
@@ -42,7 +42,7 @@ export class CommitmentReveal {
         const repoBox = await this.boxes.getRepoBox()
         try {
             const signed = await ErgoUtils.createAndSignTx(
-                ergoConfig.secretKey,
+                config.secretKey,
                 inputBoxes,
                 [triggerEvent],
                 height,

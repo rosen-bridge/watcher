@@ -27,9 +27,10 @@ const TRANSACTION_REMOVING_TIMEOUT: number | undefined = config.get?.('ergo.tran
 const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transactions.confirmation');
 const OBSERVATION_CONFIRMATION: number | undefined = config.get?.('watcher.observation.confirmation');
 const OBSERVATION_VALID_THRESH: number | undefined = config.get?.('watcher.observation.validThreshold');
-const CARDANO_NAME_CONSTANT: string = config.get?.('cardano.name');
-
-const supportingBridges: Array<string> = ["Ergo", "Cardano"]
+const CARDANO_NAME_CONSTANT: string = config.get?.('watcher.supportedNetworks.cardano');
+const ERGO_NAME_CONSTANT: string = config.get?.('watcher.supportedNetworks.ergo');
+const CARDANO_SCANNER_CONSTANT: string = config.get?.('watcher.scannerConstants.cardano');
+const ERGO_SCANNER_CONSTANT: string = config.get?.('watcher.scannerConstants.ergo');
 
 export class Config {
     private static instance: Config;
@@ -53,8 +54,14 @@ export class Config {
     transactionCheckingInterval: number;
     observationConfirmation: number;
     observationValidThreshold: number;
-    plainExtractorName: string;
-    widExtractorName: string
+    addressExtractorName: string;
+    permitExtractorName: string;
+    commitmentExtractorName: string;
+    triggerExtractorName: string;
+    ergoNameConstant: string
+    cardanoNameConstant: string
+    ergoScannerConstant: string
+    cardanoScannerConstant: string
 
     private constructor() {
         let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -80,6 +87,13 @@ export class Config {
             );
             throw new SecretError("Secret key doesn't set in config file");
         }
+        if (CARDANO_NAME_CONSTANT === undefined) {
+            throw new Error("Cardano Constant Name is not set in the config");
+        }
+        if (ERGO_NAME_CONSTANT === undefined) {
+            throw new Error("Ergo Constant Name is not set in the config");
+        }
+        const supportingBridges = [ERGO_NAME_CONSTANT, CARDANO_NAME_CONSTANT]
         if (EXPLORER_URL === undefined) {
             throw new Error("Ergo Explorer Url is not set in the config");
         }
@@ -134,6 +148,12 @@ export class Config {
         if (!OBSERVATION_VALID_THRESH) {
             throw new Error("Watcher observation valid thresh doesn't set correctly");
         }
+        if (!CARDANO_SCANNER_CONSTANT) {
+            throw new Error("Cardano Scanner Name Constant is not set in the config");
+        }
+        if (!ERGO_SCANNER_CONSTANT) {
+            throw new Error("Ergo Scanner Name Constant is not set in the config");
+        }
 
         const secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
         const watcherAddress: string = secretKey.get_address().to_base58(networkType)
@@ -159,8 +179,14 @@ export class Config {
         this.observationConfirmation = OBSERVATION_CONFIRMATION
         this.observationValidThreshold = OBSERVATION_VALID_THRESH
         this.ergoInitialHeight = ERGO_INITIAL_HEIGHT
-        this.plainExtractorName = "plainBoxExtractor"
-        this.widExtractorName = "WIDBoxExtractor"
+        this.ergoNameConstant = ERGO_NAME_CONSTANT
+        this.cardanoNameConstant = CARDANO_NAME_CONSTANT
+        this.ergoScannerConstant = ERGO_SCANNER_CONSTANT
+        this.cardanoScannerConstant = CARDANO_SCANNER_CONSTANT
+        this.addressExtractorName = "watcher-address-extractor"
+        this.permitExtractorName = "watcher-permit-extractor"
+        this.commitmentExtractorName = "watcher-commitment-extractor"
+        this.permitExtractorName = "watcher-trigger-extractor"
     }
 
     static getConfig() {
@@ -177,7 +203,6 @@ export class CardanoConfig{
     interval: number;
     timeout: number;
     initialHeight: number;
-    nameConstant: string
 
     private constructor() {
 
@@ -201,7 +226,6 @@ export class CardanoConfig{
         this.interval = INTERVAL;
         this.timeout = CARDANO_TIMEOUT;
         this.initialHeight = CARDANO_INITIAL_HEIGHT;
-        this.nameConstant = CARDANO_NAME_CONSTANT
     }
 
     static getConfig() {

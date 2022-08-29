@@ -10,15 +10,13 @@ import { NetworkDataBase } from "./database/models/networkModel";
 import { BridgeDataBase } from "./database/models/bridgeModel";
 import { dataSource } from "../config/dataSource";
 import { DatabaseConnection } from "./database/databaseConnection";
-import { scannerInit } from "./jobs/Scanner";
+import { scannerInit } from "./jobs/scanner";
 import { creation } from "./jobs/commitmentCreation";
 import { reveal } from "./jobs/commitmetnReveal";
 import { transactionQueueJob } from "./jobs/transactionQueue";
 import { delay } from "./utils/utils";
-import { ErgoScanner } from "@rosen-bridge/scanner";
 
-
-const ergoConfig = Config.getConfig();
+const config = Config.getConfig();
 
 
 export let watcherTransaction: Transaction;
@@ -29,21 +27,18 @@ export let databaseConnection: DatabaseConnection;
 
 const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
-        const ergoConfig = Config.getConfig();
 
         await dataSource.initialize();
         await dataSource.runMigrations();
         bridgeDatabase = new BridgeDataBase(dataSource)
         boxesObject = new Boxes(rosenConfig, bridgeDatabase)
 
-        const temp = new Transaction(
+        return new Transaction(
             rosenConfig,
-            ergoConfig.address,
-            ergoConfig.secretKey,
+            config.address,
+            config.secretKey,
             boxesObject,
         );
-        // console.log("ready to return",temp)
-        return temp;
     }
 
     const initExpress = () => {
@@ -74,8 +69,8 @@ const init = async () => {
                 networkDatabase,
                 bridgeDatabase,
                 watcherTransaction,
-                ergoConfig.observationConfirmation,
-                ergoConfig.observationValidThreshold
+                config.observationConfirmation,
+                config.observationValidThreshold
             )
             // Running transaction checking thread
             transactionQueueJob()

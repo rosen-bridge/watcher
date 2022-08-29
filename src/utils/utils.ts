@@ -29,10 +29,10 @@ export function delay(time: number) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
-export const generateSK = (ergoConfig: Config): { address: string, secret: string} => {
+export const generateSK = (config: Config): { address: string, secret: string} => {
     const secretKey= ergoLib.SecretKey.random_dlog();
     return {
-        address: secretKey.get_address().to_base58(ergoConfig.networkType),
+        address: secretKey.get_address().to_base58(config.networkType),
         secret: uint8ArrayToHex(secretKey.to_bytes())
     };
 }

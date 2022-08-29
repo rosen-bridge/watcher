@@ -20,7 +20,7 @@ import WIDObj2 from "./dataset/WIDBox2.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
 import { hexStrToUint8Array } from "../../../src/utils/utils";
-import { TxType } from "../../../src/database/entities/TxEntity";
+import { TxType } from "../../../src/database/entities/txEntity";
 import { NetworkDataBase } from "../../../src/database/models/networkModel";
 import { BridgeDataBase } from "../../../src/database/models/bridgeModel";
 import { CommitmentReveal } from "../../../src/transactions/commitmentReveal";

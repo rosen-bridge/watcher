@@ -6,7 +6,7 @@ import { Config } from "../config/config";
 import { Boxes } from "../ergo/boxes";
 import { ErgoUtils } from "../ergo/utils";
 
-const ergoConfig = Config.getConfig();
+const config = Config.getConfig();
 
 export type ApiResponse = {
     response: string;
@@ -351,7 +351,7 @@ export class Transaction{
 
         const userOut = await this.boxes.createUserBoxCandidate(
             height,
-            this.userAddress.to_base58(ergoConfig.networkType),
+            this.userAddress.to_base58(config.networkType),
             changeBoxValue,
             WIDToken,
             WIDTokenAmount,

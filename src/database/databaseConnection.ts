@@ -6,14 +6,14 @@ import { Config } from "../config/config";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Buffer } from "buffer";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
-import { TxType } from "./entities/TxEntity";
-import { TxStatus } from "./entities/ObservationStatusEntity";
+import { TxType } from "./entities/txEntity";
+import { TxStatus } from "./entities/observationStatusEntity";
 import { Transaction } from "../api/Transaction";
 import { NoObservationStatus } from "../utils/errors";
 
-const ergoConfig = Config.getConfig();
+const config = Config.getConfig();
 
-
+// TODO: Change the name
 export class DatabaseConnection{
     bridgeDataBase: BridgeDataBase
     networkDataBase: NetworkDataBase
@@ -39,7 +39,7 @@ export class DatabaseConnection{
             throw new NoObservationStatus(`observation with requestId ${observation.requestId} has no status`)
         // Check observation time out
         if (observationStatus.status == TxStatus.TIMED_OUT) return false
-        const currentHeight = await this.networkDataBase.getLastBlockHeight(ergoConfig.networkWatcher)
+        const currentHeight = await this.networkDataBase.getLastBlockHeight(config.networkWatcher)
         if (currentHeight - observation.height > this.observationValidThreshold) {
             await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.TIMED_OUT)
             return false
@@ -64,7 +64,7 @@ export class DatabaseConnection{
         const eventTrigger = await this.bridgeDataBase.eventTriggerBySourceTxId(observation.sourceTxId)
         if (eventTrigger) {
             const height = await ErgoNetwork.getHeight()
-            if (height - eventTrigger.height > ergoConfig.transactionConfirmation)
+            if (height - eventTrigger.height > config.transactionConfirmation)
                 await this.networkDataBase.updateObservationTxStatus(observation, TxStatus.REVEALED)
             return true
         }
@@ -75,11 +75,11 @@ export class DatabaseConnection{
      * Returns all confirmed observations to create new commitments
      */
     allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
-        const height = await this.networkDataBase.getLastBlockHeight(ergoConfig.networkWatcher)
+        const height = await this.networkDataBase.getLastBlockHeight(config.networkWatcher)
         const observations = await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height);
         const validObservations: Array<ObservationEntity> = [];
         for (const observation of observations) {
-            const observationStatus = await this.networkDataBase.setStatusForObservations(observation);
+            const observationStatus = await this.networkDataBase.checkNewObservation(observation);
             if (observationStatus.status === TxStatus.NOT_COMMITTED) {
                 if (await this.isObservationValid(observation)) {
                     validObservations.push(observation);
@@ -94,7 +94,7 @@ export class DatabaseConnection{
      */
     allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
         const readyCommitments: Array<CommitmentSet> = []
-        const height = await this.networkDataBase.getLastBlockHeight(ergoConfig.networkWatcher)
+        const height = await this.networkDataBase.getLastBlockHeight(config.networkWatcher)
         const observations = (await this.networkDataBase.getConfirmedObservations(this.observationConfirmation, height));
         for (const observation of observations) {
             const observationStatus = await this.networkDataBase.getStatusForObservations(observation);
@@ -118,11 +118,13 @@ export class DatabaseConnection{
      * @param txType
      */
     submitTransaction = async (tx: wasm.Transaction, observation: ObservationEntity, txType: TxType) => {
+        const height = await ErgoNetwork.getHeight();
         await this.networkDataBase.submitTx(
             Buffer.from(tx.sigma_serialize_bytes()).toString("base64"),
             observation.requestId,
             tx.id().to_str(),
-            txType
+            txType,
+            height
         )
         await this.networkDataBase.upgradeObservationTxStatus(observation)
     }

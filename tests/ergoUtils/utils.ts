@@ -17,7 +17,7 @@ import spies from "chai-spies";
 
 import boxesJson from "./dataset/boxes.json" assert { type: "json" }
 
-const ergoConfig = Config.getConfig();
+const config = Config.getConfig();
 initMockedAxios()
 chai.use(spies);
 
@@ -54,7 +54,7 @@ describe("Testing ergoUtils", () => {
     describe("createChangeBox", () => {
         const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson)
         const totalValue = extractBoxes(boxes).map(box => box.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
-        const secret = ergoConfig.secretKey
+        const secret = config.secretKey
         const txFee = parseInt(rosenConfig.fee)
         const contract = wasm.Contract.pay_to_address(secret.get_address())
 

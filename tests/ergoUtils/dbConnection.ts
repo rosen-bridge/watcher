@@ -1,7 +1,7 @@
 import { loadNetworkDataBase } from "../database/networkDatabase";
 import { loadBridgeDataBase } from "../database/bridgeDatabase";
 import { DatabaseConnection } from "../../src/database/databaseConnection";
-import { TxStatus } from "../../src/database/entities/ObservationStatusEntity";
+import { TxStatus } from "../../src/database/entities/observationStatusEntity";
 import {
     commitmentEntity,
     eventTriggerEntity,
@@ -21,13 +21,14 @@ import { JsonBI } from "../../src/ergo/network/parser";
 import txObj from "../ergo/transactions/dataset/commitmentTx.json" assert { type: "json" };
 import { NetworkDataBase } from "../../src/database/models/networkModel";
 import { BridgeDataBase } from "../../src/database/models/bridgeModel";
-import { TxType } from "../../src/database/entities/TxEntity";
+import { TxType } from "../../src/database/entities/txEntity";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import chai, { expect } from "chai";
 import spies from "chai-spies";
 import chaiPromise from "chai-as-promised"
 import { NoObservationStatus } from "../../src/utils/errors";
+import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 
 chai.use(spies)
 
@@ -135,6 +136,7 @@ describe("Testing the DatabaseConnection", () => {
 
     describe("submitTransaction", () => {
         it("should submit a transaction and upgrade its status", async () => {
+            chai.spy.on(ErgoNetwork, "getHeight", () => 100)
             chai.spy.on(networkDb, "upgradeObservationTxStatus", () => undefined)
             chai.spy.on(networkDb, "submitTx", () => undefined)
             await dbConnection.submitTransaction(signedTx, observationEntity1, TxType.COMMITMENT)
@@ -143,7 +145,9 @@ describe("Testing the DatabaseConnection", () => {
                 observationEntity1.requestId,
                 signedTx.id().to_str(),
                 TxType.COMMITMENT)
-            expect(networkDb.upgradeObservationTxStatus).to.have.been.called.once
+            expect(networkDb.upgradeObservationTxStatus).to.have.been.called.with(observationEntity1)
+            expect(ErgoNetwork.getHeight).to.have.been.called.once
+            chai.spy.restore(ErgoNetwork)
         })
     })
 })

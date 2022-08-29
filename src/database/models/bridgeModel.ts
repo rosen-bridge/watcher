@@ -1,9 +1,7 @@
 import { DataSource, In, Repository } from "typeorm";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { PermitEntity, CommitmentEntity, EventTriggerEntity } from "@rosen-bridge/watcher-data-extractor";
-import { Config } from "../../config/config";
 
-const config = Config.getConfig()
 
 class BridgeDataBase{
     commitmentRepository: Repository<CommitmentEntity>;
