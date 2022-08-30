@@ -7,7 +7,7 @@ import { WatcherDataBase } from "../database/models/watcherModel";
 import { Observation } from "../utils/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { Buffer } from "buffer";
-import { BoxEntity } from "../../../address-extractor";
+import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { NoWID } from "../errors/errors";
 
 const config = Config.getConfig();
