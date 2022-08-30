@@ -1,4 +1,4 @@
-import rosenConfigJson from './RosenTokens&Addresses.json' assert { type: "json" };
+import rosenConfigJson from './cardano-testnet.json' assert { type: "json" };
 
 export type rosenConfig = {
     RSN: string;
