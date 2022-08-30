@@ -25,7 +25,7 @@ export class CommitmentUtils{
         const commitmentErgoTrees: Array<string> = commitmentAddresses.map(ad => Address.from_base58(ad).to_ergo_tree().to_base16_bytes())
         const commitment: NodeOutputBox = tx.outputs.filter((box) =>
             commitmentErgoTrees.includes(box.ergoTree)
-        ).filter(box => box.assets.length > 0 && box.assets[0].tokenId == ergoConfig.RWTId)[0]
+        ).filter(box => box.assets.length > 0 && box.assets[0].tokenId == rosenConfig.RWTId)[0]
         if (commitment != undefined) {
             const WID = (await decodeCollColl(commitment.additionalRegisters['R4']))[0]
             const requestId = (await decodeCollColl(commitment.additionalRegisters['R5']))[0]
@@ -98,7 +98,7 @@ export class CommitmentUtils{
                 // Adding new permit boxesSample
                 if(box.ergoTree === permitErgoTree &&
                     box.assets.length > 0 &&
-                    box.assets[0].tokenId == ergoConfig.RWTId) {
+                    box.assets[0].tokenId == rosenConfig.RWTId) {
                     specialBoxes.push({
                         boxId: box.boxId,
                         type: BoxType.PERMIT,

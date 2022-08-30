@@ -1,6 +1,5 @@
 import { CommitmentUtils } from "../../../src/bridge/scanner/utils";
 import { expect } from "chai";
-import { ErgoConfig } from "../../../src/config/config"
 import { loadBridgeDataBase } from "../models/bridgeModel";
 import { BoxType } from "../../../src/entities/watcher/bridge/BoxEntity";
 import { NodeTransaction } from "../../../src/bridge/network/ergoApiModels";
@@ -10,6 +9,7 @@ import spies from "chai-spies";
 
 import tx from "../dataset/tx.json" assert {type: "json"}
 import commitmentTx from "../dataset/commitmentTx.json" assert {type: "json"}
+import { rosenConfig } from "../../ergo/transactions/permit";
 
 chai.use(spies);
 
@@ -25,7 +25,7 @@ describe("Bridge Scanner Utils test", () => {
             expect(commitment).to.be.undefined
         });
         it("should be commitment", async () => {
-            commitmentTx.outputs[1].assets[0].tokenId = ErgoConfig.getConfig().RWTId
+            commitmentTx.outputs[1].assets[0].tokenId = rosenConfig.RWTId
             const commitment = await CommitmentUtils.checkTx(<NodeTransaction><unknown>commitmentTx, [commitmentAddress]);
             expect(commitment).to.not.be.undefined;
             expect(commitment?.WID).to.eql("f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b")
@@ -60,7 +60,7 @@ describe("Bridge Scanner Utils test", () => {
 
     describe("specialBoxesAtHeight", () => {
         it("Should find one permit box and one WID box", async () => {
-            commitmentTx.outputs[0].assets[0].tokenId = ErgoConfig.getConfig().RWTId
+            commitmentTx.outputs[0].assets[0].tokenId = rosenConfig.RWTId
             const specialBoxes = await CommitmentUtils.extractSpecialBoxes(
                 [<NodeTransaction><unknown>commitmentTx],
                 permitAddress,

@@ -29,8 +29,8 @@ export class Boxes{
 
     constructor(rosenConfig: rosenConfig, db: BridgeDataBase) {
         this._dataBase = db
-        this.repoNFTId = wasm.TokenId.from_str(ergoConfig.RepoNFT);
-        this.RWTTokenId = wasm.TokenId.from_str(ergoConfig.RWTId);
+        this.repoNFTId = wasm.TokenId.from_str(rosenConfig.RepoNFT);
+        this.RWTTokenId = wasm.TokenId.from_str(rosenConfig.RWTId);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
         this.watcherPermitAddress = wasm.Address.from_base58(rosenConfig.watcherPermitAddress);
         this.watcherPermitContract = wasm.Contract.pay_to_address(this.watcherPermitAddress);

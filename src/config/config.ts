@@ -14,8 +14,6 @@ const COMMITMENT_HEIGHT_LIMIT: number | undefined = config.get?.('bridgeScanner.
 const CLEANUP_CONFIRMATION: number | undefined = config.get?.('bridgeScanner.cleanupConfirmation');
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
-const RWT_ID: string | undefined = config.get?.('ergo.RWTId');
-const REPO_NFT: string | undefined = config.get?.('ergo.repoNFT');
 const CARDANO_TIMEOUT: number | undefined = config.get?.('cardano.timeout');
 const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.('ergo.explorerTimeout');
 const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
@@ -43,8 +41,6 @@ export class ErgoConfig{
     nodeUrl: string;
     nodeTimeout: number;
     explorerTimeout: number;
-    RWTId: string;
-    RepoNFT: string;
     bridgeScanInterval: number;
     commitmentInitialHeight: number;
     commitmentHeightLimit: number;
@@ -88,12 +84,6 @@ export class ErgoConfig{
         }
         if (NODE_URL === undefined) {
             throw new Error("Ergo Node Url is not set in the config");
-        }
-        if (RWT_ID === undefined) {
-            throw new Error("RWTId doesn't set in config file");
-        }
-        if (REPO_NFT === undefined) {
-            throw new Error("Repo NFT doesn't set in config file");
         }
         if (BRIDGE_SCAN_INTERVAL === undefined) {
             throw new Error("Commitment scanner interval doesn't set correctly");
@@ -149,8 +139,6 @@ export class ErgoConfig{
         this.nodeUrl = NODE_URL;
         this.explorerTimeout = ERGO_EXPLORER_TIMEOUT;
         this.nodeTimeout = ERGO_NODE_TIMEOUT;
-        this.RWTId = RWT_ID;
-        this.RepoNFT = REPO_NFT;
         this.bridgeScanInterval = BRIDGE_SCAN_INTERVAL;
         this.commitmentInitialHeight = COMMITMENT_INITIAL_HEIGHT;
         this.commitmentHeightLimit = COMMITMENT_HEIGHT_LIMIT;
