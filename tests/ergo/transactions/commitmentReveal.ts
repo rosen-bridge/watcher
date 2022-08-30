@@ -46,16 +46,16 @@ describe("Commitment reveal transaction tests", () => {
         cr = new CommitmentReveal(watcherUtils, txUtils, boxes)
     })
 
-    /**
-     * Target: testing triggerEventCreationTx
-     * Dependencies:
-     *    databaseConnection
-     *    Boxes
-     * Expected Output:
-     *    The function should construct a valid trigger event creation tx
-     *    It should also sign and send it successfully
-     */
     describe("triggerEventCreationTx", () => {
+        /**
+         * Target: testing triggerEventCreationTx
+         * Dependencies:
+         *    watcherUtils
+         *    Boxes
+         * Expected Output:
+         *    The function should construct a valid trigger event creation tx
+         *    It should also sign and send it successfully
+         */
         it("Should create, sign and send a trigger event transaction", async () => {
             chai.spy.on(txUtils, "submitTransaction", () => null)
             chai.spy.on(boxes, "createTriggerEvent")
@@ -68,22 +68,29 @@ describe("Commitment reveal transaction tests", () => {
             sinon.restore()
         })
     })
-
-    /**
-     * Target: testing triggerEventCreationTx
-     * Dependencies:
-     *    databaseConnection
-     *    Boxes
-     * Expected Output:
-     *    The function should check validness of commitments and return all valid commitments
-     */
+    
     describe("commitmentCheck", () => {
+        /**
+         * Target: testing commitmentCheck
+         * Dependencies:
+         *    ErgoUtils
+         * Expected Output:
+         *    The function should check validness of commitments and return nothing since the commitments are incorrect
+         */
         it("Should return empty array cause input is invalid", async () => {
             sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(thirdCommitment.commitment))
             const data = cr.commitmentCheck([firstCommitment], observation)
             expect(data).to.have.length(0)
             sinon.restore()
         })
+
+        /**
+         * Target: testing commitmentCheck
+         * Dependencies:
+         *    ErgoUtils
+         * Expected Output:
+         *   The function should check validness of commitments and return one valid commitment
+         */
         it("Should return one valid commitment", async () => {
             sinon.stub(ErgoUtils, "commitmentFromObservation").returns(Buffer.from(firstCommitment.commitment, "hex"))
             const data = cr.commitmentCheck([firstCommitment], observation)
@@ -92,17 +99,17 @@ describe("Commitment reveal transaction tests", () => {
             sinon.restore()
         })
     })
-
-    /**
-     * Target: testing triggerEventCreationTx
-     * Dependencies:
-     *    databaseConnection
-     *    Boxes
-     * Expected Output:
-     *    The function should collect all ready commitment sets and check the commitment validation
-     *    In case of enough valid commitments it should create the transaction
-     */
+    
     describe("job", () => {
+        /**
+         * Target: testing reveal job
+         * Dependencies:
+         *    watcherUtils
+         *    Boxes
+         * Expected Output:
+         *    The function should collect all ready commitment sets and check the commitment validation
+         *    In case of enough valid commitments it should create the transaction
+         */
         it("Should collect ready commitments and reveals the commitment by creating trigger event", async () => {
             const commitmentSet: CommitmentSet = {
                 commitments: [firstCommitment, thirdCommitment],

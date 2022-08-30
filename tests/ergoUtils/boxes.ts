@@ -69,41 +69,77 @@ describe("Testing Box Creation", () => {
     before(async () => {
         DB = await loadDataBase("boxes");
         boxes = new Boxes(rosenConfig, DB)
+        const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool')
+        mempoolTrack.onCall(1).resolves(wasm.ErgoBox.from_json(WIDJson))
+        mempoolTrack.onCall(2).resolves(wasm.ErgoBox.from_json(plainJson))
     })
 
     afterEach(() => {
         chai.spy.restore(DB)
+        chai.spy.restore(ErgoNetwork)
     })
 
     describe("getPermits", () => {
-        it("returns all permits ready to merge", async () => {
+        /**
+         * Target: testing getPermits
+         * Dependencies:
+         *    watcherDatabase
+         *    ErgoNetwork
+         * Expected Output:
+         *    The function should return all unspent permits
+         */
+        it("returns one unspent permit ready to merge", async () => {
             chai.spy.on(DB, 'getUnspentPermitBoxes', () => [permitBox])
-            const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool')
-            mempoolTrack.onCall(0).resolves(wasm.ErgoBox.from_json(permitJson))
-            mempoolTrack.onCall(1).resolves(wasm.ErgoBox.from_json(WIDJson))
-            mempoolTrack.onCall(2).resolves(wasm.ErgoBox.from_json(plainJson))
+            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(permitJson))
             const data = await boxes.getPermits(WID)
             expect(data).to.have.length(1)
             expect(data[0].box_id().to_str()).to.eq(permitBox.boxId)
         })
     })
 
+    /**
+     * Target: testing getWIDBox
+     * Dependencies:
+     *    watcherDatabase
+     *    ErgoNetwork
+     * Expected Output:
+     *    The function should return the unspent WID
+     */
     describe("getWIDBox", () => {
-        it("returns all wids ready to merge", async () => {
+        it("returns The watcher wid box", async () => {
             chai.spy.on(DB, 'getUnspentAddressBoxes', () => [WIDBox])
+            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(WIDJson))
             const data = await boxes.getWIDBox("f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b")
             expect(data.box_id().to_str()).to.eq(WIDBox.boxId)
         })
     })
 
     describe("getUserPaymentBox", () => {
+        /**
+         * Target: testing getUserPaymentBox
+         * Dependencies:
+         *    watcherDatabase
+         *    ErgoNetwork
+         * Expected Output:
+         *    The function should return all unspent watcher boxes
+         */
         it("returns a covering plain boxesSample", async () => {
             chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox])
+            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(plainJson))
             const data = await boxes.getUserPaymentBox(value)
             expect(data).to.have.length(1)
             expect(data[0].box_id().to_str()).to.eq(plainBox.boxId)
         })
-        // TODO: after the improvement
+
+        // TODO: user payment box currently not covering the amount, update the test after resolving issue #6
+        // /**
+        //  * Target: testing getUserPaymentBox
+        //  * Dependencies:
+        //  *    watcherDatabase
+        //  *    ErgoNetwork
+        //  * Expected Output:
+        //  *    The function should throw an error since the required amount is not covered
+        //  */
         // it("throws an error not covering the required amount", async () => {
         //     const DB = await loadBridgeDataBase("commitments");
         //     chai.spy.on(DB, 'getUnspentPlainBoxes', () => [plainBox])
@@ -113,17 +149,29 @@ describe("Testing Box Creation", () => {
     })
 
     describe("getRepoBox", () => {
-        it("should return repoBox(with tracking mempool)", async () => {
+        /**
+         * Target: testing getRepoBox
+         * Dependencies:
+         *    ErgoNetwork
+         * Expected Output:
+         *    The function should return the repo box considering the mempool
+         */
+        it("should return repoBox (with tracking mempool)", async () => {
             initMockedAxios(1)
             chai.spy.on(boxes, "getRepoBox", () => {
                 return wasm.ErgoBox.from_json(boxesSample.repoLastBox)
             })
             const repoBox = await boxes.getRepoBox();
             expect(repoBox.box_id().to_str()).to.be.equal("2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350");
-        });
-    });
+        })
+    })
 
     describe('createRepo', () => {
+        /**
+         * Target: testing createRepo
+         * Expected Output:
+         *    The function should return a new repo box with required information
+         */
         it("checks repoBox tokens order and count", async () => {
             const RWTCount = "100";
             const RSNCount = "1";
@@ -135,17 +183,22 @@ describe("Testing Box Creation", () => {
                 [],
                 wasm.Constant.from_i64_str_array([]),
                 0
-            );
+            )
 
             expect(repoBox.tokens().len()).to.be.equal(3);
             expect(repoBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
             expect(repoBox.tokens().get(1).amount().as_i64().to_str()).to.be.equal(RWTCount);
             expect(repoBox.tokens().get(2).amount().as_i64().to_str()).to.be.equal(RSNCount);
-        });
-    });
+        })
+    })
 
 
     describe("createPermit", () => {
+        /**
+         * Target: testing createPermit
+         * Expected Output:
+         *    The function should return a new permit box with required information
+         */
         it("checks permit box registers and tokens", async () => {
             const WID = hexStrToUint8Array("4198da878b927fdd33e884d7ed399a3dbd22cf9d855ff5a103a50301e70d89fc");
             const RWTCount = BigInt(100)
@@ -153,8 +206,7 @@ describe("Testing Box Creation", () => {
                 1,
                 RWTCount,
                 WID
-            );
-
+            )
             expect(permitBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
             expect(permitBox.tokens().len()).to.be.equal(1);
             expect(permitBox.tokens().get(0).amount().as_i64().to_str()).to.be.equal(RWTCount.toString());
@@ -162,16 +214,17 @@ describe("Testing Box Creation", () => {
             expect(permitBox.register_value(4)?.to_coll_coll_byte().length).to.be.equal(1);
             expect(permitBox.register_value(4)?.to_coll_coll_byte()[0]).to.be.eql(WID);
             expect(permitBox.register_value(5)?.to_byte_array()).to.be.eql(new Uint8Array([0]));
-
-        });
-    });
+        })
+    })
 
     /**
      * createUserBoxCandidate function tests
      */
     describe("createUserBoxCandidate", () => {
         /**
-         * checks userChangeBox and erg amount is made correctly with respect to input tokens
+         * Target: testing createUserBoxCandidate
+         * Expected Output:
+         *    The function should return a new user box with required information
          */
         it("checks userBox tokens and value", async () => {
             const tokensAmount = ["100", "1", "8000", "999000"];
@@ -206,6 +259,11 @@ describe("Testing Box Creation", () => {
     });
 
     describe("createCommitment", () => {
+        /**
+         * Target: testing createCommitment
+         * Expected Output:
+         *    The function should return a new commitment box with required information
+         */
         it("tests the commitment box creation", async () => {
             const permitHash = ErgoUtils.contractHash(wasm.Contract.pay_to_address(
                 wasm.Address.from_base58(permit)
@@ -218,6 +276,11 @@ describe("Testing Box Creation", () => {
     })
 
     describe("createTriggerEvent", () => {
+        /**
+         * Target: testing createTriggerEvent
+         * Expected Output:
+         *    The function should return a new trigger box with required information
+         */
         it("tests the event trigger box creation", async () => {
             const data = boxes.createTriggerEvent(value, 10, [Buffer.from(WID), Buffer.from(WID)], firstObservation)
             expect(BigInt(data.value().as_i64().to_str())).to.eql(value)

@@ -67,18 +67,18 @@ describe("Commitment creation transaction tests", () => {
     afterEach(() => {
         chai.spy.restore(watcherUtils)
     })
-
-    /**
-     * Target: testing createCommitmentTx
-     * Dependencies:
-     *    databaseConnection
-     *    Boxes
-     *    Transaction
-     * Expected Output:
-     *    The function should construct a valid commitment creation tx
-     *    It should also sign and send it successfully
-     */
+    
     describe("createCommitmentTx", () => {
+        /**
+         * Target: testing createCommitmentTx
+         * Dependencies:
+         *    WatcherUtils
+         *    Boxes
+         *    Transaction
+         * Expected Output:
+         *    The function should construct a valid commitment creation tx
+         *    It should also sign and send it successfully
+         */
         it("Should create, sign and send a commitment transaction", async () => {
             chai.spy.on(txUtils, "submitTransaction", () => null)
             chai.spy.on(boxes, "createCommitment")
@@ -92,18 +92,18 @@ describe("Commitment creation transaction tests", () => {
             sinon.restore()
         })
     })
-
-    /**
-     * Target: testing job
-     * Dependencies:
-     *    databaseConnection
-     *    Boxes
-     *    Transaction
-     * Expected Output:
-     *    The function should collect all ready observations to create the commitment transaction
-     *    If the box values is not enough should use an excess fee box covering the tx fee
-     */
+    
     describe("job", () => {
+        /**
+         * Target: testing job
+         * Dependencies:
+         *    WatcherUtils
+         *    Boxes
+         *    Transaction
+         * Expected Output:
+         *    The function should collect all ready observations to create the commitment transaction
+         *    Since the box values is enough should not use an excess fee box
+         */
         it("Should collect ready observations and create commitments", async () => {
             chai.spy.on(watcherUtils, "allReadyObservations", () => [observation])
             chai.spy.on(watcherUtils, "updateObservation", () => {
@@ -122,6 +122,16 @@ describe("Commitment creation transaction tests", () => {
             expect(cc.createCommitmentTx).to.have.called.with(WID, observation, commitment, permits, WIDBox, [])
         })
 
+        /**
+         * Target: testing job
+         * Dependencies:
+         *    WatcherUtils
+         *    Boxes
+         *    Transaction
+         * Expected Output:
+         *    The function should collect all ready observations to create the commitment transaction
+         *    Since the box values is not enough should use an excess fee box covering the tx fee
+         */
         it("Should collect ready observations and create commitment with excess fee box", async () => {
             chai.spy.on(watcherUtils, "allReadyObservations", () => [observation])
             chai.spy.on(watcherUtils, "updateObservation", () => {

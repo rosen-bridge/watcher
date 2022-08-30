@@ -44,8 +44,7 @@ class WatcherUtils {
         if (await this.isMergeHappened(observation)) return false
         // check this watcher have created the commitment lately
         const relatedCommitments = await this.dataBase.commitmentsByEventId(observation.requestId)
-        if (relatedCommitments.filter(commitment => commitment.WID === this.api.watcherWID).length > 0) return false
-        return true
+        return relatedCommitments.filter(commitment => commitment.WID === this.api.watcherWID).length <= 0
     }
 
     /**

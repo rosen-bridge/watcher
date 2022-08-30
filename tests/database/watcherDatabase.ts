@@ -160,45 +160,58 @@ describe("WatcherModel tests", () => {
         })
     })
 
-    /**
-     * Target: testing submitTx
-     * Expected Output:
-     *    The function should store two transactions in the database
-     */
     describe("submitTx", () => {
+        /**
+         * Target: testing submitTx
+         * Expected Output:
+         *    The function should store two transactions in the database
+         */
         it("should save two new transaction without any errors", async () => {
             await DB.submitTx("txSerialized", "reqId1", "txId", TxType.COMMITMENT, 1000)
             await DB.submitTx("txSerialized2", "reqId1", "txId2", TxType.TRIGGER, 1000)
         })
     })
 
-    /**
-     * Target: testing getAllTxs & removeTx
-     * Expected Output:
-     *    The test should return two stored transactions then remove one and return one remaining transaction
-     */
+
     describe("getAllTxs and removeTx", () => {
+        /**
+         * Target: testing getAllTxs
+         * Expected Output:
+         *    The test should return two stored transactions
+         */
         it("should return two available txs", async () => {
             const data = await DB.getAllTxs()
             expect(data).to.have.length(2)
         })
+
+        /**
+         * Target: testing removeTx
+         * Expected Output:
+         *    The test should remove first stored transaction
+         */
         it("should remove a tx", async () => {
             const txs = await DB.getAllTxs()
             const data = await DB.removeTx(txs[0])
             expect(data.deleted).to.true
         })
+
+        /**
+         * Target: testing getAllTxs
+         * Expected Output:
+         *    The test should return one remaining transaction
+         */
         it("should return one available tx", async () => {
             const data = await DB.getAllTxs()
             expect(data).to.have.length(1)
         })
     })
 
-    /**
-     * Target: testing updateTxTime
-     * Expected Output:
-     *    The function should set the update height
-     */
     describe("updateTxTime", () => {
+        /**
+         * Target: testing updateTxTime
+         * Expected Output:
+         *    The function should set the update height
+         */
         it("should update the tx time", async () => {
             const txs = await DB.getAllTxs()
             const data = await DB.setTxUpdateHeight(txs[0], 150)
@@ -206,12 +219,12 @@ describe("WatcherModel tests", () => {
         })
     })
 
-    /**
-     * Target: testing upgradeObservationTxStatus
-     * Expected Output:
-     *    The function should upgrade the tx status to the commitment_sent status
-     */
     describe("upgradeObservationTxStatus", () => {
+        /**
+         * Target: testing upgradeObservationTxStatus
+         * Expected Output:
+         *    The function should upgrade the tx status to the commitment_sent status
+         */
         it("should upgrade the observation txStatus", async () => {
             const obs = await DB.getConfirmedObservations(0, 100);
             const res = await DB.upgradeObservationTxStatus(obs[0])
@@ -219,12 +232,12 @@ describe("WatcherModel tests", () => {
         })
     })
 
-    /**
-     * Target: testing downgradeObservationTxStatus
-     * Expected Output:
-     *    The function should downgrade the tx status to the not_committed status
-     */
     describe("downgradeObservationTxStatus", () => {
+        /**
+         * Target: testing downgradeObservationTxStatus
+         * Expected Output:
+         *    The function should downgrade the tx status to the not_committed status
+         */
         it("should upgrade the observation txStatus", async () => {
             const obs = await DB.getConfirmedObservations(0, 100);
             const res = await DB.downgradeObservationTxStatus(obs[0])
@@ -232,12 +245,12 @@ describe("WatcherModel tests", () => {
         })
     })
 
-    /**
-     * Target: testing updateObservationTxStatus
-     * Expected Output:
-     *    The function should update the tx status to the revealed status
-     */
     describe("updateObservationTxStatus", () => {
+        /**
+         * Target: testing updateObservationTxStatus
+         * Expected Output:
+         *    The function should update the tx status to the revealed status
+         */
         it("should update the observation txStatus to revealed", async () => {
             const obs = await DB.getConfirmedObservations(0, 100);
             const res = await DB.updateObservationTxStatus(obs[0], TxStatus.REVEALED)
@@ -246,6 +259,11 @@ describe("WatcherModel tests", () => {
     })
 
     describe("getOldSpentCommitments", () => {
+        /**
+         * Target: testing getOldSpentCommitments
+         * Expected Output:
+         *    The function should return one old commitment
+         */
         it("should return an old commitment", async () => {
             const data = await DB.getOldSpentCommitments(3433335)
             expect(data).to.have.length(1)
@@ -253,6 +271,11 @@ describe("WatcherModel tests", () => {
     })
 
     describe("commitmentsByEventId", () => {
+        /**
+         * Target: testing commitmentsByEventId
+         * Expected Output:
+         *    The function should return two commitments with the event id
+         */
         it("should return two commitments with specified event id", async () => {
             const data = await DB.commitmentsByEventId("eventId")
             expect(data).to.have.length(2)
@@ -260,6 +283,11 @@ describe("WatcherModel tests", () => {
     })
 
     describe("findCommitmentsById", () => {
+        /**
+         * Target: testing findCommitmentsById
+         * Expected Output:
+         *    The function should return two commitments with the box ids
+         */
         it("should return exactly two commitments with the specified box id", async () => {
             const data = await DB.findCommitmentsById([commitmentEntity.boxId, spentCommitmentEntity.boxId])
             expect(data).to.have.length(2)
@@ -269,6 +297,11 @@ describe("WatcherModel tests", () => {
     })
 
     describe("deleteCommitments", () => {
+        /**
+         * Target: testing getOldSpentCommitments
+         * Expected Output:
+         *    The function should delete two commitments with the box ids
+         */
         it("should delete two commitments with specified ids", async () => {
             await DB.deleteCommitments([commitmentEntity.boxId, spentCommitmentEntity.boxId])
             const data = await DB.getOldSpentCommitments(3433335)
@@ -277,6 +310,11 @@ describe("WatcherModel tests", () => {
     })
 
     describe("getUnspentPermitBoxes", () => {
+        /**
+         * Target: testing getUnspentPermitBoxes
+         * Expected Output:
+         *    The function should return one unspent permit box
+         */
         it("should find one unspent permit box", async () => {
             const data = await DB.getUnspentPermitBoxes("WID")
             expect(data).to.have.length(1)
@@ -285,6 +323,11 @@ describe("WatcherModel tests", () => {
     })
 
     describe("getUnspentPlainBoxes", () => {
+        /**
+         * Target: testing getUnspentPlainBoxes
+         * Expected Output:
+         *    The function should return one unspent address box
+         */
         it("should find one unspent plain box", async () => {
             const data = await DB.getUnspentAddressBoxes()
             expect(data).to.have.length(1)
@@ -293,6 +336,11 @@ describe("WatcherModel tests", () => {
     })
 
     describe("eventTriggerBySourceTxId", () => {
+        /**
+         * Target: testing eventTriggerBySourceTxId
+         * Expected Output:
+         *    The function should return one unspent trigger box
+         */
         it("should find one unspent event trigger box", async () => {
             const data = await DB.eventTriggerBySourceTxId(eventTriggerEntity.sourceTxId)
             expect(data).to.eql(eventTriggerEntity)
