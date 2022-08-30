@@ -158,13 +158,16 @@ describe("Testing Box Creation", () => {
          */
         it("should return repoBox (with tracking mempool)", async () => {
             initMockedAxios(1)
-            chai.spy.on(boxes, "getRepoBox", () => {
+            chai.spy.on(ErgoNetwork, "getBoxWithToken", (address, nft) => {
                 return wasm.ErgoBox.from_json(boxesSample.repoLastBox)
             })
-            const repoBox = await boxes.getRepoBox();
-            expect(repoBox.box_id().to_str()).to.be.equal("2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350");
-        })
-    })
+            chai.spy.on(ErgoNetwork, "trackMemPool", (box) => {
+                return wasm.ErgoBox.from_json(boxesSample.repoLastBox)
+            })
+            await boxes.getRepoBox();
+            expect(ErgoNetwork.getBoxWithToken).to.have.been.called.with(boxes.repoAddress, "a40b86c663fbbfefa243c9c6ebbc5690fc4e385f15b44c49ba469c91c5af0f48");
+        });
+    });
 
     describe('createRepo', () => {
         /**
