@@ -1,6 +1,7 @@
 {
     "watcher": {
         "network": "Ergo",
+        "networkType": "Testnet",
         "observation" : {
             "confirmation": 2,
             "validThreshold": 100

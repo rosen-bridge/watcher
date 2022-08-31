@@ -4,11 +4,8 @@ import { NodeOutputBox, NodeTransaction } from "../network/ergoApiModels";
 import { BridgeDataBase } from "../models/bridgeModel";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { rosenConfig } from "../../config/rosenConfig";
-import { ErgoConfig } from "../../config/config";
 import { SpendReason } from "../../entities/watcher/bridge/ObservedCommitmentEntity";
 import { BoxType } from "../../entities/watcher/bridge/BoxEntity";
-
-const ergoConfig = ErgoConfig.getConfig();
 
 export class CommitmentUtils{
 

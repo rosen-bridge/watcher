@@ -20,6 +20,7 @@ const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
 const ERGO_SCANNER_INTERVAL: number | undefined = config.get?.('ergo.scanner.interval');
 const ERGO_SCANNER_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scanner.initialBlockHeight');
 const NETWORK_WATCHER: string | undefined = config.get?.('watcher.network');
+const NETWORK_WATCHER_TYPE: string | undefined = config.get?.('watcher.networkType');
 const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.('ergo.commitmentCreationInterval')
 const COMMITMENT_REVEAL_INTERVAL: number | undefined = config.get?.('ergo.commitmentRevealInterval')
 const TRANSACTION_CHECK_INTERVAL: number | undefined = config.get?.('ergo.transactions.interval')
@@ -46,6 +47,7 @@ export class ErgoConfig{
     commitmentHeightLimit: number;
     cleanupConfirmation: number;
     networkWatcher: string;
+    networkWatcherType: string;
     commitmentCreationInterval: number;
     commitmentRevealInterval: number;
     transactionRemovingTimeout: number;
@@ -106,6 +108,9 @@ export class ErgoConfig{
         if (!NETWORK_WATCHER || !supportingBridges.includes(NETWORK_WATCHER)) {
             throw new Error("Watching Bridge is not set correctly");
         }
+        if (NETWORK_WATCHER_TYPE === undefined) {
+            throw new Error("Network watcher type is not set correctly");
+        }
         if(!COMMITMENT_CREATION_INTERVAL){
             throw new Error("Commitment creation job interval is not set");
         }
@@ -143,7 +148,8 @@ export class ErgoConfig{
         this.commitmentInitialHeight = COMMITMENT_INITIAL_HEIGHT;
         this.commitmentHeightLimit = COMMITMENT_HEIGHT_LIMIT;
         this.cleanupConfirmation = CLEANUP_CONFIRMATION;
-        this.networkWatcher = NETWORK_WATCHER
+        this.networkWatcher = NETWORK_WATCHER;
+        this.networkWatcherType = NETWORK_WATCHER_TYPE;
         this.commitmentCreationInterval = COMMITMENT_CREATION_INTERVAL
         this.commitmentRevealInterval = COMMITMENT_REVEAL_INTERVAL
         this.transactionCheckingInterval = TRANSACTION_CHECK_INTERVAL
