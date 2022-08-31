@@ -22,11 +22,12 @@ import chaiPromise from "chai-as-promised"
 import permitObj from "./dataset/permitBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
+import { ErgoConfig } from "../../src/config/config";
 
 const permitJson = JsonBI.stringify(permitObj)
 const WIDJson = JsonBI.stringify(WIDObj)
 const plainJson = JsonBI.stringify(plainObj)
-
+const ergoConfig = ErgoConfig.getConfig();
 chai.use(spies);
 chai.use(chaiPromise)
 initMockedAxios();
@@ -130,7 +131,7 @@ describe("Testing Box Creation", () => {
             );
 
             expect(repoBox.tokens().len()).to.be.equal(3);
-            expect(repoBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
+            expect(repoBox.value().as_i64().to_str()).to.be.equal(ergoConfig.minBoxValue);
             expect(repoBox.tokens().get(1).amount().as_i64().to_str()).to.be.equal(RWTCount);
             expect(repoBox.tokens().get(2).amount().as_i64().to_str()).to.be.equal(RSNCount);
         });
@@ -149,7 +150,7 @@ describe("Testing Box Creation", () => {
                 WID
             );
 
-            expect(permitBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
+            expect(permitBox.value().as_i64().to_str()).to.be.equal(ergoConfig.minBoxValue);
             expect(permitBox.tokens().len()).to.be.equal(1);
             expect(permitBox.tokens().get(0).amount().as_i64().to_str()).to.be.equal(RWTCount.toString());
             expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(rosenConfig.RWTId);
@@ -209,7 +210,7 @@ describe("Testing Box Creation", () => {
                 wasm.Address.from_base58(permit)
             ))
             const data = boxes.createCommitment(10, WID, firstCommitment.eventId, Buffer.from(firstCommitment.commitment, 'hex'), permitHash)
-            expect(BigInt(data.value().as_i64().to_str())).to.eql(BigInt(rosenConfig.minBoxValue.toString()))
+            expect(BigInt(data.value().as_i64().to_str())).to.eql(BigInt(ergoConfig.minBoxValue.toString()))
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(1)
         })

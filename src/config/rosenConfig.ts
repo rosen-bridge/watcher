@@ -5,8 +5,6 @@ const ergoConfig = ErgoConfig.getConfig();
 
 export type rosenConfig = {
     RSN: string;
-    minBoxValue: string;
-    fee: string;
     guardNFT: string;
     cleanupNFT: string;
     cleanupConfirm: number;
@@ -21,20 +19,18 @@ export type rosenConfig = {
 }
 
 class RosenConfig{
-    minBoxValue = "1100000";
-    fee = "1100000";
-    RSN: string;
-    guardNFT: string;
-    cleanupNFT: string;
-    cleanupConfirm: number;
-    watcherPermitAddress: string;
-    RWTRepoAddress: string;
-    fraudAddress: string;
-    eventTriggerAddress: string;
-    commitmentAddress: string;
-    lockAddress: string;
-    RepoNFT: string;
-    RWTId: string;
+    readonly RSN: string;
+    readonly guardNFT: string;
+    readonly cleanupNFT: string;
+    readonly cleanupConfirm: number;
+    readonly watcherPermitAddress: string;
+    readonly RWTRepoAddress: string;
+    readonly fraudAddress: string;
+    readonly eventTriggerAddress: string;
+    readonly commitmentAddress: string;
+    readonly lockAddress: string;
+    readonly RepoNFT: string;
+    readonly RWTId: string;
 
     constructor(network: string, networkType: string) {
         const rosenConfigPath = this.getAddress(network, networkType);

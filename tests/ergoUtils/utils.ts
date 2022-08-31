@@ -55,7 +55,7 @@ describe("Testing ergoUtils", () => {
         const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson)
         const totalValue = extractBoxes(boxes).map(box => box.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
         const secret = ergoConfig.secretKey
-        const txFee = parseInt(rosenConfig.fee)
+        const txFee = parseInt(ergoConfig.fee)
         const contract = wasm.Contract.pay_to_address(secret.get_address())
 
         it("should not return change box all assets are spent", () => {
@@ -118,7 +118,7 @@ describe("Testing ergoUtils", () => {
          */
         it("should sign an arbitrary transaction", async () => {
             initMockedAxios(0);
-            const outValue = BigInt(rosenConfig.minBoxValue) + BigInt(rosenConfig.fee);
+            const outValue = BigInt(ergoConfig.minBoxValue) + BigInt(ergoConfig.fee);
             const add = Address.from_base58(userAddress)
             const transactionInput = await ErgoNetwork.getErgBox(
                 add,
@@ -134,7 +134,7 @@ describe("Testing ergoUtils", () => {
             const height = await ErgoNetwork.getHeight();
 
             const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
-                wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue.toString())),
+                wasm.BoxValue.from_i64(wasm.I64.from_str(ergoConfig.minBoxValue.toString())),
                 wasm.Contract.pay_to_address(add),
                 height
             );
@@ -149,9 +149,9 @@ describe("Testing ergoUtils", () => {
                 boxSelection,
                 txOutBox,
                 height,
-                wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee.toString())),
+                wasm.BoxValue.from_i64(wasm.I64.from_str(ergoConfig.fee.toString())),
                 add,
-                wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue.toString())),
+                wasm.BoxValue.from_i64(wasm.I64.from_str(ergoConfig.minBoxValue.toString())),
             );
 
             const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);

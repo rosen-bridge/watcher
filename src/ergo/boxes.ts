@@ -34,12 +34,12 @@ export class Boxes{
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
         this.watcherPermitAddress = wasm.Address.from_base58(rosenConfig.watcherPermitAddress);
         this.watcherPermitContract = wasm.Contract.pay_to_address(this.watcherPermitAddress);
-        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
+        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(ergoConfig.minBoxValue));
         this.userAddress = wasm.Address.from_base58(ergoConfig.address);
         this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);
         this.repoAddress = wasm.Address.from_base58(rosenConfig.RWTRepoAddress);
         this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
-        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
+        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(ergoConfig.fee));
         this.rosenConfig = rosenConfig;
     }
 

@@ -43,8 +43,8 @@ export class Transaction{
         this.watcherPermitState = undefined;
         this.watcherWID = "";
         this.boxes = boxes;
-        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
-        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
+        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(ergoConfig.fee));
+        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(ergoConfig.minBoxValue));
         this.userSecret = userSecret
         this.userAddress = wasm.Address.from_base58(userAddress);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);

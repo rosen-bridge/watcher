@@ -5,7 +5,9 @@
         "observation" : {
             "confirmation": 2,
             "validThreshold": 100
-        }
+        },
+        "minBoxValue": "1100000",
+        "fee": "1100000"
     },
     "cardano": {
         "interval": 10,

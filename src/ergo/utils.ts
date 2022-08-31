@@ -1,13 +1,15 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { Observation } from "../objects/interfaces";
 import { bigIntToUint8Array } from "../utils/utils";
-import { rosenConfig } from "../config/rosenConfig";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 import { blake2b } from "blakejs";
 import { Boxes } from "./boxes";
+import { ErgoConfig } from "../config/config";
 
-const txFee = parseInt(rosenConfig.fee)
+const ergoConfig=ErgoConfig.getConfig();
+
+const txFee = parseInt(ergoConfig.fee)
 
 export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
     return Array(boxes.len()).fill("")

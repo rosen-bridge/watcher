@@ -21,6 +21,8 @@ const ERGO_SCANNER_INTERVAL: number | undefined = config.get?.('ergo.scanner.int
 const ERGO_SCANNER_INITIAL_HEIGHT: number | undefined = config.get?.('ergo.scanner.initialBlockHeight');
 const NETWORK_WATCHER: string | undefined = config.get?.('watcher.network');
 const NETWORK_WATCHER_TYPE: string | undefined = config.get?.('watcher.networkType');
+const MIN_BOX_VALUE: string | undefined = config.get?.('watcher.minBoxValue');
+const FEE: string | undefined = config.get?.('watcher.fee');
 const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.('ergo.commitmentCreationInterval')
 const COMMITMENT_REVEAL_INTERVAL: number | undefined = config.get?.('ergo.commitmentRevealInterval')
 const TRANSACTION_CHECK_INTERVAL: number | undefined = config.get?.('ergo.transactions.interval')
@@ -48,6 +50,8 @@ export class ErgoConfig{
     cleanupConfirmation: number;
     networkWatcher: string;
     networkWatcherType: string;
+    minBoxValue:string;
+    fee:string;
     commitmentCreationInterval: number;
     commitmentRevealInterval: number;
     transactionRemovingTimeout: number;
@@ -132,6 +136,12 @@ export class ErgoConfig{
         if (!OBSERVATION_VALID_THRESH) {
             throw new Error("Watcher observation valid thresh doesn't set correctly");
         }
+        if (MIN_BOX_VALUE === undefined) {
+            throw new Error("Watcher min box value doesn't set correctly");
+        }
+        if (FEE === undefined) {
+            throw new Error("Watcher Fee doesn't set correctly");
+        }
 
         const secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
         const watcherAddress: string = secretKey.get_address().to_base58(networkType)
@@ -157,6 +167,8 @@ export class ErgoConfig{
         this.transactionRemovingTimeout = TRANSACTION_REMOVING_TIMEOUT;
         this.observationConfirmation = OBSERVATION_CONFIRMATION
         this.observationValidThreshold = OBSERVATION_VALID_THRESH
+        this.minBoxValue = MIN_BOX_VALUE;
+        this.fee = FEE;
     }
 
     static getConfig() {
