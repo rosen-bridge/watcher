@@ -60,13 +60,18 @@ describe("Watcher Permit Transactions", () => {
         chai.spy.restore(boxes)
     })
 
-    // TODO: Fix all doc strings with the global pattern
-    /**
-     * getWID functions tests
-     */
     describe("getWID", () => {
         /**
-         * it checks that functions find the user WID correctly
+         * Target: testing getWID for getting user WID
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    The function should return user WID
          */
         it("checks is there any wid in the usersBoxes", async () => {
             const sampleWID = "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8";
@@ -86,12 +91,18 @@ describe("Watcher Permit Transactions", () => {
         });
     });
 
-    /**
-     * inputBoxesTokenMap function tests
-     */
     describe("inputBoxesTokenMap", () => {
         /**
-         * the token map of input and output should be the same
+         * Target: testing inputBoxesTokenMap that should get all input boxes tokens
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    the token map of input and output should be the same
          */
         it('the token map of input and output should be the same', async () => {
             const transaction = new Transaction(
@@ -122,7 +133,16 @@ describe("Watcher Permit Transactions", () => {
      */
     describe("getPermit", () => {
         /**
-         * checks getPermit with correct inputs and state should be signed
+         * Target: testing that getPermit should sign a transaction with valid input
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    getPermit with correct inputs and state should be signed
          */
         it("checks get permit transaction is signed", async () => {
             initMockedAxios(0);
@@ -140,7 +160,16 @@ describe("Watcher Permit Transactions", () => {
         });
 
         /**
-         * in the case of watcher have permit box in his/her address the getPermit should returns error
+         * Target: testing that getPermit in case of invalid state should return error
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    getPermit with invalid state should return error
          */
         it("tests that if watcher have permit box should returns error", async () => {
             const transaction = new Transaction(
@@ -159,8 +188,16 @@ describe("Watcher Permit Transactions", () => {
      */
     describe("returnPermit", () => {
         /**
-         * it checks if the state of the watcher permit and input is correct the transaction
-         *  should be signed without error
+         * Target: testing that returnPermit in case of valid state and input should be signed return permit transaction
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit transaction should be signed
          */
         it("checks transaction is signed", async () => {
             initMockedAxios(0);
@@ -183,7 +220,16 @@ describe("Watcher Permit Transactions", () => {
         });
 
         /**
-         * it checks case that the return permit transaction have permit box in its output
+         * Target: testing that returnPermit in case that return permit transaction have permit box in its output
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit transaction should be signed in case that we have permit box in output
          */
         it("it checks case that the return permit transaction have permit box in its output", async () => {
             initMockedAxios(1);
@@ -206,7 +252,16 @@ describe("Watcher Permit Transactions", () => {
         });
 
         /**
-         * tests that if watcher doesn't have permit box should returns error
+         * Target: testing that returnPermit in case that watcher doesn't have permit box should return error
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit should return error
          */
         it("tests that if watcher doesn't have permit box should returns error", async () => {
             initMockedAxios();
@@ -234,7 +289,16 @@ describe("Watcher Permit Transactions", () => {
      */
     describe("getWatcherState", () => {
         /**
-         * the watcher state with this mocked input should be true(have permitBox)
+         * Target: testing getWatcherState when watcher gets permit
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit should return true
          */
         it("should be true", async () => {
             initMockedAxios();
@@ -249,7 +313,16 @@ describe("Watcher Permit Transactions", () => {
         });
 
         /**
-         * the watcher state with this mocked input should be false(no permitBox)
+         * Target: testing getWatcherState when watcher doesn't get permit
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit should return false
          */
         it("should be false", async () => {
             initMockedAxios();
