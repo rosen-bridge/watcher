@@ -60,6 +60,7 @@ describe("Watcher Permit Transactions", () => {
         chai.spy.restore(boxes)
     })
 
+    // TODO: Fix all doc strings with the global pattern
     /**
      * getWID functions tests
      */

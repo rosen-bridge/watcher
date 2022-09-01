@@ -1,4 +1,4 @@
-import { CardanoConfig, Constants } from "../config/config";
+import { CardanoConfig} from "../config/config";
 import { ErgoScanner, CardanoKoiosScanner } from "@rosen-bridge/scanner";
 import { Config } from "../config/config";
 import { dataSource } from "../../config/dataSource";
@@ -7,6 +7,7 @@ import tokens from '../config/tokens.test.json' assert { type: "json" };
 import { CommitmentExtractor, PermitExtractor, EventTriggerExtractor } from "@rosen-bridge/watcher-data-extractor";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoUTXOExtractor } from "@rosen-bridge/address-extractor";
+import { Constants } from "../config/constants";
 
 const config = Config.getConfig()
 let scanner: ErgoScanner;

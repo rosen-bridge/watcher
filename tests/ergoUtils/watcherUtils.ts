@@ -46,6 +46,10 @@ describe("Testing the WatcherUtils & TransactionUtils", () => {
          * Target: testing allReadyObservations
          * Dependencies:
          *    watcherDatabase
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should return all ready observations for commitment creation
          *    It should return one observation since
@@ -68,6 +72,10 @@ describe("Testing the WatcherUtils & TransactionUtils", () => {
          * Target: testing allReadyObservations
          * Dependencies:
          *    watcherDatabase
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should return all ready observations for commitment creation
          *    It should return nothing since the stored observation trigger had been created
@@ -85,6 +93,10 @@ describe("Testing the WatcherUtils & TransactionUtils", () => {
          * Target: testing allReadyObservations
          * Dependencies:
          *    watcherDatabase
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should return all ready observations for commitment creation
          *    It should return nothing since the stored observation had passed the valid threshold
@@ -105,6 +117,10 @@ describe("Testing the WatcherUtils & TransactionUtils", () => {
          * Target: testing allReadyCommitmentSets
          * Dependencies:
          *    watcherDatabase
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should return all ready commitments along with the related observation for trigger creation
          *    It should return one commitment set with two commitments, since:
@@ -126,6 +142,10 @@ describe("Testing the WatcherUtils & TransactionUtils", () => {
          * Target: testing allReadyCommitmentSets
          * Dependencies:
          *    watcherDatabase
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should return all ready commitments along with the related observation for trigger creation
          *    It should return nothing since the observation has no status or database had a problem
@@ -141,6 +161,10 @@ describe("Testing the WatcherUtils & TransactionUtils", () => {
          * Target: testing allReadyCommitmentSets
          * Dependencies:
          *    watcherDatabase
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should return all ready commitments along with the related observation for trigger creation
          *    It should return nothing since the observation status is NOT-COMMITTED
@@ -157,6 +181,10 @@ describe("Testing the WatcherUtils & TransactionUtils", () => {
          * Target: testing allReadyCommitmentSets
          * Dependencies:
          *    watcherDatabase
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should return all ready commitments along with the related observation for trigger creation
          *    It should return nothing since one of the commitments is merged to create the trigger
@@ -249,6 +277,10 @@ describe("Testing the WatcherUtils & TransactionUtils", () => {
          * Target: testing submitTransaction
          * Dependencies:
          *    watcherDatabase
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
          * Expected Output:
          *    The function should submit a transaction and update its status
          */

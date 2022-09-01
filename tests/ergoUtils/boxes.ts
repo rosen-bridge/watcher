@@ -85,6 +85,10 @@ describe("Testing Box Creation", () => {
          * Dependencies:
          *    watcherDatabase
          *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should return all unspent permits
          */
@@ -102,6 +106,10 @@ describe("Testing Box Creation", () => {
      * Dependencies:
      *    watcherDatabase
      *    ErgoNetwork
+     * Test Procedure:
+     *    1- Mocking environment
+     *    2- calling function
+     *    3- validate output
      * Expected Output:
      *    The function should return the unspent WID
      */
@@ -120,6 +128,10 @@ describe("Testing Box Creation", () => {
          * Dependencies:
          *    watcherDatabase
          *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should return all unspent watcher boxes
          */
@@ -153,6 +165,10 @@ describe("Testing Box Creation", () => {
          * Target: testing getRepoBox
          * Dependencies:
          *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
          * Expected Output:
          *    The function should return the repo box considering the mempool
          */

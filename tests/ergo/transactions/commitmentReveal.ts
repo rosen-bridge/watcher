@@ -52,6 +52,10 @@ describe("Commitment reveal transaction tests", () => {
          * Dependencies:
          *    watcherUtils
          *    Boxes
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
          * Expected Output:
          *    The function should construct a valid trigger event creation tx
          *    It should also sign and send it successfully
@@ -74,6 +78,10 @@ describe("Commitment reveal transaction tests", () => {
          * Target: testing commitmentCheck
          * Dependencies:
          *    ErgoUtils
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should check validness of commitments and return nothing since the commitments are incorrect
          */
@@ -88,6 +96,10 @@ describe("Commitment reveal transaction tests", () => {
          * Target: testing commitmentCheck
          * Dependencies:
          *    ErgoUtils
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *   The function should check validness of commitments and return one valid commitment
          */
@@ -106,6 +118,10 @@ describe("Commitment reveal transaction tests", () => {
          * Dependencies:
          *    watcherUtils
          *    Boxes
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
          * Expected Output:
          *    The function should collect all ready commitment sets and check the commitment validation
          *    In case of enough valid commitments it should create the transaction

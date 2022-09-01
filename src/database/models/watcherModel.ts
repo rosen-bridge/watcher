@@ -3,12 +3,10 @@ import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { TxEntity, TxType } from "../entities/txEntity";
 import { ObservationStatusEntity, TxStatus } from "../entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
-import { Config, Constants } from "../../config/config";
 import { PROCEED } from "@rosen-bridge/scanner/dist/entities/blockEntity";
 import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 
-const config = Config.getConfig()
 
 class WatcherDataBase {
     private readonly blockRepository: Repository<BlockEntity>
@@ -33,6 +31,7 @@ class WatcherDataBase {
 
     /**
      * returns the last saved block height based on the observing network
+     * @param network: watcher observing network
      */
     getLastBlockHeight = async (network: string): Promise<number> => {
         const lastBlock = await this.blockRepository.find({
@@ -219,7 +218,7 @@ class WatcherDataBase {
     }
 
     /**
-     * returns old spent commitments
+     * returns spent commitments before the specified height
      * @param height
      */
     getOldSpentCommitments = async (height: number) => {
@@ -262,6 +261,7 @@ class WatcherDataBase {
 
     /**
      * Returns all unspent permit boxes
+     * @param wid
      */
     getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
         return this.permitRepository.createQueryBuilder("permit_entity")

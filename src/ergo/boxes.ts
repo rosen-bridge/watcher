@@ -42,6 +42,11 @@ export class Boxes{
         this.rosenConfig = rosenConfig;
     }
 
+    /**
+     * Returns unspent permits covering the RWTCount (Considering the mempool)
+     * @param wid
+     * @param RWTCount
+     */
     getPermits = async (wid: string, RWTCount?: bigint): Promise<Array<wasm.ErgoBox>> => {
         // TODO: Rewrite the function to return the required number of RWTs after changing database
         const permits = await this.dataBase.getUnspentPermitBoxes(wid)
@@ -51,6 +56,10 @@ export class Boxes{
         return Promise.all(permitBoxes)
     }
 
+    /**
+     * Returns unspent WID boxes with the specified WID (Considering the mempool)
+     * @param wid
+     */
     getWIDBox = async (wid?: string): Promise<wasm.ErgoBox> => {
         if (wid) {
             const WID = (await this.dataBase.getUnspentAddressBoxes())
@@ -69,6 +78,10 @@ export class Boxes{
         }
     }
 
+    /**
+     * Returns unspent watcher boxes covering the required erg value (Considering the mempool)
+     * @param requiredValue
+     */
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
         const boxes = await this.dataBase.getUnspentAddressBoxes()
         // TODO: Improvement on selecting the plain boxes

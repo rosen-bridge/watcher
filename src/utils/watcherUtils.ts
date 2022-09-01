@@ -133,5 +133,4 @@ class TransactionUtils {
     }
 }
 
-export { TransactionUtils };
-export { WatcherUtils };
+export { TransactionUtils, WatcherUtils };

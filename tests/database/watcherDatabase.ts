@@ -12,11 +12,11 @@ import {
 import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
-import { Constants } from "../../src/config/config";
 
 import { expect } from "chai";
 import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
+import { Constants } from "../../src/config/constants";
 
 const observation2Status = {observation: observationEntity2, status: TxStatus.NOT_COMMITTED};
 let blockRepo: Repository<BlockEntity>

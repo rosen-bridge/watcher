@@ -5,7 +5,7 @@ import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
 import { PROCEED } from "@rosen-bridge/scanner/dist/entities/blockEntity";
-import { Constants } from "../../src/config/config";
+import { Constants } from "../../src/config/constants";
 
 export const ergoBlockEntity = new BlockEntity()
 ergoBlockEntity.scanner = Constants.ergoNode

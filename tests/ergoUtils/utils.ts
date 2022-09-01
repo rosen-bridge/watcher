@@ -85,7 +85,7 @@ describe("Testing ergoUtils", () => {
          *    The function should return the change box with the respect to input and outputs
          *    It should throw a box creation error, since input tokens is more than output tokens
          *      and there is no erg amount left to create a change box for remaining tokens;
-         *      tokens are burning in the transaction
+         *      thus, tokens are burning in the transaction
          */
         it("should throw error because tokens are burning", () => {
             const outputs = [new wasm.ErgoBoxCandidateBuilder(
@@ -154,6 +154,7 @@ describe("Testing ergoUtils", () => {
     describe("buildTxAndSign", () => {
         /**
          * Target: testing buildTxAndSign
+         * # TODO Procedure
          * Expected Output:
          *    The function should create and sign an arbitrary transaction
          */

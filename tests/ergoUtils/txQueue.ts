@@ -49,6 +49,10 @@ describe("Transaction queue tests", () => {
      *    networkDatabase
      *    DatabaseConnection
      *    ErgoNetwork
+     * Test Procedure:
+     *    1- Mocking environment
+     *    2- calling function
+     *    3- validate used functions with inputs
      */
     describe("TransactionQueue job", () => {
         /**

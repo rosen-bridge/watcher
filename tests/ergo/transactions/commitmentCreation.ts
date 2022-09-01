@@ -75,6 +75,10 @@ describe("Commitment creation transaction tests", () => {
          *    WatcherUtils
          *    Boxes
          *    Transaction
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
          * Expected Output:
          *    The function should construct a valid commitment creation tx
          *    It should also sign and send it successfully
@@ -100,6 +104,10 @@ describe("Commitment creation transaction tests", () => {
          *    WatcherUtils
          *    Boxes
          *    Transaction
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
          * Expected Output:
          *    The function should collect all ready observations to create the commitment transaction
          *    Since the box values is enough should not use an excess fee box
@@ -128,6 +136,10 @@ describe("Commitment creation transaction tests", () => {
          *    WatcherUtils
          *    Boxes
          *    Transaction
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
          * Expected Output:
          *    The function should collect all ready observations to create the commitment transaction
          *    Since the box values is not enough should use an excess fee box covering the tx fee
