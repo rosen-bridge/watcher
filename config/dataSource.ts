@@ -5,6 +5,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// TODO: datasource config
+//  fix entities directories
+//  fix migrations (use package migrations)
 export const dataSource = new DataSource({
     type: "sqlite",
     database: __dirname + "/../sqlite/watcher.sqlite",

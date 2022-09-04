@@ -1,5 +1,5 @@
 {
-  "name": "cardano-watcher",
+  "name": "rosen-watcher",
   "version": "1.0.0",
   "description": "Watcher process for cardano bridge to ergo",
   "main": "index.js",
@@ -10,14 +10,13 @@
     "coverage": "c8 npm run test",
     "start:dev": "nodemon src/index.ts",
     "typeorm": "typeorm-ts-node-esm",
-    "typeorm:generate": "npm run typeorm migration:generate src/database/migrations/watcher/networkModelMigration -- -d config/dataSource.ts",
+    "typeorm:generate": "npm run typeorm migration:generate src/database/migrations/watcher/watcherModelMigration -- -d config/dataSource.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
-    "typeorm:migrate:bridge": "npm run typeorm migration:run -- -d ./config/bridgeOrmConfig.ts",
     "madge": "npx madge --circular --extensions ts ./"
   },
   "repository": {
     "type": "git",
-    "url": "git@git.ergopool.io:rozen-bridge/cardano-watcher.git"
+    "url": "https://github.com/rosen-bridge/scanner.git"
   },
   "keywords": [],
   "author": "",
