@@ -2,24 +2,26 @@ import * as wasm from "ergo-lib-wasm-nodejs";
 import { Boxes } from "../ergo/boxes";
 import { ErgoUtils } from "../ergo/utils";
 import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
+import { Config } from "../config/config";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
-import { boxCreationError, NotEnoughFund } from "../errors/errors";
-import { DatabaseConnection } from "../ergo/databaseConnection";
+import { boxCreationError, NotEnoughFund, NoWID } from "../errors/errors";
 import { Transaction } from "../api/Transaction";
-import { hexStrToUint8Array } from "../utils/utils";
-import { TxType } from "../entities/watcher/network/TransactionEntity";
-import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
+import { hexStrToUint8Array} from "../utils/utils";
+import { TxType } from "../database/entities/txEntity";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { TransactionUtils, WatcherUtils } from "../utils/watcherUtils";
 
-const ergoConfig = ErgoConfig.getConfig();
+const config = Config.getConfig();
 
 export class CommitmentCreation {
-    dataBaseConnection: DatabaseConnection
+    watcherUtils: WatcherUtils
+    txUtils: TransactionUtils
     boxes: Boxes
     widApi: Transaction
 
-    constructor(db: DatabaseConnection, boxes: Boxes, api: Transaction) {
-        this.dataBaseConnection = db
+    constructor(watcherUtils: WatcherUtils, txUtils: TransactionUtils, boxes: Boxes, api: Transaction) {
+        this.watcherUtils = watcherUtils
+        this.txUtils = txUtils
         this.boxes = boxes
         this.widApi = api
     }
@@ -27,7 +29,7 @@ export class CommitmentCreation {
     /**
      * creates the commitment transaction and submits to the transactionQueue
      * @param WID
-     * @param requestId
+     * @param observation
      * @param eventDigest
      * @param permits
      * @param WIDBox
@@ -63,12 +65,12 @@ export class CommitmentCreation {
         feeBoxes.forEach(box => inputBoxes.add(box))
         try {
             const signed = await ErgoUtils.createAndSignTx(
-                ergoConfig.secretKey,
+                config.secretKey,
                 inputBoxes,
                 [outPermit, outCommitment],
                 height
             )
-            await this.dataBaseConnection.submitTransaction(signed, observation, TxType.COMMITMENT)
+            await this.txUtils.submitTransaction(signed, observation, TxType.COMMITMENT)
             console.log("Commitment tx submitted to the queue with txId: ", signed.id().to_str())
         } catch (e) {
             console.log(e)
@@ -84,7 +86,7 @@ export class CommitmentCreation {
      * Finally saves the created commitment in the database
      */
     job = async () => {
-        const observations = await this.dataBaseConnection.allReadyObservations()
+        const observations = await this.watcherUtils.allReadyObservations()
         if(!this.widApi.watcherWID) {
             console.log("Watcher WID is not set, can not run commitment creation job.")
             return
@@ -94,8 +96,8 @@ export class CommitmentCreation {
         for (const observation of observations) {
             try {
                 const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
-                const permits = await this.boxes.getPermits(BigInt(0))
-                const WIDBox = await this.boxes.getWIDBox()
+                const permits = await this.boxes.getPermits(WID)
+                const WIDBox = await this.boxes.getWIDBox(WID)
                 const totalValue: bigint = permits.map(permit =>
                         BigInt(permit.value().as_i64().to_str()))
                         .reduce((a, b) => a + b, BigInt(0)) +
@@ -109,7 +111,7 @@ export class CommitmentCreation {
                 }
                 await this.createCommitmentTx(WID, observation, commitment, permits, WIDBox, feeBoxes)
             } catch(e) {
-                if(!(e instanceof NotEnoughFund))
+                if(!(e instanceof NotEnoughFund) || !(e instanceof NoWID))
                     console.log(e)
                 console.log("Skipping the commitment creation")
             }

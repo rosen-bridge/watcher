@@ -1,41 +1,39 @@
 {
-    "watcher": {
-        "network": "Ergo",
-        "observation" : {
-            "confirmation": 2,
-            "validThreshold": 100
-        }
+    "network": "cardano-koios",
+    "observation" : {
+        "confirmation": 2,
+        "validThreshold": 1000
     },
     "cardano": {
         "interval": 10,
-        "initialBlockHeight": 3471392,
+        "initialBlockHeight": 3797267,
         "timeout": 10000,
         "node": {
             "URL": "https://testnet.koios.rest/api/v0"
         },
-        "name": "Cardano"
+        "name": "cardano"
     },
     "ergo": {
         "explorerUrl": "change",
         "nodeUrl": "change",
-        "explorerTimeout": 10000,
-        "nodeTimeout": 10000,
+        "explorerTimeout": 20000,
+        "nodeTimeout": 100000,
         "networkType": "Mainnet",
-        "watcherSecretKey": "1111111111111111111111111111111111111111111111111111111111111111",
-        "RWTId": "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267",
-        "repoNFT": "a40b86c663fbbfefa243c9c6ebbc5690fc4e385f15b44c49ba469c91c5af0f48",
+        "watcherSecretKey": "30ec2689d8920095a34193de5b313dc84b178fd827d568be96f85bba12b69db0",
+        "RWTId": "8cdd008b37615dabd8b60ada8e56703ef21a486548358f0737ac3413c2871adf",
+        "repoNFT": "f0d0d1035aea91fb2aad35a9c56a004e3a8b402debf9b9bab4f254a864a30a3f",
         "scanner": {
             "interval": 10,
-            "initialBlockHeight": 252765
+            "initialBlockHeight": 268657
         },
         "commitmentCreationInterval": 180,
         "commitmentRevealInterval": 180,
         "transactions": {
-            "timeout": 3,
+            "timeout": 1,
             "confirmation": 1,
             "interval": 30
         },
-        "name": "Ergo"
+        "name": "ergo"
     },
     "bridgeScanner": {
         "interval": 10,

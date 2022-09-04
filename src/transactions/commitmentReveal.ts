@@ -1,26 +1,28 @@
-import { Commitment, Observation } from "../objects/interfaces";
+import { Commitment, Observation } from "../utils/interfaces";
 import { ErgoUtils } from "../ergo/utils";
 import { Boxes } from "../ergo/boxes";
 import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError, NotEnoughFund } from "../errors/errors";
-import { DatabaseConnection } from "../ergo/databaseConnection";
 import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
-import { TxType } from "../entities/watcher/network/TransactionEntity";
-import { ObservationEntity } from "../entities/watcher/network/ObservationEntity";
+import { Config } from "../config/config";
+import { TxType } from "../database/entities/txEntity";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
+import { TransactionUtils, WatcherUtils } from "../utils/watcherUtils";
 
 const txFee = BigInt(rosenConfig.fee)
-const ergoConfig = ErgoConfig.getConfig();
+const config = Config.getConfig();
 
 export class CommitmentReveal {
-    databaseConnection: DatabaseConnection
+    watcherUtils: WatcherUtils
+    txUtils: TransactionUtils
     boxes: Boxes
 
-    constructor(db: DatabaseConnection, boxes: Boxes) {
+    constructor(watcherUtils: WatcherUtils, txUtils: TransactionUtils, boxes: Boxes) {
         this.boxes = boxes
-        this.databaseConnection = db
+        this.watcherUtils = watcherUtils
+        this.txUtils = txUtils
     }
     /**
      * creates the trigger event transaction and submits to the transactionQueue
@@ -42,13 +44,13 @@ export class CommitmentReveal {
         const repoBox = await this.boxes.getRepoBox()
         try {
             const signed = await ErgoUtils.createAndSignTx(
-                ergoConfig.secretKey,
+                config.secretKey,
                 inputBoxes,
                 [triggerEvent],
                 height,
                 new wasm.ErgoBoxes(repoBox)
             )
-            await this.databaseConnection.submitTransaction(signed, observation, TxType.TRIGGER)
+            await this.txUtils.submitTransaction(signed, observation, TxType.TRIGGER)
             console.log("Trigger event created with tx id:", signed.id().to_str())
         } catch (e) {
             if (e instanceof boxCreationError) {
@@ -75,16 +77,16 @@ export class CommitmentReveal {
      * If the number of valid bridge are more than the required bridge it generates the trigger event
      */
     job = async () => {
-        const commitmentSets = await this.databaseConnection.allReadyCommitmentSets()
+        const commitmentSets = await this.watcherUtils.allReadyCommitmentSets()
         console.log("Starting trigger event creation with", commitmentSets.length, "number of commitment sets")
         for (const commitmentSet of commitmentSets) {
             try {
                 const validCommitments = this.commitmentCheck(commitmentSet.commitments, commitmentSet.observation)
-                const requiredCommitments = await ErgoUtils.requiredCommitmentCount(this.boxes)
+                const requiredCommitments = await ErgoUtils.requiredCommitmentCount(await this.boxes.getRepoBox())
                 console.log("required number of commitments is", requiredCommitments, "available valild commitments is:", validCommitments.length)
                 if (BigInt(validCommitments.length) >= requiredCommitments) {
                     const commitmentBoxes = validCommitments.map(async (commitment) => {
-                        return await ErgoNetwork.boxById(commitment.commitmentBoxId)
+                        return await ErgoNetwork.boxById(commitment.boxId)
                     })
                     await Promise.all(commitmentBoxes).then(async (cBoxes) => {
                         const WIDs: Array<Uint8Array> = validCommitments.map(commitment => {

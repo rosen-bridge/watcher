@@ -3,46 +3,37 @@ import express, { Router } from "express";
 import addressRouter from "./api/showAddress";
 import permitRouter from "./api/permit";
 import { Transaction } from "./api/Transaction";
-import { ErgoConfig } from "./config/config";
+import { Config } from "./config/config";
 import { rosenConfig } from "./config/rosenConfig";
 import { Boxes } from "./ergo/boxes";
-import { NetworkDataBase } from "./models/networkModel";
-import { BridgeDataBase } from "./bridge/models/bridgeModel";
-import { bridgeOrmConfig } from "../config/bridgeOrmConfig";
-import { ErgoNetworkApi } from "./bridge/network/networkApi";
-import { ergoOrmConfig } from "../config/ergoOrmConfig";
-import { cardanoOrmConfig } from "../config/ormconfig";
-import { DatabaseConnection } from "./ergo/databaseConnection";
-import { bridgeScanner } from "./bridgeScanner";
-import { ergoScanner } from "./ergoScanner";
-import { cardanoScanner } from "./cardanoScanner";
-import { creation } from "./commitmentCreation";
-import { reveal } from "./commitmetnReveal";
-import { transactionQueueJob } from "./transactionQueue";
-import { delay } from "./utils/utils";
+import { WatcherDataBase } from "./database/models/watcherModel";
+import { dataSource } from "../config/dataSource";
+import { scannerInit } from "./jobs/scanner";
+import { creation } from "./jobs/commitmentCreation";
+import { reveal } from "./jobs/commitmetnReveal";
+import { transactionQueueJob } from "./jobs/transactionQueue";
+import { delay} from "./utils/utils";
+import { TransactionUtils, WatcherUtils } from "./utils/watcherUtils";
 
-const ergoConfig = ErgoConfig.getConfig();
-
+const config = Config.getConfig();
 
 export let watcherTransaction: Transaction;
-export let boxesObject: Boxes;
-export let ergoNetworkApi: ErgoNetworkApi;
-export let networkDatabase: NetworkDataBase;
-export let bridgeDatabase: BridgeDataBase;
-export let databaseConnection: DatabaseConnection;
-
+let boxesObject: Boxes;
+let watcherDatabase: WatcherDataBase;
+let watcherUtils: WatcherUtils;
 
 const init = async () => {
     const generateTransactionObject = async (): Promise<Transaction> => {
-        const ergoConfig = ErgoConfig.getConfig();
 
-        bridgeDatabase = await BridgeDataBase.init(bridgeOrmConfig);
-        boxesObject = new Boxes(rosenConfig, bridgeDatabase)
-        ergoNetworkApi = new ErgoNetworkApi();
+        await dataSource.initialize();
+        await dataSource.runMigrations();
+        watcherDatabase = new WatcherDataBase(dataSource)
+        boxesObject = new Boxes(rosenConfig, watcherDatabase)
+
         return new Transaction(
             rosenConfig,
-            ergoConfig.address,
-            ergoConfig.secretKey,
+            config.address,
+            config.secretKey,
             boxesObject,
         );
     }
@@ -65,34 +56,31 @@ const init = async () => {
         async (res) => {
             watcherTransaction = res;
             initExpress();
-            await delay(10000)
-            // Running bridge scanner thread
-            bridgeScanner()
+            // Initializing database
+            watcherDatabase = new WatcherDataBase(dataSource)
             // Running network scanner thread
-            if (ergoConfig.networkWatcher == "Ergo") {
-                // Initializing database
-                networkDatabase = await NetworkDataBase.init(ergoOrmConfig)
-                // Running Ergo scanner
-                ergoScanner()
-            } else if (ergoConfig.networkWatcher == "Cardano") {
-                // Initializing database
-                networkDatabase = await NetworkDataBase.init(cardanoOrmConfig)
-                // Running Cardano scanner
-                cardanoScanner()
-            }
+            scannerInit()
 
-            await delay(30000)
-            databaseConnection = new DatabaseConnection(networkDatabase, bridgeDatabase, ergoConfig.observationConfirmation, ergoConfig.observationValidThreshold)
+            await delay(10000)
+            watcherUtils = new WatcherUtils(
+                watcherDatabase,
+                watcherTransaction,
+                config.observationConfirmation,
+                config.observationValidThreshold
+            )
+            const txUtils = new TransactionUtils(watcherDatabase)
             // Running transaction checking thread
-            transactionQueueJob()
+            transactionQueueJob(watcherDatabase, watcherUtils)
             // Running commitment creation thread
-            creation()
+            creation(watcherUtils, txUtils, boxesObject, watcherTransaction)
             // Running trigger event creation thread
-            reveal()
+            reveal(watcherUtils, txUtils, boxesObject)
         }
     ).catch(e => {
         console.log(e)
     });
 }
 
-init().then(() => null);
+if (process.env.NODE_ENV === undefined || process.env.NODE_ENV !== "test") {
+    init().then(() => null);
+}

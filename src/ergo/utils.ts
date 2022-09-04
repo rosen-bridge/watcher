@@ -1,11 +1,12 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { Observation } from "../objects/interfaces";
+import { ErgoBox } from "ergo-lib-wasm-nodejs";
+import { Observation } from "../utils/interfaces";
 import { bigIntToUint8Array } from "../utils/utils";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { boxCreationError } from "../errors/errors";
 import { blake2b } from "blakejs";
-import { Boxes } from "./boxes";
+import { Buffer } from "buffer";
 
 const txFee = parseInt(rosenConfig.fee)
 
@@ -17,21 +18,11 @@ export const extractTokens = (tokens: wasm.Tokens): Array<wasm.Token> => {
     return Array(tokens.len()).fill("")
         .map((item, index) => tokens.get(index))
 }
-export const ergoTreeToAddress = (ergoTree: wasm.ErgoTree): wasm.Address => {
-    return wasm.Address.recreate_from_ergo_tree(ergoTree)
+export const decodeSerializedBox = (boxSerialized: string) => {
+    return wasm.ErgoBox.sigma_parse_bytes(new Uint8Array(Buffer.from(boxSerialized, "base64")))
 }
-export const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree,
-                                        networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Mainnet): string => {
-    return ergoTreeToAddress(ergoTree).to_base58(networkType)
-}
-export const decodeCollColl = (str: string): Uint8Array[] => {
-    return wasm.Constant.decode_from_base16(str).to_coll_coll_byte()
-}
-export const decodeStr = async (str: string): Promise<string> => {
-    return Buffer.from(wasm.Constant.decode_from_base16(str).to_byte_array()).toString('hex')
-}
-export const generateSK = (): wasm.SecretKey => {
-    return wasm.SecretKey.random_dlog();
+export const boxHaveAsset = (box: ErgoBox, asset: string) => {
+    return extractTokens(box.tokens()).map(token => token.id().to_str()).includes(asset)
 }
 
 
@@ -157,7 +148,7 @@ export class ErgoUtils {
      */
     static commitmentFromObservation = (observation: Observation, WID: string): Uint8Array => {
         const content = Buffer.concat([
-            Buffer.from(observation.sourceTxId, "hex"),
+            Buffer.from(observation.sourceTxId),
             Buffer.from(observation.fromChain),
             Buffer.from(observation.toChain),
             Buffer.from(observation.fromAddress),
@@ -165,9 +156,9 @@ export class ErgoUtils {
             bigIntToUint8Array(BigInt(observation.amount)),
             bigIntToUint8Array(BigInt(observation.bridgeFee)),
             bigIntToUint8Array(BigInt(observation.networkFee)),
-            Buffer.from(observation.sourceChainTokenId, "hex"),
-            Buffer.from(observation.targetChainTokenId, "hex"),
-            Buffer.from(observation.sourceBlockId, "hex"),
+            Buffer.from(observation.sourceChainTokenId),
+            Buffer.from(observation.targetChainTokenId),
+            Buffer.from(observation.sourceBlockId),
             Buffer.from(WID, "hex"),
         ])
         return blake2b(content, undefined, 32)
@@ -185,10 +176,9 @@ export class ErgoUtils {
 
     /**
      * returns the required number of commitments to merge creating an event trigger
-     * @param boxes
+     * @param repo
      */
-    static requiredCommitmentCount = async (boxes: Boxes): Promise<bigint> => {
-        const repo = await boxes.getRepoBox()
+    static requiredCommitmentCount = (repo: wasm.ErgoBox): bigint => {
         const R6 = repo.register_value(6)
         const R4 = repo.register_value(4)
         if (!R6 || !R4) throw new Error("Bad Repo Box response")

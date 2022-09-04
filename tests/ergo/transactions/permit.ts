@@ -2,8 +2,6 @@ import { Transaction } from "../../../src/api/Transaction";
 import { hexStrToUint8Array } from "../../../src/utils/utils";
 import { expect } from "chai";
 import { initMockedAxios } from "../objects/axios";
-import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
-import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
 import { Boxes } from "../../../src/ergo/boxes";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { boxesSample } from "../dataset/BoxesSample";
@@ -11,6 +9,9 @@ import { boxesSample } from "../dataset/BoxesSample";
 import chai from "chai";
 import spies from "chai-spies";
 import { Buffer } from "buffer";
+import { WatcherDataBase } from "../../../src/database/models/watcherModel";
+import { mockedResponseBody } from "../objects/mockedResponseBody";
+import { loadDataBase } from "../../database/watcherDatabase";
 
 chai.use(spies);
 
@@ -39,7 +40,7 @@ export const rosenConfig = {
     lockAddress: "9iLfrEVYMEXeqt9tTJn2X4Mmp2QfaQuCeBwgdxpmNoZvaErgj2o",
     RWTId: "3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267"
 }
-const secret1 = wasm.SecretKey.dlog_from_bytes(Buffer.from("7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2", "hex"))
+export const secret1 = wasm.SecretKey.dlog_from_bytes(Buffer.from("7c390866f06156c5c67b355dac77b6f42eaffeb30e739e65eac2c7e27e6ce1e2", "hex"))
 const secret2 = wasm.SecretKey.dlog_from_bytes(Buffer.from("3edc2de69487617255c53bb1baccc9c73bd6ebe67fe702644ff6d92f2362e03e", "hex"))
 const secret3 = wasm.SecretKey.dlog_from_bytes(Buffer.from("1111111111111111111111111111111111111111111111111111111111111111", "hex"))
 
@@ -49,18 +50,31 @@ initMockedAxios();
  * requirements: an object of Transaction class, rosenConfig, userAddress, userSecret
  */
 describe("Watcher Permit Transactions", () => {
+    let DB: WatcherDataBase, boxes: Boxes
+    before(async () => {
+        DB = await loadDataBase("permit");
+        boxes = new Boxes(rosenConfig, DB)
+    })
 
-    /**
-     * getWID functions tests
-     */
+    afterEach(() => {
+        chai.spy.restore(boxes)
+    })
+
     describe("getWID", () => {
         /**
-         * it checks that functions find the user WID correctly
+         * Target: testing getWID for getting user WID
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    The function should return user WID
          */
         it("checks is there any wid in the usersBoxes", async () => {
             const sampleWID = "4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8";
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -77,23 +91,31 @@ describe("Watcher Permit Transactions", () => {
         });
     });
 
-    /**
-     * inputBoxesTokenMap function tests
-     */
     describe("inputBoxesTokenMap", () => {
         /**
-         * the token map of input and output should be the same
+         * Target: testing inputBoxesTokenMap that should get all input boxes tokens
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    the token map of input and output should be the same
          */
         it('the token map of input and output should be the same', async () => {
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
                 secret1,
                 boxes
             );
-            const ergoBoxes = await ErgoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
+            const ergoBoxes = wasm.ErgoBoxes.from_boxes_json([]);
+            JSON.parse(mockedResponseBody.watcherUnspentBoxes).items.forEach((box: JSON) => {
+                const ergoBox = wasm.ErgoBox.from_json(JSON.stringify(box))
+                ergoBoxes.add(ergoBox)
+            });
             let map = transaction.inputBoxesTokenMap(ergoBoxes, 0);
             expect(map.get(tokens[0])).to.be.equal("1");
             expect(map.get(tokens[1])).to.be.equal("100");
@@ -111,12 +133,19 @@ describe("Watcher Permit Transactions", () => {
      */
     describe("getPermit", () => {
         /**
-         * checks getPermit with correct inputs and state should be signed
+         * Target: testing that getPermit should sign a transaction with valid input
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    getPermit with correct inputs and state should be signed
          */
         it("checks get permit transaction is signed", async () => {
             initMockedAxios(0);
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getRepoBox", () => {
                 return wasm.ErgoBox.from_json(boxesSample.secondRepoBox)
             })
@@ -131,11 +160,18 @@ describe("Watcher Permit Transactions", () => {
         });
 
         /**
-         * in the case of watcher have permit box in his/her address the getPermit should returns error
+         * Target: testing that getPermit in case of invalid state should return error
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    getPermit with invalid state should return error
          */
         it("tests that if watcher have permit box should returns error", async () => {
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -152,12 +188,18 @@ describe("Watcher Permit Transactions", () => {
      */
     describe("returnPermit", () => {
         /**
-         * it checks if the state of the watcher permit and input is correct the transaction
-         *  should be signed without error
+         * Target: testing that returnPermit in case of valid state and input should be signed return permit transaction
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit transaction should be signed
          */
         it("checks transaction is signed", async () => {
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             initMockedAxios(0);
             chai.spy.on(boxes, "getPermits", () => {
                 return [
@@ -178,12 +220,19 @@ describe("Watcher Permit Transactions", () => {
         });
 
         /**
-         * it checks case that the return permit transaction have permit box in its output
+         * Target: testing that returnPermit in case that return permit transaction have permit box in its output
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit transaction should be signed in case that we have permit box in output
          */
         it("it checks case that the return permit transaction have permit box in its output", async () => {
             initMockedAxios(1);
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getPermits", () => {
                 return [
                     wasm.ErgoBox.from_json(boxesSample.firstPermitBox)
@@ -203,12 +252,19 @@ describe("Watcher Permit Transactions", () => {
         });
 
         /**
-         * tests that if watcher doesn't have permit box should returns error
+         * Target: testing that returnPermit in case that watcher doesn't have permit box should return error
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit should return error
          */
         it("tests that if watcher doesn't have permit box should returns error", async () => {
             initMockedAxios();
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             chai.spy.on(boxes, "getPermits", () => {
                 return [
                     wasm.ErgoBox.from_json(boxesSample.firstWatcherPermitBox),
@@ -233,12 +289,19 @@ describe("Watcher Permit Transactions", () => {
      */
     describe("getWatcherState", () => {
         /**
-         * the watcher state with this mocked input should be true(have permitBox)
+         * Target: testing getWatcherState when watcher gets permit
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit should return true
          */
         it("should be true", async () => {
             initMockedAxios();
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const transaction = new Transaction(
                 rosenConfig,
                 userAddress,
@@ -250,12 +313,19 @@ describe("Watcher Permit Transactions", () => {
         });
 
         /**
-         * the watcher state with this mocked input should be false(no permitBox)
+         * Target: testing getWatcherState when watcher doesn't get permit
+         * Dependencies:
+         *    Transaction
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    returnPermit should return false
          */
         it("should be false", async () => {
             initMockedAxios();
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
             const secondTransaction = new Transaction(
                 rosenConfig,
                 "9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL",

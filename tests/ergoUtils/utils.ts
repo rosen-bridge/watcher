@@ -1,14 +1,12 @@
-import { Observation } from "../../src/objects/interfaces";
+import { Observation } from "../../src/utils/interfaces";
 import { ErgoUtils, extractBoxes } from "../../src/ergo/utils";
 import { uint8ArrayToHex } from "../../src/utils/utils";
-import { ErgoConfig } from "../../src/config/config";
+import { Config } from "../../src/config/config";
 import { rosenConfig } from "../../src/config/rosenConfig";
 import { boxCreationError } from "../../src/errors/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { Address } from "ergo-lib-wasm-nodejs";
 import { initMockedAxios } from "../ergo/objects/axios";
-import { loadBridgeDataBase } from "../bridge/models/bridgeModel";
-import { Boxes } from "../../src/ergo/boxes";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
@@ -17,7 +15,7 @@ import spies from "chai-spies";
 
 import boxesJson from "./dataset/boxes.json" assert { type: "json" }
 
-const ergoConfig = ErgoConfig.getConfig();
+const config = Config.getConfig();
 initMockedAxios()
 chai.use(spies);
 
@@ -45,19 +43,30 @@ const repoBox = JSON.stringify(repoObj)
 
 describe("Testing ergoUtils", () => {
     describe("commitmentFromObservation", () => {
+        /**
+         * Target: testing commitmentFromObservation
+         * Expected Output:
+         *    The function should return the commitment from the input observation
+         */
         it("should return the correct commitment", () => {
             const res = ErgoUtils.commitmentFromObservation(observation, WID)
-            expect(uint8ArrayToHex(res)).to.eql("188c1f6c228e07bd79fcbf198c5dbed51e0f6208feff9e868632b0b30ea5b4b0")
+            expect(uint8ArrayToHex(res)).to.eql("1e00562af2a1c57b7b4495286f7122c12c78fb3665381fd240e60d9ad45a53bb")
         })
     })
 
     describe("createChangeBox", () => {
         const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson)
         const totalValue = extractBoxes(boxes).map(box => box.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
-        const secret = ergoConfig.secretKey
+        const secret = config.secretKey
         const txFee = parseInt(rosenConfig.fee)
         const contract = wasm.Contract.pay_to_address(secret.get_address())
 
+        /**
+         * Target: testing createChangeBox
+         * Expected Output:
+         *    The function should return the change box with the respect to input and outputs
+         *    It should return nothing since all inputs are spent in outputs
+         */
         it("should not return change box all assets are spent", () => {
             const builder = new wasm.ErgoBoxCandidateBuilder(
                 wasm.BoxValue.from_i64(wasm.I64.from_str(totalValue.toString())),
@@ -69,7 +78,16 @@ describe("Testing ergoUtils", () => {
             const res = ErgoUtils.createChangeBox(boxes, [builder.build()], 10, secret)
             expect(res).to.null
         })
-        it("should return error because tokens are burning", () => {
+
+        /**
+         * Target: testing createChangeBox
+         * Expected Output:
+         *    The function should return the change box with the respect to input and outputs
+         *    It should throw a box creation error, since input tokens is more than output tokens
+         *      and there is no erg amount left to create a change box for remaining tokens;
+         *      thus, tokens are burning in the transaction
+         */
+        it("should throw error because tokens are burning", () => {
             const outputs = [new wasm.ErgoBoxCandidateBuilder(
                 wasm.BoxValue.from_i64(wasm.I64.from_str(totalValue.toString())),
                 contract,
@@ -79,7 +97,14 @@ describe("Testing ergoUtils", () => {
                 ErgoUtils.createChangeBox(boxes, outputs, 10, secret)
             }).to.throw(boxCreationError)
         })
-        it("should return error because output tokens are more", () => {
+
+        /**
+         * Target: testing createChangeBox
+         * Expected Output:
+         *    The function should return the change box with the respect to input and outputs
+         *    It should throw box creation error, since output tokens are more than inputs
+         */
+        it("should throw error because output tokens are more", () => {
             const builder = new wasm.ErgoBoxCandidateBuilder(
                 wasm.BoxValue.from_i64(wasm.I64.from_str(txFee.toString())),
                 wasm.Contract.pay_to_address(secret.get_address()),
@@ -91,12 +116,26 @@ describe("Testing ergoUtils", () => {
                 ErgoUtils.createChangeBox(boxes, [builder.build()], 10, secret)
             }).to.throw(boxCreationError)
         })
+
+        /**
+         * Target: testing createChangeBox
+         * Expected Output:
+         *    The function should return the change box with the respect to input and outputs
+         *    It should return a change box containing all tokens, since output boxes doesn't have tokens
+         */
         it("should return change box with all tokens", () => {
             const res = ErgoUtils.createChangeBox(boxes, [], 10, secret)
             expect(res).to.not.null
             expect(res?.value().as_i64().as_num()).to.eql(totalValue - txFee)
             expect(res?.tokens().get(0).amount().as_i64().as_num()).to.eql(100)
         })
+
+        /**
+         * Target: testing createChangeBox
+         * Expected Output:
+         *    The function should return the change box with the respect to input and outputs
+         *   It should return a change box containing all tokens, since output boxes have some tokens but not all
+         */
         it("should return change box with some token", () => {
             const builder = new wasm.ErgoBoxCandidateBuilder(
                 wasm.BoxValue.from_i64(wasm.I64.from_str(txFee.toString())),
@@ -114,7 +153,13 @@ describe("Testing ergoUtils", () => {
 
     describe("buildTxAndSign", () => {
         /**
-         * an arbitrary transaction should be signed without error
+         * Target: testing buildTxAndSign
+         * Test Procedure:
+         *    1- Mocking ErgoNetwork Api
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    The function should create and sign an arbitrary transaction
          */
         it("should sign an arbitrary transaction", async () => {
             initMockedAxios(0);
@@ -161,6 +206,11 @@ describe("Testing ergoUtils", () => {
     });
 
     describe("contractHash", () => {
+        /**
+         * Target: testing contractHash
+         * Expected Output:
+         *    The function should return the blake2b digest of the input contract
+         */
         it("tests the contract hash creation", () => {
             const fraudAddress = "LFz5FPkW7nPVq2NA5YcZAdSTVwt2BDL1ixGkVvoU7mNY3B8PoX6ix4YiqUe9WMRPQNdPZD7BJESqWiXwvjHh2Fik3XxFz6JYJLCS5WKrgzzZeXDctKRHYydwLbxpqXjqQda7s7M6FzuZ4uCdKudW19Ku8caVcZY6kQfqb8PUiRMpRQPuqfYtcr9S2feShR3BicKV9m2upFVmjd7bzsV6sXZXdaSAuCYCCoNbSoasJ9Xxtg1NVE94d";
             const data = ErgoUtils.contractHash(wasm.Contract.pay_to_address(wasm.Address.from_base58(fraudAddress)))
@@ -169,13 +219,18 @@ describe("Testing ergoUtils", () => {
     })
 
     describe("requiredCommitmentCount", () => {
+        /**
+         * Target: testing requiredCommitmentCount
+         * Expected Output:
+         *    The function should return the required commitments for trigger creation
+         *    max commitments = 100
+         *    percentage = 51
+         *    watchers = 7
+         *    min commitment = 0
+         *    => result = 4
+         */
         it("should return formula number as the required commitment count", async () => {
-            // max commitments: 100
-            // formula: 51% * 7
-            const DB = await loadBridgeDataBase("commitments");
-            const boxes = new Boxes(rosenConfig, DB)
-            chai.spy.on(boxes, "getRepoBox", () => wasm.ErgoBox.from_json(repoBox))
-            const data = await ErgoUtils.requiredCommitmentCount(boxes)
+            const data = ErgoUtils.requiredCommitmentCount(wasm.ErgoBox.from_json(repoBox))
             expect(data).to.eql(BigInt(4))
         })
     })

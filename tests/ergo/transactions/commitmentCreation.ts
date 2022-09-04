@@ -1,30 +1,30 @@
 import { Boxes } from "../../../src/ergo/boxes";
 import { Transaction } from "../../../src/api/Transaction";
-import { rosenConfig } from "./permit";
-import { DatabaseConnection } from "../../../src/ergo/databaseConnection";
+import { rosenConfig, secret1 } from "./permit";
 import { CommitmentCreation } from "../../../src/transactions/commitmentCreation";
-import { loadDataBase } from "../../cardano/models/models";
-import { loadBridgeDataBase } from "../../bridge/models/bridgeModel";
-import { JsonBI } from "../../../src/network/parser";
-import { ObservationEntity } from "../../../src/entities/watcher/network/ObservationEntity";
+import { JsonBI } from "../../../src/ergo/network/parser";
+import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ErgoUtils } from "../../../src/ergo/utils";
 import { ErgoNetwork } from "../../../src/ergo/network/ergoNetwork";
+import { hexStrToUint8Array} from "../../../src/utils/utils";
+import { TxType } from "../../../src/database/entities/txEntity";
+import { WatcherDataBase } from "../../../src/database/models/watcherModel";
+import { loadDataBase } from "../../database/watcherDatabase";
+import { TransactionUtils, WatcherUtils } from "../../../src/utils/watcherUtils";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
 import chai from "chai";
 import spies from "chai-spies";
 import sinon from "sinon"
-
-chai.use(spies)
-
 import permitObj from "./dataset/permitBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import WIDObj2 from "./dataset/WIDBox2.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
-import { hexStrToUint8Array } from "../../../src/utils/utils";
-import { TxType } from "../../../src/entities/watcher/network/TransactionEntity";
+
+
+chai.use(spies)
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
@@ -33,7 +33,6 @@ const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))]
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj))
 
 const userAddress = "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9"
-const userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from("1111111111111111111111111111111111111111111111111111111111111111", "hex"))
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
 
 export const observation: ObservationEntity = new ObservationEntity()
@@ -54,64 +53,73 @@ observation.fromAddress = 'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID)
 
 describe("Commitment creation transaction tests", () => {
-
-    /**
-     * Target: testing createCommitmentTx
-     * Dependencies:
-     *    databaseConnection
-     *    Boxes
-     *    Transaction
-     * Expected Output:
-     *    The function should construct a valid commitment creation tx
-     *    It should also sign and send it successfully
-     */
+    let watcherDb: WatcherDataBase, txUtils: TransactionUtils, boxes: Boxes, transaction: Transaction, watcherUtils: WatcherUtils
+    let cc: CommitmentCreation
+    before(async () => {
+        watcherDb = await loadDataBase("commitmentCreation");
+        boxes = new Boxes(rosenConfig, watcherDb)
+        transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+        watcherUtils = new WatcherUtils(watcherDb, transaction, 0, 100)
+        txUtils = new TransactionUtils(watcherDb)
+        cc = new CommitmentCreation(watcherUtils, txUtils, boxes, transaction)
+    })
+    afterEach(() => {
+        chai.spy.restore(watcherUtils)
+    })
+    
     describe("createCommitmentTx", () => {
+        /**
+         * Target: testing createCommitmentTx
+         * Dependencies:
+         *    WatcherUtils
+         *    Boxes
+         *    Transaction
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
+         * Expected Output:
+         *    The function should construct a valid commitment creation tx
+         *    It should also sign and send it successfully
+         */
         it("Should create, sign and send a commitment transaction", async () => {
-            const networkDb = await loadDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
-            chai.spy.on(dbConnection, "submitTransaction", () => null)
-            const boxes = new Boxes(rosenConfig, bridgeDb)
+            chai.spy.on(txUtils, "submitTransaction", () => null)
             chai.spy.on(boxes, "createCommitment")
             chai.spy.on(boxes, "createPermit")
-            const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
-            const cc = new CommitmentCreation(dbConnection, boxes, tx)
             sinon.stub(ErgoNetwork, "getHeight").resolves(111)
             sinon.stub(ErgoUtils, "createAndSignTx").resolves(signedTx)
             await cc.createCommitmentTx(WID, observation, commitment, permits, WIDBox, [])
             expect(boxes.createPermit).to.have.called.with(111, BigInt(97), hexStrToUint8Array(WID))
             expect(boxes.createCommitment).to.have.called.once
-            expect(dbConnection.submitTransaction).to.have.been.called.with(signedTx, observation, TxType.COMMITMENT)
+            expect(txUtils.submitTransaction).to.have.been.called.with(signedTx, observation, TxType.COMMITMENT)
             sinon.restore()
         })
     })
-
-    /**
-     * Target: testing job
-     * Dependencies:
-     *    databaseConnection
-     *    Boxes
-     *    Transaction
-     * Expected Output:
-     *    The function should collect all ready observations to create the commitment transaction
-     *    If the box values is not enough should use an excess fee box covering the tx fee
-     */
+    
     describe("job", () => {
+        /**
+         * Target: testing job
+         * Dependencies:
+         *    WatcherUtils
+         *    Boxes
+         *    Transaction
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
+         * Expected Output:
+         *    The function should collect all ready observations to create the commitment transaction
+         *    Since the box values is enough should not use an excess fee box
+         */
         it("Should collect ready observations and create commitments", async () => {
-            const networkDb = await loadDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
-            chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
-            chai.spy.on(dbConnection, "updateObservation", () => {
+            chai.spy.on(watcherUtils, "allReadyObservations", () => [observation])
+            chai.spy.on(watcherUtils, "updateObservation", () => {
                 return
             })
-            const boxes = new Boxes(rosenConfig, bridgeDb)
             chai.spy.on(boxes, "getPermits", () => permits)
             chai.spy.on(boxes, "getWIDBox", () => WIDBox)
             chai.spy.on(boxes, "getUserPaymentBox")
-            const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
-            sinon.stub(tx, 'watcherWID').value(WID)
-            const cc = new CommitmentCreation(dbConnection, boxes, tx)
+            sinon.stub(transaction, 'watcherWID').value(WID)
             chai.spy.on(cc, "createCommitmentTx", () => {
                 return {txId: "txId", commitmentBoxId: "boxId"}
             })
@@ -121,21 +129,29 @@ describe("Commitment creation transaction tests", () => {
             expect(cc.createCommitmentTx).to.have.called.with(WID, observation, commitment, permits, WIDBox, [])
         })
 
+        /**
+         * Target: testing job
+         * Dependencies:
+         *    WatcherUtils
+         *    Boxes
+         *    Transaction
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate used functions with inputs
+         * Expected Output:
+         *    The function should collect all ready observations to create the commitment transaction
+         *    Since the box values is not enough should use an excess fee box covering the tx fee
+         */
         it("Should collect ready observations and create commitment with excess fee box", async () => {
-            const networkDb = await loadDataBase("dataBase");
-            const bridgeDb = await loadBridgeDataBase("commitments");
-            const dbConnection = new DatabaseConnection(networkDb, bridgeDb, 0, 100)
-            chai.spy.on(dbConnection, "allReadyObservations", () => [observation])
-            chai.spy.on(dbConnection, "updateObservation", () => {
+            chai.spy.on(watcherUtils, "allReadyObservations", () => [observation])
+            chai.spy.on(watcherUtils, "updateObservation", () => {
                 return
             })
-            const boxes = new Boxes(rosenConfig, bridgeDb)
             chai.spy.on(boxes, "getPermits", () => permits)
             chai.spy.on(boxes, "getWIDBox", () => WIDBox2)
             chai.spy.on(boxes, "getUserPaymentBox", () => plainBox)
-            const tx = new Transaction(rosenConfig, userAddress, userSecret, boxes)
-            sinon.stub(tx, 'watcherWID').value(WID)
-            const cc = new CommitmentCreation(dbConnection, boxes, tx)
+            sinon.stub(transaction, 'watcherWID').value(WID)
             chai.spy.on(cc, "createCommitmentTx", () => {
                 return {txId: "txId", commitmentBoxId: "boxId"}
             })
