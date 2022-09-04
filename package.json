@@ -1,5 +1,5 @@
 {
-  "name": "rosen-watcher",
+  "name": "@rosen-bridge/watcher",
   "version": "1.0.0",
   "description": "Watcher process for cardano bridge to ergo",
   "main": "index.js",
