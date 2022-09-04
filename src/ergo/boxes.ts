@@ -48,7 +48,7 @@ export class Boxes{
      * @param RWTCount
      */
     getPermits = async (wid: string, RWTCount?: bigint): Promise<Array<wasm.ErgoBox>> => {
-        // TODO: Rewrite the function to return the required number of RWTs after changing database
+        // TODO: (issue #6) Rewrite the function to return the required number of RWTs
         const permits = await this.dataBase.getUnspentPermitBoxes(wid)
         const permitBoxes = permits.map(async (permit) => {
             return await ErgoNetwork.trackMemPool(decodeSerializedBox(permit.boxSerialized))
@@ -84,7 +84,7 @@ export class Boxes{
      */
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
         const boxes = await this.dataBase.getUnspentAddressBoxes()
-        // TODO: Improvement on selecting the plain boxes
+        // TODO: (issue #6) Improvement on selecting the plain boxes
         // const selectedBoxes = []
         // let totalValue = BigInt(0)
         // for (const box of boxes) {
