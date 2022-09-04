@@ -187,25 +187,27 @@ export class ErgoNetwork{
 
     /**
      * tracks mempool boxes used for chaining transactions
+     * it returns undefined if the box is spent and that transaction didn't have similar box in the output
      * @param box
      */
     static trackMemPool = async (box: wasm.ErgoBox): Promise<wasm.ErgoBox> => {
         const address: string = ergoTreeToBase58Address(box.ergo_tree(), config.networkType)
-        const memPoolBoxesMap = new Map<string, wasm.ErgoBox>();
+        const memPoolBoxesMap = new Map<string, wasm.ErgoBox | undefined>();
         const transactions = await this.getMemPoolTxForAddress(address).then(res => res.items);
         if (transactions !== undefined) {
             transactions.forEach(tx => {
                 const inputs = tx.inputs.filter(box => box.address === address);
                 const outputs = tx.outputs.filter(box => box.address === address);
-                if (inputs.length >= 1 && outputs.length >= 1) {
+                if (inputs.length >= 1) {
                     inputs.forEach(input => {
-                        memPoolBoxesMap.set(input.boxId, wasm.ErgoBox.from_json(JsonBI.stringify(outputs[0])))
+                        const box = outputs.length > 0? wasm.ErgoBox.from_json(JsonBI.stringify(outputs[0])): undefined
+                        memPoolBoxesMap.set(input.boxId, box)
                     });
                 }
             });
         }
         let lastBox: wasm.ErgoBox = box
-        while (memPoolBoxesMap.has(lastBox.box_id().to_str())) lastBox = memPoolBoxesMap.get(lastBox.box_id().to_str())!
+        while (lastBox && memPoolBoxesMap.has(lastBox.box_id().to_str())) lastBox = memPoolBoxesMap.get(lastBox.box_id().to_str())!
         return lastBox
     }
 

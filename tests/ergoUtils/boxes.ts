@@ -13,6 +13,9 @@ import { PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { Buffer } from "buffer";
 import { Observation } from "../../src/utils/interfaces";
+import { firstCommitment } from "../database/mockedData";
+import { WatcherDataBase } from "../../src/database/models/watcherModel";
+import { NotEnoughFund } from "../../src/errors/errors";
 
 import chai from "chai";
 import spies from "chai-spies";
@@ -22,8 +25,6 @@ import chaiPromise from "chai-as-promised"
 import permitObj from "./dataset/permitBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
-import { firstCommitment } from "../database/mockedData";
-import { WatcherDataBase } from "../../src/database/models/watcherModel";
 
 const permitJson = JsonBI.stringify(permitObj)
 const WIDJson = JsonBI.stringify(WIDObj)
@@ -64,7 +65,7 @@ export const firstObservation: Observation = {
 }
 
 describe("Testing Box Creation", () => {
-    const value = BigInt(10000000)
+    const value = BigInt(67500000000)
     let DB: WatcherDataBase, boxes: Boxes
     before(async () => {
         DB = await loadDataBase("boxes");
@@ -98,6 +99,44 @@ describe("Testing Box Creation", () => {
             const data = await boxes.getPermits(WID)
             expect(data).to.have.length(1)
             expect(data[0].box_id().to_str()).to.eq(permitBox.boxId)
+        })
+
+        /**
+         * Target: testing getPermits
+         * Dependencies:
+         *    watcherDatabase
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    The function should return all unspent permits
+         */
+        it("returns one unspent permit ready to merge", async () => {
+            chai.spy.on(DB, 'getUnspentPermitBoxes', () => [permitBox])
+            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(permitJson))
+            const data = await boxes.getPermits(WID, 98n)
+            expect(data).to.have.length(1)
+            expect(data[0].box_id().to_str()).to.eq(permitBox.boxId)
+        })
+
+        /**
+         * Target: testing getPermits
+         * Dependencies:
+         *    watcherDatabase
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    The function should throws an error since watcher doesn't have enough permits
+         */
+        it("throws an error since there is no enough RWT", async () => {
+            chai.spy.on(DB, 'getUnspentPermitBoxes', () => [permitBox])
+            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(permitJson))
+            await expect(boxes.getPermits(WID, 100n)).to.rejectedWith(NotEnoughFund)
         })
     })
 
@@ -143,21 +182,43 @@ describe("Testing Box Creation", () => {
             expect(data[0].box_id().to_str()).to.eq(plainBox.boxId)
         })
 
-        // TODO: user payment box currently not covering the amount, update the test after resolving issue #6
-        // /**
-        //  * Target: testing getUserPaymentBox
-        //  * Dependencies:
-        //  *    watcherDatabase
-        //  *    ErgoNetwork
-        //  * Expected Output:
-        //  *    The function should throw an error since the required amount is not covered
-        //  */
-        // it("throws an error not covering the required amount", async () => {
-        //     const DB = await loadBridgeDataBase("commitments");
-        //     chai.spy.on(DB, 'getUnspentPlainBoxes', () => [plainBox])
-        //     const boxes = new Boxes(rosenConfig, DB)
-        //     await expect(boxes.getUserPaymentBox(value * BigInt(2))).to.rejectedWith(NotEnoughFund)
-        // })
+        /**
+         * Target: testing getUserPaymentBox
+         * Dependencies:
+         *    watcherDatabase
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    The function should throw an error since the required amount is not covered
+         */
+        it("throws an error not covering the required amount", async () => {
+            chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox])
+            chai.spy.on(ErgoNetwork, 'trackMemPool', () => wasm.ErgoBox.from_json(plainJson))
+            const boxes = new Boxes(rosenConfig, DB)
+            await expect(boxes.getUserPaymentBox(value * BigInt(2))).to.rejectedWith(NotEnoughFund)
+        })
+
+        /**
+         * Target: testing getUserPaymentBox
+         * Dependencies:
+         *    watcherDatabase
+         *    ErgoNetwork
+         * Test Procedure:
+         *    1- Mocking environment
+         *    2- calling function
+         *    3- validate output
+         * Expected Output:
+         *    The function should throw an error since the box is spent and the amount is not covered
+         */
+        it("throws an error not covering the required amount", async () => {
+            chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox])
+            chai.spy.on(ErgoNetwork, 'trackMemPool', () => undefined)
+            const boxes = new Boxes(rosenConfig, DB)
+            await expect(boxes.getUserPaymentBox(value)).to.rejectedWith(NotEnoughFund)
+        })
     })
 
     describe("getRepoBox", () => {

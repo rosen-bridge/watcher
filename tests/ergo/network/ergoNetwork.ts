@@ -182,7 +182,17 @@ describe("Ergo Network(API)", () => {
             ).to.be.equal(
                 "2afbd9393fb1ddb982e9d82a269e27b1b97184c1bc45451d5c63dae28d25d708"
             );
+        });
 
+        /**
+         * Target: testing trackMempool
+         * Expected Output:
+         *    The function should return null since the box is spent and nothing similar were created in the tx
+         */
+        it("should return null since the box is spent", async () => {
+            const ergoBox = wasm.ErgoBox.from_json(mockedResponseBody.unspentBox2);
+            const res = await ErgoNetwork.trackMemPool(ergoBox);
+            expect(res).to.be.undefined
         });
     });
 

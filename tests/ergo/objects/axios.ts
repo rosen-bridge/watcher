@@ -77,6 +77,9 @@ export const initMockedAxios = (vector = 0) => {
     mockedExplorer.onGet('/api/v1/mempool/transactions/byAddress/9iAEDf2b4J5T1QSAPStkSbSzNUUW38cy8EMJkKC3cxHCBoaQYfY')
         .reply(200, mockedResponseBody.mempoolTxs);
 
+    mockedExplorer.onGet('/api/v1/mempool/transactions/byAddress/9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH')
+        .reply(200, mockedResponseBody.mempoolTxs2);
+
     mockedExplorer.onGet('/api/v1/mempool/transactions/byAddress/9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9')
         .reply(200, mockedResponseBody.emptyMempool);
 
