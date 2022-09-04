@@ -33,7 +33,6 @@ const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))]
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj))
 
 const userAddress = "9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9"
-const userSecret = wasm.SecretKey.dlog_from_bytes(Buffer.from("1111111111111111111111111111111111111111111111111111111111111111", "hex"))
 const WID = "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b"
 
 export const observation: ObservationEntity = new ObservationEntity()

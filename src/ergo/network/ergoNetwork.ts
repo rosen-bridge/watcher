@@ -4,6 +4,7 @@ import { AddressBoxes, ErgoTx, ExplorerTransaction } from "./types";
 import { JsonBI } from "./parser";
 import { Config } from "../../config/config";
 import { ergoTreeToBase58Address } from "../../utils/utils";
+import { ConnectionError } from "../../errors/errors";
 
 const config = Config.getConfig();
 
@@ -237,7 +238,15 @@ export class ErgoNetwork{
     static getConfirmedTx = (txId: string): Promise<ExplorerTransaction | null> => {
         return explorerApi.get(`/api/v1/transactions/${txId}`).then(res => {
             return res.data
-        }).catch(e => null)
+        }).catch(e => {
+            let message = "Explorer is unavailable"
+            if (e.response) {
+                if (e.response.status == 404) return null
+                message = e.response
+            }
+            console.log("Error occurred connecting to the explorer [" + message + "]")
+            throw ConnectionError
+        })
     }
 
     /**
@@ -247,7 +256,15 @@ export class ErgoNetwork{
     static getUnconfirmedTx = (txId: string): Promise<ExplorerTransaction | null> => {
         return explorerApi.get(`/api/v0/transactions/unconfirmed/${txId}`).then(res => {
             return res.data
-        }).catch(e => null)
+        }).catch(e => {
+            let message = "Explorer is unavailable"
+            if (e.response) {
+                if (e.response.status == 404) return null
+                message = e.response
+            }
+            console.log("Error occurred connecting to the explorer [" + message + "]")
+            throw ConnectionError
+        })
     }
 
     /**
@@ -277,8 +294,13 @@ export class ErgoNetwork{
             }))
             return true
         } catch (e) {
-            if (e.response && e.response.status == 404) return false
-            throw Error("Connection problem")
+            let message = "Explorer is unavailable"
+            if (e.response) {
+                if (e.response.status == 404) return false
+                message = e.response
+            }
+            console.log("Error occurred connecting to the explorer [" + message + "]")
+            throw ConnectionError
         }
     }
 

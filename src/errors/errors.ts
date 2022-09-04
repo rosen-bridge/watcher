@@ -37,3 +37,10 @@ export class NoObservationStatus extends Error {
         this.name = "The observation doesn't have a status"
     }
 }
+
+export class ConnectionError extends Error {
+    constructor(message?: string) {
+        super(message)
+        this.name = "Error occurred while trying to connect to apis"
+    }
+}

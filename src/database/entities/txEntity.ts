@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToOne, PrimaryColumn, Relation } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from "typeorm";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor"
 
 export enum TxType {
