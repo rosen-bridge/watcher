@@ -154,7 +154,10 @@ describe("Testing ergoUtils", () => {
     describe("buildTxAndSign", () => {
         /**
          * Target: testing buildTxAndSign
-         * # TODO Procedure
+         * Test Procedure:
+         *    1- Mocking ErgoNetwork Api
+         *    2- calling function
+         *    3- validate output
          * Expected Output:
          *    The function should create and sign an arbitrary transaction
          */
