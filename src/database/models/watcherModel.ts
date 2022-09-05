@@ -3,7 +3,7 @@ import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { TxEntity, TxType } from "../entities/txEntity";
 import { ObservationStatusEntity, TxStatus } from "../entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
-// import { PROCEED } from "@rosen-bridge/scanner/entities/blockEntity";
+import { PROCEED } from "@rosen-bridge/scanner";
 import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 
@@ -34,9 +34,8 @@ class WatcherDataBase {
      * @param network: watcher observing network
      */
     getLastBlockHeight = async (network: string): Promise<number> => {
-        // TODO: fix the status (status: PROCEED)
         const lastBlock = await this.blockRepository.find({
-            where: { scanner: network },
+            where: { status: PROCEED, scanner: network },
             order: { height: 'DESC' },
             take: 1
         });
