@@ -30,8 +30,9 @@ export const scannerInit = () => {
     }
     scanner = new ErgoScanner(ergoScannerConfig);
     ergoScanningJob()
+    // TODO: fix the lock addresses
     if (config.networkWatcher == Constants.ergoNode) {
-        const observationExtractor = new ErgoObservationExtractor(dataSource, tokens)
+        const observationExtractor = new ErgoObservationExtractor(dataSource, tokens, "nB3L2PD3LBtiNhDYK7XhZ8nVt6uekBXN7RcPUKgdKLXFcrJiSPxmQsUKuUkTRQ1hbvDrxEQAKYurGFbaGD1RPxU7XqQimD78j23HHMQKL1boUGsnNhCxaVNAYMcFbQNo355Af8cWkhAN6")
         scanner.registerExtractor(observationExtractor)
     } else if (config.networkWatcher == Constants.cardanoKoios) {
         const cardanoConfig = CardanoConfig.getConfig()
@@ -43,7 +44,7 @@ export const scannerInit = () => {
         }
         cardanoScanner = new CardanoKoiosScanner(cardanoScannerConfig)
         cardanoScanningJob(cardanoConfig.interval)
-        const observationExtractor = new CardanoObservationExtractor(dataSource, tokens)
+        const observationExtractor = new CardanoObservationExtractor(dataSource, tokens, "addr_test1qpr7wrk7t0tgxuysdqn7gnkrghxp8fxur8sg2hs907x637qs75e4g7y6af54ew972jmen04rhapzcp65e34zd2afes8s4fvph3")
         cardanoScanner.registerExtractor(observationExtractor)
     }
     else {

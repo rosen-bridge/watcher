@@ -4,16 +4,17 @@ import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { ObservationStatusEntity, TxStatus } from "../../src/database/entities/observationStatusEntity";
 import { BlockEntity } from "@rosen-bridge/scanner";
-import { PROCEED } from "@rosen-bridge/scanner/dist/entities/blockEntity";
+// import { PROCEED } from "@rosen-bridge/scanner/entities/blockEntity";
 import { Constants } from "../../src/config/constants";
 
+//TODO: fix the proceed
 export const ergoBlockEntity = new BlockEntity()
 ergoBlockEntity.scanner = Constants.ergoNode
 ergoBlockEntity.id = 1
 ergoBlockEntity.hash = "blockHash"
 ergoBlockEntity.height = 1111
 ergoBlockEntity.parentHash = "parentHash"
-ergoBlockEntity.status = PROCEED
+ergoBlockEntity.status = "proceed"//PROCEED
 
 export const cardanoBlockEntity = new BlockEntity()
 cardanoBlockEntity.scanner = Constants.cardanoKoios
@@ -21,7 +22,7 @@ cardanoBlockEntity.id = 2
 cardanoBlockEntity.hash = "blockHash2"
 cardanoBlockEntity.height = 2222
 cardanoBlockEntity.parentHash = "parentHash2"
-cardanoBlockEntity.status = PROCEED
+cardanoBlockEntity.status = "proceed"//PROCEED
 
 export const firstCommitment: Commitment = {
     WID: "f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b",
