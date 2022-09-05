@@ -200,7 +200,7 @@ export class ErgoNetwork{
                 const outputs = tx.outputs.filter(box => box.address === address);
                 if (inputs.length >= 1) {
                     inputs.forEach(input => {
-                        const box = outputs.length > 0? wasm.ErgoBox.from_json(JsonBI.stringify(outputs[0])): undefined
+                        const box = outputs.length > 0 ? wasm.ErgoBox.from_json(JsonBI.stringify(outputs[0])) : undefined
                         memPoolBoxesMap.set(input.boxId, box)
                     });
                 }
