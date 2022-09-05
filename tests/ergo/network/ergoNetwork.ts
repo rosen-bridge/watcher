@@ -5,7 +5,7 @@ import { boxId, confirmedTxId, initMockedAxios, unavailableTxId, unconfirmedTxId
 
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { expect } from "chai";
-import { JsonBI } from "../../../src/network/parser";
+import { JsonBI } from "../../../src/ergo/network/parser";
 
 initMockedAxios();
 import txObj from "../transactions/dataset/commitmentTx.json" assert {type: "json"}
@@ -64,24 +64,6 @@ describe("Ergo Network(API)", () => {
                     mockedResponseBody.emptyAddressBox
                 )
             );
-        });
-    });
-
-    /**
-     * getBoxesByAddress function tests
-     */
-    describe("getBoxesByAddress", () => {
-        /**
-         * should return ErgoBoxes that asserted in the tests body
-         */
-        it("should return array of ErgoBoxes", async () => {
-            const res = await ErgoNetwork.getBoxesByAddress("9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT");
-            expect(res.len().valueOf()).to.be.equal(4);
-            expect(res.get(0).box_id().to_str()).to.be.equal("3ac7e967200368b6a95f0714d24f830161fb0d5c7c173beae316969687ba98af");
-            expect(res.get(1).box_id().to_str()).to.be.equal("762a25c986e4cc2dfbad6e092b214307ab88de9a073d01e80c17a81efab6d98b");
-            expect(res.get(2).box_id().to_str()).to.be.equal("61b4f0080f8af2046a26fbaeca3e7404075b9b2ae4d74d07920abac09a6a766b");
-            expect(res.get(3).box_id().to_str()).to.be.equal("18bb8ff0fdb2c005405ddee776e08303f6a129495e2a0e68969fe5e25844a689");
-
         });
     });
 

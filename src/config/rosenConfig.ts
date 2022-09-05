@@ -1,9 +1,9 @@
 import fs from "fs";
-import { ErgoConfig } from "./config";
+import { Config } from "./config";
 
-const ergoConfig = ErgoConfig.getConfig();
+const ergoConfig = Config.getConfig();
 
-export type rosenConfig = {
+type rosenConfigType = {
     RSN: string;
     guardNFT: string;
     cleanupNFT: string;
@@ -66,6 +66,6 @@ class RosenConfig{
 
 const network = ergoConfig.networkWatcher.split("-")[0].toLowerCase();
 const networkType = ergoConfig.networkWatcherType.toLowerCase();
-export const rosenConfig: rosenConfig = new RosenConfig(network, networkType);
+const rosenConfig: rosenConfigType = new RosenConfig(network, networkType);
 
-export { RosenConfig };
+export { RosenConfig, rosenConfigType, rosenConfig };

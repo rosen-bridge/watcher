@@ -1,12 +1,12 @@
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { hexStrToUint8Array, uint8ArrayToHex } from "../utils/utils";
-import { rosenConfig } from "../config/rosenConfig";
-import { ErgoConfig } from "../config/config";
+import { rosenConfigType } from "../config/rosenConfig";
+import { Config } from "../config/config";
 import { Boxes } from "../ergo/boxes";
 import { ErgoUtils } from "../ergo/utils";
 
-const ergoConfig = ErgoConfig.getConfig();
+const config = Config.getConfig();
 
 export type ApiResponse = {
     response: string;
@@ -35,7 +35,7 @@ export class Transaction{
      * @param boxes
      */
     constructor(
-        rosenConfig: rosenConfig,
+        rosenConfig: rosenConfigType,
         userAddress: string,
         userSecret: wasm.SecretKey,
         boxes: Boxes
@@ -43,8 +43,8 @@ export class Transaction{
         this.watcherPermitState = undefined;
         this.watcherWID = "";
         this.boxes = boxes;
-        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(ergoConfig.fee));
-        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(ergoConfig.minBoxValue));
+        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee));
+        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(config.minBoxValue));
         this.userSecret = userSecret
         this.userAddress = wasm.Address.from_base58(userAddress);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
@@ -88,7 +88,7 @@ export class Transaction{
         const WID = this.watcherWID!;
         const height = await ErgoNetwork.getHeight();
 
-        const permitBoxes = await this.boxes.getPermits(RWTCount)
+        const permitBoxes = await this.boxes.getPermits(WID, RWTCount)
         const repoBox = await this.boxes.getRepoBox();
         const R4 = repoBox.register_value(4)
         const R5 = repoBox.register_value(5)
@@ -351,7 +351,7 @@ export class Transaction{
 
         const userOut = await this.boxes.createUserBoxCandidate(
             height,
-            this.userAddress.to_base58(ergoConfig.networkType),
+            this.userAddress.to_base58(config.networkType),
             changeBoxValue,
             WIDToken,
             WIDTokenAmount,

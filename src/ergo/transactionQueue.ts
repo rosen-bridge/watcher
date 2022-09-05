@@ -1,18 +1,18 @@
-import { TxEntity, TxType } from "../entities/watcher/network/TransactionEntity";
+import { TxEntity, TxType } from "../database/entities/txEntity";
 import { ErgoNetwork } from "./network/ergoNetwork";
-import { NetworkDataBase } from "../models/networkModel";
-import { DatabaseConnection } from "./databaseConnection";
+import { WatcherDataBase } from "../database/models/watcherModel";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { ErgoConfig } from "../config/config";
-import { base64ToArrayBuffer } from "../utils/utils";
+import { Config } from "../config/config";
+import { base64ToArrayBuffer} from "../utils/utils";
+import { WatcherUtils } from "../utils/watcherUtils";
 
-const ergoConfig = ErgoConfig.getConfig();
+const config = Config.getConfig();
 
 export class TransactionQueue {
-    database: NetworkDataBase
-    databaseConnection: DatabaseConnection
+    database: WatcherDataBase
+    databaseConnection: WatcherUtils
 
-    constructor(db: NetworkDataBase, dbConnection: DatabaseConnection) {
+    constructor(db: WatcherDataBase, dbConnection: WatcherUtils) {
         this.database = db
         this.databaseConnection = dbConnection
     }
@@ -41,7 +41,7 @@ export class TransactionQueue {
                         // transaction input validation
                         !(await ErgoNetwork.checkTxInputs(signedTx.inputs()))
                     ){
-                        if(currentHeight - tx.updateBlock > ergoConfig.transactionRemovingTimeout) {
+                        if(currentHeight - tx.updateBlock > config.transactionRemovingTimeout) {
                             await this.database.downgradeObservationTxStatus(tx.observation)
                             await this.database.removeTx(tx)
                         }
@@ -53,7 +53,7 @@ export class TransactionQueue {
                     console.log("Sending the", tx.type, "transaction with txId", tx.txId)
                     await ErgoNetwork.sendTx(signedTx.to_json())
                     await this.database.setTxUpdateHeight(tx, currentHeight)
-                } else if (txStatus > ergoConfig.transactionConfirmation) {
+                } else if (txStatus > config.transactionConfirmation) {
                     console.log("The", tx.type, "transaction with txId", tx.txId, "is confirmed, removing the tx from txQueue")
                     await this.database.upgradeObservationTxStatus(tx.observation)
                     await this.database.removeTx(tx)

@@ -1,5 +1,5 @@
 {
-  "name": "cardano-watcher",
+  "name": "@rosen-bridge/watcher",
   "version": "1.0.0",
   "description": "Watcher process for cardano bridge to ergo",
   "main": "index.js",
@@ -11,14 +11,13 @@
     "start:dev": "nodemon src/index.ts",
     "start": "ts-node --experimental-specifier-resolution=node ./src/index.ts",
     "typeorm": "typeorm-ts-node-esm",
-    "typeorm:generate:network": "npm run typeorm migration:generate src/migrations/watcher/network/networkModelMigration -- -d ./config/ormconfig.ts",
-    "typeorm:generate:bridge": "npm run typeorm migration:generate src/migrations/watcher/bridge/bridgeModelMigration -- -d ./config/bridgeOrmConfig.ts",
-    "typeorm:migrate": "npm run typeorm migration:run -- -d ./config/ormconfig.ts",
-    "typeorm:migrate:bridge": "npm run typeorm migration:run -- -d ./config/bridgeOrmConfig.ts"
+    "typeorm:generate": "npm run typeorm migration:generate src/database/migrations/watcher/watcherModelMigration -- -d config/dataSource.ts",
+    "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
+    "madge": "npx madge --circular --extensions ts ./"
   },
   "repository": {
     "type": "git",
-    "url": "git@git.ergopool.io:rozen-bridge/cardano-watcher.git"
+    "url": "git+https://github.com/rosen-bridge/watcher.git"
   },
   "keywords": [],
   "author": "",
@@ -40,6 +39,7 @@
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "eslint": "^8.16.0",
+    "madge": "^5.0.1",
     "mocha": "^9.2.2",
     "nodemon": "^2.0.15",
     "sinon": "^14.0.0",
@@ -49,6 +49,10 @@
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
+    "@rosen-bridge/address-extractor": "0.1.4-alpha",
+    "@rosen-bridge/observation-extractor": "0.1.2-alpha-6",
+    "@rosen-bridge/scanner": "0.1.7-alpha-2",
+    "@rosen-bridge/watcher-data-extractor": "0.1.0-alpha-5",
     "axios": "^0.26.1",
     "blakejs": "^1.2.1",
     "chai-spies": "^1.0.0",

@@ -1,21 +1,38 @@
 import * as ergoLib from "ergo-lib-wasm-nodejs";
-import { ErgoConfig } from "../config/config";
+import * as wasm from "ergo-lib-wasm-nodejs";
+import { Buffer } from "buffer";
 
-export const hexStrToUint8Array = (str: string): Uint8Array => {
+/**
+ * returns the decoded input hex string
+ * @param str
+ */
+const hexStrToUint8Array = (str: string): Uint8Array => {
     return new Uint8Array(Buffer.from(str, "hex"))
 }
 
-export const uint8ArrayToHex = (buffer: Uint8Array): string => {
+/**
+ * Encodes the uint array to the hex string
+ * @param buffer
+ */
+const uint8ArrayToHex = (buffer: Uint8Array): string => {
     return Buffer.from(buffer).toString('hex');
 }
 
-export function bigIntToUint8Array(num: bigint) {
+/**
+ * returns the decoded bigint input
+ * @param num
+ */
+function bigIntToUint8Array(num: bigint) {
     const b = new ArrayBuffer(8)
     new DataView(b).setBigUint64(0, num);
     return new Uint8Array(b);
 }
 
-export const base64ToArrayBuffer = (base64: string): Uint8Array => {
+/**
+ * returns the decoded base64 input string
+ * @param base64
+ */
+const base64ToArrayBuffer = (base64: string): Uint8Array => {
     const binary_string = atob(base64);
     const len = binary_string.length;
     const bytes = new Uint8Array(len);
@@ -25,14 +42,42 @@ export const base64ToArrayBuffer = (base64: string): Uint8Array => {
     return bytes;
 };
 
-export function delay(time: number) {
+/**
+ * create delay in process running
+ * @param time
+ */
+function delay(time: number) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
-export const generateSK = (ergoConfig: ErgoConfig): { address: string, secret: string} => {
+/**
+ * returns a random secret key along with its associate address
+ * @param networkType
+ */
+const generateSK = (networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Mainnet): { address: string, secret: string} => {
     const secretKey= ergoLib.SecretKey.random_dlog();
     return {
-        address: secretKey.get_address().to_base58(ergoConfig.networkType),
+        address: secretKey.get_address().to_base58(networkType),
         secret: uint8ArrayToHex(secretKey.to_bytes())
     };
+}
+
+/**
+ * returns address of the ergoTree
+ * @param ergoTree
+ * @param networkType
+ */
+const ergoTreeToBase58Address = (ergoTree: wasm.ErgoTree,
+                                 networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Mainnet): string => {
+    return wasm.Address.recreate_from_ergo_tree(ergoTree).to_base58(networkType)
+}
+
+export {
+    hexStrToUint8Array,
+    uint8ArrayToHex,
+    delay,
+    bigIntToUint8Array,
+    generateSK,
+    base64ToArrayBuffer,
+    ergoTreeToBase58Address
 }
