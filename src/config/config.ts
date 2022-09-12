@@ -28,8 +28,9 @@ const TRANSACTION_REMOVING_TIMEOUT: number | undefined = config.get?.('ergo.tran
 const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transactions.confirmation');
 const OBSERVATION_CONFIRMATION: number | undefined = config.get?.('observation.confirmation');
 const OBSERVATION_VALID_THRESH: number | undefined = config.get?.('observation.validThreshold');
-
 const supportedNetworks: Array<string> = ['ergo-node', 'cardano-koios']
+const ROSEN_CONFIG_TEST_PATH: string | undefined = config.get?.('rosenConfigTestPath');
+const ROSEN_TOKEN_TEST_PATH: string | undefined = config.get?.('rosenTokenTestPath');
 
 class Config {
     private static instance: Config;
@@ -208,4 +209,4 @@ class CardanoConfig {
     }
 }
 
-export { Config, CardanoConfig}
+export { Config, CardanoConfig, ROSEN_CONFIG_TEST_PATH, ROSEN_TOKEN_TEST_PATH }

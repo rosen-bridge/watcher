@@ -3,11 +3,11 @@ import { ErgoScanner, CardanoKoiosScanner } from "@rosen-bridge/scanner";
 import { Config } from "../config/config";
 import { dataSource } from "../../config/dataSource";
 import { ErgoObservationExtractor, CardanoObservationExtractor } from "@rosen-bridge/observation-extractor";
-import tokens from '../config/tokens.test.json' assert { type: "json" };
 import { CommitmentExtractor, PermitExtractor, EventTriggerExtractor } from "@rosen-bridge/watcher-data-extractor";
 import { rosenConfig } from "../config/rosenConfig";
 import { ErgoUTXOExtractor } from "@rosen-bridge/address-extractor";
 import { Constants } from "../config/constants";
+import { Tokens } from "../config/tokensConfig";
 
 const config = Config.getConfig()
 let scanner: ErgoScanner;
@@ -31,7 +31,7 @@ export const scannerInit = () => {
     scanner = new ErgoScanner(ergoScannerConfig);
     ergoScanningJob()
     if (config.networkWatcher == Constants.ergoNode) {
-        const observationExtractor = new ErgoObservationExtractor(dataSource, tokens)
+        const observationExtractor = new ErgoObservationExtractor(dataSource, Tokens)
         scanner.registerExtractor(observationExtractor)
     } else if (config.networkWatcher == Constants.cardanoKoios) {
         const cardanoConfig = CardanoConfig.getConfig()
@@ -43,7 +43,7 @@ export const scannerInit = () => {
         }
         cardanoScanner = new CardanoKoiosScanner(cardanoScannerConfig)
         cardanoScanningJob(cardanoConfig.interval)
-        const observationExtractor = new CardanoObservationExtractor(dataSource, tokens)
+        const observationExtractor = new CardanoObservationExtractor(dataSource, Tokens)
         cardanoScanner.registerExtractor(observationExtractor)
     }
     else {

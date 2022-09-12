@@ -151,7 +151,7 @@ describe("Watcher Permit Transactions", () => {
                 boxes
             );
             const response = await secondTransaction.getPermit(100n);
-            expect(response.response).to.be.equal("34b0a9cb65c0b33ac608906535b0b4ac75bc60eda57c07e463de51b7c3a7b89e");
+            expect(response.response).to.be.equal("d337b49085f42a32baa2b0f3dd6bddbb2e6b0d14571e0ecabd845490d756ca02");
         });
 
         /**
