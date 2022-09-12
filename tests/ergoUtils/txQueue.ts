@@ -4,7 +4,7 @@ import { TxEntity, TxType } from "../../src/database/entities/txEntity";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { Boxes } from "../../src/ergo/boxes";
-import { rosenConfig, secret1, userAddress } from "../ergo/transactions/permit";
+import { secret1, userAddress } from "../ergo/transactions/permit";
 import { Transaction } from "../../src/api/Transaction";
 import { WatcherDataBase } from "../../src/database/models/watcherModel";
 
@@ -16,6 +16,7 @@ chai.use(spies)
 
 import txObj from "../ergo/dataset/tx.json" assert { type: "json" }
 import { WatcherUtils } from "../../src/utils/watcherUtils";
+import { rosenConfig } from "../../src/config/rosenConfig";
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj))
 

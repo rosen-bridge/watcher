@@ -13,7 +13,7 @@ import {
     unspentCommitment2
 } from "../database/mockedData";
 import { Boxes } from "../../src/ergo/boxes";
-import { rosenConfig, secret1, userAddress } from "../ergo/transactions/permit";
+import {  secret1, userAddress } from "../ergo/transactions/permit";
 import { Transaction } from "../../src/api/Transaction";
 import { JsonBI } from "../../src/ergo/network/parser";
 import txObj from "../ergo/transactions/dataset/commitmentTx.json" assert { type: "json" };
@@ -26,6 +26,7 @@ import spies from "chai-spies";
 import { NoObservationStatus } from "../../src/errors/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { TransactionUtils, WatcherUtils } from "../../src/utils/watcherUtils";
+import { rosenConfig } from "../../src/config/rosenConfig";
 
 chai.use(spies)
 

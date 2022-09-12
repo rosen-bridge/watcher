@@ -10,7 +10,7 @@ import { CommitmentSet } from "../../../src/utils/interfaces";
 import { observation } from "./commitmentCreation";
 import { TxType } from "../../../src/database/entities/txEntity";
 import { Transaction } from "../../../src/api/Transaction";
-import { rosenConfig, secret1, userAddress } from "./permit";
+import { secret1, userAddress } from "./permit";
 import { firstCommitment, thirdCommitment } from "../../database/mockedData";
 
 import * as wasm from "ergo-lib-wasm-nodejs";
@@ -26,6 +26,7 @@ import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
 import { TransactionUtils, WatcherUtils } from "../../../src/utils/watcherUtils";
+import { rosenConfig } from "../../../src/config/rosenConfig";
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))]
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj))
