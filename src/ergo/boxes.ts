@@ -8,7 +8,7 @@ import { Observation } from "../utils/interfaces";
 import { ErgoNetwork } from "./network/ergoNetwork";
 import { Buffer } from "buffer";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
-import { NoWID } from "../errors/errors";
+import { NotEnoughFund, NoWID } from "../errors/errors";
 
 const config = Config.getConfig();
 
@@ -48,10 +48,28 @@ export class Boxes{
      * @param RWTCount
      */
     getPermits = async (wid: string, RWTCount?: bigint): Promise<Array<wasm.ErgoBox>> => {
-        // TODO: (issue #6) Rewrite the function to return the required number of RWTs
-        const permits = await this.dataBase.getUnspentPermitBoxes(wid)
+        const permits = (await this.dataBase.getUnspentPermitBoxes(wid)).map((box) => {
+            return decodeSerializedBox(box.boxSerialized)
+        })
+        if (RWTCount) {
+            const selectedBoxes = []
+            let totalRWT = BigInt(0)
+            for (const box of permits) {
+                const unspentBox = await ErgoNetwork.trackMemPool(box)
+                if(unspentBox) {
+                    totalRWT = totalRWT + BigInt(unspentBox.tokens().get(0).amount().as_i64().to_str())
+                    selectedBoxes.push(unspentBox)
+                    if (totalRWT >= RWTCount) break
+                }
+            }
+            if (totalRWT < RWTCount) {
+                console.log("ERROR: Watcher doesn't have enough unspent permits")
+                throw new NotEnoughFund
+            }
+            return selectedBoxes
+        }
         const permitBoxes = permits.map(async (permit) => {
-            return await ErgoNetwork.trackMemPool(decodeSerializedBox(permit.boxSerialized))
+            return await ErgoNetwork.trackMemPool(permit)
         })
         return Promise.all(permitBoxes)
     }
@@ -83,23 +101,24 @@ export class Boxes{
      * @param requiredValue
      */
     getUserPaymentBox = async (requiredValue: bigint): Promise<Array<wasm.ErgoBox>> => {
-        const boxes = await this.dataBase.getUnspentAddressBoxes()
-        // TODO: (issue #6) Improvement on selecting the plain boxes
-        // const selectedBoxes = []
-        // let totalValue = BigInt(0)
-        // for (const box of boxes) {
-        //     totalValue = totalValue + BigInt(box.value)
-        //     selectedBoxes.push(box)
-        //     if (totalValue > requiredValue) break
-        // }
-        // if (totalValue < requiredValue) {
-        //     console.log("ERROR: Not enough fund to create the transaction")
-        //     throw new NotEnoughFund
-        // }
-        const outBoxes = boxes.map(async (fund) => {
-            return await ErgoNetwork.trackMemPool(decodeSerializedBox(fund.serialized))
+        const boxes = (await this.dataBase.getUnspentAddressBoxes()).map((box) => {
+            return decodeSerializedBox(box.serialized)
         })
-        return Promise.all(outBoxes)
+        const selectedBoxes = []
+        let totalValue = BigInt(0)
+        for (const box of boxes) {
+            const unspentBox = await ErgoNetwork.trackMemPool(box)
+            if(unspentBox) {
+                totalValue = totalValue + BigInt(unspentBox.value().as_i64().to_str())
+                selectedBoxes.push(unspentBox)
+                if (totalValue >= requiredValue) break
+            }
+        }
+        if (totalValue < requiredValue) {
+            console.log("ERROR: Not enough fund to create the transaction")
+            throw new NotEnoughFund
+        }
+        return selectedBoxes
     }
 
     /**
