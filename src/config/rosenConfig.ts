@@ -1,5 +1,5 @@
 import fs from "fs";
-import { Config, ROSEN_CONFIG_TEST_PATH } from "./config";
+import { Config } from "./config";
 
 const ergoConfig = Config.getConfig();
 
@@ -55,11 +55,7 @@ class RosenConfig{
     }
 
     getAddress = (network: string, networkType: string) => {
-        if (ROSEN_CONFIG_TEST_PATH === undefined) {
-            return `src/config/${network}-${networkType}.json`;
-        } else {
-            return ROSEN_CONFIG_TEST_PATH;
-        }
+        return ergoConfig.rosenConfigPath + `${network}-${networkType}.json`;
     }
 
 }

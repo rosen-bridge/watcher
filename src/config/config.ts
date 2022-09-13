@@ -29,8 +29,8 @@ const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transact
 const OBSERVATION_CONFIRMATION: number | undefined = config.get?.('observation.confirmation');
 const OBSERVATION_VALID_THRESH: number | undefined = config.get?.('observation.validThreshold');
 const supportedNetworks: Array<string> = ['ergo-node', 'cardano-koios']
-const ROSEN_CONFIG_TEST_PATH: string | undefined = config.get?.('rosenConfigTestPath');
-const ROSEN_TOKEN_TEST_PATH: string | undefined = config.get?.('rosenTokenTestPath');
+const ROSEN_CONFIG_PATH: string | undefined = config.get?.('rosenConfigPath');
+const ROSEN_TOKENS_PATH: string | undefined = config.get?.('rosenTokensPath');
 
 class Config {
     private static instance: Config;
@@ -55,6 +55,8 @@ class Config {
     transactionCheckingInterval: number;
     observationConfirmation: number;
     observationValidThreshold: number;
+    rosenConfigPath: string;
+    rosenTokensPath: string;
 
     private constructor() {
         let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -137,6 +139,12 @@ class Config {
         if (FEE === undefined) {
             throw new Error("Watcher Fee doesn't set correctly");
         }
+        if (ROSEN_CONFIG_PATH === undefined) {
+            throw new Error("RosenConfig file path doesn't set correctly");
+        }
+        if (ROSEN_TOKENS_PATH === undefined) {
+            throw new Error("Rosen Tokens file path doesn't set correctly");
+        }
 
         const secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
         const watcherAddress: string = secretKey.get_address().to_base58(networkType)
@@ -163,6 +171,8 @@ class Config {
         this.ergoInitialHeight = ERGO_INITIAL_HEIGHT
         this.minBoxValue = MIN_BOX_VALUE;
         this.fee = FEE;
+        this.rosenConfigPath = ROSEN_CONFIG_PATH;
+        this.rosenTokensPath = ROSEN_TOKENS_PATH;
     }
 
     static getConfig() {
@@ -209,4 +219,4 @@ class CardanoConfig {
     }
 }
 
-export { Config, CardanoConfig, ROSEN_CONFIG_TEST_PATH, ROSEN_TOKEN_TEST_PATH }
+export { Config, CardanoConfig }

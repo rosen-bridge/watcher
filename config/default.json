@@ -1,5 +1,5 @@
 {
-    "network": "cardano-koios",
+    "network": "ergo-node",
     "networkType": "Testnet",
     "observation" : {
         "confirmation": 2,
@@ -41,5 +41,7 @@
         "initialBlockHeight": 249243,
         "heightLimit": 100,
         "cleanupConfirmation": 10
-    }
+    },
+    "rosenConfigPath": "src/config/",
+    "rosenTokensPath": "src/config/tokens.json"
 }

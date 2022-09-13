@@ -1,4 +1,4 @@
 {
-  "rosenConfigTestPath": "tests/config/ergo-testnet.json",
-  "rosenTokenTestPath": "tests/config/tokens.test.json"
+  "rosenConfigPath": "tests/config/",
+  "rosenTokensPath": "tests/config/tokens.test.json"
 }
