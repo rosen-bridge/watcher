@@ -1,4 +1,343 @@
 export const mockedResponseBody = {
+    repoBox:
+        `{
+            "boxId": "a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e",
+            "transactionId": "c889766d66e9a6521f6e512ac82ca0bd84b7904938cdc572b51a2597c0a1e9b5",
+            "blockId": "3e02354addca5f87f24a3a8a61c29d564f675a5ab0d6bb965d6c99d34faad8ab",
+            "value": 1100000,
+            "index": 0,
+            "globalIndex": 596720,
+            "creationHeight": 277597,
+            "settlementHeight": 277599,
+            "ergoTree": "101c040204000e20a6ac381e6fa99929fd1477b3ba9499790a775e91d4c14c5aa86e9a118dfac8530101040204000402040404040400040004020402040204000400040004000e2012a8eb76bd00653da26d9af3a3660d587ddbe90f54b71ec9a505222eaa009534040404000400040204020400040004000400d801d601b2a473000095938cb2db63087201730100017302d17303d811d602db6308a7d603b27202730400d6048c720302d605b2a5730500d606db63087205d607b27206730600d6088c720702d609e4c6a70511d60ab17209d60be4c672050511d60cb1720bd60de4c6a70611d60eb27206730700d60f8c720e02d610b27202730800d6118c721002d6129683050193c27205c2a793e4c672050611720d938cb27206730900018cb27202730a0001938c7207018c720301938c720e018c721001959172047208d806d613e4c67205041ad6149a720a730bd61599720c730cd616c5a7d6179972047208d618b2a5730d00d196830c01721293b17213721493b47213730e7215e4c6a7041a93b27213721500721693720c721493b4720b730f7215720993b2720b7215007217939c7217b2720d73100099720f7211938cb2db6308721873110002721793cbc27218731293e4c67218041a83010e7216938cb2db6308b2a5731300731400017216d804d613e4c6a7041ad614e4c672050704d6159972087204d616b27209721400d19683040172129383010eb27213721400e4c67201041a939c7215b2720d731500997211720f959172167215968302019372169ab2720b7214007215937213e4c67205041ad803d617e4c67205041ad6189a72147316d61999720a731796830501937216721593b4721373187214b472177319721493b472137218720ab472177214721993b47209731a7214b4720b731b721493b472097218720ab4720b72147219",
+            "address": "N9nHZxAm7Z476Nbw6yF2X6BQEct7nNCm4SJeCK8DJEkERj6LXMJvKqG49WWSfNDufuuFEtN8msfWDd8UR4QUCmLEwFRWXC5hxEdjTWfFYT8YqPrrYziDrjYzCbyzTjyht6qg4W5KPs6zNirtN7AyeTSMDeT6bRzL66kCSp8UFkmCsn9U4ZteWeFNp1xDtYtaqRE5SkABjwNsP5RioUY7hpbFhpWWQLosND6ys8eJJGkziwxjVV8goEEMzjGrTH5KUM8hDKQBAeNsiaZLLVfrAJBfFTHKggTLzkZQXB7Nhx6GP36E4jgAPPmKkvaKbtd7ANtfqpfjjBroCcK4E9ZVNM34r4BNaMazeBYxPAtcjFCeCTaMR7vRuaAVmX7xwLK3MYoHBH3NPH9usseDDxnz5sm21AqZVdp6t7CUi9xFb3qSnThFFPJk2fZF5FvCUkh2Vy9pYLs1E33kFC2cywrt6yWCc1iJ5Q6niAixG928UwFXvigcx2ZJrUmzHUKPhzJKHLKpi61BjeJiLgnYAiH59ciHH23sSuci9ffWE8G77uY4HX4F6JSuKAxaLbPeAQ4bZce86xmNYKEhjoz1FwQt5yUW4JPNhHCwYK57U1kPTU34UpFRUgvn9Vyktby4Wm9E6AVYGxg4s8PCX2EQkntzhzde1DcTEjd1KcsfXLUwxA9qYQd7XKvvzsb9sKMK6znaHUP18G6xbhBaQJjbuch1NXhLR7nAfyJWEyr2KGM8WvoUsVyzWBvzJTwFEW9GhEzTcbSxvFxWanQ5ezqeiMvBskHQCMdVwaG4N7vH4WJMkitDKAeKyaxcM7eFkZsSa8naW1CKCurAc4t1avXTWPg2d7vavwLFGwh5p63NGYd6DdYduobMVXjjYsr5MyNmTEPVAi8FVeDVi4VBiMdYjdM2K66aCTvT5qyMoa39ab9o",
+            "assets": [
+                {
+                    "tokenId": "a29d9bb0d622eb8b4f83a34c4ab1b7d3f18aaaabc3aa6876912a3ebaf0da1018",
+                    "index": 0,
+                    "amount": 1,
+                    "name": "repo NFT",
+                    "decimals": 0,
+                    "type": "EIP-004"
+                },
+                {
+                    "tokenId": "497287b9a1eff643791277744a74b7d598b834dc613f2ebc972e33767c61ac2b",
+                    "index": 1,
+                    "amount": 1000,
+                    "name": "RWT",
+                    "decimals": 0,
+                    "type": "EIP-004"
+                },
+                {
+                    "tokenId": "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516",
+                    "index": 2,
+                    "amount": 100,
+                    "name": "RSN",
+                    "decimals": 0,
+                    "type": "EIP-004"
+                }
+            ],
+            "additionalRegisters": {
+                "R4": {
+                    "serializedValue": "1a01046572676f",
+                    "sigmaType": "Coll[Coll[SByte]]",
+                    "renderedValue": "[6572676f]"
+                },
+                "R5": {
+                    "serializedValue": "110100",
+                    "sigmaType": "Coll[SLong]",
+                    "renderedValue": "[0]"
+                },
+                "R6": {
+                    "serializedValue": "110414660012",
+                    "sigmaType": "Coll[SLong]",
+                    "renderedValue": "[10,51,0,9]"
+                },
+                "R7": {
+                    "serializedValue": "0400",
+                    "sigmaType": "SInt",
+                    "renderedValue": "0"
+                }
+            },
+            "spentTransactionId": "f93fb2acde9429906b98d9c813fcb39f8ec7d42c60202e828d4f8118960c58fc",
+            "mainChain": true
+        }`,
+    repoBoxWithPermit:
+        `{
+            "boxId": "3582b12ab4413c9a877845e8faf18d546d1ae11ddd7bb365c0118c7abefdd157",
+            "transactionId": "f93fb2acde9429906b98d9c813fcb39f8ec7d42c60202e828d4f8118960c58fc",
+            "blockId": "28786ca9fd62d60b3ec4cb58cf14726ab3c66c60c29636081f0ffdbaf8663d08",
+            "value": 1100000,
+            "index": 0,
+            "globalIndex": 597538,
+            "creationHeight": 278003,
+            "settlementHeight": 278005,
+            "ergoTree": "101c040204000e20a6ac381e6fa99929fd1477b3ba9499790a775e91d4c14c5aa86e9a118dfac8530101040204000402040404040400040004020402040204000400040004000e2012a8eb76bd00653da26d9af3a3660d587ddbe90f54b71ec9a505222eaa009534040404000400040204020400040004000400d801d601b2a473000095938cb2db63087201730100017302d17303d811d602db6308a7d603b27202730400d6048c720302d605b2a5730500d606db63087205d607b27206730600d6088c720702d609e4c6a70511d60ab17209d60be4c672050511d60cb1720bd60de4c6a70611d60eb27206730700d60f8c720e02d610b27202730800d6118c721002d6129683050193c27205c2a793e4c672050611720d938cb27206730900018cb27202730a0001938c7207018c720301938c720e018c721001959172047208d806d613e4c67205041ad6149a720a730bd61599720c730cd616c5a7d6179972047208d618b2a5730d00d196830c01721293b17213721493b47213730e7215e4c6a7041a93b27213721500721693720c721493b4720b730f7215720993b2720b7215007217939c7217b2720d73100099720f7211938cb2db6308721873110002721793cbc27218731293e4c67218041a83010e7216938cb2db6308b2a5731300731400017216d804d613e4c6a7041ad614e4c672050704d6159972087204d616b27209721400d19683040172129383010eb27213721400e4c67201041a939c7215b2720d731500997211720f959172167215968302019372169ab2720b7214007215937213e4c67205041ad803d617e4c67205041ad6189a72147316d61999720a731796830501937216721593b4721373187214b472177319721493b472137218720ab472177214721993b47209731a7214b4720b731b721493b472097218720ab4720b72147219",
+            "address": "N9nHZxAm7Z476Nbw6yF2X6BQEct7nNCm4SJeCK8DJEkERj6LXMJvKqG49WWSfNDufuuFEtN8msfWDd8UR4QUCmLEwFRWXC5hxEdjTWfFYT8YqPrrYziDrjYzCbyzTjyht6qg4W5KPs6zNirtN7AyeTSMDeT6bRzL66kCSp8UFkmCsn9U4ZteWeFNp1xDtYtaqRE5SkABjwNsP5RioUY7hpbFhpWWQLosND6ys8eJJGkziwxjVV8goEEMzjGrTH5KUM8hDKQBAeNsiaZLLVfrAJBfFTHKggTLzkZQXB7Nhx6GP36E4jgAPPmKkvaKbtd7ANtfqpfjjBroCcK4E9ZVNM34r4BNaMazeBYxPAtcjFCeCTaMR7vRuaAVmX7xwLK3MYoHBH3NPH9usseDDxnz5sm21AqZVdp6t7CUi9xFb3qSnThFFPJk2fZF5FvCUkh2Vy9pYLs1E33kFC2cywrt6yWCc1iJ5Q6niAixG928UwFXvigcx2ZJrUmzHUKPhzJKHLKpi61BjeJiLgnYAiH59ciHH23sSuci9ffWE8G77uY4HX4F6JSuKAxaLbPeAQ4bZce86xmNYKEhjoz1FwQt5yUW4JPNhHCwYK57U1kPTU34UpFRUgvn9Vyktby4Wm9E6AVYGxg4s8PCX2EQkntzhzde1DcTEjd1KcsfXLUwxA9qYQd7XKvvzsb9sKMK6znaHUP18G6xbhBaQJjbuch1NXhLR7nAfyJWEyr2KGM8WvoUsVyzWBvzJTwFEW9GhEzTcbSxvFxWanQ5ezqeiMvBskHQCMdVwaG4N7vH4WJMkitDKAeKyaxcM7eFkZsSa8naW1CKCurAc4t1avXTWPg2d7vavwLFGwh5p63NGYd6DdYduobMVXjjYsr5MyNmTEPVAi8FVeDVi4VBiMdYjdM2K66aCTvT5qyMoa39ab9o",
+            "assets": [
+                {
+                    "tokenId": "a29d9bb0d622eb8b4f83a34c4ab1b7d3f18aaaabc3aa6876912a3ebaf0da1018",
+                    "index": 0,
+                    "amount": 1,
+                    "name": "repo NFT",
+                    "decimals": 0,
+                    "type": "EIP-004"
+                },
+                {
+                    "tokenId": "497287b9a1eff643791277744a74b7d598b834dc613f2ebc972e33767c61ac2b",
+                    "index": 1,
+                    "amount": 900,
+                    "name": "RWT",
+                    "decimals": 0,
+                    "type": "EIP-004"
+                },
+                {
+                    "tokenId": "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516",
+                    "index": 2,
+                    "amount": 1100,
+                    "name": "RSN",
+                    "decimals": 0,
+                    "type": "EIP-004"
+                }
+            ],
+            "additionalRegisters": {
+                "R4": {
+                    "serializedValue": "1a02046572676f20a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e",
+                    "sigmaType": "Coll[Coll[SByte]]",
+                    "renderedValue": "[6572676f,a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e]"
+                },
+                "R5": {
+                    "serializedValue": "110200c801",
+                    "sigmaType": "Coll[SLong]",
+                    "renderedValue": "[0,100]"
+                },
+                "R6": {
+                    "serializedValue": "110414660012",
+                    "sigmaType": "Coll[SLong]",
+                    "renderedValue": "[10,51,0,9]"
+                },
+                "R7": {
+                    "serializedValue": "0400",
+                    "sigmaType": "SInt",
+                    "renderedValue": "0"
+                }
+            },
+            "spentTransactionId": null,
+            "mainChain": true
+        }`,
+    watcherBox:
+        `{
+            "boxId": "8a3c4ffcadd2913f7e392bc345b45f4b9743e0edd266b8c80eb99a446e94531b",
+            "transactionId": "f93fb2acde9429906b98d9c813fcb39f8ec7d42c60202e828d4f8118960c58fc",
+            "blockId": "28786ca9fd62d60b3ec4cb58cf14726ab3c66c60c29636081f0ffdbaf8663d08",
+            "value": 1994800000,
+            "index": 2,
+            "globalIndex": 597540,
+            "creationHeight": 278003,
+            "settlementHeight": 278005,
+            "ergoTree": "0008cd028bcc85fa22006fa13767ab00af28ae0b2389d576fb59cfd0e46865e0449eeb8a",
+            "address": "9fadVRGYyiSBCgD7QtZU13BfGoDyTQ1oX918P8py22MJuMEwSuo",
+            "assets": [
+                {
+                    "tokenId": "a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e",
+                    "index": 0,
+                    "amount": 1,
+                    "name": null,
+                    "decimals": null,
+                    "type": null
+                },
+                {
+                    "tokenId": "290202fee226b93997e2bbc4e7ffc99dc1b464d685b78e46f901f93240675a31",
+                    "index": 1,
+                    "amount": 1,
+                    "name": null,
+                    "decimals": null,
+                    "type": null
+                },
+                {
+                    "tokenId": "0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95",
+                    "index": 2,
+                    "amount": 8,
+                    "name": "SWSE",
+                    "decimals": 0,
+                    "type": "EIP-004"
+                },
+                {
+                    "tokenId": "064c58ea394d41fada074a3c560a132467adf4ca1512c409c014c625ca285e9c",
+                    "index": 3,
+                    "amount": 1,
+                    "name": null,
+                    "decimals": null,
+                    "type": null
+                },
+                {
+                    "tokenId": "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516",
+                    "index": 4,
+                    "amount": 3900,
+                    "name": "RSN",
+                    "decimals": 0,
+                    "type": "EIP-004"
+                }
+            ],
+            "additionalRegisters": {},
+            "spentTransactionId": "2c4c2613d05d36c3595da22c426d398df2a99aa7184737048a90e6b1cf680c18",
+            "mainChain": true
+        }`,
+    permitBox: `{
+    "boxId": "07ad49fff88001712bcc255367f1622de431834b66f62f3d7be1e506ecfb9b72",
+    "transactionId": "f93fb2acde9429906b98d9c813fcb39f8ec7d42c60202e828d4f8118960c58fc",
+    "blockId": "28786ca9fd62d60b3ec4cb58cf14726ab3c66c60c29636081f0ffdbaf8663d08",
+    "value": 1100000,
+    "index": 1,
+    "globalIndex": 597539,
+    "creationHeight": 278003,
+    "settlementHeight": 278005,
+    "ergoTree": "10130400040004040400040204000e20a29d9bb0d622eb8b4f83a34c4ab1b7d3f18aaaabc3aa6876912a3ebaf0da10180404040004000400010104020400040004000e2064cc72f329f5db7b69667a10af3e1726161b9b7ce918a794ea80b9c32c4ce38805020101d807d601b2a5730000d6028cb2db6308a773010001d603aeb5b4a57302b1a5d901036391b1db630872037303d9010363aedb63087203d901054d0e938c7205017202d604e4c6a7041ad605b2a5730400d606db63087205d607ae7206d901074d0e938c720701720295938cb2db63087201730500017306d196830301ef7203938cb2db6308b2a473070073080001b2720473090095720796830201938cb27206730a0001720293c27205c2a7730bd801d608c2a7d196830501ef720393c27201720893e4c67201041a7204938cb2db6308b2a4730c00730d0001b27204730e00957207d801d609b27206730f0096830701938c720901720293cbc272057310e6c67205051ae6c67205060e93e4c67205070ecb720893e4c67205041a7204938c72090273117312",
+    "address": "EE7687i4URb4YuSGSQXPCbAgnr73Bb67aXgwzpjguuNwyRrWwVamRPKsiE3hbewDFDzkQa2PDdQG1S3KGcPbbPqvaT15RXFcCELtrAJ5BeZJFf9EfumFNWKztr7Me5Z23TRUPNgbcYEpCkC3RJeui3Tv6jXbEF2v284inu65FisnWoicPvpbuJb3fHpLkr5JAFPcp6uGTqTaaNWMJxWrHRbpKtvwVjG2VibGBGZJPtMbG3pzryH7Aq6CtLKtCAkSivDUkQWbXpm7TuvMnRCL78LvdoqauB8fRHxxxMw5BbmhVqBsKigUa92WBJCdyM7efp5SM1EXvNskbDEtuHHiYbLPxBJHXvZWWa8XCKvbWVV5eWdWExzASe3KzPCDEFm5JY2Peq64SY5gz6yu9n23BxDtb7PueWCMYfJs2VaYcLbndFJpkcDJKDiaEm18wSd3oKQ9eENKNZ74H2JyqmjnX6yVXcecP6NUj5gE3N2b5Pm5MjL37wveibdWHeSRQZFepWQdVAK5TLTgDL9YEE4jv5RLqB6vZ5eMtfSjhZ2",
+    "assets": [
+        {
+            "tokenId": "497287b9a1eff643791277744a74b7d598b834dc613f2ebc972e33767c61ac2b",
+            "index": 0,
+            "amount": 100,
+            "name": "RWT",
+            "decimals": 0,
+            "type": "EIP-004"
+        }
+    ],
+    "additionalRegisters": {
+        "R4": {
+            "serializedValue": "1a0120a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e",
+            "sigmaType": "Coll[Coll[SByte]]",
+            "renderedValue": "[a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e]"
+        },
+        "R5": {
+            "serializedValue": "0e0100",
+            "sigmaType": "Coll[SByte]",
+            "renderedValue": "00"
+        }
+    },
+    "spentTransactionId": "f6a8314c694e50864c8aee0e198711e76fb7a54c920d13329e51549935560b90",
+    "mainChain": true
+}`,
+    repoBoxWithWIDToken: `{
+    "boxId": "3582b12ab4413c9a877845e8faf18d546d1ae11ddd7bb365c0118c7abefdd157",
+    "transactionId": "f93fb2acde9429906b98d9c813fcb39f8ec7d42c60202e828d4f8118960c58fc",
+    "blockId": "28786ca9fd62d60b3ec4cb58cf14726ab3c66c60c29636081f0ffdbaf8663d08",
+    "value": 1100000,
+    "index": 0,
+    "globalIndex": 597538,
+    "creationHeight": 278003,
+    "settlementHeight": 278005,
+    "ergoTree": "101c040204000e20a6ac381e6fa99929fd1477b3ba9499790a775e91d4c14c5aa86e9a118dfac8530101040204000402040404040400040004020402040204000400040004000e2012a8eb76bd00653da26d9af3a3660d587ddbe90f54b71ec9a505222eaa009534040404000400040204020400040004000400d801d601b2a473000095938cb2db63087201730100017302d17303d811d602db6308a7d603b27202730400d6048c720302d605b2a5730500d606db63087205d607b27206730600d6088c720702d609e4c6a70511d60ab17209d60be4c672050511d60cb1720bd60de4c6a70611d60eb27206730700d60f8c720e02d610b27202730800d6118c721002d6129683050193c27205c2a793e4c672050611720d938cb27206730900018cb27202730a0001938c7207018c720301938c720e018c721001959172047208d806d613e4c67205041ad6149a720a730bd61599720c730cd616c5a7d6179972047208d618b2a5730d00d196830c01721293b17213721493b47213730e7215e4c6a7041a93b27213721500721693720c721493b4720b730f7215720993b2720b7215007217939c7217b2720d73100099720f7211938cb2db6308721873110002721793cbc27218731293e4c67218041a83010e7216938cb2db6308b2a5731300731400017216d804d613e4c6a7041ad614e4c672050704d6159972087204d616b27209721400d19683040172129383010eb27213721400e4c67201041a939c7215b2720d731500997211720f959172167215968302019372169ab2720b7214007215937213e4c67205041ad803d617e4c67205041ad6189a72147316d61999720a731796830501937216721593b4721373187214b472177319721493b472137218720ab472177214721993b47209731a7214b4720b731b721493b472097218720ab4720b72147219",
+    "address": "N9nHZxAm7Z476Nbw6yF2X6BQEct7nNCm4SJeCK8DJEkERj6LXMJvKqG49WWSfNDufuuFEtN8msfWDd8UR4QUCmLEwFRWXC5hxEdjTWfFYT8YqPrrYziDrjYzCbyzTjyht6qg4W5KPs6zNirtN7AyeTSMDeT6bRzL66kCSp8UFkmCsn9U4ZteWeFNp1xDtYtaqRE5SkABjwNsP5RioUY7hpbFhpWWQLosND6ys8eJJGkziwxjVV8goEEMzjGrTH5KUM8hDKQBAeNsiaZLLVfrAJBfFTHKggTLzkZQXB7Nhx6GP36E4jgAPPmKkvaKbtd7ANtfqpfjjBroCcK4E9ZVNM34r4BNaMazeBYxPAtcjFCeCTaMR7vRuaAVmX7xwLK3MYoHBH3NPH9usseDDxnz5sm21AqZVdp6t7CUi9xFb3qSnThFFPJk2fZF5FvCUkh2Vy9pYLs1E33kFC2cywrt6yWCc1iJ5Q6niAixG928UwFXvigcx2ZJrUmzHUKPhzJKHLKpi61BjeJiLgnYAiH59ciHH23sSuci9ffWE8G77uY4HX4F6JSuKAxaLbPeAQ4bZce86xmNYKEhjoz1FwQt5yUW4JPNhHCwYK57U1kPTU34UpFRUgvn9Vyktby4Wm9E6AVYGxg4s8PCX2EQkntzhzde1DcTEjd1KcsfXLUwxA9qYQd7XKvvzsb9sKMK6znaHUP18G6xbhBaQJjbuch1NXhLR7nAfyJWEyr2KGM8WvoUsVyzWBvzJTwFEW9GhEzTcbSxvFxWanQ5ezqeiMvBskHQCMdVwaG4N7vH4WJMkitDKAeKyaxcM7eFkZsSa8naW1CKCurAc4t1avXTWPg2d7vavwLFGwh5p63NGYd6DdYduobMVXjjYsr5MyNmTEPVAi8FVeDVi4VBiMdYjdM2K66aCTvT5qyMoa39ab9o",
+    "assets": [
+        {
+            "tokenId": "a29d9bb0d622eb8b4f83a34c4ab1b7d3f18aaaabc3aa6876912a3ebaf0da1018",
+            "index": 0,
+            "amount": 1,
+            "name": "repo NFT",
+            "decimals": 0,
+            "type": "EIP-004"
+        },
+        {
+            "tokenId": "497287b9a1eff643791277744a74b7d598b834dc613f2ebc972e33767c61ac2b",
+            "index": 1,
+            "amount": 900,
+            "name": "RWT",
+            "decimals": 0,
+            "type": "EIP-004"
+        },
+        {
+            "tokenId": "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516",
+            "index": 2,
+            "amount": 1100,
+            "name": "RSN",
+            "decimals": 0,
+            "type": "EIP-004"
+        }
+    ],
+    "additionalRegisters": {
+        "R4": {
+            "serializedValue": "1a02046572676f20a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e",
+            "sigmaType": "Coll[Coll[SByte]]",
+            "renderedValue": "[6572676f,a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e]"
+        },
+        "R5": {
+            "serializedValue": "110200c801",
+            "sigmaType": "Coll[SLong]",
+            "renderedValue": "[0,100]"
+        },
+        "R6": {
+            "serializedValue": "110414660012",
+            "sigmaType": "Coll[SLong]",
+            "renderedValue": "[10,51,0,9]"
+        },
+        "R7": {
+            "serializedValue": "0400",
+            "sigmaType": "SInt",
+            "renderedValue": "0"
+        }
+    },
+    "spentTransactionId": null,
+    "mainChain": true
+}`,
+    watcherBoxWithWIDToken: `{
+    "boxId": "8a3c4ffcadd2913f7e392bc345b45f4b9743e0edd266b8c80eb99a446e94531b",
+    "transactionId": "f93fb2acde9429906b98d9c813fcb39f8ec7d42c60202e828d4f8118960c58fc",
+    "blockId": "28786ca9fd62d60b3ec4cb58cf14726ab3c66c60c29636081f0ffdbaf8663d08",
+    "value": 1994800000,
+    "index": 2,
+    "globalIndex": 597540,
+    "creationHeight": 278003,
+    "settlementHeight": 278005,
+    "ergoTree": "0008cd028bcc85fa22006fa13767ab00af28ae0b2389d576fb59cfd0e46865e0449eeb8a",
+    "address": "9fadVRGYyiSBCgD7QtZU13BfGoDyTQ1oX918P8py22MJuMEwSuo",
+    "assets": [
+        {
+            "tokenId": "a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e",
+            "index": 0,
+            "amount": 1,
+            "name": null,
+            "decimals": null,
+            "type": null
+        },
+        {
+            "tokenId": "290202fee226b93997e2bbc4e7ffc99dc1b464d685b78e46f901f93240675a31",
+            "index": 1,
+            "amount": 1,
+            "name": null,
+            "decimals": null,
+            "type": null
+        },
+        {
+            "tokenId": "0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95",
+            "index": 2,
+            "amount": 8,
+            "name": "SWSE",
+            "decimals": 0,
+            "type": "EIP-004"
+        },
+        {
+            "tokenId": "064c58ea394d41fada074a3c560a132467adf4ca1512c409c014c625ca285e9c",
+            "index": 3,
+            "amount": 1,
+            "name": null,
+            "decimals": null,
+            "type": null
+        },
+        {
+            "tokenId": "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516",
+            "index": 4,
+            "amount": 3900,
+            "name": "RSN",
+            "decimals": 0,
+            "type": "EIP-004"
+        }
+    ],
+    "additionalRegisters": {},
+    "spentTransactionId": "2c4c2613d05d36c3595da22c426d398df2a99aa7184737048a90e6b1cf680c18",
+    "mainChain": true
+}`,
     watcherUnspentBoxes:
         `{
         "items": [

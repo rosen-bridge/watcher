@@ -1,7 +1,7 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { boxHaveAsset, decodeSerializedBox, ErgoUtils } from "./utils";
 import { Config } from "../config/config";
-import { rosenConfig } from "../config/rosenConfig";
+import { rosenConfigType } from "../config/rosenConfig";
 import { bigIntToUint8Array, hexStrToUint8Array } from "../utils/utils";
 import { WatcherDataBase } from "../database/models/watcherModel";
 import { Observation } from "../utils/interfaces";
@@ -24,21 +24,21 @@ export class Boxes{
     userAddressContract: wasm.Contract;
     repoAddressContract: wasm.Contract;
     repoAddress: wasm.Address;
-    rosenConfig: rosenConfig;
+    rosenConfig: rosenConfigType;
 
-    constructor(rosenConfig: rosenConfig, db: WatcherDataBase) {
+    constructor(rosenConfig: rosenConfigType, db: WatcherDataBase) {
         this.dataBase = db
-        this.repoNFTId = wasm.TokenId.from_str(config.RepoNFT);
-        this.RWTTokenId = wasm.TokenId.from_str(config.RWTId);
+        this.repoNFTId = wasm.TokenId.from_str(rosenConfig.RepoNFT);
+        this.RWTTokenId = wasm.TokenId.from_str(rosenConfig.RWTId);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
         const watcherPermitAddress = wasm.Address.from_base58(rosenConfig.watcherPermitAddress);
         this.watcherPermitContract = wasm.Contract.pay_to_address(watcherPermitAddress);
-        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
+        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(config.minBoxValue));
         const userAddress = wasm.Address.from_base58(config.address);
         this.userAddressContract = wasm.Contract.pay_to_address(userAddress);
         this.repoAddress = wasm.Address.from_base58(rosenConfig.RWTRepoAddress);
         this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
-        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
+        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee));
         this.rosenConfig = rosenConfig;
     }
 

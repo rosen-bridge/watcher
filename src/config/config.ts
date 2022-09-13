@@ -14,12 +14,13 @@ const COMMITMENT_HEIGHT_LIMIT: number | undefined = config.get?.('bridgeScanner.
 const CLEANUP_CONFIRMATION: number | undefined = config.get?.('bridgeScanner.cleanupConfirmation');
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
-const RWT_ID: string | undefined = config.get?.('ergo.RWTId');
-const REPO_NFT: string | undefined = config.get?.('ergo.repoNFT');
 const CARDANO_TIMEOUT: number | undefined = config.get?.('cardano.timeout');
 const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.('ergo.explorerTimeout');
 const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
 const NETWORK_WATCHER: string | undefined = config.get?.('network');
+const NETWORK_WATCHER_TYPE: string | undefined = config.get?.('networkType');
+const MIN_BOX_VALUE: string | undefined = config.get?.('minBoxValue');
+const FEE: string | undefined = config.get?.('fee');
 const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.('ergo.commitmentCreationInterval')
 const COMMITMENT_REVEAL_INTERVAL: number | undefined = config.get?.('ergo.commitmentRevealInterval')
 const TRANSACTION_CHECK_INTERVAL: number | undefined = config.get?.('ergo.transactions.interval')
@@ -27,8 +28,9 @@ const TRANSACTION_REMOVING_TIMEOUT: number | undefined = config.get?.('ergo.tran
 const TRANSACTION_CONFIRMATION: number | undefined = config.get?.('ergo.transactions.confirmation');
 const OBSERVATION_CONFIRMATION: number | undefined = config.get?.('observation.confirmation');
 const OBSERVATION_VALID_THRESH: number | undefined = config.get?.('observation.validThreshold');
-
 const supportedNetworks: Array<string> = ['ergo-node', 'cardano-koios']
+const ROSEN_CONFIG_PATH: string | undefined = config.get?.('rosenConfigPath');
+const ROSEN_TOKENS_PATH: string | undefined = config.get?.('rosenTokensPath');
 
 class Config {
     private static instance: Config;
@@ -39,12 +41,13 @@ class Config {
     nodeUrl: string;
     nodeTimeout: number;
     explorerTimeout: number;
-    RWTId: string;
-    RepoNFT: string;
     bridgeScanInterval: number;
     ergoInitialHeight: number
     cleanupConfirmation: number;
     networkWatcher: string;
+    networkWatcherType: string;
+    minBoxValue: string;
+    fee: string;
     commitmentCreationInterval: number;
     commitmentRevealInterval: number;
     transactionRemovingTimeout: number;
@@ -52,6 +55,8 @@ class Config {
     transactionCheckingInterval: number;
     observationConfirmation: number;
     observationValidThreshold: number;
+    rosenConfigPath: string;
+    rosenTokensPath: string;
 
     private constructor() {
         let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -83,12 +88,6 @@ class Config {
         if (NODE_URL === undefined) {
             throw new Error("Ergo Node Url is not set in the config");
         }
-        if (RWT_ID === undefined) {
-            throw new Error("RWTId doesn't set in config file");
-        }
-        if (REPO_NFT === undefined) {
-            throw new Error("Repo NFT doesn't set in config file");
-        }
         if (BRIDGE_SCAN_INTERVAL === undefined) {
             throw new Error("Commitment scanner interval doesn't set correctly");
         }
@@ -109,6 +108,9 @@ class Config {
         }
         if (!NETWORK_WATCHER || !supportedNetworks.includes(NETWORK_WATCHER)) {
             throw new Error("Watching Bridge is not set correctly");
+        }
+        if (NETWORK_WATCHER_TYPE === undefined) {
+            throw new Error("Network watcher type is not set correctly");
         }
         if (!COMMITMENT_CREATION_INTERVAL) {
             throw new Error("Commitment creation job interval is not set");
@@ -131,6 +133,18 @@ class Config {
         if (!OBSERVATION_VALID_THRESH) {
             throw new Error("Watcher observation valid thresh doesn't set correctly");
         }
+        if (MIN_BOX_VALUE === undefined) {
+            throw new Error("Watcher min box value doesn't set correctly");
+        }
+        if (FEE === undefined) {
+            throw new Error("Watcher Fee doesn't set correctly");
+        }
+        if (ROSEN_CONFIG_PATH === undefined) {
+            throw new Error("RosenConfig file path doesn't set correctly");
+        }
+        if (ROSEN_TOKENS_PATH === undefined) {
+            throw new Error("Rosen Tokens file path doesn't set correctly");
+        }
 
         const secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(SECRET_KEY, "hex"))
         const watcherAddress: string = secretKey.get_address().to_base58(networkType)
@@ -143,11 +157,10 @@ class Config {
         this.nodeUrl = NODE_URL;
         this.explorerTimeout = ERGO_EXPLORER_TIMEOUT;
         this.nodeTimeout = ERGO_NODE_TIMEOUT;
-        this.RWTId = RWT_ID;
-        this.RepoNFT = REPO_NFT;
         this.bridgeScanInterval = BRIDGE_SCAN_INTERVAL;
         this.cleanupConfirmation = CLEANUP_CONFIRMATION;
-        this.networkWatcher = NETWORK_WATCHER
+        this.networkWatcher = NETWORK_WATCHER;
+        this.networkWatcherType = NETWORK_WATCHER_TYPE;
         this.commitmentCreationInterval = COMMITMENT_CREATION_INTERVAL
         this.commitmentRevealInterval = COMMITMENT_REVEAL_INTERVAL
         this.transactionCheckingInterval = TRANSACTION_CHECK_INTERVAL
@@ -156,6 +169,10 @@ class Config {
         this.observationConfirmation = OBSERVATION_CONFIRMATION
         this.observationValidThreshold = OBSERVATION_VALID_THRESH
         this.ergoInitialHeight = ERGO_INITIAL_HEIGHT
+        this.minBoxValue = MIN_BOX_VALUE;
+        this.fee = FEE;
+        this.rosenConfigPath = ROSEN_CONFIG_PATH;
+        this.rosenTokensPath = ROSEN_TOKENS_PATH;
     }
 
     static getConfig() {
@@ -202,4 +219,4 @@ class CardanoConfig {
     }
 }
 
-export { Config, CardanoConfig}
+export { Config, CardanoConfig }

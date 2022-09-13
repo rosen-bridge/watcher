@@ -5,14 +5,13 @@ import { Buffer } from "buffer";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import { boxCreationError, NotEnoughFund } from "../errors/errors";
-import { rosenConfig } from "../config/rosenConfig";
 import { Config } from "../config/config";
 import { TxType } from "../database/entities/txEntity";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { TransactionUtils, WatcherUtils } from "../utils/watcherUtils";
 
-const txFee = BigInt(rosenConfig.fee)
 const config = Config.getConfig();
+const txFee = BigInt(config.fee);
 
 export class CommitmentReveal {
     watcherUtils: WatcherUtils

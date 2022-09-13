@@ -5,9 +5,8 @@ import { loadDataBase } from "../database/watcherDatabase";
 import { ErgoUtils } from "../../src/ergo/utils";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { hexStrToUint8Array } from "../../src/utils/utils";
-import { rosenConfig, tokens } from "../ergo/transactions/permit";
+import {  tokens } from "../ergo/transactions/permit";
 import { initMockedAxios } from "../ergo/objects/axios";
-import { boxesSample } from "../ergo/dataset/BoxesSample";
 import { JsonBI } from "../../src/ergo/network/parser";
 import { PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
@@ -25,7 +24,11 @@ import chaiPromise from "chai-as-promised"
 import permitObj from "./dataset/permitBox.json" assert { type: "json" }
 import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
+import { Config } from "../../src/config/config";
+import { rosenConfig } from "../../src/config/rosenConfig";
+import { mockedResponseBody } from "../ergo/objects/mockedResponseBody";
 
+const config = Config.getConfig();
 const permitJson = JsonBI.stringify(permitObj)
 const WIDJson = JsonBI.stringify(WIDObj)
 const plainJson = JsonBI.stringify(plainObj)
@@ -235,11 +238,11 @@ describe("Testing Box Creation", () => {
          */
         it("should return repoBox (with tracking mempool)", async () => {
             initMockedAxios(1)
-            const box = wasm.ErgoBox.from_json(boxesSample.repoLastBox)
+            const box = wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken)
             chai.spy.on(ErgoNetwork, "getBoxWithToken", () => box)
             chai.spy.on(ErgoNetwork, "trackMemPool", (box) => box)
             await boxes.getRepoBox();
-            expect(ErgoNetwork.getBoxWithToken).to.have.been.called.with(boxes.repoAddress, "a40b86c663fbbfefa243c9c6ebbc5690fc4e385f15b44c49ba469c91c5af0f48");
+            expect(ErgoNetwork.getBoxWithToken).to.have.been.called.with(boxes.repoAddress, "a29d9bb0d622eb8b4f83a34c4ab1b7d3f18aaaabc3aa6876912a3ebaf0da1018");
             expect(ErgoNetwork.trackMemPool).to.have.been.called.with(box)
         });
     });
@@ -264,7 +267,7 @@ describe("Testing Box Creation", () => {
             )
 
             expect(repoBox.tokens().len()).to.be.equal(3);
-            expect(repoBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
+            expect(repoBox.value().as_i64().to_str()).to.be.equal(config.minBoxValue);
             expect(repoBox.tokens().get(1).amount().as_i64().to_str()).to.be.equal(RWTCount);
             expect(repoBox.tokens().get(2).amount().as_i64().to_str()).to.be.equal(RSNCount);
         })
@@ -285,7 +288,7 @@ describe("Testing Box Creation", () => {
                 RWTCount,
                 WID
             )
-            expect(permitBox.value().as_i64().to_str()).to.be.equal(rosenConfig.minBoxValue);
+            expect(permitBox.value().as_i64().to_str()).to.be.equal(config.minBoxValue);
             expect(permitBox.tokens().len()).to.be.equal(1);
             expect(permitBox.tokens().get(0).amount().as_i64().to_str()).to.be.equal(RWTCount.toString());
             expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(rosenConfig.RWTId);
@@ -347,7 +350,7 @@ describe("Testing Box Creation", () => {
                 wasm.Address.from_base58(permit)
             ))
             const data = boxes.createCommitment(10, WID, firstCommitment.eventId, Buffer.from(firstCommitment.commitment, 'hex'), permitHash)
-            expect(BigInt(data.value().as_i64().to_str())).to.eql(BigInt(rosenConfig.minBoxValue.toString()))
+            expect(BigInt(data.value().as_i64().to_str())).to.eql(BigInt(config.minBoxValue.toString()))
             expect(data.tokens().len()).to.eq(1)
             expect(data.tokens().get(0).amount().as_i64().as_num()).to.eq(1)
         })

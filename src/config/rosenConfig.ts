@@ -1,7 +1,10 @@
-export type rosenConfig = {
+import fs from "fs";
+import { Config } from "./config";
+
+const ergoConfig = Config.getConfig();
+
+type rosenConfigType = {
     RSN: string;
-    minBoxValue: string;
-    fee: string;
     guardNFT: string;
     cleanupNFT: string;
     cleanupConfirm: number;
@@ -10,21 +13,55 @@ export type rosenConfig = {
     fraudAddress: string;
     eventTriggerAddress: string;
     commitmentAddress: string;
-    lockAddress: string
+    lockAddress: string;
+    RepoNFT: string;
+    RWTId: string;
 }
 
-export const rosenConfig: rosenConfig = {
-    RSN: "fc3de5322354d773edc152d39ac615dd04f4dc9b9b7e6eb1949474c86e3c8a6c",
-    minBoxValue: "1100000",
-    fee: "1100000",
-    guardNFT: "c852bfad53e7b8cecb98399d56df86b8f662e2613bff81e1d7503e23e6c85e17",
-    cleanupNFT: "ac0c16cee8caefd0814c5568a9d50bea51fec88e8abbd3ac8347b94d054a1b65",
-    cleanupConfirm: 0,
-    watcherPermitAddress: "EE7687i4URb4YuSGSQXPCbD7ARzwxrw86g6k3uRjnkshajwnRhWp4mxD5QWLunk7cB8DMAG4dLuQQkTruaRWV7ocK3YbcD4LYAVEUf7H4jGriaD2eNGLzs4rC1yN2MYhqMYMYUeVGBfAYU7gH8UcRZDivpWAPsSoR2ZN3pkjE77WZWroUxk6CkEeu7dgRw9Fk1tkNoZAWVt5o91D4gmdqjLfcwgBnwGksg4ps3RpjUY9pRryppm5mJxBtTCPFoAiFpfzJStw39Grk5SxiioHFLjfyDzCNzeRZVXrSEacAx3xCzkC8C6qrKEJVDxiF4wiqLuTUvovCqV8YnbepgHXoGAEpaAMGBBHvTChzajVai59uR8NaaLxb74wQZ74pcpHEQQF6yngQu61WRXifL9UfxQjfoSQpc323UFGrSTB99tfLYQt6CR2KWN2zTHi8mFd5Zd4DRQnaYCMPYh8dggQidtLnKRbbyZrJ5i3tLFwaFiKQeJ7ojCoNND27vgG1S3sq19293jQsj1pcfXsnE4nU1pqmqJpkWMDEh9ZMHf",
-    RWTRepoAddress: "N9nHZxAm7Z48KgmdVqvgJcEf2dhrKXw8tzzHLngn1m1Fs25TDZqrDo5xa8YuDy2kA3SkqFnxtLiVR2eTyCkBXYD9UFf9YKjUDVk3LsLjinaCqhE64aHoRBFLkLrMtcKSdpzVDTqSpP25a1ZnX6wdA5TxzUb3pmKB1MnjNY8orj2BiTHCk8o2qpPJHXLfuK6o9NC4UK8UwCRkdnU4HRp63W8zjF68QeGvEjeaRngh8mj15LSiir3ZDBGxb1t3pSh3Bs35Tei58kX2GgEBeb83WjeQaqLVwyLN92zBFfuZhBZmJZrj5q1fzG64FynR8UcoQnRDM8P6F2LWTmjoV1C22u2c44Ajiht5pWTnD7d8mzt1KFFe8uhspb656ZCv6SgpwYfedkgqdfeaLauLGk6aQ8z4zruuC8qe1uLFoBS5WcPAtCspYkj4VfesU2uFuRq6XEpV2qi6tNGUAGjaj3MsFrSu5HqDeV6YcWG2fAPD3mK9YVEDuLNdLTLbegjiP5YXNxBAzFWj2DVCbSgsi52suCs4CEe4iMq1ygFEEimhhJcEGfdMyZzY3aXuUYdNDjf4dmjvBnoavdfpx6NHsJpAbUsDfa9F29unpqESeht48Pvo9KhBd1CJefkGS3L9rawjAXN2mR8rvkxUpGJwnnGyB7dxAetRgsg17hSFg3VWXXF58zRChTAT9oL6ZW8EmnWyegJrhMxRZbBm14ZhVT52wFiGYfWyfMU9CMob7ixE1MtqK1Ek5mpH88JaV1Rd332SJx7E64UhjgCxnjCeqG4fx4VHTWrxXuT3Qw4zWMMScSit2zVS8P7xE5VV6eymnrh7hhs4J9Nuxh6KCYW9nhZj4TbWeSEgxd5wXnsfxDFTWbC91Csadzaoua8WBacR5kp1fLLjRFhvom65eZ5Qg7b6cf6WU4k16fKztPA4qC38",
-    fraudAddress: "LFz5FPkW7nPVq2NA5YccJ6GgXuyPjSQ9VdHo6hrJsJxpRNnFjvPL6peYRnmDWYHFzEMGcL6hwq3E4hKkXf3oi8jjadjQU8nxqu8bHsxSbvXhgDZrYV8EzAZLNT4Ab5h8Xe21YEEwvHeBB4htnT7WeAGj5ATx8UvZvjWbukWXe11FcgWJDcn5oKdK8ENUHUkUV8deRh1kQ8LenXxSbgGUdCHttcqPgQ8XWx5bgCxSXTkmYg3NfHX1T",
-    eventTriggerAddress: "LkY4RECaMvZe2e3ZYwz2pihuiqvyf1GVSRgAjh9kvkPzzAysv6Je5ei72PHZjMJ5mqcdYpcjMZxZQR4wDtCRieeCBM7BAyCsWzRXrtRHPNKGbvfARmY29vjSfjEHSEX2BioHkDQ7u7EpAb5ovNX3T7AQeYJyuGHumMHYqDT6Jd7pCkxr9LK5XuyN1TmUC4rZ4V1ZMvA5manQddn6GatvwXRrh1o5uqNRi5cxK1WB6ZZTTTG8gcgG2XMJdP6yKk6LupEwLiPcToX9Gusiu4dF4zjimhLnTAB2soYsUYEfn9QmNBCi7kiS1yvPEpHe7ZCKryQdcJwEWNLaWC3zuhB7kVoLxBATZtjYnMjHh9PwhdC2VWFJKWhQ",
-    commitmentAddress: "58grLgCGkZwpT9TwSMrRDtQwdYVNGbNkDQf97NWS44TzHKrk6CAUYDEh6YKQTp5GTjj2XKrhWe8thrmhWo6DVbyaLwLcJaMnYyiF6jR6DdA3AFD93FUB2h6nMtEgWWhYiboRLWKEwuokPEytPPUrs9DpJU2PYRzSagchSSo3fPpSgxB2yq6TVoWv8DsjELyCjf3B7RSHTWpNLcr3Jw7uFbFVvQ9eASKxNeChDMVhuF43HbShvVHCEXQeS3ZDDAwZbwasGkVzrkWriGpFrReijvdXnz52DBtwdKyE1n8WWtjrtTMB4DrGEX6nfpSPEhALW5sWiqFNiGUoQEvmYQYb2nc2qV3fEFtskFnWSKUjkGKAQ9jMKsbksDGQhLprw1Hnv6eNPGQYjkznpA9KSW1wFZHDFCg2jkXwhcY2TvxixDgwAuS9XLc2fM3WoUNeJ9ZoSN1gTvFc12r2hc8WUMZ9v8xLdA5vR9sz2bu6afwEoFaS1QMHj3a3uniwwVYVyeJnAmVwCAJAQ8qYmGyqoy2WcjBJbF2zzetVfZyLFCGVCkAsx8L68zjcctyy59Kf5YD1yHEFDkCY4fNaT6W2TMSGdTkDA2rxRJwciVuy8d5iRHqZvWLgoY2GtRcDbRyYF4dd3fHvVPZrceC1neEm6ipZHKLjQaTtMsS36DpGzWKZf6WJWYCu6n12ubc8JDznQymRNSmsGMw6faDHvpG4TPZdt96LCqaV4bCyS3vV7peeDbSB2oVGj3wWetsCEphnxaF872oW3Jfym1n8XADBz8oAhCSkCcxpEDpxwMDK18PzFvRqJQZQ8bBhYrVpJvV9VQQwV7sCEKnK81f5SADoD",
-    lockAddress: "nB3L2PD3M54CjQFNzFW3zohrwj6uNuSzTLBJjcvEJ13pfPWprG22W1DkThinRAKNs3UL7QM2uzFH5oJdqNF15i5fvzt5rezH7NVaKdeDazF94mgwab773KwB9NTGryKykkjterpezHdST",
-};
+class RosenConfig{
+    readonly RSN: string;
+    readonly guardNFT: string;
+    readonly cleanupNFT: string;
+    readonly cleanupConfirm: number;
+    readonly watcherPermitAddress: string;
+    readonly RWTRepoAddress: string;
+    readonly fraudAddress: string;
+    readonly eventTriggerAddress: string;
+    readonly commitmentAddress: string;
+    readonly lockAddress: string;
+    readonly RepoNFT: string;
+    readonly RWTId: string;
 
+    constructor(network: string, networkType: string) {
+        const rosenConfigPath = this.getAddress(network, networkType);
+        if (!fs.existsSync(rosenConfigPath)) {
+            throw new Error(`rosenConfig file with path ${rosenConfigPath} doesn't exist`);
+        } else {
+            const configJson: string = fs.readFileSync(rosenConfigPath, 'utf8');
+            const config = JSON.parse(configJson);
+            this.RSN = config.tokens.RSN;
+            this.guardNFT = config.tokens.GuardNFT;
+            this.cleanupNFT = config.tokens.CleanupNFT;
+            this.cleanupConfirm = config.cleanupConfirm;
+            this.watcherPermitAddress = config.addresses.WatcherPermit;
+            this.RWTRepoAddress = config.addresses.RWTRepo;
+            this.fraudAddress = config.addresses.Fraud;
+            this.eventTriggerAddress = config.addresses.WatcherTriggerEvent;
+            this.commitmentAddress = config.addresses.Commitment;
+            this.lockAddress = config.addresses.lock;
+            this.RepoNFT = config.tokens.RepoNFT;
+            this.RWTId = config.tokens.RWTId;
+        }
+    }
+
+    getAddress = (network: string, networkType: string) => {
+        return ergoConfig.rosenConfigPath + `${network}-${networkType}.json`;
+    }
+
+}
+
+const network = ergoConfig.networkWatcher.split("-")[0].toLowerCase();
+const networkType = ergoConfig.networkWatcherType.toLowerCase();
+const rosenConfig: rosenConfigType = new RosenConfig(network, networkType);
+
+export { RosenConfig, rosenConfigType, rosenConfig };

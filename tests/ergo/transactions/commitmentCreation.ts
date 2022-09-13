@@ -1,6 +1,6 @@
 import { Boxes } from "../../../src/ergo/boxes";
 import { Transaction } from "../../../src/api/Transaction";
-import { rosenConfig, secret1 } from "./permit";
+import { secret1 } from "./permit";
 import { CommitmentCreation } from "../../../src/transactions/commitmentCreation";
 import { JsonBI } from "../../../src/ergo/network/parser";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
@@ -22,6 +22,7 @@ import WIDObj from "./dataset/WIDBox.json" assert { type: "json" }
 import WIDObj2 from "./dataset/WIDBox2.json" assert { type: "json" }
 import plainObj from "./dataset/plainBox.json" assert { type: "json" }
 import txObj from "./dataset/commitmentTx.json" assert { type: "json" }
+import { rosenConfig } from "../../../src/config/rosenConfig";
 
 
 chai.use(spies)

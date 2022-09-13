@@ -1,7 +1,7 @@
 import { ErgoNetwork } from "../ergo/network/ergoNetwork";
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { hexStrToUint8Array, uint8ArrayToHex } from "../utils/utils";
-import { rosenConfig } from "../config/rosenConfig";
+import { rosenConfigType } from "../config/rosenConfig";
 import { Config } from "../config/config";
 import { Boxes } from "../ergo/boxes";
 import { ErgoUtils } from "../ergo/utils";
@@ -35,7 +35,7 @@ export class Transaction{
      * @param boxes
      */
     constructor(
-        rosenConfig: rosenConfig,
+        rosenConfig: rosenConfigType,
         userAddress: string,
         userSecret: wasm.SecretKey,
         boxes: Boxes
@@ -43,8 +43,8 @@ export class Transaction{
         this.watcherPermitState = undefined;
         this.watcherWID = "";
         this.boxes = boxes;
-        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee));
-        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue));
+        this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee));
+        this.minBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(config.minBoxValue));
         this.userSecret = userSecret
         this.userAddress = wasm.Address.from_base58(userAddress);
         this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
@@ -124,13 +124,13 @@ export class Transaction{
                 RWTCount.toString()
             )
         );
+        const RSNRWTRatio = R6.to_i64_str_array()[0];
         const RSNTokenCount = repoBox.tokens().get(2).amount().as_i64().checked_add(
             wasm.I64.from_str(
-                (RWTCount * (-BigInt("100"))).toString()
+                (RWTCount * (-BigInt(RSNRWTRatio))).toString()
             )
         );
 
-        const RSNRWTRatio = R6.to_i64_str_array()[0];
 
         const repoOut = await this.boxes.createRepo(
             height,
@@ -269,7 +269,6 @@ export class Transaction{
         const RSNRWTRation = R6.to_i64_str_array()[0];
 
         const RWTCount = RSNCount / BigInt(R6.to_i64_str_array()[0]);
-
         const RSNInput = await ErgoNetwork.getBoxWithToken(this.userAddress, this.RSN.to_str())
         const users: Array<Uint8Array> = R4.to_coll_coll_byte();
         const repoBoxId = repoBox.box_id().as_bytes();
@@ -289,7 +288,6 @@ export class Transaction{
                 (RWTCount * BigInt(RSNRWTRation)).toString()
             )
         );
-
         const repoOut = await this.boxes.createRepo(
             height,
             RepoRWTCount.to_str(),

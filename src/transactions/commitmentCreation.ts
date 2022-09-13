@@ -103,7 +103,7 @@ export class CommitmentCreation {
                         .reduce((a, b) => a + b, BigInt(0)) +
                     BigInt(WIDBox.value().as_i64().to_str())
                 console.log("WID Box: ", WIDBox.box_id().to_str(), WIDBox.value().as_i64().to_str())
-                const requiredValue = BigInt(rosenConfig.fee) + BigInt(rosenConfig.minBoxValue) * BigInt(3)
+                const requiredValue = BigInt(config.fee) + BigInt(config.minBoxValue) * BigInt(3)
                 let feeBoxes: Array<wasm.ErgoBox> = []
                 console.log("Total value is: ", totalValue, " Required value is: ", requiredValue)
                 if (totalValue < requiredValue) {

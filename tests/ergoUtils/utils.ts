@@ -2,7 +2,7 @@ import { Observation } from "../../src/utils/interfaces";
 import { ErgoUtils, extractBoxes } from "../../src/ergo/utils";
 import { uint8ArrayToHex } from "../../src/utils/utils";
 import { Config } from "../../src/config/config";
-import { rosenConfig } from "../../src/config/rosenConfig";
+import { rosenConfigType } from "../../src/config/rosenConfig";
 import { boxCreationError } from "../../src/errors/errors";
 import { ErgoNetwork } from "../../src/ergo/network/ergoNetwork";
 import { Address } from "ergo-lib-wasm-nodejs";
@@ -58,7 +58,7 @@ describe("Testing ergoUtils", () => {
         const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson)
         const totalValue = extractBoxes(boxes).map(box => box.value().as_i64().as_num()).reduce((a, b) => a + b, 0)
         const secret = config.secretKey
-        const txFee = parseInt(rosenConfig.fee)
+        const txFee = parseInt(config.fee)
         const contract = wasm.Contract.pay_to_address(secret.get_address())
 
         /**
@@ -163,7 +163,7 @@ describe("Testing ergoUtils", () => {
          */
         it("should sign an arbitrary transaction", async () => {
             initMockedAxios(0);
-            const outValue = BigInt(rosenConfig.minBoxValue) + BigInt(rosenConfig.fee);
+            const outValue = BigInt(config.minBoxValue) + BigInt(config.fee);
             const add = Address.from_base58(userAddress)
             const transactionInput = await ErgoNetwork.getErgBox(
                 add,
@@ -179,7 +179,7 @@ describe("Testing ergoUtils", () => {
             const height = await ErgoNetwork.getHeight();
 
             const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
-                wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue.toString())),
+                wasm.BoxValue.from_i64(wasm.I64.from_str(config.minBoxValue.toString())),
                 wasm.Contract.pay_to_address(add),
                 height
             );
@@ -194,9 +194,9 @@ describe("Testing ergoUtils", () => {
                 boxSelection,
                 txOutBox,
                 height,
-                wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.fee.toString())),
+                wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee.toString())),
                 add,
-                wasm.BoxValue.from_i64(wasm.I64.from_str(rosenConfig.minBoxValue.toString())),
+                wasm.BoxValue.from_i64(wasm.I64.from_str(config.minBoxValue.toString())),
             );
 
             const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);
