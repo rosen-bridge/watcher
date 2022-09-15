@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as wasm from "ergo-lib-wasm-nodejs";
-import { AddressBoxes, ErgoTx, ExplorerTransaction } from "./types";
+import { AddressBoxes, Balance, ErgoTx, ExplorerTransaction } from "./types";
 import { JsonBI } from "./parser";
 import { Config } from "../../config/config";
 import { ergoTreeToBase58Address } from "../../utils/utils";
@@ -28,6 +28,14 @@ export class ErgoNetwork{
         return nodeClient.get<{fullHeight: number}>("/info").then(res => res.data.fullHeight);
     }
 
+    static getBalanceConfirmed = async (address: string): Promise<Balance> => {
+        return explorerApi.get<Balance>(
+            `/api/v1/addresses/${address}/balance/confirmed`,
+            {transformResponse: data => JsonBI.parse(data)}
+        ).then(
+            res => res.data
+        )
+    }
     /**
      * gets unspent boxes for a specific ergotree with default limit of 100 and offset 0
      * @param tree

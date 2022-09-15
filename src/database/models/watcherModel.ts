@@ -279,6 +279,8 @@ class WatcherDataBase {
             .getMany()
     }
 
+    getAllAddressBoxesPermitBox
+
     /**
      * Returns an eventTriggerEntity with the specified sourceTxId
      * @param sourceTxId

@@ -17,8 +17,8 @@
         "name": "cardano"
     },
     "ergo": {
-        "explorerUrl": "change",
-        "nodeUrl": "change",
+        "explorerUrl": "http://10.10.9.3:7000/",
+        "nodeUrl": "http://10.10.9.3:9065/",
         "explorerTimeout": 20000,
         "nodeTimeout": 100000,
         "networkType": "Mainnet",

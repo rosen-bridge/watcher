@@ -7,7 +7,7 @@ type TxOutput = {
     address: string,
 }
 
-export type ErgoTx = {
+type ErgoTx = {
     inputs: Array<TxInput>,
     outputs: Array<TxOutput>,
 }
@@ -19,20 +19,33 @@ type Asset = {
     name: string,
 }
 
-export interface ErgoBoxJson  {
+interface ErgoBoxJson{
     boxId: string,
     address: string,
     value: bigint,
     assets?: Array<Asset>,
 }
 
-export interface AddressBoxes  {
+interface AddressBoxes{
     items: Array<ErgoBoxJson>,
     total: number,
 }
 
-export interface ExplorerTransaction {
+interface ExplorerTransaction{
     id: string,
     creationTimestamp: number,
     numConfirmations: number,
+}
+
+interface Balance{
+    nanoErgs: bigint,
+    tokens: Array<Asset>,
+}
+
+export {
+    ErgoTx,
+    ErgoBoxJson,
+    AddressBoxes,
+    ExplorerTransaction,
+    Balance
 }

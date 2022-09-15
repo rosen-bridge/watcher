@@ -96,6 +96,10 @@ export class Boxes{
         }
     }
 
+    getAllCommitments = async ()=>{
+
+    }
+
     /**
      * Returns unspent watcher boxes covering the required erg value (Considering the mempool)
      * @param requiredValue

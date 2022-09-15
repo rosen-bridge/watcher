@@ -14,6 +14,7 @@ import { reveal } from "./jobs/commitmetnReveal";
 import { transactionQueueJob } from "./jobs/transactionQueue";
 import { delay} from "./utils/utils";
 import { TransactionUtils, WatcherUtils } from "./utils/watcherUtils";
+import Statistics from "./statistics/statistics";
 
 const config = Config.getConfig();
 
@@ -22,65 +23,68 @@ let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
 let watcherUtils: WatcherUtils;
 
-const init = async () => {
-    const generateTransactionObject = async (): Promise<Transaction> => {
+// const init = async () => {
+//     const generateTransactionObject = async (): Promise<Transaction> => {
+//
+//         await dataSource.initialize();
+//         await dataSource.runMigrations();
+//         watcherDatabase = new WatcherDataBase(dataSource)
+//         boxesObject = new Boxes(rosenConfig, watcherDatabase)
+//
+//         return new Transaction(
+//             rosenConfig,
+//             config.address,
+//             config.secretKey,
+//             boxesObject,
+//         );
+//     }
+//
+//     const initExpress = () => {
+//         const app = express();
+//         app.use(express.json())
+//
+//         const router = Router();
+//         router.use('/address', addressRouter);
+//         router.use('/permit', permitRouter);
+//
+//         app.use(router)
+//         const port = process.env.PORT || 3000;
+//
+//         app.listen(port, () => console.log(`app listening on port ${port}`));
+//     }
+//
+//     generateTransactionObject().then(
+//         async (res) => {
+//             watcherTransaction = res;
+//             initExpress();
+//             // Initializing database
+//             watcherDatabase = new WatcherDataBase(dataSource)
+//             // Running network scanner thread
+//             scannerInit()
+//
+//             await delay(10000)
+//             watcherUtils = new WatcherUtils(
+//                 watcherDatabase,
+//                 watcherTransaction,
+//                 config.observationConfirmation,
+//                 config.observationValidThreshold
+//             )
+//             const txUtils = new TransactionUtils(watcherDatabase)
+//             // Running transaction checking thread
+//             transactionQueueJob(watcherDatabase, watcherUtils)
+//             // Running commitment creation thread
+//             creation(watcherUtils, txUtils, boxesObject, watcherTransaction)
+//             // Running trigger event creation thread
+//             reveal(watcherUtils, txUtils, boxesObject)
+//         }
+//     ).catch(e => {
+//         console.log(e)
+//     });
+// }
+//
+// if (process.env.NODE_ENV === undefined || process.env.NODE_ENV !== "test") {
+//     init().then(() => null);
+// }
 
-        await dataSource.initialize();
-        await dataSource.runMigrations();
-        watcherDatabase = new WatcherDataBase(dataSource)
-        boxesObject = new Boxes(rosenConfig, watcherDatabase)
-
-        return new Transaction(
-            rosenConfig,
-            config.address,
-            config.secretKey,
-            boxesObject,
-        );
-    }
-
-    const initExpress = () => {
-        const app = express();
-        app.use(express.json())
-
-        const router = Router();
-        router.use('/address', addressRouter);
-        router.use('/permit', permitRouter);
-
-        app.use(router)
-        const port = process.env.PORT || 3000;
-
-        app.listen(port, () => console.log(`app listening on port ${port}`));
-    }
-
-    generateTransactionObject().then(
-        async (res) => {
-            watcherTransaction = res;
-            initExpress();
-            // Initializing database
-            watcherDatabase = new WatcherDataBase(dataSource)
-            // Running network scanner thread
-            scannerInit()
-
-            await delay(10000)
-            watcherUtils = new WatcherUtils(
-                watcherDatabase,
-                watcherTransaction,
-                config.observationConfirmation,
-                config.observationValidThreshold
-            )
-            const txUtils = new TransactionUtils(watcherDatabase)
-            // Running transaction checking thread
-            transactionQueueJob(watcherDatabase, watcherUtils)
-            // Running commitment creation thread
-            creation(watcherUtils, txUtils, boxesObject, watcherTransaction)
-            // Running trigger event creation thread
-            reveal(watcherUtils, txUtils, boxesObject)
-        }
-    ).catch(e => {
-        console.log(e)
-    });
-}
-
-if (process.env.NODE_ENV === undefined || process.env.NODE_ENV !== "test") {
-    init().then(() => null);
-}
+const temp=Statistics.getInstance();
+temp.getErgs().then(res=>console.log(res))
