@@ -1,6 +1,5 @@
 export const boxesSample = {
-    firstRepoBox:
-        `{
+  firstRepoBox: `{
             "boxId": "b56c1c51234dcaa9bfdc46db052dae1b0b53ea77b87fe9f4ed2c8a24994fb42c",
             "transactionId": "dc84702d37d98367149572e1e01361c66e1b4f531ea7e0813b510e3fec91fbeb",
             "blockId": "0918e0d916d547902cf67ddab4020d12690ca558252871dd6f5c150dcd8dad2a",
@@ -37,7 +36,7 @@ export const boxesSample = {
             "mainChain": true
         }`,
 
-    secondRepoBox: `
+  secondRepoBox: `
     {
         "boxId": "2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350",
         "transactionId": "dc84702d37d98367149572e1e01361c66e1b4f531ea7e0813b510e3fec91fbeb",
@@ -101,8 +100,7 @@ export const boxesSample = {
         "mainChain": true
     }`,
 
-    thirdRepoBox:
-        `{
+  thirdRepoBox: `{
             "boxId": "636c5fe2c9a58041699373b21edae447574d6590782ee653638b9d3f66295728",
             "transactionId": "834703d2f92d8deea32dd977c5c2875800aabf41963d533fd64f5b5ec7dc1c80",
             "blockId": "ea948b613a3979ed9f594d2a775095755c938a61aa763388519c5ad7b6283a0b",
@@ -165,8 +163,7 @@ export const boxesSample = {
             "mainChain": true
         }`,
 
-    repoLastBox:
-        `{
+  repoLastBox: `{
             "boxId": "2420251b88745c325124fac2abb6f1d3c0f23db66dd5d561aae6767b41cb5350",
             "transactionId": "dc84702d37d98367149572e1e01361c66e1b4f531ea7e0813b510e3fec91fbeb",
             "blockId": "0918e0d916d547902cf67ddab4020d12690ca558252871dd6f5c150dcd8dad2a",
@@ -229,8 +226,7 @@ export const boxesSample = {
             "mainChain": true
         }`,
 
-    firstWatcherPermitBox:
-        `{
+  firstWatcherPermitBox: `{
             "boxId": "b56c1c51234dcaa9bfdc46db052dae1b0b53ea77b87fe9f4ed2c8a24994fb42c",
             "transactionId": "dc84702d37d98367149572e1e01361c66e1b4f531ea7e0813b510e3fec91fbeb",
             "blockId": "0918e0d916d547902cf67ddab4020d12690ca558252871dd6f5c150dcd8dad2a",
@@ -267,7 +263,7 @@ export const boxesSample = {
             "mainChain": true
             }`,
 
-    firstPermitBox: `
+  firstPermitBox: `
         {
             "boxId": "6056eeef3715c6153c9123f22060cd684aaa3d6f6e3eb008c04f57292126c917",
             "transactionId": "834703d2f92d8deea32dd977c5c2875800aabf41963d533fd64f5b5ec7dc1c80",
@@ -305,7 +301,7 @@ export const boxesSample = {
             "mainChain": true
         }
     `,
-    secondPermitBox: `
+  secondPermitBox: `
     {
         "boxId": "fe92da4e3f2d377dba4b653caf1f13211fada224a41b59872971b8defe89aafb",
         "transactionId": "aa553fd62c0806028db7b1722bb1fc3c6d6296bf816728cab6e6bf0c36c1f71f",
@@ -337,7 +333,7 @@ export const boxesSample = {
         "spentTransactionId": null,
         "mainChain": true
     }`,
-    thirdPermitBox: `
+  thirdPermitBox: `
     {
         "boxId": "fe27e70a073921f0a154ea96d623fe1414188ccf7acacb5210c037f63751807d",
         "transactionId": "a52262ecb452c8a0919b4e571fab2abfa69787bae07a9a9d081821740d4ee7cf",
@@ -375,7 +371,7 @@ export const boxesSample = {
         "mainChain": true
     }
     `,
-    forthPermitBox: `
+  forthPermitBox: `
     {
         "boxId": "e1cc015338053ecd9cdaf67c89a816880626141f2d8b15a075a3739e910e4d57",
         "transactionId": "3a714c9d495f223c7e5d254b051cd016287dd051e43f60c3e6e84e26a096631a",
@@ -412,7 +408,7 @@ export const boxesSample = {
         "spentTransactionId": null,
         "mainChain": true
     }`,
-    fifthPermitBox: `
+  fifthPermitBox: `
     {
         "boxId": "4d3296450e5b75419aaae1d81195433e99e5a486418dcad572810fca53ad0c1b",
         "transactionId": "e51485aa3b02f3f40d94e24081f393a46beca8d8c9b567c90f7fe03a16573309",
@@ -449,4 +445,4 @@ export const boxesSample = {
         "spentTransactionId": null,
         "mainChain": true
         }`,
-}
+};
