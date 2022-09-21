@@ -1,40 +1,37 @@
-import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from "typeorm";
-import { ObservationEntity } from "@rosen-bridge/observation-extractor"
+import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 export enum TxType {
-    COMMITMENT = 'commitment',
-    TRIGGER = 'trigger',
+  COMMITMENT = 'commitment',
+  TRIGGER = 'trigger',
 }
 
 @Entity()
 export class TxEntity {
-    @PrimaryColumn()
-    id: number
+  @PrimaryColumn()
+  id: number;
 
-    @Column()
-    creationTime: number
+  @Column()
+  creationTime: number;
 
-    @Column()
-    updateBlock: number
+  @Column()
+  updateBlock: number;
 
-    @Column({
-        type: 'simple-enum',
-        enum: TxType
-    })
-    type: TxType
+  @Column({
+    type: 'simple-enum',
+    enum: TxType,
+  })
+  type: TxType;
 
-    @Column()
-    txId: string
+  @Column()
+  txId: string;
 
-    @Column()
-    txSerialized: string
+  @Column()
+  txSerialized: string;
 
-    @ManyToOne(
-        "ObservationEntity",
-        "id",
-    )
-    observation: Relation<ObservationEntity>
+  @ManyToOne('ObservationEntity', 'id')
+  observation: Relation<ObservationEntity>;
 
-    @Column()
-    deleted: boolean
+  @Column()
+  deleted: boolean;
 }
