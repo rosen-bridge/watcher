@@ -15,7 +15,8 @@
     "type-check": "tsc --noEmit",
     "typeorm:generate": "npm run typeorm migration:generate src/database/migrations/watcher/watcherModelMigration -- -d config/dataSource.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
-    "typeorm": "typeorm-ts-node-esm"
+    "typeorm": "typeorm-ts-node-esm",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -49,7 +50,8 @@
     "sinon": "^14.0.0",
     "ts-mockito": "^2.6.1",
     "ts-node": "^10.7.0",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.2",
+    "husky": "^8.0.0"
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
