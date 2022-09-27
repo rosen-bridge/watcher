@@ -5,16 +5,18 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "prettify": "prettier --write . --ignore-path ./.gitignore",
-    "lint": "eslint . && npm run prettify",
-    "test": "rm -rf ./sqlite && tsc --noEmit && npm run lint && NODE_ENV=\"test\" mocha --slow 3000; rm -rf ./sqlite",
     "coverage": "c8 npm run test",
+    "lint": "eslint . && npm run prettify",
+    "madge": "npx madge --circular --extensions ts ./",
+    "prettify": "prettier --write . --ignore-path ./.gitignore",
     "start:dev": "nodemon src/index.ts",
     "start": "ts-node --experimental-specifier-resolution=node ./src/index.ts",
-    "typeorm": "typeorm-ts-node-esm",
+    "test": "rm -rf ./sqlite && tsc --noEmit && npm run lint && NODE_ENV=\"test\" mocha --slow 3000; rm -rf ./sqlite",
+    "type-check": "tsc --noEmit",
     "typeorm:generate": "npm run typeorm migration:generate src/database/migrations/watcher/watcherModelMigration -- -d config/dataSource.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
-    "madge": "npx madge --circular --extensions ts ./"
+    "typeorm": "typeorm-ts-node-esm",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -48,7 +50,8 @@
     "sinon": "^14.0.0",
     "ts-mockito": "^2.6.1",
     "ts-node": "^10.7.0",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.2",
+    "husky": "^8.0.0"
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
