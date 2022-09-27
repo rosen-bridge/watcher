@@ -19,6 +19,7 @@ import Statistics from "./statistics/statistics";
 const config = Config.getConfig();
 
 export let watcherTransaction: Transaction;
+export let watcherStatistics:Statistics;
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
 let watcherUtils: WatcherUtils;
@@ -86,5 +87,8 @@ let watcherUtils: WatcherUtils;
 //     init().then(() => null);
 // }
 
-const temp=Statistics.getInstance();
+// eslint-disable-next-line prefer-const
+watcherDatabase = new WatcherDataBase(dataSource)
+
+const temp=Statistics.getInstance(watcherDatabase);
 temp.getErgs().then(res=>console.log(res))

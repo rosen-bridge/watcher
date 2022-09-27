@@ -1,4 +1,4 @@
-import { DataSource, In, Repository } from "typeorm";
+import { DataSource, In, Repository,Like } from "typeorm";
 import { ObservationEntity } from "@rosen-bridge/observation-extractor";
 import { TxEntity, TxType } from "../entities/txEntity";
 import { ObservationStatusEntity, TxStatus } from "../entities/observationStatusEntity";
@@ -260,6 +260,74 @@ class WatcherDataBase {
     }
 
     /**
+     * Returns all commitments with specific wid
+     * @param wid
+     * @param offset
+     * @param limit
+     */
+    commitmentByWID = async (wid: string, offset: number, limit: number): Promise<Array<CommitmentEntity>> => {
+        return await this.commitmentRepository.find({
+            where: {
+                WID: wid
+            },
+            take: limit,
+            skip: offset,
+        })
+    }
+
+    /**
+     * Returns Count of all commitments with specific wid
+     * @param wid
+     */
+    commitmentsByWIDCount = async (wid: string): Promise<number> => {
+        return await this.commitmentRepository.count({
+            where: {
+                WID: wid
+            }
+        })
+    }
+
+    /**
+     * Returns all event triggers that have wid in wids field
+     * @param wid
+     */
+    eventTriggersByWIDCount = async (wid: string): Promise<number> => {
+        return await this.eventTriggerRepository.count({
+            where: {
+                WIDs: Like(`%${wid}%`)
+            }
+        })
+    }
+
+    /**
+     * Returns event triggers count that have wid in wids field
+     * @param wid
+     * @param offset
+     * @param limit
+     */
+    eventTriggersByWID = async (wid: string, offset: number, limit: number): Promise<Array<EventTriggerEntity>> => {
+        return await this.eventTriggerRepository.find({
+            where: {
+                WIDs: Like(`%${wid}%`)
+            },
+            take: limit,
+            skip: offset,
+        })
+    }
+
+    /**
+     * Returns all Permits by WID
+     * @param wid
+     */
+    getPermitBoxesByWID = async (wid: string) => {
+        return await this.permitRepository.find({
+            where: {
+                WID: wid,
+            }
+        })
+    }
+
+    /**
      * Returns all unspent permit boxes
      * @param wid
      */
@@ -279,7 +347,7 @@ class WatcherDataBase {
             .getMany()
     }
 
-    getAllAddressBoxesPermitBox
+    // getAllAddressBoxesPermitBox
 
     /**
      * Returns an eventTriggerEntity with the specified sourceTxId
