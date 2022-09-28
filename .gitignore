@@ -1,4 +1,4 @@
-package-lock.json
+yarn.lock
 src/config/*.json
 
 sqlite
