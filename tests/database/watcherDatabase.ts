@@ -17,6 +17,16 @@ import { expect } from "chai";
 import { CommitmentEntity, EventTriggerEntity, PermitEntity } from "@rosen-bridge/watcher-data-extractor";
 import { BoxEntity } from "@rosen-bridge/address-extractor";
 import { Constants } from "../../src/config/constants";
+import {
+    firstPermit,
+    firstStatisticCommitment,
+    firstStatisticsEventTrigger,
+    secondPermit,
+    secondStatisticCommitment,
+    secondStatisticsEventTrigger,
+    thirdStatisticCommitment,
+    thirdStatisticsEventTrigger
+} from "../ergo/statistics/mockUtilsFunctions";
 
 const observation2Status = {observation: observationEntity2, status: TxStatus.NOT_COMMITTED};
 let blockRepo: Repository<BlockEntity>
@@ -27,7 +37,7 @@ let permitRepo: Repository<PermitEntity>
 let boxRepo: Repository<BoxEntity>
 let eventTriggerRepo: Repository<EventTriggerEntity>
 
-export const loadDataBase = async (name: string): Promise<WatcherDataBase> => {
+export const loadDataBase = async (name: string, empty?: boolean): Promise<WatcherDataBase> => {
     const ormConfig = new DataSource({
         type: "sqlite",
         database: `./sqlite/watcher-test-${name}.sqlite`,
@@ -52,6 +62,15 @@ export const loadDataBase = async (name: string): Promise<WatcherDataBase> => {
     permitRepo = ormConfig.getRepository(PermitEntity)
     boxRepo = ormConfig.getRepository(BoxEntity)
     eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity)
+    if (!empty) {
+        await blockRepo.save([ergoBlockEntity, cardanoBlockEntity])
+        await observationRepo.save([observationEntity2])
+        await observationStatusRepo.save([{observation: observationEntity2, status: TxStatus.NOT_COMMITTED}])
+        await commitmentRepo.save([commitmentEntity, spentCommitmentEntity, firstStatisticCommitment, secondStatisticCommitment, thirdStatisticCommitment])
+        await permitRepo.save([permitEntity, spentPermitEntity, firstPermit, secondPermit])
+        await boxRepo.save([plainBox, spentPlainBox])
+        await eventTriggerRepo.save([eventTriggerEntity, newEventTriggerEntity, firstStatisticsEventTrigger, secondStatisticsEventTrigger, thirdStatisticsEventTrigger])
+    }
     return new WatcherDataBase(ormConfig)
 }
 
@@ -59,13 +78,6 @@ describe("WatcherModel tests", () => {
     let DB: WatcherDataBase
     before("inserting into database", async () => {
         DB = await loadDataBase("networkDataBase")
-        await blockRepo.save([ergoBlockEntity, cardanoBlockEntity])
-        await observationRepo.save([observationEntity2])
-        await observationStatusRepo.save([{observation: observationEntity2, status: TxStatus.NOT_COMMITTED}])
-        await commitmentRepo.save([commitmentEntity, spentCommitmentEntity])
-        await permitRepo.save([permitEntity, spentPermitEntity])
-        await boxRepo.save([plainBox, spentPlainBox])
-        await eventTriggerRepo.save([eventTriggerEntity, newEventTriggerEntity])
     })
 
     describe("getLastBlockHeight", () => {

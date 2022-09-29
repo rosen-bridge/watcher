@@ -88,7 +88,7 @@ let watcherUtils: WatcherUtils;
 // }
 
 // eslint-disable-next-line prefer-const
-watcherDatabase = new WatcherDataBase(dataSource)
-
-const temp=Statistics.getInstance(watcherDatabase);
-temp.getErgs().then(res=>console.log(res))
+// watcherDatabase = new WatcherDataBase(dataSource)
+//
+// const temp=Statistics.getInstance(watcherDatabase);
+// temp.getErgs().then(res=>console.log(res))

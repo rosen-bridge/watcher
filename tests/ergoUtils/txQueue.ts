@@ -33,7 +33,7 @@ describe("Transaction queue tests", () => {
     let dataBase: WatcherDataBase, boxes: Boxes, transaction: Transaction, dbConnection: WatcherUtils
     let txQueue: TransactionQueue
     before(async () => {
-        dataBase = await loadDataBase("commitmentReveal");
+        dataBase = await loadDataBase("commitmentReveal", true);
         boxes = new Boxes(rosenConfig, dataBase)
         transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
         dbConnection = new WatcherUtils(dataBase, transaction, 0, 100)

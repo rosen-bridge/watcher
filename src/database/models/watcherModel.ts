@@ -280,6 +280,8 @@ class WatcherDataBase {
      * @param wid
      */
     commitmentsByWIDCount = async (wid: string): Promise<number> => {
+        console.log(await this.commitmentRepository.findAndCount())
+        console.log(await this.commitmentRepository.find({where:{WID:wid}}))
         return await this.commitmentRepository.count({
             where: {
                 WID: wid

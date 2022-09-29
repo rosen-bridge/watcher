@@ -35,7 +35,7 @@ const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj))
 describe("Testing the WatcherUtils & TransactionUtils", () => {
     let dataBase: WatcherDataBase, boxes: Boxes, transaction: Transaction, watcherUtils: WatcherUtils, txUtils: TransactionUtils
     beforeEach(async () => {
-        dataBase = await loadDataBase("network-watcherUtils");
+        dataBase = await loadDataBase("network-watcherUtils", true);
         boxes = new Boxes(rosenConfig, dataBase)
         transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
         watcherUtils = new WatcherUtils(dataBase, transaction, 0, 100)

@@ -5,15 +5,15 @@ const statisticsRouter = Router();
 
 statisticsRouter.get("", async (req: Request, res: Response) => {
     try {
-        const ergs = await watcherStatistics.getErgs();
+        const ergsAndFee = await watcherStatistics.getErgsAndFee();
         const commitmentsCount = await watcherStatistics.getCommitmentsCount();
         const eventTriggersCount = await watcherStatistics.getEventTriggersCount();
         res.status(200).send(
             {
-                ergs: ergs,
+                ergs: ergsAndFee.ergs.toString(),
                 commitmentsCount: commitmentsCount,
                 eventTriggersCount: eventTriggersCount,
-                fee: ''
+                fee: ergsAndFee.tokens
             }
         )
     } catch (e) {
