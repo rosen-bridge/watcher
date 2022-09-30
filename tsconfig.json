@@ -7,9 +7,7 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "*": [
-        "node_modules/*"
-      ]
+      "*": ["node_modules/*"]
     },
     "lib": ["esnext", "esnext.bigint"],
     "experimentalDecorators": true,
@@ -27,9 +25,7 @@
     "skipLibCheck": true,
     "rootDir": "./"
   },
-  "include": [
-    "./**/*.ts"
-  ],
+  "include": ["./**/*.ts"],
   "ts-node": {
     "esm": true
   }
