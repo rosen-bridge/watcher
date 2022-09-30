@@ -107,11 +107,6 @@ class Config {
     }
 
     if (SECRET_KEY === undefined || SECRET_KEY === '') {
-      logger.info(
-        `We generated a secret key. You can use this if you want: ${uint8ArrayToHex(
-          wasm.SecretKey.random_dlog().to_bytes()
-        )}`
-      );
       throw new SecretError("Secret key doesn't set in config file");
     }
     if (EXPLORER_URL === undefined) {
