@@ -43,5 +43,10 @@
     "cleanupConfirmation": 10
   },
   "rosenConfigPath": "src/config/",
-  "rosenTokensPath": "src/config/tokens.json"
+  "rosenTokensPath": "src/config/tokens.json",
+  "logs": {
+    "path": "logs/",
+    "maxSize": "20m",
+    "maxFiles": "14d"
+  }
 }

@@ -5,6 +5,7 @@ import { rosenConfigType } from '../config/rosenConfig';
 import { Config } from '../config/config';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
+import { logger } from '../log/Logger';
 
 const config = Config.getConfig();
 
@@ -442,15 +443,15 @@ export class Transaction {
    * updating watcher state(permitState and WID if exist)
    */
   getWatcherState = async () => {
-    console.log('Getting watcher status');
+    logger.info('Getting watcher status');
     if (this.watcherPermitState === undefined) {
       const repoBox = await this.boxes.getRepoBox();
       const R4 = repoBox.register_value(4);
-      console.log('Repo box id is: ', repoBox.box_id().to_str());
+      logger.info(`Repo box id is: ${repoBox.box_id().to_str()}`);
       if (R4) {
         const users = R4.to_coll_coll_byte();
         this.watcherWID = await this.getWID(users);
-        console.log('Watcher WID is set to: ', this.watcherWID);
+        logger.info(`Watcher WID is set to: ${this.watcherWID}`);
         this.watcherPermitState = this.watcherWID !== '';
       }
     }

@@ -157,7 +157,6 @@ describe('Watcher Permit Transactions', () => {
         return wasm.ErgoBox.from_json(mockedResponseBody.repoBox);
       });
       chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
-        console.log(tokenId);
         if (
           tokenId ===
           'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516'

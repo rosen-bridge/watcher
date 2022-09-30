@@ -5,6 +5,7 @@ import { JsonBI } from './parser';
 import { Config } from '../../config/config';
 import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
+import { logger } from '../../log/Logger';
 
 const config = Config.getConfig();
 
@@ -64,7 +65,9 @@ export class ErgoNetwork {
       .post('/transactions', tx)
       .then((response) => ({ txId: response.data as string }))
       .catch((exp) => {
-        console.log(exp.response.data);
+        logger.info(
+          `An error occurred while sending transaction to Node: ${exp}`
+        );
       });
   };
 
@@ -267,8 +270,8 @@ export class ErgoNetwork {
           if (e.response.status == 404) return null;
           message = e.response;
         }
-        console.log(
-          'Error occurred connecting to the explorer [' + message + ']'
+        logger.warn(
+          `An error occurred while getting confirmed transaction from Explorer: ${e}`
         );
         throw ConnectionError;
       });
@@ -292,8 +295,8 @@ export class ErgoNetwork {
           if (e.response.status == 404) return null;
           message = e.response;
         }
-        console.log(
-          'Error occurred connecting to the explorer [' + message + ']'
+        logger.warn(
+          `An error occurred while getting unconfirmed transaction from Explorer: ${e}`
         );
         throw ConnectionError;
       });
@@ -338,8 +341,8 @@ export class ErgoNetwork {
         if (e.response.status == 404) return false;
         message = e.response;
       }
-      console.log(
-        'Error occurred connecting to the explorer [' + message + ']'
+      logger.warn(
+        `An error occurred while checking transaction inputs using Explorer: ${e}`
       );
       throw ConnectionError;
     }

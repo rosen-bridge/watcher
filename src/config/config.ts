@@ -2,6 +2,7 @@ import config from 'config';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
 import { uint8ArrayToHex } from '../utils/utils';
+import { logger } from '../log/Logger';
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
@@ -57,6 +58,9 @@ const OBSERVATION_VALID_THRESH: number | undefined = config.get?.(
 const supportedNetworks: Array<string> = ['ergo-node', 'cardano-koios'];
 const ROSEN_CONFIG_PATH: string | undefined = config.get?.('rosenConfigPath');
 const ROSEN_TOKENS_PATH: string | undefined = config.get?.('rosenTokensPath');
+const LOGS_PATH: string | undefined = config.get?.('logs.path');
+const LOGS_MAX_SIZE: string | undefined = config.get?.('logs.maxSize');
+const LOGS_MAX_FILES: string | undefined = config.get?.('logs.maxFiles');
 
 class Config {
   private static instance: Config;
@@ -83,6 +87,9 @@ class Config {
   observationValidThreshold: number;
   rosenConfigPath: string;
   rosenTokensPath: string;
+  logPath: string;
+  logMaxSize: string;
+  logMaxFiles: string;
 
   private constructor() {
     let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -100,9 +107,10 @@ class Config {
     }
 
     if (SECRET_KEY === undefined || SECRET_KEY === '') {
-      console.log(
-        'We generated a secret key for you can use this if you want:',
-        uint8ArrayToHex(wasm.SecretKey.random_dlog().to_bytes())
+      logger.info(
+        `We generated a secret key. You can use this if you want: ${uint8ArrayToHex(
+          wasm.SecretKey.random_dlog().to_bytes()
+        )}`
       );
       throw new SecretError("Secret key doesn't set in config file");
     }
@@ -169,6 +177,13 @@ class Config {
     if (ROSEN_TOKENS_PATH === undefined) {
       throw new Error("Rosen Tokens file path doesn't set correctly");
     }
+    if (
+      LOGS_PATH === undefined ||
+      LOGS_MAX_SIZE === undefined ||
+      LOGS_MAX_FILES === undefined
+    ) {
+      throw new Error("Log configs doesn't set correctly");
+    }
 
     const secretKey = wasm.SecretKey.dlog_from_bytes(
       Buffer.from(SECRET_KEY, 'hex')
@@ -200,6 +215,9 @@ class Config {
     this.fee = FEE;
     this.rosenConfigPath = ROSEN_CONFIG_PATH;
     this.rosenTokensPath = ROSEN_TOKENS_PATH;
+    this.logPath = LOGS_PATH;
+    this.logMaxSize = LOGS_MAX_SIZE;
+    this.logMaxFiles = LOGS_MAX_FILES;
   }
 
   static getConfig() {
