@@ -3,26 +3,30 @@ import * as wasm from 'ergo-lib-wasm-nodejs'
 import { boxesSample } from "../dataset/BoxesSample";
 import { mockedResponseBody } from "../objects/mockedResponseBody";
 
-
 const permitAddress =
     'EE7687i4URb4YuSGSQXPCbAjMfN4dUt5Qx8BqKZJiZhDY8fdnSUwcAGqAsqfn1tW1byXB8nDrgkFzkAFgaaempKxfcPtDzAbnu9QfknzmtfnLYHdxPPg7Qtjy7jK5yUpPQ2M4Ps3h5kH57xWDJxcKviEMY11rQnxATjTKTQgGtfzsAPpqsUyT2ZpVYsFzUGJ4nSj4WaDZSU1Hovv6dPkSTArLQSjp38wE72ae6hbNJwXGkqgfBtdVXcZVtnqevw9xUNcE6i942CQ9hVMfbdRobnsaLgsDLQomsh8jLMXqkMde5qH2vGBUqnLKgjxCZaa7vStpPXT5EuzLn9napGwUcbJjgRk69FsRSfCrcydZbYxw4Gnh6ZB9at2USpwL1HdVkHVh8M6Kbw6ppRfeG4JeFsUw33H4sSRk6UPqfuFcRUf7Cec2vmPezXTPT7CXQqEeCjxmWXqfyEQUfnCwpiH5fQ9A8CQ3jTyFhxBTpoGDdtiVCmhqhKxjh9M7gcjpr1dUjGMCWxjir94ejfq24XQrSscrZuUT5NVHTWAkzQ';
 export const RWTId =
     '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267';
-
+/**
+ * Generating sample Permit Box for the statistics test
+ *  with ergo wasm we can't generate box directly, so we should generate a transaction and sign it
+ *  then use the output box as a sample box
+ * @param permitBoxValue
+ * @param tokensList list of tokenIds that we want to be in the permit box
+ * @param WID permit box WID
+ */
 const permitBoxGenerator = (permitBoxValue: string, tokensList: Array<string>, WID: string) => {
     const sk = wasm.SecretKey.random_dlog();
     const permitAddressContract = wasm.Contract.pay_to_address(
         wasm.Address.from_base58(permitAddress)
     );
     const address = wasm.Contract.pay_to_address(sk.get_address());
-    // const outBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str('100000000'));
     const outBoxValue = wasm.BoxValue.from_i64(wasm.I64.from_str(permitBoxValue));
     const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
         outBoxValue,
         permitAddressContract,
         0
     );
-
 
     outBoxBuilder.add_token(
         wasm.TokenId.from_str(RWTId),
@@ -118,7 +122,7 @@ secondPermit.extractor = "extractor"
 secondPermit.boxId = "boxIDStatistics1"
 secondPermit.boxSerialized = permitBoxGenerator('100000000', ['0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95'], 'WIDStatistics')
 secondPermit.spendBlock = "blockHash1"
-secondPermit.spendHeight = 110
+secondPermit.spendHeight = 111
 
 const firstStatisticCommitment = new CommitmentEntity()
 firstStatisticCommitment.commitment = "commitment"
@@ -130,25 +134,9 @@ firstStatisticCommitment.extractor = "extractor"
 firstStatisticCommitment.height = 1005
 firstStatisticCommitment.boxSerialized = "222"
 
-const secondStatisticCommitment = new CommitmentEntity()
-secondStatisticCommitment.commitment = "commitment"
-secondStatisticCommitment.boxId = "boxIdStatistics2"
-secondStatisticCommitment.WID = "WIDStatistics"
-secondStatisticCommitment.eventId = "eventId2"
-secondStatisticCommitment.block = "block"
-secondStatisticCommitment.extractor = "extractor"
-secondStatisticCommitment.height = 1005
-secondStatisticCommitment.boxSerialized = "222"
+const secondStatisticCommitment = {...firstStatisticCommitment, boxId: "boxIdStatistics2", eventId: "eventId2"}
+const thirdStatisticCommitment = {...firstStatisticCommitment, boxId: "boxIdStatistics3", eventId: "eventId3"}
 
-const thirdStatisticCommitment = new CommitmentEntity()
-thirdStatisticCommitment.commitment = "commitment"
-thirdStatisticCommitment.boxId = "boxIdStatistics3"
-thirdStatisticCommitment.WID = "WIDStatistics"
-thirdStatisticCommitment.eventId = "eventId3"
-thirdStatisticCommitment.block = "block"
-thirdStatisticCommitment.extractor = "extractor"
-thirdStatisticCommitment.height = 1005
-thirdStatisticCommitment.boxSerialized = "222"
 
 const firstStatisticsEventTrigger = new EventTriggerEntity()
 firstStatisticsEventTrigger.sourceTxId = "txId"
@@ -168,7 +156,6 @@ firstStatisticsEventTrigger.sourceChainTokenId = "tokenId"
 firstStatisticsEventTrigger.targetChainTokenId = "targetTokenId"
 firstStatisticsEventTrigger.WIDs = "1,WIDStatistics,3"
 firstStatisticsEventTrigger.sourceBlockId = "block"
-
 
 const secondStatisticsEventTrigger = {...firstStatisticsEventTrigger, boxId: "boxIdStatistics2"}
 const thirdStatisticsEventTrigger = {...firstStatisticsEventTrigger, boxId: "boxIdStatistics3"}

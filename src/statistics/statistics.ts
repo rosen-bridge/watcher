@@ -13,8 +13,7 @@ class Statistics{
     private readonly ergoNetwork = ErgoNetwork;
     private readonly database: WatcherDataBase;
     watcherWID: string | undefined;
-    //TODO:should fixed later
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     private constructor(watcherDB: WatcherDataBase,wid?:string) {
         this.database = watcherDB;
         if (!wid) this.watcherWID = watcherTransaction.watcherWID
@@ -89,7 +88,8 @@ class Statistics{
     }
 
     getEventTriggers = async (offset = 0, limit = 10) => {
-        const eventTriggers = await this.database.eventTriggersByWID('', offset, limit)
+        const WID = this.getWID();
+        const eventTriggers = await this.database.eventTriggersByWID(WID, offset, limit)
         return eventTriggers.map((event) => {
             return {
                 boxId: event.boxId,
