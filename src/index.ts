@@ -47,7 +47,7 @@ const init = async () => {
     const router = Router();
     router.use('/address', addressRouter);
     router.use('/permit', permitRouter);
-    router.use('statistics', statisticsRouter);
+    router.use('/statistics', statisticsRouter);
 
     app.use(router);
     const port = process.env.PORT || 3000;

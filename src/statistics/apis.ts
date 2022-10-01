@@ -8,11 +8,15 @@ statisticsRouter.get('', async (req: Request, res: Response) => {
     const ergsAndFee = await watcherStatistics.getErgsAndFee();
     const commitmentsCount = await watcherStatistics.getCommitmentsCount();
     const eventTriggersCount = await watcherStatistics.getEventTriggersCount();
+    const fee: { [token: string]: string } = {};
+    for (const key in ergsAndFee.tokens) {
+      fee[key] = ergsAndFee.tokens[key].toString();
+    }
     res.status(200).send({
       ergs: ergsAndFee.ergs.toString(),
       commitmentsCount: commitmentsCount,
       eventTriggersCount: eventTriggersCount,
-      fee: ergsAndFee.tokens,
+      fee: fee,
     });
   } catch (e) {
     res.status(500).send({ message: e.message });
