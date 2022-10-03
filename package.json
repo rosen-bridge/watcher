@@ -43,6 +43,8 @@
     "chai-as-promised": "^7.1.1",
     "eslint": "^8.16.0",
     "eslint-config-prettier": "^8.5.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.3",
     "madge": "^5.0.1",
     "mocha": "^9.2.2",
     "nodemon": "^2.0.15",
@@ -50,8 +52,7 @@
     "sinon": "^14.0.0",
     "ts-mockito": "^2.6.1",
     "ts-node": "^10.7.0",
-    "typescript": "^4.7.2",
-    "husky": "^8.0.0"
+    "typescript": "^4.7.2"
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
@@ -75,5 +76,8 @@
     "typeorm": "^0.3.6",
     "winston": "^3.8.2",
     "winston-daily-rotate-file": "^4.7.1"
+  },
+  "engines": {
+    "node": ">=16.14.0"
   }
 }
