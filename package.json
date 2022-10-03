@@ -74,5 +74,8 @@
     "sqlite3": "^5.0.2",
     "tsconfig-paths": "^4.0.0",
     "typeorm": "^0.3.6"
+  },
+  "engines": {
+    "node": ">=16.14.0"
   }
 }
