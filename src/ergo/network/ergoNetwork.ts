@@ -336,11 +336,7 @@ export class ErgoNetwork {
       );
       return true;
     } catch (e) {
-      let message = 'Explorer is unavailable';
-      if (e.response) {
-        if (e.response.status == 404) return false;
-        message = e.response;
-      }
+      if (e.response && e.response.status == 404) return false;
       logger.warn(
         `An error occurred while checking transaction inputs using Explorer: ${e}`
       );

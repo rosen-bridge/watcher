@@ -156,10 +156,9 @@ export class CommitmentCreation {
           feeBoxes
         );
       } catch (e) {
-        if (!(e instanceof NotEnoughFund) || !(e instanceof NoWID))
-          logger.warn(
-            `Skipping the commitment creation due to occurred error: ${e}`
-          );
+        logger.warn(
+          `Skipping the commitment creation due to occurred error: ${e}`
+        );
       }
     }
     logger.info(`Commitment creation job is done`, {
