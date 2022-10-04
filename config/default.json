@@ -46,6 +46,7 @@
   "rosenTokensPath": "src/config/tokens.json",
   "logs": {
     "path": "logs/",
+    "level": "info",
     "maxSize": "20m",
     "maxFiles": "14d"
   }

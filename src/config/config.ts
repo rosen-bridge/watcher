@@ -1,8 +1,6 @@
 import config from 'config';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
-import { uint8ArrayToHex } from '../utils/utils';
-import { logger } from '../log/Logger';
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
@@ -56,11 +54,14 @@ const OBSERVATION_VALID_THRESH: number | undefined = config.get?.(
   'observation.validThreshold'
 );
 const supportedNetworks: Array<string> = ['ergo-node', 'cardano-koios'];
-const ROSEN_CONFIG_PATH: string | undefined = config.get?.('rosenConfigPath');
-const ROSEN_TOKENS_PATH: string | undefined = config.get?.('rosenTokensPath');
-const LOGS_PATH: string | undefined = config.get?.('logs.path');
-const LOGS_MAX_SIZE: string | undefined = config.get?.('logs.maxSize');
-const LOGS_MAX_FILES: string | undefined = config.get?.('logs.maxFiles');
+const ROSEN_CONFIG_PATH: string | undefined =
+  config.get<string>('rosenConfigPath');
+const ROSEN_TOKENS_PATH: string | undefined =
+  config.get<string>('rosenTokensPath');
+const LOGS_PATH: string | undefined = config.get<string>('logs.path');
+const LOGS_LEVEL: string | undefined = config.get<string>('logs.level');
+const LOGS_MAX_SIZE: string | undefined = config.get<string>('logs.maxSize');
+const LOGS_MAX_FILES: string | undefined = config.get<string>('logs.maxFiles');
 
 class Config {
   private static instance: Config;
@@ -88,6 +89,7 @@ class Config {
   rosenConfigPath: string;
   rosenTokensPath: string;
   logPath: string;
+  logLevel: string;
   logMaxSize: string;
   logMaxFiles: string;
 
@@ -174,6 +176,7 @@ class Config {
     }
     if (
       LOGS_PATH === undefined ||
+      LOGS_LEVEL === undefined ||
       LOGS_MAX_SIZE === undefined ||
       LOGS_MAX_FILES === undefined
     ) {
@@ -211,6 +214,7 @@ class Config {
     this.rosenConfigPath = ROSEN_CONFIG_PATH;
     this.rosenTokensPath = ROSEN_TOKENS_PATH;
     this.logPath = LOGS_PATH;
+    this.logLevel = LOGS_LEVEL;
     this.logMaxSize = LOGS_MAX_SIZE;
     this.logMaxFiles = LOGS_MAX_FILES;
   }
