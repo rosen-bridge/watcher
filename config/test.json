@@ -1,0 +1,4 @@
+{
+  "rosenConfigPath": "tests/config/",
+  "rosenTokensPath": "tests/config/tokens.test.json"
+}
