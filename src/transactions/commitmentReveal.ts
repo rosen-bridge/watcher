@@ -9,6 +9,7 @@ import { Config } from '../config/config';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
+import { logger } from '../log/Logger';
 
 const config = Config.getConfig();
 const txFee = BigInt(config.fee);
@@ -65,14 +66,16 @@ export class CommitmentReveal {
         new wasm.ErgoBoxes(repoBox)
       );
       await this.txUtils.submitTransaction(signed, observation, TxType.TRIGGER);
-      console.log('Trigger event created with tx id:', signed.id().to_str());
+      logger.info(`Trigger event created with txId [${signed.id().to_str()}]`);
     } catch (e) {
       if (e instanceof boxCreationError) {
-        console.log(
+        logger.warn(
           "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."
         );
-      } else console.log(e);
-      console.log('Skipping the event trigger creation.');
+      }
+      logger.warn(
+        `Skipping the event trigger creation due to occurred error: ${e}`
+      );
     }
   };
 
@@ -101,11 +104,7 @@ export class CommitmentReveal {
    */
   job = async () => {
     const commitmentSets = await this.watcherUtils.allReadyCommitmentSets();
-    console.log(
-      'Starting trigger event creation with',
-      commitmentSets.length,
-      'number of commitment sets'
-    );
+    logger.info(`Starting trigger event creation job`);
     for (const commitmentSet of commitmentSets) {
       try {
         const validCommitments = this.commitmentCheck(
@@ -115,11 +114,8 @@ export class CommitmentReveal {
         const requiredCommitments = await ErgoUtils.requiredCommitmentCount(
           await this.boxes.getRepoBox()
         );
-        console.log(
-          'required number of commitments is',
-          requiredCommitments,
-          'available valild commitments is:',
-          validCommitments.length
+        logger.info(
+          `Valid commitments: [${validCommitments.length}/${requiredCommitments}]`
         );
         if (BigInt(validCommitments.length) >= requiredCommitments) {
           const commitmentBoxes = validCommitments.map(async (commitment) => {
@@ -140,9 +136,13 @@ export class CommitmentReveal {
           });
         }
       } catch (e) {
-        if (!(e instanceof NotEnoughFund)) console.log(e);
-        console.log('Skipping the event trigger creation');
+        logger.warn(
+          `Skipping the event trigger creation due to occurred error: ${e}`
+        );
       }
     }
+    logger.info(`Event trigger creation job is done`, {
+      count: commitmentSets.length,
+    });
   };
 }
