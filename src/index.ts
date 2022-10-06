@@ -16,6 +16,7 @@ import { delay } from './utils/utils';
 import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
 import Statistics from './statistics/statistics';
 import { statisticsRouter } from './statistics/apis';
+import { logger } from './log/Logger';
 
 const config = Config.getConfig();
 
@@ -52,7 +53,7 @@ const init = async () => {
     app.use(router);
     const port = process.env.PORT || 3000;
 
-    app.listen(port, () => console.log(`app listening on port ${port}`));
+    app.listen(port, () => logger.info(`App listening on port ${port}`));
   };
 
   generateTransactionObject()
@@ -85,7 +86,7 @@ const init = async () => {
       reveal(watcherUtils, txUtils, boxesObject);
     })
     .catch((e) => {
-      console.log(e);
+      logger.error(`An error occurred while initializing datasource: ${e}`);
     });
 };
 
