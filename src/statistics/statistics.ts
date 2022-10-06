@@ -127,8 +127,8 @@ class Statistics {
         targetChainTokenId: event.targetChainTokenId,
         sourceTxId: event.sourceTxId,
         sourceBlockId: event.sourceBlockId,
-        // spendBlock:event.spendBlock,
-        // spendHeight:event.spendHeight,
+        spendBlock: event.spendBlock,
+        spendHeight: event.spendHeight,
       };
     });
   };

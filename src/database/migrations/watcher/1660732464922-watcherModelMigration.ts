@@ -50,6 +50,8 @@ export class watcherModelMigration1660732464922 implements MigrationInterface {
                     "sourceTxId" varchar NOT NULL,
                     "sourceBlockId" varchar NOT NULL,
                     "WIDs" varchar NOT NULL,
+                    "spendBlock" varchar,
+                    "spendHeight" INTEGER,
                     CONSTRAINT "UQ_c905f221a1b6271ca4405dbbe5f" UNIQUE ("boxId", "extractor")
                     )`
     );

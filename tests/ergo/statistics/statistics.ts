@@ -123,6 +123,8 @@ describe('Statistics', () => {
           targetChainTokenId: 'targetTokenId',
           sourceTxId: 'txId',
           sourceBlockId: 'block',
+          spendBlock: null,
+          spendHeight: null,
         },
       ]);
     });
@@ -149,6 +151,8 @@ describe('Statistics', () => {
           targetChainTokenId: 'targetTokenId',
           sourceTxId: 'txId',
           sourceBlockId: 'block',
+          spendBlock: null,
+          spendHeight: null,
         },
         {
           boxId: 'boxIdStatistics3',
@@ -165,6 +169,8 @@ describe('Statistics', () => {
           targetChainTokenId: 'targetTokenId',
           sourceTxId: 'txId',
           sourceBlockId: 'block',
+          spendBlock: null,
+          spendHeight: null,
         },
       ]);
     });

@@ -59,7 +59,7 @@
     "@rosen-bridge/address-extractor": "0.1.4-alpha",
     "@rosen-bridge/observation-extractor": "0.1.5-alpha",
     "@rosen-bridge/scanner": "0.1.9-alpha",
-    "@rosen-bridge/watcher-data-extractor": "0.1.2-alpha",
+    "@rosen-bridge/watcher-data-extractor": "0.1.3",
     "axios": "^0.26.1",
     "blakejs": "^1.2.1",
     "chai-spies": "^1.0.0",
