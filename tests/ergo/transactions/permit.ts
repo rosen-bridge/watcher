@@ -11,7 +11,7 @@ import spies from 'chai-spies';
 import { Buffer } from 'buffer';
 import { WatcherDataBase } from '../../../src/database/models/watcherModel';
 import { mockedResponseBody } from '../objects/mockedResponseBody';
-import { loadDataBase } from '../../database/watcherDatabase';
+import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import { rosenConfig } from '../../../src/config/rosenConfig';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 
@@ -56,7 +56,9 @@ initMockedAxios();
 describe('Watcher Permit Transactions', () => {
   let DB: WatcherDataBase, boxes: Boxes;
   before(async () => {
-    DB = await loadDataBase('permit');
+    const ORM = await loadDataBase('permit');
+    await fillORM(ORM);
+    DB = ORM.DB;
     boxes = new Boxes(rosenConfig, DB);
   });
 

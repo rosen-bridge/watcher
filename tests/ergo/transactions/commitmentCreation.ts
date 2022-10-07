@@ -9,7 +9,7 @@ import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import { hexStrToUint8Array } from '../../../src/utils/utils';
 import { TxType } from '../../../src/database/entities/txEntity';
 import { WatcherDataBase } from '../../../src/database/models/watcherModel';
-import { loadDataBase } from '../../database/watcherDatabase';
+import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import {
   TransactionUtils,
   WatcherUtils,
@@ -67,7 +67,9 @@ describe('Commitment creation transaction tests', () => {
     watcherUtils: WatcherUtils;
   let cc: CommitmentCreation;
   before(async () => {
-    watcherDb = await loadDataBase('commitmentCreation');
+    const ORM = await loadDataBase('commitmentCreation');
+    await fillORM(ORM);
+    watcherDb = ORM.DB;
     boxes = new Boxes(rosenConfig, watcherDb);
     transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
     watcherUtils = new WatcherUtils(watcherDb, transaction, 0, 100);

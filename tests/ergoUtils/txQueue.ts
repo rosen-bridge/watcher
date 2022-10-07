@@ -1,4 +1,4 @@
-import { loadDataBase } from '../database/watcherDatabase';
+import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { TransactionQueue } from '../../src/ergo/transactionQueue';
 import { TxEntity, TxType } from '../../src/database/entities/txEntity';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
@@ -38,7 +38,8 @@ describe('Transaction queue tests', () => {
     dbConnection: WatcherUtils;
   let txQueue: TransactionQueue;
   before(async () => {
-    dataBase = await loadDataBase('commitmentReveal', true);
+    const ORM = await loadDataBase('commitmentReveal');
+    dataBase = ORM.DB;
     boxes = new Boxes(rosenConfig, dataBase);
     transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
     dbConnection = new WatcherUtils(dataBase, transaction, 0, 100);

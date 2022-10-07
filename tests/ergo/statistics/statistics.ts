@@ -1,5 +1,5 @@
 import { WatcherDataBase } from '../../../src/database/models/watcherModel';
-import { loadDataBase } from '../../database/watcherDatabase';
+import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import Statistics from '../../../src/statistics/statistics';
 import { expect } from 'chai';
 
@@ -12,7 +12,9 @@ describe('Statistics', () => {
    * setting up pretest database and Statistic Object
    */
   before('inserting into database', async () => {
-    DB = await loadDataBase('Statistics');
+    const ORM = await loadDataBase('Statistics');
+    await fillORM(ORM);
+    DB = ORM.DB;
     statistics = Statistics.getInstance(DB, 'WIDStatistics');
   });
 

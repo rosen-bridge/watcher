@@ -1,4 +1,4 @@
-import { loadDataBase } from '../database/watcherDatabase';
+import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { TxStatus } from '../../src/database/entities/observationStatusEntity';
 import {
   commitmentEntity,
@@ -39,7 +39,8 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
     watcherUtils: WatcherUtils,
     txUtils: TransactionUtils;
   beforeEach(async () => {
-    dataBase = await loadDataBase('network-watcherUtils', true);
+    const ORM = await loadDataBase('network-watcherUtils');
+    dataBase = ORM.DB;
     boxes = new Boxes(rosenConfig, dataBase);
     transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
     watcherUtils = new WatcherUtils(dataBase, transaction, 0, 100);

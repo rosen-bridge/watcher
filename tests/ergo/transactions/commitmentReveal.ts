@@ -1,6 +1,6 @@
 import { Boxes } from '../../../src/ergo/boxes';
 import { WatcherDataBase } from '../../../src/database/models/watcherModel';
-import { loadDataBase } from '../../database/watcherDatabase';
+import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import { JsonBI } from '../../../src/ergo/network/parser';
 import { ErgoUtils } from '../../../src/ergo/utils';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
@@ -49,7 +49,9 @@ describe('Commitment reveal transaction tests', () => {
     txUtils: TransactionUtils;
   let cr: CommitmentReveal;
   before(async () => {
-    dataBase = await loadDataBase('commitmentReveal');
+    const ORM = await loadDataBase('commitmentReveal');
+    await fillORM(ORM);
+    dataBase = ORM.DB;
     boxes = new Boxes(rosenConfig, dataBase);
     transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
     watcherUtils = new WatcherUtils(dataBase, transaction, 0, 100);

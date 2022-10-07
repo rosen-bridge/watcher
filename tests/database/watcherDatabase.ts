@@ -48,16 +48,19 @@ const observation2Status = {
 };
 let blockRepo: Repository<BlockEntity>;
 let observationRepo: Repository<ObservationEntity>;
-let observationStatusRepo: Repository<ObservationStatusEntity>;
-let commitmentRepo: Repository<CommitmentEntity>;
-let permitRepo: Repository<PermitEntity>;
-let boxRepo: Repository<BoxEntity>;
-let eventTriggerRepo: Repository<EventTriggerEntity>;
 
-export const loadDataBase = async (
-  name: string,
-  empty?: boolean
-): Promise<WatcherDataBase> => {
+type ORMType = {
+  DB: WatcherDataBase;
+  blockRepo: Repository<BlockEntity>;
+  observationRepo: Repository<ObservationEntity>;
+  observationStatusRepo: Repository<ObservationStatusEntity>;
+  commitmentRepo: Repository<CommitmentEntity>;
+  permitRepo: Repository<PermitEntity>;
+  boxRepo: Repository<BoxEntity>;
+  eventTriggerRepo: Repository<EventTriggerEntity>;
+};
+
+export const loadDataBase = async (name: string): Promise<ORMType> => {
   const ormConfig = new DataSource({
     type: 'sqlite',
     database: `./sqlite/watcher-test-${name}.sqlite`,
@@ -75,48 +78,65 @@ export const loadDataBase = async (
 
   await ormConfig.initialize();
   await ormConfig.runMigrations();
-  blockRepo = ormConfig.getRepository(BlockEntity);
-  observationRepo = ormConfig.getRepository(ObservationEntity);
-  observationStatusRepo = ormConfig.getRepository(ObservationStatusEntity);
-  commitmentRepo = ormConfig.getRepository(CommitmentEntity);
-  permitRepo = ormConfig.getRepository(PermitEntity);
-  boxRepo = ormConfig.getRepository(BoxEntity);
-  eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity);
-  if (!empty) {
-    await blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
-    await observationRepo.save([observationEntity2]);
-    await observationStatusRepo.save([
-      { observation: observationEntity2, status: TxStatus.NOT_COMMITTED },
-    ]);
-    await commitmentRepo.save([
-      commitmentEntity,
-      spentCommitmentEntity,
-      firstStatisticCommitment,
-      secondStatisticCommitment,
-      thirdStatisticCommitment,
-    ]);
-    await permitRepo.save([
-      permitEntity,
-      spentPermitEntity,
-      firstPermit,
-      secondPermit,
-    ]);
-    await boxRepo.save([plainBox, spentPlainBox]);
-    await eventTriggerRepo.save([
-      eventTriggerEntity,
-      newEventTriggerEntity,
-      firstStatisticsEventTrigger,
-      secondStatisticsEventTrigger,
-      thirdStatisticsEventTrigger,
-    ]);
-  }
-  return new WatcherDataBase(ormConfig);
+  const blockRepo = ormConfig.getRepository(BlockEntity);
+  const observationRepo = ormConfig.getRepository(ObservationEntity);
+  const observationStatusRepo = ormConfig.getRepository(
+    ObservationStatusEntity
+  );
+  const commitmentRepo = ormConfig.getRepository(CommitmentEntity);
+  const permitRepo = ormConfig.getRepository(PermitEntity);
+  const boxRepo = ormConfig.getRepository(BoxEntity);
+  const eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity);
+
+  return {
+    DB: new WatcherDataBase(ormConfig),
+    blockRepo: blockRepo,
+    observationRepo: observationRepo,
+    observationStatusRepo: observationStatusRepo,
+    commitmentRepo: commitmentRepo,
+    permitRepo: permitRepo,
+    boxRepo: boxRepo,
+    eventTriggerRepo: eventTriggerRepo,
+  };
+};
+
+export const fillORM = async (ORM: ORMType) => {
+  await ORM.blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
+  await ORM.observationRepo.save([observationEntity2]);
+  await ORM.observationStatusRepo.save([
+    { observation: observationEntity2, status: TxStatus.NOT_COMMITTED },
+  ]);
+  await ORM.commitmentRepo.save([
+    commitmentEntity,
+    spentCommitmentEntity,
+    firstStatisticCommitment,
+    secondStatisticCommitment,
+    thirdStatisticCommitment,
+  ]);
+  await ORM.permitRepo.save([
+    permitEntity,
+    spentPermitEntity,
+    firstPermit,
+    secondPermit,
+  ]);
+  await ORM.boxRepo.save([plainBox, spentPlainBox]);
+  await ORM.eventTriggerRepo.save([
+    eventTriggerEntity,
+    newEventTriggerEntity,
+    firstStatisticsEventTrigger,
+    secondStatisticsEventTrigger,
+    thirdStatisticsEventTrigger,
+  ]);
 };
 
 describe('WatcherModel tests', () => {
   let DB: WatcherDataBase;
   before('inserting into database', async () => {
-    DB = await loadDataBase('networkDataBase');
+    const ORM = await loadDataBase('networkDataBase');
+    await fillORM(ORM);
+    DB = ORM.DB;
+    blockRepo = ORM.blockRepo;
+    observationRepo = ORM.observationRepo;
   });
 
   describe('getLastBlockHeight', () => {
