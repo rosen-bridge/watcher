@@ -1,4 +1,9 @@
 {
+  "networkType": "Testnet",
+  "ergo": {
+    "networkType": "Testnet"
+  },
+  "watcherSecretKey": "30ec2689d8920095a34193de5b313dc84b178fd827d568be96f85bba12b69db0",
   "rosenConfigPath": "tests/config/",
   "rosenTokensPath": "tests/config/tokens.test.json"
 }
