@@ -1,6 +1,7 @@
 import config from 'config';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
+import { uint8ArrayToHex } from '../utils/utils';
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
@@ -100,7 +101,14 @@ class Config {
     }
 
     if (SECRET_KEY === undefined || SECRET_KEY === '') {
-      throw new SecretError("Secret key doesn't set in config file");
+      const secretKey = wasm.SecretKey.random_dlog();
+      console.warn(
+        'Watcher secret key does not exist in the config.' +
+          `you can use {${uint8ArrayToHex(
+            secretKey.to_bytes()
+          ).toString()}} or generate one by yourself`
+      );
+      throw new SecretError(`Secret key doesn't set in config file.`);
     }
     if (EXPLORER_URL === undefined) {
       throw new Error('Ergo Explorer Url is not set in the config');
