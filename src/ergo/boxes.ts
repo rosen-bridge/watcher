@@ -73,10 +73,8 @@ export class Boxes {
           if (totalRWT >= RWTCount) break;
         }
       }
-      if (totalRWT < RWTCount) {
-        console.log("ERROR: Watcher doesn't have enough unspent permits");
-        throw new NotEnoughFund();
-      }
+      if (totalRWT < RWTCount)
+        throw new NotEnoughFund("Watcher doesn't have enough unspent permits");
       return selectedBoxes;
     }
     const permitBoxes = permits.map(async (permit) => {
@@ -99,17 +97,13 @@ export class Boxes {
           (box: wasm.ErgoBox) =>
             box.tokens().len() > 0 && boxHaveAsset(box, wid)
         )[0];
-      if (!WID) {
-        console.log(
-          'WID box is not found, can not sign the transaction. Please check the box containing the WID is created after the scanner initial height.'
+      if (!WID)
+        throw new NoWID(
+          'WID box is not found. Cannot sign the transaction. Please check that the box containing the WID is created after the scanner initial height.'
         );
-        throw NoWID;
-      }
       return await ErgoNetwork.trackMemPool(WID);
-    } else {
-      console.log('Watcher WID is not set, can not sign the transaction.');
-      throw NoWID;
-    }
+    } else
+      throw new NoWID('Watcher WID is not set. Cannot sign the transaction.');
   };
 
   /**
@@ -133,8 +127,7 @@ export class Boxes {
       }
     }
     if (totalValue < requiredValue) {
-      console.log('ERROR: Not enough fund to create the transaction');
-      throw new NotEnoughFund();
+      throw new NotEnoughFund("Not enough fund to create the transaction'");
     }
     return selectedBoxes;
   };

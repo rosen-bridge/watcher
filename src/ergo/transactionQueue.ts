@@ -5,6 +5,7 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { Config } from '../config/config';
 import { base64ToArrayBuffer } from '../utils/utils';
 import { WatcherUtils } from '../utils/watcherUtils';
+import { logger } from '../log/Logger';
 
 const config = Config.getConfig();
 
@@ -24,15 +25,11 @@ export class TransactionQueue {
   job = async () => {
     const txs: Array<TxEntity> = await this.database.getAllTxs();
     const currentHeight = await ErgoNetwork.getHeight();
-    console.log(
-      'Starting Transaction checking with',
-      txs.length,
-      'total number of transactions'
-    );
+    logger.info(`Starting Transaction check job`);
     for (const tx of txs) {
       try {
         const txStatus = await ErgoNetwork.getConfNum(tx.txId);
-        console.log('Tx', tx.txId, 'status is', txStatus);
+        logger.info(`Tx [${tx.txId}] confirmation: [${txStatus}]`);
         if (txStatus === -1) {
           const signedTx = wasm.Transaction.sigma_parse_bytes(
             base64ToArrayBuffer(tx.txSerialized)
@@ -58,21 +55,18 @@ export class TransactionQueue {
               await this.database.downgradeObservationTxStatus(tx.observation);
               await this.database.removeTx(tx);
             }
-            console.log(currentHeight, tx.updateBlock);
-            console.log('Skipping');
+            logger.info('Skipping tx [${tx.txId}]');
             continue;
           }
           // resend the tx
-          console.log('Sending the', tx.type, 'transaction with txId', tx.txId);
+          logger.info(
+            `Sending the [${tx.type}] transaction with txId: [${tx.txId}]`
+          );
           await ErgoNetwork.sendTx(signedTx.to_json());
           await this.database.setTxUpdateHeight(tx, currentHeight);
         } else if (txStatus > config.transactionConfirmation) {
-          console.log(
-            'The',
-            tx.type,
-            'transaction with txId',
-            tx.txId,
-            'is confirmed, removing the tx from txQueue'
+          logger.info(
+            `The [${tx.type}] transaction with txId: [${tx.txId}] is confirmed, removing the tx from txQueue`
           );
           await this.database.upgradeObservationTxStatus(tx.observation);
           await this.database.removeTx(tx);
@@ -80,12 +74,9 @@ export class TransactionQueue {
           await this.database.setTxUpdateHeight(tx, currentHeight);
         }
       } catch (e) {
-        console.log(e);
-        console.log(
-          'Something went wrong, Skipping transaction checking with txId:',
-          tx.txId
-        );
+        logger.warn(`An error occurred while processing tx [${tx.txId}]: ${e}`);
       }
     }
+    logger.info('Transactions check job is done', { count: txs.length });
   };
 }

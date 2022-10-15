@@ -10,6 +10,7 @@ import { hexStrToUint8Array } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
+import { logger } from '../log/Logger';
 
 const config = Config.getConfig();
 
@@ -68,7 +69,7 @@ export class CommitmentCreation {
       .reduce((a, b) => a + b, BigInt(0));
     if (RWTCount <= 1) {
       // TODO: Fix this problem
-      console.log('Not enough RWT tokens to create a new commitment');
+      logger.warn('Not enough RWT tokens to create a new commitment');
       return {};
     }
     const outPermit = this.boxes.createPermit(
@@ -92,18 +93,18 @@ export class CommitmentCreation {
         observation,
         TxType.COMMITMENT
       );
-      console.log(
-        'Commitment tx submitted to the queue with txId: ',
-        signed.id().to_str()
+      logger.info(
+        `Commitment tx [${signed.id().to_str()}] submitted to the queue`
       );
     } catch (e) {
-      console.log(e);
       if (e instanceof boxCreationError) {
-        console.log(
+        logger.warn(
           "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."
         );
       }
-      console.log('Skipping the commitment creation.');
+      logger.warn(
+        `Skipping the commitment creation due to occurred error: ${e}`
+      );
     }
   };
 
@@ -114,17 +115,13 @@ export class CommitmentCreation {
   job = async () => {
     const observations = await this.watcherUtils.allReadyObservations();
     if (!this.widApi.watcherWID) {
-      console.log(
-        'Watcher WID is not set, can not run commitment creation job.'
+      logger.warn(
+        'Watcher WID is not set. Cannot run commitment creation job.'
       );
       return;
     }
     const WID = this.widApi.watcherWID;
-    console.log(
-      'starting commitment creation job with',
-      observations.length,
-      'number of ready observations'
-    );
+    logger.info(`Starting commitment creation job`);
     for (const observation of observations) {
       try {
         const commitment = ErgoUtils.commitmentFromObservation(
@@ -138,21 +135,14 @@ export class CommitmentCreation {
             .map((permit) => BigInt(permit.value().as_i64().to_str()))
             .reduce((a, b) => a + b, BigInt(0)) +
           BigInt(WIDBox.value().as_i64().to_str());
-        console.log(
-          'WID Box: ',
-          WIDBox.box_id().to_str(),
-          WIDBox.value().as_i64().to_str()
-        );
+        logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
         const requiredValue =
           BigInt(config.fee) + BigInt(config.minBoxValue) * BigInt(3);
         let feeBoxes: Array<wasm.ErgoBox> = [];
-        console.log(
-          'Total value is: ',
-          totalValue,
-          ' Required value is: ',
-          requiredValue
-        );
         if (totalValue < requiredValue) {
+          logger.info(
+            `Require more Erg. Total: [${totalValue}], Required: [${requiredValue}]`
+          );
           feeBoxes = await this.boxes.getUserPaymentBox(
             requiredValue - totalValue
           );
@@ -166,10 +156,13 @@ export class CommitmentCreation {
           feeBoxes
         );
       } catch (e) {
-        if (!(e instanceof NotEnoughFund) || !(e instanceof NoWID))
-          console.log(e);
-        console.log('Skipping the commitment creation');
+        logger.warn(
+          `Skipping the commitment creation due to occurred error: ${e}`
+        );
       }
     }
+    logger.info(`Commitment creation job is done`, {
+      count: observations.length,
+    });
   };
 }

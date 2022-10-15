@@ -67,8 +67,9 @@ export const scannerInit = () => {
     );
     cardanoScanner.registerExtractor(observationExtractor);
   } else {
-    console.log('The observing network is not supported');
-    throw new Error('source network not found');
+    throw new Error(
+      `The observing network [${config.networkWatcher}] is not supported`
+    );
   }
   const commitmentExtractor = new CommitmentExtractor(
     Constants.commitmentExtractorName,
