@@ -404,7 +404,7 @@ export class Transaction {
 
     const userOut = await this.boxes.createUserBoxCandidate(
       height,
-      this.userAddress.to_base58(config.networkType),
+      this.userAddress.to_base58(config.networkPrefix),
       changeBoxValue,
       WIDToken,
       WIDTokenAmount,

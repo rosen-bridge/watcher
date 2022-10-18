@@ -1,9 +1,8 @@
 {
   "network": "ergo-node",
-  "networkType": "Testnet",
   "observation": {
-    "confirmation": 2,
-    "validThreshold": 1000
+    "confirmation": 15,
+    "validThreshold": 720
   },
   "minBoxValue": "1100000",
   "fee": "1100000",
@@ -24,15 +23,15 @@
     "networkType": "Mainnet",
     "watcherSecretKey": "30ec2689d8920095a34193de5b313dc84b178fd827d568be96f85bba12b69db0",
     "scanner": {
-      "interval": 10,
-      "initialBlockHeight": 268657
+      "interval": 180,
+      "initialBlockHeight": 848300
     },
     "commitmentCreationInterval": 180,
     "commitmentRevealInterval": 180,
     "transactions": {
-      "timeout": 1,
-      "confirmation": 1,
-      "interval": 30
+      "timeout": 10,
+      "confirmation": 10,
+      "interval": 180
     },
     "name": "ergo"
   },

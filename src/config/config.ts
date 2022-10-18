@@ -1,26 +1,19 @@
 import config from 'config';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
+import { uint8ArrayToHex } from '../utils/utils';
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
 const URL: string | undefined = config.get?.('cardano.node.URL');
-const INTERVAL: number | undefined = config.get?.('cardano.interval');
+const CARDANO_INTERVAL: number | undefined = config.get?.('cardano.interval');
 const CARDANO_INITIAL_HEIGHT: number | undefined = config.get?.(
   'cardano.initialBlockHeight'
-);
-const BRIDGE_SCAN_INTERVAL: number | undefined = config.get?.(
-  'bridgeScanner.interval'
 );
 const ERGO_INITIAL_HEIGHT: number | undefined = config.get?.(
   'ergo.scanner.initialBlockHeight'
 );
-const COMMITMENT_HEIGHT_LIMIT: number | undefined = config.get?.(
-  'bridgeScanner.heightLimit'
-);
-const CLEANUP_CONFIRMATION: number | undefined = config.get?.(
-  'bridgeScanner.cleanupConfirmation'
-);
+const ERGO_INTERVAL: number | undefined = config.get?.('ergo.scanner.interval');
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
 const CARDANO_TIMEOUT: number | undefined = config.get?.('cardano.timeout');
@@ -29,7 +22,6 @@ const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.(
 );
 const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
 const NETWORK_WATCHER: string | undefined = config.get?.('network');
-const NETWORK_WATCHER_TYPE: string | undefined = config.get?.('networkType');
 const MIN_BOX_VALUE: string | undefined = config.get?.('minBoxValue');
 const FEE: string | undefined = config.get?.('fee');
 const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.(
@@ -65,18 +57,17 @@ const LOGS_MAX_FILES: string | undefined = config.get<string>('logs.maxFiles');
 
 class Config {
   private static instance: Config;
-  networkType: wasm.NetworkPrefix;
+  networkPrefix: wasm.NetworkPrefix;
+  networkType: string;
   secretKey: wasm.SecretKey;
   address: string;
   explorerUrl: string;
   nodeUrl: string;
   nodeTimeout: number;
   explorerTimeout: number;
-  bridgeScanInterval: number;
   ergoInitialHeight: number;
-  cleanupConfirmation: number;
+  ergoInterval: number;
   networkWatcher: string;
-  networkWatcherType: string;
   minBoxValue: string;
   fee: string;
   commitmentCreationInterval: number;
@@ -109,7 +100,14 @@ class Config {
     }
 
     if (SECRET_KEY === undefined || SECRET_KEY === '') {
-      throw new SecretError("Secret key doesn't set in config file");
+      const secretKey = wasm.SecretKey.random_dlog();
+      console.warn(
+        'Watcher secret key does not exist in the config.' +
+          `you can use {${uint8ArrayToHex(
+            secretKey.to_bytes()
+          ).toString()}} or generate one by yourself`
+      );
+      throw new SecretError(`Secret key doesn't set in config file.`);
     }
     if (EXPLORER_URL === undefined) {
       throw new Error('Ergo Explorer Url is not set in the config');
@@ -117,17 +115,11 @@ class Config {
     if (NODE_URL === undefined) {
       throw new Error('Ergo Node Url is not set in the config');
     }
-    if (BRIDGE_SCAN_INTERVAL === undefined) {
-      throw new Error("Commitment scanner interval doesn't set correctly");
-    }
     if (ERGO_INITIAL_HEIGHT === undefined) {
       throw new Error("Ergo scanner initial height doesn't set correctly");
     }
-    if (COMMITMENT_HEIGHT_LIMIT === undefined) {
-      throw new Error("Commitment scanner height limit doesn't set correctly");
-    }
-    if (CLEANUP_CONFIRMATION === undefined) {
-      throw new Error("Clean up doesn't set correctly");
+    if (!ERGO_INTERVAL) {
+      throw new Error("Ergo scanner interval doesn't set correctly");
     }
     if (ERGO_EXPLORER_TIMEOUT === undefined) {
       throw new Error("Ergo explorer timeout doesn't set correctly");
@@ -137,9 +129,6 @@ class Config {
     }
     if (!NETWORK_WATCHER || !supportedNetworks.includes(NETWORK_WATCHER)) {
       throw new Error('Watching Bridge is not set correctly');
-    }
-    if (NETWORK_WATCHER_TYPE === undefined) {
-      throw new Error('Network watcher type is not set correctly');
     }
     if (!COMMITMENT_CREATION_INTERVAL) {
       throw new Error('Commitment creation job interval is not set');
@@ -190,17 +179,15 @@ class Config {
       .get_address()
       .to_base58(networkType);
 
-    this.networkType = networkType;
+    this.networkPrefix = networkType;
+    this.networkType = NETWORK_TYPE;
     this.secretKey = secretKey;
     this.address = watcherAddress;
     this.explorerUrl = EXPLORER_URL;
     this.nodeUrl = NODE_URL;
     this.explorerTimeout = ERGO_EXPLORER_TIMEOUT;
     this.nodeTimeout = ERGO_NODE_TIMEOUT;
-    this.bridgeScanInterval = BRIDGE_SCAN_INTERVAL;
-    this.cleanupConfirmation = CLEANUP_CONFIRMATION;
     this.networkWatcher = NETWORK_WATCHER;
-    this.networkWatcherType = NETWORK_WATCHER_TYPE;
     this.commitmentCreationInterval = COMMITMENT_CREATION_INTERVAL;
     this.commitmentRevealInterval = COMMITMENT_REVEAL_INTERVAL;
     this.transactionCheckingInterval = TRANSACTION_CHECK_INTERVAL;
@@ -209,6 +196,7 @@ class Config {
     this.observationConfirmation = OBSERVATION_CONFIRMATION;
     this.observationValidThreshold = OBSERVATION_VALID_THRESH;
     this.ergoInitialHeight = ERGO_INITIAL_HEIGHT;
+    this.ergoInterval = ERGO_INTERVAL;
     this.minBoxValue = MIN_BOX_VALUE;
     this.fee = FEE;
     this.rosenConfigPath = ROSEN_CONFIG_PATH;
@@ -238,7 +226,7 @@ class CardanoConfig {
     if (URL === undefined) {
       throw new Error('koios URL is not set config file');
     }
-    if (INTERVAL === undefined) {
+    if (CARDANO_INTERVAL === undefined) {
       throw new Error('Cardano Scanner interval is not set in the config file');
     }
     if (CARDANO_INITIAL_HEIGHT === undefined) {
@@ -251,7 +239,7 @@ class CardanoConfig {
     }
 
     this.koiosURL = URL;
-    this.interval = INTERVAL;
+    this.interval = CARDANO_INTERVAL;
     this.timeout = CARDANO_TIMEOUT;
     this.initialHeight = CARDANO_INITIAL_HEIGHT;
   }

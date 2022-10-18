@@ -23,7 +23,7 @@ let cardanoScanner: CardanoKoiosScanner;
 const ergoScanningJob = () => {
   scanner
     .update()
-    .then(() => setTimeout(ergoScanningJob, config.bridgeScanInterval * 1000));
+    .then(() => setTimeout(ergoScanningJob, config.ergoInterval * 1000));
 };
 
 const cardanoScanningJob = (interval: number) => {
@@ -81,7 +81,8 @@ export const scannerInit = () => {
     Constants.permitExtractorName,
     dataSource,
     rosenConfig.watcherPermitAddress,
-    rosenConfig.RWTId
+    rosenConfig.RWTId,
+    config.explorerUrl
   );
   const eventTriggerExtractor = new EventTriggerExtractor(
     Constants.triggerExtractorName,
@@ -92,7 +93,8 @@ export const scannerInit = () => {
   const plainExtractor = new ErgoUTXOExtractor(
     dataSource,
     Constants.addressExtractorName,
-    config.networkType,
+    config.networkPrefix,
+    config.explorerUrl,
     config.address
   );
   scanner.registerExtractor(commitmentExtractor);
