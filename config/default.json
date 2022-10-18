@@ -1,6 +1,5 @@
 {
   "network": "ergo-node",
-  "networkType": "Mainnet",
   "observation": {
     "confirmation": 15,
     "validThreshold": 720

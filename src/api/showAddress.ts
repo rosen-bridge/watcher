@@ -13,7 +13,7 @@ addressRouter.get('/generate', async (req: Request, res: Response) => {
       return res.status(400).json({ errors: errors.array() });
     }
     const config: Config = Config.getConfig();
-    res.status(200).json(generateSK(config.networkType));
+    res.status(200).json(generateSK(config.networkPrefix));
   } catch (e) {
     logger.warn(`An error occurred while generating secret key: ${e}`);
     res.status(500).send({ message: e.message });

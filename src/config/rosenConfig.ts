@@ -62,7 +62,7 @@ class RosenConfig {
 }
 
 const network = ergoConfig.networkWatcher.split('-')[0].toLowerCase();
-const networkType = ergoConfig.networkWatcherType.toLowerCase();
+const networkType = ergoConfig.networkType.toLowerCase();
 const rosenConfig: rosenConfigType = new RosenConfig(network, networkType);
 
 export { RosenConfig, rosenConfigType, rosenConfig };

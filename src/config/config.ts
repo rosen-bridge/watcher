@@ -22,7 +22,6 @@ const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.(
 );
 const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
 const NETWORK_WATCHER: string | undefined = config.get?.('network');
-const NETWORK_WATCHER_TYPE: string | undefined = config.get?.('networkType');
 const MIN_BOX_VALUE: string | undefined = config.get?.('minBoxValue');
 const FEE: string | undefined = config.get?.('fee');
 const COMMITMENT_CREATION_INTERVAL: number | undefined = config.get?.(
@@ -58,7 +57,8 @@ const LOGS_MAX_FILES: string | undefined = config.get<string>('logs.maxFiles');
 
 class Config {
   private static instance: Config;
-  networkType: wasm.NetworkPrefix;
+  networkPrefix: wasm.NetworkPrefix;
+  networkType: string;
   secretKey: wasm.SecretKey;
   address: string;
   explorerUrl: string;
@@ -68,7 +68,6 @@ class Config {
   ergoInitialHeight: number;
   ergoInterval: number;
   networkWatcher: string;
-  networkWatcherType: string;
   minBoxValue: string;
   fee: string;
   commitmentCreationInterval: number;
@@ -131,9 +130,6 @@ class Config {
     if (!NETWORK_WATCHER || !supportedNetworks.includes(NETWORK_WATCHER)) {
       throw new Error('Watching Bridge is not set correctly');
     }
-    if (NETWORK_WATCHER_TYPE === undefined) {
-      throw new Error('Network watcher type is not set correctly');
-    }
     if (!COMMITMENT_CREATION_INTERVAL) {
       throw new Error('Commitment creation job interval is not set');
     }
@@ -183,7 +179,8 @@ class Config {
       .get_address()
       .to_base58(networkType);
 
-    this.networkType = networkType;
+    this.networkPrefix = networkType;
+    this.networkType = NETWORK_TYPE;
     this.secretKey = secretKey;
     this.address = watcherAddress;
     this.explorerUrl = EXPLORER_URL;
@@ -191,7 +188,6 @@ class Config {
     this.explorerTimeout = ERGO_EXPLORER_TIMEOUT;
     this.nodeTimeout = ERGO_NODE_TIMEOUT;
     this.networkWatcher = NETWORK_WATCHER;
-    this.networkWatcherType = NETWORK_WATCHER_TYPE;
     this.commitmentCreationInterval = COMMITMENT_CREATION_INTERVAL;
     this.commitmentRevealInterval = COMMITMENT_REVEAL_INTERVAL;
     this.transactionCheckingInterval = TRANSACTION_CHECK_INTERVAL;

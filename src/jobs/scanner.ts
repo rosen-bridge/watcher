@@ -93,7 +93,7 @@ export const scannerInit = () => {
   const plainExtractor = new ErgoUTXOExtractor(
     dataSource,
     Constants.addressExtractorName,
-    config.networkType,
+    config.networkPrefix,
     config.explorerUrl,
     config.address
   );
