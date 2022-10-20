@@ -11,8 +11,8 @@ describe('Statistics', () => {
   /**
    * setting up pretest database and Statistic Object
    */
-  before('inserting into database', async () => {
-    const ORM = await loadDataBase('Statistics');
+  before('initiating Database and inserting into it', async () => {
+    const ORM = await loadDataBase('StatisticsApi');
     await fillORM(ORM);
     DB = ORM.DB;
     statistics = Statistics.getInstance(DB, 'WIDStatistics');
