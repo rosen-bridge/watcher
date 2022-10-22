@@ -232,8 +232,7 @@ describe('Testing ergoUtils', () => {
         txOutBox,
         height,
         wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee.toString())),
-        add,
-        wasm.BoxValue.from_i64(wasm.I64.from_str(config.minBoxValue.toString()))
+        add
       );
 
       const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);
