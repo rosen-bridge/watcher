@@ -60,6 +60,10 @@ type ORMType = {
   eventTriggerRepo: Repository<EventTriggerEntity>;
 };
 
+/**
+ * Initiate and migrate databases for test environment
+ * @param name
+ */
 export const loadDataBase = async (name: string): Promise<ORMType> => {
   const ormConfig = new DataSource({
     type: 'sqlite',
@@ -100,6 +104,10 @@ export const loadDataBase = async (name: string): Promise<ORMType> => {
   };
 };
 
+/**
+ *  Filling ORM test databases with mocked data
+ * @param ORM
+ */
 export const fillORM = async (ORM: ORMType) => {
   await ORM.blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
   await ORM.observationRepo.save([observationEntity2]);
