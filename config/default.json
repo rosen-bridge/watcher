@@ -35,14 +35,9 @@
     },
     "name": "ergo"
   },
-  "bridgeScanner": {
-    "interval": 10,
-    "initialBlockHeight": 249243,
-    "heightLimit": 100,
-    "cleanupConfirmation": 10
-  },
   "rosenConfigPath": "src/config/",
   "rosenTokensPath": "src/config/tokens.json",
+  "databasePath": "/../sqlite/watcher.sqlite",
   "logs": {
     "path": "logs/",
     "level": "info",

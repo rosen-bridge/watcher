@@ -54,6 +54,7 @@ const LOGS_PATH: string | undefined = config.get<string>('logs.path');
 const LOGS_LEVEL: string | undefined = config.get<string>('logs.level');
 const LOGS_MAX_SIZE: string | undefined = config.get<string>('logs.maxSize');
 const LOGS_MAX_FILES: string | undefined = config.get<string>('logs.maxFiles');
+const DATABASE_PATH: string | undefined = config.get<string>('databasePath');
 
 class Config {
   private static instance: Config;
@@ -83,6 +84,7 @@ class Config {
   logLevel: string;
   logMaxSize: string;
   logMaxFiles: string;
+  databasePath: string;
 
   private constructor() {
     let networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Testnet;
@@ -163,6 +165,9 @@ class Config {
     if (ROSEN_TOKENS_PATH === undefined) {
       throw new Error("Rosen Tokens file path doesn't set correctly");
     }
+    if (!DATABASE_PATH) {
+      throw new Error("Database path doesn't set correctly");
+    }
     if (
       LOGS_PATH === undefined ||
       LOGS_LEVEL === undefined ||
@@ -205,6 +210,7 @@ class Config {
     this.logLevel = LOGS_LEVEL;
     this.logMaxSize = LOGS_MAX_SIZE;
     this.logMaxFiles = LOGS_MAX_FILES;
+    this.databasePath = DATABASE_PATH;
   }
 
   static getConfig() {
