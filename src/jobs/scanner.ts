@@ -15,15 +15,21 @@ import { rosenConfig } from '../config/rosenConfig';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 import { Constants } from '../config/constants';
 import { Tokens } from '../config/tokensConfig';
+import { logger } from '../log/Logger';
 
 const config = Config.getConfig();
 let scanner: ErgoScanner;
 let cardanoScanner: CardanoKoiosScanner;
 
-const ergoScanningJob = () => {
-  scanner
-    .update()
-    .then(() => setTimeout(ergoScanningJob, config.ergoInterval * 1000));
+const ergoScanningJob = async () => {
+  try {
+    await scanner.update();
+    setTimeout(ergoScanningJob, config.ergoInterval * 1000);
+  } catch (e) {
+    logger.warn('Scanning Job failed with error:');
+    console.log(e.message);
+    setTimeout(ergoScanningJob, config.ergoInterval * 1000);
+  }
 };
 
 const cardanoScanningJob = (interval: number) => {
