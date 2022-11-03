@@ -26,6 +26,10 @@ let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
 let watcherUtils: WatcherUtils;
 
+export const getWatcherDataBase = () => {
+  return watcherDatabase;
+};
+
 const init = async () => {
   const generateTransactionObject = async (): Promise<Transaction> => {
     await dataSource.initialize();
@@ -74,10 +78,7 @@ const init = async () => {
       );
       const txUtils = new TransactionUtils(watcherDatabase);
       // Initiating watcher Transaction API
-      watcherStatistics = Statistics.getInstance(
-        watcherDatabase,
-        watcherTransaction.watcherWID
-      );
+      watcherStatistics = Statistics.getInstance();
       // Running transaction checking thread
       transactionQueueJob(watcherDatabase, watcherUtils);
       // Running commitment creation thread

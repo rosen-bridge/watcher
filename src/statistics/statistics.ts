@@ -1,7 +1,6 @@
 import { Config } from '../config/config';
-import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { WatcherDataBase } from '../database/models/watcherModel';
-import { watcherTransaction } from '../index';
+import { getWatcherDataBase, watcherTransaction } from '../index';
 import { base64ToArrayBuffer } from '../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
@@ -14,13 +13,20 @@ class Statistics {
 
   private constructor(watcherDB: WatcherDataBase, wid?: string) {
     this.database = watcherDB;
-    if (!wid) this.watcherWID = watcherTransaction.watcherWID;
-    else this.watcherWID = wid;
+    this.watcherWID = wid;
   }
 
-  static getInstance = (watcherDB: WatcherDataBase, wid?: string) => {
+  static getInstance = (watcherDatabase?: WatcherDataBase, wid?: string) => {
     if (!Statistics.instance) {
-      Statistics.instance = new Statistics(watcherDB, wid);
+      if (watcherDatabase && wid)
+        Statistics.instance = new Statistics(watcherDatabase, wid);
+      else {
+        const watcherDB = getWatcherDataBase();
+        Statistics.instance = new Statistics(
+          watcherDB,
+          watcherTransaction.watcherWID
+        );
+      }
     }
     return Statistics.instance;
   };
