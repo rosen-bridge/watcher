@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { watcherTransaction } from '../index';
+import { watcherTransaction } from '../init';
 import { ApiResponse } from './Transaction';
 import { body, validationResult } from 'express-validator';
 import { logger } from '../log/Logger';

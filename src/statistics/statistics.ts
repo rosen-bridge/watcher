@@ -1,6 +1,6 @@
 import { Config } from '../config/config';
 import { WatcherDataBase } from '../database/models/watcherModel';
-import { getWatcherDataBase, watcherTransaction } from '../index';
+import { getWatcherDataBase, watcherTransaction } from '../init';
 import { base64ToArrayBuffer } from '../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
@@ -16,6 +16,11 @@ class Statistics {
     this.watcherWID = wid;
   }
 
+  /**
+   * Singleton Instance of the statistics class that get watcherDatabase and watcher WID if sets(tests)
+   * @param watcherDatabase
+   * @param wid
+   */
   static getInstance = (watcherDatabase?: WatcherDataBase, wid?: string) => {
     if (!Statistics.instance) {
       if (watcherDatabase && wid)

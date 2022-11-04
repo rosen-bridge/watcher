@@ -18,6 +18,18 @@ describe('Statistics', () => {
     statistics = Statistics.getInstance(DB, 'WIDStatistics');
   });
 
+  describe('getInstance', () => {
+    /**
+     *  Target: testing getInstance
+     *  Expected Output:
+     *    the watcher WID should be WIDStatistics
+     */
+    it('should return one instance with specific watcher WID', () => {
+      const statistics = Statistics.getInstance();
+      expect(statistics.getWID()).to.equal('WIDStatistics');
+    });
+  });
+
   describe('getErgsAndFee', () => {
     /**
      * Target: testing getErgsAndFee for the watcher
