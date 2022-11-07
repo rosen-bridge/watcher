@@ -41,7 +41,8 @@ describe('Transaction queue tests', () => {
     const ORM = await loadDataBase('commitmentReveal');
     dataBase = ORM.DB;
     boxes = new Boxes(rosenConfig, dataBase);
-    transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+    Transaction.setup(rosenConfig, userAddress, secret1, boxes);
+    transaction = Transaction.getInstance();
     dbConnection = new WatcherUtils(dataBase, transaction, 0, 100);
     txQueue = new TransactionQueue(dataBase, dbConnection);
   });

@@ -41,13 +41,13 @@ const init = async () => {
     await dataSource.runMigrations();
     watcherDatabase = new WatcherDataBase(dataSource);
     boxesObject = new Boxes(rosenConfig, watcherDatabase);
-
-    return new Transaction(
+    Transaction.setup(
       rosenConfig,
       config.address,
       config.secretKey,
       boxesObject
     );
+    return Transaction.getInstance();
   };
 
   const initExpress = () => {
@@ -83,6 +83,7 @@ const init = async () => {
       );
       const txUtils = new TransactionUtils(watcherDatabase);
       // Initiating watcher Transaction API
+      Statistics.setup(watcherDatabase, Transaction.watcherWID);
       watcherStatistics = Statistics.getInstance();
       // Running transaction checking thread
       transactionQueueJob(watcherDatabase, watcherUtils);

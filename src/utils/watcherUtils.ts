@@ -64,7 +64,7 @@ class WatcherUtils {
     );
     return (
       relatedCommitments.filter(
-        (commitment) => commitment.WID === this.api.watcherWID
+        (commitment) => commitment.WID === Transaction.watcherWID
       ).length <= 0
     );
   };

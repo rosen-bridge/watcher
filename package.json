@@ -11,7 +11,7 @@
     "prettify": "prettier --write . --ignore-path ./.gitignore",
     "start:dev": "nodemon src/index.ts",
     "start": "ts-node --experimental-specifier-resolution=node ./src/index.ts",
-    "test": "rm -rf ./sqlite && NODE_ENV=\"test\" mocha --slow 3000; rm -rf ./sqlite",
+    "test": "rm -rf ./sqlite && NODE_ENV=\"test\" mocha -g returnPermit --slow 3000; rm -rf ./sqlite",
     "type-check": "tsc --noEmit",
     "typeorm:generate": "npm run typeorm migration:generate src/database/migrations/watcher/watcherModelMigration -- -d config/dataSource.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",

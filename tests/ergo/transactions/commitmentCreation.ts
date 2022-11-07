@@ -71,7 +71,8 @@ describe('Commitment creation transaction tests', () => {
     await fillORM(ORM);
     watcherDb = ORM.DB;
     boxes = new Boxes(rosenConfig, watcherDb);
-    transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+    Transaction.setup(rosenConfig, userAddress, secret1, boxes);
+    transaction = Transaction.getInstance();
     watcherUtils = new WatcherUtils(watcherDb, transaction, 0, 100);
     txUtils = new TransactionUtils(watcherDb);
     cc = new CommitmentCreation(watcherUtils, txUtils, boxes, transaction);
@@ -147,7 +148,7 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(boxes, 'getPermits', () => permits);
       chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
       chai.spy.on(boxes, 'getUserPaymentBox');
-      sinon.stub(transaction, 'watcherWID').value(WID);
+      sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cc, 'createCommitmentTx', () => {
         return { txId: 'txId', commitmentBoxId: 'boxId' };
       });
@@ -186,7 +187,7 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(boxes, 'getPermits', () => permits);
       chai.spy.on(boxes, 'getWIDBox', () => WIDBox2);
       chai.spy.on(boxes, 'getUserPaymentBox', () => plainBox);
-      sinon.stub(transaction, 'watcherWID').value(WID);
+      sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cc, 'createCommitmentTx', () => {
         return { txId: 'txId', commitmentBoxId: 'boxId' };
       });

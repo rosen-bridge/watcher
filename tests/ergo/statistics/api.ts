@@ -21,7 +21,8 @@ describe('Statistics-Api', () => {
   before('Mocking Statistics Class functions', async () => {
     const ORM = await loadDataBase('Statistics');
     const DB = ORM.DB;
-    Statistics.getInstance(DB, 'WIDStatistics');
+    Statistics.setup(DB, 'WIDStatistics');
+    Statistics.getInstance();
     chai.spy.on(Statistics, 'getCommitments', (offset, limit) => {
       if (offset === 0 && limit === 1) {
         return [

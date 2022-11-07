@@ -114,13 +114,13 @@ export class CommitmentCreation {
    */
   job = async () => {
     const observations = await this.watcherUtils.allReadyObservations();
-    if (!this.widApi.watcherWID) {
+    if (!Transaction.watcherWID) {
       logger.warn(
         'Watcher WID is not set. Cannot run commitment creation job.'
       );
       return;
     }
-    const WID = this.widApi.watcherWID;
+    const WID = Transaction.watcherWID;
     logger.info(`Starting commitment creation job`);
     for (const observation of observations) {
       try {

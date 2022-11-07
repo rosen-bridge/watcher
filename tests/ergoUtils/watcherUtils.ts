@@ -42,7 +42,8 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
     const ORM = await loadDataBase('network-watcherUtils');
     dataBase = ORM.DB;
     boxes = new Boxes(rosenConfig, dataBase);
-    transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
+    Transaction.setup(rosenConfig, userAddress, secret1, boxes);
+    transaction = Transaction.getInstance();
     watcherUtils = new WatcherUtils(dataBase, transaction, 0, 100);
     txUtils = new TransactionUtils(dataBase);
   });
@@ -289,8 +290,8 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
      *    The function should return false since this watcher have created this commitment beforehand
      */
     it('should return false since this watcher have created this commitment beforehand', async () => {
-      commitmentEntity.WID = transaction.watcherWID
-        ? transaction.watcherWID
+      commitmentEntity.WID = Transaction.watcherWID
+        ? Transaction.watcherWID
         : '';
       chai.spy.on(
         dataBase,

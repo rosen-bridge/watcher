@@ -15,7 +15,8 @@ describe('Statistics', () => {
     const ORM = await loadDataBase('StatisticsApi');
     await fillORM(ORM);
     DB = ORM.DB;
-    statistics = Statistics.getInstance(DB, 'WIDStatistics');
+    Statistics.setup(DB, 'WIDStatistics');
+    statistics = Statistics.getInstance();
   });
 
   describe('getInstance', () => {

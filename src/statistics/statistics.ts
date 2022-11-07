@@ -1,6 +1,5 @@
 import { Config } from '../config/config';
 import { WatcherDataBase } from '../database/models/watcherModel';
-import { getWatcherDataBase, watcherTransaction } from '../init';
 import { base64ToArrayBuffer } from '../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
@@ -8,30 +7,36 @@ const config = Config.getConfig();
 
 class Statistics {
   private static instance: Statistics;
-  private readonly database: WatcherDataBase;
-  watcherWID: string | undefined;
+  private static database: WatcherDataBase | undefined;
+  private static watcherWID: string | undefined;
+  private static isSetupCalled = false;
+  // private constructor(watcherDB: WatcherDataBase, wid?: string) {
+  //   this.database = watcherDB;
+  //   this.watcherWID = wid;
+  // }
 
-  private constructor(watcherDB: WatcherDataBase, wid?: string) {
-    this.database = watcherDB;
-    this.watcherWID = wid;
-  }
+  static setup = (db: WatcherDataBase, wid?: string) => {
+    if (!Statistics.instance) {
+      Statistics.database = db;
+      Statistics.watcherWID = wid;
+      Statistics.isSetupCalled = true;
+    }
+  };
 
   /**
    * Singleton Instance of the statistics class that get watcherDatabase and watcher WID if sets(tests)
-   * @param watcherDatabase
-   * @param wid
    */
-  static getInstance = (watcherDatabase?: WatcherDataBase, wid?: string) => {
+  static getInstance = () => {
     if (!Statistics.instance) {
-      if (watcherDatabase && wid)
-        Statistics.instance = new Statistics(watcherDatabase, wid);
-      else {
-        const watcherDB = getWatcherDataBase();
-        Statistics.instance = new Statistics(
-          watcherDB,
-          watcherTransaction.watcherWID
-        );
-      }
+      if (Statistics.isSetupCalled) Statistics.instance = new Statistics();
+      else throw new Error("Setup doesn't called for Statistics");
+      // else {
+      //   const watcherDB = getWatcherDataBase();
+      //   Statistics.instance = new Statistics(
+      //     watcherDB,
+      //     watcherTransaction.watcherWID
+      //   );
+      // }
     }
     return Statistics.instance;
   };
@@ -40,10 +45,10 @@ class Statistics {
    * Getting watcher WID
    */
   getWID = () => {
-    if (this.watcherWID === undefined) {
+    if (Statistics.watcherWID === undefined) {
       throw new Error("Watcher doesn't have any WID to see statistics");
     }
-    return this.watcherWID;
+    return Statistics.watcherWID;
   };
 
   /**
@@ -51,7 +56,7 @@ class Statistics {
    */
   getErgsAndFee = async () => {
     const WID = this.getWID();
-    const permits = await this.database.getPermitBoxesByWID(WID);
+    const permits = await Statistics.database!.getPermitBoxesByWID(WID);
     let ergs = 0n;
     const tokens: { [tokenId: string]: bigint } = {};
     permits.forEach((permit) => {
@@ -79,7 +84,7 @@ class Statistics {
    */
   getCommitmentsCount = async () => {
     const WID = this.getWID();
-    return await this.database.commitmentsByWIDCount(WID);
+    return await Statistics.database!.commitmentsByWIDCount(WID);
   };
 
   /**
@@ -87,7 +92,7 @@ class Statistics {
    */
   getEventTriggersCount = async () => {
     const WID = this.getWID();
-    return await this.database.eventTriggersByWIDCount(WID);
+    return await Statistics.database!.eventTriggersByWIDCount(WID);
   };
 
   /**
@@ -97,7 +102,11 @@ class Statistics {
    */
   getCommitments = async (offset = 0, limit = 10) => {
     const WID = this.getWID();
-    const commitments = await this.database.commitmentByWID(WID, offset, limit);
+    const commitments = await Statistics.database!.commitmentByWID(
+      WID,
+      offset,
+      limit
+    );
     return commitments.map((commitment) => {
       return {
         eventId: commitment.eventId,
@@ -117,7 +126,7 @@ class Statistics {
    */
   getEventTriggers = async (offset = 0, limit = 10) => {
     const WID = this.getWID();
-    const eventTriggers = await this.database.eventTriggersByWID(
+    const eventTriggers = await Statistics.database!.eventTriggersByWID(
       WID,
       offset,
       limit
