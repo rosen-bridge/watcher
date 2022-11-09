@@ -26,13 +26,6 @@ let watcherDatabase: WatcherDataBase;
 let watcherUtils: WatcherUtils;
 
 /**
- * getting watcherDatabase
- */
-const getWatcherDataBase = () => {
-  return watcherDatabase;
-};
-
-/**
  * initiating watcher
  */
 const init = async () => {
@@ -41,7 +34,7 @@ const init = async () => {
     await dataSource.runMigrations();
     watcherDatabase = new WatcherDataBase(dataSource);
     boxesObject = new Boxes(rosenConfig, watcherDatabase);
-    Transaction.setup(
+    await Transaction.setup(
       rosenConfig,
       config.address,
       config.secretKey,
@@ -97,4 +90,4 @@ const init = async () => {
     });
 };
 
-export { watcherTransaction, watcherStatistics, getWatcherDataBase, init };
+export { watcherTransaction, watcherStatistics, init };

@@ -18,8 +18,8 @@ export type ApiResponse = {
  * Transaction class used by watcher to generate transaction for ergo network
  */
 export class Transaction {
-  private static instance: Transaction;
-  private static isSetupCalled = false;
+  protected static instance: Transaction | undefined;
+  protected static isSetupCalled = false;
   static watcherPermitState?: boolean;
   static watcherWID?: string;
   static boxes: Boxes;
@@ -31,34 +31,19 @@ export class Transaction {
   static RSN: wasm.TokenId;
 
   /**
-   * constructor
+   * setup function to set up the singleton class before getting instance
+   * @param rosenConfig
+   * @param userAddress
+   * @param userSecret
+   * @param boxes
    */
-  constructor() // rosenConfig: rosenConfigType,
-  // userAddress: string,
-  // userSecret: wasm.SecretKey,
-  // boxes: Boxes
-  {
-    // this.watcherPermitState = undefined;
-    // this.watcherWID = '';
-    // this.boxes = boxes;
-    // this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee));
-    // this.minBoxValue = wasm.BoxValue.from_i64(
-    //   wasm.I64.from_str(config.minBoxValue)
-    // );
-    // this.userSecret = userSecret;
-    // this.userAddress = wasm.Address.from_base58(userAddress);
-    // this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
-    // this.userAddressContract = wasm.Contract.pay_to_address(this.userAddress);
-    this.getWatcherState();
-  }
-
-  static setup = (
+  static setup = async (
     rosenConfig: rosenConfigType,
     userAddress: string,
     userSecret: wasm.SecretKey,
     boxes: Boxes
   ) => {
-    if (!Transaction.instance) {
+    if (!Transaction.isSetupCalled) {
       Transaction.watcherPermitState = undefined;
       Transaction.watcherWID = '';
       Transaction.boxes = boxes;
@@ -73,13 +58,14 @@ export class Transaction {
         this.userAddress
       );
       Transaction.isSetupCalled = true;
+      await Transaction.getWatcherState();
     }
-
-    // Transaction.getWatcherState();
   };
 
+  /**
+   * Getting singleton instance of the class
+   */
   static getInstance = () => {
-    console.log(!Transaction.instance, 'instance');
     if (!Transaction.instance) {
       if (Transaction.isSetupCalled) Transaction.instance = new Transaction();
       else throw new Error("Setup doesn't called for Transaction");
@@ -92,8 +78,10 @@ export class Transaction {
    *  returns it's wid or in case of no permits return empty string
    * @param users
    */
-  getWID = async (users: Array<Uint8Array>): Promise<string> => {
+  static getWID = async (users: Array<Uint8Array>): Promise<string> => {
     // TODO: This function hasn't good performance
+    if (!Transaction.isSetupCalled)
+      throw new Error("The Transaction class setup doesn't called");
     const usersWID = users.map(async (id) => {
       const wid = uint8ArrayToHex(id);
       try {
@@ -116,7 +104,6 @@ export class Transaction {
    * @param RWTCount
    */
   returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
-    await this.getWatcherState();
     if (!Transaction.watcherPermitState) {
       return { response: "you don't have permit box", status: 500 };
     }
@@ -318,7 +305,6 @@ export class Transaction {
    * @param RSNCount
    */
   getPermit = async (RSNCount: bigint): Promise<ApiResponse> => {
-    await this.getWatcherState();
     if (Transaction.watcherPermitState) {
       return { response: "you don't have locked any RSN", status: 500 };
     }
@@ -477,7 +463,9 @@ export class Transaction {
   /**
    * updating watcher state(permitState and WID if exist)
    */
-  getWatcherState = async () => {
+  static getWatcherState = async () => {
+    if (!Transaction.isSetupCalled)
+      throw new Error("The Transaction class setup doesn't called");
     logger.info('Getting watcher status');
     if (Transaction.watcherPermitState === undefined) {
       const repoBox = await Transaction.boxes.getRepoBox();
@@ -485,7 +473,7 @@ export class Transaction {
       logger.info(`Repo box id is: ${repoBox.box_id().to_str()}`);
       if (R4) {
         const users = R4.to_coll_coll_byte();
-        Transaction.watcherWID = await this.getWID(users);
+        Transaction.watcherWID = await Transaction.getWID(users);
         logger.info(`Watcher WID is set to: ${Transaction.watcherWID}`);
         Transaction.watcherPermitState = Transaction.watcherWID !== '';
         logger.info(`Watcher WID is set to: ${Transaction.watcherPermitState}`);

@@ -9,7 +9,6 @@ import { Buffer } from 'buffer';
 import { CommitmentSet } from '../../../src/utils/interfaces';
 import { observation } from './commitmentCreation';
 import { TxType } from '../../../src/database/entities/txEntity';
-import { Transaction } from '../../../src/api/Transaction';
 import { secret1, userAddress } from './permit';
 import { firstCommitment, thirdCommitment } from '../../database/mockedData';
 
@@ -30,6 +29,8 @@ import {
   WatcherUtils,
 } from '../../../src/utils/watcherUtils';
 import { rosenConfig } from '../../../src/config/rosenConfig';
+import TransactionTest from '../../../src/api/TransactionTest';
+import { mockedResponseBody } from '../objects/mockedResponseBody';
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))];
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
@@ -44,7 +45,7 @@ const WIDs = [
 describe('Commitment reveal transaction tests', () => {
   let dataBase: WatcherDataBase,
     boxes: Boxes,
-    transaction: Transaction,
+    transaction: TransactionTest,
     watcherUtils: WatcherUtils,
     txUtils: TransactionUtils;
   let cr: CommitmentReveal;
@@ -53,8 +54,10 @@ describe('Commitment reveal transaction tests', () => {
     await fillORM(ORM);
     dataBase = ORM.DB;
     boxes = new Boxes(rosenConfig, dataBase);
-    Transaction.setup(rosenConfig, userAddress, secret1, boxes);
-    transaction = Transaction.getInstance();
+    chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
+    TransactionTest.reset();
+    await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+    transaction = TransactionTest.getInstance();
     watcherUtils = new WatcherUtils(dataBase, transaction, 0, 100);
     txUtils = new TransactionUtils(dataBase);
     cr = new CommitmentReveal(watcherUtils, txUtils, boxes);
@@ -77,7 +80,7 @@ describe('Commitment reveal transaction tests', () => {
     it('Should create, sign and send a trigger event transaction', async () => {
       chai.spy.on(txUtils, 'submitTransaction', () => null);
       chai.spy.on(boxes, 'createTriggerEvent');
-      chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
+      // chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);
       await cr.triggerEventCreationTx(commitments, observation, WIDs, plainBox);

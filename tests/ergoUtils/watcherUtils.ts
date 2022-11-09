@@ -1,4 +1,4 @@
-import { fillORM, loadDataBase } from '../database/watcherDatabase';
+import { loadDataBase } from '../database/watcherDatabase';
 import { TxStatus } from '../../src/database/entities/observationStatusEntity';
 import {
   commitmentEntity,
@@ -14,7 +14,6 @@ import {
 } from '../database/mockedData';
 import { Boxes } from '../../src/ergo/boxes';
 import { secret1, userAddress } from '../ergo/transactions/permit';
-import { Transaction } from '../../src/api/Transaction';
 import { JsonBI } from '../../src/ergo/network/parser';
 import txObj from '../ergo/transactions/dataset/commitmentTx.json' assert { type: 'json' };
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
@@ -27,6 +26,7 @@ import { NoObservationStatus } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
 import { rosenConfig } from '../../src/config/rosenConfig';
+import TransactionTest from '../../src/api/TransactionTest';
 
 chai.use(spies);
 
@@ -35,15 +35,15 @@ const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 describe('Testing the WatcherUtils & TransactionUtils', () => {
   let dataBase: WatcherDataBase,
     boxes: Boxes,
-    transaction: Transaction,
+    transaction: TransactionTest,
     watcherUtils: WatcherUtils,
     txUtils: TransactionUtils;
   beforeEach(async () => {
     const ORM = await loadDataBase('network-watcherUtils');
     dataBase = ORM.DB;
     boxes = new Boxes(rosenConfig, dataBase);
-    Transaction.setup(rosenConfig, userAddress, secret1, boxes);
-    transaction = Transaction.getInstance();
+    await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+    transaction = TransactionTest.getInstance();
     watcherUtils = new WatcherUtils(dataBase, transaction, 0, 100);
     txUtils = new TransactionUtils(dataBase);
   });
@@ -290,8 +290,8 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
      *    The function should return false since this watcher have created this commitment beforehand
      */
     it('should return false since this watcher have created this commitment beforehand', async () => {
-      commitmentEntity.WID = Transaction.watcherWID
-        ? Transaction.watcherWID
+      commitmentEntity.WID = TransactionTest.watcherWID
+        ? TransactionTest.watcherWID
         : '';
       chai.spy.on(
         dataBase,

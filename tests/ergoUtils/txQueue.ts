@@ -1,11 +1,10 @@
-import { fillORM, loadDataBase } from '../database/watcherDatabase';
+import { loadDataBase } from '../database/watcherDatabase';
 import { TransactionQueue } from '../../src/ergo/transactionQueue';
 import { TxEntity, TxType } from '../../src/database/entities/txEntity';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { Boxes } from '../../src/ergo/boxes';
 import { secret1, userAddress } from '../ergo/transactions/permit';
-import { Transaction } from '../../src/api/Transaction';
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
 
 import { Buffer } from 'buffer';
@@ -17,6 +16,7 @@ chai.use(spies);
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 import { WatcherUtils } from '../../src/utils/watcherUtils';
 import { rosenConfig } from '../../src/config/rosenConfig';
+import TransactionTest from '../../src/api/TransactionTest';
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
 
@@ -34,15 +34,15 @@ txEntity.updateBlock = height - 1;
 describe('Transaction queue tests', () => {
   let dataBase: WatcherDataBase,
     boxes: Boxes,
-    transaction: Transaction,
+    transaction: TransactionTest,
     dbConnection: WatcherUtils;
   let txQueue: TransactionQueue;
   before(async () => {
     const ORM = await loadDataBase('commitmentReveal');
     dataBase = ORM.DB;
     boxes = new Boxes(rosenConfig, dataBase);
-    Transaction.setup(rosenConfig, userAddress, secret1, boxes);
-    transaction = Transaction.getInstance();
+    await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+    transaction = TransactionTest.getInstance();
     dbConnection = new WatcherUtils(dataBase, transaction, 0, 100);
     txQueue = new TransactionQueue(dataBase, dbConnection);
   });
