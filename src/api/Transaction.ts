@@ -476,7 +476,6 @@ export class Transaction {
         Transaction.watcherWID = await Transaction.getWID(users);
         logger.info(`Watcher WID is set to: ${Transaction.watcherWID}`);
         Transaction.watcherPermitState = Transaction.watcherWID !== '';
-        logger.info(`Watcher WID is set to: ${Transaction.watcherPermitState}`);
       }
     }
   };

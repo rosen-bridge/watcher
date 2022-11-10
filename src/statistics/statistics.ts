@@ -10,11 +10,12 @@ class Statistics {
   private static database: WatcherDataBase | undefined;
   private static watcherWID: string | undefined;
   private static isSetupCalled = false;
-  // private constructor(watcherDB: WatcherDataBase, wid?: string) {
-  //   this.database = watcherDB;
-  //   this.watcherWID = wid;
-  // }
 
+  /**
+   * Setup function that class should setup before getting instance
+   * @param db
+   * @param wid
+   */
   static setup = (db: WatcherDataBase, wid?: string) => {
     if (!Statistics.instance) {
       Statistics.database = db;
@@ -30,13 +31,6 @@ class Statistics {
     if (!Statistics.instance) {
       if (Statistics.isSetupCalled) Statistics.instance = new Statistics();
       else throw new Error("Setup doesn't called for Statistics");
-      // else {
-      //   const watcherDB = getWatcherDataBase();
-      //   Statistics.instance = new Statistics(
-      //     watcherDB,
-      //     watcherTransaction.watcherWID
-      //   );
-      // }
     }
     return Statistics.instance;
   };
