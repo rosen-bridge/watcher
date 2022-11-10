@@ -18,18 +18,15 @@ export class CommitmentCreation {
   watcherUtils: WatcherUtils;
   txUtils: TransactionUtils;
   boxes: Boxes;
-  widApi: Transaction;
 
   constructor(
     watcherUtils: WatcherUtils,
     txUtils: TransactionUtils,
-    boxes: Boxes,
-    api: Transaction
+    boxes: Boxes
   ) {
     this.watcherUtils = watcherUtils;
     this.txUtils = txUtils;
     this.boxes = boxes;
-    this.widApi = api;
   }
 
   /**

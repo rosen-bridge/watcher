@@ -19,8 +19,6 @@ import { logger } from './log/Logger';
 
 const config = Config.getConfig();
 
-let watcherTransaction: Transaction;
-let watcherStatistics: Statistics;
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
 let watcherUtils: WatcherUtils;
@@ -29,7 +27,7 @@ let watcherUtils: WatcherUtils;
  * initiating watcher
  */
 const init = async () => {
-  const generateTransactionObject = async (): Promise<Transaction> => {
+  const generateTransactionObject = async () => {
     await dataSource.initialize();
     await dataSource.runMigrations();
     watcherDatabase = new WatcherDataBase(dataSource);
@@ -40,7 +38,7 @@ const init = async () => {
       config.secretKey,
       boxesObject
     );
-    return Transaction.getInstance();
+    Transaction.getInstance();
   };
 
   const initExpress = () => {
@@ -59,8 +57,7 @@ const init = async () => {
   };
 
   generateTransactionObject()
-    .then(async (res) => {
-      watcherTransaction = res;
+    .then(async () => {
       initExpress();
       // Initializing database
       watcherDatabase = new WatcherDataBase(dataSource);
@@ -70,18 +67,17 @@ const init = async () => {
       await delay(10000);
       watcherUtils = new WatcherUtils(
         watcherDatabase,
-        watcherTransaction,
         config.observationConfirmation,
         config.observationValidThreshold
       );
       const txUtils = new TransactionUtils(watcherDatabase);
       // Initiating watcher Transaction API
       Statistics.setup(watcherDatabase, Transaction.watcherWID);
-      watcherStatistics = Statistics.getInstance();
+      Statistics.getInstance();
       // Running transaction checking thread
       transactionQueueJob(watcherDatabase, watcherUtils);
       // Running commitment creation thread
-      creation(watcherUtils, txUtils, boxesObject, watcherTransaction);
+      creation(watcherUtils, txUtils, boxesObject);
       // Running trigger event creation thread
       reveal(watcherUtils, txUtils, boxesObject);
     })
@@ -90,4 +86,4 @@ const init = async () => {
     });
 };
 
-export { watcherTransaction, watcherStatistics, init };
+export default init;

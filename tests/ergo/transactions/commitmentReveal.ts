@@ -58,7 +58,7 @@ describe('Commitment reveal transaction tests', () => {
     TransactionTest.reset();
     await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
     transaction = TransactionTest.getInstance();
-    watcherUtils = new WatcherUtils(dataBase, transaction, 0, 100);
+    watcherUtils = new WatcherUtils(dataBase, 0, 100);
     txUtils = new TransactionUtils(dataBase);
     cr = new CommitmentReveal(watcherUtils, txUtils, boxes);
   });

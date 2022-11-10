@@ -74,9 +74,9 @@ describe('Commitment creation transaction tests', () => {
     chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
     await Transaction.setup(rosenConfig, userAddress, secret1, boxes);
     transaction = Transaction.getInstance();
-    watcherUtils = new WatcherUtils(watcherDb, transaction, 0, 100);
+    watcherUtils = new WatcherUtils(watcherDb, 0, 100);
     txUtils = new TransactionUtils(watcherDb);
-    cc = new CommitmentCreation(watcherUtils, txUtils, boxes, transaction);
+    cc = new CommitmentCreation(watcherUtils, txUtils, boxes);
   });
   afterEach(() => {
     chai.spy.restore(watcherUtils);

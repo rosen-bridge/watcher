@@ -1,6 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { watcherTransaction } from '../init';
-import { ApiResponse } from './Transaction';
+import { ApiResponse, Transaction } from './Transaction';
 import { body, validationResult } from 'express-validator';
 import { logger } from '../log/Logger';
 
@@ -15,6 +14,7 @@ permitRouter.post(
         return res.status(400).json({ errors: errors.array() });
       }
       const RSNCount = req.body.count;
+      const watcherTransaction = Transaction.getInstance();
       const response: ApiResponse = await watcherTransaction.getPermit(
         BigInt(RSNCount)
       );
@@ -40,6 +40,7 @@ permitRouter.post(
         return res.status(400).json({ errors: errors.array() });
       }
       const RWTCount = req.body.count;
+      const watcherTransaction = Transaction.getInstance();
       const response: ApiResponse = await watcherTransaction.returnPermit(
         BigInt(RWTCount)
       );

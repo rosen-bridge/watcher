@@ -44,7 +44,7 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
     boxes = new Boxes(rosenConfig, dataBase);
     await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
     transaction = TransactionTest.getInstance();
-    watcherUtils = new WatcherUtils(dataBase, transaction, 0, 100);
+    watcherUtils = new WatcherUtils(dataBase, 0, 100);
     txUtils = new TransactionUtils(dataBase);
   });
 
