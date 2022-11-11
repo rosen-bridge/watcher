@@ -31,6 +31,16 @@ import {
 } from '@rosen-bridge/watcher-data-extractor';
 import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { Constants } from '../../src/config/constants';
+import {
+  firstPermit,
+  firstStatisticCommitment,
+  firstStatisticsEventTrigger,
+  secondPermit,
+  secondStatisticCommitment,
+  secondStatisticsEventTrigger,
+  thirdStatisticCommitment,
+  thirdStatisticsEventTrigger,
+} from '../ergo/statistics/mockUtils';
 
 const observation2Status = {
   observation: observationEntity2,
@@ -38,13 +48,23 @@ const observation2Status = {
 };
 let blockRepo: Repository<BlockEntity>;
 let observationRepo: Repository<ObservationEntity>;
-let observationStatusRepo: Repository<ObservationStatusEntity>;
-let commitmentRepo: Repository<CommitmentEntity>;
-let permitRepo: Repository<PermitEntity>;
-let boxRepo: Repository<BoxEntity>;
-let eventTriggerRepo: Repository<EventTriggerEntity>;
 
-export const loadDataBase = async (name: string): Promise<WatcherDataBase> => {
+type ORMType = {
+  DB: WatcherDataBase;
+  blockRepo: Repository<BlockEntity>;
+  observationRepo: Repository<ObservationEntity>;
+  observationStatusRepo: Repository<ObservationStatusEntity>;
+  commitmentRepo: Repository<CommitmentEntity>;
+  permitRepo: Repository<PermitEntity>;
+  boxRepo: Repository<BoxEntity>;
+  eventTriggerRepo: Repository<EventTriggerEntity>;
+};
+
+/**
+ * Initiate and migrate databases for test environment
+ * @param name
+ */
+export const loadDataBase = async (name: string): Promise<ORMType> => {
   const ormConfig = new DataSource({
     type: 'sqlite',
     database: `./sqlite/watcher-test-${name}.sqlite`,
@@ -62,29 +82,69 @@ export const loadDataBase = async (name: string): Promise<WatcherDataBase> => {
 
   await ormConfig.initialize();
   await ormConfig.runMigrations();
-  blockRepo = ormConfig.getRepository(BlockEntity);
-  observationRepo = ormConfig.getRepository(ObservationEntity);
-  observationStatusRepo = ormConfig.getRepository(ObservationStatusEntity);
-  commitmentRepo = ormConfig.getRepository(CommitmentEntity);
-  permitRepo = ormConfig.getRepository(PermitEntity);
-  boxRepo = ormConfig.getRepository(BoxEntity);
-  eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity);
-  return new WatcherDataBase(ormConfig);
+  const blockRepo = ormConfig.getRepository(BlockEntity);
+  const observationRepo = ormConfig.getRepository(ObservationEntity);
+  const observationStatusRepo = ormConfig.getRepository(
+    ObservationStatusEntity
+  );
+  const commitmentRepo = ormConfig.getRepository(CommitmentEntity);
+  const permitRepo = ormConfig.getRepository(PermitEntity);
+  const boxRepo = ormConfig.getRepository(BoxEntity);
+  const eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity);
+
+  return {
+    DB: new WatcherDataBase(ormConfig),
+    blockRepo: blockRepo,
+    observationRepo: observationRepo,
+    observationStatusRepo: observationStatusRepo,
+    commitmentRepo: commitmentRepo,
+    permitRepo: permitRepo,
+    boxRepo: boxRepo,
+    eventTriggerRepo: eventTriggerRepo,
+  };
+};
+
+/**
+ *  Filling ORM test databases with mocked data
+ * @param ORM
+ */
+export const fillORM = async (ORM: ORMType) => {
+  await ORM.blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
+  await ORM.observationRepo.save([observationEntity2]);
+  await ORM.observationStatusRepo.save([
+    { observation: observationEntity2, status: TxStatus.NOT_COMMITTED },
+  ]);
+  await ORM.commitmentRepo.save([
+    commitmentEntity,
+    spentCommitmentEntity,
+    firstStatisticCommitment,
+    secondStatisticCommitment,
+    thirdStatisticCommitment,
+  ]);
+  await ORM.permitRepo.save([
+    permitEntity,
+    spentPermitEntity,
+    firstPermit,
+    secondPermit,
+  ]);
+  await ORM.boxRepo.save([plainBox, spentPlainBox]);
+  await ORM.eventTriggerRepo.save([
+    eventTriggerEntity,
+    newEventTriggerEntity,
+    firstStatisticsEventTrigger,
+    secondStatisticsEventTrigger,
+    thirdStatisticsEventTrigger,
+  ]);
 };
 
 describe('WatcherModel tests', () => {
   let DB: WatcherDataBase;
   before('inserting into database', async () => {
-    DB = await loadDataBase('networkDataBase');
-    await blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
-    await observationRepo.save([observationEntity2]);
-    await observationStatusRepo.save([
-      { observation: observationEntity2, status: TxStatus.NOT_COMMITTED },
-    ]);
-    await commitmentRepo.save([commitmentEntity, spentCommitmentEntity]);
-    await permitRepo.save([permitEntity, spentPermitEntity]);
-    await boxRepo.save([plainBox, spentPlainBox]);
-    await eventTriggerRepo.save([eventTriggerEntity, newEventTriggerEntity]);
+    const ORM = await loadDataBase('networkDataBase');
+    await fillORM(ORM);
+    DB = ORM.DB;
+    blockRepo = ORM.blockRepo;
+    observationRepo = ORM.observationRepo;
   });
 
   describe('getLastBlockHeight', () => {
@@ -306,6 +366,97 @@ describe('WatcherModel tests', () => {
     it('should return two commitments with specified event id', async () => {
       const data = await DB.commitmentsByEventId('eventId');
       expect(data).to.have.length(2);
+    });
+  });
+
+  describe('findCommitmentsById', () => {
+    /**
+     * Target: testing findCommitmentsById
+     * Expected Output:
+     *    The function should return two commitments with the box ids
+     */
+    it('should return exactly two commitments with the specified box id', async () => {
+      const data = await DB.findCommitmentsById([
+        commitmentEntity.boxId,
+        spentCommitmentEntity.boxId,
+      ]);
+      expect(data).to.have.length(2);
+      expect(data[0]).to.eql(commitmentEntity);
+      expect(data[1]).to.eql(spentCommitmentEntity);
+    });
+  });
+
+  describe('commitmentByWID', () => {
+    /**
+     * Target: testing commitmentByWID
+     * Expected Output:
+     *    The function should return one specific commitment
+     */
+    it('should return first commitment with specific WID', async () => {
+      const data = await DB.commitmentByWID('WIDStatistics', 0, 1);
+      expect(data).to.be.eql([firstStatisticCommitment]);
+    });
+
+    /**
+     * Target: testing commitmentByWID
+     * Expected Output:
+     *    The function should return two specific commitment
+     */
+    it('should return two commitment with specific WID with offset 1', async () => {
+      const data = await DB.commitmentByWID('WIDStatistics', 1, 2);
+      expect(data).to.be.eql([
+        secondStatisticCommitment,
+        thirdStatisticCommitment,
+      ]);
+    });
+  });
+
+  describe('commitmentsByWIDCount', () => {
+    /**
+     * Target: testing commitmentsByWIDCount
+     * Expected Output:
+     *    The function should return 3
+     */
+    it('should return counts of commitments with specific WID', async () => {
+      const data = await DB.commitmentsByWIDCount('WIDStatistics');
+      expect(data).to.be.equal(3);
+    });
+  });
+
+  describe('eventTriggersByWIDCount', () => {
+    /**
+     * Target: testing eventTriggersByWIDCount
+     * Expected Output:
+     *    The function should return 3
+     */
+    it('should return counts of eventTriggers that have specific WID in them', async () => {
+      const data = await DB.eventTriggersByWIDCount('WIDStatistics');
+      expect(data).to.be.equal(3);
+    });
+  });
+
+  describe('eventTriggersByWID', () => {
+    /**
+     * Target: testing commitmentByWID
+     * Expected Output:
+     *    The function should return one specific eventTrigger
+     */
+    it('should return first eventTrigger with specific WID', async () => {
+      const data = await DB.eventTriggersByWID('WIDStatistics', 0, 1);
+      expect(data).to.be.eql([firstStatisticsEventTrigger]);
+    });
+
+    /**
+     * Target: testing commitmentByWID
+     * Expected Output:
+     *    The function should return two specific eventTriggers
+     */
+    it('should return two commitment with specific WID with offset 1', async () => {
+      const data = await DB.eventTriggersByWID('WIDStatistics', 1, 2);
+      expect(data).to.be.eql([
+        secondStatisticsEventTrigger,
+        thirdStatisticsEventTrigger,
+      ]);
     });
   });
 

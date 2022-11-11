@@ -1,4 +1,3 @@
-import { Transaction } from '../../../src/api/Transaction';
 import { hexStrToUint8Array } from '../../../src/utils/utils';
 import { expect } from 'chai';
 import { initMockedAxios } from '../objects/axios';
@@ -11,9 +10,10 @@ import spies from 'chai-spies';
 import { Buffer } from 'buffer';
 import { WatcherDataBase } from '../../../src/database/models/watcherModel';
 import { mockedResponseBody } from '../objects/mockedResponseBody';
-import { loadDataBase } from '../../database/watcherDatabase';
+import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import { rosenConfig } from '../../../src/config/rosenConfig';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
+import TransactionTest from '../../../src/api/TransactionTest';
 
 chai.use(spies);
 
@@ -56,12 +56,15 @@ initMockedAxios();
 describe('Watcher Permit Transactions', () => {
   let DB: WatcherDataBase, boxes: Boxes;
   before(async () => {
-    DB = await loadDataBase('permit');
+    const ORM = await loadDataBase('permit');
+    await fillORM(ORM);
+    DB = ORM.DB;
     boxes = new Boxes(rosenConfig, DB);
   });
 
   afterEach(() => {
     chai.spy.restore(boxes);
+    TransactionTest.reset();
   });
 
   describe('getWID', () => {
@@ -80,18 +83,26 @@ describe('Watcher Permit Transactions', () => {
     it('checks is there any wid in the usersBoxes', async () => {
       const sampleWID =
         '4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8';
-      const transaction = new Transaction(
-        rosenConfig,
-        userAddress,
-        secret1,
-        boxes
-      );
+      chai.spy.on(boxes, 'getRepoBox', () => {
+        return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
+      });
+
+      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
+        if (tokenId === sampleWID)
+          return wasm.ErgoBox.from_json(
+            mockedResponseBody.watcherBoxWithWIDToken
+          );
+        else throw new Error('There is no box with this tokenId');
+      });
+
+      await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+      TransactionTest.getInstance();
       const usersHex = ['414441', sampleWID];
       const users: Array<Uint8Array> = [];
       for (const user of usersHex) {
         users.push(hexStrToUint8Array(user));
       }
-      const WID = await transaction.getWID(users);
+      const WID = await TransactionTest.getWID(users);
       expect(WID).to.be.equal(sampleWID);
     });
   });
@@ -110,12 +121,14 @@ describe('Watcher Permit Transactions', () => {
      *    the token map of input and output should be the same
      */
     it('the token map of input and output should be the same', async () => {
-      const transaction = new Transaction(
-        rosenConfig,
-        userAddress,
-        secret1,
-        boxes
-      );
+      chai.spy.on(boxes, 'getRepoBox', () => {
+        return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithPermit);
+      });
+      chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
+        return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
+      });
+      await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+      const transaction = TransactionTest.getInstance();
       const ergoBoxes = wasm.ErgoBoxes.from_boxes_json([]);
       JSON.parse(mockedResponseBody.watcherUnspentBoxes).items.forEach(
         (box: JSON) => {
@@ -164,12 +177,13 @@ describe('Watcher Permit Transactions', () => {
           return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
         else throw Error('No box with token');
       });
-      const secondTransaction = new Transaction(
+      await TransactionTest.setup(
         rosenConfig,
         watcherAddress,
         permitSecret,
         boxes
       );
+      const secondTransaction = TransactionTest.getInstance();
       const response = await secondTransaction.getPermit(100n);
       expect(response.response).to.be.equal(
         'd337b49085f42a32baa2b0f3dd6bddbb2e6b0d14571e0ecabd845490d756ca02'
@@ -193,15 +207,12 @@ describe('Watcher Permit Transactions', () => {
         return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithPermit);
       });
 
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
+      chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
         return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
       });
-      const transaction = new Transaction(
-        rosenConfig,
-        userAddress,
-        secret1,
-        boxes
-      );
+
+      await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+      const transaction = TransactionTest.getInstance();
       const res = await transaction.getPermit(100n);
       expect(res.status).to.be.equal(500);
     });
@@ -239,12 +250,14 @@ describe('Watcher Permit Transactions', () => {
         );
       });
 
-      const transaction = new Transaction(
+      await TransactionTest.setup(
         rosenConfig,
         watcherAddress,
         permitSecret,
         boxes
       );
+      const transaction = TransactionTest.getInstance();
+
       const res = await transaction.returnPermit(100n);
       expect(res.response).to.be.equal(
         '5d2926187ccd2feb6ef526d7e6cd0efffe23c33b3fec26ab918cff75b7089fe5'
@@ -278,12 +291,15 @@ describe('Watcher Permit Transactions', () => {
           mockedResponseBody.watcherBoxWithWIDToken
         );
       });
-      const transaction = new Transaction(
+      TransactionTest.reset();
+      await TransactionTest.setup(
         rosenConfig,
         watcherAddress,
         permitSecret,
         boxes
       );
+      const transaction = TransactionTest.getInstance();
+
       const res = await transaction.returnPermit(1n);
       expect(res.response).to.be.equal(
         '4e4ae9e870aefd70da618f55d27ea4b1040d58824eeaee841fa4cb83b6730003'
@@ -310,12 +326,13 @@ describe('Watcher Permit Transactions', () => {
       chai.spy.on(boxes, 'getRepoBox', () => {
         return wasm.ErgoBox.from_json(boxesSample.secondRepoBox);
       });
-      const secondTransaction = new Transaction(
+      await TransactionTest.setup(
         rosenConfig,
         '9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL',
         secret2,
         boxes
       );
+      const secondTransaction = TransactionTest.getInstance();
       const res = await secondTransaction.returnPermit(1n);
       expect(res.status).to.be.equal(500);
     });
@@ -352,14 +369,16 @@ describe('Watcher Permit Transactions', () => {
           mockedResponseBody.watcherBoxWithWIDToken
         );
       });
-      const transaction = new Transaction(
+
+      await TransactionTest.setup(
         rosenConfig,
         watcherAddress,
         permitSecret,
         boxes
       );
-      await transaction.getWatcherState();
-      expect(transaction.watcherPermitState).to.be.true;
+      const transaction = TransactionTest.getInstance();
+      await TransactionTest.getWatcherState();
+      expect(TransactionTest.watcherPermitState).to.be.true;
     });
 
     /**
@@ -382,17 +401,18 @@ describe('Watcher Permit Transactions', () => {
       chai.spy.on(boxes, 'getRepoBox', () => {
         return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
       });
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
+      chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
         throw Error('There is no box with token id');
       });
-      const secondTransaction = new Transaction(
+      await TransactionTest.setup(
         rosenConfig,
         watcherAddress,
         permitSecret,
         boxes
       );
-      await secondTransaction.getWatcherState();
-      expect(secondTransaction.watcherPermitState).to.be.false;
+      TransactionTest.getInstance();
+      await TransactionTest.getWatcherState();
+      expect(TransactionTest.watcherPermitState).to.be.false;
     });
   });
 });

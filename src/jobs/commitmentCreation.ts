@@ -18,14 +18,8 @@ const creationJob = () => {
 export const creation = (
   watcherUtils: WatcherUtils,
   txUtils: TransactionUtils,
-  boxes: Boxes,
-  transaction: Transaction
+  boxes: Boxes
 ) => {
-  commitmentCreatorObj = new CommitmentCreation(
-    watcherUtils,
-    txUtils,
-    boxes,
-    transaction
-  );
+  commitmentCreatorObj = new CommitmentCreation(watcherUtils, txUtils, boxes);
   creationJob();
 };
