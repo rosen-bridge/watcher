@@ -15,7 +15,7 @@
     "type-check": "tsc --noEmit",
     "typeorm:generate": "npm run typeorm migration:generate src/database/migrations/watcher/watcherModelMigration -- -d config/dataSource.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
-    "typeorm": "typeorm-ts-node-esm",
+    "typeorm": "NODE_OPTIONS=--experimental-specifier-resolution=node typeorm-ts-node-esm",
     "prepare": "husky install"
   },
   "repository": {
