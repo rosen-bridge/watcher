@@ -446,7 +446,7 @@ export class Transaction {
       Transaction.fee,
       Transaction.userAddress
     );
-    // This part added because of test data has a bug. we must fixed it soon.
+    // TODO: This part added because of test data has a bug. we must fixed it soon.
     const burnTokens = new wasm.Tokens();
     burnTokens.add(
       new wasm.Token(
@@ -457,7 +457,6 @@ export class Transaction {
       )
     );
     builder.set_token_burn_permit(burnTokens);
-    console.log(builder.build().to_json());
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,
