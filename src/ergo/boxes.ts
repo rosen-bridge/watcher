@@ -285,7 +285,9 @@ export class Boxes {
       Buffer.from(observation.sourceChainTokenId),
       Buffer.from(observation.targetChainTokenId),
       Buffer.from(observation.sourceBlockId),
+      bigIntToUint8Array(BigInt(observation.height)),
     ];
+
     const permitHash = ErgoUtils.contractHash(
       wasm.Contract.pay_to_address(
         wasm.Address.from_base58(this.rosenConfig.watcherPermitAddress)

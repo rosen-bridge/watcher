@@ -2,7 +2,6 @@ import { Observation } from '../../src/utils/interfaces';
 import { ErgoUtils, extractBoxes } from '../../src/ergo/utils';
 import { uint8ArrayToHex } from '../../src/utils/utils';
 import { Config } from '../../src/config/config';
-import { rosenConfigType } from '../../src/config/rosenConfig';
 import { boxCreationError } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { Address } from 'ergo-lib-wasm-nodejs';
@@ -36,6 +35,7 @@ const observation: Observation = {
   sourceBlockId:
     '7e3b6c9cf8146cf49c0b255d9a8fbeeeb76bea64345f74edc25f8dfee0473968',
   requestId: 'reqId1',
+  height: 1212,
 };
 const WID = '245341e0dda895feca93adbd2db9e643a74c50a1b3702db4c2535f23f1c72e6e';
 const tokenId =
@@ -61,7 +61,7 @@ describe('Testing ergoUtils', () => {
     it('should return the correct commitment', () => {
       const res = ErgoUtils.commitmentFromObservation(observation, WID);
       expect(uint8ArrayToHex(res)).to.eql(
-        '1e00562af2a1c57b7b4495286f7122c12c78fb3665381fd240e60d9ad45a53bb'
+        '6e97daf406bd1f6fbfec1806316d84e55c87bee5e074f58448b1b1564a944f42'
       );
     });
   });
@@ -232,8 +232,7 @@ describe('Testing ergoUtils', () => {
         txOutBox,
         height,
         wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee.toString())),
-        add,
-        wasm.BoxValue.from_i64(wasm.I64.from_str(config.minBoxValue.toString()))
+        add
       );
 
       const tx_data_inputs = wasm.ErgoBoxes.from_boxes_json([]);
@@ -277,9 +276,8 @@ describe('Testing ergoUtils', () => {
      *    => result = 4
      */
     it('should return formula number as the required commitment count', async () => {
-      const data = ErgoUtils.requiredCommitmentCount(
-        wasm.ErgoBox.from_json(repoBox)
-      );
+      const box = wasm.ErgoBox.from_json(repoBox);
+      const data = ErgoUtils.requiredCommitmentCount(box);
       expect(data).to.eql(BigInt(4));
     });
   });

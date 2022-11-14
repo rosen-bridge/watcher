@@ -75,6 +75,7 @@ export const firstObservation: Observation = {
   sourceTxId: 'ergoTxId1',
   sourceBlockId: 'ergoBlockId',
   requestId: 'reqId1',
+  height: 1000,
 };
 
 describe('Testing Box Creation', () => {

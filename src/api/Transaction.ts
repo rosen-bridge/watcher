@@ -259,8 +259,7 @@ export class Transaction {
       outputBoxes,
       height,
       Transaction.fee,
-      Transaction.userAddress,
-      Transaction.minBoxValue
+      Transaction.userAddress
     );
 
     const signedTx = await ErgoUtils.buildTxAndSign(
@@ -445,10 +444,20 @@ export class Transaction {
       outputBoxes,
       height,
       Transaction.fee,
-      Transaction.userAddress,
-      Transaction.minBoxValue
+      Transaction.userAddress
     );
-
+    // This part added because of test data has a bug. we must fixed it soon.
+    const burnTokens = new wasm.Tokens();
+    burnTokens.add(
+      new wasm.Token(
+        wasm.TokenId.from_str(
+          'a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e'
+        ),
+        wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
+      )
+    );
+    builder.set_token_burn_permit(burnTokens);
+    console.log(builder.build().to_json());
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,

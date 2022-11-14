@@ -23,6 +23,7 @@ const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
 const height = 1000;
 export const observation: ObservationEntity = new ObservationEntity();
 observation.requestId = 'requestId';
+observation.height = 123;
 const txEntity = new TxEntity();
 txEntity.observation = observation;
 txEntity.txId = 'txId';

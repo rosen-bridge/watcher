@@ -54,6 +54,7 @@ observation.sourceBlockId =
 observation.requestId =
   'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa';
 observation.toAddress = 'ergoAddress';
+observation.height = 123;
 observation.fromAddress =
   'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0';
 
