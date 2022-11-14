@@ -91,8 +91,7 @@ const permitBoxGenerator = (
     txOutputs,
     0,
     fee,
-    sk.get_address(),
-    wasm.BoxValue.SAFE_USER_MIN()
+    sk.get_address()
   ).build();
   const blockHeaders = wasm.BlockHeaders.from_json(
     mockedResponseBody.last10BlockHeaders

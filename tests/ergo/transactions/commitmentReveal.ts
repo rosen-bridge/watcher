@@ -166,7 +166,7 @@ describe('Commitment reveal transaction tests', () => {
       ]);
       chai.spy.on(boxes, 'getUserPaymentBox', () => plainBox);
       sinon.stub(ErgoNetwork, 'boxById').resolves(WIDBox);
-      sinon.stub(ErgoUtils, 'requiredCommitmentCount').resolves(BigInt(2));
+      sinon.stub(ErgoUtils, 'requiredCommitmentCount').returns(BigInt(2));
       chai.spy.on(cr, 'triggerEventCreationTx', () => 'txId');
       chai.spy.on(cr, 'commitmentCheck', () => [
         firstCommitment,

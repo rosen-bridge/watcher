@@ -259,8 +259,7 @@ export class Transaction {
       outputBoxes,
       height,
       Transaction.fee,
-      Transaction.userAddress,
-      Transaction.minBoxValue
+      Transaction.userAddress
     );
 
     const signedTx = await ErgoUtils.buildTxAndSign(
@@ -445,8 +444,7 @@ export class Transaction {
       outputBoxes,
       height,
       Transaction.fee,
-      Transaction.userAddress,
-      Transaction.minBoxValue
+      Transaction.userAddress
     );
 
     const signedTx = await ErgoUtils.buildTxAndSign(

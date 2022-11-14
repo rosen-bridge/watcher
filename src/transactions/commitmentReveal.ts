@@ -111,7 +111,7 @@ export class CommitmentReveal {
           commitmentSet.commitments,
           commitmentSet.observation
         );
-        const requiredCommitments = await ErgoUtils.requiredCommitmentCount(
+        const requiredCommitments = ErgoUtils.requiredCommitmentCount(
           await this.boxes.getRepoBox()
         );
         logger.info(
