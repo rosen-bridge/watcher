@@ -68,7 +68,7 @@ export class Queue {
         await this.database.downgradeObservationTxStatus(tx.observation);
         await this.database.removeTx(tx);
       }
-      logger.info('Skipping tx [${tx.txId}]');
+      logger.info(`Skipping tx [${tx.txId}]`);
       return;
     }
     // resend the tx
