@@ -1,5 +1,5 @@
 import { loadDataBase } from '../database/watcherDatabase';
-import { TransactionQueue } from '../../src/ergo/transactionQueue';
+import { Queue } from '../../src/ergo/transaction/queue';
 import { TxEntity, TxType } from '../../src/database/entities/txEntity';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
@@ -37,7 +37,7 @@ describe('Transaction queue tests', () => {
     boxes: Boxes,
     transaction: TransactionTest,
     dbConnection: WatcherUtils;
-  let txQueue: TransactionQueue;
+  let txQueue: Queue;
   before(async () => {
     const ORM = await loadDataBase('commitmentReveal');
     dataBase = ORM.DB;
@@ -45,7 +45,7 @@ describe('Transaction queue tests', () => {
     await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
     transaction = TransactionTest.getInstance();
     dbConnection = new WatcherUtils(dataBase, 0, 100);
-    txQueue = new TransactionQueue(dataBase, dbConnection);
+    txQueue = new Queue(dataBase, dbConnection);
   });
 
   afterEach(() => {
@@ -53,7 +53,7 @@ describe('Transaction queue tests', () => {
   });
 
   /**
-   * Target: testing TransactionQueue job
+   * Target: testing Queue job
    * Dependencies:
    *    networkDatabase
    *    DatabaseConnection
@@ -63,7 +63,7 @@ describe('Transaction queue tests', () => {
    *    2- calling function
    *    3- validate used functions with inputs
    */
-  describe('TransactionQueue job', () => {
+  describe('Queue job', () => {
     /**
      * Expected Output:
      *    The function should resend the ready commitment transaction
