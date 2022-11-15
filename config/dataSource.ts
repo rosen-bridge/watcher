@@ -24,6 +24,8 @@ import {
 import { ObservationStatusEntity } from '../src/database/entities/observationStatusEntity';
 import { TxEntity } from '../src/database/entities/txEntity';
 
+import migrations from '../src/database/migrations/watcher';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -45,7 +47,7 @@ export const dataSource = new DataSource({
     ...observationMigrations,
     ...scannerMigrations,
     ...watcherDataExtractorMigrations,
-    '../src/database/migrations/watcher/*.ts',
+    ...migrations,
   ],
   synchronize: false,
   logging: false,
