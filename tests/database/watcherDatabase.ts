@@ -1,7 +1,36 @@
-import { DataSource, Repository } from 'typeorm';
-import { WatcherDataBase } from '../../src/database/models/watcherModel';
+import { expect } from 'chai';
 import { describe } from 'mocha';
-import { TxType } from '../../src/database/entities/txEntity';
+import { DataSource, Repository } from 'typeorm';
+
+import {
+  BoxEntity,
+  migrations as addressExtractorMigrations,
+} from '@rosen-bridge/address-extractor';
+import {
+  migrations as observationMigrations,
+  ObservationEntity,
+} from '@rosen-bridge/observation-extractor';
+import {
+  BlockEntity,
+  migrations as scannerMigrations,
+} from '@rosen-bridge/scanner';
+import {
+  CommitmentEntity,
+  EventTriggerEntity,
+  migrations as watcherDataExtractorMigrations,
+  PermitEntity,
+} from '@rosen-bridge/watcher-data-extractor';
+
+import {
+  ObservationStatusEntity,
+  TxStatus,
+} from '../../src/database/entities/observationStatusEntity';
+import { TxEntity, TxType } from '../../src/database/entities/txEntity';
+
+import migrations from '../../src/database/migrations/watcher';
+
+import { WatcherDataBase } from '../../src/database/models/watcherModel';
+
 import {
   cardanoBlockEntity,
   commitmentEntity,
@@ -16,21 +45,9 @@ import {
   spentPermitEntity,
   spentPlainBox,
 } from './mockedData';
-import {
-  ObservationStatusEntity,
-  TxStatus,
-} from '../../src/database/entities/observationStatusEntity';
-import { BlockEntity } from '@rosen-bridge/scanner';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
-import { expect } from 'chai';
-import {
-  CommitmentEntity,
-  EventTriggerEntity,
-  PermitEntity,
-} from '@rosen-bridge/watcher-data-extractor';
-import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { Constants } from '../../src/config/constants';
+
 import {
   firstPermit,
   firstStatisticCommitment,
@@ -69,13 +86,22 @@ export const loadDataBase = async (name: string): Promise<ORMType> => {
     type: 'sqlite',
     database: `./sqlite/watcher-test-${name}.sqlite`,
     entities: [
-      'src/database/entities/*.ts',
-      'node_modules/@rosen-bridge/scanner/dist/entities/*.js',
-      'node_modules/@rosen-bridge/watcher-data-extractor/dist/entities/*.js',
-      'node_modules/@rosen-bridge/observation-extractor/dist/entities/*.js',
-      'node_modules/@rosen-bridge/address-extractor/dist/entities/*.js',
+      BlockEntity,
+      BoxEntity,
+      CommitmentEntity,
+      EventTriggerEntity,
+      ObservationEntity,
+      ObservationStatusEntity,
+      PermitEntity,
+      TxEntity,
     ],
-    migrations: ['src/database/migrations/watcher/*.ts'],
+    migrations: [
+      ...addressExtractorMigrations,
+      ...observationMigrations,
+      ...scannerMigrations,
+      ...watcherDataExtractorMigrations,
+      ...migrations,
+    ],
     synchronize: false,
     logging: false,
   });
