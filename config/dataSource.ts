@@ -2,13 +2,23 @@ import path from 'path';
 import { DataSource } from 'typeorm';
 import { fileURLToPath } from 'url';
 
-import { BoxEntity } from '@rosen-bridge/address-extractor';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
-import { BlockEntity } from '@rosen-bridge/scanner';
+import {
+  BoxEntity,
+  migrations as addressExtractorMigrations,
+} from '@rosen-bridge/address-extractor';
+import {
+  ObservationEntity,
+  migrations as observationMigrations,
+} from '@rosen-bridge/observation-extractor';
+import {
+  BlockEntity,
+  migrations as scannerMigrations,
+} from '@rosen-bridge/scanner';
 import {
   CommitmentEntity,
   EventTriggerEntity,
   PermitEntity,
+  migrations as watcherDataExtractorMigrations,
 } from '@rosen-bridge/watcher-data-extractor';
 
 import { ObservationStatusEntity } from '../src/database/entities/observationStatusEntity';
@@ -30,7 +40,13 @@ export const dataSource = new DataSource({
     PermitEntity,
     TxEntity,
   ],
-  migrations: ['../src/database/migrations/watcher/*.ts'],
+  migrations: [
+    ...addressExtractorMigrations,
+    ...observationMigrations,
+    ...scannerMigrations,
+    ...watcherDataExtractorMigrations,
+    '../src/database/migrations/watcher/*.ts',
+  ],
   synchronize: false,
   logging: false,
 });
