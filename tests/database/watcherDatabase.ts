@@ -1,7 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
 import { describe } from 'mocha';
-import { TxType } from '../../src/database/entities/txEntity';
+import { TxEntity, TxType } from '../../src/database/entities/txEntity';
 import {
   cardanoBlockEntity,
   commitmentEntity,
@@ -49,7 +49,7 @@ const observation2Status = {
 let blockRepo: Repository<BlockEntity>;
 let observationRepo: Repository<ObservationEntity>;
 
-type ORMType = {
+export type ORMType = {
   DB: WatcherDataBase;
   blockRepo: Repository<BlockEntity>;
   observationRepo: Repository<ObservationEntity>;
@@ -58,6 +58,7 @@ type ORMType = {
   permitRepo: Repository<PermitEntity>;
   boxRepo: Repository<BoxEntity>;
   eventTriggerRepo: Repository<EventTriggerEntity>;
+  transactionRepo: Repository<TxEntity>;
 };
 
 /**
@@ -91,6 +92,7 @@ export const loadDataBase = async (name: string): Promise<ORMType> => {
   const permitRepo = ormConfig.getRepository(PermitEntity);
   const boxRepo = ormConfig.getRepository(BoxEntity);
   const eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity);
+  const transactionRepo = ormConfig.getRepository(TxEntity);
 
   return {
     DB: new WatcherDataBase(ormConfig),
@@ -101,6 +103,7 @@ export const loadDataBase = async (name: string): Promise<ORMType> => {
     permitRepo: permitRepo,
     boxRepo: boxRepo,
     eventTriggerRepo: eventTriggerRepo,
+    transactionRepo: transactionRepo,
   };
 };
 

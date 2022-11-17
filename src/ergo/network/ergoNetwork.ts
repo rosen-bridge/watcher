@@ -3,9 +3,14 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { AddressBoxes, ErgoTx, ExplorerTransaction } from './types';
 import { JsonBI } from './parser';
 import { Config } from '../../config/config';
-import { ergoTreeToBase58Address } from '../../utils/utils';
+import {
+  base64ToArrayBuffer,
+  ergoTreeToBase58Address,
+} from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
 import { logger } from '../../log/Logger';
+import { WatcherDataBase } from '../../database/models/watcherModel';
+import { TxEntity } from '../../database/entities/txEntity';
 
 const config = Config.getConfig();
 
@@ -198,7 +203,10 @@ export class ErgoNetwork {
    * it returns undefined if the box is spent and that transaction didn't have similar box in the output
    * @param box
    */
-  static trackMemPool = async (box: wasm.ErgoBox): Promise<wasm.ErgoBox> => {
+  static trackMemPool = async (
+    box: wasm.ErgoBox,
+    database?: WatcherDataBase
+  ): Promise<wasm.ErgoBox> => {
     const address: string = ergoTreeToBase58Address(
       box.ergo_tree(),
       config.networkPrefix
@@ -225,7 +233,33 @@ export class ErgoNetwork {
     let lastBox: wasm.ErgoBox = box;
     while (lastBox && memPoolBoxesMap.has(lastBox.box_id().to_str()))
       lastBox = memPoolBoxesMap.get(lastBox.box_id().to_str())!;
-    return lastBox;
+    if (!database) return lastBox;
+    else {
+      const txs: Array<TxEntity> = await database.getAllTxs();
+      const map = new Map<string, wasm.ErgoBox>();
+
+      for (const tx of txs) {
+        const signedTx = wasm.Transaction.sigma_parse_bytes(
+          base64ToArrayBuffer(tx.txSerialized)
+        );
+        const outputs = signedTx.outputs();
+        for (let i = 0; i < outputs.len(); i++) {
+          const output = outputs.get(i);
+          const boxAddress = ergoTreeToBase58Address(output.ergo_tree());
+          if (boxAddress === address) {
+            const inputs = signedTx.inputs();
+            for (let j = 0; j < inputs.len(); j++) {
+              const input = inputs.get(j);
+              map.set(input.box_id().to_str(), output);
+            }
+            break;
+          }
+        }
+      }
+      while (map.has(lastBox.box_id().to_str()))
+        lastBox = map.get(lastBox.box_id().to_str())!;
+      return lastBox;
+    }
   };
 
   /**
