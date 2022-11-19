@@ -1,11 +1,11 @@
 import { Config } from '../config/config';
-import { TransactionQueue } from '../ergo/transactionQueue';
+import { Queue } from '../ergo/transaction/queue';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { WatcherUtils } from '../utils/watcherUtils';
 import { logger } from '../log/Logger';
 
 const config = Config.getConfig();
-let transactionQueue: TransactionQueue;
+let transactionQueue: Queue;
 
 const transactionCheck = async () => {
   try {
@@ -22,6 +22,6 @@ export const transactionQueueJob = (
   database: WatcherDataBase,
   dbConnection: WatcherUtils
 ) => {
-  transactionQueue = new TransactionQueue(database, dbConnection);
+  transactionQueue = new Queue(database, dbConnection);
   transactionCheck();
 };

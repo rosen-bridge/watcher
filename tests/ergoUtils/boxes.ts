@@ -1,7 +1,7 @@
 import { Boxes } from '../../src/ergo/boxes';
 import { expect } from 'chai';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { loadDataBase } from '../database/watcherDatabase';
+import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { ErgoUtils } from '../../src/ergo/utils';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { hexStrToUint8Array } from '../../src/utils/utils';
@@ -75,13 +75,16 @@ export const firstObservation: Observation = {
   sourceTxId: 'ergoTxId1',
   sourceBlockId: 'ergoBlockId',
   requestId: 'reqId1',
+  height: 1000,
 };
 
 describe('Testing Box Creation', () => {
   const value = BigInt(67500000000);
   let DB: WatcherDataBase, boxes: Boxes;
   before(async () => {
-    DB = await loadDataBase('boxes');
+    const ORM = await loadDataBase('boxes');
+    await fillORM(ORM);
+    DB = ORM.DB;
     boxes = new Boxes(rosenConfig, DB);
     const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool');
     mempoolTrack.onCall(1).resolves(wasm.ErgoBox.from_json(WIDJson));

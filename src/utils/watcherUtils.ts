@@ -4,28 +4,25 @@ import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxType } from '../database/entities/txEntity';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { Buffer } from 'buffer';
-import { Transaction } from '../api/Transaction';
 import { NoObservationStatus } from '../errors/errors';
 import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Config } from '../config/config';
+import { Transaction } from '../api/Transaction';
 
 const config = Config.getConfig();
 
 class WatcherUtils {
   dataBase: WatcherDataBase;
-  api: Transaction;
   observationConfirmation: number;
   observationValidThreshold: number;
 
   constructor(
     db: WatcherDataBase,
-    api: Transaction,
     confirmation: number,
     validThreshold: number
   ) {
     this.dataBase = db;
-    this.api = api;
     this.observationConfirmation = confirmation;
     this.observationValidThreshold = validThreshold;
   }
@@ -64,7 +61,7 @@ class WatcherUtils {
     );
     return (
       relatedCommitments.filter(
-        (commitment) => commitment.WID === this.api.watcherWID
+        (commitment) => commitment.WID === Transaction.watcherWID
       ).length <= 0
     );
   };

@@ -10,6 +10,7 @@ export interface Observation {
   toChain: string;
   fromAddress: string;
   toAddress: string;
+  height: number;
   amount: string;
   bridgeFee: string;
   networkFee: string;

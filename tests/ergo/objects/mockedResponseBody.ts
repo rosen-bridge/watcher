@@ -124,24 +124,24 @@ export const mockedResponseBody = {
             "mainChain": true
         }`,
   watcherBox: `{
-            "boxId": "8a3c4ffcadd2913f7e392bc345b45f4b9743e0edd266b8c80eb99a446e94531b",
-            "transactionId": "f93fb2acde9429906b98d9c813fcb39f8ec7d42c60202e828d4f8118960c58fc",
-            "blockId": "28786ca9fd62d60b3ec4cb58cf14726ab3c66c60c29636081f0ffdbaf8663d08",
-            "value": 1994800000,
-            "index": 2,
-            "globalIndex": 597540,
-            "creationHeight": 278003,
-            "settlementHeight": 278005,
+            "boxId": "784fd9d95f5537b4206cfd4709e2953c48bc6373c467b16544a7369fc83d4e89",
+            "transactionId": "2067b19f665d491a4f79409c896ec051d2acff7b1726c57e4bc6192ecc9f03d0",
+            "blockId": "cc8335b1044207397c5aa1dc2ca3db467c4e23d0ee3a87476692525ccc044e27",
+            "value": 12913700000,
+            "index": 1,
+            "globalIndex": 622800,
+            "creationHeight": 290541,
+            "settlementHeight": 290543,
             "ergoTree": "0008cd028bcc85fa22006fa13767ab00af28ae0b2389d576fb59cfd0e46865e0449eeb8a",
             "address": "9fadVRGYyiSBCgD7QtZU13BfGoDyTQ1oX918P8py22MJuMEwSuo",
             "assets": [
                 {
-                    "tokenId": "a337e33042eaa1da67bcc7dfa5fcc444f63b8a695c9786494d7d22293eba542e",
+                    "tokenId": "58e8ee406cbd6d8b192dd64adff64eebe9336e2e673993916ccbbd6455f6911f",
                     "index": 0,
-                    "amount": 1,
-                    "name": null,
-                    "decimals": null,
-                    "type": null
+                    "amount": 170000000,
+                    "name": "test token7",
+                    "decimals": 0,
+                    "type": "EIP-004"
                 },
                 {
                     "tokenId": "290202fee226b93997e2bbc4e7ffc99dc1b464d685b78e46f901f93240675a31",
@@ -154,7 +154,7 @@ export const mockedResponseBody = {
                 {
                     "tokenId": "0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95",
                     "index": 2,
-                    "amount": 8,
+                    "amount": 843,
                     "name": "SWSE",
                     "decimals": 0,
                     "type": "EIP-004"
@@ -170,14 +170,14 @@ export const mockedResponseBody = {
                 {
                     "tokenId": "a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516",
                     "index": 4,
-                    "amount": 3900,
+                    "amount": 3935,
                     "name": "RSN",
                     "decimals": 0,
                     "type": "EIP-004"
                 }
             ],
             "additionalRegisters": {},
-            "spentTransactionId": "2c4c2613d05d36c3595da22c426d398df2a99aa7184737048a90e6b1cf680c18",
+            "spentTransactionId": null,
             "mainChain": true
         }`,
   permitBox: `{

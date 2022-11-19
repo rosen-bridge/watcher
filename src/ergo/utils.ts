@@ -214,6 +214,7 @@ export class ErgoUtils {
       Buffer.from(observation.targetChainTokenId),
       Buffer.from(observation.sourceBlockId),
       Buffer.from(WID, 'hex'),
+      bigIntToUint8Array(BigInt(observation.height)),
     ]);
     return blake2b(content, undefined, 32);
   };

@@ -1,11 +1,10 @@
 import { loadDataBase } from '../database/watcherDatabase';
-import { TransactionQueue } from '../../src/ergo/transactionQueue';
+import { Queue } from '../../src/ergo/transaction/queue';
 import { TxEntity, TxType } from '../../src/database/entities/txEntity';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { Boxes } from '../../src/ergo/boxes';
 import { secret1, userAddress } from '../ergo/transactions/permit';
-import { Transaction } from '../../src/api/Transaction';
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
 
 import { Buffer } from 'buffer';
@@ -17,12 +16,14 @@ chai.use(spies);
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 import { WatcherUtils } from '../../src/utils/watcherUtils';
 import { rosenConfig } from '../../src/config/rosenConfig';
+import TransactionTest from '../../src/api/TransactionTest';
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
 
 const height = 1000;
 export const observation: ObservationEntity = new ObservationEntity();
 observation.requestId = 'requestId';
+observation.height = 123;
 const txEntity = new TxEntity();
 txEntity.observation = observation;
 txEntity.txId = 'txId';
@@ -34,15 +35,17 @@ txEntity.updateBlock = height - 1;
 describe('Transaction queue tests', () => {
   let dataBase: WatcherDataBase,
     boxes: Boxes,
-    transaction: Transaction,
+    transaction: TransactionTest,
     dbConnection: WatcherUtils;
-  let txQueue: TransactionQueue;
+  let txQueue: Queue;
   before(async () => {
-    dataBase = await loadDataBase('commitmentReveal');
+    const ORM = await loadDataBase('commitmentReveal');
+    dataBase = ORM.DB;
     boxes = new Boxes(rosenConfig, dataBase);
-    transaction = new Transaction(rosenConfig, userAddress, secret1, boxes);
-    dbConnection = new WatcherUtils(dataBase, transaction, 0, 100);
-    txQueue = new TransactionQueue(dataBase, dbConnection);
+    await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+    transaction = TransactionTest.getInstance();
+    dbConnection = new WatcherUtils(dataBase, 0, 100);
+    txQueue = new Queue(dataBase, dbConnection);
   });
 
   afterEach(() => {
@@ -50,7 +53,7 @@ describe('Transaction queue tests', () => {
   });
 
   /**
-   * Target: testing TransactionQueue job
+   * Target: testing Queue job
    * Dependencies:
    *    networkDatabase
    *    DatabaseConnection
@@ -60,7 +63,7 @@ describe('Transaction queue tests', () => {
    *    2- calling function
    *    3- validate used functions with inputs
    */
-  describe('TransactionQueue job', () => {
+  describe('Queue job', () => {
     /**
      * Expected Output:
      *    The function should resend the ready commitment transaction
