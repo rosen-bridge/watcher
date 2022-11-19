@@ -10,12 +10,11 @@ let commitmentRevealingObj: CommitmentReveal;
 const revealJob = async () => {
   try {
     await commitmentRevealingObj.job();
-    setTimeout(revealJob, config.commitmentRevealInterval * 1000);
   } catch (e) {
     logger.warn('Reveal Job failed with error:');
     console.log(e.message);
-    setTimeout(revealJob, config.commitmentRevealInterval * 1000);
   }
+  setTimeout(revealJob, config.commitmentRevealInterval * 1000);
 };
 
 export const reveal = (

@@ -24,12 +24,11 @@ let cardanoScanner: CardanoKoiosScanner;
 const ergoScanningJob = async () => {
   try {
     await scanner.update();
-    setTimeout(ergoScanningJob, config.ergoInterval * 1000);
   } catch (e) {
     logger.warn('Scanning Job failed with error:');
     console.log(e.message);
-    setTimeout(ergoScanningJob, config.ergoInterval * 1000);
   }
+  setTimeout(ergoScanningJob, config.ergoInterval * 1000);
 };
 
 const cardanoScanningJob = (interval: number) => {

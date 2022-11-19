@@ -10,12 +10,11 @@ let transactionQueue: Queue;
 const transactionCheck = async () => {
   try {
     await transactionQueue.job();
-    setTimeout(transactionCheck, config.transactionCheckingInterval * 1000);
   } catch (e) {
     logger.warn('Transaction Queue Job failed with error:');
     console.log(e.message);
-    setTimeout(transactionCheck, config.transactionCheckingInterval * 1000);
   }
+  setTimeout(transactionCheck, config.transactionCheckingInterval * 1000);
 };
 
 export const transactionQueueJob = (
