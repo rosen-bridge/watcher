@@ -173,8 +173,7 @@ export class ErgoUtils {
       candidateBoxes,
       height,
       wasm.BoxValue.from_i64(wasm.I64.from_str(txFee.toString())),
-      secret.get_address(),
-      wasm.BoxValue.from_i64(wasm.I64.from_str(txFee.toString()))
+      secret.get_address()
     );
     if (dataInputs) {
       const txDataInputs = new wasm.DataInputs();
