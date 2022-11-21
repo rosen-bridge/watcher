@@ -77,10 +77,16 @@ export class Boxes {
         throw new NotEnoughFund("Watcher doesn't have enough unspent permits");
       return selectedBoxes;
     }
-    const permitBoxes = permits.map(async (permit) => {
-      return await ErgoNetwork.trackMemPool(permit);
-    });
-    return Promise.all(permitBoxes);
+    const permitBoxes = await Promise.all(
+      permits.map(async (permit) => {
+        return await ErgoNetwork.trackMemPool(permit, this.dataBase);
+      })
+    );
+    const allIds = [...new Set(permitBoxes.map((box) => box.box_id().to_str))];
+    const uniqBoxes = allIds.map(
+      (id) => permitBoxes.find((box) => box.box_id().to_str == id)!
+    );
+    return uniqBoxes;
   };
 
   /**
