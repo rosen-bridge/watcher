@@ -39,13 +39,21 @@ export class Queue {
    */
   private verifyTx = async (tx: TxEntity) => {
     if (tx.type === TxType.COMMITMENT) {
-      return !(await this.databaseConnection.isObservationValid(
-        tx.observation
-      ));
+      return await this.databaseConnection.isObservationValid(tx.observation);
     } else if (tx.type === TxType.TRIGGER) {
-      return await this.databaseConnection.isMergeHappened(tx.observation);
+      return !(await this.databaseConnection.isMergeHappened(tx.observation));
     }
     return false;
+  };
+
+  private removeTx = async (tx: TxEntity, currentHeight: number) => {
+    if (currentHeight - tx.updateBlock > config.transactionRemovingTimeout) {
+      await this.database.downgradeObservationTxStatus(tx.observation);
+      await this.database.removeTx(tx);
+      logger.info(
+        `Tx [${tx.id}] is not valid anymore, removed from the tx queue.`
+      );
+    }
   };
 
   /**
@@ -60,21 +68,30 @@ export class Queue {
     const signedTx = wasm.Transaction.sigma_parse_bytes(
       base64ToArrayBuffer(tx.txSerialized)
     );
-    if (
-      (await this.verifyTx(tx)) ||
-      !(await ErgoNetwork.checkTxInputs(signedTx.inputs()))
-    ) {
-      if (currentHeight - tx.updateBlock > config.transactionRemovingTimeout) {
-        await this.database.downgradeObservationTxStatus(tx.observation);
-        await this.database.removeTx(tx);
+    if (await this.verifyTx(tx)) {
+      try {
+        logger.info(
+          `Sending the [${tx.type}] transaction with txId: [${tx.txId}]`
+        );
+        await ErgoNetwork.sendTx(signedTx.to_json());
+        await this.database.setTxUpdateHeight(tx, currentHeight);
+      } catch (e) {
+        if (!(await ErgoNetwork.checkTxInputs(signedTx.inputs()))) {
+          logger.info(
+            `Tx [${tx.id} inputs are not valid, skipping the transaction sending]`
+          );
+          this.removeTx(tx, currentHeight);
+        } else {
+          console.warn(`Error occurred while sending tx [${tx.id}]`);
+          console.error(e);
+        }
       }
-      logger.info(`Skipping tx [${tx.txId}]`);
-      return;
+    } else {
+      logger.info(
+        `Tx [${tx.id} observation or commitments are not valid, skipping the transaction sending]`
+      );
+      this.removeTx(tx, currentHeight);
     }
-    // resend the tx
-    logger.info(`Sending the [${tx.type}] transaction with txId: [${tx.txId}]`);
-    await ErgoNetwork.sendTx(signedTx.to_json());
-    await this.database.setTxUpdateHeight(tx, currentHeight);
   };
 
   /**
