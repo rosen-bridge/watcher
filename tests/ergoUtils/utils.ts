@@ -61,7 +61,7 @@ describe('Testing ergoUtils', () => {
     it('should return the correct commitment', () => {
       const res = ErgoUtils.commitmentFromObservation(observation, WID);
       expect(uint8ArrayToHex(res)).to.eql(
-        '6e97daf406bd1f6fbfec1806316d84e55c87bee5e074f58448b1b1564a944f42'
+        '32d5595a12048a13a7807505b26b11e4eae4c69a0c87c39ff7555600708bd23a'
       );
     });
   });
