@@ -46,12 +46,12 @@ export class Queue {
     return false;
   };
 
-  private removeTx = async (tx: TxEntity, currentHeight: number) => {
+  private removeTrial = async (tx: TxEntity, currentHeight: number) => {
     if (currentHeight - tx.updateBlock > config.transactionRemovingTimeout) {
       await this.database.downgradeObservationTxStatus(tx.observation);
       await this.database.removeTx(tx);
       logger.info(
-        `Tx [${tx.id}] is not valid anymore, removed from the tx queue.`
+        `Tx [${tx.txId}] is not valid anymore, removed from the tx queue.`
       );
     }
   };
@@ -69,28 +69,27 @@ export class Queue {
       base64ToArrayBuffer(tx.txSerialized)
     );
     if (await this.verifyTx(tx)) {
-      try {
-        logger.info(
-          `Sending the [${tx.type}] transaction with txId: [${tx.txId}]`
-        );
-        await ErgoNetwork.sendTx(signedTx.to_json());
+      const result = await ErgoNetwork.sendTx(signedTx.to_json());
+      if (result.success) {
         await this.database.setTxUpdateHeight(tx, currentHeight);
-      } catch (e) {
+        logger.info(
+          `The [${tx.type}] transaction with txId: [${tx.txId}] sent succcessfully`
+        );
+      } else {
         if (!(await ErgoNetwork.checkTxInputs(signedTx.inputs()))) {
           logger.info(
-            `Tx [${tx.id} inputs are not valid, skipping the transaction sending]`
+            `Tx [${tx.txId}] inputs are not valid, skipping the transaction sending`
           );
-          this.removeTx(tx, currentHeight);
+          this.removeTrial(tx, currentHeight);
         } else {
           console.warn(`Error occurred while sending tx [${tx.id}]`);
-          console.error(e);
         }
       }
     } else {
       logger.info(
-        `Tx [${tx.id} observation or commitments are not valid, skipping the transaction sending]`
+        `Tx [${tx.txId} observation or commitments are not valid, skipping the transaction sending]`
       );
-      this.removeTx(tx, currentHeight);
+      this.removeTrial(tx, currentHeight);
     }
   };
 
