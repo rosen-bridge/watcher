@@ -343,6 +343,18 @@ describe('WatcherModel tests', () => {
       const res = await DB.upgradeObservationTxStatus(obs[0]);
       expect(res.status).to.eql(TxStatus.COMMITMENT_SENT);
     });
+
+    /**
+     * Target: testing upgradeObservationTxStatus
+     * Expected Output:
+     *    The function should not change the observation status since it's timed out
+     */
+    it('should not upgrade the timed out observation txStatus', async () => {
+      const obs = await DB.getConfirmedObservations(0, 100);
+      await DB.updateObservationTxStatus(obs[0], TxStatus.TIMED_OUT);
+      const res = await DB.upgradeObservationTxStatus(obs[0]);
+      expect(res.status).to.eql(TxStatus.TIMED_OUT);
+    });
   });
 
   describe('downgradeObservationTxStatus', () => {
@@ -351,10 +363,23 @@ describe('WatcherModel tests', () => {
      * Expected Output:
      *    The function should downgrade the tx status to the not_committed status
      */
-    it('should upgrade the observation txStatus', async () => {
+    it('should downgrade the observation txStatus', async () => {
       const obs = await DB.getConfirmedObservations(0, 100);
+      await DB.updateObservationTxStatus(obs[0], TxStatus.COMMITMENT_SENT);
       const res = await DB.downgradeObservationTxStatus(obs[0]);
       expect(res.status).to.eql(TxStatus.NOT_COMMITTED);
+    });
+
+    /**
+     * Target: testing downgradeObservationTxStatus
+     * Expected Output:
+     *    The function should not downgrade the tx status since its already merged
+     */
+    it('should downgrade the observation txStatus', async () => {
+      const obs = await DB.getConfirmedObservations(0, 100);
+      await DB.updateObservationTxStatus(obs[0], TxStatus.REVEALED);
+      const res = await DB.downgradeObservationTxStatus(obs[0]);
+      expect(res.status).to.eql(TxStatus.REVEALED);
     });
   });
 
