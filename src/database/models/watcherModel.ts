@@ -13,6 +13,11 @@ import {
   PermitEntity,
 } from '@rosen-bridge/watcher-data-extractor';
 import { BoxEntity } from '@rosen-bridge/address-extractor';
+import {
+  base64ToArrayBuffer,
+  ergoTreeToBase58Address,
+} from '../../utils/utils';
+import * as wasm from 'ergo-lib-wasm-nodejs';
 
 class WatcherDataBase {
   private readonly blockRepository: Repository<BlockEntity>;
@@ -420,6 +425,47 @@ class WatcherDataBase {
         sourceTxId: sourceTxId,
       },
     });
+  };
+
+  trackTxQueue = async (
+    box: wasm.ErgoBox,
+    tokenId?: string
+  ): Promise<wasm.ErgoBox> => {
+    const txs: Array<TxEntity> = await this.getAllTxs();
+    const map = new Map<string, wasm.ErgoBox>();
+    const address: string = box.ergo_tree().to_base16_bytes();
+    for (const tx of txs) {
+      const signedTx = wasm.Transaction.sigma_parse_bytes(
+        base64ToArrayBuffer(tx.txSerialized)
+      );
+      const outputs = signedTx.outputs();
+      for (let i = 0; i < outputs.len(); i++) {
+        const output = outputs.get(i);
+        const boxAddress = output.ergo_tree().to_base16_bytes();
+        const assetId =
+          tokenId && output.tokens().len() > 0
+            ? output.tokens().get(0).id().to_str()
+            : '';
+        if (boxAddress === address && (!tokenId || assetId == tokenId)) {
+          const inputs = signedTx.inputs();
+          for (let j = 0; j < inputs.len(); j++) {
+            const input = inputs.get(j);
+            const inBoxAddress = output.ergo_tree().to_base16_bytes();
+            const inAssetId =
+              tokenId && output.tokens().len() > 0
+                ? output.tokens().get(0).id().to_str()
+                : '';
+            if (inBoxAddress === address && (!tokenId || inAssetId === tokenId))
+              map.set(input.box_id().to_str(), output);
+          }
+          break;
+        }
+      }
+    }
+    let lastBox: wasm.ErgoBox = box;
+    while (map.has(lastBox.box_id().to_str()))
+      lastBox = map.get(lastBox.box_id().to_str())!;
+    return lastBox;
   };
 }
 

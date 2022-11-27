@@ -12,17 +12,18 @@ import {
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { expect } from 'chai';
 import { JsonBI } from '../../../src/ergo/network/parser';
-import txObj from '../transactions/dataset/commitmentTx.json' assert { type: 'json' };
-import txObj2 from '../dataset/tx.json' assert { type: 'json' };
+import commitmentTxObj from '../transactions/dataset/commitmentTx.json' assert { type: 'json' };
+import txObj from '../dataset/tx.json' assert { type: 'json' };
 import { loadDataBase, ORMType } from '../../database/watcherDatabase';
 import { TxEntity, TxType } from '../../../src/database/entities/txEntity';
 import { Buffer } from 'buffer';
-import { observation } from '../../ergoUtils/txQueue';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 initMockedAxios();
+const commitmentTx = wasm.Transaction.from_json(
+  JSON.stringify(commitmentTxObj)
+);
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
-const tx2 = wasm.Transaction.from_json(JSON.stringify(txObj2));
 
 /**
  * Ergo Network class tests
@@ -319,14 +320,14 @@ describe('Ergo Network(API)', () => {
      * The function checks the inputs and return false if any of them is spent
      */
     it('Returns false because tx inputs are spent', async () => {
-      const data = await ErgoNetwork.checkTxInputs(tx.inputs());
+      const data = await ErgoNetwork.checkTxInputs(commitmentTx.inputs());
       expect(data).to.false;
     });
     /**
      * The function should return true cause all inputs are unspent
      */
     it('Returns true because tx inputs are all unspent', async () => {
-      const data = await ErgoNetwork.checkTxInputs(tx2.inputs());
+      const data = await ErgoNetwork.checkTxInputs(tx.inputs());
       expect(data).to.true;
     });
   });
