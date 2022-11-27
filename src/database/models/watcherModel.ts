@@ -1,4 +1,4 @@
-import { DataSource, In, Like, Repository } from 'typeorm';
+import { DataSource, In, Like, Not, Repository } from 'typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxEntity, TxType } from '../entities/txEntity';
 import {
@@ -193,6 +193,7 @@ class WatcherDataBase {
     await this.observationStatusEntity.update(
       {
         id: observationStatus.id,
+        status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
       },
       {
         status: observationStatus.status + 1,
@@ -221,6 +222,7 @@ class WatcherDataBase {
     await this.observationStatusEntity.update(
       {
         id: observationStatus.id,
+        status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
       },
       {
         status: observationStatus.status - 1,

@@ -177,6 +177,7 @@ firstStatisticsEventTrigger.sourceChainTokenId = 'tokenId';
 firstStatisticsEventTrigger.targetChainTokenId = 'targetTokenId';
 firstStatisticsEventTrigger.WIDs = '1,WIDStatistics,3';
 firstStatisticsEventTrigger.sourceBlockId = 'block';
+firstStatisticsEventTrigger.sourceChainHeight = 123456;
 
 const secondStatisticsEventTrigger = {
   ...firstStatisticsEventTrigger,

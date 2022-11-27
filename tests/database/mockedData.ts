@@ -126,6 +126,7 @@ eventTriggerEntity.sourceChainTokenId = 'tokenId';
 eventTriggerEntity.targetChainTokenId = 'targetTokenId';
 eventTriggerEntity.WIDs = '1,2,3';
 eventTriggerEntity.sourceBlockId = 'block';
+eventTriggerEntity.sourceChainHeight = 123456;
 
 export const newEventTriggerEntity = new EventTriggerEntity();
 newEventTriggerEntity.sourceTxId = 'txId2';
@@ -145,6 +146,7 @@ newEventTriggerEntity.sourceChainTokenId = 'tokenId';
 newEventTriggerEntity.targetChainTokenId = 'targetTokenId';
 newEventTriggerEntity.WIDs = '1,2,3';
 newEventTriggerEntity.sourceBlockId = 'block';
+newEventTriggerEntity.sourceChainHeight = 123457;
 
 export const observationEntity1 = new ObservationEntity();
 observationEntity1.height = 1;
