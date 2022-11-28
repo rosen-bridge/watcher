@@ -200,10 +200,7 @@ export class ErgoNetwork {
    * it returns undefined if the box is spent and that transaction didn't have similar box in the output
    * @param box
    */
-  static trackMemPool = async (
-    box: wasm.ErgoBox,
-    database?: WatcherDataBase
-  ): Promise<wasm.ErgoBox> => {
+  static trackMemPool = async (box: wasm.ErgoBox): Promise<wasm.ErgoBox> => {
     const address: string = ergoTreeToBase58Address(
       box.ergo_tree(),
       config.networkPrefix

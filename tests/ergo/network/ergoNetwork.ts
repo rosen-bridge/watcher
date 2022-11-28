@@ -14,10 +14,6 @@ import { expect } from 'chai';
 import { JsonBI } from '../../../src/ergo/network/parser';
 import commitmentTxObj from '../transactions/dataset/commitmentTx.json' assert { type: 'json' };
 import txObj from '../dataset/tx.json' assert { type: 'json' };
-import { loadDataBase, ORMType } from '../../database/watcherDatabase';
-import { TxEntity, TxType } from '../../../src/database/entities/txEntity';
-import { Buffer } from 'buffer';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 initMockedAxios();
 const commitmentTx = wasm.Transaction.from_json(
@@ -184,27 +180,6 @@ describe('Ergo Network(API)', () => {
    * trackMemPool function tests
    */
   describe('trackMemPool', () => {
-    let ORM: ORMType;
-
-    before(async () => {
-      ORM = await loadDataBase('transactionQueue');
-      const txEntity = new TxEntity();
-      const observation: ObservationEntity = new ObservationEntity();
-      observation.requestId = 'requestId';
-      observation.height = 123;
-      txEntity.observation = observation;
-      txEntity.txId = 'txId';
-      const tx = wasm.Transaction.from_json(mockedResponseBody.txJson);
-      txEntity.txSerialized = Buffer.from(tx.sigma_serialize_bytes()).toString(
-        'base64'
-      );
-      txEntity.updateBlock = 0;
-      txEntity.creationTime = 0;
-      txEntity.type = TxType.COMMITMENT;
-      txEntity.deleted = false;
-      await ORM.transactionRepo.save([txEntity]);
-    });
-
     /**
      * should return last box in the mempool the assertion is on boxid
      */
@@ -225,20 +200,6 @@ describe('Ergo Network(API)', () => {
       const ergoBox = wasm.ErgoBox.from_json(mockedResponseBody.unspentBox2);
       const res = await ErgoNetwork.trackMemPool(ergoBox);
       expect(res).to.be.undefined;
-    });
-
-    /**
-     * Target: testing trackMempool
-     * Expected Output:
-     *    The function should return boxes that in the transaction queue
-     */
-    it('test with transaction queue', async () => {
-      const ergoBox = wasm.ErgoBox.from_json(mockedResponseBody.unspentBox);
-      const res = await ErgoNetwork.trackMemPool(ergoBox, ORM.DB);
-      // const res = await ErgoNetwork.trackMemPool(ergoBox)
-      expect(res.box_id().to_str()).to.be.equal(
-        '2afbd9393fb1ddb982e9d82a269e27b1b97184c1bc45451d5c63dae28d25d708'
-      );
     });
   });
 
