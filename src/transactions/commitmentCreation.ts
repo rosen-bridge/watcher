@@ -78,11 +78,23 @@ export class CommitmentCreation {
     inputBoxes.add(WIDBox);
     permits.slice(1).forEach((permit) => inputBoxes.add(permit));
     feeBoxes.forEach((box) => inputBoxes.add(box));
+    const candidates = [outPermit, outCommitment];
+    const change = ErgoUtils.createChangeBox(
+      inputBoxes,
+      candidates,
+      height,
+      config.secretKey
+    );
+    if (change && change.tokens().len() > 1) {
+      // TODO: Check if amount is always 1
+      const WIDBox = this.boxes.createWIDBox(height, WID, '1');
+      candidates.push(WIDBox);
+    }
     try {
       const signed = await ErgoUtils.createAndSignTx(
         config.secretKey,
         inputBoxes,
-        [outPermit, outCommitment],
+        candidates,
         height
       );
       await this.txUtils.submitTransaction(

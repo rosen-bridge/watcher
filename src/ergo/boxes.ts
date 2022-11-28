@@ -345,4 +345,24 @@ export class Boxes {
     repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
     return repoBuilder.build();
   };
+
+  createWIDBox = (
+    height: number,
+    WID: string,
+    WIDAmount: string,
+    contract?: wasm.Contract
+  ): wasm.ErgoBoxCandidate => {
+    const WIDBuilder = new wasm.ErgoBoxCandidateBuilder(
+      this.minBoxValue,
+      contract
+        ? contract
+        : wasm.Contract.pay_to_address(config.secretKey.get_address()),
+      height
+    );
+    WIDBuilder.add_token(
+      wasm.TokenId.from_str(WID),
+      wasm.TokenAmount.from_i64(wasm.I64.from_str(WIDAmount))
+    );
+    return WIDBuilder.build();
+  };
 }
