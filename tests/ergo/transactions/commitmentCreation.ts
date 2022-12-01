@@ -102,6 +102,8 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(txUtils, 'submitTransaction', () => null);
       chai.spy.on(boxes, 'createCommitment');
       chai.spy.on(boxes, 'createPermit');
+      chai.spy.on(boxes, 'createWIDBox');
+      chai.spy.on(ErgoUtils, 'getExtraTokenCount');
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);
       await cc.createCommitmentTx(
@@ -123,6 +125,9 @@ describe('Commitment creation transaction tests', () => {
         observation,
         TxType.COMMITMENT
       );
+      expect(ErgoUtils.getExtraTokenCount).to.have.called.once;
+      expect(boxes.createWIDBox).to.have.been.called.with(111, WID, '1');
+
       sinon.restore();
     });
   });
