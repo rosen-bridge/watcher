@@ -114,6 +114,22 @@ export class ErgoUtils {
     return null;
   };
 
+  static getExtraTokenCount = (
+    boxes: wasm.ErgoBoxes,
+    allowedTokens: wasm.TokenId[]
+  ): number => {
+    let extraTokenCount = 0;
+    const allowedTokensString = allowedTokens.map((token) => token.to_str());
+    extractBoxes(boxes).forEach((box) => {
+      extractTokens(box.tokens()).forEach((token) => {
+        if (!allowedTokensString.includes(token.id().to_str())) {
+          extraTokenCount++;
+        }
+      });
+    });
+    return extraTokenCount;
+  };
+
   /**
    * signs the transaction by required secret
    * @param builder

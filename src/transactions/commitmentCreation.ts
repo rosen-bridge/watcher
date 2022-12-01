@@ -79,14 +79,9 @@ export class CommitmentCreation {
     permits.slice(1).forEach((permit) => inputBoxes.add(permit));
     feeBoxes.forEach((box) => inputBoxes.add(box));
     const candidates = [outPermit, outCommitment];
-    const change = ErgoUtils.createChangeBox(
-      inputBoxes,
-      candidates,
-      height,
-      config.secretKey
-    );
-    if (change && change.tokens().len() > 1) {
-      // TODO: Check if amount is always 1
+    const allowedTokens = [this.boxes.RWTTokenId, wasm.TokenId.from_str(WID)];
+    const extraTokens = ErgoUtils.getExtraTokenCount(inputBoxes, allowedTokens);
+    if (extraTokens > 0) {
       const WIDBox = this.boxes.createWIDBox(height, WID, '1');
       candidates.push(WIDBox);
     }
