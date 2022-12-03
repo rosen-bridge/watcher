@@ -27,6 +27,7 @@ import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import { Config } from '../../src/config/config';
 import { rosenConfig } from '../../src/config/rosenConfig';
 import { mockedResponseBody } from '../ergo/objects/mockedResponseBody';
+import { beforeEach } from 'mocha';
 
 const config = Config.getConfig();
 const permitJson = JsonBI.stringify(permitObj);
@@ -188,6 +189,10 @@ describe('Testing Box Creation', () => {
   });
 
   describe('getUserPaymentBox', () => {
+    beforeEach(() => {
+      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox]);
+      chai.spy.on(DB, 'trackTxQueue', () => wasm.ErgoBox.from_json(plainJson));
+    });
     /**
      * Target: testing getUserPaymentBox
      * Dependencies:
@@ -201,7 +206,6 @@ describe('Testing Box Creation', () => {
      *    The function should return all unspent watcher boxes
      */
     it('returns a covering plain boxesSample', async () => {
-      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox]);
       chai.spy.on(ErgoNetwork, 'trackMemPool', () =>
         wasm.ErgoBox.from_json(plainJson)
       );
@@ -223,7 +227,6 @@ describe('Testing Box Creation', () => {
      *    The function should throw an error since the required amount is not covered
      */
     it('throws an error not covering the required amount', async () => {
-      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox]);
       chai.spy.on(ErgoNetwork, 'trackMemPool', () =>
         wasm.ErgoBox.from_json(plainJson)
       );
@@ -246,7 +249,6 @@ describe('Testing Box Creation', () => {
      *    The function should throw an error since the box is spent and the amount is not covered
      */
     it('throws an error not covering the required amount', async () => {
-      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox]);
       chai.spy.on(ErgoNetwork, 'trackMemPool', () => undefined);
       const boxes = new Boxes(rosenConfig, DB);
       await expect(boxes.getUserPaymentBox(value)).to.rejectedWith(

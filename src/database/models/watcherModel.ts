@@ -429,6 +429,12 @@ class WatcherDataBase {
     });
   };
 
+  /**
+   * Tracks transaction queue to find the chained unspent boxes with required information
+   * @param box: starts tracking this box in the queue
+   * @param tokenId: tracks boxes containing this asset
+   * @returns
+   */
   trackTxQueue = async (
     box: wasm.ErgoBox,
     tokenId?: string

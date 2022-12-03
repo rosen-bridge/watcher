@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { describe } from 'mocha';
 import { DataSource, Repository } from 'typeorm';
+import * as wasm from 'ergo-lib-wasm-nodejs';
 
 import {
   BoxEntity,
@@ -34,11 +35,13 @@ import { WatcherDataBase } from '../../src/database/models/watcherModel';
 import {
   cardanoBlockEntity,
   commitmentEntity,
+  commitmentTxJson,
   ergoBlockEntity,
   eventTriggerEntity,
   newEventTriggerEntity,
   observationEntity1,
   observationEntity2,
+  permitBox,
   permitEntity,
   plainBox,
   spentCommitmentEntity,
@@ -58,6 +61,9 @@ import {
   thirdStatisticCommitment,
   thirdStatisticsEventTrigger,
 } from '../ergo/statistics/mockUtils';
+
+// import commitmentTxObj from '../ergo/transactions/dataset/commitmentTx.json' assert { type: 'json' };
+import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 
 const observation2Status = {
   observation: observationEntity2,
@@ -272,19 +278,41 @@ describe('WatcherModel tests', () => {
      *    The function should store two transactions in the database
      */
     it('should save two new transaction without any errors', async () => {
+      const commitmentTx = wasm.Transaction.from_json(
+        JSON.stringify(commitmentTxJson)
+      );
       await DB.submitTx(
-        'txSerialized',
+        Buffer.from(commitmentTx.sigma_serialize_bytes()).toString('base64'),
         'reqId1',
-        'txId',
+        commitmentTx.id().to_str(),
         TxType.COMMITMENT,
         1000
       );
+      const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
       await DB.submitTx(
-        'txSerialized2',
+        Buffer.from(tx.sigma_serialize_bytes()).toString('base64'),
         'reqId1',
-        'txId2',
+        tx.id().to_str(),
         TxType.TRIGGER,
         1000
+      );
+    });
+  });
+
+  describe('trackTxQueue', () => {
+    /**
+     * Target: testing trackTxQueue
+     * Expected Output:
+     *    The test should return the tracked box from database
+     */
+    it('should return tracked permit box in tx queue', async () => {
+      const commitmentTx = wasm.Transaction.from_json(
+        JSON.stringify(commitmentTxJson)
+      );
+      const box = wasm.ErgoBox.from_json(JSON.stringify(permitBox));
+      const res = await DB.trackTxQueue(box);
+      expect(res.box_id().to_str()).to.eq(
+        commitmentTx.outputs().get(0).box_id().to_str()
       );
     });
   });
