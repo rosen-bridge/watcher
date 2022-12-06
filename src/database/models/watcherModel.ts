@@ -13,10 +13,7 @@ import {
   PermitEntity,
 } from '@rosen-bridge/watcher-data-extractor';
 import { BoxEntity } from '@rosen-bridge/address-extractor';
-import {
-  base64ToArrayBuffer,
-  ergoTreeToBase58Address,
-} from '../../utils/utils';
+import { base64ToArrayBuffer } from '../../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
 class WatcherDataBase {
@@ -451,16 +448,14 @@ class WatcherDataBase {
         const output = outputs.get(i);
         const boxAddress = output.ergo_tree().to_base16_bytes();
         const assetId =
-          tokenId && output.tokens().len() > 0
-            ? output.tokens().get(0).id().to_str()
-            : '';
+          output.tokens().len() > 0 ? output.tokens().get(0).id().to_str() : '';
         if (boxAddress === address && (!tokenId || assetId == tokenId)) {
           const inputs = signedTx.inputs();
           for (let j = 0; j < inputs.len(); j++) {
             const input = inputs.get(j);
             const inBoxAddress = output.ergo_tree().to_base16_bytes();
             const inAssetId =
-              tokenId && output.tokens().len() > 0
+              output.tokens().len() > 0
                 ? output.tokens().get(0).id().to_str()
                 : '';
             if (inBoxAddress === address && (!tokenId || inAssetId === tokenId))

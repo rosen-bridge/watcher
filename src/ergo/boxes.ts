@@ -47,6 +47,26 @@ export class Boxes {
   }
 
   /**
+   * Returns unique boxes after tracking the spent boxes in the queue
+   * @param boxes boxes needed to be tracked in the transaction queue
+   */
+  uniqueTrackedBoxes = async (
+    boxes: Array<wasm.ErgoBox>,
+    token?: string
+  ): Promise<Array<wasm.ErgoBox>> => {
+    const allIds: string[] = [];
+    const uniqueBoxes: wasm.ErgoBox[] = [];
+    for (const permit of boxes) {
+      const newPermit = await this.dataBase.trackTxQueue(permit, token);
+      if (!allIds.includes(newPermit.box_id().to_str())) {
+        uniqueBoxes.push(newPermit);
+        allIds.push(newPermit.box_id().to_str());
+      }
+    }
+    return uniqueBoxes;
+  };
+
+  /**
    * Returns unspent permits covering the RWTCount (Considering the mempool)
    * @param wid
    * @param RWTCount
@@ -84,19 +104,10 @@ export class Boxes {
     }
     const permitBoxes = await Promise.all(
       permits.map(async (permit) => {
-        return await this.dataBase.trackTxQueue(
-          await ErgoNetwork.trackMemPool(permit),
-          this.rosenConfig.RWTId
-        );
+        return await ErgoNetwork.trackMemPool(permit);
       })
     );
-    const allIds = [
-      ...new Set(permitBoxes.map((box) => box.box_id().to_str())),
-    ];
-    const uniqBoxes = allIds.map(
-      (id) => permitBoxes.find((box) => box.box_id().to_str() == id)!
-    );
-    return uniqBoxes;
+    return this.uniqueTrackedBoxes(permitBoxes, this.rosenConfig.RWTId);
   };
 
   /**

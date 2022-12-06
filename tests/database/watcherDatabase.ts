@@ -62,7 +62,6 @@ import {
   thirdStatisticsEventTrigger,
 } from '../ergo/statistics/mockUtils';
 
-// import commitmentTxObj from '../ergo/transactions/dataset/commitmentTx.json' assert { type: 'json' };
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 
 const observation2Status = {
