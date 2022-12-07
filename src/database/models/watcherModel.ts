@@ -453,13 +453,7 @@ class WatcherDataBase {
           const inputs = signedTx.inputs();
           for (let j = 0; j < inputs.len(); j++) {
             const input = inputs.get(j);
-            const inBoxAddress = output.ergo_tree().to_base16_bytes();
-            const inAssetId =
-              output.tokens().len() > 0
-                ? output.tokens().get(0).id().to_str()
-                : '';
-            if (inBoxAddress === address && (!tokenId || inAssetId === tokenId))
-              map.set(input.box_id().to_str(), output);
+            map.set(input.box_id().to_str(), output);
           }
           break;
         }
