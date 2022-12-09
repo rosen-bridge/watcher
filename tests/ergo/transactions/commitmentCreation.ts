@@ -36,6 +36,8 @@ const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 
 const userAddress = '9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9';
+const rwtID =
+  '469255244f7b12ea7d375ec94ec8d2838a98be0779c8231ece3529ae69c421db';
 const WID = 'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
 
 export const observation: ObservationEntity = new ObservationEntity();
@@ -79,13 +81,14 @@ describe('Commitment creation transaction tests', () => {
     txUtils = new TransactionUtils(watcherDb);
     cc = new CommitmentCreation(watcherUtils, txUtils, boxes);
   });
+
   afterEach(() => {
     chai.spy.restore(watcherUtils);
   });
 
   describe('createCommitmentTx', () => {
     /**
-     * Target: testing createCommitmentTx
+     * Target: testing createCommitmentTx without any extra tokens
      * Dependencies:
      *    WatcherUtils
      *    Boxes
@@ -98,12 +101,13 @@ describe('Commitment creation transaction tests', () => {
      *    The function should construct a valid commitment creation tx
      *    It should also sign and send it successfully
      */
-    it('Should create, sign and send a commitment transaction', async () => {
+    it('Should create, sign and send a commitment transaction without any extra tokens', async () => {
       chai.spy.on(txUtils, 'submitTransaction', () => null);
       chai.spy.on(boxes, 'createCommitment');
       chai.spy.on(boxes, 'createPermit');
       chai.spy.on(boxes, 'createWIDBox');
       chai.spy.on(ErgoUtils, 'getExtraTokenCount');
+      sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);
       await cc.createCommitmentTx(
@@ -126,7 +130,7 @@ describe('Commitment creation transaction tests', () => {
         TxType.COMMITMENT
       );
       expect(ErgoUtils.getExtraTokenCount).to.have.called.once;
-      expect(boxes.createWIDBox).to.have.been.called.with(111, WID, '1');
+      expect(boxes.createWIDBox).not.to.have.called;
 
       sinon.restore();
     });
