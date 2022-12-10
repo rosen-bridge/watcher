@@ -21,6 +21,7 @@ import chai from 'chai';
 import spies from 'chai-spies';
 import sinon from 'sinon';
 import permitObj from './dataset/permitBox.json' assert { type: 'json' };
+import permitObj2 from './dataset/permitBox2.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox.json' assert { type: 'json' };
 import WIDObj2 from './dataset/WIDBox2.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
@@ -30,6 +31,7 @@ import { rosenConfig } from '../../../src/config/rosenConfig';
 chai.use(spies);
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))];
+const permits2 = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj2))];
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
 const WIDBox2 = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2));
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
@@ -131,6 +133,39 @@ describe('Commitment creation transaction tests', () => {
       );
       expect(ErgoUtils.getExtraTokenCount).to.have.called.once;
       expect(boxes.createWIDBox).not.to.have.called;
+
+      sinon.restore();
+    });
+  });
+
+  describe('createCommitmentTx + Extra tokens', () => {
+    /**
+     * Target: testing createCommitmentTx with one extra token
+     * Dependencies:
+     *    WatcherUtils
+     *    Boxes
+     *    Transaction
+     * Test Procedure:
+     *    1- Mocking environment
+     *    2- calling function
+     *    3- validate used functions with inputs
+     * Expected Output:
+     *   Should create WID box with one extra token
+     */
+    it('Should create, sign and send a commitment transaction', async () => {
+      chai.spy.on(boxes, 'createWIDBox');
+      sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
+      sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
+      await cc.createCommitmentTx(
+        WID,
+        observation,
+        commitment,
+        permits2,
+        WIDBox,
+        []
+      );
+
+      expect(boxes.createWIDBox).to.have.called.with(111, WID, '1');
 
       sinon.restore();
     });
