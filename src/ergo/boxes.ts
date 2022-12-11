@@ -47,6 +47,26 @@ export class Boxes {
   }
 
   /**
+   * Returns unique boxes after tracking the spent boxes in the queue
+   * @param boxes boxes needed to be tracked in the transaction queue
+   */
+  uniqueTrackedBoxes = async (
+    boxes: Array<wasm.ErgoBox>,
+    token?: string
+  ): Promise<Array<wasm.ErgoBox>> => {
+    const allIds: string[] = [];
+    const uniqueBoxes: wasm.ErgoBox[] = [];
+    for (const box of boxes) {
+      const newPermit = await this.dataBase.trackTxQueue(box, token);
+      if (!allIds.includes(newPermit.box_id().to_str())) {
+        uniqueBoxes.push(newPermit);
+        allIds.push(newPermit.box_id().to_str());
+      }
+    }
+    return uniqueBoxes;
+  };
+
+  /**
    * Returns unspent permits covering the RWTCount (Considering the mempool)
    * @param wid
    * @param RWTCount
@@ -64,7 +84,12 @@ export class Boxes {
       const selectedBoxes = [];
       let totalRWT = BigInt(0);
       for (const box of permits) {
-        const unspentBox = await ErgoNetwork.trackMemPool(box);
+        let unspentBox = await ErgoNetwork.trackMemPool(box);
+        if (unspentBox)
+          unspentBox = await this.dataBase.trackTxQueue(
+            unspentBox,
+            this.rosenConfig.RWTId
+          );
         if (unspentBox) {
           totalRWT =
             totalRWT +
@@ -77,10 +102,12 @@ export class Boxes {
         throw new NotEnoughFund("Watcher doesn't have enough unspent permits");
       return selectedBoxes;
     }
-    const permitBoxes = permits.map(async (permit) => {
-      return await ErgoNetwork.trackMemPool(permit);
-    });
-    return Promise.all(permitBoxes);
+    const permitBoxes = await Promise.all(
+      permits.map(async (permit) => {
+        return await ErgoNetwork.trackMemPool(permit);
+      })
+    );
+    return this.uniqueTrackedBoxes(permitBoxes, this.rosenConfig.RWTId);
   };
 
   /**
@@ -101,7 +128,10 @@ export class Boxes {
         throw new NoWID(
           'WID box is not found. Cannot sign the transaction. Please check that the box containing the WID is created after the scanner initial height.'
         );
-      return await ErgoNetwork.trackMemPool(WID);
+      return await this.dataBase.trackTxQueue(
+        await ErgoNetwork.trackMemPool(WID),
+        wid
+      );
     } else
       throw new NoWID('Watcher WID is not set. Cannot sign the transaction.');
   };
@@ -119,7 +149,8 @@ export class Boxes {
     const selectedBoxes = [];
     let totalValue = BigInt(0);
     for (const box of boxes) {
-      const unspentBox = await ErgoNetwork.trackMemPool(box);
+      let unspentBox = await ErgoNetwork.trackMemPool(box);
+      if (unspentBox) unspentBox = await this.dataBase.trackTxQueue(unspentBox);
       if (unspentBox) {
         totalValue = totalValue + BigInt(unspentBox.value().as_i64().to_str());
         selectedBoxes.push(unspentBox);

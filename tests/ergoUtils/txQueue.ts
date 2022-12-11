@@ -75,7 +75,9 @@ describe('Transaction queue tests', () => {
       chai.spy.on(dataBase, 'setTxUpdateHeight', () => undefined);
       chai.spy.on(ErgoNetwork, 'getConfNum', () => -1);
       chai.spy.on(ErgoNetwork, 'getHeight', () => height);
-      chai.spy.on(ErgoNetwork, 'sendTx');
+      chai.spy.on(ErgoNetwork, 'sendTx', () => {
+        return { success: true };
+      });
       chai.spy.on(ErgoNetwork, 'checkTxInputs', () => true);
       chai.spy.on(dbConnection, 'isObservationValid', () => true);
       await txQueue.job();
@@ -94,7 +96,9 @@ describe('Transaction queue tests', () => {
       chai.spy.on(dataBase, 'setTxUpdateHeight', () => undefined);
       chai.spy.on(ErgoNetwork, 'getConfNum', () => -1);
       chai.spy.on(ErgoNetwork, 'getHeight', () => height);
-      chai.spy.on(ErgoNetwork, 'sendTx');
+      chai.spy.on(ErgoNetwork, 'sendTx', () => {
+        return { success: true };
+      });
       chai.spy.on(ErgoNetwork, 'checkTxInputs', () => true);
       chai.spy.on(dbConnection, 'isMergeHappened', () => false);
       await txQueue.job();
@@ -208,7 +212,9 @@ describe('Transaction queue tests', () => {
       chai.spy.on(dataBase, 'removeTx', () => undefined);
       chai.spy.on(ErgoNetwork, 'getConfNum', () => -1);
       chai.spy.on(ErgoNetwork, 'getHeight', () => height + 1000);
-      chai.spy.on(ErgoNetwork, 'sendTx');
+      chai.spy.on(ErgoNetwork, 'sendTx', () => {
+        return { success: false };
+      });
       chai.spy.on(ErgoNetwork, 'checkTxInputs', () => false);
       chai.spy.on(dbConnection, 'isObservationValid', () => true);
       await txQueue.job();

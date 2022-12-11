@@ -6,6 +6,7 @@ import { Config } from '../../config/config';
 import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
 import { logger } from '../../log/Logger';
+import { WatcherDataBase } from '../../database/models/watcherModel';
 
 const config = Config.getConfig();
 
@@ -63,11 +64,12 @@ export class ErgoNetwork {
   static sendTx = (tx: string) => {
     return nodeClient
       .post('/transactions', tx)
-      .then((response) => ({ txId: response.data as string }))
+      .then((response) => ({ txId: response.data as string, success: true }))
       .catch((exp) => {
         logger.info(
           `An error occurred while sending transaction to Node: ${exp}`
         );
+        return { success: false };
       });
   };
 
