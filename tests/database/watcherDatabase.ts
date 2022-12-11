@@ -301,6 +301,11 @@ describe('WatcherModel tests', () => {
   describe('trackTxQueue', () => {
     /**
      * Target: testing trackTxQueue
+     * Dependencies: -
+     * Test Procedure:
+     *    - mock function inputs
+     *    - call function
+     *    - verify the output
      * Expected Output:
      *    The test should return the tracked box from database
      */
