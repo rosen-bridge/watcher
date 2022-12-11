@@ -46,6 +46,13 @@ export class Queue {
     return false;
   };
 
+  /**
+   * Tries to remove an invalid transaction from the transaction queue
+   * If we had waited enought to observe its situation in network, 
+   * it removes from the queue, unless waits more for its stable situation
+   * @param tx
+   * @param currentHeight
+   */
   private removeTrial = async (tx: TxEntity, currentHeight: number) => {
     if (currentHeight - tx.updateBlock > config.transactionRemovingTimeout) {
       await this.database.downgradeObservationTxStatus(tx.observation);

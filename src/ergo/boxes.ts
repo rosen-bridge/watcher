@@ -56,8 +56,8 @@ export class Boxes {
   ): Promise<Array<wasm.ErgoBox>> => {
     const allIds: string[] = [];
     const uniqueBoxes: wasm.ErgoBox[] = [];
-    for (const permit of boxes) {
-      const newPermit = await this.dataBase.trackTxQueue(permit, token);
+    for (const box of boxes) {
+      const newPermit = await this.dataBase.trackTxQueue(box, token);
       if (!allIds.includes(newPermit.box_id().to_str())) {
         uniqueBoxes.push(newPermit);
         allIds.push(newPermit.box_id().to_str());
