@@ -47,13 +47,12 @@ export class Queue {
   };
 
   /**
-   * Tries to remove an invalid transaction from the transaction queue
-   * If we had waited enought to observe its situation in network, 
-   * it removes from the queue, unless waits more for its stable situation
+   * Removes invalid and timed out transaction from tx queue after enough confirmation,
+   * and updates the related observation status
    * @param tx
    * @param currentHeight
    */
-  private removeTrial = async (tx: TxEntity, currentHeight: number) => {
+  private resetTxStatus = async (tx: TxEntity, currentHeight: number) => {
     if (currentHeight - tx.updateBlock > config.transactionRemovingTimeout) {
       await this.database.downgradeObservationTxStatus(tx.observation);
       await this.database.removeTx(tx);
@@ -87,7 +86,7 @@ export class Queue {
           logger.info(
             `Tx [${tx.txId}] inputs are not valid, skipping the transaction sending`
           );
-          this.removeTrial(tx, currentHeight);
+          this.resetTxStatus(tx, currentHeight);
         } else {
           console.warn(`Error occurred while sending tx [${tx.id}]`);
         }
@@ -96,7 +95,7 @@ export class Queue {
       logger.info(
         `Tx [${tx.txId} observation or commitments are not valid, skipping the transaction sending]`
       );
-      this.removeTrial(tx, currentHeight);
+      this.resetTxStatus(tx, currentHeight);
     }
   };
 
