@@ -102,6 +102,7 @@ describe('Commitment creation transaction tests', () => {
      * Expected Output:
      *    The function should construct a valid commitment creation tx
      *    It should also sign and send it successfully
+     *    It should not call createWIDBox
      */
     it('Should create, sign and send a commitment transaction without any extra tokens', async () => {
       chai.spy.on(txUtils, 'submitTransaction', () => null);
@@ -147,7 +148,7 @@ describe('Commitment creation transaction tests', () => {
      *    1- Mocking environment (RWTTokenId and getHeight)
      *    2- calling function
      * Expected Output:
-     *   Should call createWIDBox and create WID Box successfully
+     *   Should call createWIDBox with specified parameters
      */
     it('Should create, sign and send a commitment transaction with extra tokens', async () => {
       chai.spy.on(boxes, 'createWIDBox');

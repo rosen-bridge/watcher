@@ -346,6 +346,13 @@ export class Boxes {
     return repoBuilder.build();
   };
 
+  /**
+   * create WID box that used in output of commitment transaction
+   * @param height
+   * @param WID
+   * @param WIDAmount
+   * @param contract
+   */
   createWIDBox = (
     height: number,
     WID: string,

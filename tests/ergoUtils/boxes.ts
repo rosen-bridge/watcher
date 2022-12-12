@@ -187,6 +187,29 @@ describe('Testing Box Creation', () => {
     });
   });
 
+  /**
+   * Target: testing createWIDBox
+   * Dependencies: None
+   * Test Procedure:
+   *   1- Calling function
+   *   2- Validate output
+   * Expected Output:
+   *  Returned box should have proper creation height, token, and contract
+   */
+  describe('createWIDBox', () => {
+    it('returns wid box', async () => {
+      const WID =
+        'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
+      const data = await boxes.createWIDBox(111, WID, '1');
+      expect(data.creation_height()).to.eq(111);
+      expect(data.tokens().get(0).id().to_str()).to.eq(WID);
+      expect(data.tokens().get(0).amount().as_i64().to_str()).to.eq('1');
+      expect(data.ergo_tree().to_base16_bytes()).to.eq(
+        config.secretKey.get_address().to_ergo_tree().to_base16_bytes()
+      );
+    });
+  });
+
   describe('getUserPaymentBox', () => {
     /**
      * Target: testing getUserPaymentBox
