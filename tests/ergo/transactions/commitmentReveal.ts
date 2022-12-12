@@ -30,7 +30,6 @@ import {
 } from '../../../src/utils/watcherUtils';
 import { rosenConfig } from '../../../src/config/rosenConfig';
 import TransactionTest from '../../../src/api/TransactionTest';
-import { mockedResponseBody } from '../objects/mockedResponseBody';
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))];
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
@@ -166,7 +165,7 @@ describe('Commitment reveal transaction tests', () => {
       ]);
       chai.spy.on(boxes, 'getUserPaymentBox', () => plainBox);
       sinon.stub(ErgoNetwork, 'boxById').resolves(WIDBox);
-      sinon.stub(ErgoUtils, 'requiredCommitmentCount').returns(BigInt(2));
+      sinon.stub(ErgoUtils, 'requiredCommitmentCount').returns(BigInt(1));
       chai.spy.on(cr, 'triggerEventCreationTx', () => 'txId');
       chai.spy.on(cr, 'commitmentCheck', () => [
         firstCommitment,
