@@ -198,6 +198,7 @@ describe('Testing Box Creation', () => {
    */
   describe('createWIDBox', () => {
     it('returns wid box', async () => {
+      chai.spy.on(boxes, 'getWIDBox', () => undefined);
       const WID =
         'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
       const data = await boxes.createWIDBox(111, WID, '1');
