@@ -115,9 +115,11 @@ export class CommitmentReveal {
           await this.boxes.getRepoBox()
         );
         logger.info(
-          `Valid commitments: [${validCommitments.length}/${requiredCommitments}]`
+          `Valid commitments: [${validCommitments.length}/${
+            requiredCommitments + 1n
+          }]`
         );
-        if (BigInt(validCommitments.length) >= requiredCommitments) {
+        if (BigInt(validCommitments.length) > requiredCommitments) {
           const commitmentBoxes = validCommitments.map(async (commitment) => {
             return await ErgoNetwork.boxById(commitment.boxId);
           });
