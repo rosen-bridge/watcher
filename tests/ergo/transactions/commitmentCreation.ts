@@ -96,7 +96,7 @@ describe('Commitment creation transaction tests', () => {
      *    Boxes
      *    Transaction
      * Test Procedure:
-     *    1- Mocking environment
+     *    1- Mocking environment (RWTTokenId, getHeight and createAndSignTx)
      *    2- calling function
      *    3- validate used functions with inputs
      * Expected Output:
@@ -138,17 +138,17 @@ describe('Commitment creation transaction tests', () => {
     });
 
     /**
-     //    * Target: testing createCommitmentTx with one extra token
-     //    * Dependencies:
-     //    *    WatcherUtils
-     //    *    Boxes
-     //    *    Transaction
-     //    * Test Procedure:
-     //    *    1- Mocking environment (RWTTokenId and getHeight)
-     //    *    2- calling function
-     //    * Expected Output:
-     //    *   Should call createWIDBox and create WID Box
-     //    */
+     * Target: testing createCommitmentTx with one extra token
+     * Dependencies:
+     *    WatcherUtils
+     *    Boxes
+     *    Transaction
+     * Test Procedure:
+     *    1- Mocking environment (RWTTokenId and getHeight)
+     *    2- calling function
+     * Expected Output:
+     *   Should call createWIDBox and create WID Box successfully
+     */
     it('Should create, sign and send a commitment transaction with extra tokens', async () => {
       chai.spy.on(boxes, 'createWIDBox');
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
