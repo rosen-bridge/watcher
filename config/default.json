@@ -12,8 +12,7 @@
     "koios": {
       "url": "https://testnet.koios.rest/api/v0",
       "timeout": 10000
-    },
-    "name": "cardano"
+    }
   },
   "ergo": {
     "networkType": "Mainnet",
@@ -36,17 +35,10 @@
       "timeout": 10,
       "confirmation": 10,
       "interval": 180
-    },
-    "name": "ergo"
+    }
   },
-  "bridgeScanner": {
-    "interval": 10,
-    "initialBlockHeight": 249243,
-    "heightLimit": 100,
-    "cleanupConfirmation": 10
-  },
-  "rosenConfigPath": "src/config/",
-  "rosenTokensPath": "src/config/tokens.json",
+  "rosenConfigPath": "config/rosen",
+  "rosenTokensPath": "config/rosen/tokens.json",
   "logs": {
     "path": "logs/",
     "level": "info",
