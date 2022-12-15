@@ -39,13 +39,27 @@ export class Queue {
    */
   private verifyTx = async (tx: TxEntity) => {
     if (tx.type === TxType.COMMITMENT) {
-      return !(await this.databaseConnection.isObservationValid(
-        tx.observation
-      ));
+      return await this.databaseConnection.isObservationValid(tx.observation);
     } else if (tx.type === TxType.TRIGGER) {
-      return await this.databaseConnection.isMergeHappened(tx.observation);
+      return !(await this.databaseConnection.isMergeHappened(tx.observation));
     }
     return false;
+  };
+
+  /**
+   * Removes invalid and timed out transaction from tx queue after enough confirmation,
+   * and updates the related observation status
+   * @param tx
+   * @param currentHeight
+   */
+  private resetTxStatus = async (tx: TxEntity, currentHeight: number) => {
+    if (currentHeight - tx.updateBlock > config.transactionRemovingTimeout) {
+      await this.database.downgradeObservationTxStatus(tx.observation);
+      await this.database.removeTx(tx);
+      logger.info(
+        `Tx [${tx.txId}] is not valid anymore, removed from the tx queue.`
+      );
+    }
   };
 
   /**
@@ -60,21 +74,29 @@ export class Queue {
     const signedTx = wasm.Transaction.sigma_parse_bytes(
       base64ToArrayBuffer(tx.txSerialized)
     );
-    if (
-      (await this.verifyTx(tx)) ||
-      !(await ErgoNetwork.checkTxInputs(signedTx.inputs()))
-    ) {
-      if (currentHeight - tx.updateBlock > config.transactionRemovingTimeout) {
-        await this.database.downgradeObservationTxStatus(tx.observation);
-        await this.database.removeTx(tx);
+    if (await this.verifyTx(tx)) {
+      const result = await ErgoNetwork.sendTx(signedTx.to_json());
+      if (result.success) {
+        await this.database.setTxUpdateHeight(tx, currentHeight);
+        logger.info(
+          `The [${tx.type}] transaction with txId: [${tx.txId}] sent succcessfully`
+        );
+      } else {
+        if (!(await ErgoNetwork.checkTxInputs(signedTx.inputs()))) {
+          logger.info(
+            `Tx [${tx.txId}] inputs are not valid, skipping the transaction sending`
+          );
+          this.resetTxStatus(tx, currentHeight);
+        } else {
+          console.warn(`Error occurred while sending tx [${tx.id}]`);
+        }
       }
-      logger.info(`Skipping tx [${tx.txId}]`);
-      return;
+    } else {
+      logger.info(
+        `Tx [${tx.txId} observation or commitments are not valid, skipping the transaction sending]`
+      );
+      this.resetTxStatus(tx, currentHeight);
     }
-    // resend the tx
-    logger.info(`Sending the [${tx.type}] transaction with txId: [${tx.txId}]`);
-    await ErgoNetwork.sendTx(signedTx.to_json());
-    await this.database.setTxUpdateHeight(tx, currentHeight);
   };
 
   /**
