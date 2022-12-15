@@ -5,7 +5,7 @@ import { uint8ArrayToHex } from '../utils/utils';
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
-const URL: string | undefined = config.get?.('cardano.node.URL');
+const URL: string | undefined = config.get?.('cardano.koios.url');
 const CARDANO_INTERVAL: number | undefined = config.get?.('cardano.interval');
 const CARDANO_INITIAL_HEIGHT: number | undefined = config.get?.(
   'cardano.initialBlockHeight'
@@ -14,13 +14,15 @@ const ERGO_INITIAL_HEIGHT: number | undefined = config.get?.(
   'ergo.scanner.initialBlockHeight'
 );
 const ERGO_INTERVAL: number | undefined = config.get?.('ergo.scanner.interval');
-const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
-const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
-const CARDANO_TIMEOUT: number | undefined = config.get?.('cardano.timeout');
-const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.(
-  'ergo.explorerTimeout'
+const EXPLORER_URL: string | undefined = config.get?.('ergo.explorer.url');
+const NODE_URL: string | undefined = config.get?.('ergo.node.url');
+const CARDANO_TIMEOUT: number | undefined = config.get?.(
+  'cardano.koios.timeout'
 );
-const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
+const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.(
+  'ergo.explorer.timeout'
+);
+const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.node.timeout');
 const NETWORK_WATCHER: string | undefined = config.get?.('network');
 const MIN_BOX_VALUE: string | undefined = config.get?.('minBoxValue');
 const FEE: string | undefined = config.get?.('fee');

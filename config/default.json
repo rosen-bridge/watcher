@@ -9,18 +9,22 @@
   "cardano": {
     "interval": 10,
     "initialBlockHeight": 3797267,
-    "timeout": 10000,
-    "node": {
-      "URL": "https://testnet.koios.rest/api/v0"
+    "koios": {
+      "url": "https://testnet.koios.rest/api/v0",
+      "timeout": 10000
     },
     "name": "cardano"
   },
   "ergo": {
-    "explorerUrl": "change",
-    "nodeUrl": "change",
-    "explorerTimeout": 20000,
-    "nodeTimeout": 100000,
     "networkType": "Mainnet",
+    "explorer": {
+      "url": "change",
+      "timeout": 20000
+    },
+    "node": {
+      "url": "change",
+      "timeout": 100000
+    },
     "watcherSecretKey": "30ec2689d8920095a34193de5b313dc84b178fd827d568be96f85bba12b69db0",
     "scanner": {
       "interval": 180,
