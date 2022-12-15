@@ -210,7 +210,7 @@ describe('Testing Box Creation', () => {
    *   1- Calling function
    *   2- Validate output
    * Expected Output:
-   *  Returned box should have proper creation height, token, and contract
+   *  Returned box should have proper creation height and token
    */
   describe('createWIDBox', () => {
     it('returns wid box', async () => {
