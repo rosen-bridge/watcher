@@ -37,7 +37,7 @@
       "interval": 180
     }
   },
-  "rosenConfigPath": "config/rosen",
+  "rosenConfigPath": "config/rosen/",
   "rosenTokensPath": "config/rosen/tokens.json",
   "logs": {
     "path": "logs/",
