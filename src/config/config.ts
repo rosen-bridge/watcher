@@ -2,21 +2,17 @@ import config from 'config';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
 import { uint8ArrayToHex } from '../utils/utils';
+import Defaults from './defaults';
+import * as Constants from './constants';
 
 const NETWORK_TYPE: string | undefined = config.get?.('ergo.networkType');
 const SECRET_KEY: string | undefined = config.get?.('ergo.watcherSecretKey');
-const URL: string | undefined = config.get?.('cardano.node.URL');
-const CARDANO_INTERVAL: number | undefined = config.get?.('cardano.interval');
-const CARDANO_INITIAL_HEIGHT: number | undefined = config.get?.(
-  'cardano.initialBlockHeight'
-);
 const ERGO_INITIAL_HEIGHT: number | undefined = config.get?.(
   'ergo.scanner.initialBlockHeight'
 );
 const ERGO_INTERVAL: number | undefined = config.get?.('ergo.scanner.interval');
 const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
 const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
-const CARDANO_TIMEOUT: number | undefined = config.get?.('cardano.timeout');
 const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.(
   'ergo.explorerTimeout'
 );
@@ -45,7 +41,7 @@ const OBSERVATION_CONFIRMATION: number | undefined = config.get?.(
 const OBSERVATION_VALID_THRESH: number | undefined = config.get?.(
   'observation.validThreshold'
 );
-const supportedNetworks: Array<string> = ['ergo-node', 'cardano-koios'];
+const supportedNetworks: Array<string> = ['ergo', 'cardano'];
 const ROSEN_CONFIG_PATH: string | undefined =
   config.get<string>('rosenConfigPath');
 const ROSEN_TOKENS_PATH: string | undefined =
@@ -217,31 +213,76 @@ class Config {
 
 class CardanoConfig {
   private static instance: CardanoConfig;
-  koiosURL: string;
-  interval: number;
-  timeout: number;
-  initialHeight: number;
+  type: string;
+  ogmios?: {
+    ip: string;
+    port: number;
+    initialSlot: number;
+    initialHash: string;
+  };
+  koios?: {
+    url: string;
+    timeout: number;
+    initialHeight: number;
+    interval: number;
+  };
 
   private constructor() {
-    if (URL === undefined) {
-      throw new Error('koios URL is not set config file');
+    this.type = config.get('cardano.type') as string;
+    if (config.get('network') === Constants.CARDANO_WATCHER) {
+      if (this.type === Constants.OGMIOS_TYPE) {
+        const ip = config.get('cardano.node.ip') as string | undefined;
+        const port = config.get('cardano.node.port') as number | undefined;
+        const initialSlot = config.get('cardano.initial.slot') as
+          | number
+          | undefined;
+        const initialHash = config.get('cardano.initial.hash') as
+          | string
+          | undefined;
+        if (!ip)
+          throw new Error(
+            'Improperly configured. `cardano.node.ip` if required when using ogmios'
+          );
+        if (!port)
+          throw new Error(
+            'Improperly configured. `cardano.node.port` if required when using ogmios'
+          );
+        if (!initialSlot)
+          throw new Error(
+            'Improperly configured. `cardano.initial.slot` if required when using ogmios'
+          );
+        if (!initialHash)
+          throw new Error(
+            'Improperly configured. `cardano.initial.hash` if required when using ogmios'
+          );
+        this.ogmios = { ip, port, initialHash, initialSlot };
+      } else if (this.type === Constants.KOIOS_TYPE) {
+        const url = config.get('cardano.node.URL') as string | undefined;
+        const interval = config.get('cardano.interval') as number | undefined;
+        const timeout = config.get('cardano.timeout') as number | undefined;
+        const initialHeight = config.get('cardano.initialBlockHeight') as
+          | number
+          | undefined;
+        if (!url)
+          throw new Error(
+            'Improperly configured. `cardano.node.url` if required when using koios'
+          );
+        if (!initialHeight)
+          throw new Error(
+            'Improperly configured. `cardano.initialBlockHeight` if required when using koios'
+          );
+        this.koios = {
+          url,
+          initialHeight,
+          interval: interval ? interval : Defaults.cardano.interval,
+          timeout: timeout ? timeout : Defaults.cardano.timeout,
+        };
+      } else {
+        throw new Error(
+          `Improperly configured. cardano configuration type is invalid available choices are '${Constants.OGMIOS_TYPE}', '${Constants.KOIOS_TYPE}'`
+        );
+      }
     }
-    if (CARDANO_INTERVAL === undefined) {
-      throw new Error('Cardano Scanner interval is not set in the config file');
-    }
-    if (CARDANO_INITIAL_HEIGHT === undefined) {
-      throw new Error(
-        'Cardano Scanner initial height is not set in the config file'
-      );
-    }
-    if (CARDANO_TIMEOUT === undefined) {
-      throw new Error("Cardano network timeout doesn't set correctly");
-    }
-
-    this.koiosURL = URL;
-    this.interval = CARDANO_INTERVAL;
-    this.timeout = CARDANO_TIMEOUT;
-    this.initialHeight = CARDANO_INITIAL_HEIGHT;
   }
 
   static getConfig() {

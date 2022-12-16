@@ -1,5 +1,5 @@
 {
-  "network": "ergo-node",
+  "network": "cardano",
   "observation": {
     "confirmation": 15,
     "validThreshold": 720
@@ -7,17 +7,19 @@
   "minBoxValue": "1100000",
   "fee": "1100000",
   "cardano": {
+    "type": "koios",
     "interval": 10,
-    "initialBlockHeight": 3797267,
+    "initialBlockHeight": 8062870,
     "timeout": 10000,
     "node": {
-      "URL": "https://testnet.koios.rest/api/v0"
-    },
-    "name": "cardano"
+      "ip": "",
+      "port": 1337,
+      "URL": "https://api.koios.rest/api/v0"
+    }
   },
   "ergo": {
-    "explorerUrl": "change",
-    "nodeUrl": "change",
+    "explorerUrl": "https://api.ergoplatform.com/",
+    "nodeUrl": "https://node.ergopool.io/",
     "explorerTimeout": 20000,
     "nodeTimeout": 100000,
     "networkType": "Mainnet",

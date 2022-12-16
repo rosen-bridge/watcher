@@ -12,10 +12,10 @@ import {
 } from '../../src/database/entities/observationStatusEntity';
 import { BlockEntity } from '@rosen-bridge/scanner';
 import { PROCEED } from '@rosen-bridge/scanner/dist/entities/blockEntity';
-import { Constants } from '../../src/config/constants';
+import * as Constants from '../../src/config/constants';
 
 export const ergoBlockEntity = new BlockEntity();
-ergoBlockEntity.scanner = Constants.ergoNode;
+ergoBlockEntity.scanner = Constants.ERGO_WATCHER;
 ergoBlockEntity.id = 1;
 ergoBlockEntity.hash = 'blockHash';
 ergoBlockEntity.height = 1111;
@@ -23,7 +23,7 @@ ergoBlockEntity.parentHash = 'parentHash';
 ergoBlockEntity.status = PROCEED;
 
 export const cardanoBlockEntity = new BlockEntity();
-cardanoBlockEntity.scanner = Constants.cardanoKoios;
+cardanoBlockEntity.scanner = Constants.CARDANO_WATCHER;
 cardanoBlockEntity.id = 2;
 cardanoBlockEntity.hash = 'blockHash2';
 cardanoBlockEntity.height = 2222;
@@ -95,7 +95,7 @@ export const plainBox = new BoxEntity();
 plainBox.address = 'address';
 plainBox.createBlock = 'blockID';
 plainBox.creationHeight = 100;
-plainBox.extractor = Constants.addressExtractorName;
+plainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 plainBox.boxId = 'boxId';
 plainBox.serialized = 'box';
 
@@ -103,7 +103,7 @@ export const spentPlainBox = new BoxEntity();
 spentPlainBox.address = 'address';
 spentPlainBox.createBlock = 'blockID';
 spentPlainBox.creationHeight = 100;
-spentPlainBox.extractor = Constants.addressExtractorName;
+spentPlainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 spentPlainBox.boxId = 'boxId2';
 spentPlainBox.serialized = 'box2';
 spentPlainBox.spendBlock = 'blockHash';

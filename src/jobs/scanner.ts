@@ -1,10 +1,16 @@
 import { CardanoConfig } from '../config/config';
-import { ErgoScanner, CardanoKoiosScanner } from '@rosen-bridge/scanner';
+import {
+  ErgoNodeScanner,
+  CardanoKoiosScanner,
+  CardanoOgmiosScanner,
+  GeneralScanner,
+} from '@rosen-bridge/scanner';
 import { Config } from '../config/config';
 import { dataSource } from '../../config/dataSource';
 import {
   ErgoObservationExtractor,
-  CardanoObservationExtractor,
+  CardanoKoiosObservationExtractor,
+  CardanoOgmiosObservationExtractor,
 } from '@rosen-bridge/observation-extractor';
 import {
   CommitmentExtractor,
@@ -13,30 +19,20 @@ import {
 } from '@rosen-bridge/watcher-data-extractor';
 import { rosenConfig } from '../config/rosenConfig';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
-import { Constants } from '../config/constants';
+import * as Constants from '../config/constants';
 import { Tokens } from '../config/tokensConfig';
 import { logger } from '../log/Logger';
 
 const config = Config.getConfig();
-let scanner: ErgoScanner;
-let cardanoScanner: CardanoKoiosScanner;
+let scanner: ErgoNodeScanner;
 
-const ergoScanningJob = async () => {
+const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   try {
     await scanner.update();
   } catch (e) {
-    logger.warn('Scanning Job failed with error:');
-    console.log(e.message);
+    logger.warn(`Scanning Job failed for ${scanner.name()}, ${e.message}`);
   }
-  setTimeout(ergoScanningJob, config.ergoInterval * 1000);
-};
-
-const cardanoScanningJob = (interval: number) => {
-  cardanoScanner
-    .update()
-    .then(() =>
-      setTimeout(() => cardanoScanningJob(interval), interval * 1000)
-    );
+  setTimeout(() => scanningJob(interval, scanner), interval * 1000);
 };
 
 export const scannerInit = () => {
@@ -46,58 +42,76 @@ export const scannerInit = () => {
     initialHeight: config.ergoInitialHeight,
     dataSource: dataSource,
   };
-  scanner = new ErgoScanner(ergoScannerConfig);
-  ergoScanningJob();
-  if (config.networkWatcher == Constants.ergoNode) {
+  scanner = new ErgoNodeScanner(ergoScannerConfig);
+  // scanningJob(config.ergoInterval, scanner).then(() => null);
+  if (config.networkWatcher == Constants.ERGO_WATCHER) {
     const observationExtractor = new ErgoObservationExtractor(
       dataSource,
       Tokens,
       rosenConfig.lockAddress
     );
     scanner.registerExtractor(observationExtractor);
-  } else if (config.networkWatcher == Constants.cardanoKoios) {
+  } else if (config.networkWatcher == Constants.CARDANO_WATCHER) {
     const cardanoConfig = CardanoConfig.getConfig();
-    const cardanoScannerConfig = {
-      koiosUrl: cardanoConfig.koiosURL,
-      timeout: cardanoConfig.timeout,
-      initialHeight: cardanoConfig.initialHeight,
-      dataSource: dataSource,
-    };
-    cardanoScanner = new CardanoKoiosScanner(cardanoScannerConfig);
-    cardanoScanningJob(cardanoConfig.interval);
-    const observationExtractor = new CardanoObservationExtractor(
-      dataSource,
-      Tokens,
-      rosenConfig.lockAddress
-    );
-    cardanoScanner.registerExtractor(observationExtractor);
+    if (cardanoConfig.ogmios) {
+      const cardanoScanner = new CardanoOgmiosScanner({
+        nodeIp: cardanoConfig.ogmios.ip,
+        nodePort: cardanoConfig.ogmios.port,
+        dataSource: dataSource,
+        initialHash: cardanoConfig.ogmios.initialHash,
+        initialSlot: cardanoConfig.ogmios.initialSlot,
+      });
+      const observationExtractor = new CardanoOgmiosObservationExtractor(
+        dataSource,
+        Tokens,
+        rosenConfig.lockAddress
+      );
+      cardanoScanner.registerExtractor(observationExtractor);
+    } else if (cardanoConfig.koios) {
+      console.log(cardanoConfig.koios);
+      const cardanoScanner = new CardanoKoiosScanner({
+        dataSource: dataSource,
+        koiosUrl: cardanoConfig.koios?.url,
+        timeout: cardanoConfig.koios.timeout,
+        initialHeight: cardanoConfig.koios.initialHeight,
+      });
+      scanningJob(cardanoConfig.koios.interval, cardanoScanner).then(
+        () => null
+      );
+      const observationExtractor = new CardanoKoiosObservationExtractor(
+        dataSource,
+        Tokens,
+        rosenConfig.lockAddress
+      );
+      cardanoScanner.registerExtractor(observationExtractor);
+    }
   } else {
     throw new Error(
       `The observing network [${config.networkWatcher}] is not supported`
     );
   }
   const commitmentExtractor = new CommitmentExtractor(
-    Constants.commitmentExtractorName,
+    Constants.COMMITMENT_EXTRACTOR_NAME,
     [rosenConfig.commitmentAddress],
     rosenConfig.RWTId,
     dataSource
   );
   const permitExtractor = new PermitExtractor(
-    Constants.permitExtractorName,
+    Constants.PERMIT_EXTRACTOR_NAME,
     dataSource,
     rosenConfig.watcherPermitAddress,
     rosenConfig.RWTId,
     config.explorerUrl
   );
   const eventTriggerExtractor = new EventTriggerExtractor(
-    Constants.triggerExtractorName,
+    Constants.TRIGGER_EXTRACTOR_NAME,
     dataSource,
     rosenConfig.eventTriggerAddress,
     rosenConfig.RWTId
   );
   const plainExtractor = new ErgoUTXOExtractor(
     dataSource,
-    Constants.addressExtractorName,
+    Constants.ADDRESS_EXTRACTOR_NAME,
     config.networkPrefix,
     config.explorerUrl,
     config.address
