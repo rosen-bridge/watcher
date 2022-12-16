@@ -69,7 +69,6 @@ export const scannerInit = () => {
       cardanoScanner.registerExtractor(observationExtractor);
       cardanoScanner.start().then(() => null);
     } else if (cardanoConfig.koios) {
-      console.log(cardanoConfig.koios);
       const cardanoScanner = new CardanoKoiosScanner({
         dataSource: dataSource,
         koiosUrl: cardanoConfig.koios?.url,

@@ -228,17 +228,13 @@ class CardanoConfig {
   };
 
   private constructor() {
-    this.type = config.get('cardano.type') as string;
-    if (config.get('network') === Constants.CARDANO_WATCHER) {
+    this.type = config.get<string>('cardano.type');
+    if (NETWORK_WATCHER === Constants.CARDANO_WATCHER) {
       if (this.type === Constants.OGMIOS_TYPE) {
-        const ip = config.get('cardano.node.ip') as string | undefined;
-        const port = config.get('cardano.node.port') as number | undefined;
-        const initialSlot = config.get('cardano.initial.slot') as
-          | number
-          | undefined;
-        const initialHash = config.get('cardano.initial.hash') as
-          | string
-          | undefined;
+        const ip = config.get<string>('cardano.node.ip');
+        const port = config.get<number>('cardano.node.port');
+        const initialSlot = config.get<number>('cardano.initial.slot');
+        const initialHash = config.get<string>('cardano.initial.hash');
         if (!ip)
           throw new Error(
             'Improperly configured. `cardano.node.ip` if required when using ogmios'
@@ -257,12 +253,10 @@ class CardanoConfig {
           );
         this.ogmios = { ip, port, initialHash, initialSlot };
       } else if (this.type === Constants.KOIOS_TYPE) {
-        const url = config.get('cardano.node.URL') as string | undefined;
-        const interval = config.get('cardano.interval') as number | undefined;
-        const timeout = config.get('cardano.timeout') as number | undefined;
-        const initialHeight = config.get('cardano.initialBlockHeight') as
-          | number
-          | undefined;
+        const url = config.get<string>('cardano.node.URL');
+        const interval = config.get<number>('cardano.interval');
+        const timeout = config.get<number>('cardano.timeout');
+        const initialHeight = config.get<number>('cardano.initialBlockHeight');
         if (!url)
           throw new Error(
             'Improperly configured. `cardano.node.url` if required when using koios'
