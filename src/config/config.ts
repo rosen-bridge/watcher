@@ -253,10 +253,10 @@ class CardanoConfig {
           );
         this.ogmios = { ip, port, initialHash, initialSlot };
       } else if (this.type === Constants.KOIOS_TYPE) {
-        const url = config.get<string>('cardano.node.URL');
+        const url = config.get<string>('cardano.node.url');
         const interval = config.get<number>('cardano.interval');
         const timeout = config.get<number>('cardano.timeout');
-        const initialHeight = config.get<number>('cardano.initialBlockHeight');
+        const initialHeight = config.get<number>('cardano.initial.height');
         if (!url)
           throw new Error(
             'Improperly configured. `cardano.node.url` if required when using koios'

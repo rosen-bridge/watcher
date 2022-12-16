@@ -1,5 +1,5 @@
 {
-  "network": "cardano",
+  "network": "",
   "observation": {
     "confirmation": 15,
     "validThreshold": 720
@@ -9,12 +9,16 @@
   "cardano": {
     "type": "ogmios",
     "initial": {
-      "slot": 77903318,
-      "hash": "changeme"
+      "slot": 0,
+      "hash": "initial-block-hash",
+      "height": 0
     },
+    "interval": 0,
+    "timeout": 0,
     "node": {
-      "ip": "changeme",
-      "port": 1337
+      "ip": "ogmios-node-ip-address",
+      "port": 1337,
+      "url": "koios-url-in-used"
     }
   },
   "ergo": {

@@ -35,7 +35,7 @@ const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   setTimeout(() => scanningJob(interval, scanner), interval * 1000);
 };
 
-export const scannerInit = () => {
+export const scannerInit = async () => {
   const ergoScannerConfig = {
     nodeUrl: config.nodeUrl,
     timeout: config.nodeTimeout,
@@ -67,7 +67,7 @@ export const scannerInit = () => {
         rosenConfig.lockAddress
       );
       cardanoScanner.registerExtractor(observationExtractor);
-      cardanoScanner.start().then(() => null);
+      await cardanoScanner.start();
     } else if (cardanoConfig.koios) {
       const cardanoScanner = new CardanoKoiosScanner({
         dataSource: dataSource,
