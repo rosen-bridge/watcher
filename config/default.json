@@ -7,19 +7,19 @@
   "minBoxValue": "1100000",
   "fee": "1100000",
   "cardano": {
-    "type": "koios",
-    "interval": 10,
-    "initialBlockHeight": 8062870,
-    "timeout": 10000,
+    "type": "ogmios",
+    "initial": {
+      "slot": 77903318,
+      "hash": "changeme"
+    },
     "node": {
-      "ip": "",
-      "port": 1337,
-      "URL": "https://api.koios.rest/api/v0"
+      "ip": "changeme",
+      "port": 1337
     }
   },
   "ergo": {
-    "explorerUrl": "https://api.ergoplatform.com/",
-    "nodeUrl": "https://node.ergopool.io/",
+    "explorerUrl": "changeme",
+    "nodeUrl": "changeme",
     "explorerTimeout": 20000,
     "nodeTimeout": 100000,
     "networkType": "Mainnet",

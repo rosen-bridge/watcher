@@ -43,7 +43,7 @@ export const scannerInit = () => {
     dataSource: dataSource,
   };
   scanner = new ErgoNodeScanner(ergoScannerConfig);
-  // scanningJob(config.ergoInterval, scanner).then(() => null);
+  scanningJob(config.ergoInterval, scanner).then(() => null);
   if (config.networkWatcher == Constants.ERGO_WATCHER) {
     const observationExtractor = new ErgoObservationExtractor(
       dataSource,
@@ -67,6 +67,7 @@ export const scannerInit = () => {
         rosenConfig.lockAddress
       );
       cardanoScanner.registerExtractor(observationExtractor);
+      cardanoScanner.start().then(() => null);
     } else if (cardanoConfig.koios) {
       console.log(cardanoConfig.koios);
       const cardanoScanner = new CardanoKoiosScanner({
