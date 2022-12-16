@@ -57,7 +57,9 @@ class RosenConfig {
   }
 
   getAddress = (network: string, networkType: string) => {
-    return ergoConfig.rosenConfigPath + `${network}-${networkType}.json`;
+    return (
+      ergoConfig.rosenConfigPath + `contracts-${network}-${networkType}.json`
+    );
   };
 }
 
