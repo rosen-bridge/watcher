@@ -107,7 +107,7 @@ export class CommitmentCreation {
         );
       }
       if (e instanceof NotEnoughFund) {
-        // TODO: Send notification
+        // TODO: Send notification (https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/33)
         logger.warn(
           'Transaction build failed due to ERG insufficiency in the watcher.'
         );
