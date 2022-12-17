@@ -114,6 +114,11 @@ export class ErgoUtils {
     return null;
   };
 
+  /**
+   * Returns number of extra tokens (except allowed tokens) in the boxes
+   * @param boxes
+   * @param allowedTokens
+   */
   static getExtraTokenCount = (
     boxes: wasm.ErgoBoxes,
     allowedTokens: wasm.TokenId[]

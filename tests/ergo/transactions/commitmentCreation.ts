@@ -14,6 +14,7 @@ import {
   TransactionUtils,
   WatcherUtils,
 } from '../../../src/utils/watcherUtils';
+import { NotEnoughFund } from '../../../src/errors/errors';
 
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { expect } from 'chai';
@@ -22,18 +23,23 @@ import spies from 'chai-spies';
 import sinon from 'sinon';
 import permitObj from './dataset/permitBox.json' assert { type: 'json' };
 import permitObj2 from './dataset/permitBox2.json' assert { type: 'json' };
+import permitObj3 from './dataset/permitBox3.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox.json' assert { type: 'json' };
 import WIDObj2 from './dataset/WIDBox2.json' assert { type: 'json' };
+import WIDObj3 from './dataset/WIDBox3.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
 import { rosenConfig } from '../../../src/config/rosenConfig';
+import { logger } from '../../../src/log/Logger';
 
 chai.use(spies);
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))];
 const permits2 = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj2))];
+const permits3 = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj3))];
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
 const WIDBox2 = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2));
+const WIDBox3 = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj3));
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 
@@ -63,6 +69,8 @@ observation.fromAddress =
   'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0';
 
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID);
+const boxCreationError =
+  "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets.";
 
 describe('Commitment creation transaction tests', () => {
   let watcherDb: WatcherDataBase,
@@ -166,6 +174,22 @@ describe('Commitment creation transaction tests', () => {
       expect(boxes.createWIDBox).to.have.called.once;
       expect(boxes.createWIDBox).to.have.called.with(111, WID, '1');
 
+      sinon.restore();
+    });
+
+    it('Should throw error while creating commitment transaction', async () => {
+      chai.spy.on(logger, 'warn');
+      sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
+      sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
+      await cc.createCommitmentTx(
+        WID,
+        observation,
+        commitment,
+        permits3,
+        WIDBox3,
+        []
+      );
+      expect(logger.warn).to.have.called.with(boxCreationError);
       sinon.restore();
     });
   });
