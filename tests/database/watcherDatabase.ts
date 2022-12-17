@@ -49,7 +49,7 @@ import {
   spentPlainBox,
 } from './mockedData';
 
-import { Constants } from '../../src/config/constants';
+import * as Constants from '../../src/config/constants';
 
 import {
   firstPermit,
@@ -188,7 +188,7 @@ describe('WatcherModel tests', () => {
      *    The function should return the ergo chain last block height
      */
     it('Should return the last block height on ergo', async () => {
-      const res = await DB.getLastBlockHeight(Constants.ergoNode);
+      const res = await DB.getLastBlockHeight(Constants.ERGO_WATCHER);
       expect(res).to.eql(ergoBlockEntity.height);
     });
 
@@ -198,7 +198,7 @@ describe('WatcherModel tests', () => {
      *    The function should return the cardano chain last block height
      */
     it('Should return the last block height on cardano', async () => {
-      const res = await DB.getLastBlockHeight(Constants.cardanoKoios);
+      const res = await DB.getLastBlockHeight(Constants.CARDANO_WATCHER);
       expect(res).to.eql(cardanoBlockEntity.height);
     });
 

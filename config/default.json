@@ -1,5 +1,5 @@
 {
-  "network": "ergo-node",
+  "network": "",
   "observation": {
     "confirmation": 15,
     "validThreshold": 720
@@ -7,11 +7,18 @@
   "minBoxValue": "1100000",
   "fee": "1100000",
   "cardano": {
-    "interval": 10,
-    "initialBlockHeight": 3797267,
-    "koios": {
-      "url": "https://testnet.koios.rest/api/v0",
-      "timeout": 10000
+    "type": "ogmios",
+    "initial": {
+      "slot": 0,
+      "hash": "initial-block-hash",
+      "height": 0
+    },
+    "interval": 0,
+    "timeout": 0,
+    "node": {
+      "ip": "ogmios-node-ip-address",
+      "port": 1337,
+      "url": "koios-url-in-used"
     }
   },
   "ergo": {
