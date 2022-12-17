@@ -71,7 +71,7 @@ export const scannerInit = async () => {
     } else if (cardanoConfig.koios) {
       const cardanoScanner = new CardanoKoiosScanner({
         dataSource: dataSource,
-        koiosUrl: cardanoConfig.koios?.url,
+        koiosUrl: cardanoConfig.koios.url,
         timeout: cardanoConfig.koios.timeout,
         initialHeight: cardanoConfig.koios.initialHeight,
       });
