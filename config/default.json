@@ -22,11 +22,15 @@
     }
   },
   "ergo": {
-    "explorerUrl": "changeme",
-    "nodeUrl": "changeme",
-    "explorerTimeout": 20000,
-    "nodeTimeout": 100000,
     "networkType": "Mainnet",
+    "explorer": {
+      "url": "change",
+      "timeout": 20000
+    },
+    "node": {
+      "url": "change",
+      "timeout": 100000
+    },
     "watcherSecretKey": "30ec2689d8920095a34193de5b313dc84b178fd827d568be96f85bba12b69db0",
     "scanner": {
       "interval": 180,
@@ -38,17 +42,10 @@
       "timeout": 10,
       "confirmation": 10,
       "interval": 180
-    },
-    "name": "ergo"
+    }
   },
-  "bridgeScanner": {
-    "interval": 10,
-    "initialBlockHeight": 249243,
-    "heightLimit": 100,
-    "cleanupConfirmation": 10
-  },
-  "rosenConfigPath": "src/config/",
-  "rosenTokensPath": "src/config/tokens.json",
+  "rosenConfigPath": "config/rosen/",
+  "rosenTokensPath": "config/rosen/tokens.json",
   "logs": {
     "path": "logs/",
     "level": "info",

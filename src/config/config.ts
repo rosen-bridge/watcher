@@ -11,12 +11,12 @@ const ERGO_INITIAL_HEIGHT: number | undefined = config.get?.(
   'ergo.scanner.initialBlockHeight'
 );
 const ERGO_INTERVAL: number | undefined = config.get?.('ergo.scanner.interval');
-const EXPLORER_URL: string | undefined = config.get?.('ergo.explorerUrl');
-const NODE_URL: string | undefined = config.get?.('ergo.nodeUrl');
+const EXPLORER_URL: string | undefined = config.get?.('ergo.explorer.url');
+const NODE_URL: string | undefined = config.get?.('ergo.node.url');
 const ERGO_EXPLORER_TIMEOUT: number | undefined = config.get?.(
-  'ergo.explorerTimeout'
+  'ergo.explorer.timeout'
 );
-const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.nodeTimeout');
+const ERGO_NODE_TIMEOUT: number | undefined = config.get?.('ergo.node.timeout');
 const NETWORK_WATCHER: string | undefined = config.get?.('network');
 const MIN_BOX_VALUE: string | undefined = config.get?.('minBoxValue');
 const FEE: string | undefined = config.get?.('fee');
