@@ -14,6 +14,7 @@ import {
   TransactionUtils,
   WatcherUtils,
 } from '../../../src/utils/watcherUtils';
+import { NotEnoughFund } from '../../../src/errors/errors';
 
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { expect } from 'chai';
@@ -21,21 +22,30 @@ import chai from 'chai';
 import spies from 'chai-spies';
 import sinon from 'sinon';
 import permitObj from './dataset/permitBox.json' assert { type: 'json' };
+import permitObj2 from './dataset/permitBox2.json' assert { type: 'json' };
+import permitObj3 from './dataset/permitBox3.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox.json' assert { type: 'json' };
 import WIDObj2 from './dataset/WIDBox2.json' assert { type: 'json' };
+import WIDObj3 from './dataset/WIDBox3.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
 import { rosenConfig } from '../../../src/config/rosenConfig';
+import { logger } from '../../../src/log/Logger';
 
 chai.use(spies);
 
 const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))];
+const permits2 = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj2))];
+const permits3 = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj3))];
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
 const WIDBox2 = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2));
+const WIDBox3 = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj3));
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 
 const userAddress = '9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9';
+const rwtID =
+  '469255244f7b12ea7d375ec94ec8d2838a98be0779c8231ece3529ae69c421db';
 const WID = 'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
 
 export const observation: ObservationEntity = new ObservationEntity();
@@ -59,6 +69,8 @@ observation.fromAddress =
   'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0';
 
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID);
+const boxCreationError =
+  'Transaction build failed due to ERG insufficiency in the watcher.';
 
 describe('Commitment creation transaction tests', () => {
   let watcherDb: WatcherDataBase,
@@ -79,29 +91,34 @@ describe('Commitment creation transaction tests', () => {
     txUtils = new TransactionUtils(watcherDb);
     cc = new CommitmentCreation(watcherUtils, txUtils, boxes);
   });
+
   afterEach(() => {
     chai.spy.restore(watcherUtils);
   });
 
   describe('createCommitmentTx', () => {
     /**
-     * Target: testing createCommitmentTx
+     * Target: testing createCommitmentTx without any extra tokens
      * Dependencies:
      *    WatcherUtils
      *    Boxes
      *    Transaction
      * Test Procedure:
-     *    1- Mocking environment
+     *    1- Mocking environment (RWTTokenId, getHeight and createAndSignTx)
      *    2- calling function
      *    3- validate used functions with inputs
      * Expected Output:
      *    The function should construct a valid commitment creation tx
      *    It should also sign and send it successfully
+     *    It should not call createWIDBox
      */
-    it('Should create, sign and send a commitment transaction', async () => {
+    it('Should create, sign and send a commitment transaction without any extra tokens', async () => {
       chai.spy.on(txUtils, 'submitTransaction', () => null);
       chai.spy.on(boxes, 'createCommitment');
       chai.spy.on(boxes, 'createPermit');
+      chai.spy.on(boxes, 'createWIDBox');
+      chai.spy.on(ErgoUtils, 'getExtraTokenCount');
+      sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);
       await cc.createCommitmentTx(
@@ -123,6 +140,56 @@ describe('Commitment creation transaction tests', () => {
         observation,
         TxType.COMMITMENT
       );
+      expect(ErgoUtils.getExtraTokenCount).to.have.called.once;
+      expect(boxes.createWIDBox).not.to.have.called;
+
+      sinon.restore();
+    });
+
+    /**
+     * Target: testing createCommitmentTx with one extra token
+     * Dependencies:
+     *    WatcherUtils
+     *    Boxes
+     *    Transaction
+     * Test Procedure:
+     *    1- Mocking environment (RWTTokenId and getHeight)
+     *    2- calling function
+     * Expected Output:
+     *   Should call createWIDBox with specified parameters
+     */
+    it('Should create, sign and send a commitment transaction with extra tokens', async () => {
+      chai.spy.on(boxes, 'createWIDBox');
+      sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
+      sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
+      await cc.createCommitmentTx(
+        WID,
+        observation,
+        commitment,
+        permits2,
+        WIDBox,
+        []
+      );
+
+      expect(boxes.createWIDBox).to.have.called.once;
+      expect(boxes.createWIDBox).to.have.called.with(111, WID, '1');
+
+      sinon.restore();
+    });
+
+    it('Should throw error while creating commitment transaction', async () => {
+      chai.spy.on(logger, 'warn');
+      sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
+      sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
+      await cc.createCommitmentTx(
+        WID,
+        observation,
+        commitment,
+        permits3,
+        WIDBox3,
+        []
+      );
+      expect(logger.warn).to.have.called.with(boxCreationError);
       sinon.restore();
     });
   });

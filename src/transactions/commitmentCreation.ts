@@ -78,11 +78,18 @@ export class CommitmentCreation {
     inputBoxes.add(WIDBox);
     permits.slice(1).forEach((permit) => inputBoxes.add(permit));
     feeBoxes.forEach((box) => inputBoxes.add(box));
+    const candidates = [outPermit, outCommitment];
+    const allowedTokens = [this.boxes.RWTTokenId, wasm.TokenId.from_str(WID)];
+    const extraTokens = ErgoUtils.getExtraTokenCount(inputBoxes, allowedTokens);
+    if (extraTokens > 0) {
+      const WIDBox = this.boxes.createWIDBox(height, WID, '1');
+      candidates.push(WIDBox);
+    }
     try {
       const signed = await ErgoUtils.createAndSignTx(
         config.secretKey,
         inputBoxes,
-        [outPermit, outCommitment],
+        candidates,
         height
       );
       await this.txUtils.submitTransaction(
@@ -97,6 +104,12 @@ export class CommitmentCreation {
       if (e instanceof boxCreationError) {
         logger.warn(
           "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."
+        );
+      }
+      if (e instanceof NotEnoughFund) {
+        // TODO: Send notification (https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/33)
+        logger.warn(
+          'Transaction build failed due to ERG insufficiency in the watcher.'
         );
       }
       logger.warn(
