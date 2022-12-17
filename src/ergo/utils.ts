@@ -3,7 +3,7 @@ import { ErgoBox } from 'ergo-lib-wasm-nodejs';
 import { Observation } from '../utils/interfaces';
 import { bigIntToUint8Array } from '../utils/utils';
 import { ErgoNetwork } from './network/ergoNetwork';
-import { boxCreationError } from '../errors/errors';
+import { boxCreationError, NotEnoughFund } from '../errors/errors';
 import { blake2b } from 'blakejs';
 import { Buffer } from 'buffer';
 import { Config } from '../config/config';
@@ -103,7 +103,7 @@ export class ErgoUtils {
       });
       return change.build();
     } else if (value < 0) {
-      throw new boxCreationError();
+      throw new NotEnoughFund();
     } else {
       Object.entries(tokens).forEach(([, value]) => {
         if (value !== BigInt(0)) {

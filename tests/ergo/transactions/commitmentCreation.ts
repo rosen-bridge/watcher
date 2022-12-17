@@ -70,7 +70,7 @@ observation.fromAddress =
 
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID);
 const boxCreationError =
-  "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets.";
+  'Transaction build failed due to ERG insufficiency in the watcher.';
 
 describe('Commitment creation transaction tests', () => {
   let watcherDb: WatcherDataBase,

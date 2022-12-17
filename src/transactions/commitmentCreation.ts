@@ -106,6 +106,12 @@ export class CommitmentCreation {
           "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."
         );
       }
+      if (e instanceof NotEnoughFund) {
+        // TODO: Send notification
+        logger.warn(
+          'Transaction build failed due to ERG insufficiency in the watcher.'
+        );
+      }
       logger.warn(
         `Skipping the commitment creation due to occurred error: ${e}`
       );
