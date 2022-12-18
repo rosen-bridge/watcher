@@ -1,13 +1,10 @@
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { hexStrToUint8Array, uint8ArrayToHex } from '../utils/utils';
-import { rosenConfigType } from '../config/rosenConfig';
-import { Config } from '../config/config';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
 import { logger } from '../log/Logger';
-
-const config = Config.getConfig();
+import { getConfig } from '../config/config';
 
 export type ApiResponse = {
   response: string;
@@ -38,7 +35,6 @@ export class Transaction {
    * @param boxes
    */
   static setup = async (
-    rosenConfig: rosenConfigType,
     userAddress: string,
     userSecret: wasm.SecretKey,
     boxes: Boxes
@@ -47,13 +43,15 @@ export class Transaction {
       Transaction.watcherPermitState = undefined;
       Transaction.watcherWID = '';
       Transaction.boxes = boxes;
-      Transaction.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee));
+      Transaction.fee = wasm.BoxValue.from_i64(
+        wasm.I64.from_str(getConfig().general.fee)
+      );
       Transaction.minBoxValue = wasm.BoxValue.from_i64(
-        wasm.I64.from_str(config.minBoxValue)
+        wasm.I64.from_str(getConfig().general.minBoxValue)
       );
       Transaction.userSecret = userSecret;
       Transaction.userAddress = wasm.Address.from_base58(userAddress);
-      Transaction.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
+      Transaction.RSN = wasm.TokenId.from_str(getConfig().rosen.RSN);
       Transaction.userAddressContract = wasm.Contract.pay_to_address(
         this.userAddress
       );
@@ -424,7 +422,7 @@ export class Transaction {
 
     const userOut = await Transaction.boxes.createUserBoxCandidate(
       height,
-      Transaction.userAddress.to_base58(config.networkPrefix),
+      Transaction.userAddress.to_base58(getConfig().general.networkPrefix),
       changeBoxValue,
       WIDToken,
       WIDTokenAmount,

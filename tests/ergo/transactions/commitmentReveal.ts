@@ -28,7 +28,6 @@ import {
   TransactionUtils,
   WatcherUtils,
 } from '../../../src/utils/watcherUtils';
-import { rosenConfig } from '../../../src/config/rosenConfig';
 import TransactionTest from '../../../src/api/TransactionTest';
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))];
@@ -52,10 +51,10 @@ describe('Commitment reveal transaction tests', () => {
     const ORM = await loadDataBase('commitmentReveal');
     await fillORM(ORM);
     dataBase = ORM.DB;
-    boxes = new Boxes(rosenConfig, dataBase);
+    boxes = new Boxes(dataBase);
     chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
     TransactionTest.reset();
-    await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+    await TransactionTest.setup(userAddress, secret1, boxes);
     transaction = TransactionTest.getInstance();
     watcherUtils = new WatcherUtils(dataBase, 0, 100);
     txUtils = new TransactionUtils(dataBase);

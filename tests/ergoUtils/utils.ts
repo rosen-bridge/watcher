@@ -1,7 +1,6 @@
 import { Observation } from '../../src/utils/interfaces';
 import { ErgoUtils, extractBoxes } from '../../src/ergo/utils';
 import { uint8ArrayToHex } from '../../src/utils/utils';
-import { Config } from '../../src/config/config';
 import { boxCreationError } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { Address } from 'ergo-lib-wasm-nodejs';
@@ -14,7 +13,6 @@ import spies from 'chai-spies';
 
 import boxesJson from './dataset/boxes.json' assert { type: 'json' };
 
-const config = Config.getConfig();
 initMockedAxios();
 chai.use(spies);
 
@@ -48,6 +46,7 @@ const userSecret = wasm.SecretKey.dlog_from_bytes(
   )
 );
 import repoObj from './dataset/repoBox.json' assert { type: 'json' };
+import { getConfig } from '../../src/config/config';
 
 const repoBox = JSON.stringify(repoObj);
 
@@ -71,8 +70,8 @@ describe('Testing ergoUtils', () => {
     const totalValue = extractBoxes(boxes)
       .map((box) => box.value().as_i64().as_num())
       .reduce((a, b) => a + b, 0);
-    const secret = config.secretKey;
-    const txFee = parseInt(config.fee);
+    const secret = getConfig().general.secretKey;
+    const txFee = parseInt(getConfig().general.fee);
     const contract = wasm.Contract.pay_to_address(secret.get_address());
 
     /**
@@ -195,7 +194,9 @@ describe('Testing ergoUtils', () => {
      */
     it('should sign an arbitrary transaction', async () => {
       initMockedAxios(0);
-      const outValue = BigInt(config.minBoxValue) + BigInt(config.fee);
+      const outValue =
+        BigInt(getConfig().general.minBoxValue) +
+        BigInt(getConfig().general.fee);
       const add = Address.from_base58(userAddress);
       const transactionInput = await ErgoNetwork.getErgBox(add, outValue);
       const inputBoxes = new wasm.ErgoBoxes(transactionInput[0]);
@@ -209,7 +210,7 @@ describe('Testing ergoUtils', () => {
 
       const outBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
         wasm.BoxValue.from_i64(
-          wasm.I64.from_str(config.minBoxValue.toString())
+          wasm.I64.from_str(getConfig().general.minBoxValue.toString())
         ),
         wasm.Contract.pay_to_address(add),
         height
@@ -231,7 +232,9 @@ describe('Testing ergoUtils', () => {
         boxSelection,
         txOutBox,
         height,
-        wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee.toString())),
+        wasm.BoxValue.from_i64(
+          wasm.I64.from_str(getConfig().general.fee.toString())
+        ),
         add
       );
 

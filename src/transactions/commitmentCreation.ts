@@ -1,8 +1,6 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
-import { rosenConfig } from '../config/rosenConfig';
-import { Config } from '../config/config';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { boxCreationError, NotEnoughFund, NoWID } from '../errors/errors';
 import { Transaction } from '../api/Transaction';
@@ -11,8 +9,7 @@ import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { logger } from '../log/Logger';
-
-const config = Config.getConfig();
+import { getConfig } from '../config/config';
 
 export class CommitmentCreation {
   watcherUtils: WatcherUtils;
@@ -49,7 +46,7 @@ export class CommitmentCreation {
     const height = await ErgoNetwork.getHeight();
     const permitHash = ErgoUtils.contractHash(
       wasm.Contract.pay_to_address(
-        wasm.Address.from_base58(rosenConfig.watcherPermitAddress)
+        wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)
       )
     );
     const outCommitment = this.boxes.createCommitment(
@@ -87,7 +84,7 @@ export class CommitmentCreation {
     }
     try {
       const signed = await ErgoUtils.createAndSignTx(
-        config.secretKey,
+        getConfig().general.secretKey,
         inputBoxes,
         candidates,
         height
@@ -147,7 +144,8 @@ export class CommitmentCreation {
           BigInt(WIDBox.value().as_i64().to_str());
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
         const requiredValue =
-          BigInt(config.fee) + BigInt(config.minBoxValue) * BigInt(3);
+          BigInt(getConfig().general.fee) +
+          BigInt(getConfig().general.minBoxValue) * BigInt(3);
         let feeBoxes: Array<wasm.ErgoBox> = [];
         if (totalValue < requiredValue) {
           logger.info(

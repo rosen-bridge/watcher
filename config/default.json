@@ -4,48 +4,53 @@
     "confirmation": 15,
     "validThreshold": 720
   },
-  "minBoxValue": "1100000",
-  "fee": "1100000",
   "cardano": {
-    "type": "ogmios",
+    "type": "",
     "initial": {
-      "slot": 0,
-      "hash": "initial-block-hash",
-      "height": 0
+      "slot": -1,
+      "hash": "",
+      "height": -1
     },
-    "interval": 0,
-    "timeout": 0,
-    "node": {
-      "ip": "ogmios-node-ip-address",
-      "port": 1337,
-      "url": "koios-url-in-used"
+    "koios": {
+      "interval": 10,
+      "timeout": 10,
+      "url": ""
+    },
+    "ogmios": {
+      "ip": "",
+      "port": 1337
     }
   },
   "ergo": {
-    "networkType": "Mainnet",
+    "network": "Mainnet",
+    "fee": "1100000",
+    "minBoxValue": "1100000",
+    "secret": "",
     "explorer": {
-      "url": "change",
-      "timeout": 20000
+      "url": "api.ergoplatform.com",
+      "timeout": 20
     },
     "node": {
-      "url": "change",
-      "timeout": 100000
-    },
-    "watcherSecretKey": "30ec2689d8920095a34193de5b313dc84b178fd827d568be96f85bba12b69db0",
-    "scanner": {
-      "interval": 180,
-      "initialBlockHeight": 848300
-    },
-    "commitmentCreationInterval": 180,
-    "commitmentRevealInterval": 180,
-    "transactions": {
+      "url": "",
       "timeout": 10,
-      "confirmation": 10,
-      "interval": 180
+      "initialHeight": 0
+    },
+    "transaction": {
+      "timeout": 10,
+      "confirmation": 10
+    },
+    "interval": {
+      "scanner": 180,
+      "transaction": 180,
+      "commitment": {
+        "creation": 180,
+        "reveal": 180
+      }
     }
   },
-  "rosenConfigPath": "config/rosen/",
-  "rosenTokensPath": "config/rosen/tokens.json",
+  "path": {
+    "addresses": "config/rosen"
+  },
   "logs": {
     "path": "logs/",
     "level": "info",

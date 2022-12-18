@@ -1,14 +1,10 @@
-import { Config } from './config';
 import fs from 'fs';
 import { RosenTokens } from '@rosen-bridge/tokens';
-
-const config = Config.getConfig();
 
 class TokensConfig {
   readonly tokens: RosenTokens;
 
-  constructor() {
-    const tokensPath = config.rosenTokensPath;
+  constructor(tokensPath: string) {
     if (!fs.existsSync(tokensPath)) {
       throw new Error(`tokensMap file with path ${tokensPath} doesn't exist`);
     } else {
@@ -18,6 +14,4 @@ class TokensConfig {
   }
 }
 
-const Tokens = new TokensConfig().tokens;
-
-export { Tokens };
+export { TokensConfig };

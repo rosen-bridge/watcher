@@ -1,9 +1,7 @@
-import { Config } from '../config/config';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { base64ToArrayBuffer } from '../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-
-const config = Config.getConfig();
+import { getConfig } from '../config/config';
 
 class Statistics {
   private static instance: Statistics;
@@ -58,7 +56,8 @@ class Statistics {
         base64ToArrayBuffer(permit.boxSerialized)
       );
       ergs +=
-        BigInt(box.value().as_i64().to_str()) - BigInt(config.minBoxValue);
+        BigInt(box.value().as_i64().to_str()) -
+        BigInt(getConfig().general.minBoxValue);
       for (let i = 0; i < box.tokens().len(); i++) {
         const token = box.tokens().get(i);
         const tokenId = token.id().to_str();

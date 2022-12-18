@@ -25,7 +25,6 @@ import spies from 'chai-spies';
 import { NoObservationStatus } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
-import { rosenConfig } from '../../src/config/rosenConfig';
 import TransactionTest from '../../src/api/TransactionTest';
 
 chai.use(spies);
@@ -41,8 +40,8 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
   beforeEach(async () => {
     const ORM = await loadDataBase('network-watcherUtils');
     dataBase = ORM.DB;
-    boxes = new Boxes(rosenConfig, dataBase);
-    await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+    boxes = new Boxes(dataBase);
+    await TransactionTest.setup(userAddress, secret1, boxes);
     transaction = TransactionTest.getInstance();
     watcherUtils = new WatcherUtils(dataBase, 0, 100);
     txUtils = new TransactionUtils(dataBase);
