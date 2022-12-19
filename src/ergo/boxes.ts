@@ -84,7 +84,10 @@ export class Boxes {
       const selectedBoxes = [];
       let totalRWT = BigInt(0);
       for (const box of permits) {
-        let unspentBox = await ErgoNetwork.trackMemPool(box);
+        let unspentBox = await ErgoNetwork.trackMemPool(
+          box,
+          this.rosenConfig.RWTId
+        );
         if (unspentBox)
           unspentBox = await this.dataBase.trackTxQueue(
             unspentBox,
@@ -104,7 +107,7 @@ export class Boxes {
     }
     const permitBoxes = await Promise.all(
       permits.map(async (permit) => {
-        return await ErgoNetwork.trackMemPool(permit);
+        return await ErgoNetwork.trackMemPool(permit, this.rosenConfig.RWTId);
       })
     );
     return this.uniqueTrackedBoxes(permitBoxes, this.rosenConfig.RWTId);
@@ -129,7 +132,7 @@ export class Boxes {
           'WID box is not found. Cannot sign the transaction. Please check that the box containing the WID is created after the scanner initial height.'
         );
       return await this.dataBase.trackTxQueue(
-        await ErgoNetwork.trackMemPool(WID),
+        await ErgoNetwork.trackMemPool(WID, wid),
         wid
       );
     } else
@@ -170,8 +173,9 @@ export class Boxes {
     return await ErgoNetwork.trackMemPool(
       await ErgoNetwork.getBoxWithToken(
         this.repoAddress,
-        this.repoNFTId.to_str()
-      )
+        this.rosenConfig.RepoNFT
+      ),
+      this.rosenConfig.RepoNFT
     );
   };
 

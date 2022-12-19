@@ -1,10 +1,12 @@
-type TxInput = {
+export type TxInput = {
   boxId: string;
   address: string;
+  assets: Array<Asset>;
 };
 
-type TxOutput = {
+export type TxOutput = {
   address: string;
+  assets: Array<Asset>;
 };
 
 export type ErgoTx = {
