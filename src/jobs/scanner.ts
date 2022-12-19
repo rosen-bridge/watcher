@@ -20,8 +20,6 @@ import * as Constants from '../config/constants';
 import { logger } from '../log/Logger';
 import { getConfig } from '../config/config';
 
-let scanner: ErgoNodeScanner;
-
 const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   try {
     await scanner.update();
@@ -42,7 +40,7 @@ export const scannerInit = async () => {
     initialHeight: config.ergoInitialHeight,
     dataSource: dataSource,
   };
-  scanner = new ErgoNodeScanner(ergoScannerConfig);
+  const scanner = new ErgoNodeScanner(ergoScannerConfig);
   scanningJob(config.ergoInterval, scanner).then(() => null);
   if (config.networkWatcher == Constants.ERGO_WATCHER) {
     const observationExtractor = new ErgoObservationExtractor(
