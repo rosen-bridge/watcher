@@ -1,5 +1,5 @@
 ---
-network: '' # which scanner network used in this watcher
+network: '' # which scanner network used in this watcher ergo/cardano
 observation:
   confirmation: 15 # number of blocks after creating event to generate its observation
   validThreshold: 720 # observation does not proceed after this block counts
@@ -12,7 +12,7 @@ cardano:
   koios:
     interval: 10 # koios scanning interval.(seconds)
     timeout: 10 # koios request timeout. (seconds)
-    url: 'https://api.koios.rest' # koios url
+    url: 'https://api.koios.rest/api/v0' # koios url
   ogmios:
     ip: '' # ogmios node ip address
     port: 1337 # ogmios port

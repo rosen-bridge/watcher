@@ -10,6 +10,14 @@ import path from 'path';
 
 const supportedNetworks: Array<string> = ['ergo', 'cardano'];
 
+interface ConfigType {
+  logger: LoggerConfig;
+  cardano: CardanoConfig;
+  general: Config;
+  rosen: RosenConfig;
+  token: RosenTokens;
+}
+
 const getNumber = (path: string) => {
   if (!config.has(path)) {
     throw new Error(`ImproperlyConfigured. ${path} not defined`);
@@ -120,6 +128,7 @@ class Config {
     this.observationConfirmation = getNumber('observation.confirmation');
     this.observationValidThreshold = getNumber('observation.validThreshold');
     // TODO verify bigint
+    // https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/34
     this.minBoxValue = getRequiredString('ergo.minBoxValue');
     this.fee = getRequiredString('ergo.fee');
     this.rosenConfigPath = getRequiredString('path.addresses');
@@ -181,14 +190,6 @@ class CardanoConfig {
       }
     }
   }
-}
-
-interface ConfigType {
-  logger: LoggerConfig;
-  cardano: CardanoConfig;
-  general: Config;
-  rosen: RosenConfig;
-  token: RosenTokens;
 }
 
 let internalConfig: ConfigType | undefined;
