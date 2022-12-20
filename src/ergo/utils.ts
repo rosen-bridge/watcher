@@ -6,11 +6,9 @@ import { ErgoNetwork } from './network/ergoNetwork';
 import { boxCreationError, NotEnoughFund } from '../errors/errors';
 import { blake2b } from 'blakejs';
 import { Buffer } from 'buffer';
-import { Config } from '../config/config';
+import { getConfig } from '../config/config';
 
-const config = Config.getConfig();
-
-const txFee = parseInt(config.fee);
+const txFee = parseInt(getConfig().general.fee);
 
 export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
   return Array(boxes.len())

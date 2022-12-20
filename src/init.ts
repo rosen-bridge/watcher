@@ -2,8 +2,6 @@ import express, { Router } from 'express';
 import addressRouter from './api/showAddress';
 import permitRouter from './api/permit';
 import { Transaction } from './api/Transaction';
-import { Config } from './config/config';
-import { rosenConfig } from './config/rosenConfig';
 import { Boxes } from './ergo/boxes';
 import { WatcherDataBase } from './database/models/watcherModel';
 import { dataSource } from '../config/dataSource';
@@ -16,8 +14,7 @@ import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
 import Statistics from './statistics/statistics';
 import { statisticsRouter } from './statistics/apis';
 import { logger } from './log/Logger';
-
-const config = Config.getConfig();
+import { getConfig } from './config/config';
 
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
@@ -31,11 +28,10 @@ const init = async () => {
     await dataSource.initialize();
     await dataSource.runMigrations();
     watcherDatabase = new WatcherDataBase(dataSource);
-    boxesObject = new Boxes(rosenConfig, watcherDatabase);
+    boxesObject = new Boxes(watcherDatabase);
     await Transaction.setup(
-      rosenConfig,
-      config.address,
-      config.secretKey,
+      getConfig().general.address,
+      getConfig().general.secretKey,
       boxesObject
     );
     Transaction.getInstance();
@@ -67,8 +63,8 @@ const init = async () => {
       await delay(10000);
       watcherUtils = new WatcherUtils(
         watcherDatabase,
-        config.observationConfirmation,
-        config.observationValidThreshold
+        getConfig().general.observationConfirmation,
+        getConfig().general.observationValidThreshold
       );
       const txUtils = new TransactionUtils(watcherDatabase);
       // Initiating watcher Transaction API

@@ -5,14 +5,11 @@ import { Buffer } from 'buffer';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { boxCreationError, NotEnoughFund } from '../errors/errors';
-import { Config } from '../config/config';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { logger } from '../log/Logger';
-
-const config = Config.getConfig();
-const txFee = BigInt(config.fee);
+import { getConfig } from '../config/config';
 
 export class CommitmentReveal {
   watcherUtils: WatcherUtils;
@@ -59,7 +56,7 @@ export class CommitmentReveal {
     const repoBox = await this.boxes.getRepoBox();
     try {
       const signed = await ErgoUtils.createAndSignTx(
-        config.secretKey,
+        getConfig().general.secretKey,
         inputBoxes,
         [triggerEvent],
         height,
@@ -133,7 +130,9 @@ export class CommitmentReveal {
               cBoxes,
               commitmentSet.observation,
               WIDs,
-              await this.boxes.getUserPaymentBox(txFee)
+              await this.boxes.getUserPaymentBox(
+                BigInt(getConfig().general.fee)
+              )
             );
           });
         }
