@@ -6,12 +6,12 @@ observation:
 cardano:
   type: '' # options: koios, ogmios
   initial:
-    slot: -1 # initial block global slot. only used for ogmios
-    hash: '' # initial block hash. only used for ogmios
-    height: -1 # initial height of scanning. only used for koios
+    slot: -1 # initial block global slot, only used for ogmios
+    hash: '' # initial block hash, only used for ogmios
+    height: -1 # initial height of scanning, only used for koios
   koios:
-    interval: 10 # koios scanning interval.(seconds)
-    timeout: 10 # koios request timeout. (seconds)
+    interval: 10 # koios scanning interval (in seconds)
+    timeout: 10 # koios request timeout (in seconds)
     url: 'https://api.koios.rest/api/v0' # koios url
   ogmios:
     ip: '' # ogmios node ip address
@@ -23,23 +23,23 @@ ergo:
   secret: '' # watcher secret.
   explorer:
     url: 'https://api.ergoplatform.com' # explorer url
-    timeout: 20 # explorer request timeout
+    timeout: 20 # explorer request timeout (in seconds)
   node:
     url: '' # node url
-    timeout: 10 # node request timeout
+    timeout: 10 # node request timeout (in seconds)
     initialHeight: 0 # scanner initial height
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
     confirmation: 10 # required block confirmations for sent transactions
   interval:
-    scanner: 180 # scanner update interval
-    transaction: 180 # processing transaction interval
+    scanner: 180 # scanner update interval (in seconds)
+    transaction: 180 # processing transaction interval (in seconds)
     commitment:
-      creation: 180 # commitment creation interval
-      reveal: 180 # commitment reveal interval
+      creation: 180 # commitment creation interval (in seconds)
+      reveal: 180 # commitment reveal interval (in seconds)
 path:
   addresses: config/rosen # addresses path
-#  tokens: config/rosen/tokens.json    # default tokens path.
+#  tokens: config/rosen/tokens.json # default tokens path.
 logs:
   path: logs/ # logs path
   level: info # logging level

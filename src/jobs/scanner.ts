@@ -36,7 +36,7 @@ export const scannerInit = async () => {
   const rosenConfig = allConfig.rosen;
   const ergoScannerConfig = {
     nodeUrl: config.nodeUrl,
-    timeout: config.nodeTimeout,
+    timeout: config.nodeTimeout * 1000,
     initialHeight: config.ergoInitialHeight,
     dataSource: dataSource,
   };

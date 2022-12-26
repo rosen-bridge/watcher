@@ -10,8 +10,7 @@ const transactionCheck = async () => {
   try {
     await transactionQueue.job();
   } catch (e) {
-    logger.warn('Transaction Queue Job failed with error:');
-    console.log(e.message);
+    logger.warn(`Transaction Queue Job failed with error: ${e.message}`);
   }
   setTimeout(
     transactionCheck,
