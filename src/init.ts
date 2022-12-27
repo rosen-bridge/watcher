@@ -7,7 +7,7 @@ import { WatcherDataBase } from './database/models/watcherModel';
 import { dataSource } from '../config/dataSource';
 import { scannerInit } from './jobs/scanner';
 import { creation } from './jobs/commitmentCreation';
-import { reveal } from './jobs/commitmetnReveal';
+import { reveal } from './jobs/commitmentReveal';
 import { transactionQueueJob } from './jobs/transactionQueue';
 import { delay } from './utils/utils';
 import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
@@ -25,7 +25,7 @@ let watcherUtils: WatcherUtils;
  */
 const init = async () => {
   const generateTransactionObject = async () => {
-    logger.debug('Initializting datasources and APIs...');
+    logger.debug('Initializing data sources and APIs...');
     await dataSource.initialize();
     logger.debug('Data sources had been initialized.');
     await dataSource.runMigrations();
@@ -38,7 +38,7 @@ const init = async () => {
       boxesObject
     );
     Transaction.getInstance();
-    logger.debug('APIs initiailized successfully.');
+    logger.debug('APIs initialized successfully.');
   };
 
   const initExpress = () => {
@@ -58,7 +58,7 @@ const init = async () => {
 
   generateTransactionObject()
     .then(async () => {
-      logger.debug('Initilizing routes...');
+      logger.debug('Initializing routes...');
       initExpress();
       watcherDatabase = new WatcherDataBase(dataSource);
       logger.debug('Initializing scanners and extractors...');
@@ -71,7 +71,7 @@ const init = async () => {
         getConfig().general.observationValidThreshold
       );
       const txUtils = new TransactionUtils(watcherDatabase);
-      logger.debug('Initializing statistic APIs...');
+      logger.debug('Initializing statistic object...');
       Statistics.setup(watcherDatabase, Transaction.watcherWID);
       Statistics.getInstance();
 
@@ -82,7 +82,7 @@ const init = async () => {
       creation(watcherUtils, txUtils, boxesObject);
       // Running trigger event creation thread
       reveal(watcherUtils, txUtils, boxesObject);
-      logger.debug('Service initilization finished successfully.');
+      logger.debug('Service initialization finished successfully.');
     })
     .catch((e) => {
       logger.error(`An error occurred while initializing datasource: ${e}`);
