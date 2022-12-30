@@ -78,7 +78,9 @@ const init = async () => {
       reveal(watcherUtils, txUtils, boxesObject);
     })
     .catch((e) => {
-      logger.error(`An error occurred while initializing datasource: ${e}`);
+      logger.error(
+        `An error occurred while initializing datasource: ${e.stack}`
+      );
     });
 };
 

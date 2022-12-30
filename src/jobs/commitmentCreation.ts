@@ -11,8 +11,7 @@ const creationJob = async () => {
   try {
     await commitmentCreatorObj.job();
   } catch (e) {
-    logger.warn('Creation Job failed with error:');
-    console.log(e.message);
+    logger.warn(`Creation Job failed with error: ${e.stack}`);
   }
   setTimeout(
     creationJob,

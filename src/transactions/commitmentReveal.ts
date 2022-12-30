@@ -71,7 +71,7 @@ export class CommitmentReveal {
         );
       }
       logger.warn(
-        `Skipping the event trigger creation due to occurred error: ${e}`
+        `Skipping the event trigger creation due to occurred error: ${e.stack}`
       );
     }
   };
@@ -138,7 +138,7 @@ export class CommitmentReveal {
         }
       } catch (e) {
         logger.warn(
-          `Skipping the event trigger creation due to occurred error: ${e}`
+          `Skipping the event trigger creation due to occurred error: ${e.stack}`
         );
       }
     }

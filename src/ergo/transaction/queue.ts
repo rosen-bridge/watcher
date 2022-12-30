@@ -129,7 +129,9 @@ export class Queue {
       try {
         await this.processTx(tx, currentHeight);
       } catch (e) {
-        logger.warn(`An error occurred while processing tx [${tx.txId}]: ${e}`);
+        logger.warn(
+          `An error occurred while processing tx [${tx.txId}]: ${e.stack}`
+        );
       }
     }
     logger.info('Transactions check job is done', { count: txs.length });

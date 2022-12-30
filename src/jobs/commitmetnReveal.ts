@@ -10,8 +10,7 @@ const revealJob = async () => {
   try {
     await commitmentRevealingObj.job();
   } catch (e) {
-    logger.warn('Reveal Job failed with error:');
-    console.log(e.message);
+    logger.warn(`Reveal Job failed with error: ${e.stack}`);
   }
   setTimeout(revealJob, getConfig().general.commitmentRevealInterval * 1000);
 };
