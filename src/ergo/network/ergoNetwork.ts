@@ -64,7 +64,7 @@ export class ErgoNetwork {
       .then((response) => ({ txId: response.data as string, success: true }))
       .catch((exp) => {
         logger.info(
-          `An error occurred while sending transaction to Node: ${exp.message}`
+          `An error occurred while sending transaction to Node: ${exp}`
         );
         return { success: false };
       });
