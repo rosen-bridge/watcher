@@ -9,7 +9,7 @@ import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
-import { observationScannerName } from './createScanner';
+import { createScanner } from './createScanner';
 
 class WatcherUtils {
   dataBase: WatcherDataBase;
@@ -43,7 +43,7 @@ class WatcherUtils {
     // Check observation time out
     if (observationStatus.status == TxStatus.TIMED_OUT) return false;
     const currentHeight = await this.dataBase.getLastBlockHeight(
-      observationScannerName
+      createScanner.observationScannerName
     );
     if (currentHeight - observation.height > this.observationValidThreshold) {
       await this.dataBase.updateObservationTxStatus(
@@ -103,7 +103,7 @@ class WatcherUtils {
    */
   allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
     const height = await this.dataBase.getLastBlockHeight(
-      observationScannerName
+      createScanner.observationScannerName
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
@@ -129,7 +129,7 @@ class WatcherUtils {
   allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
     const readyCommitments: Array<CommitmentSet> = [];
     const height = await this.dataBase.getLastBlockHeight(
-      observationScannerName
+      createScanner.observationScannerName
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
