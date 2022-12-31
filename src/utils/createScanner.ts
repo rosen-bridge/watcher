@@ -10,17 +10,17 @@ import {
   CardanoKoiosObservationExtractor,
   CardanoOgmiosObservationExtractor,
 } from '@rosen-bridge/observation-extractor';
-
-import { getConfig } from '../config/config';
-import { dataSource } from '../../config/dataSource';
-import { logger } from '../log/Logger';
-import * as Constants from '../config/constants';
 import {
   CommitmentExtractor,
   PermitExtractor,
   EventTriggerExtractor,
 } from '@rosen-bridge/watcher-data-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
+
+import { getConfig } from '../config/config';
+import { dataSource } from '../../config/dataSource';
+import { logger } from '../log/Logger';
+import * as Constants from '../config/constants';
 
 const allConfig = getConfig();
 const config = allConfig.general;
@@ -34,7 +34,7 @@ class CreateScanner {
   constructor() {
     this.createErgoScanner();
     if (config.networkWatcher == Constants.CARDANO_WATCHER)
-      this, this.createCardanoScanner();
+      this.createCardanoScanner();
   }
 
   private createErgoScanner = () => {
