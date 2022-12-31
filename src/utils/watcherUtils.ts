@@ -7,10 +7,8 @@ import { Buffer } from 'buffer';
 import { NoObservationStatus } from '../errors/errors';
 import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
-import { Config } from '../config/config';
 import { Transaction } from '../api/Transaction';
-
-const config = Config.getConfig();
+import { getConfig } from '../config/config';
 
 class WatcherUtils {
   dataBase: WatcherDataBase;
@@ -44,7 +42,7 @@ class WatcherUtils {
     // Check observation time out
     if (observationStatus.status == TxStatus.TIMED_OUT) return false;
     const currentHeight = await this.dataBase.getLastBlockHeight(
-      config.networkWatcher
+      getConfig().general.networkWatcher
     );
     if (currentHeight - observation.height > this.observationValidThreshold) {
       await this.dataBase.updateObservationTxStatus(
@@ -86,7 +84,10 @@ class WatcherUtils {
     );
     if (eventTrigger) {
       const height = await ErgoNetwork.getHeight();
-      if (height - eventTrigger.height > config.transactionConfirmation)
+      if (
+        height - eventTrigger.height >
+        getConfig().general.transactionConfirmation
+      )
         await this.dataBase.updateObservationTxStatus(
           observation,
           TxStatus.REVEALED
@@ -101,7 +102,7 @@ class WatcherUtils {
    */
   allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
     const height = await this.dataBase.getLastBlockHeight(
-      config.networkWatcher
+      getConfig().general.networkWatcher
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
@@ -127,7 +128,7 @@ class WatcherUtils {
   allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
     const readyCommitments: Array<CommitmentSet> = [];
     const height = await this.dataBase.getLastBlockHeight(
-      config.networkWatcher
+      getConfig().general.networkWatcher
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,

@@ -2,8 +2,6 @@ import express, { Router } from 'express';
 import addressRouter from './api/showAddress';
 import permitRouter from './api/permit';
 import { Transaction } from './api/Transaction';
-import { Config } from './config/config';
-import { rosenConfig } from './config/rosenConfig';
 import { Boxes } from './ergo/boxes';
 import { WatcherDataBase } from './database/models/watcherModel';
 import { dataSource } from '../config/dataSource';
@@ -16,8 +14,7 @@ import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
 import Statistics from './statistics/statistics';
 import { statisticsRouter } from './statistics/apis';
 import { logger } from './log/Logger';
-
-const config = Config.getConfig();
+import { getConfig } from './config/config';
 
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
@@ -28,17 +25,20 @@ let watcherUtils: WatcherUtils;
  */
 const init = async () => {
   const generateTransactionObject = async () => {
+    logger.debug('Initializting datasources and APIs...');
     await dataSource.initialize();
+    logger.debug('Data sources had been initialized.');
     await dataSource.runMigrations();
+    logger.debug('Migrations done successfully.');
     watcherDatabase = new WatcherDataBase(dataSource);
-    boxesObject = new Boxes(rosenConfig, watcherDatabase);
+    boxesObject = new Boxes(watcherDatabase);
     await Transaction.setup(
-      rosenConfig,
-      config.address,
-      config.secretKey,
+      getConfig().general.address,
+      getConfig().general.secretKey,
       boxesObject
     );
     Transaction.getInstance();
+    logger.debug('APIs initiailized successfully.');
   };
 
   const initExpress = () => {
@@ -58,28 +58,31 @@ const init = async () => {
 
   generateTransactionObject()
     .then(async () => {
+      logger.debug('Initilizing routes...');
       initExpress();
-      // Initializing database
       watcherDatabase = new WatcherDataBase(dataSource);
-      // Running network scanner thread
+      logger.debug('Initializing scanners and extractors...');
       scannerInit();
 
       await delay(10000);
       watcherUtils = new WatcherUtils(
         watcherDatabase,
-        config.observationConfirmation,
-        config.observationValidThreshold
+        getConfig().general.observationConfirmation,
+        getConfig().general.observationValidThreshold
       );
       const txUtils = new TransactionUtils(watcherDatabase);
-      // Initiating watcher Transaction API
+      logger.debug('Initializing statistic APIs...');
       Statistics.setup(watcherDatabase, Transaction.watcherWID);
       Statistics.getInstance();
+
+      logger.debug('Initializing job threads...');
       // Running transaction checking thread
       transactionQueueJob(watcherDatabase, watcherUtils);
       // Running commitment creation thread
       creation(watcherUtils, txUtils, boxesObject);
       // Running trigger event creation thread
       reveal(watcherUtils, txUtils, boxesObject);
+      logger.debug('Service initilization finished successfully.');
     })
     .catch((e) => {
       logger.error(`An error occurred while initializing datasource: ${e}`);

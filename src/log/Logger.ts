@@ -1,16 +1,16 @@
 import winston, { format } from 'winston';
 import 'winston-daily-rotate-file';
-import { Config } from '../config/config';
 import printf = format.printf;
+import { getConfig } from '../config/config';
 
 class Logger {
   logger: winston.Logger;
-  private readonly logsPath = Config.getConfig().logPath;
+  private readonly logsPath = getConfig().logger.path;
   private readonly logOptions = {
     datePattern: 'YYYY-MM-DD-HH',
     zippedArchive: true,
-    maxSize: Config.getConfig().logMaxSize,
-    maxFiles: Config.getConfig().logMaxFiles,
+    maxSize: getConfig().logger.maxSize,
+    maxFiles: getConfig().logger.maxFiles,
   };
   private readonly logFormat = printf(({ level, message, timestamp }) => {
     return `${timestamp} ${level} ${message}`;
@@ -21,7 +21,7 @@ class Logger {
     info: 2,
     debug: 3,
   };
-  private readonly logLevel = Config.getConfig().logLevel;
+  private readonly logLevel = getConfig().logger.level;
   constructor() {
     this.logger = winston.createLogger({
       levels: this.logLevels,

@@ -41,7 +41,7 @@ npm run start
 
 ### Config
 
-You can find the project configs here. In this config, you should set what network you're going to observe (set watcher.network) and what's your secret key as the watcher (set ergo.watcherSecretKey).
+You can find the project configs here. In this config, you should set what network you're going to observe (set watcher.network) and what's your secret key as the watcher (set ergo.secret).
 
 **Note:** If you didn't have a secret key, once you start the project, a random secret will be generated; you can use this secret that appears in the logs.
 

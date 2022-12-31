@@ -24,12 +24,11 @@ import chaiPromise from 'chai-as-promised';
 import permitObj from './dataset/permitBox.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
-import { Config } from '../../src/config/config';
-import { rosenConfig } from '../../src/config/rosenConfig';
 import { mockedResponseBody } from '../ergo/objects/mockedResponseBody';
 import { beforeEach } from 'mocha';
+import { getConfig } from '../../src/config/config';
 
-const config = Config.getConfig();
+const config = getConfig().general;
 const permitJson = JsonBI.stringify(permitObj);
 const WIDJson = JsonBI.stringify(WIDObj);
 const plainJson = JsonBI.stringify(plainObj);
@@ -86,7 +85,7 @@ describe('Testing Box Creation', () => {
     const ORM = await loadDataBase('boxes');
     await fillORM(ORM);
     DB = ORM.DB;
-    boxes = new Boxes(rosenConfig, DB);
+    boxes = new Boxes(DB);
     const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool');
     mempoolTrack.onCall(1).resolves(wasm.ErgoBox.from_json(WIDJson));
     mempoolTrack.onCall(2).resolves(wasm.ErgoBox.from_json(plainJson));
@@ -266,7 +265,7 @@ describe('Testing Box Creation', () => {
       chai.spy.on(ErgoNetwork, 'trackMemPool', () =>
         wasm.ErgoBox.from_json(plainJson)
       );
-      const boxes = new Boxes(rosenConfig, DB);
+      const boxes = new Boxes(DB);
       await expect(boxes.getUserPaymentBox(value * BigInt(2))).to.rejectedWith(
         NotEnoughFund
       );
@@ -286,7 +285,7 @@ describe('Testing Box Creation', () => {
      */
     it('throws an error not covering the required amount', async () => {
       chai.spy.on(ErgoNetwork, 'trackMemPool', () => undefined);
-      const boxes = new Boxes(rosenConfig, DB);
+      const boxes = new Boxes(DB);
       await expect(boxes.getUserPaymentBox(value)).to.rejectedWith(
         NotEnoughFund
       );
@@ -371,7 +370,7 @@ describe('Testing Box Creation', () => {
         RWTCount.toString()
       );
       expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(
-        rosenConfig.RWTId
+        getConfig().rosen.RWTId
       );
       expect(
         permitBox.register_value(4)?.to_coll_coll_byte().length

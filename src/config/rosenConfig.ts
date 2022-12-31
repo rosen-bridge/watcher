@@ -1,9 +1,7 @@
 import fs from 'fs';
-import { Config } from './config';
+import path from 'path';
 
-const ergoConfig = Config.getConfig();
-
-type rosenConfigType = {
+type RosenConfigType = {
   RSN: string;
   guardNFT: string;
   cleanupNFT: string;
@@ -32,8 +30,8 @@ class RosenConfig {
   readonly RepoNFT: string;
   readonly RWTId: string;
 
-  constructor(network: string, networkType: string) {
-    const rosenConfigPath = this.getAddress(network, networkType);
+  constructor(network: string, networkType: string, configRoot: string) {
+    const rosenConfigPath = this.getAddress(network, networkType, configRoot);
     if (!fs.existsSync(rosenConfigPath)) {
       throw new Error(
         `rosenConfig file with path ${rosenConfigPath} doesn't exist`
@@ -56,15 +54,9 @@ class RosenConfig {
     }
   }
 
-  getAddress = (network: string, networkType: string) => {
-    return (
-      ergoConfig.rosenConfigPath + `contracts-${network}-${networkType}.json`
-    );
+  getAddress = (network: string, networkType: string, configRoot: string) => {
+    return path.join(configRoot, `contracts-${network}-${networkType}.json`);
   };
 }
 
-const network = ergoConfig.networkWatcher.split('-')[0].toLowerCase();
-const networkType = ergoConfig.networkType.toLowerCase();
-const rosenConfig: rosenConfigType = new RosenConfig(network, networkType);
-
-export { RosenConfig, rosenConfigType, rosenConfig };
+export { RosenConfig, RosenConfigType };

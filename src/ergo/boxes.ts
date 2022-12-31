@@ -1,7 +1,5 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { boxHaveAsset, decodeSerializedBox, ErgoUtils } from './utils';
-import { Config } from '../config/config';
-import { rosenConfigType } from '../config/rosenConfig';
 import { bigIntToUint8Array, hexStrToUint8Array } from '../utils/utils';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { Observation } from '../utils/interfaces';
@@ -9,8 +7,7 @@ import { ErgoNetwork } from './network/ergoNetwork';
 import { Buffer } from 'buffer';
 import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { NotEnoughFund, NoWID } from '../errors/errors';
-
-const config = Config.getConfig();
+import { getConfig } from '../config/config';
 
 export class Boxes {
   dataBase: WatcherDataBase;
@@ -23,9 +20,9 @@ export class Boxes {
   userAddressContract: wasm.Contract;
   repoAddressContract: wasm.Contract;
   repoAddress: wasm.Address;
-  rosenConfig: rosenConfigType;
 
-  constructor(rosenConfig: rosenConfigType, db: WatcherDataBase) {
+  constructor(db: WatcherDataBase) {
+    const rosenConfig = getConfig().rosen;
     this.dataBase = db;
     this.repoNFTId = wasm.TokenId.from_str(rosenConfig.RepoNFT);
     this.RWTTokenId = wasm.TokenId.from_str(rosenConfig.RWTId);
@@ -36,19 +33,21 @@ export class Boxes {
     this.watcherPermitContract =
       wasm.Contract.pay_to_address(watcherPermitAddress);
     this.minBoxValue = wasm.BoxValue.from_i64(
-      wasm.I64.from_str(config.minBoxValue)
+      wasm.I64.from_str(getConfig().general.minBoxValue)
     );
-    const userAddress = wasm.Address.from_base58(config.address);
+    const userAddress = wasm.Address.from_base58(getConfig().general.address);
     this.userAddressContract = wasm.Contract.pay_to_address(userAddress);
     this.repoAddress = wasm.Address.from_base58(rosenConfig.RWTRepoAddress);
     this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
-    this.fee = wasm.BoxValue.from_i64(wasm.I64.from_str(config.fee));
-    this.rosenConfig = rosenConfig;
+    this.fee = wasm.BoxValue.from_i64(
+      wasm.I64.from_str(getConfig().general.fee)
+    );
   }
 
   /**
    * Returns unique boxes after tracking the spent boxes in the queue
    * @param boxes boxes needed to be tracked in the transaction queue
+   * @param token
    */
   uniqueTrackedBoxes = async (
     boxes: Array<wasm.ErgoBox>,
@@ -84,14 +83,11 @@ export class Boxes {
       const selectedBoxes = [];
       let totalRWT = BigInt(0);
       for (const box of permits) {
-        let unspentBox = await ErgoNetwork.trackMemPool(
-          box,
-          this.rosenConfig.RWTId
-        );
+        let unspentBox = await ErgoNetwork.trackMemPool(box);
         if (unspentBox)
           unspentBox = await this.dataBase.trackTxQueue(
             unspentBox,
-            this.rosenConfig.RWTId
+            getConfig().rosen.RWTId
           );
         if (unspentBox) {
           totalRWT =
@@ -107,10 +103,10 @@ export class Boxes {
     }
     const permitBoxes = await Promise.all(
       permits.map(async (permit) => {
-        return await ErgoNetwork.trackMemPool(permit, this.rosenConfig.RWTId);
+        return await ErgoNetwork.trackMemPool(permit);
       })
     );
-    return this.uniqueTrackedBoxes(permitBoxes, this.rosenConfig.RWTId);
+    return this.uniqueTrackedBoxes(permitBoxes, getConfig().rosen.RWTId);
   };
 
   /**
@@ -132,7 +128,7 @@ export class Boxes {
           'WID box is not found. Cannot sign the transaction. Please check that the box containing the WID is created after the scanner initial height.'
         );
       return await this.dataBase.trackTxQueue(
-        await ErgoNetwork.trackMemPool(WID, wid),
+        await ErgoNetwork.trackMemPool(WID),
         wid
       );
     } else
@@ -173,9 +169,8 @@ export class Boxes {
     return await ErgoNetwork.trackMemPool(
       await ErgoNetwork.getBoxWithToken(
         this.repoAddress,
-        this.rosenConfig.RepoNFT
-      ),
-      this.rosenConfig.RepoNFT
+        this.repoNFTId.to_str()
+      )
     );
   };
 
@@ -225,7 +220,7 @@ export class Boxes {
     permitScriptHash: Uint8Array
   ): wasm.ErgoBoxCandidate => {
     const contract = wasm.Contract.pay_to_address(
-      wasm.Address.from_base58(this.rosenConfig.commitmentAddress)
+      wasm.Address.from_base58(getConfig().rosen.commitmentAddress)
     );
     const builder = new wasm.ErgoBoxCandidateBuilder(
       this.minBoxValue,
@@ -300,7 +295,7 @@ export class Boxes {
     const builder = new wasm.ErgoBoxCandidateBuilder(
       wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
       wasm.Contract.pay_to_address(
-        wasm.Address.from_base58(this.rosenConfig.eventTriggerAddress)
+        wasm.Address.from_base58(getConfig().rosen.eventTriggerAddress)
       ),
       height
     );
@@ -325,7 +320,7 @@ export class Boxes {
 
     const permitHash = ErgoUtils.contractHash(
       wasm.Contract.pay_to_address(
-        wasm.Address.from_base58(this.rosenConfig.watcherPermitAddress)
+        wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)
       )
     );
     builder.set_register_value(4, wasm.Constant.from_coll_coll_byte(WIDs));
@@ -398,7 +393,9 @@ export class Boxes {
       this.minBoxValue,
       contract
         ? contract
-        : wasm.Contract.pay_to_address(config.secretKey.get_address()),
+        : wasm.Contract.pay_to_address(
+            getConfig().general.secretKey.get_address()
+          ),
       height
     );
     WIDBuilder.add_token(

@@ -2,12 +2,10 @@ import { TxEntity, TxType } from '../../database/entities/txEntity';
 import { ErgoNetwork } from '../network/ergoNetwork';
 import { WatcherDataBase } from '../../database/models/watcherModel';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { Config } from '../../config/config';
 import { base64ToArrayBuffer } from '../../utils/utils';
 import { WatcherUtils } from '../../utils/watcherUtils';
 import { logger } from '../../log/Logger';
-
-const config = Config.getConfig();
+import { getConfig } from '../../config/config';
 
 export class Queue {
   database: WatcherDataBase;
@@ -53,7 +51,10 @@ export class Queue {
    * @param currentHeight
    */
   private resetTxStatus = async (tx: TxEntity, currentHeight: number) => {
-    if (currentHeight - tx.updateBlock > config.transactionRemovingTimeout) {
+    if (
+      currentHeight - tx.updateBlock >
+      getConfig().general.transactionRemovingTimeout
+    ) {
       await this.database.downgradeObservationTxStatus(tx.observation);
       await this.database.removeTx(tx);
       logger.info(
@@ -88,7 +89,7 @@ export class Queue {
           );
           this.resetTxStatus(tx, currentHeight);
         } else {
-          console.warn(`Error occurred while sending tx [${tx.id}]`);
+          logger.warn(`Error occurred while sending tx [${tx.id}]`);
         }
       }
     } else {
@@ -109,7 +110,7 @@ export class Queue {
     logger.info(`Tx [${tx.txId}] confirmation: [${txStatus}]`);
     if (txStatus === -1) {
       await this.processUnConfirmedTx(tx, currentHeight);
-    } else if (txStatus > config.transactionConfirmation) {
+    } else if (txStatus > getConfig().general.transactionConfirmation) {
       await this.processConfirmedTx(tx);
     } else {
       await this.database.setTxUpdateHeight(tx, currentHeight);

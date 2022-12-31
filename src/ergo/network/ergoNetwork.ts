@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as wasm from 'ergo-lib-wasm-nodejs';
+
 import {
   AddressBoxes,
   ErgoTx,
@@ -8,23 +9,19 @@ import {
   TxOutput,
 } from './types';
 import { JsonBI } from './parser';
-import { Config } from '../../config/config';
 import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
 import { logger } from '../../log/Logger';
-import { WatcherDataBase } from '../../database/models/watcherModel';
-import { Asset } from '@rosen-bridge/scanner/dist/scanner/ergo/network/types';
-
-const config = Config.getConfig();
+import { getConfig } from '../../config/config';
 
 export const explorerApi = axios.create({
-  baseURL: config.explorerUrl,
-  timeout: config.nodeTimeout,
+  baseURL: getConfig().general.explorerUrl,
+  timeout: getConfig().general.explorerTimeout * 1000,
 });
 
 export const nodeClient = axios.create({
-  baseURL: config.nodeUrl,
-  timeout: config.explorerTimeout,
+  baseURL: getConfig().general.nodeUrl,
+  timeout: getConfig().general.nodeTimeout * 1000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -220,7 +217,7 @@ export class ErgoNetwork {
     };
     const address: string = ergoTreeToBase58Address(
       box.ergo_tree(),
-      config.networkPrefix
+      getConfig().general.networkPrefix
     );
     const memPoolBoxesMap = new Map<string, wasm.ErgoBox | undefined>();
     const transactions = await this.getMemPoolTxForAddress(address).then(

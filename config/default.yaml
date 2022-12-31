@@ -1,0 +1,47 @@
+---
+network: '' # which scanner network used in this watcher ergo/cardano
+observation:
+  confirmation: 15 # number of required block confirmations to create the commitment after observing an event
+  validThreshold: 720 # observations that have not been triggered won't be processed after this period (in blocks)
+cardano:
+  type: '' # options: koios, ogmios
+  initial:
+    slot: -1 # initial block global slot, only used for ogmios
+    hash: '' # initial block hash, only used for ogmios
+    height: -1 # initial height of scanning, only used for koios
+  koios:
+    interval: 10 # koios scanning interval (in seconds)
+    timeout: 10 # koios request timeout (in seconds)
+    url: 'https://api.koios.rest/api/v0' # koios url
+  ogmios:
+    ip: '' # ogmios node ip address
+    port: 1337 # ogmios port
+ergo:
+  network: 'Mainnet' # ergo network type. testnet or mainnet
+  fee: '1100000' # transaction fee
+  minBoxValue: '1100000' # minimum box value
+  secret: '' # watcher secret.
+  explorer:
+    url: 'https://api.ergoplatform.com' # explorer url
+    timeout: 20 # explorer request timeout (in seconds)
+  node:
+    url: '' # node url
+    timeout: 10 # node request timeout (in seconds)
+    initialHeight: 0 # scanner initial height
+  transaction:
+    timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
+    confirmation: 10 # required block confirmations for sent transactions
+  interval:
+    scanner: 180 # scanner update interval (in seconds)
+    transaction: 180 # processing transaction interval (in seconds)
+    commitment:
+      creation: 180 # commitment creation interval (in seconds)
+      reveal: 180 # commitment reveal interval (in seconds)
+path:
+  addresses: config/rosen # addresses path
+#  tokens: config/rosen/tokens.json # default tokens path.
+logs:
+  path: logs/ # logs path
+  level: info # logging level
+  maxSize: 20m # maximum file size for rotation
+  maxFiles: 14d # maximum rotated files available

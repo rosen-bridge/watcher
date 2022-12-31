@@ -29,7 +29,6 @@ import WIDObj2 from './dataset/WIDBox2.json' assert { type: 'json' };
 import WIDObj3 from './dataset/WIDBox3.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
-import { rosenConfig } from '../../../src/config/rosenConfig';
 import { logger } from '../../../src/log/Logger';
 
 chai.use(spies);
@@ -83,9 +82,9 @@ describe('Commitment creation transaction tests', () => {
     const ORM = await loadDataBase('commitmentCreation');
     await fillORM(ORM);
     watcherDb = ORM.DB;
-    boxes = new Boxes(rosenConfig, watcherDb);
+    boxes = new Boxes(watcherDb);
     chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
-    await Transaction.setup(rosenConfig, userAddress, secret1, boxes);
+    await Transaction.setup(userAddress, secret1, boxes);
     transaction = Transaction.getInstance();
     watcherUtils = new WatcherUtils(watcherDb, 0, 100);
     txUtils = new TransactionUtils(watcherDb);

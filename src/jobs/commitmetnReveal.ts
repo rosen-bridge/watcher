@@ -1,20 +1,18 @@
-import { Config } from '../config/config';
 import { CommitmentReveal } from '../transactions/commitmentReveal';
 import { Boxes } from '../ergo/boxes';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { logger } from '../log/Logger';
+import { getConfig } from '../config/config';
 
-const config = Config.getConfig();
 let commitmentRevealingObj: CommitmentReveal;
 
 const revealJob = async () => {
   try {
     await commitmentRevealingObj.job();
   } catch (e) {
-    logger.warn('Reveal Job failed with error:');
-    console.log(e.message);
+    logger.warn(`Reveal Job failed with error: ${e.message}`);
   }
-  setTimeout(revealJob, config.commitmentRevealInterval * 1000);
+  setTimeout(revealJob, getConfig().general.commitmentRevealInterval * 1000);
 };
 
 export const reveal = (

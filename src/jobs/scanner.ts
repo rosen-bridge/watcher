@@ -1,11 +1,9 @@
-import { CardanoConfig } from '../config/config';
 import {
   ErgoNodeScanner,
   CardanoKoiosScanner,
   CardanoOgmiosScanner,
   GeneralScanner,
 } from '@rosen-bridge/scanner';
-import { Config } from '../config/config';
 import { dataSource } from '../../config/dataSource';
 import {
   ErgoObservationExtractor,
@@ -17,14 +15,10 @@ import {
   PermitExtractor,
   EventTriggerExtractor,
 } from '@rosen-bridge/watcher-data-extractor';
-import { rosenConfig } from '../config/rosenConfig';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 import * as Constants from '../config/constants';
-import { Tokens } from '../config/tokensConfig';
 import { logger } from '../log/Logger';
-
-const config = Config.getConfig();
-let scanner: ErgoNodeScanner;
+import { getConfig } from '../config/config';
 
 const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   try {
@@ -36,23 +30,27 @@ const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
 };
 
 export const scannerInit = async () => {
+  const allConfig = getConfig();
+  const config = allConfig.general;
+  const tokens = allConfig.token;
+  const rosenConfig = allConfig.rosen;
   const ergoScannerConfig = {
     nodeUrl: config.nodeUrl,
-    timeout: config.nodeTimeout,
+    timeout: config.nodeTimeout * 1000,
     initialHeight: config.ergoInitialHeight,
     dataSource: dataSource,
   };
-  scanner = new ErgoNodeScanner(ergoScannerConfig);
+  const scanner = new ErgoNodeScanner(ergoScannerConfig);
   scanningJob(config.ergoInterval, scanner).then(() => null);
   if (config.networkWatcher == Constants.ERGO_WATCHER) {
     const observationExtractor = new ErgoObservationExtractor(
       dataSource,
-      Tokens,
+      tokens,
       rosenConfig.lockAddress
     );
     scanner.registerExtractor(observationExtractor);
   } else if (config.networkWatcher == Constants.CARDANO_WATCHER) {
-    const cardanoConfig = CardanoConfig.getConfig();
+    const cardanoConfig = allConfig.cardano;
     if (cardanoConfig.ogmios) {
       const cardanoScanner = new CardanoOgmiosScanner({
         nodeIp: cardanoConfig.ogmios.ip,
@@ -63,7 +61,7 @@ export const scannerInit = async () => {
       });
       const observationExtractor = new CardanoOgmiosObservationExtractor(
         dataSource,
-        Tokens,
+        tokens,
         rosenConfig.lockAddress
       );
       cardanoScanner.registerExtractor(observationExtractor);
@@ -80,7 +78,7 @@ export const scannerInit = async () => {
       );
       const observationExtractor = new CardanoKoiosObservationExtractor(
         dataSource,
-        Tokens,
+        tokens,
         rosenConfig.lockAddress
       );
       cardanoScanner.registerExtractor(observationExtractor);

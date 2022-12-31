@@ -11,7 +11,6 @@ import { Buffer } from 'buffer';
 import { WatcherDataBase } from '../../../src/database/models/watcherModel';
 import { mockedResponseBody } from '../objects/mockedResponseBody';
 import { fillORM, loadDataBase } from '../../database/watcherDatabase';
-import { rosenConfig } from '../../../src/config/rosenConfig';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import TransactionTest from '../../../src/api/TransactionTest';
 
@@ -59,7 +58,7 @@ describe('Watcher Permit Transactions', () => {
     const ORM = await loadDataBase('permit');
     await fillORM(ORM);
     DB = ORM.DB;
-    boxes = new Boxes(rosenConfig, DB);
+    boxes = new Boxes(DB);
   });
 
   afterEach(() => {
@@ -95,7 +94,7 @@ describe('Watcher Permit Transactions', () => {
         else throw new Error('There is no box with this tokenId');
       });
 
-      await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+      await TransactionTest.setup(userAddress, secret1, boxes);
       TransactionTest.getInstance();
       const usersHex = ['414441', sampleWID];
       const users: Array<Uint8Array> = [];
@@ -127,7 +126,7 @@ describe('Watcher Permit Transactions', () => {
       chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
         return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
       });
-      await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+      await TransactionTest.setup(userAddress, secret1, boxes);
       const transaction = TransactionTest.getInstance();
       const ergoBoxes = wasm.ErgoBoxes.from_boxes_json([]);
       JSON.parse(mockedResponseBody.watcherUnspentBoxes).items.forEach(
@@ -177,12 +176,7 @@ describe('Watcher Permit Transactions', () => {
           return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
         else throw Error('No box with token');
       });
-      await TransactionTest.setup(
-        rosenConfig,
-        watcherAddress,
-        permitSecret,
-        boxes
-      );
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes);
       const secondTransaction = TransactionTest.getInstance();
       const response = await secondTransaction.getPermit(100n);
       expect(response.response).to.be.equal(
@@ -211,7 +205,7 @@ describe('Watcher Permit Transactions', () => {
         return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
       });
 
-      await TransactionTest.setup(rosenConfig, userAddress, secret1, boxes);
+      await TransactionTest.setup(userAddress, secret1, boxes);
       const transaction = TransactionTest.getInstance();
       const res = await transaction.getPermit(100n);
       expect(res.status).to.be.equal(500);
@@ -250,12 +244,7 @@ describe('Watcher Permit Transactions', () => {
         );
       });
 
-      await TransactionTest.setup(
-        rosenConfig,
-        watcherAddress,
-        permitSecret,
-        boxes
-      );
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes);
       const transaction = TransactionTest.getInstance();
 
       const res = await transaction.returnPermit(100n);
@@ -292,12 +281,7 @@ describe('Watcher Permit Transactions', () => {
         );
       });
       TransactionTest.reset();
-      await TransactionTest.setup(
-        rosenConfig,
-        watcherAddress,
-        permitSecret,
-        boxes
-      );
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes);
       const transaction = TransactionTest.getInstance();
 
       const res = await transaction.returnPermit(1n);
@@ -327,7 +311,6 @@ describe('Watcher Permit Transactions', () => {
         return wasm.ErgoBox.from_json(boxesSample.secondRepoBox);
       });
       await TransactionTest.setup(
-        rosenConfig,
         '9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL',
         secret2,
         boxes
@@ -370,12 +353,7 @@ describe('Watcher Permit Transactions', () => {
         );
       });
 
-      await TransactionTest.setup(
-        rosenConfig,
-        watcherAddress,
-        permitSecret,
-        boxes
-      );
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes);
       const transaction = TransactionTest.getInstance();
       await TransactionTest.getWatcherState();
       expect(TransactionTest.watcherPermitState).to.be.true;
@@ -404,12 +382,7 @@ describe('Watcher Permit Transactions', () => {
       chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
         throw Error('There is no box with token id');
       });
-      await TransactionTest.setup(
-        rosenConfig,
-        watcherAddress,
-        permitSecret,
-        boxes
-      );
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes);
       TransactionTest.getInstance();
       await TransactionTest.getWatcherState();
       expect(TransactionTest.watcherPermitState).to.be.false;
