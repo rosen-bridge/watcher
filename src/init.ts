@@ -79,7 +79,7 @@ const init = async () => {
     })
     .catch((e) => {
       logger.error(
-        `An error occurred while initializing datasource: ${e.stack}`
+        `An error occurred while initializing datasource: ${e.message} - ${e.stack}`
       );
     });
 };

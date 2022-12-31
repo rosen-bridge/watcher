@@ -130,7 +130,7 @@ export class Queue {
         await this.processTx(tx, currentHeight);
       } catch (e) {
         logger.warn(
-          `An error occurred while processing tx [${tx.txId}]: ${e.stack}`
+          `An error occurred while processing tx [${tx.txId}]: ${e.message} - ${e.stack}`
         );
       }
     }

@@ -64,7 +64,7 @@ export class ErgoNetwork {
       .then((response) => ({ txId: response.data as string, success: true }))
       .catch((exp) => {
         logger.info(
-          `An error occurred while sending transaction to Node: ${exp.stack}`
+          `An error occurred while sending transaction to Node: ${exp.message} - ${exp.stack}`
         );
         return { success: false };
       });
@@ -270,7 +270,7 @@ export class ErgoNetwork {
           message = e.response;
         }
         logger.warn(
-          `An error occurred while getting confirmed transaction from Explorer: ${e.stack}`
+          `An error occurred while getting confirmed transaction from Explorer: ${e.message} - ${e.stack}`
         );
         throw ConnectionError;
       });
@@ -295,7 +295,7 @@ export class ErgoNetwork {
           message = e.response;
         }
         logger.warn(
-          `An error occurred while getting unconfirmed transaction from Explorer: ${e.stack}`
+          `An error occurred while getting unconfirmed transaction from Explorer: ${e.message} - ${e.stack}`
         );
         throw ConnectionError;
       });
@@ -337,7 +337,7 @@ export class ErgoNetwork {
     } catch (e) {
       if (e.response && e.response.status == 404) return false;
       logger.warn(
-        `An error occurred while checking transaction inputs using Explorer: ${e.stack}`
+        `An error occurred while checking transaction inputs using Explorer: ${e.message} - ${e.stack}`
       );
       throw ConnectionError;
     }
