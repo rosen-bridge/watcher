@@ -14,7 +14,7 @@ addressRouter.get('/generate', async (req: Request, res: Response) => {
     }
     res.status(200).json(generateSK(getConfig().general.networkPrefix));
   } catch (e) {
-    logger.warn(`An error occurred while generating secret key: ${e.stack}`);
+    logger.warn(`An error occurred while generating secret key: ${e}`);
     res.status(500).send({ message: e.message });
   }
 });
