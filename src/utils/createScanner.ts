@@ -28,11 +28,16 @@ const tokens = allConfig.token;
 const rosenConfig = allConfig.rosen;
 
 class CreateScanner {
-  private ergoScanner: GeneralScanner<any>;
-  private cardanoScanner: AbstractScanner<any>;
-  observationScannerName: string;
+  ergoScanner: GeneralScanner<any>;
+  observationScanner: AbstractScanner<any>;
 
-  createErgoScanner = () => {
+  constructor() {
+    this.createErgoScanner();
+    if (config.networkWatcher == Constants.CARDANO_WATCHER)
+      this, this.createCardanoScanner();
+  }
+
+  private createErgoScanner = () => {
     if (!this.ergoScanner) {
       const ergoScannerConfig = {
         nodeUrl: config.nodeUrl,
@@ -42,7 +47,7 @@ class CreateScanner {
       };
       this.ergoScanner = new ErgoNodeScanner(ergoScannerConfig, logger);
       if (config.networkWatcher == Constants.ERGO_WATCHER) {
-        this.observationScannerName = this.ergoScanner.name();
+        this.observationScanner = this.ergoScanner;
         const observationExtractor = new ErgoObservationExtractor(
           dataSource,
           tokens,
@@ -79,7 +84,7 @@ class CreateScanner {
         config.networkPrefix,
         config.explorerUrl,
         config.address,
-        undefined,
+        undefined, // Token constraint not needed
         logger
       );
       this.ergoScanner.registerExtractor(commitmentExtractor);
@@ -87,14 +92,13 @@ class CreateScanner {
       this.ergoScanner.registerExtractor(eventTriggerExtractor);
       this.ergoScanner.registerExtractor(plainExtractor);
     }
-    return this.ergoScanner;
   };
 
-  createCardanoScanner = (): AbstractScanner<any> => {
-    if (!this.cardanoScanner) {
+  private createCardanoScanner = () => {
+    if (!this.observationScanner) {
       const cardanoConfig = allConfig.cardano;
       if (cardanoConfig.ogmios) {
-        this.cardanoScanner = new CardanoOgmiosScanner({
+        this.observationScanner = new CardanoOgmiosScanner({
           nodeIp: cardanoConfig.ogmios.ip,
           nodePort: cardanoConfig.ogmios.port,
           dataSource: dataSource,
@@ -107,10 +111,9 @@ class CreateScanner {
           rosenConfig.lockAddress,
           logger
         );
-        this.cardanoScanner.registerExtractor(observationExtractor);
-        this.observationScannerName = this.cardanoScanner.name();
+        this.observationScanner.registerExtractor(observationExtractor);
       } else if (cardanoConfig.koios) {
-        this.cardanoScanner = new CardanoKoiosScanner({
+        this.observationScanner = new CardanoKoiosScanner({
           dataSource: dataSource,
           koiosUrl: cardanoConfig.koios.url,
           timeout: cardanoConfig.koios.timeout,
@@ -122,14 +125,12 @@ class CreateScanner {
           rosenConfig.lockAddress,
           logger
         );
-        this.cardanoScanner.registerExtractor(observationExtractor);
-        this.observationScannerName = this.cardanoScanner.name();
+        this.observationScanner.registerExtractor(observationExtractor);
       }
     }
-    return this.cardanoScanner;
   };
 }
 
-const createScanner = new CreateScanner();
+const scanner = new CreateScanner();
 
-export { createScanner };
+export { scanner };
