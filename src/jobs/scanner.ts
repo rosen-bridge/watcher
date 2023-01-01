@@ -24,7 +24,9 @@ const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   try {
     await scanner.update();
   } catch (e) {
-    logger.warn(`Scanning Job failed for ${scanner.name()}, ${e.message}`);
+    logger.warn(
+      `Scanning Job failed for ${scanner.name()}, ${e.message}, ${e.stack}`
+    );
   }
   setTimeout(() => scanningJob(interval, scanner), interval * 1000);
 };

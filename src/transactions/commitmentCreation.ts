@@ -110,7 +110,7 @@ export class CommitmentCreation {
         );
       }
       logger.warn(
-        `Skipping the commitment creation due to occurred error: ${e}`
+        `Skipping the commitment creation due to occurred error: ${e.message} - ${e.stack}`
       );
     }
   };
@@ -165,7 +165,7 @@ export class CommitmentCreation {
         );
       } catch (e) {
         logger.warn(
-          `Skipping the commitment creation due to occurred error: ${e}`
+          `Skipping the commitment creation due to occurred error: ${e.message} - ${e.stack}`
         );
       }
     }
