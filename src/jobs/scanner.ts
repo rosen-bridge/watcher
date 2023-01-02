@@ -21,6 +21,7 @@ const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
 };
 
 export const scannerInit = async () => {
+  scanner.initiateExtractors();
   const allConfig = getConfig();
   const config = allConfig.general;
   const cardanoConfig = allConfig.cardano;
