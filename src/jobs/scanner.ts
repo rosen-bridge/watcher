@@ -7,7 +7,7 @@ import {
 import * as Constants from '../config/constants';
 import { logger } from '../log/Logger';
 import { getConfig } from '../config/config';
-import { scanner } from '../utils/createScanner';
+import { scanner } from '../utils/scanner';
 
 const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   try {
@@ -23,7 +23,7 @@ export const scannerInit = async () => {
   const config = allConfig.general;
   const cardanoConfig = allConfig.cardano;
   scanningJob(config.ergoInterval, scanner.ergoScanner).then(() => null);
-  if (config.networkWatcher == Constants.CARDANO_WATCHER) {
+  if (config.networkWatcher === Constants.CARDANO_WATCHER) {
     if (cardanoConfig.ogmios)
       await (scanner.observationScanner as CardanoOgmiosScanner).start();
     else if (cardanoConfig.koios) {

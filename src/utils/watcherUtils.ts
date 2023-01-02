@@ -9,7 +9,7 @@ import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
-import { scanner } from './createScanner';
+import { scanner } from './scanner';
 
 class WatcherUtils {
   dataBase: WatcherDataBase;

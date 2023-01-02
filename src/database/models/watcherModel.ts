@@ -41,11 +41,11 @@ class WatcherDataBase {
 
   /**
    * returns the last saved block height based on the observing network
-   * @param network: watcher observing network
+   * @param scanner: considering scanned blocks by this scanner
    */
-  getLastBlockHeight = async (scannerName: string): Promise<number> => {
+  getLastBlockHeight = async (scanner: string): Promise<number> => {
     const lastBlock = await this.blockRepository.find({
-      where: { status: PROCEED, scanner: scannerName },
+      where: { status: PROCEED, scanner: scanner },
       order: { height: 'DESC' },
       take: 1,
     });

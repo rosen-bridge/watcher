@@ -7,8 +7,12 @@ import { RosenConfig } from './rosenConfig';
 import { TokensConfig } from './tokensConfig';
 import { RosenTokens } from '@rosen-bridge/tokens';
 import path from 'path';
+import { NetworkType } from '../types';
 
-const supportedNetworks: Array<string> = ['ergo', 'cardano'];
+const supportedNetworks: Array<NetworkType> = [
+  Constants.ERGO_WATCHER,
+  Constants.CARDANO_WATCHER,
+];
 
 interface ConfigType {
   logger: LoggerConfig;
@@ -54,7 +58,7 @@ class Config {
   explorerTimeout: number;
   ergoInitialHeight: number;
   ergoInterval: number;
-  networkWatcher: string;
+  networkWatcher: NetworkType;
   minBoxValue: string;
   fee: string;
   commitmentCreationInterval: number;
@@ -108,7 +112,7 @@ class Config {
     this.nodeTimeout = getNumber('ergo.node.timeout');
     this.ergoInitialHeight = getNumber('ergo.node.initialHeight');
     this.ergoInterval = getNumber('ergo.interval.scanner');
-    this.networkWatcher = getRequiredString('network');
+    this.networkWatcher = getRequiredString('network') as NetworkType;
     if (!supportedNetworks.includes(this.networkWatcher)) {
       throw new Error(
         `ImproperlyConfigured. network is invalid, supported networks are [${supportedNetworks.join(
