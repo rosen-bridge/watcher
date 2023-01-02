@@ -5,9 +5,9 @@ import { Transaction } from './api/Transaction';
 import { Boxes } from './ergo/boxes';
 import { WatcherDataBase } from './database/models/watcherModel';
 import { dataSource } from '../config/dataSource';
-import { scannerInit } from './jobs/scanner';
+import { scannerInit } from './jobs/initScanner';
 import { creation } from './jobs/commitmentCreation';
-import { reveal } from './jobs/commitmetnReveal';
+import { reveal } from './jobs/commitmentReveal';
 import { transactionQueueJob } from './jobs/transactionQueue';
 import { delay } from './utils/utils';
 import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
@@ -25,8 +25,11 @@ let watcherUtils: WatcherUtils;
  */
 const init = async () => {
   const generateTransactionObject = async () => {
+    logger.debug('Initializing data sources and APIs...');
     await dataSource.initialize();
+    logger.debug('Data sources had been initialized.');
     await dataSource.runMigrations();
+    logger.debug('Migrations done successfully.');
     watcherDatabase = new WatcherDataBase(dataSource);
     boxesObject = new Boxes(watcherDatabase);
     await Transaction.setup(
@@ -35,6 +38,7 @@ const init = async () => {
       boxesObject
     );
     Transaction.getInstance();
+    logger.debug('APIs initialized successfully.');
   };
 
   const initExpress = () => {
@@ -54,10 +58,10 @@ const init = async () => {
 
   generateTransactionObject()
     .then(async () => {
+      logger.debug('Initializing routes...');
       initExpress();
-      // Initializing database
       watcherDatabase = new WatcherDataBase(dataSource);
-      // Running network scanner thread
+      logger.debug('Initializing scanners and extractors...');
       scannerInit();
 
       await delay(10000);
@@ -67,15 +71,18 @@ const init = async () => {
         getConfig().general.observationValidThreshold
       );
       const txUtils = new TransactionUtils(watcherDatabase);
-      // Initiating watcher Transaction API
+      logger.debug('Initializing statistic object...');
       Statistics.setup(watcherDatabase, Transaction.watcherWID);
       Statistics.getInstance();
+
+      logger.debug('Initializing job threads...');
       // Running transaction checking thread
       transactionQueueJob(watcherDatabase, watcherUtils);
       // Running commitment creation thread
       creation(watcherUtils, txUtils, boxesObject);
       // Running trigger event creation thread
       reveal(watcherUtils, txUtils, boxesObject);
+      logger.debug('Service initialization finished successfully.');
     })
     .catch((e) => {
       logger.error(

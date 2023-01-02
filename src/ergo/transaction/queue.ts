@@ -89,7 +89,7 @@ export class Queue {
           );
           this.resetTxStatus(tx, currentHeight);
         } else {
-          console.warn(`Error occurred while sending tx [${tx.id}]`);
+          logger.warn(`Error occurred while sending tx [${tx.id}]`);
         }
       }
     } else {

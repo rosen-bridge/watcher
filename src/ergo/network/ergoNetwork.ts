@@ -9,12 +9,12 @@ import { getConfig } from '../../config/config';
 
 export const explorerApi = axios.create({
   baseURL: getConfig().general.explorerUrl,
-  timeout: getConfig().general.explorerTimeout,
+  timeout: getConfig().general.explorerTimeout * 1000,
 });
 
 export const nodeClient = axios.create({
   baseURL: getConfig().general.nodeUrl,
-  timeout: getConfig().general.nodeTimeout,
+  timeout: getConfig().general.nodeTimeout * 1000,
   headers: { 'Content-Type': 'application/json' },
 });
 

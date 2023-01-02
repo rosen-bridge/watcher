@@ -1,6 +1,5 @@
 import { CommitmentCreation } from '../transactions/commitmentCreation';
 import { Boxes } from '../ergo/boxes';
-import { Transaction } from '../api/Transaction';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { logger } from '../log/Logger';
 import { getConfig } from '../config/config';
