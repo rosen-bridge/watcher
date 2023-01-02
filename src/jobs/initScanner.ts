@@ -20,15 +20,14 @@ const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   setTimeout(() => scanningJob(interval, scanner), interval * 1000);
 };
 
-export const scannerInit = async () => {
-  scanner.initiateExtractors();
+export const scannerInit = () => {
   const allConfig = getConfig();
   const config = allConfig.general;
   const cardanoConfig = allConfig.cardano;
   scanningJob(config.ergoInterval, scanner.ergoScanner).then(() => null);
   if (config.networkWatcher === Constants.CARDANO_WATCHER) {
     if (cardanoConfig.ogmios)
-      await (scanner.observationScanner as CardanoOgmiosScanner).start();
+      (scanner.observationScanner as CardanoOgmiosScanner).start();
     else if (cardanoConfig.koios) {
       scanningJob(
         cardanoConfig.koios.interval,

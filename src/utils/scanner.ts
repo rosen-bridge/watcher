@@ -55,31 +55,14 @@ class CreateScanner {
     this.ergoScanner = new ErgoNodeScanner(ergoScannerConfig, logger);
     if (config.networkWatcher === Constants.ERGO_WATCHER) {
       this.observationScanner = this.ergoScanner;
+      const observationExtractor = new ErgoObservationExtractor(
+        dataSource,
+        tokensConfig,
+        rosenConfig.lockAddress,
+        logger
+      );
+      this.observationScanner.registerExtractor(observationExtractor);
     }
-  };
-
-  private createCardanoScanner = () => {
-    if (!this.observationScanner) {
-      if (cardanoConfig.ogmios) {
-        this.observationScanner = new CardanoOgmiosScanner({
-          nodeIp: cardanoConfig.ogmios.ip,
-          nodePort: cardanoConfig.ogmios.port,
-          dataSource: dataSource,
-          initialHash: cardanoConfig.ogmios.initialHash,
-          initialSlot: cardanoConfig.ogmios.initialSlot,
-        });
-      } else if (cardanoConfig.koios) {
-        this.observationScanner = new CardanoKoiosScanner({
-          dataSource: dataSource,
-          koiosUrl: cardanoConfig.koios.url,
-          timeout: cardanoConfig.koios.timeout,
-          initialHeight: cardanoConfig.koios.initialHeight,
-        });
-      }
-    }
-  };
-
-  initiateExtractors = () => {
     const commitmentExtractor = new CommitmentExtractor(
       Constants.COMMITMENT_EXTRACTOR_NAME,
       [rosenConfig.commitmentAddress],
@@ -115,31 +98,40 @@ class CreateScanner {
     this.ergoScanner.registerExtractor(permitExtractor);
     this.ergoScanner.registerExtractor(eventTriggerExtractor);
     this.ergoScanner.registerExtractor(plainExtractor);
+  };
 
-    if (this.observationScanner instanceof ErgoNodeScanner) {
-      const observationExtractor = new ErgoObservationExtractor(
-        dataSource,
-        tokensConfig,
-        rosenConfig.lockAddress,
-        logger
-      );
-      this.observationScanner.registerExtractor(observationExtractor);
-    } else if (this.observationScanner instanceof CardanoKoiosScanner) {
-      const observationExtractor = new CardanoKoiosObservationExtractor(
-        dataSource,
-        tokensConfig,
-        rosenConfig.lockAddress,
-        logger
-      );
-      this.observationScanner.registerExtractor(observationExtractor);
-    } else if (this.observationScanner instanceof CardanoOgmiosScanner) {
-      const observationExtractor = new CardanoOgmiosObservationExtractor(
-        dataSource,
-        tokensConfig,
-        rosenConfig.lockAddress,
-        logger
-      );
-      this.observationScanner.registerExtractor(observationExtractor);
+  private createCardanoScanner = () => {
+    if (!this.observationScanner) {
+      if (cardanoConfig.ogmios) {
+        this.observationScanner = new CardanoOgmiosScanner({
+          nodeIp: cardanoConfig.ogmios.ip,
+          nodePort: cardanoConfig.ogmios.port,
+          dataSource: dataSource,
+          initialHash: cardanoConfig.ogmios.initialHash,
+          initialSlot: cardanoConfig.ogmios.initialSlot,
+        });
+        const observationExtractor = new CardanoOgmiosObservationExtractor(
+          dataSource,
+          tokensConfig,
+          rosenConfig.lockAddress,
+          logger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (cardanoConfig.koios) {
+        this.observationScanner = new CardanoKoiosScanner({
+          dataSource: dataSource,
+          koiosUrl: cardanoConfig.koios.url,
+          timeout: cardanoConfig.koios.timeout,
+          initialHeight: cardanoConfig.koios.initialHeight,
+        });
+        const observationExtractor = new CardanoKoiosObservationExtractor(
+          dataSource,
+          tokensConfig,
+          rosenConfig.lockAddress,
+          logger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      }
     }
   };
 }

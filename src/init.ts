@@ -5,7 +5,7 @@ import { Transaction } from './api/Transaction';
 import { Boxes } from './ergo/boxes';
 import { WatcherDataBase } from './database/models/watcherModel';
 import { dataSource } from '../config/dataSource';
-import { scannerInit } from './jobs/scanner';
+import { scannerInit } from './jobs/initScanner';
 import { creation } from './jobs/commitmentCreation';
 import { reveal } from './jobs/commitmentReveal';
 import { transactionQueueJob } from './jobs/transactionQueue';
