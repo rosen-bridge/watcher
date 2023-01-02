@@ -85,7 +85,9 @@ const init = async () => {
       logger.debug('Service initialization finished successfully.');
     })
     .catch((e) => {
-      logger.error(`An error occurred while initializing datasource: ${e}`);
+      logger.error(
+        `An error occurred while initializing datasource: ${e.message} - ${e.stack}`
+      );
     });
 };
 
