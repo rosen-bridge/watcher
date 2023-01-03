@@ -76,6 +76,12 @@ const ergoTreeToBase58Address = (
   return wasm.Address.recreate_from_ergo_tree(ergoTree).to_base58(networkType);
 };
 
+const totalBoxValues = (boxes: Array<wasm.ErgoBox>): bigint => {
+  return boxes
+    .map((box) => BigInt(box.value().as_i64().to_str()))
+    .reduce((a, b) => a + b, BigInt(0));
+};
+
 export {
   hexStrToUint8Array,
   uint8ArrayToHex,
@@ -84,4 +90,5 @@ export {
   generateSK,
   base64ToArrayBuffer,
   ergoTreeToBase58Address,
+  totalBoxValues,
 };

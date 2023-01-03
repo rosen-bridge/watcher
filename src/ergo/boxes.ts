@@ -387,10 +387,11 @@ export class Boxes {
     height: number,
     WID: string,
     WIDAmount: string,
+    ergAmount: string,
     contract?: wasm.Contract
   ): wasm.ErgoBoxCandidate => {
     const WIDBuilder = new wasm.ErgoBoxCandidateBuilder(
-      this.minBoxValue,
+      wasm.BoxValue.from_i64(wasm.I64.from_str(ergAmount)),
       contract
         ? contract
         : wasm.Contract.pay_to_address(

@@ -14,7 +14,6 @@ import {
   TransactionUtils,
   WatcherUtils,
 } from '../../../src/utils/watcherUtils';
-import { NotEnoughFund } from '../../../src/errors/errors';
 
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { expect } from 'chai';
@@ -68,7 +67,7 @@ observation.fromAddress =
   'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0';
 
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID);
-const boxCreationError =
+const notEnoughFund =
   'Transaction build failed due to ERG insufficiency in the watcher.';
 
 describe('Commitment creation transaction tests', () => {
@@ -176,6 +175,18 @@ describe('Commitment creation transaction tests', () => {
       sinon.restore();
     });
 
+    /**
+     * Target: testing createCommitmentTx with one extra token
+     * Dependencies:
+     *    WatcherUtils
+     *    Boxes
+     *    Transaction
+     * Test Procedure:
+     *    1- Mocking environment (RWTTokenId and getHeight)
+     *    2- calling function
+     * Expected Output:
+     *   Should log a not enough fund error due to erg insufficiency
+     */
     it('Should throw error while creating commitment transaction', async () => {
       chai.spy.on(logger, 'warn');
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
@@ -188,7 +199,7 @@ describe('Commitment creation transaction tests', () => {
         WIDBox3,
         []
       );
-      expect(logger.warn).to.have.called.with(boxCreationError);
+      expect(logger.warn).to.have.called.with(notEnoughFund);
       sinon.restore();
     });
   });

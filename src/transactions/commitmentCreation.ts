@@ -2,9 +2,9 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { boxCreationError, NotEnoughFund, NoWID } from '../errors/errors';
+import { boxCreationError, NotEnoughFund } from '../errors/errors';
 import { Transaction } from '../api/Transaction';
-import { hexStrToUint8Array } from '../utils/utils';
+import { hexStrToUint8Array, totalBoxValues } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
@@ -78,11 +78,19 @@ export class CommitmentCreation {
     const candidates = [outPermit, outCommitment];
     const allowedTokens = [this.boxes.RWTTokenId, wasm.TokenId.from_str(WID)];
     const extraTokens = ErgoUtils.getExtraTokenCount(inputBoxes, allowedTokens);
-    if (extraTokens > 0) {
-      const WIDBox = this.boxes.createWIDBox(height, WID, '1');
-      candidates.push(WIDBox);
-    }
     try {
+      if (extraTokens > 0) {
+        const totalValue = totalBoxValues([...permits, WIDBox, ...feeBoxes]);
+        if (totalValue < BigInt(getConfig().general.minBoxValue))
+          throw new NotEnoughFund();
+        const outWIDBox = this.boxes.createWIDBox(
+          height,
+          WID,
+          '1',
+          (totalValue - BigInt(getConfig().general.minBoxValue)).toString()
+        );
+        candidates.push(outWIDBox);
+      }
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,
         inputBoxes,
@@ -137,11 +145,7 @@ export class CommitmentCreation {
         );
         const permits = await this.boxes.getPermits(WID);
         const WIDBox = await this.boxes.getWIDBox(WID);
-        const totalValue: bigint =
-          permits
-            .map((permit) => BigInt(permit.value().as_i64().to_str()))
-            .reduce((a, b) => a + b, BigInt(0)) +
-          BigInt(WIDBox.value().as_i64().to_str());
+        const totalValue: bigint = totalBoxValues([...permits, WIDBox]);
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
         const requiredValue =
           BigInt(getConfig().general.fee) +
