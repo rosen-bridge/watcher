@@ -1,6 +1,13 @@
 import axios from 'axios';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { AddressBoxes, ErgoTx, ExplorerTransaction } from './types';
+
+import {
+  AddressBoxes,
+  ErgoTx,
+  ExplorerTransaction,
+  TxInput,
+  TxOutput,
+} from './types';
 import { JsonBI } from './parser';
 import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
@@ -197,7 +204,17 @@ export class ErgoNetwork {
    * it returns undefined if the box is spent and that transaction didn't have similar box in the output
    * @param box
    */
-  static trackMemPool = async (box: wasm.ErgoBox): Promise<wasm.ErgoBox> => {
+  static trackMemPool = async (
+    box: wasm.ErgoBox,
+    token?: string
+  ): Promise<wasm.ErgoBox> => {
+    const filter = (box: TxInput | TxOutput) => {
+      const sameAddress = box.address === address;
+      if (!token) return sameAddress;
+      const hasToken =
+        box.assets.filter((asset) => asset.tokenId == token).length > 0;
+      return sameAddress && hasToken;
+    };
     const address: string = ergoTreeToBase58Address(
       box.ergo_tree(),
       getConfig().general.networkPrefix
@@ -208,8 +225,8 @@ export class ErgoNetwork {
     );
     if (transactions !== undefined) {
       transactions.forEach((tx) => {
-        const inputs = tx.inputs.filter((box) => box.address === address);
-        const outputs = tx.outputs.filter((box) => box.address === address);
+        const inputs = tx.inputs.filter((box) => filter(box));
+        const outputs = tx.outputs.filter((box) => filter(box));
         if (inputs.length >= 1) {
           inputs.forEach((input) => {
             const box =

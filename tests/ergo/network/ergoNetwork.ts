@@ -201,6 +201,22 @@ describe('Ergo Network(API)', () => {
       const res = await ErgoNetwork.trackMemPool(ergoBox);
       expect(res).to.be.undefined;
     });
+
+    /**
+     * Target: testing trackMempool
+     * Expected Output:
+     *    The function should return null since the box is spent and nothing similar were created in the tx
+     */
+    it('should return the tracked box with required token', async () => {
+      const ergoBox = wasm.ErgoBox.from_json(mockedResponseBody.unspentBox3);
+      const res = await ErgoNetwork.trackMemPool(
+        ergoBox,
+        '01e6498911823f4d36deaf49a964e883b2c4ae2a4530926f18b9c1411ab2a2c2'
+      );
+      expect(res.box_id().to_str()).to.be.equal(
+        '35f4527340c619e369381135fb22b111727e00dbb60037cec9b9f570a11e2d51'
+      );
+    });
   });
 
   /**

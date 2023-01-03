@@ -127,6 +127,12 @@ export const initMockedAxios = (vector = 0) => {
 
   mockedExplorer
     .onGet(
+      '/api/v1/mempool/transactions/byAddress/jL2aaqw6XU61SZznvcri5VZnx1Gn8hfZWK87JH6PM7o1YMDMZfpH1uoGJSd3gDQabX6AmCZKLyMSBqSoUAo8X7E5oNRV9JgCdLBFjV6i1BEjZLwgGo3RUr4p8zchqrJ1FeGPLf2DidW6F41aeM1zCM64ZjfBqcy8d6fgEnAn53W28GEDQi5W1XCWRjFvgTFuDdAzd6Yj65KGJhdvMSgffP7pELpCtqK5Z4dX9SQKtt8Y4RMBaeEKtKB1pEx1n'
+    )
+    .reply(200, mockedResponseBody.mempoolTxs3);
+
+  mockedExplorer
+    .onGet(
       '/api/v1/mempool/transactions/byAddress/9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9'
     )
     .reply(200, mockedResponseBody.emptyMempool);
