@@ -41,7 +41,8 @@ export class CommitmentCreation {
     eventDigest: Uint8Array,
     permits: Array<wasm.ErgoBox>,
     WIDBox: wasm.ErgoBox,
-    feeBoxes: Array<wasm.ErgoBox>
+    feeBoxes: Array<wasm.ErgoBox>,
+    requiredValue: bigint
   ) => {
     const height = await ErgoNetwork.getHeight();
     const permitHash = ErgoUtils.contractHash(
@@ -81,13 +82,16 @@ export class CommitmentCreation {
     try {
       if (extraTokens > 0) {
         const totalValue = totalBoxValues([...permits, WIDBox, ...feeBoxes]);
-        if (totalValue < BigInt(getConfig().general.minBoxValue))
+        if (
+          totalValue - requiredValue <
+          BigInt(getConfig().general.minBoxValue)
+        )
           throw new NotEnoughFund();
         const outWIDBox = this.boxes.createWIDBox(
           height,
           WID,
           '1',
-          (totalValue - BigInt(getConfig().general.minBoxValue)).toString()
+          (totalValue - requiredValue).toString()
         );
         candidates.push(outWIDBox);
       }
@@ -165,7 +169,8 @@ export class CommitmentCreation {
           commitment,
           permits,
           WIDBox,
-          feeBoxes
+          feeBoxes,
+          requiredValue
         );
       } catch (e) {
         logger.warn(

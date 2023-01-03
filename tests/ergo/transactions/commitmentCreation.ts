@@ -74,7 +74,6 @@ describe('Commitment creation transaction tests', () => {
   let watcherDb: WatcherDataBase,
     txUtils: TransactionUtils,
     boxes: Boxes,
-    transaction: Transaction,
     watcherUtils: WatcherUtils;
   let cc: CommitmentCreation;
   before(async () => {
@@ -84,7 +83,6 @@ describe('Commitment creation transaction tests', () => {
     boxes = new Boxes(watcherDb);
     chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
     await Transaction.setup(userAddress, secret1, boxes);
-    transaction = Transaction.getInstance();
     watcherUtils = new WatcherUtils(watcherDb, 0, 100);
     txUtils = new TransactionUtils(watcherDb);
     cc = new CommitmentCreation(watcherUtils, txUtils, boxes);
@@ -125,7 +123,8 @@ describe('Commitment creation transaction tests', () => {
         commitment,
         permits,
         WIDBox,
-        []
+        [],
+        100000000n
       );
       expect(boxes.createPermit).to.have.called.with(
         111,
@@ -166,7 +165,8 @@ describe('Commitment creation transaction tests', () => {
         commitment,
         permits2,
         WIDBox,
-        []
+        [],
+        100000000n
       );
 
       expect(boxes.createWIDBox).to.have.called.once;
@@ -197,7 +197,8 @@ describe('Commitment creation transaction tests', () => {
         commitment,
         permits3,
         WIDBox3,
-        []
+        [],
+        100000000n
       );
       expect(logger.warn).to.have.called.with(notEnoughFund);
       sinon.restore();
