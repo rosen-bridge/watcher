@@ -284,4 +284,30 @@ describe('Testing ergoUtils', () => {
       expect(data).to.eql(BigInt(4));
     });
   });
+
+  describe('getBoxValuesSum', () => {
+    /**
+     * Target: testing getBoxValuesSum
+     * Test Procedure: -
+     * Expected Output:
+     *    Should return zero without any input boxes
+     */
+    it('Should return zero without any input boxes', async () => {
+      const data = ErgoUtils.getBoxValuesSum([]);
+      expect(data).to.eql(0n);
+    });
+
+    /**
+     * Target: testing getBoxValuesSum
+     * Test Procedure:
+     *    Creating mocked input boxes
+     * Expected Output:
+     *    Should return sum of all input boxes values
+     */
+    it('Should return sum of all input boxes values', async () => {
+      const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson);
+      const data = ErgoUtils.getBoxValuesSum(extractBoxes(boxes));
+      expect(data).to.eql(67501049680n);
+    });
+  });
 });

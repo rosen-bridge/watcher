@@ -384,17 +384,17 @@ export class Boxes {
    * create WID box that used in output of commitment transaction
    * @param height
    * @param WID
-   * @param WIDAmount
+   * @param ergAmount
    * @param contract
    */
   createWIDBox = (
     height: number,
     WID: string,
-    WIDAmount: string,
+    ergAmount: string,
     contract?: wasm.Contract
   ): wasm.ErgoBoxCandidate => {
     const WIDBuilder = new wasm.ErgoBoxCandidateBuilder(
-      this.minBoxValue,
+      wasm.BoxValue.from_i64(wasm.I64.from_str(ergAmount)),
       contract
         ? contract
         : wasm.Contract.pay_to_address(
@@ -404,7 +404,7 @@ export class Boxes {
     );
     WIDBuilder.add_token(
       wasm.TokenId.from_str(WID),
-      wasm.TokenAmount.from_i64(wasm.I64.from_str(WIDAmount))
+      wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
     );
     return WIDBuilder.build();
   };

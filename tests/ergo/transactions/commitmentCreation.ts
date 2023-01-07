@@ -14,7 +14,6 @@ import {
   TransactionUtils,
   WatcherUtils,
 } from '../../../src/utils/watcherUtils';
-import { NotEnoughFund } from '../../../src/errors/errors';
 
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { expect } from 'chai';
@@ -68,14 +67,13 @@ observation.fromAddress =
   'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0';
 
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID);
-const boxCreationError =
+const notEnoughFund =
   'Transaction build failed due to ERG insufficiency in the watcher.';
 
 describe('Commitment creation transaction tests', () => {
   let watcherDb: WatcherDataBase,
     txUtils: TransactionUtils,
     boxes: Boxes,
-    transaction: Transaction,
     watcherUtils: WatcherUtils;
   let cc: CommitmentCreation;
   before(async () => {
@@ -85,7 +83,6 @@ describe('Commitment creation transaction tests', () => {
     boxes = new Boxes(watcherDb);
     chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
     await Transaction.setup(userAddress, secret1, boxes);
-    transaction = Transaction.getInstance();
     watcherUtils = new WatcherUtils(watcherDb, 0, 100);
     txUtils = new TransactionUtils(watcherDb);
     cc = new CommitmentCreation(watcherUtils, txUtils, boxes);
@@ -126,7 +123,8 @@ describe('Commitment creation transaction tests', () => {
         commitment,
         permits,
         WIDBox,
-        []
+        [],
+        100000000n
       );
       expect(boxes.createPermit).to.have.called.with(
         111,
@@ -167,15 +165,28 @@ describe('Commitment creation transaction tests', () => {
         commitment,
         permits2,
         WIDBox,
-        []
+        [],
+        100000000n
       );
 
       expect(boxes.createWIDBox).to.have.called.once;
-      expect(boxes.createWIDBox).to.have.called.with(111, WID, '1');
+      expect(boxes.createWIDBox).to.have.called.with(111, WID);
 
       sinon.restore();
     });
 
+    /**
+     * Target: testing createCommitmentTx with one extra token
+     * Dependencies:
+     *    WatcherUtils
+     *    Boxes
+     *    Transaction
+     * Test Procedure:
+     *    1- Mocking environment (RWTTokenId and getHeight)
+     *    2- calling function
+     * Expected Output:
+     *   Should log a not enough fund error due to erg insufficiency
+     */
     it('Should throw error while creating commitment transaction', async () => {
       chai.spy.on(logger, 'warn');
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
@@ -186,9 +197,10 @@ describe('Commitment creation transaction tests', () => {
         commitment,
         permits3,
         WIDBox3,
-        []
+        [],
+        100000000n
       );
-      expect(logger.warn).to.have.called.with(boxCreationError);
+      expect(logger.warn).to.have.called.with(notEnoughFund);
       sinon.restore();
     });
   });
