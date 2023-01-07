@@ -170,7 +170,7 @@ describe('Commitment creation transaction tests', () => {
       );
 
       expect(boxes.createWIDBox).to.have.called.once;
-      expect(boxes.createWIDBox).to.have.called.with(111, WID, '1');
+      expect(boxes.createWIDBox).to.have.called.with(111, WID);
 
       sinon.restore();
     });

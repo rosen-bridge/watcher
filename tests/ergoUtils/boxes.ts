@@ -216,7 +216,7 @@ describe('Testing Box Creation', () => {
       // chai.spy.on(boxes, 'getWIDBox', () => undefined);
       const WID =
         'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
-      const data = boxes.createWIDBox(111, WID, '1', '1000000');
+      const data = boxes.createWIDBox(111, WID, '1000000');
       expect(data.creation_height()).to.eq(111);
       expect(data.tokens().get(0).id().to_str()).to.eq(WID);
       expect(data.tokens().get(0).amount().as_i64().to_str()).to.eq('1');

@@ -4,7 +4,7 @@ import { ErgoUtils } from '../ergo/utils';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { boxCreationError, NotEnoughFund } from '../errors/errors';
 import { Transaction } from '../api/Transaction';
-import { hexStrToUint8Array, totalBoxValues } from '../utils/utils';
+import { hexStrToUint8Array } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
@@ -34,6 +34,7 @@ export class CommitmentCreation {
    * @param permits
    * @param WIDBox
    * @param feeBoxes
+   * @param requiredValue
    */
   createCommitmentTx = async (
     WID: string,
@@ -81,7 +82,11 @@ export class CommitmentCreation {
     const extraTokens = ErgoUtils.getExtraTokenCount(inputBoxes, allowedTokens);
     try {
       if (extraTokens > 0) {
-        const totalValue = totalBoxValues([...permits, WIDBox, ...feeBoxes]);
+        const totalValue = ErgoUtils.getBoxValuesSum([
+          ...permits,
+          WIDBox,
+          ...feeBoxes,
+        ]);
         if (
           totalValue - requiredValue <
           BigInt(getConfig().general.minBoxValue)
@@ -90,7 +95,6 @@ export class CommitmentCreation {
         const outWIDBox = this.boxes.createWIDBox(
           height,
           WID,
-          '1',
           (totalValue - requiredValue).toString()
         );
         candidates.push(outWIDBox);
@@ -149,7 +153,7 @@ export class CommitmentCreation {
         );
         const permits = await this.boxes.getPermits(WID);
         const WIDBox = await this.boxes.getWIDBox(WID);
-        const totalValue: bigint = totalBoxValues([...permits, WIDBox]);
+        const totalValue = ErgoUtils.getBoxValuesSum([...permits, WIDBox]);
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
         const requiredValue =
           BigInt(getConfig().general.fee) +

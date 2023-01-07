@@ -270,4 +270,15 @@ export class ErgoUtils {
       min + BigInt(Math.ceil((percentage * (watcherCount - 1)) / 100));
     return max < formula ? max : formula;
   };
+
+  /**
+   * Calculate the sum of box values
+   * @param boxes
+   * @returns sum of box Erg values
+   */
+  static getBoxValuesSum = (boxes: Array<wasm.ErgoBox>): bigint => {
+    return boxes
+      .map((box) => BigInt(box.value().as_i64().to_str()))
+      .reduce((a, b) => a + b, BigInt(0));
+  };
 }
