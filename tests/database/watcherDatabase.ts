@@ -50,6 +50,7 @@ import {
 } from './mockedData';
 
 import * as Constants from '../../src/config/constants';
+import { dataSource } from '../../config/dataSource';
 
 import {
   firstPermit,
@@ -106,7 +107,7 @@ export const loadDataBase = async (name: string): Promise<ORMType> => {
       ...observationMigrations.sqlite,
       ...scannerMigrations.sqlite,
       ...watcherDataExtractorMigrations.sqlite,
-      ...migrations,
+      ...migrations.sqlite,
     ],
     synchronize: false,
     logging: false,

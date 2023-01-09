@@ -1,7 +1,5 @@
-import path from 'path';
 import { DataSource } from 'typeorm';
-import { fileURLToPath } from 'url';
-
+import { getConfig } from '../src/config/config';
 import {
   BoxEntity,
   migrations as addressExtractorMigrations,
@@ -26,29 +24,52 @@ import { TxEntity } from '../src/database/entities/txEntity';
 
 import migrations from '../src/database/migrations/watcher';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const dbEntities = [
+  BlockEntity,
+  BoxEntity,
+  CommitmentEntity,
+  EventTriggerEntity,
+  ObservationEntity,
+  ObservationStatusEntity,
+  PermitEntity,
+  TxEntity,
+];
 
-export const dataSource = new DataSource({
-  type: 'sqlite',
-  database: __dirname + '/../sqlite/watcher.sqlite',
-  entities: [
-    BlockEntity,
-    BoxEntity,
-    CommitmentEntity,
-    EventTriggerEntity,
-    ObservationEntity,
-    ObservationStatusEntity,
-    PermitEntity,
-    TxEntity,
-  ],
-  migrations: [
-    ...addressExtractorMigrations.sqlite,
-    ...observationMigrations.sqlite,
-    ...scannerMigrations.sqlite,
-    ...watcherDataExtractorMigrations.sqlite,
-    ...migrations,
-  ],
-  synchronize: false,
-  logging: false,
-});
+let dataSource: DataSource;
+if (getConfig().database.type === 'sqlite') {
+  dataSource = new DataSource({
+    type: 'sqlite',
+    database: getConfig().database.path,
+    entities: dbEntities,
+    migrations: [
+      ...addressExtractorMigrations.sqlite,
+      ...observationMigrations.sqlite,
+      ...scannerMigrations.sqlite,
+      ...watcherDataExtractorMigrations.sqlite,
+      ...migrations.sqlite,
+    ],
+    synchronize: false,
+    logging: false,
+  });
+} else {
+  dataSource = new DataSource({
+    type: 'postgres',
+    host: getConfig().database.host,
+    port: getConfig().database.port,
+    username: getConfig().database.user,
+    password: getConfig().database.password,
+    database: getConfig().database.name,
+    entities: dbEntities,
+    migrations: [
+      ...addressExtractorMigrations.postgres,
+      ...observationMigrations.postgres,
+      ...scannerMigrations.postgres,
+      ...watcherDataExtractorMigrations.postgres,
+      ...migrations.postgres,
+    ],
+    synchronize: false,
+    logging: false,
+  });
+}
+
+export { dataSource };
