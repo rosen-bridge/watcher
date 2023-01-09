@@ -215,7 +215,7 @@ class DatabaseConfig {
       this.port = getNumber('database.port');
       this.user = getRequiredString('database.user');
       this.password = getRequiredString('database.password');
-      this.name = getOptionalString('database.name', 'voter');
+      this.name = getOptionalString('database.name', 'rosen');
     } else {
       throw new Error(
         `Improperly configured. database configuration type is invalid available choices are 'sqlite', 'postgres'`
