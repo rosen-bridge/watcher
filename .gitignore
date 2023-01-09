@@ -1,7 +1,7 @@
 yarn.lock
 src/config/*.json
 
-sqlite
+
 .idea
 node_modules
 .nyc_output
