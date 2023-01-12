@@ -47,9 +47,9 @@ logs:
   maxFiles: 14d # maximum rotated files available
 database:
   type: 'sqlite' # options: postgres, sqlite
-  path: '/tmp/watcher.sqlite' # database path (for sqlite)
-  host: '' # database host (for postgres)
-  port: 5432 # database port (for postgres)
-  user: '' # database user (for postgres)
-  password: '' # database password (for postgres)
-  name: '' # database name (for postgres) - optional
+  path: './sqlite/watcher.sqlite' # database path (for sqlite)
+  # host: '' # database host (for postgres)
+  # port: 5432 # database port (for postgres)
+  # user: '' # database user (for postgres)
+  # password: '' # database password (for postgres)
+  # name: '' # database name (for postgres)

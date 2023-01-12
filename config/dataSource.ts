@@ -35,12 +35,17 @@ const dbEntities = [
   TxEntity,
 ];
 
+const dbConfigs = {
+  entities: dbEntities,
+  synchronize: false,
+  logging: false,
+};
 let dataSource: DataSource;
 if (getConfig().database.type === 'sqlite') {
   dataSource = new DataSource({
     type: 'sqlite',
     database: getConfig().database.path,
-    entities: dbEntities,
+    ...dbConfigs,
     migrations: [
       ...addressExtractorMigrations.sqlite,
       ...observationMigrations.sqlite,
@@ -48,8 +53,6 @@ if (getConfig().database.type === 'sqlite') {
       ...watcherDataExtractorMigrations.sqlite,
       ...migrations.sqlite,
     ],
-    synchronize: false,
-    logging: false,
   });
 } else {
   dataSource = new DataSource({
@@ -59,7 +62,7 @@ if (getConfig().database.type === 'sqlite') {
     username: getConfig().database.user,
     password: getConfig().database.password,
     database: getConfig().database.name,
-    entities: dbEntities,
+    ...dbConfigs,
     migrations: [
       ...addressExtractorMigrations.postgres,
       ...observationMigrations.postgres,
@@ -67,8 +70,6 @@ if (getConfig().database.type === 'sqlite') {
       ...watcherDataExtractorMigrations.postgres,
       ...migrations.postgres,
     ],
-    synchronize: false,
-    logging: false,
   });
 }
 
