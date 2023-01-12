@@ -24,19 +24,17 @@ import { TxEntity } from '../src/database/entities/txEntity';
 
 import migrations from '../src/database/migrations/watcher';
 
-const dbEntities = [
-  BlockEntity,
-  BoxEntity,
-  CommitmentEntity,
-  EventTriggerEntity,
-  ObservationEntity,
-  ObservationStatusEntity,
-  PermitEntity,
-  TxEntity,
-];
-
 const dbConfigs = {
-  entities: dbEntities,
+  entities: [
+    BlockEntity,
+    BoxEntity,
+    CommitmentEntity,
+    EventTriggerEntity,
+    ObservationEntity,
+    ObservationStatusEntity,
+    PermitEntity,
+    TxEntity,
+  ],
   synchronize: false,
   logging: false,
 };
