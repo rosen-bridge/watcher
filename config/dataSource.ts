@@ -23,7 +23,7 @@ import { ObservationStatusEntity } from '../src/database/entities/observationSta
 import { TxEntity } from '../src/database/entities/txEntity';
 
 import migrations from '../src/database/migrations/watcher';
-
+const dbType = getConfig().database.type as keyof typeof migrations;
 const dbConfigs = {
   entities: [
     BlockEntity,
@@ -35,6 +35,13 @@ const dbConfigs = {
     PermitEntity,
     TxEntity,
   ],
+  migrations: [
+    ...addressExtractorMigrations[dbType],
+    ...observationMigrations[dbType],
+    ...scannerMigrations[dbType],
+    ...watcherDataExtractorMigrations[dbType],
+    ...migrations[dbType],
+  ],
   synchronize: false,
   logging: false,
 };
@@ -44,13 +51,6 @@ if (getConfig().database.type === 'sqlite') {
     type: 'sqlite',
     database: getConfig().database.path,
     ...dbConfigs,
-    migrations: [
-      ...addressExtractorMigrations.sqlite,
-      ...observationMigrations.sqlite,
-      ...scannerMigrations.sqlite,
-      ...watcherDataExtractorMigrations.sqlite,
-      ...migrations.sqlite,
-    ],
   });
 } else {
   dataSource = new DataSource({
@@ -61,13 +61,6 @@ if (getConfig().database.type === 'sqlite') {
     password: getConfig().database.password,
     database: getConfig().database.name,
     ...dbConfigs,
-    migrations: [
-      ...addressExtractorMigrations.postgres,
-      ...observationMigrations.postgres,
-      ...scannerMigrations.postgres,
-      ...watcherDataExtractorMigrations.postgres,
-      ...migrations.postgres,
-    ],
   });
 }
 
