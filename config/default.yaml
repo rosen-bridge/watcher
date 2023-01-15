@@ -39,7 +39,7 @@ ergo:
       reveal: 180 # commitment reveal interval (in seconds)
 path:
   addresses: config/rosen # addresses path
-#  tokens: config/rosen/tokens.json # default tokens path.
+  # tokens: config/rosen/tokens.json # default tokens path.
 logs:
   path: logs/ # logs path
   level: info # logging level
