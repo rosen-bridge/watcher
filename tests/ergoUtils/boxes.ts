@@ -31,7 +31,8 @@ import { getConfig } from '../../src/config/config';
 const config = getConfig().general;
 const permitJson = JsonBI.stringify(permitObj);
 const WIDJson = JsonBI.stringify(WIDObj);
-const plainJson = JsonBI.stringify(plainObj);
+const plainJson = JsonBI.stringify(plainObj[0]);
+const secondJson = JsonBI.stringify(plainObj[1]);
 
 chai.use(spies);
 chai.use(chaiPromise);
@@ -57,6 +58,13 @@ plainBox.serialized = Buffer.from(
 ).toString('base64');
 plainBox.boxId =
   '57dc591ecba4c90f9116740bf49ffea2c7b73625f259e60ec0c23add86b14f47';
+
+const secondBox: BoxEntity = new BoxEntity();
+secondBox.serialized = Buffer.from(
+  wasm.ErgoBox.from_json(secondJson).sigma_serialize_bytes()
+).toString('base64');
+secondBox.boxId =
+  '9fac7bdf9db4c468d716b1be9f7468a26af2b7eb4a098b934185fd6aa6127c3e';
 
 const WID = 'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
 const permit =
@@ -225,10 +233,6 @@ describe('Testing Box Creation', () => {
   });
 
   describe('getUserPaymentBox', () => {
-    beforeEach(() => {
-      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox]);
-      chai.spy.on(DB, 'trackTxQueue', () => wasm.ErgoBox.from_json(plainJson));
-    });
     /**
      * Target: testing getUserPaymentBox
      * Dependencies:
@@ -242,6 +246,8 @@ describe('Testing Box Creation', () => {
      *    The function should return all unspent watcher boxes
      */
     it('returns a covering plain boxesSample', async () => {
+      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox]);
+      chai.spy.on(DB, 'trackTxQueue', () => wasm.ErgoBox.from_json(plainJson));
       chai.spy.on(ErgoNetwork, 'trackMemPool', () =>
         wasm.ErgoBox.from_json(plainJson)
       );
@@ -263,6 +269,8 @@ describe('Testing Box Creation', () => {
      *    The function should throw an error since the required amount is not covered
      */
     it('throws an error not covering the required amount', async () => {
+      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox]);
+      chai.spy.on(DB, 'trackTxQueue', () => wasm.ErgoBox.from_json(plainJson));
       chai.spy.on(ErgoNetwork, 'trackMemPool', () =>
         wasm.ErgoBox.from_json(plainJson)
       );
@@ -284,12 +292,38 @@ describe('Testing Box Creation', () => {
      * Expected Output:
      *    The function should throw an error since the box is spent and the amount is not covered
      */
-    it('throws an error not covering the required amount', async () => {
+    it('should throw an error since the box is spent and the amount is not covered', async () => {
+      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox]);
+      chai.spy.on(DB, 'trackTxQueue', () => wasm.ErgoBox.from_json(plainJson));
       chai.spy.on(ErgoNetwork, 'trackMemPool', () => undefined);
       const boxes = new Boxes(DB);
       await expect(boxes.getUserPaymentBox(value)).to.rejectedWith(
         NotEnoughFund
       );
+    });
+
+    /**
+     * Target: testing ignore boxes for getUserPaymentBox
+     * Dependency:
+     *    watcherDatabase
+     *    ErgoNetwork
+     * Test Procedure:
+     *    1- mock getUnspentAddressBoxes to return 2 boxes
+     *    2- mock trackMempool and trackTxQueue to return input box
+     *    3- get userPaymentBox and ignore first box data
+     * Expected:
+     *    return a list contain one box
+     *    box must have same id as secondBox
+     */
+    it('should exclude box in return boxes', async () => {
+      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [plainBox, secondBox]);
+      chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
+      chai.spy.on(DB, 'trackTxQueue', (box: wasm.ErgoBox) => box);
+      const data = await boxes.getUserPaymentBox(BigInt('1000000'), [
+        plainBox.boxId,
+      ]);
+      expect(data).to.have.length(1);
+      expect(data[0].box_id().to_str()).to.eq(secondBox.boxId);
     });
   });
 
