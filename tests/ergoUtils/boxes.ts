@@ -23,7 +23,7 @@ import chaiPromise from 'chai-as-promised';
 
 import permitObj from './dataset/permitBox.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox.json' assert { type: 'json' };
-import plainObj from './dataset/plainBox.json' assert { type: 'json' };
+import plainObj from './dataset/plainBoxes.json' assert { type: 'json' };
 import { mockedResponseBody } from '../ergo/objects/mockedResponseBody';
 import { beforeEach } from 'mocha';
 import { getConfig } from '../../src/config/config';
@@ -303,14 +303,14 @@ describe('Testing Box Creation', () => {
     });
 
     /**
-     * Target: testing ignore boxes for getUserPaymentBox
+     * Target: testing boxIdsToOmit for getUserPaymentBox
      * Dependency:
      *    watcherDatabase
      *    ErgoNetwork
      * Test Procedure:
      *    1- mock getUnspentAddressBoxes to return 2 boxes
      *    2- mock trackMempool and trackTxQueue to return input box
-     *    3- get userPaymentBox and ignore first box data
+     *    3- get userPaymentBox and omit first box data
      * Expected:
      *    return a list contain one box
      *    box must have same id as secondBox
