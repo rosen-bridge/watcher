@@ -161,7 +161,7 @@ export class CommitmentCreation {
         let feeBoxes: Array<wasm.ErgoBox> = [];
         if (totalValue < requiredValue) {
           logger.debug(
-            `Require more Than WID box Ergs. Total: [${totalValue}], Required: [${requiredValue}]`
+            `Require more than WID box Ergs. Total: [${totalValue}], Required: [${requiredValue}]`
           );
           feeBoxes = await this.boxes.getUserPaymentBox(
             requiredValue - totalValue,
