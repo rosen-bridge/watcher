@@ -90,8 +90,12 @@ export type ORMType = {
  */
 export const loadDataBase = async (name: string): Promise<ORMType> => {
   const ormConfig = new DataSource({
-    type: 'sqlite',
-    database: `./sqlite/watcher-test-${name}.sqlite`,
+    type: 'postgres',
+    host: '127.0.0.1',
+    port: 5432,
+    username: 'test',
+    password: 'test',
+    database: name,
     entities: [
       BlockEntity,
       BoxEntity,
@@ -103,14 +107,14 @@ export const loadDataBase = async (name: string): Promise<ORMType> => {
       TxEntity,
     ],
     migrations: [
-      ...addressExtractorMigrations.sqlite,
-      ...observationMigrations.sqlite,
-      ...scannerMigrations.sqlite,
-      ...watcherDataExtractorMigrations.sqlite,
-      ...migrations.sqlite,
+      ...addressExtractorMigrations.postgres,
+      ...observationMigrations.postgres,
+      ...scannerMigrations.postgres,
+      ...watcherDataExtractorMigrations.postgres,
+      ...migrations.postgres,
     ],
     synchronize: false,
-    logging: false,
+    logging: 'all',
   });
 
   await ormConfig.initialize();
