@@ -50,7 +50,6 @@ import {
 } from './mockedData';
 
 import * as Constants from '../../src/config/constants';
-import { dataSource } from '../../config/dataSource';
 
 import {
   firstPermit,
