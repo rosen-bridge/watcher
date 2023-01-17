@@ -141,9 +141,11 @@ export class Boxes {
   /**
    * Returns unspent watcher boxes covering the required erg value (Considering the mempool)
    * @param requiredValue
+   * @param boxIdsToOmit: a list of box ids to omit
    */
   getUserPaymentBox = async (
-    requiredValue: bigint
+    requiredValue: bigint,
+    boxIdsToOmit: Array<string> = []
   ): Promise<Array<wasm.ErgoBox>> => {
     const boxes = (await this.dataBase.getUnspentAddressBoxes()).map((box) => {
       return decodeSerializedBox(box.serialized);
@@ -151,6 +153,7 @@ export class Boxes {
     const selectedBoxes = [];
     let totalValue = BigInt(0);
     for (const box of boxes) {
+      if (boxIdsToOmit.includes(box.box_id().to_str())) continue;
       let unspentBox = await ErgoNetwork.trackMemPool(box);
       if (unspentBox) unspentBox = await this.dataBase.trackTxQueue(unspentBox);
       if (unspentBox) {
@@ -160,7 +163,7 @@ export class Boxes {
       }
     }
     if (totalValue < requiredValue) {
-      throw new NotEnoughFund("Not enough fund to create the transaction'");
+      throw new NotEnoughFund('Not enough fund to create the transaction');
     }
     return selectedBoxes;
   };

@@ -177,15 +177,15 @@ class CardanoConfig {
     this.type = config.get<string>('cardano.type');
     if (network === Constants.CARDANO_WATCHER) {
       if (this.type === Constants.OGMIOS_TYPE) {
-        const ip = getRequiredString('cardano.node.ip');
-        const port = getNumber('cardano.node.port');
+        const ip = getRequiredString('cardano.ogmios.ip');
+        const port = getNumber('cardano.ogmios.port');
         const initialSlot = getNumber('cardano.initial.slot');
         const initialHash = getRequiredString('cardano.initial.hash');
         this.ogmios = { ip, port, initialHash, initialSlot };
       } else if (this.type === Constants.KOIOS_TYPE) {
-        const url = getRequiredString('cardano.node.url');
-        const interval = getNumber('cardano.interval');
-        const timeout = getNumber('cardano.timeout');
+        const url = getRequiredString('cardano.koios.url');
+        const interval = getNumber('cardano.koios.interval');
+        const timeout = getNumber('cardano.koios.timeout');
         const initialHeight = getNumber('cardano.initial.height');
         this.koios = { url, initialHeight, interval, timeout };
       } else {

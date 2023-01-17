@@ -178,6 +178,8 @@ firstStatisticsEventTrigger.targetChainTokenId = 'targetTokenId';
 firstStatisticsEventTrigger.WIDs = '1,WIDStatistics,3';
 firstStatisticsEventTrigger.sourceBlockId = 'block';
 firstStatisticsEventTrigger.sourceChainHeight = 123456;
+firstStatisticsEventTrigger.eventId =
+  'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b';
 
 const secondStatisticsEventTrigger = {
   ...firstStatisticsEventTrigger,

@@ -103,13 +103,16 @@ class CreateScanner {
   private createCardanoScanner = () => {
     if (!this.observationScanner) {
       if (cardanoConfig.ogmios) {
-        this.observationScanner = new CardanoOgmiosScanner({
-          nodeIp: cardanoConfig.ogmios.ip,
-          nodePort: cardanoConfig.ogmios.port,
-          dataSource: dataSource,
-          initialHash: cardanoConfig.ogmios.initialHash,
-          initialSlot: cardanoConfig.ogmios.initialSlot,
-        });
+        this.observationScanner = new CardanoOgmiosScanner(
+          {
+            nodeIp: cardanoConfig.ogmios.ip,
+            nodePort: cardanoConfig.ogmios.port,
+            dataSource: dataSource,
+            initialHash: cardanoConfig.ogmios.initialHash,
+            initialSlot: cardanoConfig.ogmios.initialSlot,
+          },
+          logger
+        );
         const observationExtractor = new CardanoOgmiosObservationExtractor(
           dataSource,
           tokensConfig,
@@ -118,12 +121,15 @@ class CreateScanner {
         );
         this.observationScanner.registerExtractor(observationExtractor);
       } else if (cardanoConfig.koios) {
-        this.observationScanner = new CardanoKoiosScanner({
-          dataSource: dataSource,
-          koiosUrl: cardanoConfig.koios.url,
-          timeout: cardanoConfig.koios.timeout,
-          initialHeight: cardanoConfig.koios.initialHeight,
-        });
+        this.observationScanner = new CardanoKoiosScanner(
+          {
+            dataSource: dataSource,
+            koiosUrl: cardanoConfig.koios.url,
+            timeout: cardanoConfig.koios.timeout,
+            initialHeight: cardanoConfig.koios.initialHeight,
+          },
+          logger
+        );
         const observationExtractor = new CardanoKoiosObservationExtractor(
           dataSource,
           tokensConfig,
