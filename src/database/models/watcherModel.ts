@@ -154,7 +154,7 @@ class WatcherDataBase {
     return await this.txRepository
       .createQueryBuilder('tx_entity')
       .leftJoinAndSelect('tx_entity.observation', 'observation_entity')
-      .where('tx_entity.deleted == false')
+      .where('tx_entity.deleted = false')
       .getMany();
   };
 
@@ -397,8 +397,8 @@ class WatcherDataBase {
   getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
     return this.permitRepository
       .createQueryBuilder('permit_entity')
-      .where('WID == :wid', { wid })
-      .andWhere('spendBlock is null')
+      .where('permit_entity.WID = :wid', { wid })
+      .andWhere('permit_entity.spendBlock is null')
       .getMany();
   };
 
@@ -408,7 +408,7 @@ class WatcherDataBase {
   getUnspentAddressBoxes = async (): Promise<Array<BoxEntity>> => {
     return this.boxRepository
       .createQueryBuilder('box_entity')
-      .where('spendBlock is null')
+      .where('box_entity.spendBlock is null')
       .getMany();
   };
 

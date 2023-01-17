@@ -55,7 +55,7 @@ initMockedAxios();
 describe('Watcher Permit Transactions', () => {
   let DB: WatcherDataBase, boxes: Boxes;
   before(async () => {
-    const ORM = await loadDataBase('permit');
+    const ORM = await loadDataBase();
     await fillORM(ORM);
     DB = ORM.DB;
     boxes = new Boxes(DB);

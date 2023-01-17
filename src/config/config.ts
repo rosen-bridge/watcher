@@ -20,6 +20,7 @@ interface ConfigType {
   general: Config;
   rosen: RosenConfig;
   token: RosenTokens;
+  database: DatabaseConfig;
 }
 
 const getNumber = (path: string) => {
@@ -196,6 +197,33 @@ class CardanoConfig {
   }
 }
 
+class DatabaseConfig {
+  type: string;
+  path = '';
+  host = '';
+  port = 0;
+  user = '';
+  password = '';
+  name = '';
+
+  constructor() {
+    this.type = getRequiredString('database.type');
+    if (this.type === 'sqlite') {
+      this.path = getRequiredString('database.path');
+    } else if (this.type === 'postgres') {
+      this.host = getRequiredString('database.host');
+      this.port = getNumber('database.port');
+      this.user = getRequiredString('database.user');
+      this.password = getRequiredString('database.password');
+      this.name = getRequiredString('database.name');
+    } else {
+      throw new Error(
+        `Improperly configured. database configuration type is invalid available choices are 'sqlite', 'postgres'`
+      );
+    }
+  }
+}
+
 let internalConfig: ConfigType | undefined;
 
 const getConfig = (): ConfigType => {
@@ -209,7 +237,8 @@ const getConfig = (): ConfigType => {
       general.rosenConfigPath
     );
     const token = new TokensConfig(general.rosenTokensPath).tokens;
-    internalConfig = { cardano, logger, general, rosen, token };
+    const database = new DatabaseConfig();
+    internalConfig = { cardano, logger, general, rosen, token, database };
   }
   return internalConfig;
 };

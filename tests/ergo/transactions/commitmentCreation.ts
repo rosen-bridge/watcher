@@ -77,7 +77,7 @@ describe('Commitment creation transaction tests', () => {
     watcherUtils: WatcherUtils;
   let cc: CommitmentCreation;
   before(async () => {
-    const ORM = await loadDataBase('commitmentCreation');
+    const ORM = await loadDataBase();
     await fillORM(ORM);
     watcherDb = ORM.DB;
     boxes = new Boxes(watcherDb);

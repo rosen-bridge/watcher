@@ -18,8 +18,8 @@ import {
 import {
   CommitmentEntity,
   EventTriggerEntity,
-  migrations as watcherDataExtractorMigrations,
   PermitEntity,
+  migrations as watcherDataExtractorMigrations,
 } from '@rosen-bridge/watcher-data-extractor';
 
 import {
@@ -85,28 +85,29 @@ export type ORMType = {
 
 /**
  * Initiate and migrate databases for test environment
- * @param name
+ * @param clean: clean database after connecting
  */
-export const loadDataBase = async (name: string): Promise<ORMType> => {
+export const loadDataBase = async (clean = true): Promise<ORMType> => {
+  const entities = [
+    BlockEntity,
+    BoxEntity,
+    ObservationEntity,
+    CommitmentEntity,
+    EventTriggerEntity,
+    PermitEntity,
+    ObservationStatusEntity,
+    TxEntity,
+  ];
   const ormConfig = new DataSource({
     type: 'sqlite',
-    database: `./sqlite/watcher-test-${name}.sqlite`,
-    entities: [
-      BlockEntity,
-      BoxEntity,
-      CommitmentEntity,
-      EventTriggerEntity,
-      ObservationEntity,
-      ObservationStatusEntity,
-      PermitEntity,
-      TxEntity,
-    ],
+    database: './sqlite/watcher-test.sqlite',
+    entities: entities,
     migrations: [
       ...addressExtractorMigrations.sqlite,
       ...observationMigrations.sqlite,
       ...scannerMigrations.sqlite,
       ...watcherDataExtractorMigrations.sqlite,
-      ...migrations,
+      ...migrations.sqlite,
     ],
     synchronize: false,
     logging: false,
@@ -124,7 +125,15 @@ export const loadDataBase = async (name: string): Promise<ORMType> => {
   const boxRepo = ormConfig.getRepository(BoxEntity);
   const eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity);
   const transactionRepo = ormConfig.getRepository(TxEntity);
-
+  if (clean) {
+    for (const entity of entities.reverse()) {
+      await ormConfig
+        .getRepository(entity)
+        .createQueryBuilder()
+        .delete()
+        .execute();
+    }
+  }
   return {
     DB: new WatcherDataBase(ormConfig),
     blockRepo: blockRepo,
@@ -174,7 +183,7 @@ export const fillORM = async (ORM: ORMType) => {
 describe('WatcherModel tests', () => {
   let DB: WatcherDataBase;
   before('inserting into database', async () => {
-    const ORM = await loadDataBase('networkDataBase');
+    const ORM = await loadDataBase();
     await fillORM(ORM);
     DB = ORM.DB;
     blockRepo = ORM.blockRepo;

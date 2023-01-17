@@ -38,7 +38,7 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
     watcherUtils: WatcherUtils,
     txUtils: TransactionUtils;
   beforeEach(async () => {
-    const ORM = await loadDataBase('network-watcherUtils');
+    const ORM = await loadDataBase();
     dataBase = ORM.DB;
     boxes = new Boxes(dataBase);
     await TransactionTest.setup(userAddress, secret1, boxes);

@@ -38,7 +38,7 @@ describe('Transaction queue tests', () => {
     dbConnection: WatcherUtils;
   let txQueue: Queue;
   before(async () => {
-    const ORM = await loadDataBase('commitmentReveal');
+    const ORM = await loadDataBase();
     dataBase = ORM.DB;
     boxes = new Boxes(dataBase);
     await TransactionTest.setup(userAddress, secret1, boxes);
