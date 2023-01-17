@@ -8,7 +8,7 @@ import spies from 'chai-spies';
 
 chai.use(spies);
 
-const ORM = await loadDataBase('Statistics');
+const ORM = await loadDataBase();
 await fillORM(ORM);
 const app = express();
 app.use(express.json());
@@ -19,7 +19,6 @@ app.use(router);
 
 describe('Statistics-Api', () => {
   before('Mocking Statistics Class functions', async () => {
-    const ORM = await loadDataBase('Statistics');
     const DB = ORM.DB;
     Statistics.setup(DB, 'WIDStatistics');
     Statistics.getInstance();

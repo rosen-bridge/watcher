@@ -82,7 +82,7 @@ describe('Testing Box Creation', () => {
   const value = BigInt(67500000000);
   let DB: WatcherDataBase, boxes: Boxes;
   before(async () => {
-    const ORM = await loadDataBase('boxes');
+    const ORM = await loadDataBase();
     await fillORM(ORM);
     DB = ORM.DB;
     boxes = new Boxes(DB);

@@ -15,8 +15,8 @@ export class watcherModelMigration1673270313743 implements MigrationInterface {
         `);
     await queryRunner.query(`
           CREATE TABLE "tx_entity" (
-            "id" integer PRIMARY KEY NOT NULL,
-            "creationTime" integer NOT NULL,
+            "id" serial PRIMARY KEY NOT NULL,
+            "creationTime" bigint NOT NULL,
             "updateBlock" integer NOT NULL,
             "type" varchar CHECK("type" IN ('commitment', 'trigger')) NOT NULL,
             "txId" varchar NOT NULL,
