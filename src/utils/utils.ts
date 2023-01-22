@@ -1,4 +1,3 @@
-import * as ergoLib from 'ergo-lib-wasm-nodejs';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { Buffer } from 'buffer';
 
@@ -57,7 +56,7 @@ function delay(time: number) {
 const generateSK = (
   networkType: wasm.NetworkPrefix = wasm.NetworkPrefix.Mainnet
 ): { address: string; secret: string } => {
-  const secretKey = ergoLib.SecretKey.random_dlog();
+  const secretKey = wasm.SecretKey.random_dlog();
   return {
     address: secretKey.get_address().to_base58(networkType),
     secret: uint8ArrayToHex(secretKey.to_bytes()),
