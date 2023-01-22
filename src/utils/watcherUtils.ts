@@ -1,15 +1,20 @@
-import { WatcherDataBase } from '../database/models/watcherModel';
+import { Buffer } from 'buffer';
 import * as wasm from 'ergo-lib-wasm-nodejs';
+
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+
+import { uniqBy } from 'lodash-es';
+
+import { WatcherDataBase } from '../database/models/watcherModel';
 import { TxType } from '../database/entities/txEntity';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { Buffer } from 'buffer';
 import { NoObservationStatus } from '../errors/errors';
 import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
+import { logger } from '../log/Logger';
 
 class WatcherUtils {
   dataBase: WatcherDataBase;
@@ -147,8 +152,19 @@ class WatcherUtils {
           observation.requestId
         );
         if (!(await this.isMergeHappened(observation))) {
+          const uniqueRelatedCommitments = uniqBy(relatedCommitments, 'WID');
+
+          if (uniqueRelatedCommitments.length !== relatedCommitments.length) {
+            logger.warn(
+              `There seems to be some duplicate commitments. It may cause some issues.`,
+              {
+                relatedCommitments,
+              }
+            );
+          }
+
           readyCommitments.push({
-            commitments: relatedCommitments.filter(
+            commitments: uniqueRelatedCommitments.filter(
               (commitment) => commitment.spendBlock == null
             ),
             observation: observation,
