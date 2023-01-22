@@ -1,6 +1,10 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { Buffer } from 'buffer';
 
+import { get, set } from 'lodash-es';
+
+import { JsonBI } from '../ergo/network/parser';
+
 /**
  * returns the decoded input hex string
  * @param str
@@ -75,6 +79,25 @@ const ergoTreeToBase58Address = (
   return wasm.Address.recreate_from_ergo_tree(ergoTree).to_base58(networkType);
 };
 
+/**
+ * Works like `JSON.parse`, but converts all paths in `forceBigIntPaths` to
+ * bigint (if possible, otherwise leaves the value as-is)
+ *
+ * @param string String to parse
+ * @param forceBigIntPaths Array of all paths that should be converted to bigint
+ * @returns parsed value
+ */
+const parseJson = (string: string, forceBigIntPaths: string[] = []) => {
+  const parsedString = JSON.parse(string);
+  const allBigIntsParsedString = JsonBI.parse(string);
+
+  forceBigIntPaths.forEach((path) => {
+    set(parsedString, path, get(allBigIntsParsedString, path));
+  });
+
+  return parsedString;
+};
+
 export {
   hexStrToUint8Array,
   uint8ArrayToHex,
@@ -83,4 +106,5 @@ export {
   generateSK,
   base64ToArrayBuffer,
   ergoTreeToBase58Address,
+  parseJson,
 };
