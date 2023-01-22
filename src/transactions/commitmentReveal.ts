@@ -4,7 +4,7 @@ import { Boxes } from '../ergo/boxes';
 import { Buffer } from 'buffer';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { boxCreationError, NotEnoughFund } from '../errors/errors';
+import { boxCreationError } from '../errors/errors';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
@@ -131,7 +131,7 @@ export class CommitmentReveal {
               commitmentSet.observation,
               WIDs,
               await this.boxes.getUserPaymentBox(
-                BigInt(getConfig().general.fee)
+                BigInt(getConfig().general.fee) * 2n
               )
             );
           });
