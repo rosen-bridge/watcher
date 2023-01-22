@@ -1,7 +1,7 @@
 import { Observation } from '../../src/utils/interfaces';
 import { ErgoUtils, extractBoxes } from '../../src/ergo/utils';
 import { uint8ArrayToHex } from '../../src/utils/utils';
-import { boxCreationError } from '../../src/errors/errors';
+import { ChangeBoxCreationError } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { Address } from 'ergo-lib-wasm-nodejs';
 import { initMockedAxios } from '../ergo/objects/axios';
@@ -117,7 +117,7 @@ describe('Testing ergoUtils', () => {
       ];
       expect(function () {
         ErgoUtils.createChangeBox(boxes, outputs, 10, secret);
-      }).to.throw(boxCreationError);
+      }).to.throw(ChangeBoxCreationError);
     });
 
     /**
@@ -138,7 +138,7 @@ describe('Testing ergoUtils', () => {
       );
       expect(function () {
         ErgoUtils.createChangeBox(boxes, [builder.build()], 10, secret);
-      }).to.throw(boxCreationError);
+      }).to.throw(ChangeBoxCreationError);
     });
 
     /**
