@@ -3,7 +3,7 @@ import { ErgoBox } from 'ergo-lib-wasm-nodejs';
 import { Observation } from '../utils/interfaces';
 import { bigIntToUint8Array } from '../utils/utils';
 import { ErgoNetwork } from './network/ergoNetwork';
-import { boxCreationError, NotEnoughFund } from '../errors/errors';
+import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 import { blake2b } from 'blakejs';
 import { Buffer } from 'buffer';
 import { getConfig } from '../config/config';
@@ -89,23 +89,29 @@ export class ErgoUtils {
           : wasm.Contract.pay_to_address(secret.get_address()),
         height
       );
-      Object.entries(tokens).forEach(([key, value]) => {
+      Object.entries(tokens).forEach(([token, value]) => {
         if (value > 0) {
           change.add_token(
-            wasm.TokenId.from_str(key),
+            wasm.TokenId.from_str(token),
             wasm.TokenAmount.from_i64(wasm.I64.from_str(value.toString()))
           );
         } else if (value < 0) {
-          throw new boxCreationError();
+          throw new ChangeBoxCreationError(
+            `Not enough token [${token}] in the input boxes, require ${
+              -1n * value
+            } more.`
+          );
         }
       });
       return change.build();
     } else if (value < 0) {
       throw new NotEnoughFund();
     } else {
-      Object.entries(tokens).forEach(([, value]) => {
+      Object.entries(tokens).forEach(([token, value]) => {
         if (value !== BigInt(0)) {
-          throw new boxCreationError();
+          throw new ChangeBoxCreationError(
+            `Token [${token}] with value ${value} is present in the inputs but absent in the outputs.`
+          );
         }
       });
     }

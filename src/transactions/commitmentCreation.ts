@@ -2,7 +2,7 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { boxCreationError, NotEnoughFund } from '../errors/errors';
+import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 import { Transaction } from '../api/Transaction';
 import { hexStrToUint8Array } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
@@ -114,7 +114,7 @@ export class CommitmentCreation {
         `Commitment tx [${signed.id().to_str()}] submitted to the queue`
       );
     } catch (e) {
-      if (e instanceof boxCreationError) {
+      if (e instanceof ChangeBoxCreationError) {
         logger.warn(
           "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."
         );

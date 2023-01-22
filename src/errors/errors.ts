@@ -10,10 +10,10 @@ export class SecretError extends ConfigError {
   }
 }
 
-export class boxCreationError extends Error {
+export class ChangeBoxCreationError extends Error {
   constructor(message?: string) {
     super(message);
-    this.name = 'BoxCreationError';
+    this.name = 'ChangeBoxCreationError';
   }
 }
 

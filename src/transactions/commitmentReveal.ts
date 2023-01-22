@@ -4,7 +4,7 @@ import { Boxes } from '../ergo/boxes';
 import { Buffer } from 'buffer';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { boxCreationError, NotEnoughFund } from '../errors/errors';
+import { ChangeBoxCreationError } from '../errors/errors';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
@@ -65,7 +65,7 @@ export class CommitmentReveal {
       await this.txUtils.submitTransaction(signed, observation, TxType.TRIGGER);
       logger.info(`Trigger event created with txId [${signed.id().to_str()}]`);
     } catch (e) {
-      if (e instanceof boxCreationError) {
+      if (e instanceof ChangeBoxCreationError) {
         logger.warn(
           "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."
         );
@@ -131,7 +131,7 @@ export class CommitmentReveal {
               commitmentSet.observation,
               WIDs,
               await this.boxes.getUserPaymentBox(
-                BigInt(getConfig().general.fee)
+                BigInt(getConfig().general.fee) * 2n
               )
             );
           });
