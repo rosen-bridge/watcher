@@ -163,13 +163,27 @@ class WatcherUtils {
                   : currentDuplicateWIDs,
               []
             );
-            logger.info(
-              `There seems to be some duplicate commitments. It may cause some issues.`,
-              {
-                duplicateWIDs,
-                eventId: observation.requestId,
-              }
-            );
+
+            if (
+              Transaction.watcherWID &&
+              duplicateWIDs.includes(Transaction.watcherWID)
+            ) {
+              logger.warn(
+                `It seems that current watcher (and probably some other watchers) created duplicate commitments. It may cause some issues.`,
+                {
+                  duplicateWIDs,
+                  eventId: observation.requestId,
+                }
+              );
+            } else {
+              logger.info(
+                `There seems to be some duplicate commitments created by other watchers. It may cause some issues.`,
+                {
+                  duplicateWIDs,
+                  eventId: observation.requestId,
+                }
+              );
+            }
           }
 
           readyCommitments.push({
