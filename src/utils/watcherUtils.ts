@@ -3,7 +3,7 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
-import { uniqBy } from 'lodash-es';
+import { uniqBy, countBy, reduce } from 'lodash-es';
 
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { TxType } from '../database/entities/txEntity';
@@ -155,10 +155,19 @@ class WatcherUtils {
           const uniqueRelatedCommitments = uniqBy(relatedCommitments, 'WID');
 
           if (uniqueRelatedCommitments.length !== relatedCommitments.length) {
-            logger.warn(
+            const duplicateWIDs = reduce<ReturnType<typeof countBy>, string[]>(
+              countBy(relatedCommitments, 'WID'),
+              (currentDuplicateWIDs, commitmentsCount, wid) =>
+                commitmentsCount > 1
+                  ? [...currentDuplicateWIDs, wid]
+                  : currentDuplicateWIDs,
+              []
+            );
+            logger.info(
               `There seems to be some duplicate commitments. It may cause some issues.`,
               {
-                relatedCommitments,
+                duplicateWIDs,
+                eventId: observation.requestId,
               }
             );
           }
