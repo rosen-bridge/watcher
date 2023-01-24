@@ -7,6 +7,7 @@ import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 import { blake2b } from 'blakejs';
 import { Buffer } from 'buffer';
 import { getConfig } from '../config/config';
+import { Transaction } from '../api/Transaction';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -89,20 +90,27 @@ export class ErgoUtils {
           : wasm.Contract.pay_to_address(secret.get_address()),
         height
       );
-      Object.entries(tokens).forEach(([token, value]) => {
-        if (value > 0) {
-          change.add_token(
-            wasm.TokenId.from_str(token),
-            wasm.TokenAmount.from_i64(wasm.I64.from_str(value.toString()))
-          );
-        } else if (value < 0) {
-          throw new ChangeBoxCreationError(
-            `Not enough token [${token}] in the input boxes, require ${
-              -1n * value
-            } more.`
-          );
-        }
-      });
+      Object.entries(tokens)
+        /**
+         * This sort expression is added because the `wid` token should be the
+         * first token in the box, otherwise the permit script will reduce to false
+         * when creating a commitment
+         */
+        .sort((token) => (token[0] === Transaction.watcherWID ? -1 : 1))
+        .forEach(([token, value]) => {
+          if (value > 0) {
+            change.add_token(
+              wasm.TokenId.from_str(token),
+              wasm.TokenAmount.from_i64(wasm.I64.from_str(value.toString()))
+            );
+          } else if (value < 0) {
+            throw new ChangeBoxCreationError(
+              `Not enough token [${token}] in the input boxes, require ${
+                -1n * value
+              } more.`
+            );
+          }
+        });
       return change.build();
     } else if (value < 0) {
       throw new NotEnoughFund();
