@@ -54,30 +54,41 @@ export class ErgoUtils {
     const processBox = (
       box: wasm.ErgoBox | wasm.ErgoBoxCandidate,
       tokens: { [id: string]: bigint },
+      widTokensCount: { [id: string]: bigint },
       sign: number
     ) => {
       extractTokens(box.tokens()).forEach((token) => {
-        if (!Object.hasOwnProperty.call(tokens, token.id().to_str())) {
-          tokens[token.id().to_str()] = BigInt(
+        if (token.id().to_str() === Transaction.watcherWID) {
+          widTokensCount[Transaction.watcherWID] += BigInt(
             token.amount().as_i64().as_num() * sign
           );
         } else {
-          tokens[token.id().to_str()] += BigInt(
-            token.amount().as_i64().as_num() * sign
-          );
+          if (!Object.hasOwnProperty.call(tokens, token.id().to_str())) {
+            tokens[token.id().to_str()] = BigInt(
+              token.amount().as_i64().as_num() * sign
+            );
+          } else {
+            tokens[token.id().to_str()] += BigInt(
+              token.amount().as_i64().as_num() * sign
+            );
+          }
         }
       });
     };
     let value = BigInt(0);
     const tokens: { [id: string]: bigint } = {};
+    const widToken = {
+      [Transaction.watcherWID!]: 0n,
+    };
     extractBoxes(boxes).forEach((box) => {
       value += BigInt(box.value().as_i64().to_str());
-      processBox(box, tokens, 1);
+      processBox(box, tokens, widToken, 1);
     });
     candidates.forEach((candidate) => {
       value -= BigInt(candidate.value().as_i64().to_str());
-      processBox(candidate, tokens, -1);
+      processBox(candidate, tokens, widToken, -1);
     });
+
     if (
       value > BigInt(txFee + wasm.BoxValue.SAFE_USER_MIN().as_i64().as_num())
     ) {
@@ -90,27 +101,23 @@ export class ErgoUtils {
           : wasm.Contract.pay_to_address(secret.get_address()),
         height
       );
-      Object.entries(tokens)
-        /**
-         * This sort expression is added because the `wid` token should be the
-         * first token in the box, otherwise the permit script will reduce to false
-         * when creating a commitment
-         */
-        .sort((token) => (token[0] === Transaction.watcherWID ? -1 : 1))
-        .forEach(([token, value]) => {
-          if (value > 0) {
-            change.add_token(
-              wasm.TokenId.from_str(token),
-              wasm.TokenAmount.from_i64(wasm.I64.from_str(value.toString()))
-            );
-          } else if (value < 0) {
-            throw new ChangeBoxCreationError(
-              `Not enough token [${token}] in the input boxes, require ${
-                -1n * value
-              } more.`
-            );
-          }
-        });
+      [
+        ...(widToken[Transaction.watcherWID!] ? Object.entries(widToken) : []),
+        ...Object.entries(tokens),
+      ].forEach(([token, value]) => {
+        if (value > 0) {
+          change.add_token(
+            wasm.TokenId.from_str(token),
+            wasm.TokenAmount.from_i64(wasm.I64.from_str(value.toString()))
+          );
+        } else if (value < 0) {
+          throw new ChangeBoxCreationError(
+            `Not enough token [${token}] in the input boxes, require ${
+              -1n * value
+            } more.`
+          );
+        }
+      });
       return change.build();
     } else if (value < 0) {
       throw new NotEnoughFund();
