@@ -11,6 +11,7 @@ import {
   redeemedCommitment,
   unspentCommitment,
   unspentCommitment2,
+  unspentCommitmentDuplicate,
 } from '../database/mockedData';
 import { Boxes } from '../../src/ergo/boxes';
 import { secret1, userAddress } from '../ergo/transactions/permit';
@@ -260,6 +261,42 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
         TxStatus.REVEALED
       );
       expect(data).to.have.length(0);
+    });
+
+    /**
+     * Target:
+     * It should not return duplicate commitments
+     *
+     * Dependencies:
+     * - watcherDatabase
+     *
+     * Scenario:
+     * N/A
+     *
+     * Expected Output:
+     * The function should return a set with only one commitment
+     */
+    it('should not return duplicate commitments', async () => {
+      chai.spy.on(dataBase, 'getLastBlockHeight', () => 15);
+      chai.spy.on(dataBase, 'getConfirmedObservations', () => [
+        observationEntity1,
+      ]);
+      chai.spy.on(
+        dataBase,
+        'getStatusForObservations',
+        () => observationStatusCommitted
+      );
+      chai.spy.on(dataBase, 'commitmentsByEventId', () => [
+        unspentCommitment,
+        unspentCommitmentDuplicate,
+      ]);
+      chai.spy.on(dataBase, 'eventTriggerBySourceTxId', () => null);
+
+      const data = await watcherUtils.allReadyCommitmentSets();
+      const actual = data[0].commitments.length;
+
+      const expected = 1;
+      expect(actual).to.equal(expected);
     });
   });
 

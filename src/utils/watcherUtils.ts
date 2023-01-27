@@ -1,15 +1,20 @@
-import { WatcherDataBase } from '../database/models/watcherModel';
+import { Buffer } from 'buffer';
 import * as wasm from 'ergo-lib-wasm-nodejs';
+
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+
+import { uniqBy, countBy, reduce } from 'lodash-es';
+
+import { WatcherDataBase } from '../database/models/watcherModel';
 import { TxType } from '../database/entities/txEntity';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { Buffer } from 'buffer';
 import { NoObservationStatus } from '../errors/errors';
 import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
+import { logger } from '../log/Logger';
 
 class WatcherUtils {
   dataBase: WatcherDataBase;
@@ -147,8 +152,42 @@ class WatcherUtils {
           observation.requestId
         );
         if (!(await this.isMergeHappened(observation))) {
+          const uniqueRelatedCommitments = uniqBy(relatedCommitments, 'WID');
+
+          if (uniqueRelatedCommitments.length !== relatedCommitments.length) {
+            const duplicateWIDs = reduce<ReturnType<typeof countBy>, string[]>(
+              countBy(relatedCommitments, 'WID'),
+              (currentDuplicateWIDs, commitmentsCount, wid) =>
+                commitmentsCount > 1
+                  ? [...currentDuplicateWIDs, wid]
+                  : currentDuplicateWIDs,
+              []
+            );
+
+            if (
+              Transaction.watcherWID &&
+              duplicateWIDs.includes(Transaction.watcherWID)
+            ) {
+              logger.warn(
+                `It seems that current watcher (and probably some other watchers) created duplicate commitments. It may cause some issues.`,
+                {
+                  duplicateWIDs,
+                  eventId: observation.requestId,
+                }
+              );
+            } else {
+              logger.info(
+                `There seems to be some duplicate commitments created by other watchers. It may cause some issues.`,
+                {
+                  duplicateWIDs,
+                  eventId: observation.requestId,
+                }
+              );
+            }
+          }
+
           readyCommitments.push({
-            commitments: relatedCommitments.filter(
+            commitments: uniqueRelatedCommitments.filter(
               (commitment) => commitment.spendBlock == null
             ),
             observation: observation,

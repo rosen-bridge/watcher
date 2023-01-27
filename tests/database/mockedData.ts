@@ -196,8 +196,13 @@ export const observationStatusRevealed = new ObservationStatusEntity();
 observationStatusRevealed.status = TxStatus.REVEALED;
 
 export const unspentCommitment = new CommitmentEntity();
+export const unspentCommitmentDuplicate = new CommitmentEntity();
 export const unspentCommitment2 = new CommitmentEntity();
 export const redeemedCommitment = new CommitmentEntity();
+unspentCommitment.WID = 'WID1';
+unspentCommitmentDuplicate.WID = unspentCommitment.WID;
+unspentCommitment2.WID = 'WID2';
+redeemedCommitment.WID = 'WID3';
 redeemedCommitment.spendBlock = 'hash';
 
 const eventTrigger = new EventTriggerEntity();

@@ -1,7 +1,7 @@
 import { Observation } from '../../src/utils/interfaces';
 import { ErgoUtils, extractBoxes } from '../../src/ergo/utils';
 import { uint8ArrayToHex } from '../../src/utils/utils';
-import { boxCreationError } from '../../src/errors/errors';
+import { ChangeBoxCreationError } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { Address } from 'ergo-lib-wasm-nodejs';
 import { initMockedAxios } from '../ergo/objects/axios';
@@ -12,6 +12,8 @@ import chai from 'chai';
 import spies from 'chai-spies';
 
 import boxesJson from './dataset/boxes.json' assert { type: 'json' };
+import permitBox from './dataset/permitBox.json' assert { type: 'json' };
+import WIDBox from './dataset/WIDBox.json' assert { type: 'json' };
 
 initMockedAxios();
 chai.use(spies);
@@ -47,6 +49,8 @@ const userSecret = wasm.SecretKey.dlog_from_bytes(
 );
 import repoObj from './dataset/repoBox.json' assert { type: 'json' };
 import { getConfig } from '../../src/config/config';
+import { Transaction } from '../../src/api/Transaction';
+import sinon from 'sinon';
 
 const repoBox = JSON.stringify(repoObj);
 
@@ -117,7 +121,7 @@ describe('Testing ergoUtils', () => {
       ];
       expect(function () {
         ErgoUtils.createChangeBox(boxes, outputs, 10, secret);
-      }).to.throw(boxCreationError);
+      }).to.throw(ChangeBoxCreationError);
     });
 
     /**
@@ -138,7 +142,7 @@ describe('Testing ergoUtils', () => {
       );
       expect(function () {
         ErgoUtils.createChangeBox(boxes, [builder.build()], 10, secret);
-      }).to.throw(boxCreationError);
+      }).to.throw(ChangeBoxCreationError);
     });
 
     /**
@@ -179,6 +183,39 @@ describe('Testing ergoUtils', () => {
       expect(res).to.not.null;
       expect(res?.value().as_i64().as_num()).to.eql(totalValue - 2 * txFee);
       expect(res?.tokens().get(0).amount().as_i64().as_num()).to.eql(90);
+    });
+
+    /**
+     * Target:
+     * It should put wid token (if any) as the first token of the change box
+     *
+     * Dependencies:
+     * - `Transaction.watcherWID`
+     *
+     * Scenario:
+     * N/A
+     *
+     * Expected output:
+     * The first token of generated change box should be wid (if present)
+     */
+    it('should put wid token (if any) as the first token of the change box', () => {
+      const wid = WIDBox.assets[0].tokenId;
+      sinon.stub(Transaction, 'watcherWID').value(wid);
+
+      const res = ErgoUtils.createChangeBox(
+        /**
+         * `permitBox` is used here just to fill the first index and can be
+         * replaced with any other box
+         */
+        wasm.ErgoBoxes.from_boxes_json([permitBox, WIDBox]),
+        [],
+        10,
+        secret
+      );
+
+      const expected = wid;
+      const actual = res?.tokens().get(0).id().to_str();
+      expect(actual).to.eql(expected);
     });
   });
 
