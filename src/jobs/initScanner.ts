@@ -5,9 +5,11 @@ import {
 } from '@rosen-bridge/scanner';
 
 import * as Constants from '../config/constants';
-import { logger } from '../log/Logger';
+import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
 import { scanner } from '../utils/scanner';
+
+const logger = loggerFactory(import.meta.url);
 
 const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   try {

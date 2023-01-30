@@ -11,8 +11,10 @@ import {
 import { JsonBI } from './parser';
 import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
-import { logger } from '../../log/Logger';
+import { loggerFactory } from '../../log/Logger';
 import { getConfig } from '../../config/config';
+
+const logger = loggerFactory(import.meta.url);
 
 export const explorerApi = axios.create({
   baseURL: getConfig().general.explorerUrl,

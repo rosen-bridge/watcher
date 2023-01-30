@@ -1,7 +1,9 @@
 import { Request, Response, Router } from 'express';
 import { ApiResponse, Transaction } from './Transaction';
 import { body, validationResult } from 'express-validator';
-import { logger } from '../log/Logger';
+import { loggerFactory } from '../log/Logger';
+
+const logger = loggerFactory(import.meta.url);
 
 const permitRouter = Router();
 permitRouter.post(

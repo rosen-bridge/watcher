@@ -14,7 +14,9 @@ import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
-import { logger } from '../log/Logger';
+import { loggerFactory } from '../log/Logger';
+
+const logger = loggerFactory(import.meta.url);
 
 class WatcherUtils {
   dataBase: WatcherDataBase;

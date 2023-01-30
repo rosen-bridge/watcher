@@ -28,7 +28,9 @@ import WIDObj2 from './dataset/WIDBox2.json' assert { type: 'json' };
 import WIDObj3 from './dataset/WIDBox3.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
-import { logger } from '../../../src/log/Logger';
+import { loggerFactory } from '../../../src/log/Logger';
+
+const logger = loggerFactory(import.meta.url);
 
 chai.use(spies);
 
