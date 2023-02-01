@@ -45,3 +45,5 @@ logs:
   level: info # logging level
   maxSize: 20m # maximum file size for rotation
   maxFiles: 14d # maximum rotated files available
+api:
+  port: 3000 # port used to run express server
