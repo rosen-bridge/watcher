@@ -24,11 +24,11 @@ interface ConfigType {
 
 const getRequiredNumber = (path: string) => {
   if (!config.has(path)) {
-    throw new Error(`ImproperlyConfigured. ${path} not defined`);
+    throw new Error(`ImproperlyConfigured. ${path} is not defined`);
   }
   const value = config.get<number>(path);
   if (isNaN(value)) {
-    throw new Error(`ImproperlyConfigured. ${path} not a number`);
+    throw new Error(`ImproperlyConfigured. ${path} is not a number`);
   }
   return value;
 };
@@ -37,7 +37,7 @@ const getOptionalNumber = (path: string, defaultValue: number) => {
   if (config.has(path)) {
     const value = config.get<number>(path);
     if (isNaN(value)) {
-      throw new Error(`ImproperlyConfigured. ${path} not a number`);
+      throw new Error(`ImproperlyConfigured. ${path} is not a number`);
     }
     return value;
   }
@@ -46,7 +46,7 @@ const getOptionalNumber = (path: string, defaultValue: number) => {
 
 const getRequiredString = (path: string) => {
   if (!config.has(path)) {
-    throw new Error(`ImproperlyConfigured. ${path} not defined`);
+    throw new Error(`ImproperlyConfigured. ${path} is not defined`);
   }
   return config.get<string>(path);
 };
