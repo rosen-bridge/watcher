@@ -51,7 +51,7 @@ const init = async () => {
     router.use('/statistics', statisticsRouter);
 
     app.use(router);
-    const port = process.env.PORT || 3000;
+    const port = getConfig().general.apiPort;
 
     app.listen(port, () => logger.info(`App listening on port ${port}`));
   };
