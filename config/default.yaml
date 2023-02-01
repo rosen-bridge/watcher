@@ -53,3 +53,5 @@ database:
   # user: '' # database user (for postgres)
   # password: '' # database password (for postgres)
   # name: '' # database name (for postgres)
+api:
+  port: 3000 # port used to run express server
