@@ -17,8 +17,10 @@ import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 
 import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
-import { logger } from '../log/Logger';
+import { loggerFactory } from '../log/Logger';
 import * as Constants from '../config/constants';
+
+const logger = loggerFactory(import.meta.url);
 
 const allConfig = getConfig();
 const {

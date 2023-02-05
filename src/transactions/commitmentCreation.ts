@@ -8,8 +8,10 @@ import { hexStrToUint8Array } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
-import { logger } from '../log/Logger';
+import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+
+const logger = loggerFactory(import.meta.url);
 
 export class CommitmentCreation {
   watcherUtils: WatcherUtils;

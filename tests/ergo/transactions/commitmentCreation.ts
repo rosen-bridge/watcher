@@ -28,7 +28,6 @@ import WIDObj2 from './dataset/WIDBox2.json' assert { type: 'json' };
 import WIDObj3 from './dataset/WIDBox3.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
-import { logger } from '../../../src/log/Logger';
 
 chai.use(spies);
 
@@ -188,7 +187,7 @@ describe('Commitment creation transaction tests', () => {
      *   Should log a not enough fund error due to erg insufficiency
      */
     it('Should throw error while creating commitment transaction', async () => {
-      chai.spy.on(logger, 'warn');
+      chai.spy.on(ErgoUtils, 'createAndSignTx');
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       await cc.createCommitmentTx(
@@ -200,7 +199,7 @@ describe('Commitment creation transaction tests', () => {
         [],
         100000000n
       );
-      expect(logger.warn).to.have.called.with(notEnoughFund);
+      expect(ErgoUtils.createAndSignTx).to.not.called;
       sinon.restore();
     });
   });

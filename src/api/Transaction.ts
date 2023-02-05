@@ -3,8 +3,10 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { hexStrToUint8Array, uint8ArrayToHex } from '../utils/utils';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
-import { logger } from '../log/Logger';
+import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+
+const logger = loggerFactory(import.meta.url);
 
 export type ApiResponse = {
   response: string;

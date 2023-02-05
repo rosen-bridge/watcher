@@ -4,8 +4,10 @@ import { WatcherDataBase } from '../../database/models/watcherModel';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { base64ToArrayBuffer } from '../../utils/utils';
 import { WatcherUtils } from '../../utils/watcherUtils';
-import { logger } from '../../log/Logger';
+import { loggerFactory } from '../../log/Logger';
 import { getConfig } from '../../config/config';
+
+const logger = loggerFactory(import.meta.url);
 
 export class Queue {
   database: WatcherDataBase;

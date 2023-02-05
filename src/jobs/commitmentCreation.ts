@@ -1,8 +1,10 @@
 import { CommitmentCreation } from '../transactions/commitmentCreation';
 import { Boxes } from '../ergo/boxes';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
-import { logger } from '../log/Logger';
+import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+
+const logger = loggerFactory(import.meta.url);
 
 let commitmentCreatorObj: CommitmentCreation;
 

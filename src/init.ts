@@ -13,8 +13,10 @@ import { delay } from './utils/utils';
 import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
 import Statistics from './statistics/statistics';
 import { statisticsRouter } from './statistics/apis';
-import { logger } from './log/Logger';
+import { loggerFactory } from './log/Logger';
 import { getConfig } from './config/config';
+
+const logger = loggerFactory(import.meta.url);
 
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;

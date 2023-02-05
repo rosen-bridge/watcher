@@ -1,8 +1,10 @@
 import { Queue } from '../ergo/transaction/queue';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { WatcherUtils } from '../utils/watcherUtils';
-import { logger } from '../log/Logger';
+import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+
+const logger = loggerFactory(import.meta.url);
 
 let transactionQueue: Queue;
 
