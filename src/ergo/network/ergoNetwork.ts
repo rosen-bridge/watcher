@@ -289,7 +289,7 @@ export class ErgoNetwork {
           message = e.response;
         }
         logger.warn(
-          `An error occurred while getting confirmed transaction from Explorer: ${e.message}`
+          `An error occurred while getting confirmed transaction from Explorer: ${message}`
         );
         throw ConnectionError;
       });
@@ -314,7 +314,7 @@ export class ErgoNetwork {
           message = e.response;
         }
         logger.warn(
-          `An error occurred while getting unconfirmed transaction from Explorer: ${e.message}`
+          `An error occurred while getting unconfirmed transaction from Explorer: ${message}`
         );
         throw ConnectionError;
       });
