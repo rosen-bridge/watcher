@@ -21,15 +21,16 @@ type Asset = {
   name: string;
 };
 
-export interface ErgoBoxJson {
+export interface ExplorerBox {
   boxId: string;
   address: string;
   value: bigint;
   assets?: Array<Asset>;
+  spentTransactionId: string;
 }
 
-export interface AddressBoxes {
-  items: Array<ErgoBoxJson>;
+export interface ExplorerBoxes {
+  items: Array<ExplorerBox>;
   total: number;
 }
 
