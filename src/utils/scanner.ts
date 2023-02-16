@@ -20,8 +20,6 @@ import { dataSource } from '../../config/dataSource';
 import { loggerFactory } from '../log/Logger';
 import * as Constants from '../config/constants';
 
-const logger = loggerFactory(import.meta.url);
-
 const allConfig = getConfig();
 const {
   general: config,
@@ -29,6 +27,21 @@ const {
   rosen: rosenConfig,
   cardano: cardanoConfig,
 } = allConfig;
+
+/**
+ * Creates loggers for scanners and extractors
+ * @returns loggers object
+ */
+const createLoggers = () => ({
+  commitmentExtractorLogger: loggerFactory('commitment-extractor'),
+  eventTriggerExtractorLogger: loggerFactory('event-trigger-extractor'),
+  observationExtractorLogger: loggerFactory('observation-extractor'),
+  permitExtractorLogger: loggerFactory('permit-extractor'),
+  plainExtractorLogger: loggerFactory('plain-extractor'),
+  scannerLogger: loggerFactory('scanner'),
+});
+
+const loggers = createLoggers();
 
 class CreateScanner {
   ergoScanner: ErgoNodeScanner;
@@ -54,14 +67,17 @@ class CreateScanner {
       initialHeight: config.ergoInitialHeight,
       dataSource: dataSource,
     };
-    this.ergoScanner = new ErgoNodeScanner(ergoScannerConfig, logger);
+    this.ergoScanner = new ErgoNodeScanner(
+      ergoScannerConfig,
+      loggers.scannerLogger
+    );
     if (config.networkWatcher === Constants.ERGO_WATCHER) {
       this.observationScanner = this.ergoScanner;
       const observationExtractor = new ErgoObservationExtractor(
         dataSource,
         tokensConfig,
         rosenConfig.lockAddress,
-        logger
+        loggers.observationExtractorLogger
       );
       this.observationScanner.registerExtractor(observationExtractor);
     }
@@ -70,7 +86,7 @@ class CreateScanner {
       [rosenConfig.commitmentAddress],
       rosenConfig.RWTId,
       dataSource,
-      logger
+      loggers.commitmentExtractorLogger
     );
     const permitExtractor = new PermitExtractor(
       Constants.PERMIT_EXTRACTOR_NAME,
@@ -78,14 +94,14 @@ class CreateScanner {
       rosenConfig.watcherPermitAddress,
       rosenConfig.RWTId,
       config.explorerUrl,
-      logger
+      loggers.permitExtractorLogger
     );
     const eventTriggerExtractor = new EventTriggerExtractor(
       Constants.TRIGGER_EXTRACTOR_NAME,
       dataSource,
       rosenConfig.eventTriggerAddress,
       rosenConfig.RWTId,
-      logger
+      loggers.eventTriggerExtractorLogger
     );
     const plainExtractor = new ErgoUTXOExtractor(
       dataSource,
@@ -94,7 +110,7 @@ class CreateScanner {
       config.explorerUrl,
       config.address,
       undefined, // Token constraint not needed
-      logger
+      loggers.plainExtractorLogger
     );
     this.ergoScanner.registerExtractor(commitmentExtractor);
     this.ergoScanner.registerExtractor(permitExtractor);
@@ -113,13 +129,13 @@ class CreateScanner {
             initialHash: cardanoConfig.ogmios.initialHash,
             initialSlot: cardanoConfig.ogmios.initialSlot,
           },
-          logger
+          loggers.scannerLogger
         );
         const observationExtractor = new CardanoOgmiosObservationExtractor(
           dataSource,
           tokensConfig,
           rosenConfig.lockAddress,
-          logger
+          loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
       } else if (cardanoConfig.koios) {
@@ -130,13 +146,13 @@ class CreateScanner {
             timeout: cardanoConfig.koios.timeout,
             initialHeight: cardanoConfig.koios.initialHeight,
           },
-          logger
+          loggers.scannerLogger
         );
         const observationExtractor = new CardanoKoiosObservationExtractor(
           dataSource,
           tokensConfig,
           rosenConfig.lockAddress,
-          logger
+          loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
       }
