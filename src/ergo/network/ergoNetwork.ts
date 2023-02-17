@@ -7,6 +7,7 @@ import {
   ExplorerTransaction,
   TxInput,
   TxOutput,
+  NodeBoxes,
 } from './types';
 import { JsonBI } from './parser';
 import { ergoTreeToBase58Address } from '../../utils/utils';
@@ -264,7 +265,7 @@ export class ErgoNetwork {
    * @param id
    */
   static unspentErgoBoxById = (id: string): Promise<wasm.ErgoBox> => {
-    return nodeClient.get<ExplorerBoxes>(`utxo/byId/${id}`).then((res) => {
+    return nodeClient.get<NodeBoxes>(`utxo/byId/${id}`).then((res) => {
       return wasm.ErgoBox.from_json(JSON.stringify(res.data));
     });
   };
