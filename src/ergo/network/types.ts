@@ -51,11 +51,6 @@ export interface NodeBox {
   spentTransactionId: string;
 }
 
-export interface NodeBoxes {
-  items: Array<NodeBox>;
-  total: number;
-}
-
 export interface ExplorerTransaction {
   id: string;
   creationTimestamp: number;
