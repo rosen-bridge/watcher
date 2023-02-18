@@ -14,6 +14,7 @@ import { expect } from 'chai';
 import { JsonBI } from '../../../src/ergo/network/parser';
 import commitmentTxObj from '../transactions/dataset/commitmentTx.json' assert { type: 'json' };
 import txObj from '../dataset/tx.json' assert { type: 'json' };
+import sinon from 'sinon';
 
 initMockedAxios();
 const commitmentTx = wasm.Transaction.from_json(
@@ -233,15 +234,28 @@ describe('Ergo Network(API)', () => {
   });
 
   /**
-   * boxById function tests
+   * unspentErgoBoxById function tests
    */
-  describe('boxById', () => {
+  describe('unspentErgoBoxById', () => {
     /**
      * should return the box with the specified id
      */
     it('should return a box', async () => {
-      const res = await ErgoNetwork.boxById(boxId);
+      const res = await ErgoNetwork.unspentErgoBoxById(boxId);
       expect(res.box_id().to_str()).to.eql(boxId);
+    });
+  });
+
+  /**
+   * explorerBoxById function tests
+   */
+  describe('explorerBoxById', () => {
+    /**
+     * should return the box with the specified id
+     */
+    it('should return a box', async () => {
+      const res = await ErgoNetwork.explorerBoxById(boxId);
+      expect(res.boxId).to.eql(boxId);
     });
   });
 
@@ -290,22 +304,44 @@ describe('Ergo Network(API)', () => {
   });
 
   /**
-   * txInputsCheck function tests
+   * checkTxInputs function tests
    */
-  describe('txInputsCheck', () => {
+  describe('checkTxInputs', () => {
     /**
      * The function checks the inputs and return false if any of them is spent
      */
     it('Returns false because tx inputs are spent', async () => {
-      const data = await ErgoNetwork.checkTxInputs(commitmentTx.inputs());
+      const data = await ErgoNetwork.checkTxInputs(
+        commitmentTx.id().to_str(),
+        commitmentTx.inputs()
+      );
       expect(data).to.false;
     });
     /**
      * The function should return true cause all inputs are unspent
      */
     it('Returns true because tx inputs are all unspent', async () => {
-      const data = await ErgoNetwork.checkTxInputs(tx.inputs());
+      sinon.stub(ErgoNetwork, 'explorerBoxById').resolves({} as any);
+      const data = await ErgoNetwork.checkTxInputs(
+        tx.id().to_str(),
+        tx.inputs()
+      );
       expect(data).to.true;
+      sinon.restore();
+    });
+    /**
+     * The function should return true cause all inputs are spent but in the same tx
+     */
+    it('Returns true because tx inputs are all unspent', async () => {
+      sinon.stub(ErgoNetwork, 'explorerBoxById').resolves({
+        spentTransactionId: txObj.id,
+      } as any);
+      const data = await ErgoNetwork.checkTxInputs(
+        tx.id().to_str(),
+        tx.inputs()
+      );
+      expect(data).to.true;
+      sinon.restore();
     });
   });
 });
