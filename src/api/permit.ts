@@ -6,6 +6,11 @@ import { loggerFactory } from '../log/Logger';
 const logger = loggerFactory(import.meta.url);
 
 const permitRouter = Router();
+
+/**
+ * Api for creating permit in exchange of RSN
+ * @param count {number} the amount of RSN to change into permit
+ */
 permitRouter.post(
   '',
   body('count').notEmpty().withMessage('key count is required!').isString(),
@@ -32,6 +37,10 @@ permitRouter.post(
   }
 );
 
+/**
+ * Api for returning permit and return the RSN to user
+ * @param count {number} the amount of RWT (permit) to return
+ */
 permitRouter.post(
   '/return',
   body('count').notEmpty().withMessage('key count is required!').isString(),
