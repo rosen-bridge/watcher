@@ -8,6 +8,9 @@ const logger = loggerFactory(import.meta.url);
 
 const addressRouter = express.Router();
 
+/**
+ * Api for generating secret key
+ */
 addressRouter.get('/generate', async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
