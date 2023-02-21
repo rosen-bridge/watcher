@@ -125,7 +125,7 @@ class CreateScanner {
           {
             dataSource: dataSource,
             koiosUrl: cardanoConfig.koios.url,
-            timeout: cardanoConfig.koios.timeout,
+            timeout: cardanoConfig.koios.timeout * 1000,
             initialHeight: cardanoConfig.koios.initialHeight,
           },
           logger
