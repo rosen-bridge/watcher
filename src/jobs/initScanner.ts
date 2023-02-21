@@ -30,7 +30,7 @@ export const scannerInit = () => {
       (scanner.observationScanner as CardanoOgmiosScanner).start();
     else if (cardanoConfig.koios) {
       scanningJob(
-        cardanoConfig.koios.interval,
+        cardanoConfig.koios.interval * 1000,
         scanner.observationScanner as CardanoKoiosScanner
       ).then(() => null);
     } else {
