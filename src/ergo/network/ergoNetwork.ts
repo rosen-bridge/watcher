@@ -291,13 +291,13 @@ export class ErgoNetwork {
         return res.data;
       })
       .catch((e) => {
-        let message = 'Explorer is unavailable';
+        let message = 'Explorer is unavailable: ';
         if (e.response) {
           if (e.response.status == 404) return null;
-          message = e.response;
-        }
+          else message += `[${e.response.status}: ${e.response.data.reason}]`;
+        } else message += `[${e}]`;
         logger.warn(
-          `An error occurred while getting confirmed transaction from Explorer: ${message}`
+          `An error occurred while getting confirmed transaction from Explorer: [${message}]`
         );
         throw ConnectionError;
       });
@@ -316,13 +316,13 @@ export class ErgoNetwork {
         return res.data;
       })
       .catch((e) => {
-        let message = 'Explorer is unavailable';
+        let message = 'Explorer is unavailable: ';
         if (e.response) {
           if (e.response.status == 404) return null;
-          message = e.response;
-        }
+          else message += `[${e.response.status}: ${e.response.data.reason}]`;
+        } else message += `[${e}]`;
         logger.warn(
-          `An error occurred while getting unconfirmed transaction from Explorer: ${message}`
+          `An error occurred while getting unconfirmed transaction from Explorer: [${message}]`
         );
         throw ConnectionError;
       });
