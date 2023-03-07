@@ -1,12 +1,10 @@
-import { DataSource } from 'typeorm';
-import { getConfig } from '../src/config/config';
 import {
   BoxEntity,
   migrations as addressExtractorMigrations,
 } from '@rosen-bridge/address-extractor';
 import {
-  ObservationEntity,
   migrations as observationMigrations,
+  ObservationEntity,
 } from '@rosen-bridge/observation-extractor';
 import {
   BlockEntity,
@@ -15,9 +13,11 @@ import {
 import {
   CommitmentEntity,
   EventTriggerEntity,
-  PermitEntity,
   migrations as watcherDataExtractorMigrations,
+  PermitEntity,
 } from '@rosen-bridge/watcher-data-extractor';
+import { DataSource } from 'typeorm';
+import { getConfig } from '../src/config/config';
 
 import { ObservationStatusEntity } from '../src/database/entities/observationStatusEntity';
 import { TxEntity } from '../src/database/entities/txEntity';

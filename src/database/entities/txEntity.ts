@@ -4,6 +4,7 @@ import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 export enum TxType {
   COMMITMENT = 'commitment',
   TRIGGER = 'trigger',
+  DETACH = 'detach',
 }
 
 @Entity()
