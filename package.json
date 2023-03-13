@@ -62,7 +62,7 @@
     "@emurgo/cip14-js": "^3.0.1",
     "@rosen-bridge/address-extractor": "^0.2.9",
     "@rosen-bridge/observation-extractor": "^0.3.7-prerelease",
-    "@rosen-bridge/scanner": "^0.4.4",
+    "@rosen-bridge/scanner": "^0.4.6",
     "@rosen-bridge/watcher-data-extractor": "^0.2.12",
     "axios": "^0.26.1",
     "blakejs": "^1.2.1",
