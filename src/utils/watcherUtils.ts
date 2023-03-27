@@ -216,18 +216,22 @@ class TransactionUtils {
    */
   submitTransaction = async (
     tx: wasm.Transaction,
-    observation: ObservationEntity,
-    txType: TxType
+    txType: TxType,
+    observation?: ObservationEntity
   ) => {
     const height = await ErgoNetwork.getHeight();
+    let requestId = undefined;
+    if (observation) {
+      await this.dataBase.upgradeObservationTxStatus(observation);
+      requestId = observation.requestId;
+    }
     await this.dataBase.submitTx(
       Buffer.from(tx.sigma_serialize_bytes()).toString('base64'),
-      observation.requestId,
       tx.id().to_str(),
       txType,
-      height
+      height,
+      requestId
     );
-    await this.dataBase.upgradeObservationTxStatus(observation);
   };
 }
 

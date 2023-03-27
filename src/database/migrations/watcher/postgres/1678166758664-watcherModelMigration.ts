@@ -17,7 +17,7 @@ export class watcherModelMigration1678166758664 implements MigrationInterface {
             )
         `);
     await queryRunner.query(`
-            CREATE TYPE "public"."tx_entity_type_enum" AS ENUM('commitment', 'trigger')
+            CREATE TYPE "public"."tx_entity_type_enum" AS ENUM('commitment', 'trigger', 'detach')
         `);
     await queryRunner.query(`
             CREATE TABLE "tx_entity" (

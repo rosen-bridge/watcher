@@ -30,8 +30,8 @@ export class TxEntity {
   @Column()
   txSerialized: string;
 
-  @ManyToOne('ObservationEntity', 'id')
-  observation: Relation<ObservationEntity>;
+  @ManyToOne('ObservationEntity', 'id', { nullable: true })
+  observation?: Relation<ObservationEntity>;
 
   @Column()
   deleted: boolean;

@@ -109,8 +109,8 @@ export class CommitmentCreation {
       );
       await this.txUtils.submitTransaction(
         signed,
-        observation,
-        TxType.COMMITMENT
+        TxType.COMMITMENT,
+        observation
       );
       logger.info(
         `Commitment tx [${signed.id().to_str()}] submitted to the queue`

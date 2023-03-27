@@ -119,22 +119,26 @@ class WatcherDataBase {
    */
   submitTx = async (
     tx: string,
-    requestId: string,
     txId: string,
     txType: TxType,
-    height: number
+    height: number,
+    requestId?: string
   ) => {
-    const observation: ObservationEntity | null =
-      await this.observationRepository.findOne({
+    let observation: ObservationEntity | undefined | null = undefined;
+    if (requestId) {
+      observation = await this.observationRepository.findOne({
         where: { requestId: requestId },
       });
-    if (!observation)
-      throw new Error('Observation with this request id is not found');
-    const observationStatus = await this.getStatusForObservations(observation);
-    if (observationStatus === null)
-      throw new Error(
-        `observation with requestId ${observation.requestId} has no status`
+      if (!observation)
+        throw new Error('Observation with this request id is not found');
+      const observationStatus = await this.getStatusForObservations(
+        observation
       );
+      if (observationStatus === null)
+        throw new Error(
+          `observation with requestId ${observation.requestId} has no status`
+        );
+    }
     const time = new Date().getTime();
     return await this.txRepository.insert({
       txId: txId,

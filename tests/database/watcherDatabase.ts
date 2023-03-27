@@ -291,18 +291,18 @@ describe('WatcherModel tests', () => {
       );
       await DB.submitTx(
         Buffer.from(commitmentTx.sigma_serialize_bytes()).toString('base64'),
-        'reqId1',
         commitmentTx.id().to_str(),
         TxType.COMMITMENT,
-        1000
+        1000,
+        'reqId1'
       );
       const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
       await DB.submitTx(
         Buffer.from(tx.sigma_serialize_bytes()).toString('base64'),
-        'reqId1',
         tx.id().to_str(),
         TxType.TRIGGER,
-        1000
+        1000,
+        'reqId1'
       );
     });
   });
