@@ -217,6 +217,45 @@ describe('Testing ergoUtils', () => {
       const actual = res?.tokens().get(0).id().to_str();
       expect(actual).to.eql(expected);
     });
+
+    /**
+     * @target ErgoUtils.createChangeBox should create a change box with correct amount of tokens
+     * @dependencies
+     * @scenario
+     * - mock tokenBox to have a token with a large amount (bigger than number.MAX_SAFE)
+     * - run test
+     * - check output has the same number of tokens
+     * @expected
+     * - it should assume value and token amounts as BigInt type
+     */
+    it('should create the change box with correct amount of tokens', () => {
+      const tokenAmount = '987654321987654321';
+      const boxTokens: wasm.Tokens = new wasm.Tokens();
+      boxTokens.add(
+        new wasm.Token(
+          wasm.TokenId.from_str(tokenId),
+          wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount))
+        )
+      );
+
+      const tokenBox = new wasm.ErgoBox(
+        wasm.BoxValue.from_i64(wasm.I64.from_str('100000000')),
+        10000,
+        wasm.Contract.pay_to_address(wasm.Address.from_base58(userAddress)),
+        wasm.TxId.from_str(observation.sourceTxId),
+        0,
+        boxTokens
+      );
+      const res = ErgoUtils.createChangeBox(
+        new wasm.ErgoBoxes(tokenBox),
+        [],
+        10,
+        secret
+      );
+
+      const outToken = res?.tokens().get(0).amount().as_i64().to_str();
+      expect(outToken).to.eql(tokenAmount);
+    });
   });
 
   describe('buildTxAndSign', () => {
