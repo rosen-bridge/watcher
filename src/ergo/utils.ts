@@ -59,18 +59,15 @@ export class ErgoUtils {
     ) => {
       extractTokens(box.tokens()).forEach((token) => {
         if (token.id().to_str() === Transaction.watcherWID) {
-          widTokensCount[Transaction.watcherWID] += BigInt(
-            token.amount().as_i64().as_num() * sign
-          );
+          widTokensCount[Transaction.watcherWID] +=
+            BigInt(token.amount().as_i64().to_str()) * BigInt(sign);
         } else {
           if (!Object.hasOwnProperty.call(tokens, token.id().to_str())) {
-            tokens[token.id().to_str()] = BigInt(
-              token.amount().as_i64().as_num() * sign
-            );
+            tokens[token.id().to_str()] =
+              BigInt(token.amount().as_i64().to_str()) * BigInt(sign);
           } else {
-            tokens[token.id().to_str()] += BigInt(
-              token.amount().as_i64().as_num() * sign
-            );
+            tokens[token.id().to_str()] +=
+              BigInt(token.amount().as_i64().to_str()) * BigInt(sign);
           }
         }
       });
