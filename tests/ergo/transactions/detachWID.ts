@@ -35,6 +35,11 @@ describe('DetachWID', () => {
     txUtils = new TransactionUtils(watcherDb);
   });
 
+  afterEach(() => {
+    sinon.restore();
+    chai.spy.restore(txUtils);
+  });
+
   /**
    * @target DetachWID.detachWIDTx should create and submit a detach wid transaction
    * @dependencies
@@ -67,8 +72,6 @@ describe('DetachWID', () => {
       TxType.DETACH
     );
     expect(boxes.getUserPaymentBox).to.not.have.been.called();
-    sinon.restore();
-    chai.spy.restore(txUtils);
   });
 
   /**
@@ -114,7 +117,5 @@ describe('DetachWID', () => {
       TxType.DETACH
     );
     expect(boxes.getUserPaymentBox).to.have.been.called();
-    sinon.restore();
-    chai.spy.restore(txUtils);
   });
 });

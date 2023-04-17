@@ -33,8 +33,9 @@ class DetachWID {
     const candidates = [];
     try {
       const fee = BigInt(getConfig().general.fee);
-      if (WIDBox.value().as_i64().as_num() < fee) {
-        const feeBoxes = await boxes.getUserPaymentBox(fee, [
+      const minBoxValue = BigInt(getConfig().general.minBoxValue);
+      if (WIDBox.value().as_i64().as_num() < fee + minBoxValue) {
+        const feeBoxes = await boxes.getUserPaymentBox(fee + minBoxValue, [
           WIDBox.box_id().to_str(),
         ]);
         feeBoxes.forEach((box) => inputBoxes.add(box));
@@ -64,8 +65,9 @@ class DetachWID {
         );
       }
       logger.warn(
-        `Skipping the wid detach transaction due to occurred error: ${e.message} - ${e.stack}`
+        `Skipping the wid detach transaction due to occurred error: ${e.message}`
       );
+      logger.warn(`${e.stack}`);
     }
   };
 }

@@ -225,6 +225,7 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(boxes, 'getPermits', () => permits);
       chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
       chai.spy.on(boxes, 'getUserPaymentBox');
+      chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cc, 'createCommitmentTx', () => {
         return { txId: 'txId', commitmentBoxId: 'boxId' };
@@ -240,6 +241,7 @@ describe('Commitment creation transaction tests', () => {
         WIDBox,
         []
       );
+      expect(DetachWID.detachWIDtx).to.not.have.been.called();
     });
 
     /**
