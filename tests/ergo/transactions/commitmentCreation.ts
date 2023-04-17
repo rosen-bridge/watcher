@@ -204,18 +204,27 @@ describe('Commitment creation transaction tests', () => {
 
   describe('job', () => {
     /**
-     * Target: testing job
-     * Dependencies:
-     *    WatcherUtils
-     *    Boxes
-     *    Transaction
-     * Test Procedure:
-     *    1- Mocking environment
-     *    2- calling function
-     *    3- validate used functions with inputs
-     * Expected Output:
-     *    The function should collect all ready observations to create the commitment transaction
-     *    Since the box values is enough should not use an excess fee box
+     * @target CommitmentCreation.job should collect ready observations and create commitments
+     * @dependencies
+     * - WatcherUtils
+     * - Boxes
+     * - Transaction
+     * @scenario
+     * - mock allReadyObservations to return the mocked observation
+     * - mock getPermits to return the mocked permit
+     * - mock getWIDBox to return the mocked WIDBox
+     * - mock detachWID
+     * - mock getUserPaymentBox
+     * - mock WatcherWID to return the correct test WID
+     * - mock createCommitmentTx
+     * - run test
+     * - check calling createCommitmentTx
+     * - check not calling detach tx
+     * - check not calling getUserPaymentBox
+     * @expected
+     * - it should not call DetachWID.detachWIDtx since the WID token is the first token of WIDBox
+     * - It should not call getUserPaymentBox since the box values is enough
+     * - It should call the commitment tx with correct input values
      */
     it('Should collect ready observations and create commitments', async () => {
       chai.spy.on(watcherUtils, 'allReadyObservations', () => [observation]);

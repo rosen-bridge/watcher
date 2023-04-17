@@ -161,7 +161,10 @@ export class CommitmentCreation {
             'WID Token is not the first token in WID Box, trying to detach WID token.'
           );
           DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
-          throw new Error('Malformed WID box');
+          logger.info(
+            `Skipping the commitment creation due to having a malformed WID box`
+          );
+          continue;
         }
         const totalValue = ErgoUtils.getBoxValuesSum([...permits, WIDBox]);
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
