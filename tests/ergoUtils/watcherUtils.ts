@@ -406,8 +406,8 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
       chai.spy.on(dataBase, 'submitTx', () => undefined);
       await txUtils.submitTransaction(
         signedTx,
-        observationEntity1,
-        TxType.COMMITMENT
+        TxType.COMMITMENT,
+        observationEntity1
       );
       expect(dataBase.submitTx).to.have.been.called.with(
         Buffer.from(signedTx.sigma_serialize_bytes()).toString('base64'),

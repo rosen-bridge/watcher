@@ -64,7 +64,7 @@ export class CommitmentReveal {
         height,
         new wasm.ErgoBoxes(repoBox)
       );
-      await this.txUtils.submitTransaction(signed, observation, TxType.TRIGGER);
+      await this.txUtils.submitTransaction(signed, TxType.TRIGGER, observation);
       logger.info(`Trigger event created with txId [${signed.id().to_str()}]`);
     } catch (e) {
       if (e instanceof ChangeBoxCreationError) {

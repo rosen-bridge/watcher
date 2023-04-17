@@ -10,6 +10,7 @@ import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+import { DetachWID } from './detachWID';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -109,8 +110,8 @@ export class CommitmentCreation {
       );
       await this.txUtils.submitTransaction(
         signed,
-        observation,
-        TxType.COMMITMENT
+        TxType.COMMITMENT,
+        observation
       );
       logger.info(
         `Commitment tx [${signed.id().to_str()}] submitted to the queue`
@@ -155,6 +156,16 @@ export class CommitmentCreation {
         );
         const permits = await this.boxes.getPermits(WID);
         const WIDBox = await this.boxes.getWIDBox(WID);
+        if (WIDBox.tokens().get(0).id().to_str() != WID) {
+          logger.info(
+            'WID Token is not the first token in WID Box, trying to detach WID token.'
+          );
+          DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
+          logger.info(
+            `Skipping the commitment creation due to having a malformed WID box`
+          );
+          continue;
+        }
         const totalValue = ErgoUtils.getBoxValuesSum([...permits, WIDBox]);
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
         const requiredValue =

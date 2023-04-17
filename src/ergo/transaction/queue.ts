@@ -27,7 +27,8 @@ export class Queue {
     logger.info(
       `The [${tx.type}] transaction with txId: [${tx.txId}] is confirmed, removing the tx from txQueue`
     );
-    await this.database.upgradeObservationTxStatus(tx.observation);
+    if (tx.observation)
+      await this.database.upgradeObservationTxStatus(tx.observation);
     await this.database.removeTx(tx);
   };
 
@@ -39,10 +40,10 @@ export class Queue {
    */
   private verifyTx = async (tx: TxEntity) => {
     if (tx.type === TxType.COMMITMENT) {
-      return await this.databaseConnection.isObservationValid(tx.observation);
+      return await this.databaseConnection.isObservationValid(tx.observation!);
     } else if (tx.type === TxType.TRIGGER) {
-      return !(await this.databaseConnection.isMergeHappened(tx.observation));
-    }
+      return !(await this.databaseConnection.isMergeHappened(tx.observation!));
+    } else if (tx.type === TxType.DETACH) return true;
     return false;
   };
 
@@ -57,7 +58,8 @@ export class Queue {
       currentHeight - tx.updateBlock >
       getConfig().general.transactionRemovingTimeout
     ) {
-      await this.database.downgradeObservationTxStatus(tx.observation);
+      if (tx.observation)
+        await this.database.downgradeObservationTxStatus(tx.observation);
       await this.database.removeTx(tx);
       logger.info(
         `Tx [${tx.txId}] is not valid anymore, removed from the tx queue.`
