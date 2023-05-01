@@ -356,7 +356,7 @@ export class Boxes {
     users: Array<Uint8Array>,
     userRWT: Array<string>,
     R6: wasm.Constant,
-    R7: number
+    R7?: number
   ) => {
     const repoBuilder = new wasm.ErgoBoxCandidateBuilder(
       this.minBoxValue,
@@ -382,7 +382,7 @@ export class Boxes {
       wasm.Constant.from_i64_str_array(userRWT)
     );
     repoBuilder.set_register_value(6, R6);
-    repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
+    R7 && repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
     return repoBuilder.build();
   };
 

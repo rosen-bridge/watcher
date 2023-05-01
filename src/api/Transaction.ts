@@ -354,8 +354,7 @@ export class Transaction {
       RSNTokenCount.to_str(),
       users,
       usersCount,
-      R6,
-      0
+      R6
     );
 
     const permitOut = await Transaction.boxes.createPermit(
