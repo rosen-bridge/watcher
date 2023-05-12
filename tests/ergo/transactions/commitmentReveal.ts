@@ -48,7 +48,7 @@ describe('Commitment reveal transaction tests', () => {
     txUtils: TransactionUtils;
   let cr: CommitmentReveal;
   before(async () => {
-    const ORM = await loadDataBase('commitmentReveal');
+    const ORM = await loadDataBase();
     await fillORM(ORM);
     dataBase = ORM.DB;
     boxes = new Boxes(dataBase);

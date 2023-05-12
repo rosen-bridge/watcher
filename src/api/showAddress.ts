@@ -2,10 +2,15 @@ import express, { Request, Response } from 'express';
 import { getConfig } from '../config/config';
 import { validationResult } from 'express-validator';
 import { generateSK } from '../utils/utils';
-import { logger } from '../log/Logger';
+import { loggerFactory } from '../log/Logger';
+
+const logger = loggerFactory(import.meta.url);
 
 const addressRouter = express.Router();
 
+/**
+ * Api for generating secret key
+ */
 addressRouter.get('/generate', async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);

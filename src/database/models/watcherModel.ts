@@ -119,22 +119,26 @@ class WatcherDataBase {
    */
   submitTx = async (
     tx: string,
-    requestId: string,
     txId: string,
     txType: TxType,
-    height: number
+    height: number,
+    requestId?: string
   ) => {
-    const observation: ObservationEntity | null =
-      await this.observationRepository.findOne({
+    let observation: ObservationEntity | undefined | null = undefined;
+    if (requestId) {
+      observation = await this.observationRepository.findOne({
         where: { requestId: requestId },
       });
-    if (!observation)
-      throw new Error('Observation with this request id is not found');
-    const observationStatus = await this.getStatusForObservations(observation);
-    if (observationStatus === null)
-      throw new Error(
-        `observation with requestId ${observation.requestId} has no status`
+      if (!observation)
+        throw new Error('Observation with this request id is not found');
+      const observationStatus = await this.getStatusForObservations(
+        observation
       );
+      if (observationStatus === null)
+        throw new Error(
+          `observation with requestId ${observation.requestId} has no status`
+        );
+    }
     const time = new Date().getTime();
     return await this.txRepository.insert({
       txId: txId,
@@ -154,7 +158,7 @@ class WatcherDataBase {
     return await this.txRepository
       .createQueryBuilder('tx_entity')
       .leftJoinAndSelect('tx_entity.observation', 'observation_entity')
-      .where('tx_entity.deleted == false')
+      .where('tx_entity.deleted = false')
       .getMany();
   };
 
@@ -397,8 +401,8 @@ class WatcherDataBase {
   getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
     return this.permitRepository
       .createQueryBuilder('permit_entity')
-      .where('WID == :wid', { wid })
-      .andWhere('spendBlock is null')
+      .where('permit_entity.WID = :wid', { wid })
+      .andWhere('permit_entity.spendBlock is null')
       .getMany();
   };
 
@@ -408,7 +412,7 @@ class WatcherDataBase {
   getUnspentAddressBoxes = async (): Promise<Array<BoxEntity>> => {
     return this.boxRepository
       .createQueryBuilder('box_entity')
-      .where('spendBlock is null')
+      .where('box_entity.spendBlock is null')
       .getMany();
   };
 

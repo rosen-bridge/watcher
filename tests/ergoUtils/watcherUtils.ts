@@ -39,7 +39,7 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
     watcherUtils: WatcherUtils,
     txUtils: TransactionUtils;
   beforeEach(async () => {
-    const ORM = await loadDataBase('network-watcherUtils');
+    const ORM = await loadDataBase();
     dataBase = ORM.DB;
     boxes = new Boxes(dataBase);
     await TransactionTest.setup(userAddress, secret1, boxes);
@@ -406,8 +406,8 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
       chai.spy.on(dataBase, 'submitTx', () => undefined);
       await txUtils.submitTransaction(
         signedTx,
-        observationEntity1,
-        TxType.COMMITMENT
+        TxType.COMMITMENT,
+        observationEntity1
       );
       expect(dataBase.submitTx).to.have.been.called.with(
         Buffer.from(signedTx.sigma_serialize_bytes()).toString('base64'),

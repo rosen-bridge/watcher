@@ -20,22 +20,34 @@ interface ConfigType {
   general: Config;
   rosen: RosenConfig;
   token: RosenTokens;
+  database: DatabaseConfig;
 }
 
-const getNumber = (path: string) => {
+const getRequiredNumber = (path: string) => {
   if (!config.has(path)) {
-    throw new Error(`ImproperlyConfigured. ${path} not defined`);
+    throw new Error(`ImproperlyConfigured. ${path} is not defined`);
   }
   const value = config.get<number>(path);
   if (isNaN(value)) {
-    throw new Error(`ImproperlyConfigured. ${path} not a number`);
+    throw new Error(`ImproperlyConfigured. ${path} is not a number`);
   }
   return value;
 };
 
+const getOptionalNumber = (path: string, defaultValue: number) => {
+  if (config.has(path)) {
+    const value = config.get<number>(path);
+    if (isNaN(value)) {
+      throw new Error(`ImproperlyConfigured. ${path} is not a number`);
+    }
+    return value;
+  }
+  return defaultValue;
+};
+
 const getRequiredString = (path: string) => {
   if (!config.has(path)) {
-    throw new Error(`ImproperlyConfigured. ${path} not defined`);
+    throw new Error(`ImproperlyConfigured. ${path} is not defined`);
   }
   return config.get<string>(path);
 };
@@ -70,6 +82,7 @@ class Config {
   observationValidThreshold: number;
   rosenConfigPath: string;
   rosenTokensPath: string;
+  apiPort: number;
 
   constructor() {
     this.networkType = getRequiredString('ergo.network').toLowerCase();
@@ -102,16 +115,16 @@ class Config {
         'ImproperlyConfigured. ergo.explorer.url is not set in the config'
       );
     }
-    this.explorerTimeout = getNumber('ergo.explorer.timeout');
+    this.explorerTimeout = getRequiredNumber('ergo.explorer.timeout');
     this.nodeUrl = getRequiredString('ergo.node.url');
     if (this.nodeUrl === undefined) {
       throw new Error(
         'ImproperlyConfigured. ergo.node.url is not set in the config'
       );
     }
-    this.nodeTimeout = getNumber('ergo.node.timeout');
-    this.ergoInitialHeight = getNumber('ergo.node.initialHeight');
-    this.ergoInterval = getNumber('ergo.interval.scanner');
+    this.nodeTimeout = getRequiredNumber('ergo.node.timeout');
+    this.ergoInitialHeight = getRequiredNumber('ergo.node.initialHeight');
+    this.ergoInterval = getRequiredNumber('ergo.interval.scanner');
     this.networkWatcher = getRequiredString('network') as NetworkType;
     if (!supportedNetworks.includes(this.networkWatcher)) {
       throw new Error(
@@ -120,17 +133,27 @@ class Config {
         )}]`
       );
     }
-    this.commitmentCreationInterval = getNumber(
+    this.commitmentCreationInterval = getRequiredNumber(
       'ergo.interval.commitment.creation'
     );
-    this.commitmentRevealInterval = getNumber(
+    this.commitmentRevealInterval = getRequiredNumber(
       'ergo.interval.commitment.reveal'
     );
-    this.transactionCheckingInterval = getNumber('ergo.interval.transaction');
-    this.transactionConfirmation = getNumber('ergo.transaction.confirmation');
-    this.transactionRemovingTimeout = getNumber('ergo.transaction.timeout');
-    this.observationConfirmation = getNumber('observation.confirmation');
-    this.observationValidThreshold = getNumber('observation.validThreshold');
+    this.transactionCheckingInterval = getRequiredNumber(
+      'ergo.interval.transaction'
+    );
+    this.transactionConfirmation = getRequiredNumber(
+      'ergo.transaction.confirmation'
+    );
+    this.transactionRemovingTimeout = getRequiredNumber(
+      'ergo.transaction.timeout'
+    );
+    this.observationConfirmation = getRequiredNumber(
+      'observation.confirmation'
+    );
+    this.observationValidThreshold = getRequiredNumber(
+      'observation.validThreshold'
+    );
     // TODO verify bigint
     // https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/34
     this.minBoxValue = getRequiredString('ergo.minBoxValue');
@@ -140,6 +163,7 @@ class Config {
       'path.tokens',
       path.join(this.rosenConfigPath, 'tokens.json')
     );
+    this.apiPort = getOptionalNumber('api.port', 3000);
   }
 }
 
@@ -182,21 +206,48 @@ class CardanoConfig {
     if (network === Constants.CARDANO_WATCHER) {
       if (this.type === Constants.OGMIOS_TYPE) {
         const ip = getRequiredString('cardano.ogmios.ip');
-        const port = getNumber('cardano.ogmios.port');
-        const initialSlot = getNumber('cardano.initial.slot');
+        const port = getRequiredNumber('cardano.ogmios.port');
+        const initialSlot = getRequiredNumber('cardano.initial.slot');
         const initialHash = getRequiredString('cardano.initial.hash');
         this.ogmios = { ip, port, initialHash, initialSlot };
       } else if (this.type === Constants.KOIOS_TYPE) {
         const url = getRequiredString('cardano.koios.url');
-        const interval = getNumber('cardano.koios.interval');
-        const timeout = getNumber('cardano.koios.timeout');
-        const initialHeight = getNumber('cardano.initial.height');
+        const interval = getRequiredNumber('cardano.koios.interval');
+        const timeout = getRequiredNumber('cardano.koios.timeout');
+        const initialHeight = getRequiredNumber('cardano.initial.height');
         this.koios = { url, initialHeight, interval, timeout };
       } else {
         throw new Error(
           `Improperly configured. cardano configuration type is invalid available choices are '${Constants.OGMIOS_TYPE}', '${Constants.KOIOS_TYPE}'`
         );
       }
+    }
+  }
+}
+
+class DatabaseConfig {
+  type: string;
+  path = '';
+  host = '';
+  port = 0;
+  user = '';
+  password = '';
+  name = '';
+
+  constructor() {
+    this.type = getRequiredString('database.type');
+    if (this.type === 'sqlite') {
+      this.path = getRequiredString('database.path');
+    } else if (this.type === 'postgres') {
+      this.host = getRequiredString('database.host');
+      this.port = getRequiredNumber('database.port');
+      this.user = getRequiredString('database.user');
+      this.password = getRequiredString('database.password');
+      this.name = getRequiredString('database.name');
+    } else {
+      throw new Error(
+        `Improperly configured. database configuration type is invalid available choices are 'sqlite', 'postgres'`
+      );
     }
   }
 }
@@ -214,7 +265,8 @@ const getConfig = (): ConfigType => {
       general.rosenConfigPath
     );
     const token = new TokensConfig(general.rosenTokensPath).tokens;
-    internalConfig = { cardano, logger, general, rosen, token };
+    const database = new DatabaseConfig();
+    internalConfig = { cardano, logger, general, rosen, token, database };
   }
   return internalConfig;
 };

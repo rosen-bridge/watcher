@@ -13,8 +13,10 @@ import { delay } from './utils/utils';
 import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
 import Statistics from './statistics/statistics';
 import { statisticsRouter } from './statistics/apis';
-import { logger } from './log/Logger';
+import { loggerFactory } from './log/Logger';
 import { getConfig } from './config/config';
+
+const logger = loggerFactory(import.meta.url);
 
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
@@ -51,7 +53,7 @@ const init = async () => {
     router.use('/statistics', statisticsRouter);
 
     app.use(router);
-    const port = process.env.PORT || 3000;
+    const port = getConfig().general.apiPort;
 
     app.listen(port, () => logger.info(`App listening on port ${port}`));
   };

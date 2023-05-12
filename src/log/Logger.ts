@@ -2,6 +2,7 @@ import winston, { format } from 'winston';
 import 'winston-daily-rotate-file';
 import printf = format.printf;
 import { getConfig } from '../config/config';
+import path from 'path';
 
 class Logger {
   logger: winston.Logger;
@@ -12,9 +13,11 @@ class Logger {
     maxSize: getConfig().logger.maxSize,
     maxFiles: getConfig().logger.maxFiles,
   };
-  private readonly logFormat = printf(({ level, message, timestamp }) => {
-    return `${timestamp} ${level} ${message}`;
-  });
+  private readonly logFormat = printf(
+    ({ level, message, timestamp, fileName }) => {
+      return `${timestamp} ${level}: [${fileName}] ${message}`;
+    }
+  );
   private readonly logLevels = {
     error: 0,
     warn: 1,
@@ -48,4 +51,9 @@ class Logger {
 
 const logger = new Logger().logger;
 
-export { logger };
+const loggerFactory = (filePath: string) =>
+  logger.child({
+    fileName: path.parse(filePath).name,
+  });
+
+export { loggerFactory };

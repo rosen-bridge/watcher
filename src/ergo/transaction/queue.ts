@@ -4,8 +4,10 @@ import { WatcherDataBase } from '../../database/models/watcherModel';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { base64ToArrayBuffer } from '../../utils/utils';
 import { WatcherUtils } from '../../utils/watcherUtils';
-import { logger } from '../../log/Logger';
+import { loggerFactory } from '../../log/Logger';
 import { getConfig } from '../../config/config';
+
+const logger = loggerFactory(import.meta.url);
 
 export class Queue {
   database: WatcherDataBase;
@@ -25,7 +27,8 @@ export class Queue {
     logger.info(
       `The [${tx.type}] transaction with txId: [${tx.txId}] is confirmed, removing the tx from txQueue`
     );
-    await this.database.upgradeObservationTxStatus(tx.observation);
+    if (tx.observation)
+      await this.database.upgradeObservationTxStatus(tx.observation);
     await this.database.removeTx(tx);
   };
 
@@ -37,10 +40,10 @@ export class Queue {
    */
   private verifyTx = async (tx: TxEntity) => {
     if (tx.type === TxType.COMMITMENT) {
-      return await this.databaseConnection.isObservationValid(tx.observation);
+      return await this.databaseConnection.isObservationValid(tx.observation!);
     } else if (tx.type === TxType.TRIGGER) {
-      return !(await this.databaseConnection.isMergeHappened(tx.observation));
-    }
+      return !(await this.databaseConnection.isMergeHappened(tx.observation!));
+    } else if (tx.type === TxType.DETACH) return true;
     return false;
   };
 
@@ -55,7 +58,8 @@ export class Queue {
       currentHeight - tx.updateBlock >
       getConfig().general.transactionRemovingTimeout
     ) {
-      await this.database.downgradeObservationTxStatus(tx.observation);
+      if (tx.observation)
+        await this.database.downgradeObservationTxStatus(tx.observation);
       await this.database.removeTx(tx);
       logger.info(
         `Tx [${tx.txId}] is not valid anymore, removed from the tx queue.`

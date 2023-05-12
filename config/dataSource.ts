@@ -1,14 +1,10 @@
-import path from 'path';
-import { DataSource } from 'typeorm';
-import { fileURLToPath } from 'url';
-
 import {
   BoxEntity,
   migrations as addressExtractorMigrations,
 } from '@rosen-bridge/address-extractor';
 import {
-  ObservationEntity,
   migrations as observationMigrations,
+  ObservationEntity,
 } from '@rosen-bridge/observation-extractor';
 import {
   BlockEntity,
@@ -17,21 +13,18 @@ import {
 import {
   CommitmentEntity,
   EventTriggerEntity,
-  PermitEntity,
   migrations as watcherDataExtractorMigrations,
+  PermitEntity,
 } from '@rosen-bridge/watcher-data-extractor';
+import { DataSource } from 'typeorm';
+import { getConfig } from '../src/config/config';
 
 import { ObservationStatusEntity } from '../src/database/entities/observationStatusEntity';
 import { TxEntity } from '../src/database/entities/txEntity';
 
 import migrations from '../src/database/migrations/watcher';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-export const dataSource = new DataSource({
-  type: 'sqlite',
-  database: __dirname + '/../sqlite/watcher.sqlite',
+const dbType = getConfig().database.type as keyof typeof migrations;
+const dbConfigs = {
   entities: [
     BlockEntity,
     BoxEntity,
@@ -43,12 +36,32 @@ export const dataSource = new DataSource({
     TxEntity,
   ],
   migrations: [
-    ...addressExtractorMigrations.sqlite,
-    ...observationMigrations.sqlite,
-    ...scannerMigrations.sqlite,
-    ...watcherDataExtractorMigrations.sqlite,
-    ...migrations,
+    ...addressExtractorMigrations[dbType],
+    ...observationMigrations[dbType],
+    ...scannerMigrations[dbType],
+    ...watcherDataExtractorMigrations[dbType],
+    ...migrations[dbType],
   ],
   synchronize: false,
   logging: false,
-});
+};
+let dataSource: DataSource;
+if (getConfig().database.type === 'sqlite') {
+  dataSource = new DataSource({
+    type: 'sqlite',
+    database: getConfig().database.path,
+    ...dbConfigs,
+  });
+} else {
+  dataSource = new DataSource({
+    type: 'postgres',
+    host: getConfig().database.host,
+    port: getConfig().database.port,
+    username: getConfig().database.user,
+    password: getConfig().database.password,
+    database: getConfig().database.name,
+    ...dbConfigs,
+  });
+}
+
+export { dataSource };

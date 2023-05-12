@@ -14,11 +14,11 @@ export type ErgoTx = {
   outputs: Array<TxOutput>;
 };
 
-type Asset = {
+export type Asset = {
   tokenId: string;
-  index: number;
+  index?: number;
   amount: bigint;
-  name: string;
+  name?: string;
 };
 
 export interface ExplorerBox {

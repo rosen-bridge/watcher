@@ -20,15 +20,15 @@ import { expect } from 'chai';
 import chai from 'chai';
 import spies from 'chai-spies';
 import sinon from 'sinon';
+
+import { DetachWID } from '../../../src/transactions/detachWID';
 import permitObj from './dataset/permitBox.json' assert { type: 'json' };
 import permitObj2 from './dataset/permitBox2.json' assert { type: 'json' };
 import permitObj3 from './dataset/permitBox3.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox.json' assert { type: 'json' };
-import WIDObj2 from './dataset/WIDBox2.json' assert { type: 'json' };
-import WIDObj3 from './dataset/WIDBox3.json' assert { type: 'json' };
+import WIDObj2 from './dataset/WIDBoxWithoutErg.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
-import { logger } from '../../../src/log/Logger';
 
 chai.use(spies);
 
@@ -36,8 +36,7 @@ const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))];
 const permits2 = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj2))];
 const permits3 = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj3))];
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
-const WIDBox2 = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2));
-const WIDBox3 = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj3));
+const WIDBoxWithoutErg = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2));
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 
@@ -67,8 +66,6 @@ observation.fromAddress =
   'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0';
 
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID);
-const notEnoughFund =
-  'Transaction build failed due to ERG insufficiency in the watcher.';
 
 describe('Commitment creation transaction tests', () => {
   let watcherDb: WatcherDataBase,
@@ -77,7 +74,7 @@ describe('Commitment creation transaction tests', () => {
     watcherUtils: WatcherUtils;
   let cc: CommitmentCreation;
   before(async () => {
-    const ORM = await loadDataBase('commitmentCreation');
+    const ORM = await loadDataBase();
     await fillORM(ORM);
     watcherDb = ORM.DB;
     boxes = new Boxes(watcherDb);
@@ -126,16 +123,16 @@ describe('Commitment creation transaction tests', () => {
         [],
         100000000n
       );
-      expect(boxes.createPermit).to.have.called.with(
+      expect(boxes.createPermit).to.have.called.with.exactly(
         111,
         BigInt(97),
         hexStrToUint8Array(WID)
       );
       expect(boxes.createCommitment).to.have.called.once;
-      expect(txUtils.submitTransaction).to.have.been.called.with(
+      expect(txUtils.submitTransaction).to.have.been.called.with.exactly(
         signedTx,
-        observation,
-        TxType.COMMITMENT
+        TxType.COMMITMENT,
+        observation
       );
       expect(ErgoUtils.getExtraTokenCount).to.have.called.once;
       expect(boxes.createWIDBox).not.to.have.called;
@@ -188,7 +185,7 @@ describe('Commitment creation transaction tests', () => {
      *   Should log a not enough fund error due to erg insufficiency
      */
     it('Should throw error while creating commitment transaction', async () => {
-      chai.spy.on(logger, 'warn');
+      chai.spy.on(ErgoUtils, 'createAndSignTx');
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       await cc.createCommitmentTx(
@@ -196,29 +193,38 @@ describe('Commitment creation transaction tests', () => {
         observation,
         commitment,
         permits3,
-        WIDBox3,
+        WIDBoxWithoutErg,
         [],
         100000000n
       );
-      expect(logger.warn).to.have.called.with(notEnoughFund);
+      expect(ErgoUtils.createAndSignTx).to.not.called;
       sinon.restore();
     });
   });
 
   describe('job', () => {
     /**
-     * Target: testing job
-     * Dependencies:
-     *    WatcherUtils
-     *    Boxes
-     *    Transaction
-     * Test Procedure:
-     *    1- Mocking environment
-     *    2- calling function
-     *    3- validate used functions with inputs
-     * Expected Output:
-     *    The function should collect all ready observations to create the commitment transaction
-     *    Since the box values is enough should not use an excess fee box
+     * @target CommitmentCreation.job should collect ready observations and create commitments
+     * @dependencies
+     * - WatcherUtils
+     * - Boxes
+     * - Transaction
+     * @scenario
+     * - mock allReadyObservations to return the mocked observation
+     * - mock getPermits to return the mocked permit
+     * - mock getWIDBox to return the mocked WIDBox
+     * - mock detachWID
+     * - mock getUserPaymentBox
+     * - mock WatcherWID to return the correct test WID
+     * - mock createCommitmentTx
+     * - run test
+     * - check calling createCommitmentTx
+     * - check not calling detach tx
+     * - check not calling getUserPaymentBox
+     * @expected
+     * - it should not call DetachWID.detachWIDtx since the WID token is the first token of WIDBox
+     * - It should not call getUserPaymentBox since the box values is enough
+     * - It should call the commitment tx with correct input values
      */
     it('Should collect ready observations and create commitments', async () => {
       chai.spy.on(watcherUtils, 'allReadyObservations', () => [observation]);
@@ -228,6 +234,7 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(boxes, 'getPermits', () => permits);
       chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
       chai.spy.on(boxes, 'getUserPaymentBox');
+      chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cc, 'createCommitmentTx', () => {
         return { txId: 'txId', commitmentBoxId: 'boxId' };
@@ -243,6 +250,7 @@ describe('Commitment creation transaction tests', () => {
         WIDBox,
         []
       );
+      expect(DetachWID.detachWIDtx).to.not.have.been.called();
     });
 
     /**
@@ -265,7 +273,7 @@ describe('Commitment creation transaction tests', () => {
         return;
       });
       chai.spy.on(boxes, 'getPermits', () => permits);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox2);
+      chai.spy.on(boxes, 'getWIDBox', () => WIDBoxWithoutErg);
       chai.spy.on(boxes, 'getUserPaymentBox', () => plainBox);
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cc, 'createCommitmentTx', () => {
@@ -279,9 +287,43 @@ describe('Commitment creation transaction tests', () => {
         observation,
         commitment,
         permits,
-        WIDBox2,
+        WIDBoxWithoutErg,
         plainBox
       );
+    });
+
+    /**
+     * @target CommitmentCreation.job should call wid detach and skip the commitment creation
+     * @dependencies
+     * - WatcherUtils
+     * - Boxes
+     * - Transaction
+     * @scenario
+     * - mock detachWID
+     * - mock allReadyObservations to return the mocked observation
+     * - mock getPermits to return the mocked permit
+     * - mock getWIDBox to return the mocked WIDBox
+     * - mock WatcherWID to return a different token id
+     * - mock createCommitmentTx
+     * - run test
+     * - check calling detach tx
+     * - check not calling createCommitmentTx
+     * @expected
+     * - it should call DetachWID.detachWIDtx
+     * - should skip the rest of the process
+     */
+    it('Should call wid detach and skip the commitment creation', async () => {
+      chai.spy.on(DetachWID, 'detachWIDtx', () => '');
+      chai.spy.on(watcherUtils, 'allReadyObservations', () => [observation]);
+      chai.spy.on(boxes, 'getPermits', () => permits);
+      chai.spy.on(boxes, 'getWIDBox', () => WIDBoxWithoutErg);
+      sinon.stub(Transaction, 'watcherWID').value('differentWID');
+      chai.spy.on(cc, 'createCommitmentTx', () => {
+        return { txId: 'txId', commitmentBoxId: 'boxId' };
+      });
+      await cc.job();
+      expect(DetachWID.detachWIDtx).to.have.called();
+      expect(cc.createCommitmentTx).to.not.have.called;
     });
   });
 });

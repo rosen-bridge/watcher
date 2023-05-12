@@ -46,3 +46,13 @@ logs:
   maxSize: 20m # maximum file size for rotation
   maxFiles: 14d # maximum rotated files available
   # datePattern: 'YYYY-MM-DD' # log rotation date pattern
+database:
+  type: 'sqlite' # options: postgres, sqlite
+  path: './sqlite/watcher.sqlite' # database path (for sqlite)
+  # host: '' # database host (for postgres)
+  # port: 5432 # database port (for postgres)
+  # user: '' # database user (for postgres)
+  # password: '' # database password (for postgres)
+  # name: '' # database name (for postgres)
+api:
+  port: 3000 # port used to run express server
