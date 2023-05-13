@@ -172,12 +172,17 @@ class LoggerConfig {
   level: string;
   maxSize: string;
   maxFiles: string;
+  datePattern: string;
 
   constructor() {
     this.path = getRequiredString('logs.path');
     this.level = getRequiredString('logs.level');
     this.maxSize = getRequiredString('logs.maxSize');
     this.maxFiles = getRequiredString('logs.maxFiles');
+    this.datePattern = getOptionalString(
+      'logs.datePattern',
+      this.level === 'debug' ? 'YYYY-MM-DD-HH' : 'YYYY-MM-DD'
+    );
   }
 }
 

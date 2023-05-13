@@ -24,6 +24,7 @@ import chaiPromise from 'chai-as-promised';
 import permitObj from './dataset/permitBox.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox.json' assert { type: 'json' };
 import plainObj from './dataset/plainBoxes.json' assert { type: 'json' };
+import boxesObj from './dataset/boxes.json' assert { type: 'json' };
 import { mockedResponseBody } from '../ergo/objects/mockedResponseBody';
 import { beforeEach } from 'mocha';
 import { getConfig } from '../../src/config/config';
@@ -33,6 +34,7 @@ const permitJson = JsonBI.stringify(permitObj);
 const WIDJson = JsonBI.stringify(WIDObj);
 const plainJson = JsonBI.stringify(plainObj[0]);
 const secondJson = JsonBI.stringify(plainObj[1]);
+const thirdJson = JsonBI.stringify(boxesObj[0]);
 
 chai.use(spies);
 chai.use(chaiPromise);
@@ -65,6 +67,13 @@ secondBox.serialized = Buffer.from(
 ).toString('base64');
 secondBox.boxId =
   '9fac7bdf9db4c468d716b1be9f7468a26af2b7eb4a098b934185fd6aa6127c3e';
+
+const thirdBox: BoxEntity = new BoxEntity();
+thirdBox.serialized = Buffer.from(
+  wasm.ErgoBox.from_json(thirdJson).sigma_serialize_bytes()
+).toString('base64');
+thirdBox.boxId =
+  '87b988e426a1226bbbe7b42c7405d763cc4dd3d6f5a9fc8dbc4e67710163f442';
 
 const WID = 'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
 const permit =
@@ -324,6 +333,40 @@ describe('Testing Box Creation', () => {
       ]);
       expect(data).to.have.length(1);
       expect(data[0].box_id().to_str()).to.eq(secondBox.boxId);
+    });
+
+    /**
+     * Target:
+     * It should not include duplicate boxes when selecting boxes for payment
+     *
+     * Dependencies:
+     * - database
+     * - ErgoNetwork
+     *
+     * Scenario:
+     * N/A
+     *
+     * Expected output:
+     * An array of boxes without duplicate ones
+     */
+    it('should not include duplicate boxes when selecting boxes for payment', async () => {
+      chai.spy.on(DB, 'getUnspentAddressBoxes', () => [
+        plainBox,
+        secondBox,
+        thirdBox,
+      ]);
+      chai.spy.on(DB, 'trackTxQueue', (box: wasm.ErgoBox) =>
+        wasm.ErgoBox.from_json(
+          box.box_id().to_str() === thirdBox.boxId ? thirdJson : plainJson
+        )
+      );
+      chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
+
+      const selectedBox = await boxes.getUserPaymentBox(
+        BigInt(plainObj[0].value + 1)
+      );
+
+      expect(selectedBox).to.have.length(2);
     });
   });
 

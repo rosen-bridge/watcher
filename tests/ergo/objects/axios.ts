@@ -102,6 +102,10 @@ export const initMockedAxios = (vector = 0) => {
     .reply(200, mockedResponseBody.utxo);
 
   mockedExplorer
+    .onGet(`/api/v1/boxes/${boxId}`)
+    .reply(200, mockedResponseBody.utxo);
+
+  mockedExplorer
     .onGet(
       '/api/v1/boxes/unspent/byAddress/9hwWcMhrebk4Ew5pBpXaCJ7zuH8eYkY9gRfLjNP3UeBYNDShGCT'
     )

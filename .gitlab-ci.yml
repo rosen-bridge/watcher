@@ -1,4 +1,4 @@
-image: node:16.17
+image: node:16.19.1
 
 stages:
   - installation
@@ -44,10 +44,4 @@ test:
     paths:
       - node_modules
   script:
-    - npm run coverage
-  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
+    - npm run test

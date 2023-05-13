@@ -150,13 +150,16 @@ export class Boxes {
     const boxes = (await this.dataBase.getUnspentAddressBoxes()).map((box) => {
       return decodeSerializedBox(box.serialized);
     });
-    const selectedBoxes = [];
+    const selectedBoxes: wasm.ErgoBox[] = [];
     let totalValue = BigInt(0);
     for (const box of boxes) {
       if (boxIdsToOmit.includes(box.box_id().to_str())) continue;
       let unspentBox = await ErgoNetwork.trackMemPool(box);
       if (unspentBox) unspentBox = await this.dataBase.trackTxQueue(unspentBox);
-      if (unspentBox) {
+      const isBoxNotSelected = selectedBoxes.every(
+        (box) => box.box_id().to_str() !== unspentBox.box_id().to_str()
+      );
+      if (unspentBox && isBoxNotSelected) {
         totalValue = totalValue + BigInt(unspentBox.value().as_i64().to_str());
         selectedBoxes.push(unspentBox);
         if (totalValue >= requiredValue) break;
@@ -353,7 +356,7 @@ export class Boxes {
     users: Array<Uint8Array>,
     userRWT: Array<string>,
     R6: wasm.Constant,
-    R7: number
+    R7?: number
   ) => {
     const repoBuilder = new wasm.ErgoBoxCandidateBuilder(
       this.minBoxValue,
@@ -379,7 +382,7 @@ export class Boxes {
       wasm.Constant.from_i64_str_array(userRWT)
     );
     repoBuilder.set_register_value(6, R6);
-    repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
+    R7 && repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
     return repoBuilder.build();
   };
 

@@ -87,7 +87,12 @@ export class Queue {
           `The [${tx.type}] transaction with txId: [${tx.txId}] sent succcessfully`
         );
       } else {
-        if (!(await ErgoNetwork.checkTxInputs(signedTx.inputs()))) {
+        if (
+          !(await ErgoNetwork.checkTxInputs(
+            signedTx.id().to_str(),
+            signedTx.inputs()
+          ))
+        ) {
           logger.info(
             `Tx [${tx.txId}] inputs are not valid, skipping the transaction sending`
           );
