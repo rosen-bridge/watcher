@@ -1,13 +1,14 @@
-image: node:16.19.1
-
 stages:
-  - installation
+  - installation_16
   - type_check
   - lint
   - test
+  - installation_18
+  - coverage
 
-installation:
-  stage: installation
+installation_16:
+  image: node:16.19.1
+  stage: installation_16
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: push
@@ -17,7 +18,9 @@ installation:
     - npm ci
 
 type_check:
+  image: node:16.19.1
   stage: type_check
+  needs: ['installation_16']
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: pull
@@ -27,7 +30,9 @@ type_check:
     - npm run type-check
 
 lint:
+  image: node:16.19.1
   stage: lint
+  needs: ['type_check']
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: pull
@@ -37,7 +42,32 @@ lint:
     - npm run lint
 
 test:
+  image: node:16.19.1
   stage: test
+  needs: ['lint']
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    policy: pull
+    paths:
+      - node_modules
+  script:
+    - npm run test
+
+installation_18:
+  image: node:18.14.0
+  stage: installation_18
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    policy: push
+    paths:
+      - node_modules
+  script:
+    - npm ci
+
+coverage:
+  image: node:18.14.0
+  stage: coverage
+  needs: ['installation_18']
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: pull
