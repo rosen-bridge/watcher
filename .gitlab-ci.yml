@@ -5,9 +5,9 @@ stages:
   - test
   - coverage
 
-installation-16:
+installation_16:
   image: node:16.19.1
-  stage: installation-16
+  stage: installation_16
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: push
@@ -19,7 +19,7 @@ installation-16:
 type_check:
   image: node:16.19.1
   stage: type_check
-  needs: ['installation']
+  needs: ['installation_16']
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: pull
@@ -52,9 +52,9 @@ test:
   script:
     - npm run test
 
-installation-18:
+installation_18:
   image: node:18.14.0
-  stage: installation-18
+  stage: installation_18
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: push
@@ -66,7 +66,7 @@ installation-18:
 coverage:
   image: node:18.14.0
   stage: coverage
-  needs: ['installation-18']
+  needs: ['installation_18']
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: pull
