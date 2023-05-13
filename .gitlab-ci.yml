@@ -1,8 +1,9 @@
 stages:
-  - installation
+  - installation_16
   - type_check
   - lint
   - test
+  - installation_18
   - coverage
 
 installation_16:
