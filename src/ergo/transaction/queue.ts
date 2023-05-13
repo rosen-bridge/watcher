@@ -44,6 +44,7 @@ export class Queue {
     } else if (tx.type === TxType.TRIGGER) {
       return !(await this.databaseConnection.isMergeHappened(tx.observation!));
     } else if (tx.type === TxType.DETACH) return true;
+    else if (tx.type === TxType.REDEEM) return true;
     return false;
   };
 

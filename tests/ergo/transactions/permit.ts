@@ -180,7 +180,7 @@ describe('Watcher Permit Transactions', () => {
       const secondTransaction = TransactionTest.getInstance();
       const response = await secondTransaction.getPermit(100n);
       expect(response.response).to.be.equal(
-        '86817edc16b1dd0b0d461ad6b7bc2bcbc15d168e36eaacfc892eed955c5faefc'
+        'e4dbbcf8e757e8dcb6b3036821241e2d1e155116204ad969636cd5715275ba84'
       );
     });
 
@@ -286,7 +286,7 @@ describe('Watcher Permit Transactions', () => {
 
       const res = await transaction.returnPermit(1n);
       expect(res.response).to.be.equal(
-        '4e4ae9e870aefd70da618f55d27ea4b1040d58824eeaee841fa4cb83b6730003'
+        'cddc2ecb58dde47afbcbbb4a2281b0e71d5b1be7ae5a91506126c5efd4f6ac3b'
       );
     });
 

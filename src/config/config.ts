@@ -74,9 +74,11 @@ class Config {
   minBoxValue: string;
   fee: string;
   commitmentCreationInterval: number;
+  commitmentRedeemInterval: number;
   commitmentRevealInterval: number;
   transactionRemovingTimeout: number;
   transactionConfirmation: number;
+  commitmentRedeemConfirmation: number;
   transactionCheckingInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
@@ -136,6 +138,9 @@ class Config {
     this.commitmentCreationInterval = getRequiredNumber(
       'ergo.interval.commitment.creation'
     );
+    this.commitmentRedeemInterval = getRequiredNumber(
+      'ergo.interval.commitment.redeem'
+    );
     this.commitmentRevealInterval = getRequiredNumber(
       'ergo.interval.commitment.reveal'
     );
@@ -144,6 +149,9 @@ class Config {
     );
     this.transactionConfirmation = getRequiredNumber(
       'ergo.transaction.confirmation'
+    );
+    this.commitmentRedeemConfirmation = getRequiredNumber(
+      'ergo.transaction.redeemConfirmation'
     );
     this.transactionRemovingTimeout = getRequiredNumber(
       'ergo.transaction.timeout'

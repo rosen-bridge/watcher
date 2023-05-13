@@ -31,12 +31,14 @@ ergo:
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
     confirmation: 10 # required block confirmations for sent transactions
+    redeemConfirmation: 25 # required block confirmations for sent transactions
   interval:
     scanner: 180 # scanner update interval (in seconds)
     transaction: 180 # processing transaction interval (in seconds)
     commitment:
       creation: 180 # commitment creation interval (in seconds)
       reveal: 180 # commitment reveal interval (in seconds)
+      redeem: 3600 # commitment reveal interval (in seconds)
 path:
   addresses: config/rosen # addresses path
   # tokens: config/rosen/tokens.json # default tokens path.

@@ -204,10 +204,6 @@ export class Boxes {
       );
     }
     builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([WID]));
-    builder.set_register_value(
-      5,
-      wasm.Constant.from_byte_array(new Uint8Array([0]))
-    );
     return builder.build();
   };
 

@@ -15,6 +15,7 @@ import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
 import { loggerFactory } from '../log/Logger';
+import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -198,6 +199,23 @@ class WatcherUtils {
       }
     }
     return readyCommitments;
+  };
+
+  /**
+   * returns all timeout commitments
+   * @param timeoutConfirmation number of confirmation to a commitment become timeout
+   */
+  allTimeoutCommitments = async (
+    timeoutConfirmation: number
+  ): Promise<Array<CommitmentEntity>> => {
+    const height = await this.dataBase.getLastBlockHeight(
+      scanner.observationScanner.name()
+    );
+    return await this.dataBase.confirmedCommitmentsByWID(
+      Transaction.watcherWID!,
+      timeoutConfirmation,
+      height
+    );
   };
 }
 

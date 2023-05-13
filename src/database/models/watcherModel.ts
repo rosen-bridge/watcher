@@ -1,4 +1,12 @@
-import { DataSource, In, Like, Not, Repository } from 'typeorm';
+import {
+  DataSource,
+  In,
+  IsNull,
+  LessThan,
+  Like,
+  Not,
+  Repository,
+} from 'typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxEntity, TxType } from '../entities/txEntity';
 import {
@@ -335,6 +343,27 @@ class WatcherDataBase {
       },
       take: limit,
       skip: offset,
+    });
+  };
+
+  /**
+   * returns confirmed commitments after required confirmation with specific wid
+   * @param wid
+   * @param offset
+   * @param limit
+   */
+  confirmedCommitmentsByWID = async (
+    wid: string,
+    confirmation: number,
+    height: number
+  ): Promise<Array<CommitmentEntity>> => {
+    const maxHeight = height - confirmation;
+    return await this.commitmentRepository.find({
+      where: {
+        WID: wid,
+        height: LessThan(maxHeight),
+        spendHeight: IsNull(),
+      },
     });
   };
 
