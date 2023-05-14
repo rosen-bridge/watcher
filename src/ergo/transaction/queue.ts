@@ -30,7 +30,7 @@ export class Queue {
     if (tx.observation)
       await this.database.upgradeObservationTxStatus(
         tx.observation,
-        tx.type === TxType.REDEEM
+        false // here tx get marked as confirmed (not sent), so isRedeemSent is always false
       );
     await this.database.removeTx(tx);
   };

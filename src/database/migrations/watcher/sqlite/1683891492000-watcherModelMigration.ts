@@ -45,6 +45,33 @@ export class watcherModelMigration1683891492000 implements MigrationInterface {
             ALTER TABLE "temporary_tx_entity"
                 RENAME TO "tx_entity"
         `);
+    await queryRunner.query(`
+            CREATE TABLE "temporary_observation_status_entity" (
+                "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+                "status" varchar CHECK("status" IN ('0', '1', '2', '3', '4', '5', '6', '7')) NOT NULL,
+                "observationId" integer,
+                CONSTRAINT "REL_0a64720aa46fb4fd199a0285df" UNIQUE ("observationId"),
+                CONSTRAINT "FK_0a64720aa46fb4fd199a0285df2" FOREIGN KEY ("observationId") REFERENCES "observation_entity" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+            )
+        `);
+    await queryRunner.query(`
+            INSERT INTO "temporary_observation_status_entity"(
+                    "id",
+                    "status",
+                    "observationId"
+                )
+            SELECT "id",
+                "status",
+                "observationId"
+            FROM "observation_status_entity"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "observation_status_entity"
+        `);
+    await queryRunner.query(`
+            ALTER TABLE "temporary_observation_status_entity"
+                RENAME TO "observation_status_entity"
+        `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -88,6 +115,33 @@ export class watcherModelMigration1683891492000 implements MigrationInterface {
         `);
     await queryRunner.query(`
             DROP TABLE "temporary_tx_entity"
+        `);
+    await queryRunner.query(`
+            ALTER TABLE "observation_status_entity"
+                RENAME TO "temporary_observation_status_entity"
+        `);
+    await queryRunner.query(`
+            CREATE TABLE "temporary_observation_status_entity" (
+                "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+                "status" varchar CHECK("status" IN ('0', '1', '2', '3', '4', '5')) NOT NULL,
+                "observationId" integer,
+                CONSTRAINT "REL_0a64720aa46fb4fd199a0285df" UNIQUE ("observationId"),
+                CONSTRAINT "FK_0a64720aa46fb4fd199a0285df2" FOREIGN KEY ("observationId") REFERENCES "observation_entity" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+            )
+        `);
+    await queryRunner.query(`
+            INSERT INTO "temporary_observation_status_entity"(
+                    "id",
+                    "status",
+                    "observationId"
+                )
+            SELECT "id",
+                "status",
+                "observationId"
+            FROM "observation_status_entity"
+        `);
+    await queryRunner.query(`
+            DROP TABLE "temporary_observation_status_entity"
         `);
   }
 }
