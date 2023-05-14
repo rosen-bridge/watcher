@@ -28,7 +28,10 @@ export class Queue {
       `The [${tx.type}] transaction with txId: [${tx.txId}] is confirmed, removing the tx from txQueue`
     );
     if (tx.observation)
-      await this.database.upgradeObservationTxStatus(tx.observation);
+      await this.database.upgradeObservationTxStatus(
+        tx.observation,
+        tx.type === TxType.REDEEM
+      );
     await this.database.removeTx(tx);
   };
 
@@ -60,7 +63,10 @@ export class Queue {
       getConfig().general.transactionRemovingTimeout
     ) {
       if (tx.observation)
-        await this.database.downgradeObservationTxStatus(tx.observation);
+        await this.database.downgradeObservationTxStatus(
+          tx.observation,
+          tx.type === TxType.REDEEM
+        );
       await this.database.removeTx(tx);
       logger.info(
         `Tx [${tx.txId}] is not valid anymore, removed from the tx queue.`

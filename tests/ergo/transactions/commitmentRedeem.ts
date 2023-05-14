@@ -22,6 +22,7 @@ import sinon from 'sinon';
 import feeBoxObj1 from './dataset/feeBox1.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox3.json' assert { type: 'json' };
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
+import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 chai.use(spies);
 
@@ -32,6 +33,26 @@ const userAddress = '9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9';
 const rwtID =
   '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074';
 const WID = '72eadf8bef7d2597cda26de0fb673616b44a66a3adc7ab57c6cfcac6a68ef639';
+
+export const observation: ObservationEntity = new ObservationEntity();
+observation.id = 2;
+observation.fromChain = 'CARDANO';
+observation.toChain = 'ERGO';
+observation.bridgeFee = '10000';
+observation.networkFee = '10000';
+observation.amount = '10';
+observation.sourceChainTokenId = 'asset12y0ewmxggeglymjpmp9mjf5qzh4kgwj9chtkpv';
+observation.targetChainTokenId = 'cardanoTokenId';
+observation.sourceTxId =
+  'cf32ad374daefdce563e3391effc4fc42eb0e74bbec8afe16a46eeea69e3b2aa';
+observation.sourceBlockId =
+  '93395496d590ec6db0f2fd13a7bcf91e82a9f230ef677f6216ea8c9f57df6ab3';
+observation.requestId =
+  'f6bc60c6e5c5c195eaf1e2a7fea88f155d7a1f7f263b099983426985356559be';
+observation.toAddress = 'ergoAddress';
+observation.height = 123;
+observation.fromAddress =
+  'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0';
 
 export const commitment = new CommitmentEntity();
 commitment.id = 9;
@@ -101,6 +122,7 @@ describe('Commitment redeem transaction tests', () => {
       sinon.stub(ErgoNetwork, 'getHeight').resolves(999999);
       await cr.redeemCommitmentTx(
         WID,
+        observation,
         WIDBox,
         decodeSerializedBox(commitment.boxSerialized),
         [feeBox1],

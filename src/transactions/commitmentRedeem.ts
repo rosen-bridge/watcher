@@ -37,6 +37,7 @@ export class CommitmentRedeem {
    * creates the commitment redeem transaction and submits to the transactionQueue
    * and returns new WID box to chain redeem transactions
    * @param WID
+   * @param observation
    * @param WIDBox
    * @param commitmentBox
    * @param feeBoxes
@@ -45,6 +46,7 @@ export class CommitmentRedeem {
    */
   redeemCommitmentTx = async (
     WID: string,
+    observation: ObservationEntity,
     WIDBox: wasm.ErgoBox,
     commitmentBox: wasm.ErgoBox,
     feeBoxes: Array<wasm.ErgoBox>,
@@ -91,7 +93,7 @@ export class CommitmentRedeem {
         candidates,
         height
       );
-      await this.txUtils.submitTransaction(signed, TxType.REDEEM);
+      await this.txUtils.submitTransaction(signed, TxType.REDEEM, observation);
       logger.info(`Redeem tx [${signed.id().to_str()}] submitted to the queue`);
       for (let i = 0; i < signed.outputs().len(); i++) {
         const box = signed.outputs().get(i);
@@ -126,10 +128,21 @@ export class CommitmentRedeem {
     const commitments = await this.watcherUtils.allTimeoutCommitments(
       this.redeemConfirmation
     );
+    const commitedObservations =
+      await this.watcherUtils.allCommitedObservations();
     const WID = Transaction.watcherWID;
     logger.info(`Starting commitment redeem job`);
     let WIDBox = await this.boxes.getWIDBox(WID);
     for (const commitment of commitments) {
+      const observationStatus = commitedObservations.find(
+        (obs) => obs.observation.requestId === commitment.eventId
+      );
+      if (!observationStatus) {
+        logger.debug(
+          `Skipping commitment redeem: Corresponding observation is not in 'COMMITED' status`
+        );
+        continue;
+      }
       try {
         if (WIDBox.tokens().get(0).id().to_str() != WID) {
           logger.info(
@@ -144,12 +157,18 @@ export class CommitmentRedeem {
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
         const requiredValue =
           BigInt(getConfig().general.fee) +
-          BigInt(getConfig().general.minBoxValue);
-        const feeBoxes = await this.boxes.getUserPaymentBox(requiredValue, [
-          WIDBox.box_id().to_str(),
-        ]);
+          BigInt(getConfig().general.minBoxValue) * 2n;
+        const feeBoxes: wasm.ErgoBox[] = [];
+        if (BigInt(WIDBox.value().as_i64().to_str()) < requiredValue) {
+          feeBoxes.push(
+            ...(await this.boxes.getUserPaymentBox(requiredValue, [
+              WIDBox.box_id().to_str(),
+            ]))
+          );
+        }
         WIDBox = await this.redeemCommitmentTx(
           WID,
+          observationStatus.observation,
           WIDBox,
           decodeSerializedBox(commitment.boxSerialized),
           feeBoxes,

@@ -9,7 +9,10 @@ import { WatcherDataBase } from '../database/models/watcherModel';
 import { TxType } from '../database/entities/txEntity';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { NoObservationStatus } from '../errors/errors';
-import { TxStatus } from '../database/entities/observationStatusEntity';
+import {
+  ObservationStatusEntity,
+  TxStatus,
+} from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
@@ -203,7 +206,7 @@ class WatcherUtils {
 
   /**
    * returns all timeout commitments
-   * @param timeoutConfirmation number of confirmation to a commitment become timeout
+   * @param timeoutConfirmation number of confirmation so that a commitment become timeout
    */
   allTimeoutCommitments = async (
     timeoutConfirmation: number
@@ -216,6 +219,15 @@ class WatcherUtils {
       timeoutConfirmation,
       height
     );
+  };
+
+  /**
+   * returns all observation with active commitment
+   */
+  allCommitedObservations = async (): Promise<
+    Array<ObservationStatusEntity>
+  > => {
+    return await this.dataBase.getObservationsByStatus(TxStatus.COMMITTED);
   };
 }
 
@@ -240,7 +252,10 @@ class TransactionUtils {
     const height = await ErgoNetwork.getHeight();
     let requestId = undefined;
     if (observation) {
-      await this.dataBase.upgradeObservationTxStatus(observation);
+      await this.dataBase.upgradeObservationTxStatus(
+        observation,
+        txType === TxType.REDEEM
+      );
       requestId = observation.requestId;
     }
     await this.dataBase.submitTx(
