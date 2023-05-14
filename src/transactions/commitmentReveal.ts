@@ -120,7 +120,7 @@ export class CommitmentReveal {
         );
         if (BigInt(validCommitments.length) > requiredCommitments) {
           const commitmentBoxes = validCommitments.map(async (commitment) => {
-            return await ErgoNetwork.boxById(commitment.boxId);
+            return await ErgoNetwork.unspentErgoBoxById(commitment.boxId);
           });
           await Promise.all(commitmentBoxes).then(async (cBoxes) => {
             const WIDs: Array<Uint8Array> = validCommitments.map(

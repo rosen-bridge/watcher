@@ -2,9 +2,10 @@ import axios from 'axios';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
 import {
-  AddressBoxes,
+  ExplorerBoxes,
   ErgoTx,
   ExplorerTransaction,
+  NodeBox,
   TxInput,
   TxOutput,
 } from './types';
@@ -13,6 +14,7 @@ import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
 import { loggerFactory } from '../../log/Logger';
 import { getConfig } from '../../config/config';
+import { ExplorerBox } from '../network/types';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -47,9 +49,9 @@ export class ErgoNetwork {
     tree: string,
     offset = 0,
     limit = 100
-  ): Promise<AddressBoxes> => {
+  ): Promise<ExplorerBoxes> => {
     return explorerApi
-      .get<AddressBoxes>(`/api/v1/boxes/unspent/byErgoTree/${tree}`, {
+      .get<ExplorerBoxes>(`/api/v1/boxes/unspent/byErgoTree/${tree}`, {
         params: { offset: offset, limit: limit },
         transformResponse: (data) => JsonBI.parse(data),
       })
@@ -261,13 +263,21 @@ export class ErgoNetwork {
   };
 
   /**
-   * Returns the box by its id
+   * Returns an unspent box (with wasm ErgoBox scheme) by its id
    * @param id
    */
-  static boxById = (id: string): Promise<wasm.ErgoBox> => {
-    return nodeClient.get<string>(`utxo/byId/${id}`).then((res) => {
+  static unspentErgoBoxById = (id: string): Promise<wasm.ErgoBox> => {
+    return nodeClient.get<NodeBox>(`utxo/byId/${id}`).then((res) => {
       return wasm.ErgoBox.from_json(JSON.stringify(res.data));
     });
+  };
+
+  /**
+   * Returns a box (with explorer scheme) by its id
+   */
+  static explorerBoxById = async (id: string) => {
+    const response = await explorerApi.get<ExplorerBox>(`/api/v1/boxes/${id}`);
+    return response.data;
   };
 
   /**
@@ -283,13 +293,13 @@ export class ErgoNetwork {
         return res.data;
       })
       .catch((e) => {
-        let message = 'Explorer is unavailable';
+        let message = 'Explorer is unavailable: ';
         if (e.response) {
           if (e.response.status == 404) return null;
-          message = e.response;
-        }
+          else message += `[${e.response.status}: ${e.response.data.reason}]`;
+        } else message += `[${e}]`;
         logger.warn(
-          `An error occurred while getting confirmed transaction from Explorer: ${e.message}`
+          `An error occurred while getting confirmed transaction from Explorer: [${message}]`
         );
         throw ConnectionError;
       });
@@ -308,13 +318,13 @@ export class ErgoNetwork {
         return res.data;
       })
       .catch((e) => {
-        let message = 'Explorer is unavailable';
+        let message = 'Explorer is unavailable: ';
         if (e.response) {
           if (e.response.status == 404) return null;
-          message = e.response;
-        }
+          else message += `[${e.response.status}: ${e.response.data.reason}]`;
+        } else message += `[${e}]`;
         logger.warn(
-          `An error occurred while getting unconfirmed transaction from Explorer: ${e.message}`
+          `An error occurred while getting unconfirmed transaction from Explorer: [${message}]`
         );
         throw ConnectionError;
       });
@@ -343,16 +353,20 @@ export class ErgoNetwork {
    * Checks all tx inputs are still unspent
    * @param inputs
    */
-  static checkTxInputs = async (inputs: wasm.Inputs) => {
+  static checkTxInputs = async (txId: string, inputs: wasm.Inputs) => {
     try {
-      await Promise.all(
+      const boxes = await Promise.all(
         Array(inputs.len())
           .fill('')
           .map(async (item, index) => {
-            await ErgoNetwork.boxById(inputs.get(index).box_id().to_str());
+            return await ErgoNetwork.explorerBoxById(
+              inputs.get(index).box_id().to_str()
+            );
           })
       );
-      return true;
+      return boxes.every(
+        (box) => !box.spentTransactionId || box.spentTransactionId === txId
+      );
     } catch (e) {
       if (e.response && e.response.status == 404) return false;
       logger.warn(
