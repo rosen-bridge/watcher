@@ -417,6 +417,20 @@ class WatcherDataBase {
   };
 
   /**
+   * Returns all unspent plain boxes of a specific address
+   * @param address to fetch unspent boxes
+   */
+  getAddressUnspentBoxes = async (
+    address: string
+  ): Promise<Array<BoxEntity>> => {
+    return this.boxRepository
+      .createQueryBuilder('box_entity')
+      .where('box_entity.spendBlock is null')
+      .andWhere('box_entity.address = :address', { address })
+      .getMany();
+  };
+
+  /**
    * Returns an eventTriggerEntity with the specified sourceTxId
    * @param sourceTxId
    */

@@ -32,6 +32,17 @@ export const boxHaveAsset = (box: ErgoBox, asset: string) => {
     .includes(asset);
 };
 
+export interface TokenInfo {
+  tokenId: string;
+  amount: bigint;
+  name?: string;
+}
+
+export interface AddressBalance {
+  nanoErgs: bigint;
+  tokens: Array<TokenInfo>;
+}
+
 export class ErgoUtils {
   /**
    * Creates a change box from the input and output boxesSample
@@ -298,5 +309,45 @@ export class ErgoUtils {
     return boxes
       .map((box) => BigInt(box.value().as_i64().to_str()))
       .reduce((a, b) => a + b, BigInt(0));
+  };
+
+  /**
+   * Calculate the sum of box assets
+   * @param boxes
+   * @returns sum of box assets
+   */
+  static getBoxAssetsSum = (boxes: Array<wasm.ErgoBox>): Array<TokenInfo> => {
+    const assets = new Map<string, bigint>();
+    boxes.forEach((box) => {
+      for (let i = 0; i < box.tokens().len(); i++) {
+        const token = box.tokens().get(i);
+        const id = token.id().to_str();
+        const amount = token.amount().as_i64().to_str();
+        const assetsAmount = assets.get(id) || 0n;
+        assets.set(id, assetsAmount + BigInt(amount));
+      }
+    });
+    return [...assets].map(([tokenId, amount]) => ({ tokenId, amount }));
+  };
+
+  /**
+   * Extracts the total balance from the serialized boxes
+   * @param serializedBoxes to extract balance from
+   * @returns AddressBalance of the given boxes
+   */
+  static extractBalanceFromBoxes = (
+    serializedBoxes: Array<string>
+  ): AddressBalance => {
+    const boxes = serializedBoxes.map((box) => decodeSerializedBox(box));
+    const tokens = this.getBoxAssetsSum(boxes);
+    return {
+      nanoErgs: this.getBoxValuesSum(boxes),
+      tokens: tokens.map((token) => {
+        return {
+          ...token,
+          name: 'Test',
+        };
+      }),
+    };
   };
 }

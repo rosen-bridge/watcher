@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import addressRouter from './api/showAddress';
+import addressRouter from './api/address';
 import permitRouter from './api/permit';
 import { Transaction } from './api/Transaction';
 import { Boxes } from './ergo/boxes';
@@ -94,3 +94,5 @@ const init = async () => {
 };
 
 export default init;
+
+export { watcherDatabase };
