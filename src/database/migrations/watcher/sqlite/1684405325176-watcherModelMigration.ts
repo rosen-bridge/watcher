@@ -7,7 +7,7 @@ export class watcherModelMigration1684405325176 implements MigrationInterface {
     await queryRunner.query(`
             CREATE TABLE "token_entity" (
                 "tokenId" varchar NOT NULL,
-                "tokenName" varchar NOT NULL
+                "tokenName" varchar
             )
     `);
 
