@@ -14,7 +14,7 @@ import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
 import { loggerFactory } from '../../log/Logger';
 import { getConfig } from '../../config/config';
-import { ExplorerBox } from '../network/types';
+import { ExplorerBox, ErgoAssetInfo } from '../network/types';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -373,6 +373,27 @@ export class ErgoNetwork {
         `An error occurred while checking transaction inputs using Explorer: ${e.message}`
       );
       throw ConnectionError;
+    }
+  };
+
+  /**
+   * gets token info from network
+   * @param tokenId to fetch the info
+   * @returns token info
+   */
+  static getTokenInfo = async (tokenId: string): Promise<ErgoAssetInfo> => {
+    if (getConfig().general.nodeUrl) {
+      // fetch from node
+      const token = await nodeClient.get<ErgoAssetInfo>(
+        `blockchain/token/byId/${tokenId}`
+      );
+      return token.data;
+    } else {
+      // fetch from explorer
+      const token = await explorerApi.get<ErgoAssetInfo>(
+        `/api/v1/tokens/${tokenId}`
+      );
+      return token.data;
     }
   };
 }

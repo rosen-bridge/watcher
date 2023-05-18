@@ -8,6 +8,7 @@ import { blake2b } from 'blakejs';
 import { Buffer } from 'buffer';
 import { getConfig } from '../config/config';
 import { Transaction } from '../api/Transaction';
+import { watcherDatabase } from '../init';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -349,5 +350,49 @@ export class ErgoUtils {
         };
       }),
     };
+  };
+
+  /**
+   * Fetches the tokenId and amount of the watcher UTXOs
+   */
+  static getWatcherTokens = async (): Promise<Array<TokenInfo>> => {
+    const UTXOs = await watcherDatabase.getAddressUnspentBoxes(
+      getConfig().general.address
+    );
+    const serializedUTXOs = UTXOs.map((box) => box.serialized);
+    return this.extractBalanceFromBoxes(serializedUTXOs).tokens;
+  };
+
+  /**
+   * Places the token names in the given tokens
+   * @param tokens to place
+   * @returns tokens array with filled tokens
+   */
+  static placeTokenNames = async (
+    tokens: TokenInfo[]
+  ): Promise<Array<TokenInfo>> => {
+    const tokenIds = tokens.map((token) => token.tokenId);
+    const tokensInfo = await watcherDatabase.getTokenEntity(tokenIds);
+    const tokensInfoMap = new Map<string, string>();
+    tokensInfo.forEach((token) => {
+      tokensInfoMap.set(token.tokenId, token.tokenName);
+    });
+    return await Promise.all(
+      tokens.map(async (token) => {
+        let name = '';
+        if (!tokensInfoMap.has(token.tokenId)) {
+          // name = 'MULL';
+          const fetchedInfo = await ErgoNetwork.getTokenInfo(token.tokenId);
+          name = fetchedInfo.name || '';
+          await watcherDatabase.insertTokenEntity(token.tokenId, name);
+        } else {
+          name = tokensInfoMap.get(token.tokenId)!;
+        }
+        return {
+          ...token,
+          name,
+        };
+      })
+    );
   };
 }

@@ -56,3 +56,13 @@ export interface ExplorerTransaction {
   creationTimestamp: number;
   numConfirmations: number;
 }
+
+export interface ErgoAssetInfo {
+  id: string;
+  boxId: string;
+  emissionAmount: bigint;
+  name?: string;
+  description?: string;
+  type?: string;
+  decimals?: number;
+}

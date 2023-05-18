@@ -6,6 +6,7 @@ import { loggerFactory } from '../log/Logger';
 import { watcherDatabase } from '../init';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
+import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -45,11 +46,7 @@ addressRouter.post(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      const UTXOs = await watcherDatabase.getAddressUnspentBoxes(
-        getConfig().general.address
-      );
-      const serializedUTXOs = UTXOs.map((box) => box.serialized);
-      let tokens = ErgoUtils.extractBalanceFromBoxes(serializedUTXOs).tokens;
+      let tokens = await ErgoUtils.getWatcherTokens();
       const { tokenId, tokenName, sortByAmount, limit, skip } = req.body;
       if (tokenId) {
         tokens = tokens.filter((token) => token.tokenId === tokenId);
@@ -76,6 +73,7 @@ addressRouter.post(
       if (limit) {
         tokens = tokens.slice(0, limit);
       }
+      tokens = await ErgoUtils.placeTokenNames(tokens);
       res.status(200).send(JsonBI.stringify(tokens));
     } catch (e) {
       logger.warn(`An error occurred while fetching assets: ${e}`);
