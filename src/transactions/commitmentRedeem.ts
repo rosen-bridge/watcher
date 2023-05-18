@@ -93,11 +93,17 @@ export class CommitmentRedeem {
         candidates,
         height
       );
-      await this.txUtils.submitTransaction(signed, TxType.REDEEM, observation);
       logger.info(`Redeem tx [${signed.id().to_str()}] submitted to the queue`);
       for (let i = 0; i < signed.outputs().len(); i++) {
         const box = signed.outputs().get(i);
-        if (box.tokens().len() > 0 && boxHaveAsset(box, WID)) return box;
+        if (box.tokens().len() > 0 && boxHaveAsset(box, WID)) {
+          await this.txUtils.submitTransaction(
+            signed,
+            TxType.REDEEM,
+            observation
+          );
+          return box;
+        }
       }
       throw Error(`Impossible case: No WID box found in output`);
     } catch (e) {

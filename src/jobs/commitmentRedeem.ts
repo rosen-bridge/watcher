@@ -26,7 +26,7 @@ export const redeem = (
     watcherUtils,
     txUtils,
     boxes,
-    getConfig().general.commitmentRedeemConfirmation
+    getConfig().general.commitmentTimeoutConfirmation
   );
   redeemJob();
 };

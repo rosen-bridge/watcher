@@ -78,7 +78,7 @@ class Config {
   commitmentRevealInterval: number;
   transactionRemovingTimeout: number;
   transactionConfirmation: number;
-  commitmentRedeemConfirmation: number;
+  commitmentTimeoutConfirmation: number;
   transactionCheckingInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
@@ -150,8 +150,8 @@ class Config {
     this.transactionConfirmation = getRequiredNumber(
       'ergo.transaction.confirmation'
     );
-    this.commitmentRedeemConfirmation = getRequiredNumber(
-      'ergo.transaction.redeemConfirmation'
+    this.commitmentTimeoutConfirmation = getRequiredNumber(
+      'ergo.transaction.commitmentTimeoutConfirmation'
     );
     this.transactionRemovingTimeout = getRequiredNumber(
       'ergo.transaction.timeout'

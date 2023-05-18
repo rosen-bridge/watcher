@@ -392,17 +392,14 @@ class WatcherDataBase {
   };
 
   /**
-   * returns confirmed commitments after required confirmation with specific wid
+   * returns commitments before a certain height with specific wid
    * @param wid
-   * @param offset
-   * @param limit
+   * @param maxHeight
    */
-  confirmedCommitmentsByWID = async (
+  commitmentsByWIDAndMaxHeight = async (
     wid: string,
-    confirmation: number,
-    height: number
+    maxHeight: number
   ): Promise<Array<CommitmentEntity>> => {
-    const maxHeight = height - confirmation;
     return await this.commitmentRepository.find({
       where: {
         WID: wid,

@@ -555,15 +555,15 @@ describe('WatcherModel tests', () => {
     });
   });
 
-  describe('confirmedCommitmentsByWID', () => {
+  describe('commitmentsByWIDAndMaxHeight', () => {
     /**
-     * Target: testing confirmedCommitmentsByWID
+     * Target: testing commitmentsByWIDAndMaxHeight
      * Expected Output:
      *    The function should return one commitment
      */
     it('should return one commitment', async () => {
       await commitmentRepo.insert(spentCommitmentEntityOfWID);
-      const data = await DB.confirmedCommitmentsByWID('WID', 10, 1000);
+      const data = await DB.commitmentsByWIDAndMaxHeight('WID', 1000);
       console.log(JSON.stringify(data, undefined, 2));
       expect(data).to.have.length(1);
       await commitmentRepo.delete({
