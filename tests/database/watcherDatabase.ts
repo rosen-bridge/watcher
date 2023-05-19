@@ -33,6 +33,7 @@ import migrations from '../../src/database/migrations/watcher';
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
 
 import {
+  addressValidBox,
   cardanoBlockEntity,
   commitmentEntity,
   commitmentTxJson,
@@ -47,6 +48,7 @@ import {
   spentCommitmentEntity,
   spentPermitEntity,
   spentPlainBox,
+  tokenRecord,
 } from './mockedData';
 
 import * as Constants from '../../src/config/constants';
@@ -63,6 +65,7 @@ import {
 } from '../ergo/statistics/mockUtils';
 
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
+import { TokenEntity } from '../../src/database/entities/tokenEntity';
 
 const observation2Status = {
   observation: observationEntity2,
@@ -81,6 +84,7 @@ export type ORMType = {
   boxRepo: Repository<BoxEntity>;
   eventTriggerRepo: Repository<EventTriggerEntity>;
   transactionRepo: Repository<TxEntity>;
+  tokenRepo: Repository<TokenEntity>;
 };
 
 /**
@@ -97,6 +101,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     PermitEntity,
     ObservationStatusEntity,
     TxEntity,
+    TokenEntity,
   ];
   const ormConfig = new DataSource({
     type: 'sqlite',
@@ -125,6 +130,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
   const boxRepo = ormConfig.getRepository(BoxEntity);
   const eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity);
   const transactionRepo = ormConfig.getRepository(TxEntity);
+  const tokenRepo = ormConfig.getRepository(TokenEntity);
   if (clean) {
     for (const entity of entities.reverse()) {
       await ormConfig
@@ -144,6 +150,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     boxRepo: boxRepo,
     eventTriggerRepo: eventTriggerRepo,
     transactionRepo: transactionRepo,
+    tokenRepo: tokenRepo,
   };
 };
 
@@ -170,7 +177,7 @@ export const fillORM = async (ORM: ORMType) => {
     firstPermit,
     secondPermit,
   ]);
-  await ORM.boxRepo.save([plainBox, spentPlainBox]);
+  await ORM.boxRepo.save([plainBox, spentPlainBox, addressValidBox]);
   await ORM.eventTriggerRepo.save([
     eventTriggerEntity,
     newEventTriggerEntity,
@@ -178,6 +185,7 @@ export const fillORM = async (ORM: ORMType) => {
     secondStatisticsEventTrigger,
     thirdStatisticsEventTrigger,
   ]);
+  await ORM.tokenRepo.save([tokenRecord]);
 };
 
 describe('WatcherModel tests', () => {
@@ -607,9 +615,9 @@ describe('WatcherModel tests', () => {
      * Expected Output:
      *    The function should return one unspent address box
      */
-    it('should find one unspent plain box', async () => {
+    it('should find two unspent plain boxes', async () => {
       const data = await DB.getUnspentAddressBoxes();
-      expect(data).to.have.length(1);
+      expect(data).to.have.length(2);
       expect(data[0]).to.eql(plainBox);
     });
   });
@@ -625,6 +633,60 @@ describe('WatcherModel tests', () => {
         eventTriggerEntity.sourceTxId
       );
       expect(data).to.eql(eventTriggerEntity);
+    });
+  });
+
+  describe('getTokenEntity', () => {
+    /**
+     * @target WatcherDataBase.getTokenEntity should find
+     * all token entities in ids array
+     * @dependencies
+     * @scenario
+     * - run getTokenEntity with tokenRecord.tokenId
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to tokenRecord
+     */
+    it('should find all token entities in ids array', async () => {
+      // run getTokenEntity with tokenRecord.tokenId
+      const data = await DB.getTokenEntity([tokenRecord.tokenId]);
+
+      // check the result
+      expect(data).to.have.length(1);
+      expect(data[0]).to.eql(tokenRecord);
+    });
+  });
+
+  describe('insertTokenEntity', () => {
+    /**
+     * @target WatcherDataBase.getTokenEntity should insert
+     * token record successfully
+     * @dependencies
+     * @scenario
+     * - mock a new tokenRecord
+     * - insert the tokenRecord
+     * - run getTokenEntity with new tokenRecord id
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to the new tokenRecord
+     */
+    it('should insert token record successfully', async () => {
+      // mock a new tokenRecord
+      const tokenRecord2 = new TokenEntity();
+      tokenRecord2.tokenId = 'tokenId2';
+      tokenRecord2.tokenName = 'tokenName2';
+
+      // insert the tokenRecord
+      await DB.insertTokenEntity(tokenRecord2.tokenId, tokenRecord2.tokenName);
+
+      // run getTokenEntity with new tokenRecord id
+      const data = await DB.getTokenEntity([tokenRecord2.tokenId]);
+
+      // check the result
+      expect(data).to.have.length(1);
+      expect(data[0]).to.eql(tokenRecord2);
     });
   });
 });

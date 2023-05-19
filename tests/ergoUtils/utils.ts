@@ -1,5 +1,5 @@
 import { Observation } from '../../src/utils/interfaces';
-import { ErgoUtils, extractBoxes } from '../../src/ergo/utils';
+import { ErgoUtils, extractBoxes, TokenInfo } from '../../src/ergo/utils';
 import { uint8ArrayToHex } from '../../src/utils/utils';
 import { ChangeBoxCreationError } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
@@ -47,10 +47,15 @@ const userSecret = wasm.SecretKey.dlog_from_bytes(
     'hex'
   )
 );
+
 import repoObj from './dataset/repoBox.json' assert { type: 'json' };
 import { getConfig } from '../../src/config/config';
 import { Transaction } from '../../src/api/Transaction';
 import sinon from 'sinon';
+import { describe } from 'mocha';
+import { fillORM, loadDataBase } from '../database/watcherDatabase';
+import { initWatcherDB } from '../../src/init';
+import { tokenRecord, validBox1Token } from '../database/mockedData';
 
 const repoBox = JSON.stringify(repoObj);
 
@@ -384,6 +389,97 @@ describe('Testing ergoUtils', () => {
       const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson);
       const data = ErgoUtils.getBoxValuesSum(extractBoxes(boxes));
       expect(data).to.eql(67501049680n);
+    });
+  });
+
+  describe('getWatcherTokens', () => {
+    before('inserting into database', async () => {
+      const ORM = await loadDataBase();
+      await fillORM(ORM);
+      initWatcherDB(ORM.DB);
+    });
+
+    /**
+     * @target ErgoUtils.getWatcherTokens should extract tokens in UTXOs
+     * @dependencies
+     * @scenario
+     * - run the function
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to validBox1Token
+     */
+    it('should extract tokens in UTXOs', async () => {
+      // run the function
+      const result = await ErgoUtils.getWatcherTokens();
+
+      // check the result
+      expect(result).to.have.lengthOf(1);
+      expect(result[0]).to.eql(validBox1Token);
+    });
+  });
+
+  describe('placeTokenNames', async () => {
+    before('inserting into database', async () => {
+      const ORM = await loadDataBase();
+      await fillORM(ORM);
+      initWatcherDB(ORM.DB);
+    });
+
+    /**
+     * @target ErgoUtils.placeTokenNames should place token names from db
+     * @dependencies
+     * @scenario
+     * - mock a tokenInfo array
+     * - run the function
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to validBox1Token
+     */
+    it('should place token names from db', async () => {
+      // mock a tokenInfo array
+      const tokenInfo: TokenInfo[] = [
+        {
+          tokenId: tokenRecord.tokenId,
+          amount: 1n,
+        },
+      ];
+
+      // run the function
+      const res = await ErgoUtils.placeTokenNames(tokenInfo);
+
+      // check the result
+      expect(res).to.have.lengthOf(1);
+      expect(res[0].name).to.eql(tokenRecord.tokenName);
+    });
+
+    /**
+     * @target ErgoUtils.placeTokenNames should place token names from network
+     * @dependencies
+     * @scenario
+     * - mock a tokenInfo array
+     * - run the function
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to name
+     */
+    it('should place token names from network', async () => {
+      // mock a tokenInfo array
+      const tokenInfo: TokenInfo[] = [
+        {
+          tokenId: 'token',
+          amount: 1n,
+        },
+      ];
+
+      // run the function
+      const res = await ErgoUtils.placeTokenNames(tokenInfo);
+
+      // check the result
+      expect(res).to.have.lengthOf(1);
+      expect(res[0].name).to.eql('name');
     });
   });
 });

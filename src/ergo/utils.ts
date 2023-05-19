@@ -381,7 +381,6 @@ export class ErgoUtils {
       tokens.map(async (token) => {
         let name = '';
         if (!tokensInfoMap.has(token.tokenId)) {
-          // name = 'MULL';
           const fetchedInfo = await ErgoNetwork.getTokenInfo(token.tokenId);
           name = fetchedInfo.name || '';
           await watcherDatabase.insertTokenEntity(token.tokenId, name);

@@ -1,6 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 import { explorerApi, nodeClient } from '../../../src/ergo/network/ergoNetwork';
 import { mockedResponseBody } from './mockedResponseBody';
+import { validBox1Token } from '../../database/mockedData';
 
 const mockedExplorer = new MockAdapter(explorerApi);
 const mockedNodeClient = new MockAdapter(nodeClient);
@@ -221,4 +222,24 @@ export const initMockedAxios = (vector = 0) => {
   mockedNodeClient
     .onGet(`utxo/byId/${notSpentBoxId}`)
     .reply(200, mockedResponseBody.utxo);
+
+  mockedExplorer.onGet('/api/v1/tokens/token').reply(200, {
+    id: 'token',
+    boxId: 'boxId',
+    emissionAmount: 1,
+    name: 'name',
+    description: null,
+    type: null,
+    decimals: null,
+  });
+
+  mockedExplorer.onGet(`/api/v1/tokens/${validBox1Token.tokenId}`).reply(200, {
+    id: validBox1Token.tokenId,
+    boxId: 'boxId',
+    emissionAmount: 1,
+    name: validBox1Token.name,
+    description: null,
+    type: null,
+    decimals: null,
+  });
 };

@@ -93,6 +93,10 @@ const init = async () => {
     });
 };
 
+const initWatcherDB = (db: WatcherDataBase) => {
+  watcherDatabase = db;
+};
+
 export default init;
 
-export { watcherDatabase };
+export { watcherDatabase, initWatcherDB };

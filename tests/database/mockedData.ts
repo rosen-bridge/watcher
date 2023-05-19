@@ -13,6 +13,8 @@ import {
 import { BlockEntity } from '@rosen-bridge/scanner';
 import { PROCEED } from '@rosen-bridge/scanner/dist/entities/blockEntity';
 import * as Constants from '../../src/config/constants';
+import { TokenEntity } from '../../src/database/entities/tokenEntity';
+import { getConfig } from '../../src/config/config';
 
 export const ergoBlockEntity = new BlockEntity();
 ergoBlockEntity.scanner = Constants.ERGO_WATCHER;
@@ -107,6 +109,21 @@ spentPlainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 spentPlainBox.boxId = 'boxId2';
 spentPlainBox.serialized = 'box2';
 spentPlainBox.spendBlock = 'blockHash';
+
+export const addressValidBox = new BoxEntity();
+addressValidBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
+addressValidBox.createBlock = 'blockID';
+addressValidBox.creationHeight = 100;
+addressValidBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
+addressValidBox.boxId = 'boxId3';
+addressValidBox.serialized =
+  'gLL19gYACM0Dr+cTflAvT3HF/IGXPkBvyZWODfy4wBdQjOL2A2qjpQ/RjT0BBQ8FSMAPxKAwLilT3j+WfLGMfLWkxSaxY7/kZwqSai8BAJVusRG2h5VtH5w8R7TSrHzuQbd2cO/foKTfUEvEDpbqAg==';
+
+export const validBox1Token = {
+  tokenId: '050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f',
+  amount: 1n,
+  name: 'Test',
+};
 
 export const eventTriggerEntity = new EventTriggerEntity();
 eventTriggerEntity.sourceTxId = 'txId';
@@ -208,6 +225,10 @@ redeemedCommitment.spendBlock = 'hash';
 const eventTrigger = new EventTriggerEntity();
 eventTrigger.id = 1;
 eventTrigger.height = 111;
+
+export const tokenRecord = new TokenEntity();
+tokenRecord.tokenId = 'tokenId';
+tokenRecord.tokenName = 'tokenName';
 
 export const commitmentTxJson = {
   id: '555f7d54e7073f3ad6f0a587bf8c4f748e9a82b0868362b12a28854de968ea48',
