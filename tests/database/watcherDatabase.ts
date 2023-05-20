@@ -689,4 +689,26 @@ describe('WatcherModel tests', () => {
       expect(data[0]).to.eql(tokenRecord2);
     });
   });
+
+  describe('getPermitUnspentBoxes', () => {
+    /**
+     * @target WatcherDataBase.getPermitUnspentBoxes should get all
+     * unspent permit boxes
+     * @dependencies
+     * @scenario
+     * - run the function
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to the permitEntity
+     */
+    it('should get all unspent permit boxes', async () => {
+      // run the function
+      const data = await DB.getPermitUnspentBoxes();
+
+      // check the result
+      expect(data).to.have.length(1);
+      expect(data[0]).to.eql(permitEntity);
+    });
+  });
 });

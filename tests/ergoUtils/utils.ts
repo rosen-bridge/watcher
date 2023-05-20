@@ -55,7 +55,11 @@ import sinon from 'sinon';
 import { describe } from 'mocha';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
-import { tokenRecord, validBox1Token } from '../database/mockedData';
+import {
+  permitMockRWT,
+  tokenRecord,
+  validBox1Token,
+} from '../database/mockedData';
 
 const repoBox = JSON.stringify(repoObj);
 
@@ -480,6 +484,31 @@ describe('Testing ergoUtils', () => {
       // check the result
       expect(res).to.have.lengthOf(1);
       expect(res[0].name).to.eql('name');
+    });
+  });
+
+  describe('getPermitCount', () => {
+    before('inserting into database', async () => {
+      const ORM = await loadDataBase();
+      await fillORM(ORM);
+      initWatcherDB(ORM.DB);
+    });
+
+    /**
+     * @target ErgoUtils.getPermitCount should get watcher permit count successfully
+     * @dependencies
+     * @scenario
+     * - run the function
+     * - check the result
+     * @expected
+     * - permit count should be equal to 9999
+     */
+    it('should get watcher permit count successfully', async () => {
+      // run the function
+      const result = await ErgoUtils.getPermitCount(permitMockRWT);
+
+      // check the result
+      expect(result).to.eql(9999n);
     });
   });
 });

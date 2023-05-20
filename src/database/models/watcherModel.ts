@@ -507,6 +507,16 @@ class WatcherDataBase {
   insertTokenEntity = async (tokenId: string, tokenName: string) => {
     await this.tokenRepository.insert({ tokenId, tokenName });
   };
+
+  /**
+   * Returns all unspent permit boxes
+   */
+  getPermitUnspentBoxes = async (): Promise<Array<PermitEntity>> => {
+    return this.permitRepository
+      .createQueryBuilder('permit_entity')
+      .where('permit_entity.spendBlock is null')
+      .getMany();
+  };
 }
 
 export { WatcherDataBase };
