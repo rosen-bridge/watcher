@@ -45,7 +45,7 @@ const rwtID =
   '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074';
 const WID = '72eadf8bef7d2597cda26de0fb673616b44a66a3adc7ab57c6cfcac6a68ef639';
 
-export const observation: ObservationEntity = new ObservationEntity();
+const observation: ObservationEntity = new ObservationEntity();
 observation.id = 2;
 observation.fromChain = 'CARDANO';
 observation.toChain = 'ERGO';
@@ -65,7 +65,7 @@ observation.height = 123;
 observation.fromAddress =
   'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0';
 
-export const commitment = new CommitmentEntity();
+const commitment = new CommitmentEntity();
 commitment.id = 9;
 commitment.extractor = 'cardanoCommitment';
 commitment.eventId =
@@ -162,7 +162,7 @@ describe('Commitment redeem transaction tests', () => {
      * @expected
      * - it should construct a valid commitment redeem tx
      * - it should also sign and send it successfully
-     * - it should not call createWIDBox
+     * - it should call createWIDBox
      */
     it('should create, sign and send a commitment redeem tx with extra tokens', async () => {
       chai.spy.on(txUtils, 'submitTransaction', () => null);
@@ -200,12 +200,10 @@ describe('Commitment redeem transaction tests', () => {
      * - Transaction
      * @scenario
      * - mock environment (RWTTokenId, getHeight and createAndSignTx)
-     * - call function
-     * - validate used functions with inputs
+     * - call function and expect exception to be thrown
      * @expected
-     * - it should construct a valid commitment redeem tx
-     * - it should also sign and send it successfully
-     * - it should not call createWIDBox
+     * - it should throw error
+     * - it should should not send the transaction to sign
      */
     it('should throw error when Erg is not enough', async () => {
       chai.spy.on(ErgoUtils, 'createAndSignTx');
@@ -275,6 +273,7 @@ describe('Commitment redeem transaction tests', () => {
 
     /**
      * @target redeemCommitmentTx.job should collect timeout commitments and redeem them
+     * with additional fee boxes
      * @dependencies
      * - WatcherUtils
      * - Boxes
@@ -290,10 +289,10 @@ describe('Commitment redeem transaction tests', () => {
      * - run test
      * - check calling redeemCommitmentTx
      * - check not calling detach tx
-     * - check not calling getUserPaymentBox
+     * - check calling getUserPaymentBox
      * @expected
      * - it should not call DetachWID.detachWIDtx since the WID token is the first token of WIDBox
-     * - it should not call getUserPaymentBox since the box values is enough
+     * - it should call getUserPaymentBox
      * - it should call the commitment tx with correct input values
      */
     it('should collect a timeout commitment and redeem them with additional fee boxes', async () => {
@@ -307,7 +306,7 @@ describe('Commitment redeem transaction tests', () => {
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cr, 'redeemCommitmentTx', () => WIDBox2);
       await cr.job();
-      // Total value is enough should not call paymentBox
+      // Total value is NOT enough. Should call paymentBox
       expect(cr.redeemCommitmentTx).to.have.been.called();
       expect(DetachWID.detachWIDtx).to.not.have.been.called();
       expect(boxes.getUserPaymentBox).to.have.called.once;
@@ -330,11 +329,11 @@ describe('Commitment redeem transaction tests', () => {
      * - run test
      * - check calling redeemCommitmentTx
      * - check not calling detach tx
-     * - check not calling getUserPaymentBox
+     * - check calling getUserPaymentBox
      * @expected
      * - it should not call DetachWID.detachWIDtx since the WID token is the first token of WIDBox
-     * - it should not call getUserPaymentBox since the box values is enough
-     * - it should call the commitment tx with correct input values
+     * - it should call getUserPaymentBox
+     * - it should call the commitment tx twice
      */
     it('should chain commitment redeem transactions', async () => {
       chai.spy.on(watcherUtils, 'allTimeoutCommitments', () => [
@@ -350,7 +349,6 @@ describe('Commitment redeem transaction tests', () => {
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cr, 'redeemCommitmentTx', () => WIDBox);
       await cr.job();
-      // Total value is enough should not call paymentBox
       expect(cr.redeemCommitmentTx).to.have.been.called.twice;
       expect(DetachWID.detachWIDtx).to.not.have.been.called();
       expect(boxes.getUserPaymentBox).to.have.called.once;

@@ -93,7 +93,6 @@ export class CommitmentRedeem {
         candidates,
         height
       );
-      logger.info(`Redeem tx [${signed.id().to_str()}] submitted to the queue`);
       for (let i = 0; i < signed.outputs().len(); i++) {
         const box = signed.outputs().get(i);
         if (box.tokens().len() > 0 && boxHaveAsset(box, WID)) {
@@ -101,6 +100,9 @@ export class CommitmentRedeem {
             signed,
             TxType.REDEEM,
             observation
+          );
+          logger.info(
+            `Redeem tx [${signed.id().to_str()}] submitted to the queue`
           );
           return box;
         }
@@ -145,7 +147,7 @@ export class CommitmentRedeem {
       );
       if (!observationStatus) {
         logger.debug(
-          `Skipping commitment redeem: Corresponding observation is not in 'COMMITED' status`
+          `Skipping commitment [${commitment.id}] redeem: Corresponding observation [${commitment.eventId}] is not in 'COMMITED' status`
         );
         continue;
       }
@@ -156,7 +158,7 @@ export class CommitmentRedeem {
           );
           DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
           logger.info(
-            `Skipping the commitment redeem due to having a malformed WID box`
+            `Skipping the commitment [${commitment.id}] redeem due to having a malformed WID box`
           );
           continue;
         }
@@ -182,7 +184,7 @@ export class CommitmentRedeem {
         );
       } catch (e) {
         logger.warn(
-          `Skipping the commitment redeem due to occurred error: ${e.message} - ${e.stack}`
+          `Skipping the commitment [${commitment.id}] redeem due to occurred error: ${e.message} - ${e.stack}`
         );
       }
     }

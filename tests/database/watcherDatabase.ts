@@ -564,7 +564,6 @@ describe('WatcherModel tests', () => {
     it('should return one commitment', async () => {
       await commitmentRepo.insert(spentCommitmentEntityOfWID);
       const data = await DB.commitmentsByWIDAndMaxHeight('WID', 1000);
-      console.log(JSON.stringify(data, undefined, 2));
       expect(data).to.have.length(1);
       await commitmentRepo.delete({
         eventId: spentCommitmentEntityOfWID.eventId,
