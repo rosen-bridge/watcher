@@ -396,7 +396,7 @@ describe('Testing ergoUtils', () => {
     });
   });
 
-  describe('getWatcherTokens', () => {
+  describe('getWatcherBalance', () => {
     before('inserting into database', async () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
@@ -404,22 +404,25 @@ describe('Testing ergoUtils', () => {
     });
 
     /**
-     * @target ErgoUtils.getWatcherTokens should extract tokens in UTXOs
+     * @target ErgoUtils.getWatcherTokens should extract balance in UTXOs
      * @dependencies
      * @scenario
      * - run the function
      * - check the result
      * @expected
-     * - should return data with length 1
-     * - data[0] should be equal to validBox1Token
+     * - should return data with tokens of length 1
+     * - tokens[0] should be equal to validBox1Token
+     * - nanoErgs should be equal to 1860000000n
      */
     it('should extract tokens in UTXOs', async () => {
       // run the function
-      const result = await ErgoUtils.getWatcherTokens();
+      const result = await ErgoUtils.getWatcherBalance();
+      const tokens = result.tokens;
 
       // check the result
-      expect(result).to.have.lengthOf(1);
-      expect(result[0]).to.eql(validBox1Token);
+      expect(tokens).to.have.lengthOf(1);
+      expect(tokens[0]).to.eql(validBox1Token);
+      expect(result.nanoErgs).to.eql(1860000000n);
     });
   });
 

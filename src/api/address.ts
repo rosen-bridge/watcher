@@ -46,7 +46,7 @@ addressRouter.post(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      let tokens = await ErgoUtils.getWatcherTokens();
+      let tokens = (await ErgoUtils.getWatcherBalance()).tokens;
       const { tokenId, tokenName, sortByAmount, limit, skip } = req.body;
       if (tokenId) {
         tokens = tokens.filter((token) => token.tokenId === tokenId);

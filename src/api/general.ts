@@ -22,10 +22,10 @@ const generalRouter = express.Router();
 generalRouter.get('/', async (req: Request, res: Response) => {
   try {
     const info: GeneralInfo = {
-      currentBalance: await ErgoUtils.getWatcherErgBalance(),
+      currentBalance: (await ErgoUtils.getWatcherBalance()).nanoErgs,
       network: getConfig().general.networkWatcher,
       permitCount: await ErgoUtils.getPermitCount(getConfig().rosen.RWTId),
-      health: 'OK', //TODO: implement health check
+      health: 'OK', // TODO: https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/94
       address: getConfig().general.address,
     };
     res.status(200).send(JsonBI.stringify(info));

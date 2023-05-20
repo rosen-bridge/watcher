@@ -353,25 +353,14 @@ export class ErgoUtils {
   };
 
   /**
-   * Fetches the tokenId and amount of the watcher UTXOs
-   */
-  static getWatcherTokens = async (): Promise<Array<TokenInfo>> => {
-    const UTXOs = await watcherDatabase.getAddressUnspentBoxes(
-      getConfig().general.address
-    );
-    const serializedUTXOs = UTXOs.map((box) => box.serialized);
-    return this.extractBalanceFromBoxes(serializedUTXOs).tokens;
-  };
-
-  /**
    * Fetches the balance of the watcher UTXOs
    */
-  static getWatcherErgBalance = async (): Promise<bigint> => {
+  static getWatcherBalance = async (): Promise<AddressBalance> => {
     const UTXOs = await watcherDatabase.getAddressUnspentBoxes(
       getConfig().general.address
     );
     const serializedUTXOs = UTXOs.map((box) => box.serialized);
-    return this.extractBalanceFromBoxes(serializedUTXOs).nanoErgs;
+    return this.extractBalanceFromBoxes(serializedUTXOs);
   };
 
   /**
