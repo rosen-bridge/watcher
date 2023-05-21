@@ -37,10 +37,11 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    let tokens = await ErgoUtils.getWatcherTokens();
-    const { tokenName, sortByAmount } = req.query;
-    if (tokenName) {
-      console.log('TokenName');
+    let tokens = (await ErgoUtils.getWatcherBalance()).tokens;
+    const { tokenId, tokenName, sortByAmount } = req.query;
+    if (tokenId) {
+      tokens = tokens.filter((token) => token.tokenId === (tokenId as string));
+    } else if (tokenName) {
       tokens = tokens.filter((token) =>
         token.name?.toLowerCase()?.includes((tokenName as string).toLowerCase())
       );

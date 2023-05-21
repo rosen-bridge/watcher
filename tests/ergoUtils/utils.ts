@@ -412,7 +412,7 @@ describe('Testing ergoUtils', () => {
      */
     it('should extract tokens in UTXOs', async () => {
       // run the function
-      const result = await ErgoUtils.getWatcherTokens();
+      const result = (await ErgoUtils.getWatcherBalance()).tokens;
 
       // check the result
       expect(result).to.have.lengthOf(1);
