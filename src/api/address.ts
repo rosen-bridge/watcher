@@ -40,7 +40,6 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     let tokens = await ErgoUtils.getWatcherTokens();
     const { tokenName, sortByAmount } = req.query;
     if (tokenName) {
-      console.log('TokenName');
       tokens = tokens.filter((token) =>
         token.name?.toLowerCase()?.includes((tokenName as string).toLowerCase())
       );
