@@ -423,7 +423,7 @@ class WatcherDataBase {
    * Returns all unspent plain boxes of a specific address
    * @param address to fetch unspent boxes
    */
-  getAddressUnspentBoxes = async (
+  getUnspentBoxesByAddress = async (
     address: string
   ): Promise<Array<BoxEntity>> => {
     return this.boxRepository

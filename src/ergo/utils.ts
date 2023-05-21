@@ -9,6 +9,7 @@ import { Buffer } from 'buffer';
 import { getConfig } from '../config/config';
 import { Transaction } from '../api/Transaction';
 import { watcherDatabase } from '../init';
+import { AddressBalance, TokenInfo } from './interfaces';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -32,17 +33,6 @@ export const boxHaveAsset = (box: ErgoBox, asset: string) => {
     .map((token) => token.id().to_str())
     .includes(asset);
 };
-
-export interface TokenInfo {
-  tokenId: string;
-  amount: bigint;
-  name?: string;
-}
-
-export interface AddressBalance {
-  nanoErgs: bigint;
-  tokens: Array<TokenInfo>;
-}
 
 export class ErgoUtils {
   /**
@@ -336,19 +326,14 @@ export class ErgoUtils {
    * @param serializedBoxes to extract balance from
    * @returns AddressBalance of the given boxes
    */
-  static extractBalanceFromBoxes = (
+  static extractBalanceFromBoxes = async (
     serializedBoxes: Array<string>
-  ): AddressBalance => {
+  ): Promise<AddressBalance> => {
     const boxes = serializedBoxes.map((box) => decodeSerializedBox(box));
     const tokens = this.getBoxAssetsSum(boxes);
     return {
       nanoErgs: this.getBoxValuesSum(boxes),
-      tokens: tokens.map((token) => {
-        return {
-          ...token,
-          name: 'Test',
-        };
-      }),
+      tokens: await this.placeTokenNames(tokens),
     };
   };
 
@@ -356,11 +341,11 @@ export class ErgoUtils {
    * Fetches the tokenId and amount of the watcher UTXOs
    */
   static getWatcherTokens = async (): Promise<Array<TokenInfo>> => {
-    const UTXOs = await watcherDatabase.getAddressUnspentBoxes(
+    const UTXOs = await watcherDatabase.getUnspentBoxesByAddress(
       getConfig().general.address
     );
     const serializedUTXOs = UTXOs.map((box) => box.serialized);
-    return this.extractBalanceFromBoxes(serializedUTXOs).tokens;
+    return (await this.extractBalanceFromBoxes(serializedUTXOs)).tokens;
   };
 
   /**

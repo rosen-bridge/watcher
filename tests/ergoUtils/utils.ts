@@ -1,5 +1,5 @@
 import { Observation } from '../../src/utils/interfaces';
-import { ErgoUtils, extractBoxes, TokenInfo } from '../../src/ergo/utils';
+import { ErgoUtils, extractBoxes } from '../../src/ergo/utils';
 import { uint8ArrayToHex } from '../../src/utils/utils';
 import { ChangeBoxCreationError } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
@@ -56,6 +56,7 @@ import { describe } from 'mocha';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
 import { tokenRecord, validBox1Token } from '../database/mockedData';
+import { TokenInfo } from '../../src/ergo/interfaces';
 
 const repoBox = JSON.stringify(repoObj);
 

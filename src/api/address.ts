@@ -31,30 +31,32 @@ addressRouter.get('/generate', async (req: Request, res: Response) => {
 /**
  * Api for fetching assets
  */
-addressRouter.post(
-  '/assets',
-  [
-    check('tokenId').optional().isString(),
-    check('tokenName').optional().isString(),
-    check('sortByAmount').optional().isBoolean(),
-    check('limit').optional().isNumeric(),
-    check('skip').optional().isNumeric(),
-  ],
-  async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+addressRouter.get('/assets', async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  try {
+    let tokens = await ErgoUtils.getWatcherTokens();
+    const { tokenName, sortByAmount } = req.query;
+    if (tokenName) {
+      console.log('TokenName');
+      tokens = tokens.filter((token) =>
+        token.name?.toLowerCase()?.includes((tokenName as string).toLowerCase())
+      );
     }
-    try {
-      let tokens = await ErgoUtils.getWatcherTokens();
-      const { tokenId, tokenName, sortByAmount, limit, skip } = req.body;
-      if (tokenId) {
-        tokens = tokens.filter((token) => token.tokenId === tokenId);
-      }
-      if (tokenName) {
-        tokens = tokens.filter((token) => token.name?.includes(tokenName));
-      }
-      if (sortByAmount === true) {
+    if (sortByAmount) {
+      if (sortByAmount === 'asc') {
+        tokens = tokens.sort((a, b) => {
+          if (a.amount < b.amount) {
+            return -1;
+          }
+          if (a.amount > b.amount) {
+            return 1;
+          }
+          return 0;
+        });
+      } else if (sortByAmount === 'desc') {
         tokens = tokens.sort((a, b) => {
           if (a.amount < b.amount) {
             return 1;
@@ -64,22 +66,19 @@ addressRouter.post(
           }
           return 0;
         });
-      } else {
-        tokens = tokens.sort((a, b) => a.tokenId.localeCompare(b.tokenId));
       }
-      if (skip) {
-        tokens = tokens.slice(skip);
-      }
-      if (limit) {
-        tokens = tokens.slice(0, limit);
-      }
-      tokens = await ErgoUtils.placeTokenNames(tokens);
-      res.status(200).send(JsonBI.stringify(tokens));
-    } catch (e) {
-      logger.warn(`An error occurred while fetching assets: ${e}`);
-      res.status(500).send({ message: e.message });
+    } else {
+      tokens = tokens.sort((a, b) => a.tokenId.localeCompare(b.tokenId));
     }
+    const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+    tokens = tokens.slice(offset, offset + limit);
+
+    res.status(200).send(JsonBI.stringify(tokens));
+  } catch (e) {
+    logger.warn(`An error occurred while fetching assets: ${e}`);
+    res.status(500).send({ message: e.message });
   }
-);
+});
 
 export default addressRouter;
