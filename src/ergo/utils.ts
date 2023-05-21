@@ -346,7 +346,7 @@ export class ErgoUtils {
       getConfig().general.address
     );
     const serializedUTXOs = UTXOs.map((box) => box.serialized);
-    return await this.extractBalanceFromBoxes(serializedUTXOs);
+    return this.extractBalanceFromBoxes(serializedUTXOs);
   };
 
   /**
