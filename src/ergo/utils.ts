@@ -9,6 +9,7 @@ import { Buffer } from 'buffer';
 import { getConfig } from '../config/config';
 import { Transaction } from '../api/Transaction';
 import { watcherDatabase } from '../init';
+import { AddressBalance, TokenInfo } from './interfaces';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -32,17 +33,6 @@ export const boxHaveAsset = (box: ErgoBox, asset: string) => {
     .map((token) => token.id().to_str())
     .includes(asset);
 };
-
-export interface TokenInfo {
-  tokenId: string;
-  amount: bigint;
-  name?: string;
-}
-
-export interface AddressBalance {
-  nanoErgs: bigint;
-  tokens: Array<TokenInfo>;
-}
 
 export class ErgoUtils {
   /**
@@ -336,19 +326,15 @@ export class ErgoUtils {
    * @param serializedBoxes to extract balance from
    * @returns AddressBalance of the given boxes
    */
-  static extractBalanceFromBoxes = (
-    serializedBoxes: Array<string>
-  ): AddressBalance => {
+  static extractBalanceFromBoxes = async (
+    serializedBoxes: Array<string>,
+    placeTokenNames = true
+  ): Promise<AddressBalance> => {
     const boxes = serializedBoxes.map((box) => decodeSerializedBox(box));
     const tokens = this.getBoxAssetsSum(boxes);
     return {
       nanoErgs: this.getBoxValuesSum(boxes),
-      tokens: tokens.map((token) => {
-        return {
-          ...token,
-          name: 'Test',
-        };
-      }),
+      tokens: placeTokenNames ? await this.placeTokenNames(tokens) : tokens,
     };
   };
 
@@ -356,11 +342,11 @@ export class ErgoUtils {
    * Fetches the balance of the watcher UTXOs
    */
   static getWatcherBalance = async (): Promise<AddressBalance> => {
-    const UTXOs = await watcherDatabase.getAddressUnspentBoxes(
+    const UTXOs = await watcherDatabase.getUnspentBoxesByAddress(
       getConfig().general.address
     );
     const serializedUTXOs = UTXOs.map((box) => box.serialized);
-    return this.extractBalanceFromBoxes(serializedUTXOs);
+    return await this.extractBalanceFromBoxes(serializedUTXOs);
   };
 
   /**
@@ -403,7 +389,10 @@ export class ErgoUtils {
   static getPermitCount = async (RWTId: string): Promise<bigint> => {
     const permitBoxes = await watcherDatabase.getPermitUnspentBoxes();
     const serializedUTXOs = permitBoxes.map((box) => box.boxSerialized);
-    const { tokens } = this.extractBalanceFromBoxes(serializedUTXOs);
+    const { tokens } = await this.extractBalanceFromBoxes(
+      serializedUTXOs,
+      false
+    );
     const RWT = tokens.find((token) => token.tokenId === RWTId);
     if (RWT) {
       return RWT.amount;

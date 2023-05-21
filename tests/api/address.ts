@@ -37,10 +37,7 @@ describe('Address-Api', () => {
      */
     it('Assets endpoint should return all tokens', async () => {
       // send a request to the endpoint
-      const res = await request(app)
-        .post('/address/assets')
-        .send({})
-        .set('Content-Type', 'application/json');
+      const res = await request(app).get('/address/assets');
 
       // check the result
       expect(res.status).to.equal(200);
