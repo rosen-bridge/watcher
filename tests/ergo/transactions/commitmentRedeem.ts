@@ -123,6 +123,9 @@ describe('Commitment redeem transaction tests', () => {
      * - it should construct a valid commitment redeem tx
      * - it should also sign and send it successfully
      * - it should not call createWIDBox
+     * - it should return new WID box
+     *   - tokenId should equal to WID
+     *   - ergoTree should equal to spent WID box ergoTree
      */
     it('should create, sign and send a commitment redeem tx without any extra tokens', async () => {
       chai.spy.on(txUtils, 'submitTransaction', () => null);
@@ -131,7 +134,7 @@ describe('Commitment redeem transaction tests', () => {
       chai.spy.on(ErgoUtils, 'getExtraTokenCount');
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
       sinon.stub(ErgoNetwork, 'getHeight').resolves(999999);
-      await cr.redeemCommitmentTx(
+      const res = await cr.redeemCommitmentTx(
         WID,
         observation,
         WIDBox,
@@ -146,6 +149,10 @@ describe('Commitment redeem transaction tests', () => {
       );
       expect(ErgoUtils.getExtraTokenCount).to.have.called.once;
       expect(boxes.createWIDBox).not.to.have.called;
+      expect(res.tokens().get(0).id().to_str()).to.equal(WID);
+      expect(res.ergo_tree().to_base16_bytes()).to.equal(
+        WIDBox.ergo_tree().to_base16_bytes()
+      );
     });
 
     /**
@@ -163,6 +170,9 @@ describe('Commitment redeem transaction tests', () => {
      * - it should construct a valid commitment redeem tx
      * - it should also sign and send it successfully
      * - it should call createWIDBox
+     * - it should return new WID box
+     *   - tokenId should equal to WID
+     *   - ergoTree should equal to spent WID box ergoTree
      */
     it('should create, sign and send a commitment redeem tx with extra tokens', async () => {
       chai.spy.on(txUtils, 'submitTransaction', () => null);
@@ -171,7 +181,7 @@ describe('Commitment redeem transaction tests', () => {
       chai.spy.on(ErgoUtils, 'getExtraTokenCount');
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
       sinon.stub(ErgoNetwork, 'getHeight').resolves(999999);
-      await cr.redeemCommitmentTx(
+      const res = await cr.redeemCommitmentTx(
         WID,
         observation,
         WIDBox,
@@ -190,6 +200,10 @@ describe('Commitment redeem transaction tests', () => {
         '997800000'
       );
       expect(ErgoUtils.getExtraTokenCount).to.have.called.once;
+      expect(res.tokens().get(0).id().to_str()).to.equal(WID);
+      expect(res.ergo_tree().to_base16_bytes()).to.equal(
+        WIDBox.ergo_tree().to_base16_bytes()
+      );
     });
 
     /**
