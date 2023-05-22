@@ -9,12 +9,16 @@ import { WatcherDataBase } from '../database/models/watcherModel';
 import { TxType } from '../database/entities/txEntity';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { NoObservationStatus } from '../errors/errors';
-import { TxStatus } from '../database/entities/observationStatusEntity';
+import {
+  ObservationStatusEntity,
+  TxStatus,
+} from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
 import { loggerFactory } from '../log/Logger';
+import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -199,6 +203,31 @@ class WatcherUtils {
     }
     return readyCommitments;
   };
+
+  /**
+   * returns all timeout commitments
+   * @param timeoutConfirmation number of confirmation so that a commitment become timeout
+   */
+  allTimeoutCommitments = async (
+    timeoutConfirmation: number
+  ): Promise<Array<CommitmentEntity>> => {
+    const height = await this.dataBase.getLastBlockHeight(
+      scanner.observationScanner.name()
+    );
+    return await this.dataBase.commitmentsByWIDAndMaxHeight(
+      Transaction.watcherWID!,
+      height - timeoutConfirmation
+    );
+  };
+
+  /**
+   * returns all observation with active commitment
+   */
+  allCommitedObservations = async (): Promise<
+    Array<ObservationStatusEntity>
+  > => {
+    return await this.dataBase.getObservationsByStatus(TxStatus.COMMITTED);
+  };
 }
 
 class TransactionUtils {
@@ -222,7 +251,10 @@ class TransactionUtils {
     const height = await ErgoNetwork.getHeight();
     let requestId = undefined;
     if (observation) {
-      await this.dataBase.upgradeObservationTxStatus(observation);
+      await this.dataBase.upgradeObservationTxStatus(
+        observation,
+        txType === TxType.REDEEM
+      );
       requestId = observation.requestId;
     }
     await this.dataBase.submitTx(

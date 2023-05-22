@@ -1,4 +1,12 @@
-import { DataSource, In, Like, Not, Repository } from 'typeorm';
+import {
+  DataSource,
+  In,
+  IsNull,
+  LessThan,
+  Like,
+  Not,
+  Repository,
+} from 'typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxEntity, TxType } from '../entities/txEntity';
 import {
@@ -110,6 +118,21 @@ class WatcherDataBase {
   };
 
   /**
+   * gets observations by status
+   * @param observation
+   */
+  getObservationsByStatus = async (
+    status: TxStatus
+  ): Promise<ObservationStatusEntity[]> => {
+    return await this.observationStatusEntity.find({
+      relations: ['observation'],
+      where: {
+        status: status,
+      },
+    });
+  };
+
+  /**
    * Stores a transaction in tx queue, the queue will process the transaction automatically afterward
    * @param tx
    * @param requestId
@@ -184,22 +207,37 @@ class WatcherDataBase {
   /**
    * Upgrades the observation TxStatus, it means it had progressed creating transactions
    * @param observation
+   * @param isRedeemSent true if this upgrade is due to sending commitment redeem transaction
    */
-  upgradeObservationTxStatus = async (observation: ObservationEntity) => {
+  upgradeObservationTxStatus = async (
+    observation: ObservationEntity,
+    isRedeemSent = false
+  ) => {
     const observationStatus = await this.getStatusForObservations(observation);
     if (observationStatus === null)
       throw new Error(
         `observation with requestId ${observation.requestId} has no status`
       );
-    await this.observationStatusEntity.update(
-      {
-        id: observationStatus.id,
-        status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
-      },
-      {
-        status: observationStatus.status + 1,
-      }
-    );
+    if (!isRedeemSent)
+      await this.observationStatusEntity.update(
+        {
+          id: observationStatus.id,
+          status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
+        },
+        {
+          status: observationStatus.status + 1,
+        }
+      );
+    else
+      await this.observationStatusEntity.update(
+        {
+          id: observationStatus.id,
+          status: TxStatus.COMMITTED,
+        },
+        {
+          status: TxStatus.REDEEM_SENT,
+        }
+      );
     const updatedStatus = await this.getStatusForObservations(observation);
     if (updatedStatus === null) {
       throw new Error(
@@ -213,22 +251,37 @@ class WatcherDataBase {
   /**
    * Downgrades the observation TxStatus, it means it had problems creating or sending transactions
    * @param observation
+   * @param isRedeemSent true if this downgrade is about a commitment redeem transaction
    */
-  downgradeObservationTxStatus = async (observation: ObservationEntity) => {
+  downgradeObservationTxStatus = async (
+    observation: ObservationEntity,
+    isRedeemSent = false
+  ) => {
     const observationStatus = await this.getStatusForObservations(observation);
     if (observationStatus === null)
       throw new Error(
         `observation with requestId ${observation.requestId} has no status`
       );
-    await this.observationStatusEntity.update(
-      {
-        id: observationStatus.id,
-        status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
-      },
-      {
-        status: observationStatus.status - 1,
-      }
-    );
+    if (!isRedeemSent)
+      await this.observationStatusEntity.update(
+        {
+          id: observationStatus.id,
+          status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
+        },
+        {
+          status: observationStatus.status - 1,
+        }
+      );
+    else
+      await this.observationStatusEntity.update(
+        {
+          id: observationStatus.id,
+          status: TxStatus.REDEEM_SENT,
+        },
+        {
+          status: TxStatus.COMMITTED,
+        }
+      );
     const updatedStatus = await this.getStatusForObservations(observation);
     if (updatedStatus === null) {
       throw new Error(
@@ -335,6 +388,24 @@ class WatcherDataBase {
       },
       take: limit,
       skip: offset,
+    });
+  };
+
+  /**
+   * returns commitments before a certain height with specific wid
+   * @param wid
+   * @param maxHeight
+   */
+  commitmentsByWIDAndMaxHeight = async (
+    wid: string,
+    maxHeight: number
+  ): Promise<Array<CommitmentEntity>> => {
+    return await this.commitmentRepository.find({
+      where: {
+        WID: wid,
+        height: LessThan(maxHeight),
+        spendHeight: IsNull(),
+      },
     });
   };
 

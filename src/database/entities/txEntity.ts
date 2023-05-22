@@ -5,6 +5,7 @@ export enum TxType {
   COMMITMENT = 'commitment',
   TRIGGER = 'trigger',
   DETACH = 'detach',
+  REDEEM = 'redeem',
 }
 
 @Entity()

@@ -61,6 +61,17 @@ commitmentEntity.extractor = 'extractor';
 commitmentEntity.height = 105;
 commitmentEntity.boxSerialized = '222';
 
+export const spentCommitmentEntityOfWID = new CommitmentEntity();
+spentCommitmentEntityOfWID.commitment = 'commitment3';
+spentCommitmentEntityOfWID.boxId = 'boxId3';
+spentCommitmentEntityOfWID.WID = 'WID';
+spentCommitmentEntityOfWID.eventId = 'eventId3ofWID';
+spentCommitmentEntityOfWID.block = 'block';
+spentCommitmentEntityOfWID.extractor = 'extractor';
+spentCommitmentEntityOfWID.height = 105;
+spentCommitmentEntityOfWID.spendHeight = 110;
+spentCommitmentEntityOfWID.boxSerialized = '2223';
+
 export const spentCommitmentEntity = new CommitmentEntity();
 spentCommitmentEntity.commitment = 'commitment';
 spentCommitmentEntity.boxId = 'boxId2';
@@ -185,6 +196,23 @@ observationEntity2.toAddress = 'addr1';
 observationEntity2.targetChainTokenId = 'targetToken';
 observationEntity2.toChain = 'cardano';
 observationEntity2.requestId = 'reqId1';
+
+export const observationEntity3 = new ObservationEntity();
+observationEntity3.height = 3;
+observationEntity3.amount = '44000';
+observationEntity3.extractor = 'observation-extractor';
+observationEntity3.bridgeFee = '300';
+observationEntity3.fromAddress = 'fromAddress';
+observationEntity3.block = 'hash';
+observationEntity3.fromChain = 'ergo';
+observationEntity3.networkFee = '1000';
+observationEntity3.sourceBlockId = 'block';
+observationEntity3.sourceTxId = 'txId3';
+observationEntity3.sourceChainTokenId = 'sourceToken';
+observationEntity3.toAddress = 'addr3';
+observationEntity3.targetChainTokenId = 'targetToken';
+observationEntity3.toChain = 'cardano';
+observationEntity3.requestId = 'reqId3';
 
 export const observationStatusTimedOut = new ObservationStatusEntity();
 observationStatusTimedOut.status = TxStatus.TIMED_OUT;
