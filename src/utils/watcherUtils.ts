@@ -212,7 +212,7 @@ class WatcherUtils {
     timeoutConfirmation: number
   ): Promise<Array<CommitmentEntity>> => {
     const height = await this.dataBase.getLastBlockHeight(
-      scanner.ergoScanner.name()
+      scanner.observationScanner.name()
     );
     return await this.dataBase.commitmentsByWIDAndMaxHeight(
       Transaction.watcherWID!,
