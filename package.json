@@ -18,7 +18,8 @@
     "typeorm": "NODE_OPTIONS=--experimental-specifier-resolution=node typeorm-ts-node-esm",
     "postinstall": "patch-package",
     "prepare": "husky install",
-    "build": "rollup --config ./rollup.config.ts --configPlugin @rollup/plugin-typescript"
+    "build": "rollup --config ./rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "release": "npm run build && pkg ./out/index.cjs --targets host --out-path bin"
   },
   "repository": {
     "type": "git",
@@ -59,6 +60,7 @@
     "mocha": "^9.2.2",
     "nodemon": "^2.0.15",
     "patch-package": "^6.5.1",
+    "pkg": "^5.8.1",
     "prettier": "^2.7.1",
     "rollup": "^3.21.6",
     "rollup-plugin-natives": "^0.7.6",
