@@ -17,7 +17,8 @@
     "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
     "typeorm": "NODE_OPTIONS=--experimental-specifier-resolution=node typeorm-ts-node-esm",
     "postinstall": "patch-package",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build": "rollup --config ./rollup.config.ts --configPlugin @rollup/plugin-typescript"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-typescript": "^11.1.1",
+    "@rollup/plugin-virtual": "^3.0.1",
+    "@rosen-bridge/rollup-plugin-node-wasm": "^0.1.0",
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.5",
     "@types/chai-spies": "^1.0.3",
@@ -53,6 +60,9 @@
     "nodemon": "^2.0.15",
     "patch-package": "^6.5.1",
     "prettier": "^2.7.1",
+    "rollup": "^3.21.6",
+    "rollup-plugin-natives": "^0.7.6",
+    "rollup-plugin-node-externals": "^6.0.1",
     "sinon": "^14.0.0",
     "ts-mockito": "^2.6.1",
     "ts-node": "^10.7.0",
@@ -68,7 +78,7 @@
     "blakejs": "^1.2.1",
     "chai-spies": "^1.0.0",
     "config": "^3.3.7",
-    "ergo-lib-wasm-nodejs": "^0.24.0-alpha-1f24f53",
+    "ergo-lib-wasm-nodejs": "^0.24.0",
     "express": "^4.17.3",
     "express-validator": "^6.14.2",
     "json-bigint": "^1.0.0",

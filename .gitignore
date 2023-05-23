@@ -11,3 +11,4 @@ build
 dist
 logs/
 config/rosen
+out
