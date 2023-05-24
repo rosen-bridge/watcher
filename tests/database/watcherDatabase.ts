@@ -194,7 +194,7 @@ export const fillORM = async (ORM: ORMType) => {
 
 describe('WatcherModel tests', () => {
   let DB: WatcherDataBase;
-  before('inserting into database', async () => {
+  before(async () => {
     const ORM = await loadDataBase();
     await fillORM(ORM);
     DB = ORM.DB;

@@ -55,7 +55,11 @@ import sinon from 'sinon';
 import { describe } from 'mocha';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
-import { tokenRecord, validBox1Token } from '../database/mockedData';
+import {
+  tokenRecord,
+  validBox0Token,
+  validBox1Token,
+} from '../database/mockedData';
 import { TokenInfo } from '../../src/ergo/interfaces';
 
 const repoBox = JSON.stringify(repoObj);
@@ -394,7 +398,7 @@ describe('Testing ergoUtils', () => {
   });
 
   describe('getWatcherTokens', () => {
-    before('inserting into database', async () => {
+    before(async () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
@@ -415,13 +419,13 @@ describe('Testing ergoUtils', () => {
       const result = (await ErgoUtils.getWatcherBalance()).tokens;
 
       // check the result
-      expect(result).to.have.lengthOf(1);
-      expect(result[0]).to.eql(validBox1Token);
+      expect(result).to.have.lengthOf(2);
+      expect(result).to.eql([validBox0Token, validBox1Token]);
     });
   });
 
   describe('placeTokenNames', async () => {
-    before('inserting into database', async () => {
+    before(async () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
       initWatcherDB(ORM.DB);

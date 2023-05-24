@@ -105,12 +105,13 @@ spentPermitEntity.spendBlock = 'blockHash2';
 spentPermitEntity.spendHeight = 110;
 
 export const plainBox = new BoxEntity();
-plainBox.address = 'address';
+plainBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
 plainBox.createBlock = 'blockID';
 plainBox.creationHeight = 100;
 plainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 plainBox.boxId = 'boxId';
-plainBox.serialized = 'box';
+plainBox.serialized =
+  '4JFDAAjNA6/nE35QL09xxfyBlz5Ab8mVjg38uMAXUIzi9gNqo6UP6848AYROPPRLMYG0ysvMv3WW00H0EUfXPa9LVl7KrJg6uiUIrbwBAHuYkTd1b0VCBfANI9wUXfe48u5Dx0lstbC6MR+NULUcAQ==';
 
 export const spentPlainBox = new BoxEntity();
 spentPlainBox.address = 'address';
@@ -129,6 +130,12 @@ addressValidBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 addressValidBox.boxId = 'boxId3';
 addressValidBox.serialized =
   'gLL19gYACM0Dr+cTflAvT3HF/IGXPkBvyZWODfy4wBdQjOL2A2qjpQ/RjT0BBQ8FSMAPxKAwLilT3j+WfLGMfLWkxSaxY7/kZwqSai8BAJVusRG2h5VtH5w8R7TSrHzuQbd2cO/foKTfUEvEDpbqAg==';
+
+export const validBox0Token = {
+  tokenId: '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508',
+  amount: 24109n,
+  name: 'RSN',
+};
 
 export const validBox1Token = {
   tokenId: '050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f',

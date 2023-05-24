@@ -47,27 +47,12 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
       );
     }
     if (sortByAmount) {
-      if (sortByAmount === 'asc') {
-        tokens = tokens.sort((a, b) => {
-          if (a.amount < b.amount) {
-            return -1;
-          }
-          if (a.amount > b.amount) {
-            return 1;
-          }
-          return 0;
-        });
-      } else if (sortByAmount === 'desc') {
-        tokens = tokens.sort((a, b) => {
-          if (a.amount < b.amount) {
-            return 1;
-          }
-          if (a.amount > b.amount) {
-            return -1;
-          }
-          return 0;
-        });
-      }
+      tokens = tokens.sort((a, b) =>
+        Number(
+          (sortByAmount.toString().toLowerCase() === 'desc' ? -1n : 1n) *
+            (a.amount - b.amount)
+        )
+      );
     } else {
       tokens = tokens.sort((a, b) => a.tokenId.localeCompare(b.tokenId));
     }
