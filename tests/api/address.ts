@@ -34,7 +34,7 @@ describe('addressRouter', () => {
      * - check the result
      * @expected
      * - request status should be 200
-     * - request body should be valid array of tokens
+     * - request body should be a valid array of tokens
      */
     it('Assets endpoint should return all tokens with default sorting', async () => {
       // send a request to the endpoint
@@ -47,6 +47,16 @@ describe('addressRouter', () => {
       );
     });
 
+    /**
+     * @target Assets endpoint should return sorted tokens properly
+     * @dependencies
+     * @scenario
+     * - send a request to the endpoint
+     * - check the result
+     * @expected
+     * - request status should be 200
+     * - request body should be a valid array of tokens
+     */
     it('Assets endpoint should return sorted tokens properly', async () => {
       // send a request to the endpoint
       const res = await request(app).get('/address/assets?sortByAmount=desc');
@@ -58,6 +68,16 @@ describe('addressRouter', () => {
       );
     });
 
+    /**
+     * @target Assets endpoint should return correct token when filtered by tokenId
+     * @dependencies
+     * @scenario
+     * - send a request to the endpoint
+     * - check the result
+     * @expected
+     * - request status should be 200
+     * - request body should be a valid token
+     */
     it('Assets endpoint should return correct token when filtered by tokenId', async () => {
       // send a request to the endpoint
       const res = await request(app).get(
@@ -69,6 +89,16 @@ describe('addressRouter', () => {
       expect(res.text).to.equal(JSONBigInt.stringify([validBox0Token]));
     });
 
+    /**
+     * @target Assets endpoint should return correct token when filtered by tokenName
+     * @dependencies
+     * @scenario
+     * - send a request to the endpoint
+     * - check the result
+     * @expected
+     * - request status should be 200
+     * - request body should be a valid array of tokens
+     */
     it('Assets endpoint should return correct token when filtered by tokenName', async () => {
       // send a request to the endpoint
       const res = await request(app).get(
@@ -80,6 +110,16 @@ describe('addressRouter', () => {
       expect(res.text).to.equal('[]');
     });
 
+    /**
+     * @target Assets endpoint should return the second page when setting offset/limit
+     * @dependencies
+     * @scenario
+     * - send a request to the endpoint
+     * - check the result
+     * @expected
+     * - request status should be 200
+     * - request body should be a valid array of tokens
+     */
     it('Assets endpoint should return the second page when setting offset/limit', async () => {
       // send a request to the endpoint
       const res = await request(app).get('/address/assets?offset=1&limit=1');
