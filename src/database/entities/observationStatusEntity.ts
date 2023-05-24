@@ -15,6 +15,8 @@ enum TxStatus {
   COMMITTED = 3,
   REVEAL_SENT = 4,
   REVEALED = 5,
+  REDEEM_SENT = 6,
+  REDEEMED = 7,
 }
 
 @Entity()

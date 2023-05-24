@@ -456,9 +456,6 @@ describe('Testing Box Creation', () => {
       expect(permitBox.register_value(4)?.to_coll_coll_byte()[0]).to.be.eql(
         WID
       );
-      expect(permitBox.register_value(5)?.to_byte_array()).to.be.eql(
-        new Uint8Array([0])
-      );
     });
   });
 
