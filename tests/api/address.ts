@@ -18,10 +18,11 @@ router.use('/address', addressRouter);
 app.use(router);
 
 describe('addressRouter', () => {
+  // TODO: Refactor format (https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/97)
   describe('GET /assets', () => {
     before(async () => {
       const ORM = await loadDataBase();
-      await fillORM(ORM);
+      await fillORM(ORM, true);
       initWatcherDB(ORM.DB);
     });
 

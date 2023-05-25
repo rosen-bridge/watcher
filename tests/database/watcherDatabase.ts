@@ -162,7 +162,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
  *  Filling ORM test databases with mocked data
  * @param ORM
  */
-export const fillORM = async (ORM: ORMType) => {
+export const fillORM = async (ORM: ORMType, pushExtraUtxo = false) => {
   await ORM.blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
   await ORM.observationRepo.save([observationEntity2]);
   await ORM.observationStatusRepo.save([
@@ -181,7 +181,9 @@ export const fillORM = async (ORM: ORMType) => {
     firstPermit,
     secondPermit,
   ]);
-  await ORM.boxRepo.save([plainBox, spentPlainBox, addressValidBox]);
+  const UTXOArray = [plainBox, spentPlainBox];
+  if (pushExtraUtxo) UTXOArray.push(addressValidBox);
+  await ORM.boxRepo.save(UTXOArray);
   await ORM.eventTriggerRepo.save([
     eventTriggerEntity,
     newEventTriggerEntity,
@@ -680,9 +682,9 @@ describe('WatcherModel tests', () => {
      * Expected Output:
      *    The function should return one unspent address box
      */
-    it('should find two unspent plain boxes', async () => {
+    it('should find one unspent plain boxes', async () => {
       const data = await DB.getUnspentAddressBoxes();
-      expect(data).to.have.length(2);
+      expect(data).to.have.length(1);
       expect(data[0]).to.eql(plainBox);
     });
   });

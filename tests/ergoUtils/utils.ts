@@ -400,7 +400,7 @@ describe('Testing ergoUtils', () => {
   describe('getWatcherTokens', () => {
     before(async () => {
       const ORM = await loadDataBase();
-      await fillORM(ORM);
+      await fillORM(ORM, true);
       initWatcherDB(ORM.DB);
     });
 
