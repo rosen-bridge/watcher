@@ -77,6 +77,41 @@ class WatcherDataBase {
       .getMany();
   };
 
+  getObservationWithFilters = async (
+    fromAddress = '',
+    toAddress = '',
+    minHeight = NaN,
+    maxHeight = NaN,
+    sourceTokenId = '',
+    sourceTxId = '',
+    offset = 0,
+    limit = 20
+  ) => {
+    let qb = this.observationRepository.createQueryBuilder('ob').select('*');
+    if (sourceTxId !== '') {
+      qb = qb.andWhere('ob.sourceTxId = :sourceTxId', { sourceTxId });
+      return qb.execute();
+    }
+    if (fromAddress !== '') {
+      qb = qb.andWhere('ob.fromAddress = :fromAddress', { fromAddress });
+    }
+    if (toAddress !== '') {
+      qb = qb.andWhere('ob.toAddress = :toAddress', { toAddress });
+    }
+    if (!isNaN(minHeight)) {
+      qb = qb.andWhere('ob.height >= :minHeight', { minHeight });
+    }
+    if (!isNaN(maxHeight)) {
+      qb = qb.andWhere('ob.height <= :maxHeight', { maxHeight });
+    }
+    if (sourceTokenId !== '') {
+      qb = qb.andWhere('ob.sourceChainTokenId = :sourceTokenId', {
+        sourceTokenId,
+      });
+    }
+    return qb.orderBy('ob.id', 'DESC').offset(offset).limit(limit).execute();
+  };
+
   /**
    * setting NOT_COMMITTED status for new observations that doesn't have status and return last status
    * @param observation

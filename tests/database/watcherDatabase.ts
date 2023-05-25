@@ -42,6 +42,7 @@ import {
   observationEntity1,
   observationEntity2,
   observationEntity3,
+  observationEntity4,
   permitBox,
   permitEntity,
   plainBox,
@@ -157,7 +158,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
  */
 export const fillORM = async (ORM: ORMType) => {
   await ORM.blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
-  await ORM.observationRepo.save([observationEntity2]);
+  await ORM.observationRepo.save([observationEntity2, observationEntity4]);
   await ORM.observationStatusRepo.save([
     { observation: observationEntity2, status: TxStatus.NOT_COMMITTED },
   ]);

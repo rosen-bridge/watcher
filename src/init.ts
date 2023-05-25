@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import addressRouter from './api/showAddress';
 import permitRouter from './api/permit';
+import observationRouter from './api/observation';
 import { Transaction } from './api/Transaction';
 import { Boxes } from './ergo/boxes';
 import { WatcherDataBase } from './database/models/watcherModel';
@@ -52,6 +53,7 @@ const init = async () => {
     router.use('/address', addressRouter);
     router.use('/permit', permitRouter);
     router.use('/statistics', statisticsRouter);
+    router.use('/observations', observationRouter);
 
     app.use(router);
     const port = getConfig().general.apiPort;
@@ -96,4 +98,10 @@ const init = async () => {
     });
 };
 
+const initWatcherDB = (db: WatcherDataBase) => {
+  watcherDatabase = db;
+};
+
 export default init;
+
+export { watcherDatabase, initWatcherDB };
