@@ -16,7 +16,18 @@ describe('tokenName', () => {
     initWatcherDB(ORM.DB);
     DB = ORM.DB;
   });
+
   describe('tokenNameJobFunction', () => {
+    /**
+     * @target tokenNameJobFunction should store all names
+     * of UTXO tokens in DB
+     * @dependencies
+     * @scenario
+     * - run the job
+     * - check the tokens stored in DB
+     * @expected
+     * - tokens stored in DB should be correct
+     */
     it('should store all names of UTXO tokens in DB', async () => {
       // run the job
       await tokenNameJobFunction([]);
