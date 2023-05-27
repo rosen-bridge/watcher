@@ -164,7 +164,11 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
  *  Filling ORM test databases with mocked data
  * @param ORM
  */
-export const fillORM = async (ORM: ORMType, pushExtraUtxo = false) => {
+export const fillORM = async (
+  ORM: ORMType,
+  pushExtraUtxo = false,
+  saveTokenNames = true
+) => {
   await ORM.blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
   await ORM.observationRepo.save([observationEntity2]);
   await ORM.observationStatusRepo.save([
@@ -193,7 +197,12 @@ export const fillORM = async (ORM: ORMType, pushExtraUtxo = false) => {
     secondStatisticsEventTrigger,
     thirdStatisticsEventTrigger,
   ]);
-  await ORM.tokenRepo.save([tokenRecord, validToken1Record, validToken2Record]);
+  if (saveTokenNames)
+    await ORM.tokenRepo.save([
+      tokenRecord,
+      validToken1Record,
+      validToken2Record,
+    ]);
 };
 
 describe('WatcherModel tests', () => {

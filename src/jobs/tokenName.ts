@@ -6,7 +6,14 @@ import { getConfig } from '../config/config';
 
 const logger = loggerFactory(import.meta.url);
 
-const jobFunction = async (checkedBoxIds: string[]): Promise<string[]> => {
+/**
+ * Fetches token names of the new UTXOs
+ * @param checkedBoxIds
+ * @returns updated list of UTXO ids
+ */
+export const tokenNameJobFunction = async (
+  checkedBoxIds: string[]
+): Promise<string[]> => {
   // remove spent boxes from checkedBoxIds
   const validCheckedBoxIds = (
     await watcherDatabase.getUnspentBoxesByBoxIds(checkedBoxIds)
@@ -39,10 +46,14 @@ const jobFunction = async (checkedBoxIds: string[]): Promise<string[]> => {
   return [...validCheckedBoxIds, ...newUTXOs.map((box) => box.boxId)];
 };
 
+/**
+ * Runs the job of fetching token names of the new UTXOs
+ * @param boxIds
+ */
 export const tokenNameJob = async (boxIds: string[]) => {
   let newBoxIds: string[] = [];
   try {
-    newBoxIds = await jobFunction(boxIds);
+    newBoxIds = await tokenNameJobFunction(boxIds);
   } catch (e) {
     logger.warn(`TokenName Job failed with error: ${e.message} - ${e.stack}`);
   }
