@@ -578,6 +578,28 @@ class WatcherDataBase {
   insertTokenEntity = async (tokenId: string, tokenName: string) => {
     await this.tokenRepository.insert({ tokenId, tokenName });
   };
+
+  /**
+   * Returns all unspent boxes considering boxIds
+   * @param boxIds to include/exclude from the result
+   * @param exclude if true, excludes boxIds from the result
+   */
+  getUnspentBoxesByBoxIds = async (
+    boxIds: string[],
+    exclude = false
+  ): Promise<Array<BoxEntity>> => {
+    let qb = this.boxRepository
+      .createQueryBuilder('box_entity')
+      .where('box_entity.spendBlock is null');
+
+    if (exclude) {
+      qb = qb.andWhere('box_entity.boxId not in (:...boxIds)', { boxIds });
+    } else {
+      qb = qb.andWhere('box_entity.boxId in (:...boxIds)', { boxIds });
+    }
+
+    return qb.getMany();
+  };
 }
 
 export { WatcherDataBase };

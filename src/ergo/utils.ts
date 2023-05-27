@@ -331,9 +331,19 @@ export class ErgoUtils {
   ): Promise<AddressBalance> => {
     const boxes = serializedBoxes.map((box) => decodeSerializedBox(box));
     const tokens = this.getBoxAssetsSum(boxes);
+    const tokensInfo = await watcherDatabase.getTokenEntity(
+      tokens.map((token) => token.tokenId)
+    );
+    const tokensInfoMap = new Map<string, string>();
+    tokensInfo.forEach((token) => {
+      tokensInfoMap.set(token.tokenId, token.tokenName);
+    });
     return {
       nanoErgs: this.getBoxValuesSum(boxes),
-      tokens: await this.placeTokenNames(tokens),
+      tokens: tokens.map((token) => ({
+        ...token,
+        name: tokensInfoMap.get(token.tokenId) || '',
+      })),
     };
   };
 
@@ -346,37 +356,5 @@ export class ErgoUtils {
     );
     const serializedUTXOs = UTXOs.map((box) => box.serialized);
     return this.extractBalanceFromBoxes(serializedUTXOs);
-  };
-
-  /**
-   * Places the token names in the given tokens
-   * @param tokens to place
-   * @returns tokens array with filled tokens
-   */
-  static placeTokenNames = async (
-    tokens: TokenInfo[]
-  ): Promise<Array<TokenInfo>> => {
-    const tokenIds = tokens.map((token) => token.tokenId);
-    const tokensInfo = await watcherDatabase.getTokenEntity(tokenIds);
-    const tokensInfoMap = new Map<string, string>();
-    tokensInfo.forEach((token) => {
-      tokensInfoMap.set(token.tokenId, token.tokenName);
-    });
-    return await Promise.all(
-      tokens.map(async (token) => {
-        let name = '';
-        if (!tokensInfoMap.has(token.tokenId)) {
-          const fetchedInfo = await ErgoNetwork.getTokenInfo(token.tokenId);
-          name = fetchedInfo.name || '';
-          await watcherDatabase.insertTokenEntity(token.tokenId, name);
-        } else {
-          name = tokensInfoMap.get(token.tokenId)!;
-        }
-        return {
-          ...token,
-          name,
-        };
-      })
-    );
   };
 }

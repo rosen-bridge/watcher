@@ -411,8 +411,8 @@ describe('Testing ergoUtils', () => {
      * - run the function
      * - check the result
      * @expected
-     * - should return data with length 1
-     * - data[0] should be equal to validBox1Token
+     * - should return data with length 2
+     * - result should be correct tokens
      */
     it('should extract tokens in UTXOs', async () => {
       // run the function
@@ -421,70 +421,6 @@ describe('Testing ergoUtils', () => {
       // check the result
       expect(result).to.have.lengthOf(2);
       expect(result).to.eql([validBox0Token, validBox1Token]);
-    });
-  });
-
-  describe('placeTokenNames', async () => {
-    before(async () => {
-      const ORM = await loadDataBase();
-      await fillORM(ORM);
-      initWatcherDB(ORM.DB);
-    });
-
-    /**
-     * @target ErgoUtils.placeTokenNames should place token names from db
-     * @dependencies
-     * @scenario
-     * - mock a tokenInfo array
-     * - run the function
-     * - check the result
-     * @expected
-     * - should return data with length 1
-     * - data[0] should be equal to validBox1Token
-     */
-    it('should place token names from db', async () => {
-      // mock a tokenInfo array
-      const tokenInfo: TokenInfo[] = [
-        {
-          tokenId: tokenRecord.tokenId,
-          amount: 1n,
-        },
-      ];
-
-      // run the function
-      const res = await ErgoUtils.placeTokenNames(tokenInfo);
-
-      // check the result
-      expect(res).to.have.lengthOf(1);
-      expect(res[0].name).to.eql(tokenRecord.tokenName);
-    });
-
-    /**
-     * @target ErgoUtils.placeTokenNames should place token names from network
-     * @dependencies
-     * @scenario
-     * - mock a tokenInfo array
-     * - run the function
-     * - check the result
-     * @expected
-     * - should return data with length 1
-     * - data[0] should be equal to name
-     */
-    it('should place token names from network', async () => {
-      // mock a tokenInfo array
-      const tokenInfo: TokenInfo[] = [
-        {
-          tokenId: 'token',
-          amount: 1n,
-        },
-      ];
-
-      // run the function
-      const res = await ErgoUtils.placeTokenNames(tokenInfo);
-
-      // check the result
-      expect(res).to.have.lengthOf(1);
-      expect(res[0].name).to.eql('name');
     });
   });
 });

@@ -35,6 +35,7 @@ ergo:
   interval:
     scanner: 180 # scanner update interval (in seconds)
     transaction: 180 # processing transaction interval (in seconds)
+    tokenName: 180 # token name check interval (in seconds)
     commitment:
       creation: 180 # commitment creation interval (in seconds)
       reveal: 180 # commitment reveal interval (in seconds)

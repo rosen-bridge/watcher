@@ -51,6 +51,8 @@ import {
   spentPermitEntity,
   spentPlainBox,
   tokenRecord,
+  validToken1Record,
+  validToken2Record,
 } from './mockedData';
 
 import * as Constants from '../../src/config/constants';
@@ -191,7 +193,7 @@ export const fillORM = async (ORM: ORMType, pushExtraUtxo = false) => {
     secondStatisticsEventTrigger,
     thirdStatisticsEventTrigger,
   ]);
-  await ORM.tokenRepo.save([tokenRecord]);
+  await ORM.tokenRepo.save([tokenRecord, validToken1Record, validToken2Record]);
 };
 
 describe('WatcherModel tests', () => {
@@ -682,7 +684,7 @@ describe('WatcherModel tests', () => {
      * Expected Output:
      *    The function should return one unspent address box
      */
-    it('should find one unspent plain boxes', async () => {
+    it('should find one unspent plain box', async () => {
       const data = await DB.getUnspentAddressBoxes();
       expect(data).to.have.length(1);
       expect(data[0]).to.eql(plainBox);
@@ -754,6 +756,53 @@ describe('WatcherModel tests', () => {
       // check the result
       expect(data).to.have.length(1);
       expect(data[0]).to.eql(tokenRecord2);
+    });
+  });
+
+  describe('getUnspentBoxesByBoxIds', () => {
+    before(async () => {
+      const ORM = await loadDataBase();
+      await fillORM(ORM, true);
+    });
+
+    /**
+     * @target WatcherDataBase.getUnspentBoxesByBoxIds should return
+     * unspent boxes including boxIds
+     * @dependencies
+     * @scenario
+     * - run the function with boxId3 including
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to the addressValidBox
+     */
+    it('should return unspent boxes including boxIds', async () => {
+      // run the function with boxId3 including
+      const result = await DB.getUnspentBoxesByBoxIds(['boxId3']);
+
+      // check the result
+      expect(result).to.have.length(1);
+      expect(result[0]).to.eql(addressValidBox);
+    });
+
+    /**
+     * @target WatcherDataBase.getUnspentBoxesByBoxIds should return
+     * unspent boxes excluding boxIds
+     * @dependencies
+     * @scenario
+     * - run the function with boxId excluding
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to the addressValidBox
+     */
+    it('should return unspent boxes excluding boxIds', async () => {
+      // run the function with boxId excluding
+      const result = await DB.getUnspentBoxesByBoxIds(['boxId'], true);
+
+      // check the result
+      expect(result).to.have.length(1);
+      expect(result[0]).to.eql(addressValidBox);
     });
   });
 });
