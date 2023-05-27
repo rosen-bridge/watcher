@@ -47,10 +47,20 @@ const userSecret = wasm.SecretKey.dlog_from_bytes(
     'hex'
   )
 );
+
 import repoObj from './dataset/repoBox.json' assert { type: 'json' };
 import { getConfig } from '../../src/config/config';
 import { Transaction } from '../../src/api/Transaction';
 import sinon from 'sinon';
+import { describe } from 'mocha';
+import { fillORM, loadDataBase } from '../database/watcherDatabase';
+import { initWatcherDB } from '../../src/init';
+import {
+  tokenRecord,
+  validBox0Token,
+  validBox1Token,
+} from '../database/mockedData';
+import { TokenInfo } from '../../src/ergo/interfaces';
 
 const repoBox = JSON.stringify(repoObj);
 
@@ -384,6 +394,33 @@ describe('Testing ergoUtils', () => {
       const boxes = wasm.ErgoBoxes.from_boxes_json(boxesJson);
       const data = ErgoUtils.getBoxValuesSum(extractBoxes(boxes));
       expect(data).to.eql(67501049680n);
+    });
+  });
+
+  describe('getWatcherTokens', () => {
+    before(async () => {
+      const ORM = await loadDataBase();
+      await fillORM(ORM, true);
+      initWatcherDB(ORM.DB);
+    });
+
+    /**
+     * @target ErgoUtils.getWatcherTokens should extract tokens in UTXOs
+     * @dependencies
+     * @scenario
+     * - run the function
+     * - check the result
+     * @expected
+     * - should return data with length 2
+     * - result should be correct tokens
+     */
+    it('should extract tokens in UTXOs', async () => {
+      // run the function
+      const result = (await ErgoUtils.getWatcherBalance()).tokens;
+
+      // check the result
+      expect(result).to.have.lengthOf(2);
+      expect(result).to.eql([validBox0Token, validBox1Token]);
     });
   });
 });

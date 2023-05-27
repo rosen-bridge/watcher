@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import addressRouter from './api/showAddress';
+import addressRouter from './api/address';
 import permitRouter from './api/permit';
 import { Transaction } from './api/Transaction';
 import { Boxes } from './ergo/boxes';
@@ -16,6 +16,7 @@ import { statisticsRouter } from './statistics/apis';
 import { loggerFactory } from './log/Logger';
 import { getConfig } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
+import { tokenNameJob } from './jobs/tokenName';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -87,6 +88,9 @@ const init = async () => {
       redeem(watcherUtils, txUtils, boxesObject);
       // Running trigger event creation thread
       reveal(watcherUtils, txUtils, boxesObject);
+      // Running token name thread
+      tokenNameJob([]);
+
       logger.debug('Service initialization finished successfully.');
     })
     .catch((e) => {
@@ -96,4 +100,10 @@ const init = async () => {
     });
 };
 
+const initWatcherDB = (db: WatcherDataBase) => {
+  watcherDatabase = db;
+};
+
 export default init;
+
+export { watcherDatabase, initWatcherDB };

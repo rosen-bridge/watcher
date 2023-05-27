@@ -23,6 +23,7 @@ import {
 import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { base64ToArrayBuffer } from '../../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
+import { TokenEntity } from '../entities/tokenEntity';
 
 class WatcherDataBase {
   private readonly blockRepository: Repository<BlockEntity>;
@@ -33,6 +34,7 @@ class WatcherDataBase {
   private readonly permitRepository: Repository<PermitEntity>;
   private readonly boxRepository: Repository<BoxEntity>;
   private readonly eventTriggerRepository: Repository<EventTriggerEntity>;
+  private readonly tokenRepository: Repository<TokenEntity>;
 
   constructor(dataSource: DataSource) {
     this.blockRepository = dataSource.getRepository(BlockEntity);
@@ -45,6 +47,7 @@ class WatcherDataBase {
     this.permitRepository = dataSource.getRepository(PermitEntity);
     this.boxRepository = dataSource.getRepository(BoxEntity);
     this.eventTriggerRepository = dataSource.getRepository(EventTriggerEntity);
+    this.tokenRepository = dataSource.getRepository(TokenEntity);
   }
 
   /**
@@ -488,6 +491,20 @@ class WatcherDataBase {
   };
 
   /**
+   * Returns all unspent plain boxes of a specific address
+   * @param address to fetch unspent boxes
+   */
+  getUnspentBoxesByAddress = async (
+    address: string
+  ): Promise<Array<BoxEntity>> => {
+    return this.boxRepository
+      .createQueryBuilder('box_entity')
+      .where('box_entity.spendBlock is null')
+      .andWhere('box_entity.address = :address', { address })
+      .getMany();
+  };
+
+  /**
    * Returns an eventTriggerEntity with the specified sourceTxId
    * @param sourceTxId
    */
@@ -538,6 +555,50 @@ class WatcherDataBase {
     while (map.has(lastBox.box_id().to_str()))
       lastBox = map.get(lastBox.box_id().to_str())!;
     return lastBox;
+  };
+
+  /**
+   * Returns tokenInfo of a batch of tokenIds
+   * @param ids
+   * @returns Array of TokenEntity
+   */
+  getTokenEntity = async (ids: string[]): Promise<Array<TokenEntity>> => {
+    return await this.tokenRepository.find({
+      where: {
+        tokenId: In(ids),
+      },
+    });
+  };
+
+  /**
+   * Stores the name of a token by its id
+   * @param tokenId
+   * @param tokenName
+   */
+  insertTokenEntity = async (tokenId: string, tokenName: string) => {
+    await this.tokenRepository.insert({ tokenId, tokenName });
+  };
+
+  /**
+   * Returns all unspent boxes considering boxIds
+   * @param boxIds to include/exclude from the result
+   * @param exclude if true, excludes boxIds from the result
+   */
+  getUnspentBoxesByBoxIds = async (
+    boxIds: string[],
+    exclude = false
+  ): Promise<Array<BoxEntity>> => {
+    let qb = this.boxRepository
+      .createQueryBuilder('box_entity')
+      .where('box_entity.spendBlock is null');
+
+    if (exclude) {
+      qb = qb.andWhere('box_entity.boxId not in (:...boxIds)', { boxIds });
+    } else {
+      qb = qb.andWhere('box_entity.boxId in (:...boxIds)', { boxIds });
+    }
+
+    return qb.getMany();
   };
 }
 
