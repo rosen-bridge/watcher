@@ -63,6 +63,17 @@ commitmentEntity.extractor = 'extractor';
 commitmentEntity.height = 105;
 commitmentEntity.boxSerialized = '222';
 
+export const spentCommitmentEntityOfWID = new CommitmentEntity();
+spentCommitmentEntityOfWID.commitment = 'commitment3';
+spentCommitmentEntityOfWID.boxId = 'boxId3';
+spentCommitmentEntityOfWID.WID = 'WID';
+spentCommitmentEntityOfWID.eventId = 'eventId3ofWID';
+spentCommitmentEntityOfWID.block = 'block';
+spentCommitmentEntityOfWID.extractor = 'extractor';
+spentCommitmentEntityOfWID.height = 105;
+spentCommitmentEntityOfWID.spendHeight = 110;
+spentCommitmentEntityOfWID.boxSerialized = '2223';
+
 export const spentCommitmentEntity = new CommitmentEntity();
 spentCommitmentEntity.commitment = 'commitment';
 spentCommitmentEntity.boxId = 'boxId2';
@@ -95,12 +106,13 @@ spentPermitEntity.spendBlock = 'blockHash2';
 spentPermitEntity.spendHeight = 110;
 
 export const plainBox = new BoxEntity();
-plainBox.address = 'address';
+plainBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
 plainBox.createBlock = 'blockID';
 plainBox.creationHeight = 100;
 plainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 plainBox.boxId = 'boxId';
-plainBox.serialized = 'box';
+plainBox.serialized =
+  '4JFDAAjNA6/nE35QL09xxfyBlz5Ab8mVjg38uMAXUIzi9gNqo6UP6848AYROPPRLMYG0ysvMv3WW00H0EUfXPa9LVl7KrJg6uiUIrbwBAHuYkTd1b0VCBfANI9wUXfe48u5Dx0lstbC6MR+NULUcAQ==';
 
 export const spentPlainBox = new BoxEntity();
 spentPlainBox.address = 'address';
@@ -119,6 +131,12 @@ addressValidBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 addressValidBox.boxId = 'boxId3';
 addressValidBox.serialized =
   'gLL19gYACM0Dr+cTflAvT3HF/IGXPkBvyZWODfy4wBdQjOL2A2qjpQ/RjT0BBQ8FSMAPxKAwLilT3j+WfLGMfLWkxSaxY7/kZwqSai8BAJVusRG2h5VtH5w8R7TSrHzuQbd2cO/foKTfUEvEDpbqAg==';
+
+export const validBox0Token = {
+  tokenId: '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508',
+  amount: 24109n,
+  name: 'RSN',
+};
 
 export const validBox1Token = {
   tokenId: '050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f',
@@ -204,6 +222,23 @@ observationEntity2.targetChainTokenId = 'targetToken';
 observationEntity2.toChain = 'cardano';
 observationEntity2.requestId = 'reqId1';
 
+export const observationEntity3 = new ObservationEntity();
+observationEntity3.height = 3;
+observationEntity3.amount = '44000';
+observationEntity3.extractor = 'observation-extractor';
+observationEntity3.bridgeFee = '300';
+observationEntity3.fromAddress = 'fromAddress';
+observationEntity3.block = 'hash';
+observationEntity3.fromChain = 'ergo';
+observationEntity3.networkFee = '1000';
+observationEntity3.sourceBlockId = 'block';
+observationEntity3.sourceTxId = 'txId3';
+observationEntity3.sourceChainTokenId = 'sourceToken';
+observationEntity3.toAddress = 'addr3';
+observationEntity3.targetChainTokenId = 'targetToken';
+observationEntity3.toChain = 'cardano';
+observationEntity3.requestId = 'reqId3';
+
 export const observationStatusTimedOut = new ObservationStatusEntity();
 observationStatusTimedOut.status = TxStatus.TIMED_OUT;
 export const observationStatusNotCommitted = new ObservationStatusEntity();
@@ -230,6 +265,16 @@ eventTrigger.height = 111;
 export const tokenRecord = new TokenEntity();
 tokenRecord.tokenId = 'tokenId';
 tokenRecord.tokenName = 'tokenName';
+
+export const validToken1Record = new TokenEntity();
+validToken1Record.tokenId =
+  '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508';
+validToken1Record.tokenName = 'RSN';
+
+export const validToken2Record = new TokenEntity();
+validToken2Record.tokenId =
+  '050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f';
+validToken2Record.tokenName = 'Test';
 
 export const commitmentTxJson = {
   id: '555f7d54e7073f3ad6f0a587bf8c4f748e9a82b0868362b12a28854de968ea48',
@@ -542,7 +587,7 @@ export const permitMockRWT =
   '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074';
 
 export const generalInfo = {
-  currentBalance: 1860000000,
+  currentBalance: 1100000,
   network: 'ergo',
   permitCount: 0,
   health: 'OK',

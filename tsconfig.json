@@ -25,7 +25,7 @@
     "skipLibCheck": true,
     "rootDir": "./"
   },
-  "include": ["./**/*.ts"],
+  "include": ["./**/*.ts", "./rollup.config.ts"],
   "ts-node": {
     "esm": true
   }

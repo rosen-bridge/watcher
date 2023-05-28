@@ -327,14 +327,23 @@ export class ErgoUtils {
    * @returns AddressBalance of the given boxes
    */
   static extractBalanceFromBoxes = async (
-    serializedBoxes: Array<string>,
-    placeTokenNames = true
+    serializedBoxes: Array<string>
   ): Promise<AddressBalance> => {
     const boxes = serializedBoxes.map((box) => decodeSerializedBox(box));
     const tokens = this.getBoxAssetsSum(boxes);
+    const tokensInfo = await watcherDatabase.getTokenEntity(
+      tokens.map((token) => token.tokenId)
+    );
+    const tokensInfoMap = new Map<string, string>();
+    tokensInfo.forEach((token) => {
+      tokensInfoMap.set(token.tokenId, token.tokenName);
+    });
     return {
       nanoErgs: this.getBoxValuesSum(boxes),
-      tokens: placeTokenNames ? await this.placeTokenNames(tokens) : tokens,
+      tokens: tokens.map((token) => ({
+        ...token,
+        name: tokensInfoMap.get(token.tokenId) || '',
+      })),
     };
   };
 
@@ -350,38 +359,6 @@ export class ErgoUtils {
   };
 
   /**
-   * Places the token names in the given tokens
-   * @param tokens to place
-   * @returns tokens array with filled tokens
-   */
-  static placeTokenNames = async (
-    tokens: TokenInfo[]
-  ): Promise<Array<TokenInfo>> => {
-    const tokenIds = tokens.map((token) => token.tokenId);
-    const tokensInfo = await watcherDatabase.getTokenEntity(tokenIds);
-    const tokensInfoMap = new Map<string, string>();
-    tokensInfo.forEach((token) => {
-      tokensInfoMap.set(token.tokenId, token.tokenName);
-    });
-    return await Promise.all(
-      tokens.map(async (token) => {
-        let name = '';
-        if (!tokensInfoMap.has(token.tokenId)) {
-          const fetchedInfo = await ErgoNetwork.getTokenInfo(token.tokenId);
-          name = fetchedInfo.name || '';
-          await watcherDatabase.insertTokenEntity(token.tokenId, name);
-        } else {
-          name = tokensInfoMap.get(token.tokenId)!;
-        }
-        return {
-          ...token,
-          name,
-        };
-      })
-    );
-  };
-
-  /**
    * Gets permit count of the mentioned address
    * @param RWTId RWT token id
    * @returns permit count
@@ -389,10 +366,7 @@ export class ErgoUtils {
   static getPermitCount = async (RWTId: string): Promise<bigint> => {
     const permitBoxes = await watcherDatabase.getPermitUnspentBoxes();
     const serializedUTXOs = permitBoxes.map((box) => box.boxSerialized);
-    const { tokens } = await this.extractBalanceFromBoxes(
-      serializedUTXOs,
-      false
-    );
+    const { tokens } = await this.extractBalanceFromBoxes(serializedUTXOs);
     const RWT = tokens.find((token) => token.tokenId === RWTId);
     if (RWT) {
       return RWT.amount;

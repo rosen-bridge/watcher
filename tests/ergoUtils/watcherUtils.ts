@@ -140,6 +140,32 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
     });
   });
 
+  describe('allTimeoutCommitments', () => {
+    /**
+     * @target WatcherUtils.allTimeoutCommitments should return one commitment
+     * @dependencies
+     * - watcherDatabase
+     * @scenario
+     * - mock environment
+     * - run test
+     * - check returned value
+     * @expected
+     * - it should return one commitment
+     */
+    it('should return one commitment', async () => {
+      chai.spy.on(dataBase, 'getLastBlockHeight', () => 150);
+      chai.spy.on(dataBase, 'commitmentsByWIDAndMaxHeight', () => [
+        commitmentEntity,
+      ]);
+      const data = await watcherUtils.allTimeoutCommitments(10);
+      expect(data).to.have.length(1);
+      expect(dataBase.commitmentsByWIDAndMaxHeight).to.have.been.called.with(
+        TransactionTest.watcherWID,
+        140
+      );
+    });
+  });
+
   describe('allReadyCommitmentSets', () => {
     /**
      * Target: testing allReadyCommitmentSets

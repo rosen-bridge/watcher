@@ -55,12 +55,7 @@ import sinon from 'sinon';
 import { describe } from 'mocha';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
-import {
-  permitMockRWT,
-  tokenRecord,
-  validBox1Token,
-} from '../database/mockedData';
-import { TokenInfo } from '../../src/ergo/interfaces';
+import { permitMockRWT, validBox1Token } from '../database/mockedData';
 
 const repoBox = JSON.stringify(repoObj);
 
@@ -399,120 +394,63 @@ describe('Testing ergoUtils', () => {
 
   describe('getWatcherBalance', () => {
     before('inserting into database', async () => {
-      const ORM = await loadDataBase();
-      await fillORM(ORM);
-      initWatcherDB(ORM.DB);
-    });
+      before(async () => {
+        const ORM = await loadDataBase();
+        await fillORM(ORM, true);
+        initWatcherDB(ORM.DB);
+      });
 
-    /**
+      /**
      * @target ErgoUtils.getWatcherTokens should extract balance in UTXOs
      * @dependencies
      * @scenario
      * - run the function
      * - check the result
      * @expected
+<<<<<<< HEAD
      * - should return data with tokens of length 1
      * - tokens[0] should be equal to validBox1Token
      * - nanoErgs should be equal to 1860000000n
+=======
+     * - should return data with length 2
+     * - result should be correct tokens
+>>>>>>> dev
      */
-    it('should extract tokens in UTXOs', async () => {
-      // run the function
-      const result = await ErgoUtils.getWatcherBalance();
-      const tokens = result.tokens;
+      it('should extract tokens in UTXOs', async () => {
+        // run the function
+        const result = await ErgoUtils.getWatcherBalance();
+        const tokens = result.tokens;
 
-      // check the result
-      expect(tokens).to.have.lengthOf(1);
-      expect(tokens[0]).to.eql(validBox1Token);
-      expect(result.nanoErgs).to.eql(1860000000n);
-    });
-  });
-
-  describe('placeTokenNames', async () => {
-    before('inserting into database', async () => {
-      const ORM = await loadDataBase();
-      await fillORM(ORM);
-      initWatcherDB(ORM.DB);
+        // check the result
+        expect(tokens).to.have.lengthOf(1);
+        expect(tokens[0]).to.eql(validBox1Token);
+        expect(result.nanoErgs).to.eql(1860000000n);
+      });
     });
 
-    /**
-     * @target ErgoUtils.placeTokenNames should place token names from db
-     * @dependencies
-     * @scenario
-     * - mock a tokenInfo array
-     * - run the function
-     * - check the result
-     * @expected
-     * - should return data with length 1
-     * - data[0] should be equal to validBox1Token
-     */
-    it('should place token names from db', async () => {
-      // mock a tokenInfo array
-      const tokenInfo: TokenInfo[] = [
-        {
-          tokenId: tokenRecord.tokenId,
-          amount: 1n,
-        },
-      ];
+    describe('getPermitCount', () => {
+      before('inserting into database', async () => {
+        const ORM = await loadDataBase();
+        await fillORM(ORM);
+        initWatcherDB(ORM.DB);
+      });
 
-      // run the function
-      const res = await ErgoUtils.placeTokenNames(tokenInfo);
+      /**
+       * @target ErgoUtils.getPermitCount should get watcher permit count successfully
+       * @dependencies
+       * @scenario
+       * - run the function
+       * - check the result
+       * @expected
+       * - permit count should be equal to 9999
+       */
+      it('should get watcher permit count successfully', async () => {
+        // run the function
+        const result = await ErgoUtils.getPermitCount(permitMockRWT);
 
-      // check the result
-      expect(res).to.have.lengthOf(1);
-      expect(res[0].name).to.eql(tokenRecord.tokenName);
-    });
-
-    /**
-     * @target ErgoUtils.placeTokenNames should place token names from network
-     * @dependencies
-     * @scenario
-     * - mock a tokenInfo array
-     * - run the function
-     * - check the result
-     * @expected
-     * - should return data with length 1
-     * - data[0] should be equal to name
-     */
-    it('should place token names from network', async () => {
-      // mock a tokenInfo array
-      const tokenInfo: TokenInfo[] = [
-        {
-          tokenId: 'token',
-          amount: 1n,
-        },
-      ];
-
-      // run the function
-      const res = await ErgoUtils.placeTokenNames(tokenInfo);
-
-      // check the result
-      expect(res).to.have.lengthOf(1);
-      expect(res[0].name).to.eql('name');
-    });
-  });
-
-  describe('getPermitCount', () => {
-    before('inserting into database', async () => {
-      const ORM = await loadDataBase();
-      await fillORM(ORM);
-      initWatcherDB(ORM.DB);
-    });
-
-    /**
-     * @target ErgoUtils.getPermitCount should get watcher permit count successfully
-     * @dependencies
-     * @scenario
-     * - run the function
-     * - check the result
-     * @expected
-     * - permit count should be equal to 9999
-     */
-    it('should get watcher permit count successfully', async () => {
-      // run the function
-      const result = await ErgoUtils.getPermitCount(permitMockRWT);
-
-      // check the result
-      expect(result).to.eql(9999n);
+        // check the result
+        expect(result).to.eql(9999n);
+      });
     });
   });
 });

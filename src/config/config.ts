@@ -74,9 +74,12 @@ class Config {
   minBoxValue: string;
   fee: string;
   commitmentCreationInterval: number;
+  commitmentRedeemInterval: number;
   commitmentRevealInterval: number;
+  tokenNameInterval: number;
   transactionRemovingTimeout: number;
   transactionConfirmation: number;
+  commitmentTimeoutConfirmation: number;
   transactionCheckingInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
@@ -136,6 +139,9 @@ class Config {
     this.commitmentCreationInterval = getRequiredNumber(
       'ergo.interval.commitment.creation'
     );
+    this.commitmentRedeemInterval = getRequiredNumber(
+      'ergo.interval.commitment.redeem'
+    );
     this.commitmentRevealInterval = getRequiredNumber(
       'ergo.interval.commitment.reveal'
     );
@@ -144,6 +150,9 @@ class Config {
     );
     this.transactionConfirmation = getRequiredNumber(
       'ergo.transaction.confirmation'
+    );
+    this.commitmentTimeoutConfirmation = getRequiredNumber(
+      'ergo.transaction.commitmentTimeoutConfirmation'
     );
     this.transactionRemovingTimeout = getRequiredNumber(
       'ergo.transaction.timeout'
@@ -154,6 +163,7 @@ class Config {
     this.observationValidThreshold = getRequiredNumber(
       'observation.validThreshold'
     );
+    this.tokenNameInterval = getRequiredNumber('ergo.interval.tokenName');
     // TODO verify bigint
     // https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/34
     this.minBoxValue = getRequiredString('ergo.minBoxValue');

@@ -42,13 +42,17 @@ import {
   newEventTriggerEntity,
   observationEntity1,
   observationEntity2,
+  observationEntity3,
   permitBox,
   permitEntity,
   plainBox,
   spentCommitmentEntity,
+  spentCommitmentEntityOfWID,
   spentPermitEntity,
   spentPlainBox,
   tokenRecord,
+  validToken1Record,
+  validToken2Record,
 } from './mockedData';
 
 import * as Constants from '../../src/config/constants';
@@ -73,6 +77,8 @@ const observation2Status = {
 };
 let blockRepo: Repository<BlockEntity>;
 let observationRepo: Repository<ObservationEntity>;
+let observationStatusRepo: Repository<ObservationStatusEntity>;
+let commitmentRepo: Repository<CommitmentEntity>;
 
 export type ORMType = {
   DB: WatcherDataBase;
@@ -158,7 +164,11 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
  *  Filling ORM test databases with mocked data
  * @param ORM
  */
-export const fillORM = async (ORM: ORMType) => {
+export const fillORM = async (
+  ORM: ORMType,
+  pushExtraUtxo = false,
+  saveTokenNames = true
+) => {
   await ORM.blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
   await ORM.observationRepo.save([observationEntity2]);
   await ORM.observationStatusRepo.save([
@@ -177,7 +187,9 @@ export const fillORM = async (ORM: ORMType) => {
     firstPermit,
     secondPermit,
   ]);
-  await ORM.boxRepo.save([plainBox, spentPlainBox, addressValidBox]);
+  const UTXOArray = [plainBox, spentPlainBox];
+  if (pushExtraUtxo) UTXOArray.push(addressValidBox);
+  await ORM.boxRepo.save(UTXOArray);
   await ORM.eventTriggerRepo.save([
     eventTriggerEntity,
     newEventTriggerEntity,
@@ -185,17 +197,24 @@ export const fillORM = async (ORM: ORMType) => {
     secondStatisticsEventTrigger,
     thirdStatisticsEventTrigger,
   ]);
-  await ORM.tokenRepo.save([tokenRecord]);
+  if (saveTokenNames)
+    await ORM.tokenRepo.save([
+      tokenRecord,
+      validToken1Record,
+      validToken2Record,
+    ]);
 };
 
 describe('WatcherModel tests', () => {
   let DB: WatcherDataBase;
-  before('inserting into database', async () => {
+  before(async () => {
     const ORM = await loadDataBase();
     await fillORM(ORM);
     DB = ORM.DB;
     blockRepo = ORM.blockRepo;
     observationRepo = ORM.observationRepo;
+    observationStatusRepo = ORM.observationStatusRepo;
+    commitmentRepo = ORM.commitmentRepo;
   });
 
   describe('getLastBlockHeight', () => {
@@ -407,6 +426,21 @@ describe('WatcherModel tests', () => {
       const res = await DB.upgradeObservationTxStatus(obs[0]);
       expect(res.status).to.eql(TxStatus.TIMED_OUT);
     });
+
+    /**
+     * Target: testing upgradeObservationTxStatus
+     * Expected Output:
+     *    The function should upgrade the status from COMMITED to REDEEM_SENT
+     */
+    it('should upgrade the observation txStatus from COMMITED to REDEEM_SENT', async () => {
+      await observationRepo.insert(observationEntity3);
+      await observationStatusRepo.insert({
+        observation: observationEntity3,
+        status: TxStatus.COMMITTED,
+      });
+      const res = await DB.upgradeObservationTxStatus(observationEntity3, true);
+      expect(res.status).to.eql(TxStatus.REDEEM_SENT);
+    });
   });
 
   describe('downgradeObservationTxStatus', () => {
@@ -433,6 +467,19 @@ describe('WatcherModel tests', () => {
       const res = await DB.downgradeObservationTxStatus(obs[0]);
       expect(res.status).to.eql(TxStatus.REVEALED);
     });
+
+    /**
+     * Target: testing downgradeObservationTxStatus
+     * Expected Output:
+     *    The function should downgrade the status from REDEEM_SENT to COMMITED
+     */
+    it('should downgrade the observation txStatus', async () => {
+      const res = await DB.downgradeObservationTxStatus(
+        observationEntity3,
+        true
+      );
+      expect(res.status).to.eql(TxStatus.COMMITTED);
+    });
   });
 
   describe('updateObservationTxStatus', () => {
@@ -445,6 +492,21 @@ describe('WatcherModel tests', () => {
       const obs = await DB.getConfirmedObservations(0, 100);
       const res = await DB.updateObservationTxStatus(obs[0], TxStatus.REVEALED);
       expect(res.status).to.eql(TxStatus.REVEALED);
+    });
+  });
+
+  describe('getObservationsByStatus', () => {
+    /**
+     * Target: testing getObservationsByStatus
+     * Expected Output:
+     *    The function should return one commited observation
+     */
+    it('should return one commited observation', async () => {
+      const data = await DB.getObservationsByStatus(TxStatus.COMMITTED);
+      expect(data).to.have.length(1);
+      expect(data[0].observation.requestId).to.equal(
+        observationEntity3.requestId
+      );
     });
   });
 
@@ -511,6 +573,22 @@ describe('WatcherModel tests', () => {
         secondStatisticCommitment,
         thirdStatisticCommitment,
       ]);
+    });
+  });
+
+  describe('commitmentsByWIDAndMaxHeight', () => {
+    /**
+     * Target: testing commitmentsByWIDAndMaxHeight
+     * Expected Output:
+     *    The function should return one commitment
+     */
+    it('should return one commitment', async () => {
+      await commitmentRepo.insert(spentCommitmentEntityOfWID);
+      const data = await DB.commitmentsByWIDAndMaxHeight('WID', 1000);
+      expect(data).to.have.length(1);
+      await commitmentRepo.delete({
+        eventId: spentCommitmentEntityOfWID.eventId,
+      });
     });
   });
 
@@ -615,9 +693,9 @@ describe('WatcherModel tests', () => {
      * Expected Output:
      *    The function should return one unspent address box
      */
-    it('should find two unspent plain boxes', async () => {
+    it('should find one unspent plain box', async () => {
       const data = await DB.getUnspentAddressBoxes();
-      expect(data).to.have.length(2);
+      expect(data).to.have.length(1);
       expect(data[0]).to.eql(plainBox);
     });
   });
@@ -709,6 +787,53 @@ describe('WatcherModel tests', () => {
       // check the result
       expect(data).to.have.length(1);
       expect(data[0]).to.eql(permitEntity);
+    });
+  });
+
+  describe('getUnspentBoxesByBoxIds', () => {
+    before(async () => {
+      const ORM = await loadDataBase();
+      await fillORM(ORM, true);
+    });
+
+    /**
+     * @target WatcherDataBase.getUnspentBoxesByBoxIds should return
+     * unspent boxes including boxIds
+     * @dependencies
+     * @scenario
+     * - run the function with boxId3 including
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to the addressValidBox
+     */
+    it('should return unspent boxes including boxIds', async () => {
+      // run the function with boxId3 including
+      const result = await DB.getUnspentBoxesByBoxIds(['boxId3']);
+
+      // check the result
+      expect(result).to.have.length(1);
+      expect(result[0]).to.eql(addressValidBox);
+    });
+
+    /**
+     * @target WatcherDataBase.getUnspentBoxesByBoxIds should return
+     * unspent boxes excluding boxIds
+     * @dependencies
+     * @scenario
+     * - run the function with boxId excluding
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to the addressValidBox
+     */
+    it('should return unspent boxes excluding boxIds', async () => {
+      // run the function with boxId excluding
+      const result = await DB.getUnspentBoxesByBoxIds(['boxId'], true);
+
+      // check the result
+      expect(result).to.have.length(1);
+      expect(result[0]).to.eql(addressValidBox);
     });
   });
 });

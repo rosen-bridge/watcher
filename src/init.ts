@@ -16,6 +16,8 @@ import Statistics from './statistics/statistics';
 import { statisticsRouter } from './statistics/apis';
 import { loggerFactory } from './log/Logger';
 import { getConfig } from './config/config';
+import { redeem } from './jobs/commitmentRedeem';
+import { tokenNameJob } from './jobs/tokenName';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -84,8 +86,13 @@ const init = async () => {
       transactionQueueJob(watcherDatabase, watcherUtils);
       // Running commitment creation thread
       creation(watcherUtils, txUtils, boxesObject);
+      // Running commitment redeem thread
+      redeem(watcherUtils, txUtils, boxesObject);
       // Running trigger event creation thread
       reveal(watcherUtils, txUtils, boxesObject);
+      // Running token name thread
+      tokenNameJob([]);
+
       logger.debug('Service initialization finished successfully.');
     })
     .catch((e) => {
