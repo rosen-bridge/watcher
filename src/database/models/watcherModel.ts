@@ -120,7 +120,7 @@ class WatcherDataBase {
         sourceTokenId,
       });
     }
-    return qb.orderBy('ob.id', 'DESC').offset(offset).limit(limit).getMany();
+    return qb.orderBy('ob.id', 'DESC').offset(offset).limit(limit).execute();
   };
 
   /**
