@@ -17,6 +17,7 @@ import { loggerFactory } from './log/Logger';
 import { getConfig } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
+import eventsRouter from './api/events';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -53,6 +54,7 @@ const init = async () => {
     router.use('/address', addressRouter);
     router.use('/permit', permitRouter);
     router.use('/statistics', statisticsRouter);
+    router.use('/events', eventsRouter);
 
     app.use(router);
     const port = getConfig().general.apiPort;
