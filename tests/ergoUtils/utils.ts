@@ -401,7 +401,7 @@ describe('Testing ergoUtils', () => {
       });
 
       /**
-       * @target ErgoUtils.getWatcherTokens should extract balance in UTXOs
+       * @target ErgoUtils.getWatcherBalance should extract balance in UTXOs
        * @dependencies
        * @scenario
        * - run the function
