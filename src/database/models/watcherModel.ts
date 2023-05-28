@@ -77,6 +77,17 @@ class WatcherDataBase {
       .getMany();
   };
 
+  /**
+   * Returns all observations with filters, with respect to offset and limit
+   * @param fromAddress
+   * @param toAddress
+   * @param minHeight
+   * @param maxHeight
+   * @param sourceTokenId
+   * @param sourceTxId
+   * @param offset
+   * @param limit
+   */
   getObservationWithFilters = async (
     fromAddress = '',
     toAddress = '',
@@ -109,7 +120,7 @@ class WatcherDataBase {
         sourceTokenId,
       });
     }
-    return qb.orderBy('ob.id', 'DESC').offset(offset).limit(limit).execute();
+    return qb.orderBy('ob.id', 'DESC').offset(offset).limit(limit).getMany();
   };
 
   /**
