@@ -54,7 +54,7 @@ const init = async () => {
     router.use('/address', addressRouter);
     router.use('/permit', permitRouter);
     router.use('/statistics', statisticsRouter);
-    router.use('/general', generalRouter);
+    router.use('/info', generalRouter);
 
     app.use(router);
     const port = getConfig().general.apiPort;

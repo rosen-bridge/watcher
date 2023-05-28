@@ -401,21 +401,16 @@ describe('Testing ergoUtils', () => {
       });
 
       /**
-     * @target ErgoUtils.getWatcherTokens should extract balance in UTXOs
-     * @dependencies
-     * @scenario
-     * - run the function
-     * - check the result
-     * @expected
-<<<<<<< HEAD
-     * - should return data with tokens of length 1
-     * - tokens[0] should be equal to validBox1Token
-     * - nanoErgs should be equal to 1860000000n
-=======
-     * - should return data with length 2
-     * - result should be correct tokens
->>>>>>> dev
-     */
+       * @target ErgoUtils.getWatcherTokens should extract balance in UTXOs
+       * @dependencies
+       * @scenario
+       * - run the function
+       * - check the result
+       * @expected
+       * - should return data with tokens of length 1
+       * - tokens[0] should be equal to validBox1Token
+       * - nanoErgs should be equal to 1860000000n
+       */
       it('should extract tokens in UTXOs', async () => {
         // run the function
         const result = await ErgoUtils.getWatcherBalance();

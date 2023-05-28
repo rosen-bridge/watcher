@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 
 const router = Router();
-router.use('/general', generalRouter);
+router.use('/info', generalRouter);
 app.use(router);
 
 describe('General-Info-Api', () => {
@@ -37,7 +37,7 @@ describe('General-Info-Api', () => {
      */
     it('General info endpoint should return valid data', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/general');
+      const res = await request(app).get('/info');
 
       // check the result
       expect(res.status).to.equal(200);
