@@ -55,12 +55,7 @@ import sinon from 'sinon';
 import { describe } from 'mocha';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
-import {
-  tokenRecord,
-  validBox0Token,
-  validBox1Token,
-} from '../database/mockedData';
-import { TokenInfo } from '../../src/ergo/interfaces';
+import { permitMockRWT, validBox1Token } from '../database/mockedData';
 
 const repoBox = JSON.stringify(repoObj);
 
@@ -397,30 +392,60 @@ describe('Testing ergoUtils', () => {
     });
   });
 
-  describe('getWatcherTokens', () => {
-    before(async () => {
-      const ORM = await loadDataBase();
-      await fillORM(ORM, true);
-      initWatcherDB(ORM.DB);
+  describe('getWatcherBalance', () => {
+    before('inserting into database', async () => {
+      before(async () => {
+        const ORM = await loadDataBase();
+        await fillORM(ORM, true);
+        initWatcherDB(ORM.DB);
+      });
+
+      /**
+       * @target ErgoUtils.getWatcherBalance should extract balance in UTXOs
+       * @dependencies
+       * @scenario
+       * - run the function
+       * - check the result
+       * @expected
+       * - should return data with tokens of length 1
+       * - tokens[0] should be equal to validBox1Token
+       * - nanoErgs should be equal to 1860000000n
+       */
+      it('should extract tokens in UTXOs', async () => {
+        // run the function
+        const result = await ErgoUtils.getWatcherBalance();
+        const tokens = result.tokens;
+
+        // check the result
+        expect(tokens).to.have.lengthOf(1);
+        expect(tokens[0]).to.eql(validBox1Token);
+        expect(result.nanoErgs).to.eql(1860000000n);
+      });
     });
 
-    /**
-     * @target ErgoUtils.getWatcherTokens should extract tokens in UTXOs
-     * @dependencies
-     * @scenario
-     * - run the function
-     * - check the result
-     * @expected
-     * - should return data with length 2
-     * - result should be correct tokens
-     */
-    it('should extract tokens in UTXOs', async () => {
-      // run the function
-      const result = (await ErgoUtils.getWatcherBalance()).tokens;
+    describe('getPermitCount', () => {
+      before('inserting into database', async () => {
+        const ORM = await loadDataBase();
+        await fillORM(ORM);
+        initWatcherDB(ORM.DB);
+      });
 
-      // check the result
-      expect(result).to.have.lengthOf(2);
-      expect(result).to.eql([validBox0Token, validBox1Token]);
+      /**
+       * @target ErgoUtils.getPermitCount should get watcher permit count successfully
+       * @dependencies
+       * @scenario
+       * - run the function
+       * - check the result
+       * @expected
+       * - permit count should be equal to 9999
+       */
+      it('should get watcher permit count successfully', async () => {
+        // run the function
+        const result = await ErgoUtils.getPermitCount(permitMockRWT);
+
+        // check the result
+        expect(result).to.eql(9999n);
+      });
     });
   });
 });
