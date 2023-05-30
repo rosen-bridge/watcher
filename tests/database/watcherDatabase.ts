@@ -70,6 +70,7 @@ import {
 
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 import { TokenEntity } from '../../src/database/entities/tokenEntity';
+import { createMemoryDatabase } from '../resources/inMemoryDb';
 
 const observation2Status = {
   observation: observationEntity2,
@@ -838,6 +839,13 @@ describe('WatcherModel tests', () => {
   });
 
   describe('getActivePermitTransactions', () => {
+    let memoryDb: DataSource;
+    let watcherDb: WatcherDataBase;
+
+    before(async () => {
+      memoryDb = await createMemoryDatabase();
+      watcherDb = new WatcherDataBase(memoryDb);
+    });
     /**
      * @target WatcherDataBase.getActivePermitTransactions should get txs
      * which their 'deleted' field is false
@@ -846,27 +854,23 @@ describe('WatcherModel tests', () => {
      * - insert two permit txs (one active, one deleted)
      * - run the function
      * - check the result
-     * - remove inserted txs
      * @expected
      * - should return data with length 1
      * - data[0] should be equal to the permitEntity
      */
     it(`should get txs which their 'deleted' field is false`, async () => {
       // insert two permit txs (one active, one deleted)
-      await DB.submitTx('mockedTx1', 'mockedTxId1', TxType.PERMIT, 100);
-      const mockedTx1 = (await DB.getActivePermitTransactions())[0];
-      await DB.removeTx(mockedTx1);
-      await DB.submitTx('mockedTx2', 'mockedTxId2', TxType.PERMIT, 100);
+      await watcherDb.submitTx('mockedTx1', 'mockedTxId1', TxType.PERMIT, 100);
+      const mockedTx1 = (await watcherDb.getActivePermitTransactions())[0];
+      await watcherDb.removeTx(mockedTx1);
+      await watcherDb.submitTx('mockedTx2', 'mockedTxId2', TxType.PERMIT, 100);
 
       // run the function
-      const data = await DB.getActivePermitTransactions();
+      const data = await watcherDb.getActivePermitTransactions();
 
       // check the result
       expect(data).to.have.length(1);
       expect(data[0].txId).to.eql('mockedTxId2');
-
-      // remove inserted txs
-      await DB.removeTx(data[0]);
     });
   });
 });

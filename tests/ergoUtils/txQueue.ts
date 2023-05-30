@@ -17,6 +17,8 @@ import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 import { WatcherUtils } from '../../src/utils/watcherUtils';
 import TransactionTest from '../../src/api/TransactionTest';
 import { Transaction } from '../../src/api/Transaction';
+import { createMemoryDatabase } from '../resources/inMemoryDb';
+import { DataSource } from 'typeorm';
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
 
@@ -227,6 +229,15 @@ describe('Transaction queue tests', () => {
   });
 
   describe('processConfirmedTx', () => {
+    let db: DataSource, watcherDb: WatcherDataBase, txQueue: Queue;
+
+    before(async () => {
+      db = await createMemoryDatabase();
+      watcherDb = new WatcherDataBase(db);
+      dbConnection = new WatcherUtils(watcherDb, 0, 100);
+      txQueue = new Queue(watcherDb, dbConnection);
+    });
+
     /**
      * @target Queue.processConfirmedTx should set watcherWID
      * and toggle watcherPermitState when confirmed tx type is PERMIT
@@ -236,10 +247,10 @@ describe('Transaction queue tests', () => {
      * - mock a TxEntity and insert into db
      * - run test
      * - check if variables changed
-     * - remove mockedTx
      * @expected
      * - watcherWID should equal to mocked value
      * - watcherPermitState should be true
+     * - txEntity 'deleted' field should be true
      */
     it('should set watcherWID and toggle watcherPermitState when confirmed tx type is PERMIT', async () => {
       // mock Transaction variables (permitState and WIDs)
@@ -248,13 +259,13 @@ describe('Transaction queue tests', () => {
       Transaction.watcherUnconfirmedWID = 'mockedWID';
 
       // mock TxEntity
-      await dataBase.submitTx(
+      await watcherDb.submitTx(
         'serializedTx2',
         'mockedTxId2',
         TxType.PERMIT,
         100
       );
-      const tx = (await dataBase.getActivePermitTransactions())[0];
+      const tx = (await watcherDb.getActivePermitTransactions())[0];
 
       // run test
       await txQueue.processConfirmedTx(tx);
@@ -262,6 +273,9 @@ describe('Transaction queue tests', () => {
       // check if variables changed
       expect(Transaction.watcherPermitState).to.be.equal(true);
       expect(Transaction.watcherWID).to.be.equal('mockedWID');
+      const dbTxs = await db.getRepository(TxEntity).find();
+      expect(dbTxs.length).to.be.equal(1);
+      expect(dbTxs[0].deleted).to.be.equal(true);
     });
   });
 });
