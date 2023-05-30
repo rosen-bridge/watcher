@@ -88,6 +88,7 @@ class WatcherDataBase {
    * @param maxHeight
    * @param sourceTokenId
    * @param sourceTxId
+   * @param sorting
    * @param offset
    * @param limit
    */
@@ -98,6 +99,7 @@ class WatcherDataBase {
     maxHeight = NaN,
     sourceTokenId = '',
     sourceTxId = '',
+    sorting = '',
     offset = 0,
     limit = 20
   ) => {
@@ -123,7 +125,13 @@ class WatcherDataBase {
         sourceTokenId,
       });
     }
-    return qb.orderBy('ob.id', 'DESC').offset(offset).limit(limit).execute();
+    if (sorting !== '' && sorting.toLowerCase() === 'asc') {
+      qb = qb.orderBy('ob.id', 'ASC');
+    } else {
+      qb = qb.orderBy('ob.id', 'DESC');
+    }
+
+    return qb.offset(offset).limit(limit).execute();
   };
 
   /**

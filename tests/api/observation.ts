@@ -13,14 +13,14 @@ const app = express();
 app.use(express.json());
 
 const router = Router();
-router.use('/observations', observationRouter);
+router.use('/observation', observationRouter);
 app.use(router);
 
 describe('observationRouter', () => {
-  describe('GET /observations', () => {
+  describe('GET /observation', () => {
     before(async () => {
       const ORM = await loadDataBase();
-      await fillORM(ORM);
+      await fillORM(ORM, false, true, true);
       initWatcherDB(ORM.DB);
     });
 
@@ -37,7 +37,7 @@ describe('observationRouter', () => {
      */
     it('Observations endpoint should return all observations', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/observations');
+      const res = await request(app).get('/observation');
 
       // check the result
       expect(res.status).to.equal(200);
@@ -59,7 +59,7 @@ describe('observationRouter', () => {
     it('Observations endpoint should return correct observations with fromAddress filter', async () => {
       // send a request to the endpoint
       const res = await request(app).get(
-        '/observations?fromAddress=fromAddress'
+        '/observation?fromAddress=fromAddress'
       );
 
       // check the result
@@ -81,7 +81,7 @@ describe('observationRouter', () => {
      */
     it('Observations endpoint should return correct observations with toAddress filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/observations?toAddress=addr4');
+      const res = await request(app).get('/observation?toAddress=addr4');
 
       // check the result
       expect(res.status).to.equal(200);
@@ -102,7 +102,7 @@ describe('observationRouter', () => {
      */
     it('Observations endpoint should return correct observations with minHeight filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/observations?minHeight=7');
+      const res = await request(app).get('/observation?minHeight=7');
 
       // check the result
       expect(res.status).to.equal(200);
@@ -123,7 +123,7 @@ describe('observationRouter', () => {
      */
     it('Observations endpoint should return correct observations with maxHeight filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/observations?maxHeight=7');
+      const res = await request(app).get('/observation?maxHeight=7');
 
       // check the result
       expect(res.status).to.equal(200);
@@ -145,7 +145,7 @@ describe('observationRouter', () => {
     it('Observations endpoint should return correct observations with sourceTokenId filter', async () => {
       // send a request to the endpoint
       const res = await request(app).get(
-        '/observations?sourceTokenId=sourceToken'
+        '/observation?sourceTokenId=sourceToken'
       );
 
       // check the result
@@ -167,7 +167,7 @@ describe('observationRouter', () => {
      */
     it('Observations endpoint should return correct observations with sourceTxId filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/observations?sourceTxId=txId4');
+      const res = await request(app).get('/observation?sourceTxId=txId4');
 
       // check the result
       expect(res.status).to.equal(200);
@@ -188,7 +188,7 @@ describe('observationRouter', () => {
      */
     it('Observations endpoint should return correct observations when setting offset/limit', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/observations?limit=1&offset=1');
+      const res = await request(app).get('/observation?limit=1&offset=1');
 
       // check the result
       expect(res.status).to.equal(200);

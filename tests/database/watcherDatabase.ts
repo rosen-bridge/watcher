@@ -168,10 +168,13 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
 export const fillORM = async (
   ORM: ORMType,
   pushExtraUtxo = false,
-  saveTokenNames = true
+  saveTokenNames = true,
+  pushExtraObservation = false
 ) => {
   await ORM.blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
-  await ORM.observationRepo.save([observationEntity2, observationEntity4]);
+  const observationArray = [observationEntity2];
+  if (pushExtraObservation) observationArray.push(observationEntity4);
+  await ORM.observationRepo.save(observationArray);
   await ORM.observationStatusRepo.save([
     { observation: observationEntity2, status: TxStatus.NOT_COMMITTED },
   ]);

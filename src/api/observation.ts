@@ -22,6 +22,7 @@ observationRouter.get('/', async (req, res) => {
       maxHeight,
       sourceTokenId,
       sourceTxId,
+      sorting,
       offset,
       limit,
     } = req.query;
@@ -36,6 +37,7 @@ observationRouter.get('/', async (req, res) => {
       Number(maxHeight),
       stringifyQueryParam(sourceTokenId),
       stringifyQueryParam(sourceTxId),
+      stringifyQueryParam(sorting),
       offsetString === '' ? 0 : Number(offsetString),
       limitString === '' ? 20 : Math.min(Number(limitString), 100)
     );

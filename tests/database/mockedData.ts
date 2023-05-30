@@ -620,7 +620,7 @@ export const observation1 = {
 };
 
 export const observation2 = {
-  id: 2,
+  id: 4,
   fromChain: 'ergo',
   toChain: 'cardano',
   fromAddress: 'fromAddress4',

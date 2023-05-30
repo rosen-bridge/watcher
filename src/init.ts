@@ -55,7 +55,7 @@ const init = async () => {
     router.use('/address', addressRouter);
     router.use('/permit', permitRouter);
     router.use('/statistics', statisticsRouter);
-    router.use('/observations', observationRouter);
+    router.use('/observation', observationRouter);
     router.use('/info', generalRouter);
 
     app.use(router);
