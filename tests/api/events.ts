@@ -3,7 +3,7 @@ import spies from 'chai-spies';
 import express, { Router } from 'express';
 import eventsRouter from '../../src/api/events';
 import { initWatcherDB } from '../../src/init';
-import { fillORM, loadDataBase, ORMType } from '../database/watcherDatabase';
+import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import request from 'supertest';
 import {
   eventTriggerEntity,
