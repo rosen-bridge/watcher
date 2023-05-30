@@ -11,7 +11,7 @@ describe('Statistics', () => {
   /**
    * setting up pretest database and Statistic Object
    */
-  before('initiating Database and inserting into it', async () => {
+  before(async () => {
     const ORM = await loadDataBase();
     await fillORM(ORM);
     DB = ORM.DB;

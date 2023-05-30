@@ -8,6 +8,8 @@ import { blake2b } from 'blakejs';
 import { Buffer } from 'buffer';
 import { getConfig } from '../config/config';
 import { Transaction } from '../api/Transaction';
+import { watcherDatabase } from '../init';
+import { AddressBalance, TokenInfo } from './interfaces';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -298,5 +300,77 @@ export class ErgoUtils {
     return boxes
       .map((box) => BigInt(box.value().as_i64().to_str()))
       .reduce((a, b) => a + b, BigInt(0));
+  };
+
+  /**
+   * Calculate the sum of box assets
+   * @param boxes
+   * @returns sum of box assets
+   */
+  static getBoxAssetsSum = (boxes: Array<wasm.ErgoBox>): Array<TokenInfo> => {
+    const assets = new Map<string, bigint>();
+    boxes.forEach((box) => {
+      for (let i = 0; i < box.tokens().len(); i++) {
+        const token = box.tokens().get(i);
+        const id = token.id().to_str();
+        const amount = token.amount().as_i64().to_str();
+        const assetsAmount = assets.get(id) || 0n;
+        assets.set(id, assetsAmount + BigInt(amount));
+      }
+    });
+    return [...assets].map(([tokenId, amount]) => ({ tokenId, amount }));
+  };
+
+  /**
+   * Extracts the total balance from the serialized boxes
+   * @param serializedBoxes to extract balance from
+   * @returns AddressBalance of the given boxes
+   */
+  static extractBalanceFromBoxes = async (
+    serializedBoxes: Array<string>
+  ): Promise<AddressBalance> => {
+    const boxes = serializedBoxes.map((box) => decodeSerializedBox(box));
+    const tokens = this.getBoxAssetsSum(boxes);
+    const tokensInfo = await watcherDatabase.getTokenEntity(
+      tokens.map((token) => token.tokenId)
+    );
+    const tokensInfoMap = new Map<string, string>();
+    tokensInfo.forEach((token) => {
+      tokensInfoMap.set(token.tokenId, token.tokenName);
+    });
+    return {
+      nanoErgs: this.getBoxValuesSum(boxes),
+      tokens: tokens.map((token) => ({
+        ...token,
+        name: tokensInfoMap.get(token.tokenId) || '',
+      })),
+    };
+  };
+
+  /**
+   * Fetches the balance of the watcher UTXOs
+   */
+  static getWatcherBalance = async (): Promise<AddressBalance> => {
+    const UTXOs = await watcherDatabase.getUnspentBoxesByAddress(
+      getConfig().general.address
+    );
+    const serializedUTXOs = UTXOs.map((box) => box.serialized);
+    return this.extractBalanceFromBoxes(serializedUTXOs);
+  };
+
+  /**
+   * Gets permit count of the mentioned address
+   * @param RWTId RWT token id
+   * @returns permit count
+   */
+  static getPermitCount = async (RWTId: string): Promise<bigint> => {
+    const permitBoxes = await watcherDatabase.getPermitUnspentBoxes();
+    const serializedUTXOs = permitBoxes.map((box) => box.boxSerialized);
+    const { tokens } = await this.extractBalanceFromBoxes(serializedUTXOs);
+    const RWT = tokens.find((token) => token.tokenId === RWTId);
+    if (RWT) {
+      return RWT.amount;
+    }
+    return 0n;
   };
 }

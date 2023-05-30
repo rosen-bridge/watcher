@@ -13,6 +13,8 @@ import {
 import { BlockEntity } from '@rosen-bridge/scanner';
 import { PROCEED } from '@rosen-bridge/scanner/dist/entities/blockEntity';
 import * as Constants from '../../src/config/constants';
+import { TokenEntity } from '../../src/database/entities/tokenEntity';
+import { getConfig } from '../../src/config/config';
 
 export const ergoBlockEntity = new BlockEntity();
 ergoBlockEntity.scanner = Constants.ERGO_WATCHER;
@@ -90,7 +92,8 @@ permitEntity.block = 'blockID';
 permitEntity.height = 100;
 permitEntity.extractor = 'extractor';
 permitEntity.boxId = 'boxId';
-permitEntity.boxSerialized = 'box';
+permitEntity.boxSerialized =
+  '4JFDEBMEAAQABAQEAAQCBAAOIKWZu5SyMPjTrJSFarJMMbI1q0k9NBUJcQKRbGAPu/lpBAQEAAQABAABAQQCBAAEAAQADiAlLna8Y7mrm00/ZhS6SaI5OFo/wqVFsrb+zFCE1sKy9gUCAQHYB9YBsqVzAADWAoyy22MIp3MBAAHWA661tKVzArGl2QEDY5Gx22MIcgNzA9kBA2Ou22MIcgPZAQVNDpOMcgUBcgLWBOTGpwQa1gWypXMEANYG22MIcgXWB65yBtkBB00Ok4xyBwFyApWTjLLbYwhyAXMFAAFzBtGWgwMB73IDk4yy22MIsqRzBwBzCAABsnIEcwkAlXIHloMCAZOMsnIGcwoAAXICk8JyBcKncwvYAdYIwqfRloMFAe9yA5PCcgFyCJPkxnIBBBpyBJOMsttjCLKkcwwAcw0AAbJyBHMOAJVyB9gB1gmycgZzDwCWgwcBk4xyCQFyApPLwnIFcxDmxnIFBRrmxnIFBg6T5MZyBQcOy3IIk+TGcgUEGnIEk4xyCQJzEXMSg409AY5bArpymtNkhnYZ0qi5/xQ4GQwUl5oSqgoknplhlPB0j04CGgEg6nBM+OG41ADB3w+3C5REC0ZdGcNoShXSZQQdxBkrdqcOAQCxOUv5J/07IIrBwF3p+WQnGKX2r1GQ6VhYtAvGgeH+dAA=';
 
 export const spentPermitEntity = new PermitEntity();
 spentPermitEntity.WID = 'WID';
@@ -103,12 +106,13 @@ spentPermitEntity.spendBlock = 'blockHash2';
 spentPermitEntity.spendHeight = 110;
 
 export const plainBox = new BoxEntity();
-plainBox.address = 'address';
+plainBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
 plainBox.createBlock = 'blockID';
 plainBox.creationHeight = 100;
 plainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 plainBox.boxId = 'boxId';
-plainBox.serialized = 'box';
+plainBox.serialized =
+  '4JFDAAjNA6/nE35QL09xxfyBlz5Ab8mVjg38uMAXUIzi9gNqo6UP6848AYROPPRLMYG0ysvMv3WW00H0EUfXPa9LVl7KrJg6uiUIrbwBAHuYkTd1b0VCBfANI9wUXfe48u5Dx0lstbC6MR+NULUcAQ==';
 
 export const spentPlainBox = new BoxEntity();
 spentPlainBox.address = 'address';
@@ -118,6 +122,27 @@ spentPlainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 spentPlainBox.boxId = 'boxId2';
 spentPlainBox.serialized = 'box2';
 spentPlainBox.spendBlock = 'blockHash';
+
+export const addressValidBox = new BoxEntity();
+addressValidBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
+addressValidBox.createBlock = 'blockID';
+addressValidBox.creationHeight = 100;
+addressValidBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
+addressValidBox.boxId = 'boxId3';
+addressValidBox.serialized =
+  'gLL19gYACM0Dr+cTflAvT3HF/IGXPkBvyZWODfy4wBdQjOL2A2qjpQ/RjT0BBQ8FSMAPxKAwLilT3j+WfLGMfLWkxSaxY7/kZwqSai8BAJVusRG2h5VtH5w8R7TSrHzuQbd2cO/foKTfUEvEDpbqAg==';
+
+export const validBox0Token = {
+  tokenId: '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508',
+  amount: 24109n,
+  name: 'RSN',
+};
+
+export const validBox1Token = {
+  tokenId: '050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f',
+  amount: 1n,
+  name: 'Test',
+};
 
 export const eventTriggerEntity = new EventTriggerEntity();
 eventTriggerEntity.sourceTxId = 'txId';
@@ -253,6 +278,20 @@ redeemedCommitment.spendBlock = 'hash';
 const eventTrigger = new EventTriggerEntity();
 eventTrigger.id = 1;
 eventTrigger.height = 111;
+
+export const tokenRecord = new TokenEntity();
+tokenRecord.tokenId = 'tokenId';
+tokenRecord.tokenName = 'tokenName';
+
+export const validToken1Record = new TokenEntity();
+validToken1Record.tokenId =
+  '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508';
+validToken1Record.tokenName = 'RSN';
+
+export const validToken2Record = new TokenEntity();
+validToken2Record.tokenId =
+  '050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f';
+validToken2Record.tokenName = 'Test';
 
 export const commitmentTxJson = {
   id: '555f7d54e7073f3ad6f0a587bf8c4f748e9a82b0868362b12a28854de968ea48',
@@ -597,4 +636,14 @@ export const observation2 = {
   requestId: 'reqId4',
   block: 'hash',
   extractor: 'observation-extractor',
+};
+export const permitMockRWT =
+  '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074';
+
+export const generalInfo = {
+  currentBalance: 1100000,
+  network: 'ergo',
+  permitCount: 0,
+  health: 'OK',
+  address: '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH',
 };
