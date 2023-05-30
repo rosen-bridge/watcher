@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import addressRouter from './api/address';
 import permitRouter from './api/permit';
+import generalRouter from './api/general';
 import { Transaction } from './api/Transaction';
 import { Boxes } from './ergo/boxes';
 import { WatcherDataBase } from './database/models/watcherModel';
@@ -54,6 +55,7 @@ const init = async () => {
     router.use('/address', addressRouter);
     router.use('/permit', permitRouter);
     router.use('/statistics', statisticsRouter);
+    router.use('/info', generalRouter);
     router.use('/events', eventsRouter);
 
     app.use(router);

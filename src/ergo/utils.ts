@@ -348,7 +348,7 @@ export class ErgoUtils {
   };
 
   /**
-   * Fetches the tokenId and amount of the watcher UTXOs
+   * Fetches the balance of the watcher UTXOs
    */
   static getWatcherBalance = async (): Promise<AddressBalance> => {
     const UTXOs = await watcherDatabase.getUnspentBoxesByAddress(
@@ -356,5 +356,21 @@ export class ErgoUtils {
     );
     const serializedUTXOs = UTXOs.map((box) => box.serialized);
     return this.extractBalanceFromBoxes(serializedUTXOs);
+  };
+
+  /**
+   * Gets permit count of the mentioned address
+   * @param RWTId RWT token id
+   * @returns permit count
+   */
+  static getPermitCount = async (RWTId: string): Promise<bigint> => {
+    const permitBoxes = await watcherDatabase.getPermitUnspentBoxes();
+    const serializedUTXOs = permitBoxes.map((box) => box.boxSerialized);
+    const { tokens } = await this.extractBalanceFromBoxes(serializedUTXOs);
+    const RWT = tokens.find((token) => token.tokenId === RWTId);
+    if (RWT) {
+      return RWT.amount;
+    }
+    return 0n;
   };
 }

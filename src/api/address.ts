@@ -37,7 +37,7 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    let tokens = (await ErgoUtils.getWatcherBalance()).tokens;
+    let { tokens } = await ErgoUtils.getWatcherBalance();
     const { tokenId, tokenName, sortByAmount } = req.query;
     if (tokenId) {
       tokens = tokens.filter((token) => token.tokenId === (tokenId as string));

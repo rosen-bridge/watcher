@@ -580,6 +580,16 @@ class WatcherDataBase {
   };
 
   /**
+   * Returns all unspent permit boxes
+   */
+  getPermitUnspentBoxes = async (): Promise<Array<PermitEntity>> => {
+    return this.permitRepository
+      .createQueryBuilder('permit_entity')
+      .where('permit_entity.spendBlock is null')
+      .getMany();
+  };
+
+  /**
    * Returns all unspent boxes considering boxIds
    * @param boxIds to include/exclude from the result
    * @param exclude if true, excludes boxIds from the result

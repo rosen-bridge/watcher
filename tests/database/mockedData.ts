@@ -92,7 +92,8 @@ permitEntity.block = 'blockID';
 permitEntity.height = 100;
 permitEntity.extractor = 'extractor';
 permitEntity.boxId = 'boxId';
-permitEntity.boxSerialized = 'box';
+permitEntity.boxSerialized =
+  '4JFDEBMEAAQABAQEAAQCBAAOIKWZu5SyMPjTrJSFarJMMbI1q0k9NBUJcQKRbGAPu/lpBAQEAAQABAABAQQCBAAEAAQADiAlLna8Y7mrm00/ZhS6SaI5OFo/wqVFsrb+zFCE1sKy9gUCAQHYB9YBsqVzAADWAoyy22MIp3MBAAHWA661tKVzArGl2QEDY5Gx22MIcgNzA9kBA2Ou22MIcgPZAQVNDpOMcgUBcgLWBOTGpwQa1gWypXMEANYG22MIcgXWB65yBtkBB00Ok4xyBwFyApWTjLLbYwhyAXMFAAFzBtGWgwMB73IDk4yy22MIsqRzBwBzCAABsnIEcwkAlXIHloMCAZOMsnIGcwoAAXICk8JyBcKncwvYAdYIwqfRloMFAe9yA5PCcgFyCJPkxnIBBBpyBJOMsttjCLKkcwwAcw0AAbJyBHMOAJVyB9gB1gmycgZzDwCWgwcBk4xyCQFyApPLwnIFcxDmxnIFBRrmxnIFBg6T5MZyBQcOy3IIk+TGcgUEGnIEk4xyCQJzEXMSg409AY5bArpymtNkhnYZ0qi5/xQ4GQwUl5oSqgoknplhlPB0j04CGgEg6nBM+OG41ADB3w+3C5REC0ZdGcNoShXSZQQdxBkrdqcOAQCxOUv5J/07IIrBwF3p+WQnGKX2r1GQ6VhYtAvGgeH+dAA=';
 
 export const spentPermitEntity = new PermitEntity();
 spentPermitEntity.WID = 'WID';
@@ -580,4 +581,15 @@ export const permitBox = {
       renderedValue: '00',
     },
   },
+};
+
+export const permitMockRWT =
+  '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074';
+
+export const generalInfo = {
+  currentBalance: 1100000,
+  network: 'ergo',
+  permitCount: 0,
+  health: 'OK',
+  address: '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH',
 };
