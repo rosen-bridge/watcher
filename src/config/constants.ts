@@ -6,3 +6,5 @@ export const OGMIOS_TYPE = 'ogmios';
 export const KOIOS_TYPE = 'koios';
 export const ERGO_WATCHER = 'ergo';
 export const CARDANO_WATCHER = 'cardano';
+export const DEFAULT_API_LIMIT = 20;
+export const MAX_API_LIMIT = 100;
