@@ -172,6 +172,71 @@ export class Boxes {
   };
 
   /**
+   * Returns unspent boxes covering the required erg and assets (Considering the mempool)
+   * @param requiredValue
+   * @param requiredAssets
+   */
+  getCoveringBoxes = async (
+    requiredValue: bigint,
+    requiredAssets: Map<string, bigint>
+  ): Promise<Array<wasm.ErgoBox>> => {
+    const boxes = (await this.dataBase.getUnspentAddressBoxes()).map((box) => {
+      return decodeSerializedBox(box.serialized);
+    });
+    const selectedBoxes: wasm.ErgoBox[] = [];
+    const uncoveredAssets = new Map<string, bigint>(requiredAssets);
+    let uncoveredValue = requiredValue;
+
+    const isRequiredRemaining = () => {
+      return uncoveredAssets.size > 0 || uncoveredValue > 0n;
+    };
+
+    let idx = 0;
+    while (isRequiredRemaining() && idx < boxes.length) {
+      const box = boxes[idx++];
+      let unspentBox = await ErgoNetwork.trackMemPool(box);
+      if (unspentBox) unspentBox = await this.dataBase.trackTxQueue(unspentBox);
+      const isBoxNotSelected = selectedBoxes.every(
+        (box) => box.box_id().to_str() !== unspentBox.box_id().to_str()
+      );
+      if (unspentBox && isBoxNotSelected) {
+        let isUseful = false;
+        requiredAssets.forEach((value, tokenId) => {
+          if (boxHaveAsset(unspentBox, tokenId)) {
+            uncoveredAssets.set(tokenId, uncoveredAssets.get(tokenId)! - value);
+            if (uncoveredAssets.get(tokenId)! <= 0) {
+              uncoveredAssets.delete(tokenId);
+            }
+            isUseful = true;
+          }
+        });
+        if (isUseful || uncoveredValue > 0n) {
+          const boxValue = BigInt(unspentBox.value().as_i64().to_str());
+          uncoveredValue -=
+            uncoveredValue >= boxValue ? boxValue : uncoveredValue;
+
+          selectedBoxes.push(unspentBox);
+        }
+      }
+    }
+
+    if (isRequiredRemaining()) {
+      const missingAssets = Array.from(uncoveredAssets.entries()).map(
+        ([tokenId, value]) => {
+          return { tokenId, value };
+        }
+      );
+      throw new NotEnoughFund(
+        `Not enough fund to create the transaction. Uncovered value: ${uncoveredValue}, Uncovered assets: ${JSON.stringify(
+          missingAssets
+        )}`
+      );
+    }
+
+    return selectedBoxes;
+  };
+
+  /**
    * getting repoBox from network with tracking mempool transactions
    */
   getRepoBox = async (): Promise<wasm.ErgoBox> => {
