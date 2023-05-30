@@ -610,6 +610,20 @@ class WatcherDataBase {
 
     return qb.getMany();
   };
+
+  /**
+   * returns active transaction with 'permit' type
+   * @param wid
+   * @param maxHeight
+   */
+  getActivePermitTransactions = async (): Promise<Array<TxEntity>> => {
+    return await this.txRepository.find({
+      where: {
+        type: TxType.PERMIT,
+        deleted: false,
+      },
+    });
+  };
 }
 
 export { WatcherDataBase };

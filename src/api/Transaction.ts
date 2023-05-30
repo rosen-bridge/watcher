@@ -5,6 +5,9 @@ import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
 import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+import { WatcherDataBase } from '../database/models/watcherModel';
+import { TransactionUtils } from '../utils/watcherUtils';
+import { TxType } from '../database/entities/txEntity';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -19,7 +22,9 @@ export type ApiResponse = {
 export class Transaction {
   protected static instance: Transaction | undefined;
   protected static isSetupCalled = false;
+  protected static watcherDatabase: WatcherDataBase;
   static watcherPermitState?: boolean;
+  static watcherUnconfirmedWID?: string;
   static watcherWID?: string;
   static boxes: Boxes;
   static minBoxValue: wasm.BoxValue;
@@ -28,6 +33,7 @@ export class Transaction {
   static userAddress: wasm.Address;
   static userAddressContract: wasm.Contract;
   static RSN: wasm.TokenId;
+  static txUtils: TransactionUtils;
 
   /**
    * setup function to set up the singleton class before getting instance
@@ -39,7 +45,8 @@ export class Transaction {
   static setup = async (
     userAddress: string,
     userSecret: wasm.SecretKey,
-    boxes: Boxes
+    boxes: Boxes,
+    db: WatcherDataBase
   ) => {
     if (!Transaction.isSetupCalled) {
       Transaction.watcherPermitState = undefined;
@@ -59,6 +66,9 @@ export class Transaction {
       );
       Transaction.isSetupCalled = true;
       await Transaction.getWatcherState();
+
+      this.watcherDatabase = db;
+      this.txUtils = new TransactionUtils(db);
     }
   };
 
@@ -307,6 +317,16 @@ export class Transaction {
     if (Transaction.watcherPermitState) {
       return { response: "you don't have locked any RSN", status: 500 };
     }
+
+    const activePermitTxs =
+      await Transaction.watcherDatabase.getActivePermitTransactions();
+    if (activePermitTxs.length !== 0) {
+      return {
+        response: `permit transaction [${activePermitTxs[0].txId}] is in queue`,
+        status: 500,
+      };
+    }
+
     const height = await ErgoNetwork.getHeight();
     const repoBox = await Transaction.boxes.getRepoBox();
     const R4 = repoBox.register_value(4);
@@ -451,9 +471,8 @@ export class Transaction {
       Transaction.userSecret,
       inputBoxes
     );
-    await ErgoNetwork.sendTx(signedTx.to_json());
-    Transaction.watcherPermitState = !Transaction.watcherPermitState;
-    Transaction.watcherWID = WIDToken.to_str();
+    await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
+    Transaction.watcherUnconfirmedWID = WIDToken.to_str();
     return { response: signedTx.id().to_str(), status: 200 };
   };
 

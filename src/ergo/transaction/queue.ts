@@ -6,6 +6,7 @@ import { base64ToArrayBuffer } from '../../utils/utils';
 import { WatcherUtils } from '../../utils/watcherUtils';
 import { loggerFactory } from '../../log/Logger';
 import { getConfig } from '../../config/config';
+import { Transaction } from '../../api/Transaction';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -23,10 +24,14 @@ export class Queue {
    * remove from database and update observation status for it.
    * @param tx selected tx
    */
-  private processConfirmedTx = async (tx: TxEntity) => {
+  processConfirmedTx = async (tx: TxEntity) => {
     logger.info(
       `The [${tx.type}] transaction with txId: [${tx.txId}] is confirmed, removing the tx from txQueue`
     );
+    if (tx.type === TxType.PERMIT) {
+      Transaction.watcherPermitState = !Transaction.watcherPermitState;
+      Transaction.watcherWID = Transaction.watcherUnconfirmedWID;
+    }
     if (tx.observation)
       await this.database.upgradeObservationTxStatus(
         tx.observation,
@@ -42,13 +47,22 @@ export class Queue {
    * @param tx
    */
   private verifyTx = async (tx: TxEntity) => {
-    if (tx.type === TxType.COMMITMENT) {
-      return await this.databaseConnection.isObservationValid(tx.observation!);
-    } else if (tx.type === TxType.TRIGGER) {
-      return !(await this.databaseConnection.isMergeHappened(tx.observation!));
-    } else if (tx.type === TxType.DETACH) return true;
-    else if (tx.type === TxType.REDEEM) return true;
-    return false;
+    switch (tx.type) {
+      case TxType.COMMITMENT:
+        return await this.databaseConnection.isObservationValid(
+          tx.observation!
+        );
+      case TxType.TRIGGER:
+        return !(await this.databaseConnection.isMergeHappened(
+          tx.observation!
+        ));
+      case TxType.DETACH:
+      case TxType.REDEEM:
+      case TxType.PERMIT:
+        return true;
+      default:
+        return false;
+    }
   };
 
   /**

@@ -836,4 +836,37 @@ describe('WatcherModel tests', () => {
       expect(result[0]).to.eql(addressValidBox);
     });
   });
+
+  describe('getActivePermitTransactions', () => {
+    /**
+     * @target WatcherDataBase.getActivePermitTransactions should get txs
+     * which their 'deleted' field is false
+     * @dependencies
+     * @scenario
+     * - insert two permit txs (one active, one deleted)
+     * - run the function
+     * - check the result
+     * - remove inserted txs
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to the permitEntity
+     */
+    it(`should get txs which their 'deleted' field is false`, async () => {
+      // insert two permit txs (one active, one deleted)
+      await DB.submitTx('mockedTx1', 'mockedTxId1', TxType.PERMIT, 100);
+      const mockedTx1 = (await DB.getActivePermitTransactions())[0];
+      await DB.removeTx(mockedTx1);
+      await DB.submitTx('mockedTx2', 'mockedTxId2', TxType.PERMIT, 100);
+
+      // run the function
+      const data = await DB.getActivePermitTransactions();
+
+      // check the result
+      expect(data).to.have.length(1);
+      expect(data[0].txId).to.eql('mockedTxId2');
+
+      // remove inserted txs
+      await DB.removeTx(data[0]);
+    });
+  });
 });

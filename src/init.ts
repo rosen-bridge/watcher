@@ -40,7 +40,8 @@ const init = async () => {
     await Transaction.setup(
       getConfig().general.address,
       getConfig().general.secretKey,
-      boxesObject
+      boxesObject,
+      watcherDatabase
     );
     Transaction.getInstance();
     logger.debug('APIs initialized successfully.');

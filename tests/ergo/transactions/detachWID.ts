@@ -30,7 +30,8 @@ describe('DetachWID', () => {
     await Transaction.setup(
       getConfig().general.address,
       getConfig().general.secretKey,
-      boxes
+      boxes,
+      watcherDb
     );
     txUtils = new TransactionUtils(watcherDb);
   });

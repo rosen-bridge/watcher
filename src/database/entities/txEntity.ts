@@ -6,6 +6,7 @@ export enum TxType {
   TRIGGER = 'trigger',
   DETACH = 'detach',
   REDEEM = 'redeem',
+  PERMIT = 'permit',
 }
 
 @Entity()
