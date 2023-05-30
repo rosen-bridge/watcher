@@ -32,3 +32,8 @@ export interface CommitmentSet {
   commitments: Array<Commitment>;
   observation: ObservationEntity;
 }
+
+export interface EventStatus {
+  id: number;
+  status: string;
+}
