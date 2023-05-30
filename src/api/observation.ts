@@ -1,6 +1,7 @@
 import express from 'express';
 import { loggerFactory } from '../log/Logger';
 import { watcherDatabase } from '../init';
+import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 
 const logger = loggerFactory(import.meta.url);
 const observationRouter = express.Router();
@@ -39,7 +40,9 @@ observationRouter.get('/', async (req, res) => {
       stringifyQueryParam(sourceTxId),
       stringifyQueryParam(sorting),
       offsetString === '' ? 0 : Number(offsetString),
-      limitString === '' ? 20 : Math.min(Number(limitString), 100)
+      limitString === ''
+        ? DEFAULT_API_LIMIT
+        : Math.min(Number(limitString), MAX_API_LIMIT)
     );
     res.status(200).json(result);
   } catch (e) {
