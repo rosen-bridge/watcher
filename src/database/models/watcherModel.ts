@@ -95,8 +95,8 @@ class WatcherDataBase {
   getObservationWithFilters = async (
     fromAddress = '',
     toAddress = '',
-    minHeight = NaN,
-    maxHeight = NaN,
+    minHeight: number | undefined = undefined,
+    maxHeight: number | undefined = undefined,
     sourceTokenId = '',
     sourceTxId = '',
     sorting = '',
@@ -114,10 +114,10 @@ class WatcherDataBase {
     if (toAddress !== '') {
       qb = qb.andWhere('ob.toAddress = :toAddress', { toAddress });
     }
-    if (!isNaN(minHeight)) {
+    if (minHeight) {
       qb = qb.andWhere('ob.height >= :minHeight', { minHeight });
     }
-    if (!isNaN(maxHeight)) {
+    if (maxHeight) {
       qb = qb.andWhere('ob.height <= :maxHeight', { maxHeight });
     }
     if (sourceTokenId !== '') {
