@@ -81,6 +81,60 @@ class WatcherDataBase {
   };
 
   /**
+   * Returns all observations with filters, with respect to offset and limit
+   * @param fromAddress
+   * @param toAddress
+   * @param minHeight
+   * @param maxHeight
+   * @param sourceTokenId
+   * @param sourceTxId
+   * @param sorting
+   * @param offset
+   * @param limit
+   */
+  getObservationWithFilters = async (
+    fromAddress = '',
+    toAddress = '',
+    minHeight: number | undefined = undefined,
+    maxHeight: number | undefined = undefined,
+    sourceTokenId = '',
+    sourceTxId = '',
+    sorting = '',
+    offset = 0,
+    limit = 20
+  ) => {
+    let qb = this.observationRepository.createQueryBuilder('ob').select('*');
+    if (sourceTxId !== '') {
+      qb = qb.andWhere('ob.sourceTxId = :sourceTxId', { sourceTxId });
+      return qb.execute();
+    }
+    if (fromAddress !== '') {
+      qb = qb.andWhere('ob.fromAddress = :fromAddress', { fromAddress });
+    }
+    if (toAddress !== '') {
+      qb = qb.andWhere('ob.toAddress = :toAddress', { toAddress });
+    }
+    if (minHeight) {
+      qb = qb.andWhere('ob.height >= :minHeight', { minHeight });
+    }
+    if (maxHeight) {
+      qb = qb.andWhere('ob.height <= :maxHeight', { maxHeight });
+    }
+    if (sourceTokenId !== '') {
+      qb = qb.andWhere('ob.sourceChainTokenId = :sourceTokenId', {
+        sourceTokenId,
+      });
+    }
+    if (sorting !== '' && sorting.toLowerCase() === 'asc') {
+      qb = qb.orderBy('ob.id', 'ASC');
+    } else {
+      qb = qb.orderBy('ob.id', 'DESC');
+    }
+
+    return qb.offset(offset).limit(limit).execute();
+  };
+
+  /**
    * setting NOT_COMMITTED status for new observations that doesn't have status and return last status
    * @param observation
    */
