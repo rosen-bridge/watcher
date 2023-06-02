@@ -44,6 +44,7 @@ export class Queue {
    * verify if transaction is valid already.
    * for commitment transactions must check observation be valid
    * and for trigger events must check trigger not merged
+   * TODO: add unit-test for this function in refactor
    * @param tx
    */
   private verifyTx = async (tx: TxEntity) => {

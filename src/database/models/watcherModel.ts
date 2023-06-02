@@ -613,8 +613,6 @@ class WatcherDataBase {
 
   /**
    * returns active transaction with 'permit' type
-   * @param wid
-   * @param maxHeight
    */
   getActivePermitTransactions = async (): Promise<Array<TxEntity>> => {
     return await this.txRepository.find({

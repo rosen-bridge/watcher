@@ -37,10 +37,10 @@ export class Transaction {
 
   /**
    * setup function to set up the singleton class before getting instance
-   * @param rosenConfig
    * @param userAddress
    * @param userSecret
    * @param boxes
+   * @param db
    */
   static setup = async (
     userAddress: string,
