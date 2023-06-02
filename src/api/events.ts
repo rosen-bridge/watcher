@@ -2,6 +2,7 @@ import express from 'express';
 import { loggerFactory } from '../log/Logger';
 import { watcherDatabase } from '../init';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
+import { forEach } from 'lodash-es';
 
 const logger = loggerFactory(import.meta.url);
 const eventsRouter = express.Router();
@@ -44,6 +45,34 @@ eventsRouter.get('/', async (req, res) => {
     res.status(200).send(result);
   } catch (e) {
     logger.warn(`An error occurred while fetching events: ${e}`);
+    res.status(500).send({ message: e.message });
+  }
+});
+
+/**
+ * Api for fetching events status
+ */
+eventsRouter.post('/status', async (req, res) => {
+  try {
+    const eventIds = req.body as Array<number>;
+    if (eventIds.length > MAX_API_LIMIT) {
+      throw new Error(
+        `Number of eventIds should be less than ${MAX_API_LIMIT}`
+      );
+    }
+    const result = await watcherDatabase.getEventsStatus(eventIds);
+
+    // creating the response
+    const response: {
+      [key: number]: string;
+    } = {};
+    result.forEach((eventStatus) => {
+      response[eventStatus.id] = eventStatus.status;
+    });
+
+    res.status(200).send(response);
+  } catch (e) {
+    logger.warn(`An error occurred while fetching events status: ${e}`);
     res.status(500).send({ message: e.message });
   }
 });

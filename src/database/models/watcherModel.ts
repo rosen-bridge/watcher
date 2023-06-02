@@ -24,6 +24,8 @@ import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { base64ToArrayBuffer } from '../../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { TokenEntity } from '../entities/tokenEntity';
+import { EventStatus } from '../../utils/interfaces';
+import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 
 class WatcherDataBase {
   private readonly blockRepository: Repository<BlockEntity>;
@@ -719,6 +721,20 @@ class WatcherDataBase {
     }
 
     return qb.offset(offset).limit(limit).execute();
+  };
+
+  /**
+   * Returns event status of a batch of eventIds
+   * @param ids
+   */
+  getEventsStatus = async (ids: number[]): Promise<Array<EventStatus>> => {
+    return this.eventTriggerRepository
+      .createQueryBuilder('ev')
+      .select(
+        `ev.id, CASE WHEN ev.spendBlock IS NULL THEN '${DOING_STATUS}' ELSE '${DONE_STATUS}' END as status`
+      )
+      .where('ev.id IN (:...ids)', { ids })
+      .getRawMany();
   };
 }
 
