@@ -25,6 +25,7 @@ import { base64ToArrayBuffer } from '../../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { TokenEntity } from '../entities/tokenEntity';
 import { EventStatus } from '../../utils/interfaces';
+import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 
 class WatcherDataBase {
   private readonly blockRepository: Repository<BlockEntity>;
@@ -676,7 +677,7 @@ class WatcherDataBase {
     return this.eventTriggerRepository
       .createQueryBuilder('ev')
       .select(
-        `ev.id, CASE WHEN ev.spendBlock IS NULL THEN 'Doing' ELSE 'Done' END as status`
+        `ev.id, CASE WHEN ev.spendBlock IS NULL THEN '${DOING_STATUS}' ELSE '${DONE_STATUS}' END as status`
       )
       .where('ev.id IN (:...ids)', { ids })
       .getRawMany();
