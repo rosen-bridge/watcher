@@ -622,6 +622,62 @@ class WatcherDataBase {
       },
     });
   };
+    
+  /**
+   * Returns all event triggers matching the filters, with respect to offset and limit
+   * @param fromAddress
+   * @param toAddress
+   * @param sourceTokenId
+   * @param sourceTxId
+   * @param eventStatus
+   * @param sorting
+   * @param offset
+   * @param limit
+   */
+  getEventsWithFilters = async (
+    fromAddress = '',
+    toAddress = '',
+    sourceTokenId = '',
+    sourceTxId = '',
+    eventStatus = '',
+    sorting = '',
+    offset = 0,
+    limit = 20
+  ): Promise<EventTriggerEntity[]> => {
+    let qb = this.eventTriggerRepository.createQueryBuilder('ev').select('*');
+
+    if (fromAddress !== '') {
+      qb = qb.andWhere('ev.fromAddress = :fromAddress', { fromAddress });
+    }
+    if (toAddress !== '') {
+      qb = qb.andWhere('ev.toAddress = :toAddress', { toAddress });
+    }
+    if (sourceTokenId !== '') {
+      qb = qb.andWhere('ev.sourceChainTokenId = :sourceTokenId', {
+        sourceTokenId,
+      });
+    }
+    if (sourceTxId !== '') {
+      qb = qb.andWhere('ev.sourceTxId = :sourceTxId', { sourceTxId });
+    }
+    if (eventStatus !== '') {
+      const eventStatusLower = eventStatus.toLowerCase();
+      qb = qb.andWhere(
+        eventStatusLower === 'done'
+          ? 'ev.SpendBlock IS NOT NULL'
+          : eventStatusLower === 'doing'
+          ? 'ev.SpendBlock IS NULL'
+          : ''
+      );
+    }
+    if (sorting !== '' && sorting.toLowerCase() === 'asc') {
+      qb = qb.orderBy('ev.id', 'ASC');
+    } else {
+      qb = qb.orderBy('ev.id', 'DESC');
+    }
+
+    return qb.offset(offset).limit(limit).execute();
+  };
 }
 
 export { WatcherDataBase };
