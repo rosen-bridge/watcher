@@ -8,6 +8,8 @@ import { Buffer } from 'buffer';
 import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { NotEnoughFund, NoWID } from '../errors/errors';
 import { getConfig } from '../config/config';
+import { AddressBalance } from './interfaces';
+import { JsonBI } from './network/parser';
 
 export class Boxes {
   dataBase: WatcherDataBase;
@@ -201,13 +203,21 @@ export class Boxes {
       );
       if (unspentBox && isBoxNotSelected) {
         let isUseful = false;
-        requiredAssets.forEach((value, tokenId) => {
-          if (boxHaveAsset(unspentBox, tokenId)) {
-            uncoveredAssets.set(tokenId, uncoveredAssets.get(tokenId)! - value);
-            if (uncoveredAssets.get(tokenId)! <= 0) {
-              uncoveredAssets.delete(tokenId);
+        uncoveredAssets.forEach((value, tokenId) => {
+          const boxTokens = unspentBox.tokens();
+          for (let i = 0; i < boxTokens.len(); i++) {
+            const boxToken = boxTokens.get(i);
+            if (boxToken.id().to_str() === tokenId) {
+              uncoveredAssets.set(
+                tokenId,
+                value - BigInt(boxToken.amount().as_i64().to_str())
+              );
+              if (uncoveredAssets.get(tokenId)! <= 0) {
+                uncoveredAssets.delete(tokenId);
+              }
+              isUseful = true;
+              break;
             }
-            isUseful = true;
           }
         });
         if (isUseful || uncoveredValue > 0n) {
@@ -227,7 +237,7 @@ export class Boxes {
         }
       );
       throw new NotEnoughFund(
-        `Not enough fund to create the transaction. Uncovered value: ${uncoveredValue}, Uncovered assets: ${JSON.stringify(
+        `Not enough fund to create the transaction. Uncovered value: ${uncoveredValue}, Uncovered assets: ${JsonBI.stringify(
           missingAssets
         )}`
       );
@@ -474,5 +484,32 @@ export class Boxes {
       wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
     );
     return WIDBuilder.build();
+  };
+
+  /**
+   * Creates an arbitrary box paying to the given contract, with custom amount
+   * @param contract
+   * @param amount
+   * @param height create height of the box
+   */
+  createCustomBox = (
+    contract: wasm.Contract,
+    amount: AddressBalance,
+    height: number
+  ): wasm.ErgoBoxCandidate => {
+    const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
+      wasm.BoxValue.from_i64(wasm.I64.from_str(amount.nanoErgs.toString())),
+      contract,
+      height
+    );
+
+    for (const token of amount.tokens) {
+      boxBuilder.add_token(
+        wasm.TokenId.from_str(token.tokenId),
+        wasm.TokenAmount.from_i64(wasm.I64.from_str(token.amount.toString()))
+      );
+    }
+
+    return boxBuilder.build();
   };
 }

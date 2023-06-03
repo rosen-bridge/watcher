@@ -20,6 +20,8 @@ import { getConfig } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
 import eventsRouter from './api/events';
+import { AdminActions } from './transactions/adminActions';
+import withdrawRouter from './api/withdraw';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -59,6 +61,7 @@ const init = async () => {
     router.use('/observation', observationRouter);
     router.use('/info', generalRouter);
     router.use('/events', eventsRouter);
+    router.use('/withdraw', withdrawRouter);
 
     app.use(router);
     const port = getConfig().general.apiPort;
@@ -96,6 +99,10 @@ const init = async () => {
       reveal(watcherUtils, txUtils, boxesObject);
       // Running token name thread
       tokenNameJob([]);
+
+      // setup admin action object
+      await AdminActions.setup(txUtils, boxesObject);
+      AdminActions.getInstance();
 
       logger.debug('Service initialization finished successfully.');
     })
