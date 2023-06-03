@@ -154,11 +154,11 @@ eventTriggerEntity.boxSerialized = 'box';
 eventTriggerEntity.amount = '100';
 eventTriggerEntity.networkFee = '1000';
 eventTriggerEntity.bridgeFee = '200';
-eventTriggerEntity.fromAddress = 'fromAddress';
+eventTriggerEntity.fromAddress = 'fromAddressStar';
 eventTriggerEntity.toAddress = 'toAddress';
 eventTriggerEntity.fromChain = 'fromChain';
 eventTriggerEntity.toChain = 'toChain';
-eventTriggerEntity.sourceChainTokenId = 'tokenId';
+eventTriggerEntity.sourceChainTokenId = 'tokenId2';
 eventTriggerEntity.targetChainTokenId = 'targetTokenId';
 eventTriggerEntity.WIDs = '1,2,3';
 eventTriggerEntity.sourceBlockId = 'block';
@@ -177,7 +177,7 @@ newEventTriggerEntity.amount = '100';
 newEventTriggerEntity.networkFee = '1000';
 newEventTriggerEntity.bridgeFee = '200';
 newEventTriggerEntity.fromAddress = 'fromAddress';
-newEventTriggerEntity.toAddress = 'toAddress';
+newEventTriggerEntity.toAddress = 'toAddressStar';
 newEventTriggerEntity.fromChain = 'fromChain';
 newEventTriggerEntity.toChain = 'toChain';
 newEventTriggerEntity.sourceChainTokenId = 'tokenId';
@@ -238,6 +238,23 @@ observationEntity3.toAddress = 'addr3';
 observationEntity3.targetChainTokenId = 'targetToken';
 observationEntity3.toChain = 'cardano';
 observationEntity3.requestId = 'reqId3';
+
+export const observationEntity4 = new ObservationEntity();
+observationEntity4.height = 10;
+observationEntity4.amount = '5';
+observationEntity4.extractor = 'observation-extractor';
+observationEntity4.bridgeFee = '100';
+observationEntity4.fromAddress = 'fromAddress4';
+observationEntity4.block = 'hash';
+observationEntity4.fromChain = 'ergo';
+observationEntity4.networkFee = '1000';
+observationEntity4.sourceBlockId = 'block';
+observationEntity4.sourceTxId = 'txId4';
+observationEntity4.sourceChainTokenId = 'sourceToken4';
+observationEntity4.toAddress = 'addr4';
+observationEntity4.targetChainTokenId = 'targetToken';
+observationEntity4.toChain = 'cardano';
+observationEntity4.requestId = 'reqId4';
 
 export const observationStatusTimedOut = new ObservationStatusEntity();
 observationStatusTimedOut.status = TxStatus.TIMED_OUT;
@@ -583,6 +600,43 @@ export const permitBox = {
   },
 };
 
+export const observation1 = {
+  id: 1,
+  fromChain: 'ergo',
+  toChain: 'cardano',
+  fromAddress: 'fromAddress',
+  toAddress: 'addr1',
+  height: 1,
+  amount: '10',
+  networkFee: '1000',
+  bridgeFee: '100',
+  sourceChainTokenId: 'sourceToken',
+  targetChainTokenId: 'targetToken',
+  sourceTxId: 'txId',
+  sourceBlockId: 'block',
+  requestId: 'reqId1',
+  block: 'hash',
+  extractor: 'observation-extractor',
+};
+
+export const observation2 = {
+  id: 4,
+  fromChain: 'ergo',
+  toChain: 'cardano',
+  fromAddress: 'fromAddress4',
+  toAddress: 'addr4',
+  height: 10,
+  amount: '5',
+  networkFee: '1000',
+  bridgeFee: '100',
+  sourceChainTokenId: 'sourceToken4',
+  targetChainTokenId: 'targetToken',
+  sourceTxId: 'txId4',
+  sourceBlockId: 'block',
+  requestId: 'reqId4',
+  block: 'hash',
+  extractor: 'observation-extractor',
+};
 export const permitMockRWT =
   '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074';
 

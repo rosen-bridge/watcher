@@ -190,6 +190,13 @@ const thirdStatisticsEventTrigger = {
   boxId: 'boxIdStatistics3',
 };
 
+const spentEventTrigger = {
+  ...firstStatisticsEventTrigger,
+  boxId: 'boxIdStatistics4',
+  spendBlock: 'blockHash',
+  spendHeight: 110,
+};
+
 export {
   firstPermit,
   secondPermit,
@@ -199,4 +206,5 @@ export {
   firstStatisticsEventTrigger,
   secondStatisticsEventTrigger,
   thirdStatisticsEventTrigger,
+  spentEventTrigger,
 };

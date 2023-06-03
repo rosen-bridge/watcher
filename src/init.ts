@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import addressRouter from './api/address';
 import permitRouter from './api/permit';
+import observationRouter from './api/observation';
 import generalRouter from './api/general';
 import { Transaction } from './api/Transaction';
 import { Boxes } from './ergo/boxes';
@@ -18,6 +19,7 @@ import { loggerFactory } from './log/Logger';
 import { getConfig } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
+import eventsRouter from './api/events';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -54,7 +56,9 @@ const init = async () => {
     router.use('/address', addressRouter);
     router.use('/permit', permitRouter);
     router.use('/statistics', statisticsRouter);
+    router.use('/observation', observationRouter);
     router.use('/info', generalRouter);
+    router.use('/events', eventsRouter);
 
     app.use(router);
     const port = getConfig().general.apiPort;

@@ -24,6 +24,8 @@ import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { base64ToArrayBuffer } from '../../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { TokenEntity } from '../entities/tokenEntity';
+import { EventStatus } from '../../utils/interfaces';
+import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 
 class WatcherDataBase {
   private readonly blockRepository: Repository<BlockEntity>;
@@ -78,6 +80,60 @@ class WatcherDataBase {
       .createQueryBuilder('observation_entity')
       .where('observation_entity.height < :maxHeight', { maxHeight })
       .getMany();
+  };
+
+  /**
+   * Returns all observations with filters, with respect to offset and limit
+   * @param fromAddress
+   * @param toAddress
+   * @param minHeight
+   * @param maxHeight
+   * @param sourceTokenId
+   * @param sourceTxId
+   * @param sorting
+   * @param offset
+   * @param limit
+   */
+  getObservationWithFilters = async (
+    fromAddress = '',
+    toAddress = '',
+    minHeight: number | undefined = undefined,
+    maxHeight: number | undefined = undefined,
+    sourceTokenId = '',
+    sourceTxId = '',
+    sorting = '',
+    offset = 0,
+    limit = 20
+  ) => {
+    let qb = this.observationRepository.createQueryBuilder('ob').select('*');
+    if (sourceTxId !== '') {
+      qb = qb.andWhere('ob.sourceTxId = :sourceTxId', { sourceTxId });
+      return qb.execute();
+    }
+    if (fromAddress !== '') {
+      qb = qb.andWhere('ob.fromAddress = :fromAddress', { fromAddress });
+    }
+    if (toAddress !== '') {
+      qb = qb.andWhere('ob.toAddress = :toAddress', { toAddress });
+    }
+    if (minHeight) {
+      qb = qb.andWhere('ob.height >= :minHeight', { minHeight });
+    }
+    if (maxHeight) {
+      qb = qb.andWhere('ob.height <= :maxHeight', { maxHeight });
+    }
+    if (sourceTokenId !== '') {
+      qb = qb.andWhere('ob.sourceChainTokenId = :sourceTokenId', {
+        sourceTokenId,
+      });
+    }
+    if (sorting !== '' && sorting.toLowerCase() === 'asc') {
+      qb = qb.orderBy('ob.id', 'ASC');
+    } else {
+      qb = qb.orderBy('ob.id', 'DESC');
+    }
+
+    return qb.offset(offset).limit(limit).execute();
   };
 
   /**
@@ -609,6 +665,76 @@ class WatcherDataBase {
     }
 
     return qb.getMany();
+  };
+
+  /**
+   * Returns all event triggers matching the filters, with respect to offset and limit
+   * @param fromAddress
+   * @param toAddress
+   * @param sourceTokenId
+   * @param sourceTxId
+   * @param eventStatus
+   * @param sorting
+   * @param offset
+   * @param limit
+   */
+  getEventsWithFilters = async (
+    fromAddress = '',
+    toAddress = '',
+    sourceTokenId = '',
+    sourceTxId = '',
+    eventStatus = '',
+    sorting = '',
+    offset = 0,
+    limit = 20
+  ): Promise<EventTriggerEntity[]> => {
+    let qb = this.eventTriggerRepository.createQueryBuilder('ev').select('*');
+
+    if (fromAddress !== '') {
+      qb = qb.andWhere('ev.fromAddress = :fromAddress', { fromAddress });
+    }
+    if (toAddress !== '') {
+      qb = qb.andWhere('ev.toAddress = :toAddress', { toAddress });
+    }
+    if (sourceTokenId !== '') {
+      qb = qb.andWhere('ev.sourceChainTokenId = :sourceTokenId', {
+        sourceTokenId,
+      });
+    }
+    if (sourceTxId !== '') {
+      qb = qb.andWhere('ev.sourceTxId = :sourceTxId', { sourceTxId });
+    }
+    if (eventStatus !== '') {
+      const eventStatusLower = eventStatus.toLowerCase();
+      qb = qb.andWhere(
+        eventStatusLower === 'done'
+          ? 'ev.SpendBlock IS NOT NULL'
+          : eventStatusLower === 'doing'
+          ? 'ev.SpendBlock IS NULL'
+          : ''
+      );
+    }
+    if (sorting !== '' && sorting.toLowerCase() === 'asc') {
+      qb = qb.orderBy('ev.id', 'ASC');
+    } else {
+      qb = qb.orderBy('ev.id', 'DESC');
+    }
+
+    return qb.offset(offset).limit(limit).execute();
+  };
+
+  /**
+   * Returns event status of a batch of eventIds
+   * @param ids
+   */
+  getEventsStatus = async (ids: number[]): Promise<Array<EventStatus>> => {
+    return this.eventTriggerRepository
+      .createQueryBuilder('ev')
+      .select(
+        `ev.id, CASE WHEN ev.spendBlock IS NULL THEN '${DOING_STATUS}' ELSE '${DONE_STATUS}' END as status`
+      )
+      .where('ev.id IN (:...ids)', { ids })
+      .getRawMany();
   };
 }
 
