@@ -12,6 +12,11 @@ interface WithdrawBody {
   address: string;
 }
 
+/**
+ * Casts the request body to a WithdrawBody object
+ * @param reqBody
+ * @returns WithdrawBody object with BigInts
+ */
 const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
   const nanoErgs = BigInt(reqBody.amount.nanoErgs);
   const tokens = reqBody.amount.tokens.map((token: any) => {
@@ -30,6 +35,9 @@ const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
   };
 };
 
+/**
+ * Api for withdrawing from the watcher wallet
+ */
 withdrawRouter.post('/', async (req, res) => {
   try {
     const withdrawBody = castReqBodyToWithdrawBody(req.body);
