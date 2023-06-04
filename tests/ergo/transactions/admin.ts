@@ -45,7 +45,8 @@ describe('Admin Transactions', () => {
 
   describe('withdrawFromWallet', () => {
     /**
-     * @target Transactions.withdrawFromWallet should create erg tx successfully
+     * @target Transactions.withdrawFromWallet should create erg tx
+     * and call submitTransaction successfully
      * @dependencies
      * @scenario
      * - mock ErgoNetwork and ErgoUtils
@@ -54,7 +55,7 @@ describe('Admin Transactions', () => {
      * @expected
      * - txUtils.submitTransaction should be called with signedTx and TxType.REDEEM
      */
-    it('Transactions.withdrawFromWallet should create erg tx successfully', async () => {
+    it('Transactions.withdrawFromWallet should create erg tx and call submitTransaction successfully', async () => {
       // mock ErgoNetwork and ErgoUtils
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
@@ -76,7 +77,18 @@ describe('Admin Transactions', () => {
       );
     });
 
-    it('Transactions.withdrawFromWallet should create token tx successfully', async () => {
+    /**
+     * @target Transactions.withdrawFromWallet should create token tx
+     * and call submitTransaction successfully
+     * @dependencies
+     * @scenario
+     * - mock ErgoNetwork and ErgoUtils
+     * - run the function
+     * - check the result
+     * @expected
+     * - txUtils.submitTransaction should be called with signedTx and TxType.REDEEM
+     */
+    it('Transactions.withdrawFromWallet should create token tx and call submitTransaction successfully', async () => {
       // mock ErgoNetwork and ErgoUtils
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
