@@ -1,4 +1,3 @@
-import { hexStrToUint8Array } from '../../../src/utils/utils';
 import { expect } from 'chai';
 import { initMockedAxios } from '../objects/axios';
 import { Boxes } from '../../../src/ergo/boxes';
@@ -7,12 +6,12 @@ import sinon from 'sinon';
 import { ErgoUtils } from '../../../src/ergo/utils';
 import chai from 'chai';
 import spies from 'chai-spies';
-import { Buffer } from 'buffer';
 import { WatcherDataBase } from '../../../src/database/models/watcherModel';
 import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import { TransactionUtils } from '../../../src/utils/watcherUtils';
 import withdrawErg from '../transactions/dataset/withdrawErg.json' assert { type: 'json' };
+import withdrawToken from '../transactions/dataset/withdrawToken.json' assert { type: 'json' };
 import { JsonBI } from '../../../src/ergo/network/parser';
 import { AddressBalance } from '../../../src/ergo/interfaces';
 import TransactionTest from '../../../src/api/TransactionTest';
@@ -22,6 +21,9 @@ import { NotEnoughFund } from '../../../src/errors/errors';
 
 chai.use(spies);
 const signedErgTx = wasm.Transaction.from_json(JsonBI.stringify(withdrawErg));
+const signedTokenTx = wasm.Transaction.from_json(
+  JsonBI.stringify(withdrawToken)
+);
 
 initMockedAxios();
 
@@ -43,7 +45,7 @@ describe('Admin Transactions', () => {
 
   describe('withdrawFromWallet', () => {
     /**
-     * @target Transactions.withdrawFromWallet should create tx successfully
+     * @target Transactions.withdrawFromWallet should create erg tx successfully
      * @dependencies
      * @scenario
      * - mock ErgoNetwork and ErgoUtils
@@ -52,7 +54,7 @@ describe('Admin Transactions', () => {
      * @expected
      * - txUtils.submitTransaction should be called with signedTx and TxType.REDEEM
      */
-    it('Transactions.withdrawFromWallet should create tx successfully', async () => {
+    it('Transactions.withdrawFromWallet should create erg tx successfully', async () => {
       // mock ErgoNetwork and ErgoUtils
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
@@ -70,6 +72,34 @@ describe('Admin Transactions', () => {
       // check the result
       expect(txUtils.submitTransaction).to.have.called.with(
         signedErgTx,
+        TxType.REDEEM
+      );
+    });
+
+    it('Transactions.withdrawFromWallet should create token tx successfully', async () => {
+      // mock ErgoNetwork and ErgoUtils
+      sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
+      chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
+      sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTokenTx);
+      chai.spy.on(txUtils, 'submitTransaction', (tx: any) => tx);
+
+      // run the function
+      const amount: AddressBalance = {
+        nanoErgs: 1100000n,
+        tokens: [
+          {
+            tokenId:
+              '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508',
+            amount: 200n,
+          },
+        ],
+      };
+      const address = '9gwWZGZgZhGjp1ZKNQ5rtxNELamz6trq9tigDsKRy71boWq3Fqq';
+      await TransactionTest.getInstance().withdrawFromWallet(amount, address);
+
+      // check the result
+      expect(txUtils.submitTransaction).to.have.called.with(
+        signedTokenTx,
         TxType.REDEEM
       );
     });
