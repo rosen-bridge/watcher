@@ -3,7 +3,6 @@ import express, { Request, Response } from 'express';
 import { getConfig } from '../config/config';
 import { JsonBI } from '../ergo/network/parser';
 import { ErgoUtils } from '../ergo/utils';
-import { AdminActions } from '../transactions/adminActions';
 
 const logger = loggerFactory(import.meta.url);
 

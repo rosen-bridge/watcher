@@ -14,7 +14,7 @@ import spies from 'chai-spies';
 chai.use(spies);
 
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
-import { WatcherUtils } from '../../src/utils/watcherUtils';
+import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
 import TransactionTest from '../../src/api/TransactionTest';
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
@@ -41,7 +41,8 @@ describe('Transaction queue tests', () => {
     const ORM = await loadDataBase();
     dataBase = ORM.DB;
     boxes = new Boxes(dataBase);
-    await TransactionTest.setup(userAddress, secret1, boxes);
+    const txUtils = new TransactionUtils(dataBase);
+    await TransactionTest.setup(userAddress, secret1, boxes, txUtils);
     transaction = TransactionTest.getInstance();
     dbConnection = new WatcherUtils(dataBase, 0, 100);
     txQueue = new Queue(dataBase, dbConnection);

@@ -20,7 +20,6 @@ import { getConfig } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
 import eventsRouter from './api/events';
-import { AdminActions } from './transactions/adminActions';
 import withdrawRouter from './api/withdraw';
 
 const logger = loggerFactory(import.meta.url);
@@ -41,12 +40,6 @@ const init = async () => {
     logger.debug('Migrations done successfully.');
     watcherDatabase = new WatcherDataBase(dataSource);
     boxesObject = new Boxes(watcherDatabase);
-    await Transaction.setup(
-      getConfig().general.address,
-      getConfig().general.secretKey,
-      boxesObject
-    );
-    Transaction.getInstance();
     logger.debug('APIs initialized successfully.');
   };
 
@@ -87,6 +80,13 @@ const init = async () => {
       logger.debug('Initializing statistic object...');
       Statistics.setup(watcherDatabase, Transaction.watcherWID);
       Statistics.getInstance();
+      await Transaction.setup(
+        getConfig().general.address,
+        getConfig().general.secretKey,
+        boxesObject,
+        txUtils
+      );
+      Transaction.getInstance();
 
       logger.debug('Initializing job threads...');
       // Running transaction checking thread
@@ -99,10 +99,6 @@ const init = async () => {
       reveal(watcherUtils, txUtils, boxesObject);
       // Running token name thread
       tokenNameJob([]);
-
-      // setup admin action object
-      await AdminActions.setup(txUtils, boxesObject);
-      AdminActions.getInstance();
 
       logger.debug('Service initialization finished successfully.');
     })

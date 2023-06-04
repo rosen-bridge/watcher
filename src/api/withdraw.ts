@@ -1,7 +1,7 @@
 import { loggerFactory } from '../log/Logger';
 import express from 'express';
-import { AdminActions } from '../transactions/adminActions';
 import { AddressBalance } from '../ergo/interfaces';
+import { Transaction } from './Transaction';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -41,8 +41,8 @@ const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
 withdrawRouter.post('/', async (req, res) => {
   try {
     const withdrawBody = castReqBodyToWithdrawBody(req.body);
-    const adminActions = AdminActions.getInstance();
-    await adminActions.withdrawFromWallet(
+    const txInstance = Transaction.getInstance();
+    await txInstance.withdrawFromWallet(
       withdrawBody.amount,
       withdrawBody.address
     );
