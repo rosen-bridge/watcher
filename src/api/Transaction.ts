@@ -45,8 +45,7 @@ export class Transaction {
     userAddress: string,
     userSecret: wasm.SecretKey,
     boxes: Boxes,
-    txUtils: TransactionUtils,
-    full = true
+    txUtils: TransactionUtils
   ) => {
     if (!Transaction.isSetupCalled) {
       Transaction.watcherPermitState = undefined;
@@ -66,7 +65,7 @@ export class Transaction {
         this.userAddress
       );
       Transaction.isSetupCalled = true;
-      if (full) await Transaction.getWatcherState();
+      await Transaction.getWatcherState();
     }
   };
 

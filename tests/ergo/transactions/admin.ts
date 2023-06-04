@@ -18,6 +18,7 @@ import TransactionTest from '../../../src/api/TransactionTest';
 import { secret1, userAddress } from './permit';
 import { TxType } from '../../../src/database/entities/txEntity';
 import { NotEnoughFund } from '../../../src/errors/errors';
+import { mockedResponseBody } from '../objects/mockedResponseBody';
 
 chai.use(spies);
 const signedErgTx = wasm.Transaction.from_json(JsonBI.stringify(withdrawErg));
@@ -34,8 +35,11 @@ describe('Admin Transactions', () => {
     await fillORM(ORM);
     watcherDb = ORM.DB;
     boxes = new Boxes(watcherDb);
+    chai.spy.on(boxes, 'getRepoBox', () => {
+      return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
+    });
     txUtils = new TransactionUtils(watcherDb);
-    await TransactionTest.setup(userAddress, secret1, boxes, txUtils, false);
+    await TransactionTest.setup(userAddress, secret1, boxes, txUtils);
   });
 
   afterEach(() => {
