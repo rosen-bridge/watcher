@@ -1,24 +1,24 @@
 import { expect } from 'chai';
-import { initMockedAxios } from '../objects/axios';
-import { Boxes } from '../../../src/ergo/boxes';
+import { initMockedAxios } from '../ergo/objects/axios';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import sinon from 'sinon';
-import { ErgoUtils } from '../../../src/ergo/utils';
 import chai from 'chai';
 import spies from 'chai-spies';
-import { WatcherDataBase } from '../../../src/database/models/watcherModel';
-import { fillORM, loadDataBase } from '../../database/watcherDatabase';
-import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
-import { TransactionUtils } from '../../../src/utils/watcherUtils';
-import withdrawErg from '../transactions/dataset/withdrawErg.json' assert { type: 'json' };
-import withdrawToken from '../transactions/dataset/withdrawToken.json' assert { type: 'json' };
-import { JsonBI } from '../../../src/ergo/network/parser';
-import { AddressBalance } from '../../../src/ergo/interfaces';
-import TransactionTest from '../../../src/api/TransactionTest';
-import { secret1, userAddress } from './permit';
-import { TxType } from '../../../src/database/entities/txEntity';
-import { NotEnoughFund } from '../../../src/errors/errors';
-import { mockedResponseBody } from '../objects/mockedResponseBody';
+import withdrawErg from '../ergo/transactions/dataset/withdrawErg.json' assert { type: 'json' };
+import withdrawToken from '../ergo/transactions/dataset/withdrawToken.json' assert { type: 'json' };
+import { secret1, userAddress } from '../ergo/transactions/permit';
+import { mockedResponseBody } from '../ergo/objects/mockedResponseBody';
+import { NotEnoughFund } from '../../src/errors/errors';
+import { TxType } from '../../src/database/entities/txEntity';
+import { JsonBI } from '../../src/ergo/network/parser';
+import TransactionTest from '../../src/api/TransactionTest';
+import { AddressBalance } from '../../src/ergo/interfaces';
+import { WatcherDataBase } from '../../src/database/models/watcherModel';
+import { TransactionUtils } from '../../src/utils/watcherUtils';
+import { Boxes } from '../../src/ergo/boxes';
+import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
+import { ErgoUtils } from '../../src/ergo/utils';
+import { fillORM, loadDataBase } from '../database/watcherDatabase';
 
 chai.use(spies);
 const signedErgTx = wasm.Transaction.from_json(JsonBI.stringify(withdrawErg));
@@ -28,7 +28,7 @@ const signedTokenTx = wasm.Transaction.from_json(
 
 initMockedAxios();
 
-describe('Admin Transactions', () => {
+describe('Transaction', () => {
   let watcherDb: WatcherDataBase, txUtils: TransactionUtils, boxes: Boxes;
   before(async () => {
     const ORM = await loadDataBase();
@@ -59,7 +59,7 @@ describe('Admin Transactions', () => {
      * @expected
      * - txUtils.submitTransaction should be called with signedTx and TxType.REDEEM
      */
-    it('Transactions.withdrawFromWallet should create erg tx and call submitTransaction successfully', async () => {
+    it('Transaction.withdrawFromWallet should create erg tx and call submitTransaction successfully', async () => {
       // mock ErgoNetwork and ErgoUtils
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
@@ -92,7 +92,7 @@ describe('Admin Transactions', () => {
      * @expected
      * - txUtils.submitTransaction should be called with signedTx and TxType.REDEEM
      */
-    it('Transactions.withdrawFromWallet should create token tx and call submitTransaction successfully', async () => {
+    it('Transaction.withdrawFromWallet should create token tx and call submitTransaction successfully', async () => {
       // mock ErgoNetwork and ErgoUtils
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
@@ -129,7 +129,7 @@ describe('Admin Transactions', () => {
      * @expected
      * - should throw error of type NotEnoughFund and specific message
      */
-    it('Transactions.withdrawFromWallet should throw error when erg is not enough', async () => {
+    it('Transaction.withdrawFromWallet should throw error when erg is not enough', async () => {
       // mock ErgoNetwork and ErgoUtils
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
@@ -158,7 +158,7 @@ describe('Admin Transactions', () => {
      * @expected
      * - should throw error of type NotEnoughFund and specific message
      */
-    it('Transactions.withdrawFromWallet should throw error when token is not enough', async () => {
+    it('Transaction.withdrawFromWallet should throw error when token is not enough', async () => {
       // mock ErgoNetwork and ErgoUtils
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
