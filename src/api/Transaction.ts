@@ -494,29 +494,30 @@ export class Transaction {
     amount.tokens.forEach((token) => {
       assetsMap.set(token.tokenId, token.amount);
     });
-    const coveringBoxes = await Transaction.boxes.getCoveringBoxes(
-      amount.nanoErgs,
-      assetsMap
-    );
-    const height = await ErgoNetwork.getHeight();
-    const address = wasm.Address.from_base58(toAddress);
 
-    // create input boxes
-    const inputBoxes = new wasm.ErgoBoxes(coveringBoxes[0]);
-    for (let i = 1; i < coveringBoxes.length; i++) {
-      inputBoxes.add(coveringBoxes[i]);
-    }
-
-    // create output box
-    const userBox = Transaction.boxes.createCustomBox(
-      wasm.Contract.pay_to_address(address),
-      amount,
-      height
-    );
-    const candidates = [userBox];
-
-    // create transaction
     try {
+      const coveringBoxes = await Transaction.boxes.getCoveringBoxes(
+        amount.nanoErgs,
+        assetsMap
+      );
+      const height = await ErgoNetwork.getHeight();
+      const address = wasm.Address.from_base58(toAddress);
+
+      // create input boxes
+      const inputBoxes = new wasm.ErgoBoxes(coveringBoxes[0]);
+      for (let i = 1; i < coveringBoxes.length; i++) {
+        inputBoxes.add(coveringBoxes[i]);
+      }
+
+      // create output box
+      const userBox = Transaction.boxes.createCustomBox(
+        wasm.Contract.pay_to_address(address),
+        amount,
+        height
+      );
+      const candidates = [userBox];
+
+      // create transaction
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,
         inputBoxes,
@@ -532,16 +533,17 @@ export class Transaction {
         logger.warn(
           "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."
         );
-      }
-      if (e instanceof NotEnoughFund) {
+      } else if (e instanceof NotEnoughFund) {
         // TODO: Send notification (https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/33)
         logger.warn(
-          'Transaction build failed due to ERG insufficiency in the watcher.'
+          `Transaction build failed due to asset insufficiency in the watcher: ${e.message}`
+        );
+      } else {
+        logger.warn(
+          `Failed to withdraw from wallet due to occurred error: ${e.message} - ${e.stack}`
         );
       }
-      logger.warn(
-        `Skipping the commitment creation due to occurred error: ${e.message} - ${e.stack}`
-      );
+      throw e;
     }
   };
 }
