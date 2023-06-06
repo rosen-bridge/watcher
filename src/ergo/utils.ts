@@ -34,6 +34,10 @@ export const boxHaveAsset = (box: ErgoBox, asset: string) => {
     .includes(asset);
 };
 
+export const bigintMax = (a: bigint, b: bigint) => {
+  return a > b ? a : b;
+};
+
 export class ErgoUtils {
   /**
    * Creates a change box from the input and output boxesSample

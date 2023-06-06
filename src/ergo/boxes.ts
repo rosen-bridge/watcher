@@ -1,5 +1,10 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { boxHaveAsset, decodeSerializedBox, ErgoUtils } from './utils';
+import {
+  bigintMax,
+  boxHaveAsset,
+  decodeSerializedBox,
+  ErgoUtils,
+} from './utils';
 import { bigIntToUint8Array, hexStrToUint8Array } from '../utils/utils';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { Observation } from '../utils/interfaces';
@@ -187,7 +192,10 @@ export class Boxes {
     });
     const selectedBoxes: wasm.ErgoBox[] = [];
     const uncoveredAssets = new Map<string, bigint>(requiredAssets);
-    let uncoveredValue = requiredValue;
+    let uncoveredValue = bigintMax(
+      requiredValue,
+      BigInt(getConfig().general.minBoxValue)
+    );
 
     const isRequiredRemaining = () => {
       return uncoveredAssets.size > 0 || uncoveredValue > 0n;
@@ -203,23 +211,20 @@ export class Boxes {
       );
       if (unspentBox && isBoxNotSelected) {
         let isUseful = false;
-        uncoveredAssets.forEach((value, tokenId) => {
-          const boxTokens = unspentBox.tokens();
-          for (let i = 0; i < boxTokens.len(); i++) {
-            const boxToken = boxTokens.get(i);
-            if (boxToken.id().to_str() === tokenId) {
-              uncoveredAssets.set(
-                tokenId,
-                value - BigInt(boxToken.amount().as_i64().to_str())
-              );
-              if (uncoveredAssets.get(tokenId)! <= 0) {
-                uncoveredAssets.delete(tokenId);
-              }
-              isUseful = true;
-              break;
+        const boxTokens = unspentBox.tokens();
+        for (let i = 0; i < boxTokens.len(); i++) {
+          const token = boxTokens.get(i);
+          const tokenId = token.id().to_str();
+          const tokenAmount = BigInt(token.amount().as_i64().to_str());
+          const uncoveredRecord = uncoveredAssets.get(tokenId);
+          if (uncoveredRecord) {
+            uncoveredAssets.set(tokenId, uncoveredRecord - tokenAmount);
+            if (uncoveredAssets.get(tokenId)! <= 0) {
+              uncoveredAssets.delete(tokenId);
             }
+            isUseful = true;
           }
-        });
+        }
         if (isUseful || uncoveredValue > 0n) {
           const boxValue = BigInt(unspentBox.value().as_i64().to_str());
           uncoveredValue -=

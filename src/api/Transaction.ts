@@ -504,8 +504,8 @@ export class Transaction {
       const address = wasm.Address.from_base58(toAddress);
 
       // create input boxes
-      const inputBoxes = new wasm.ErgoBoxes(coveringBoxes[0]);
-      for (let i = 1; i < coveringBoxes.length; i++) {
+      const inputBoxes = wasm.ErgoBoxes.empty();
+      for (let i = 0; i < coveringBoxes.length; i++) {
         inputBoxes.add(coveringBoxes[i]);
       }
 
@@ -524,6 +524,7 @@ export class Transaction {
         candidates,
         height
       );
+      console.log(signed.to_json());
       await Transaction.txUtils.submitTransaction(signed, TxType.REDEEM);
       logger.info(
         `Withdraw tx [${signed.id().to_str()}] submitted to the queue`
