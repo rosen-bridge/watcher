@@ -54,10 +54,10 @@ describe('Commitment reveal transaction tests', () => {
     boxes = new Boxes(dataBase);
     chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
     TransactionTest.reset();
-    await TransactionTest.setup(userAddress, secret1, boxes);
+    txUtils = new TransactionUtils(dataBase);
+    await TransactionTest.setup(userAddress, secret1, boxes, txUtils);
     transaction = TransactionTest.getInstance();
     watcherUtils = new WatcherUtils(dataBase, 0, 100);
-    txUtils = new TransactionUtils(dataBase);
     cr = new CommitmentReveal(watcherUtils, txUtils, boxes);
   });
 

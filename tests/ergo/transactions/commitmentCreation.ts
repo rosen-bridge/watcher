@@ -79,9 +79,9 @@ describe('Commitment creation transaction tests', () => {
     watcherDb = ORM.DB;
     boxes = new Boxes(watcherDb);
     chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
-    await Transaction.setup(userAddress, secret1, boxes);
-    watcherUtils = new WatcherUtils(watcherDb, 0, 100);
     txUtils = new TransactionUtils(watcherDb);
+    await Transaction.setup(userAddress, secret1, boxes, txUtils);
+    watcherUtils = new WatcherUtils(watcherDb, 0, 100);
     cc = new CommitmentCreation(watcherUtils, txUtils, boxes);
   });
 

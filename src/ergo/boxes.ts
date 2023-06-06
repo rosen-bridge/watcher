@@ -1,5 +1,10 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { boxHaveAsset, decodeSerializedBox, ErgoUtils } from './utils';
+import {
+  bigintMax,
+  boxHaveAsset,
+  decodeSerializedBox,
+  ErgoUtils,
+} from './utils';
 import { bigIntToUint8Array, hexStrToUint8Array } from '../utils/utils';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { Observation } from '../utils/interfaces';
@@ -8,6 +13,8 @@ import { Buffer } from 'buffer';
 import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { NotEnoughFund, NoWID } from '../errors/errors';
 import { getConfig } from '../config/config';
+import { AddressBalance } from './interfaces';
+import { JsonBI } from './network/parser';
 
 export class Boxes {
   dataBase: WatcherDataBase;
@@ -168,6 +175,79 @@ export class Boxes {
     if (totalValue < requiredValue) {
       throw new NotEnoughFund('Not enough fund to create the transaction');
     }
+    return selectedBoxes;
+  };
+
+  /**
+   * Returns unspent boxes covering the required erg and assets (Considering the mempool)
+   * @param requiredValue
+   * @param requiredAssets
+   */
+  getCoveringBoxes = async (
+    requiredValue: bigint,
+    requiredAssets: Map<string, bigint>
+  ): Promise<Array<wasm.ErgoBox>> => {
+    const boxes = (await this.dataBase.getUnspentAddressBoxes()).map((box) => {
+      return decodeSerializedBox(box.serialized);
+    });
+    const selectedBoxes: wasm.ErgoBox[] = [];
+    const uncoveredAssets = new Map<string, bigint>(requiredAssets);
+    let uncoveredValue = bigintMax(
+      requiredValue,
+      BigInt(getConfig().general.minBoxValue)
+    );
+
+    const isRequiredRemaining = () => {
+      return uncoveredAssets.size > 0 || uncoveredValue > 0n;
+    };
+
+    let idx = 0;
+    while (isRequiredRemaining() && idx < boxes.length) {
+      const box = boxes[idx++];
+      let unspentBox = await ErgoNetwork.trackMemPool(box);
+      if (unspentBox) unspentBox = await this.dataBase.trackTxQueue(unspentBox);
+      const isBoxNotSelected = selectedBoxes.every(
+        (box) => box.box_id().to_str() !== unspentBox.box_id().to_str()
+      );
+      if (unspentBox && isBoxNotSelected) {
+        let isUseful = false;
+        const boxTokens = unspentBox.tokens();
+        for (let i = 0; i < boxTokens.len(); i++) {
+          const token = boxTokens.get(i);
+          const tokenId = token.id().to_str();
+          const tokenAmount = BigInt(token.amount().as_i64().to_str());
+          const uncoveredRecord = uncoveredAssets.get(tokenId);
+          if (uncoveredRecord) {
+            uncoveredAssets.set(tokenId, uncoveredRecord - tokenAmount);
+            if (uncoveredAssets.get(tokenId)! <= 0) {
+              uncoveredAssets.delete(tokenId);
+            }
+            isUseful = true;
+          }
+        }
+        if (isUseful || uncoveredValue > 0n) {
+          const boxValue = BigInt(unspentBox.value().as_i64().to_str());
+          uncoveredValue -=
+            uncoveredValue >= boxValue ? boxValue : uncoveredValue;
+
+          selectedBoxes.push(unspentBox);
+        }
+      }
+    }
+
+    if (isRequiredRemaining()) {
+      const missingAssets = Array.from(uncoveredAssets.entries()).map(
+        ([tokenId, value]) => {
+          return { tokenId, value };
+        }
+      );
+      throw new NotEnoughFund(
+        `Not enough fund to create the transaction. Uncovered value: ${uncoveredValue}, Uncovered assets: ${JsonBI.stringify(
+          missingAssets
+        )}`
+      );
+    }
+
     return selectedBoxes;
   };
 
@@ -409,5 +489,32 @@ export class Boxes {
       wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
     );
     return WIDBuilder.build();
+  };
+
+  /**
+   * Creates an arbitrary box paying to the given contract, with custom amount
+   * @param contract
+   * @param amount
+   * @param height create height of the box
+   */
+  createCustomBox = (
+    contract: wasm.Contract,
+    amount: AddressBalance,
+    height: number
+  ): wasm.ErgoBoxCandidate => {
+    const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
+      wasm.BoxValue.from_i64(wasm.I64.from_str(amount.nanoErgs.toString())),
+      contract,
+      height
+    );
+
+    for (const token of amount.tokens) {
+      boxBuilder.add_token(
+        wasm.TokenId.from_str(token.tokenId),
+        wasm.TokenAmount.from_i64(wasm.I64.from_str(token.amount.toString()))
+      );
+    }
+
+    return boxBuilder.build();
   };
 }

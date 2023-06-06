@@ -5,6 +5,10 @@ import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
 import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+import { AddressBalance } from '../ergo/interfaces';
+import { TxType } from '../database/entities/txEntity';
+import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
+import { TransactionUtils } from '../utils/watcherUtils';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -22,6 +26,7 @@ export class Transaction {
   static watcherPermitState?: boolean;
   static watcherWID?: string;
   static boxes: Boxes;
+  static txUtils: TransactionUtils;
   static minBoxValue: wasm.BoxValue;
   static fee: wasm.BoxValue;
   static userSecret: wasm.SecretKey;
@@ -31,20 +36,22 @@ export class Transaction {
 
   /**
    * setup function to set up the singleton class before getting instance
-   * @param rosenConfig
    * @param userAddress
    * @param userSecret
    * @param boxes
+   * @param txUtils
    */
   static setup = async (
     userAddress: string,
     userSecret: wasm.SecretKey,
-    boxes: Boxes
+    boxes: Boxes,
+    txUtils: TransactionUtils
   ) => {
     if (!Transaction.isSetupCalled) {
       Transaction.watcherPermitState = undefined;
       Transaction.watcherWID = '';
       Transaction.boxes = boxes;
+      Transaction.txUtils = txUtils;
       Transaction.fee = wasm.BoxValue.from_i64(
         wasm.I64.from_str(getConfig().general.fee)
       );
@@ -474,6 +481,70 @@ export class Transaction {
         logger.info(`Watcher WID is set to: ${Transaction.watcherWID}`);
         Transaction.watcherPermitState = Transaction.watcherWID !== '';
       }
+    }
+  };
+
+  /**
+   * Withdraw from the wallet of the watcher
+   * @param amount to withdraw
+   * @param toAddress destination address
+   */
+  withdrawFromWallet = async (amount: AddressBalance, toAddress: string) => {
+    const assetsMap = new Map<string, bigint>();
+    amount.tokens.forEach((token) => {
+      assetsMap.set(token.tokenId, token.amount);
+    });
+
+    try {
+      const coveringBoxes = await Transaction.boxes.getCoveringBoxes(
+        amount.nanoErgs,
+        assetsMap
+      );
+      const height = await ErgoNetwork.getHeight();
+      const address = wasm.Address.from_base58(toAddress);
+
+      // create input boxes
+      const inputBoxes = wasm.ErgoBoxes.empty();
+      for (let i = 0; i < coveringBoxes.length; i++) {
+        inputBoxes.add(coveringBoxes[i]);
+      }
+
+      // create output box
+      const userBox = Transaction.boxes.createCustomBox(
+        wasm.Contract.pay_to_address(address),
+        amount,
+        height
+      );
+      const candidates = [userBox];
+
+      // create transaction
+      const signed = await ErgoUtils.createAndSignTx(
+        getConfig().general.secretKey,
+        inputBoxes,
+        candidates,
+        height
+      );
+      console.log(signed.to_json());
+      await Transaction.txUtils.submitTransaction(signed, TxType.REDEEM);
+      logger.info(
+        `Withdraw tx [${signed.id().to_str()}] submitted to the queue`
+      );
+    } catch (e) {
+      if (e instanceof ChangeBoxCreationError) {
+        logger.warn(
+          "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."
+        );
+      } else if (e instanceof NotEnoughFund) {
+        // TODO: Send notification (https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/33)
+        logger.warn(
+          `Transaction build failed due to asset insufficiency in the watcher: ${e.message}`
+        );
+      } else {
+        logger.warn(
+          `Failed to withdraw from wallet due to occurred error: ${e.message} - ${e.stack}`
+        );
+      }
+      throw e;
     }
   };
 }

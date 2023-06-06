@@ -20,6 +20,7 @@ import { getConfig } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
 import eventsRouter from './api/events';
+import withdrawRouter from './api/withdraw';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -39,12 +40,6 @@ const init = async () => {
     logger.debug('Migrations done successfully.');
     watcherDatabase = new WatcherDataBase(dataSource);
     boxesObject = new Boxes(watcherDatabase);
-    await Transaction.setup(
-      getConfig().general.address,
-      getConfig().general.secretKey,
-      boxesObject
-    );
-    Transaction.getInstance();
     logger.debug('APIs initialized successfully.');
   };
 
@@ -59,6 +54,7 @@ const init = async () => {
     router.use('/observation', observationRouter);
     router.use('/info', generalRouter);
     router.use('/events', eventsRouter);
+    router.use('/withdraw', withdrawRouter);
 
     app.use(router);
     const port = getConfig().general.apiPort;
@@ -84,6 +80,13 @@ const init = async () => {
       logger.debug('Initializing statistic object...');
       Statistics.setup(watcherDatabase, Transaction.watcherWID);
       Statistics.getInstance();
+      await Transaction.setup(
+        getConfig().general.address,
+        getConfig().general.secretKey,
+        boxesObject,
+        txUtils
+      );
+      Transaction.getInstance();
 
       logger.debug('Initializing job threads...');
       // Running transaction checking thread
