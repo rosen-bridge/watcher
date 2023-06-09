@@ -27,13 +27,13 @@ describe('DetachWID', () => {
     await fillORM(ORM);
     watcherDb = ORM.DB;
     boxes = new Boxes(watcherDb);
+    txUtils = new TransactionUtils(watcherDb);
     await Transaction.setup(
       getConfig().general.address,
       getConfig().general.secretKey,
       boxes,
       watcherDb
     );
-    txUtils = new TransactionUtils(watcherDb);
   });
 
   afterEach(() => {

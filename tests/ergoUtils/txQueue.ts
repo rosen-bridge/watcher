@@ -14,7 +14,7 @@ import spies from 'chai-spies';
 chai.use(spies);
 
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
-import { WatcherUtils } from '../../src/utils/watcherUtils';
+import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
 import TransactionTest from '../../src/api/TransactionTest';
 import { Transaction } from '../../src/api/Transaction';
 import { createMemoryDatabase } from '../resources/inMemoryDb';

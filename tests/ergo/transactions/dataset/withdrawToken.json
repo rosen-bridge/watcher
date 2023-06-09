@@ -1,0 +1,62 @@
+{
+  "id": "512346fc9376704ef4b43deded73d1d1a84f6f1a02cc90f45819ea25d3879b0f",
+  "inputs": [
+    {
+      "boxId": "ce62537417096252afbd7dc6751ffc966629142ad630138e4216302db2a948e0",
+      "spendingProof": {
+        "proofBytes": "f45d15c33c9c83d8b1f01506c110dff13f491440299c467bbaed3d045dde4986347868b6b42e76a766827494546f0ed8b71d18b7b1e88f12",
+        "extension": {}
+      }
+    },
+    {
+      "boxId": "1e4c0e0b9d9514184740b4861f77774e31b1679f6e8e4daaae9f207273b69806",
+      "spendingProof": {
+        "proofBytes": "1120e72644019bfdc1a3fd6215b4a0ca5d4fe157afef8ccf69d8b349c2ec26335618229f05bfc3e842c8581ca97598286bfe01b3306c6c44",
+        "extension": {}
+      }
+    }
+  ],
+  "dataInputs": [],
+  "outputs": [
+    {
+      "boxId": "62748f26a60e23d3bade723ca00db1bc9b6b74979276286715db1274e6b446a2",
+      "value": 10000000,
+      "ergoTree": "0008cd033ee819aa4603214afafa65342090e3538d0d3bfbe606b5a9665870e5c1f203cc",
+      "assets": [
+        {
+          "tokenId": "844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508",
+          "amount": 2
+        }
+      ],
+      "additionalRegisters": {},
+      "creationHeight": 1017728,
+      "transactionId": "512346fc9376704ef4b43deded73d1d1a84f6f1a02cc90f45819ea25d3879b0f",
+      "index": 0
+    },
+    {
+      "boxId": "5adce2dd23fe4784c9f44695325edf7ca7daaf35cdfea566a0012162440c0f56",
+      "value": 1850000000,
+      "ergoTree": "0008cd03afe7137e502f4f71c5fc81973e406fc9958e0dfcb8c017508ce2f6036aa3a50f",
+      "assets": [
+        {
+          "tokenId": "050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f",
+          "amount": 1
+        }
+      ],
+      "additionalRegisters": {},
+      "creationHeight": 1017728,
+      "transactionId": "512346fc9376704ef4b43deded73d1d1a84f6f1a02cc90f45819ea25d3879b0f",
+      "index": 1
+    },
+    {
+      "boxId": "9afcade7a30fbb5e4d88aa7a671a2648691c2775291cddcd4a9cd4b925589449",
+      "value": 1100000,
+      "ergoTree": "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304",
+      "assets": [],
+      "additionalRegisters": {},
+      "creationHeight": 1017728,
+      "transactionId": "512346fc9376704ef4b43deded73d1d1a84f6f1a02cc90f45819ea25d3879b0f",
+      "index": 2
+    }
+  ]
+}

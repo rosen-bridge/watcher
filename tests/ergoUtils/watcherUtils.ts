@@ -43,9 +43,9 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
     dataBase = ORM.DB;
     boxes = new Boxes(dataBase);
     await TransactionTest.setup(userAddress, secret1, boxes, dataBase);
+    txUtils = new TransactionUtils(dataBase);
     transaction = TransactionTest.getInstance();
     watcherUtils = new WatcherUtils(dataBase, 0, 100);
-    txUtils = new TransactionUtils(dataBase);
   });
 
   describe('allReadyObservations', () => {

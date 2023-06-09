@@ -12,6 +12,7 @@ import {
 import {
   firstStatisticsEventTrigger,
   secondStatisticsEventTrigger,
+  spentEventTrigger,
   thirdStatisticsEventTrigger,
 } from '../ergo/statistics/mockUtils';
 
@@ -25,13 +26,13 @@ router.use('/events', eventsRouter);
 app.use(router);
 
 describe('eventsRouter', () => {
-  before(async () => {
-    const ORM = await loadDataBase();
-    await fillORM(ORM);
-    initWatcherDB(ORM.DB);
-  });
-
   describe('GET /events', () => {
+    before(async () => {
+      const ORM = await loadDataBase();
+      await fillORM(ORM);
+      initWatcherDB(ORM.DB);
+    });
+
     /**
      * @target Events endpoint should return
      * all events
@@ -221,6 +222,39 @@ describe('eventsRouter', () => {
         secondStatisticsEventTrigger,
         firstStatisticsEventTrigger,
       ]);
+    });
+  });
+
+  describe('POST /events/status', () => {
+    before(async () => {
+      const ORM = await loadDataBase();
+      await fillORM(ORM);
+      await ORM.eventTriggerRepo.save(spentEventTrigger);
+      initWatcherDB(ORM.DB);
+    });
+
+    /**
+     * @target EventsStatus endpoint should return correct
+     * status for each event
+     * @dependencies
+     * @scenario
+     * - send a request to the endpoint
+     * - check the result
+     * @expected
+     * - request status should be 200
+     * - resonse should indicate correct status for each event
+     */
+    it('EventsStatus endpoint should return correct status for each event', async () => {
+      // send a request to the endpoint
+      const res = await request(app).post('/events/status').send([1, 6]);
+
+      // check the result
+      expect(res.status).to.eql(200);
+      const resultParsed = JSON.parse(res.text);
+      expect(resultParsed).to.eql({
+        1: 'Doing',
+        6: 'Done',
+      });
     });
   });
 });

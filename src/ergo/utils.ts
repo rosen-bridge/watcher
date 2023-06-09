@@ -33,6 +33,14 @@ export const boxHaveAsset = (box: ErgoBox, asset: string) => {
     .map((token) => token.id().to_str())
     .includes(asset);
 };
+/**
+ * Returns the biggest bigint
+ * @param a
+ * @param b
+ */
+export const bigintMax = (a: bigint, b: bigint) => {
+  return a > b ? a : b;
+};
 
 export class ErgoUtils {
   /**
