@@ -668,6 +668,18 @@ class WatcherDataBase {
   };
 
   /**
+   * returns active transaction with 'permit' type
+   */
+  getActivePermitTransactions = async (): Promise<Array<TxEntity>> => {
+    return await this.txRepository.find({
+      where: {
+        type: TxType.PERMIT,
+        deleted: false,
+      },
+    });
+  };
+
+  /**
    * Returns all event triggers matching the filters, with respect to offset and limit
    * @param fromAddress
    * @param toAddress

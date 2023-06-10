@@ -13,10 +13,7 @@ import { mockedResponseBody } from '../objects/mockedResponseBody';
 import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import TransactionTest from '../../../src/api/TransactionTest';
-import { TransactionUtils } from '../../../src/utils/watcherUtils';
-import sinon from 'sinon';
-import { ErgoUtils } from '../../../src/ergo/utils';
-import { AddressBalance } from '../../../src/ergo/interfaces';
+import { TxType } from '../../../src/database/entities/txEntity';
 
 chai.use(spies);
 
@@ -57,13 +54,12 @@ initMockedAxios();
  * requirements: an object of Transaction class, rosenConfig, userAddress, userSecret
  */
 describe('Watcher Permit Transactions', () => {
-  let DB: WatcherDataBase, boxes: Boxes, txUtils: TransactionUtils;
+  let DB: WatcherDataBase, boxes: Boxes;
   before(async () => {
     const ORM = await loadDataBase();
     await fillORM(ORM);
     DB = ORM.DB;
     boxes = new Boxes(DB);
-    txUtils = new TransactionUtils(DB);
   });
 
   afterEach(() => {
@@ -99,7 +95,7 @@ describe('Watcher Permit Transactions', () => {
         else throw new Error('There is no box with this tokenId');
       });
 
-      await TransactionTest.setup(userAddress, secret1, boxes, txUtils);
+      await TransactionTest.setup(userAddress, secret1, boxes, DB);
       TransactionTest.getInstance();
       const usersHex = ['414441', sampleWID];
       const users: Array<Uint8Array> = [];
@@ -131,7 +127,7 @@ describe('Watcher Permit Transactions', () => {
       chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
         return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
       });
-      await TransactionTest.setup(userAddress, secret1, boxes, txUtils);
+      await TransactionTest.setup(userAddress, secret1, boxes, DB);
       const transaction = TransactionTest.getInstance();
       const ergoBoxes = wasm.ErgoBoxes.from_boxes_json([]);
       JSON.parse(mockedResponseBody.watcherUnspentBoxes).items.forEach(
@@ -156,6 +152,10 @@ describe('Watcher Permit Transactions', () => {
    * getPermit function tests
    */
   describe('getPermit', () => {
+    afterEach(() => {
+      chai.spy.restore();
+    });
+
     /**
      * Target: testing that getPermit should sign a transaction with valid input
      * Dependencies:
@@ -165,8 +165,10 @@ describe('Watcher Permit Transactions', () => {
      *    1- Mocking environment
      *    2- calling function
      *    3- validate output
+     *    4- remove new record from database
      * Expected Output:
      *    getPermit with correct inputs and state should be signed
+     *    should send transaction to txQueue
      */
     it('checks get permit transaction is signed', async () => {
       initMockedAxios(0);
@@ -181,12 +183,19 @@ describe('Watcher Permit Transactions', () => {
           return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
         else throw Error('No box with token');
       });
-      await TransactionTest.setup(watcherAddress, permitSecret, boxes, txUtils);
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
       const secondTransaction = TransactionTest.getInstance();
       const response = await secondTransaction.getPermit(100n);
       expect(response.response).to.be.equal(
         'f2f48823e7b1131a6fe0d4b198dbe50493222689f3a223d2efa9b10ab063330a'
       );
+      const permitTxs = await DB.getActivePermitTransactions();
+      expect(permitTxs.length).to.be.equal(1);
+      expect(permitTxs[0].txId).to.be.equal(
+        'f2f48823e7b1131a6fe0d4b198dbe50493222689f3a223d2efa9b10ab063330a'
+      );
+
+      await DB.removeTx(permitTxs[0]);
     });
 
     /**
@@ -210,10 +219,49 @@ describe('Watcher Permit Transactions', () => {
         return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
       });
 
-      await TransactionTest.setup(userAddress, secret1, boxes, txUtils);
+      await TransactionTest.setup(userAddress, secret1, boxes, DB);
       const transaction = TransactionTest.getInstance();
       const res = await transaction.getPermit(100n);
       expect(res.status).to.be.equal(500);
+    });
+
+    /**
+     * Target: getPermit should return error when an active permit
+     *  transaction is already in queue
+     * Dependencies:
+     *    Transaction
+     *    ErgoNetwork
+     * Test Procedure:
+     *    1- Mocking environment
+     *    2- insert a permit tx into db
+     *    3- calling function
+     *    4- validate output
+     *    5- remove permit tx into db
+     * Expected Output:
+     *    should return error
+     */
+    it('should return error when an active permit transaction is already in queue', async () => {
+      await DB.submitTx('mockedTx', 'mockedTxId', TxType.PERMIT, 100);
+      const mockedTx = (await DB.getActivePermitTransactions())[0];
+
+      chai.spy.on(boxes, 'getRepoBox', () => {
+        return wasm.ErgoBox.from_json(mockedResponseBody.repoBox);
+      });
+      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
+        if (
+          tokenId ===
+          'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516'
+        )
+          return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
+        else throw Error('No box with token');
+      });
+
+      await TransactionTest.setup(userAddress, secret1, boxes, DB);
+      const transaction = TransactionTest.getInstance();
+      const res = await transaction.getPermit(100n);
+      expect(res.status).to.be.equal(500);
+
+      await DB.removeTx(mockedTx);
     });
   });
 
@@ -249,7 +297,7 @@ describe('Watcher Permit Transactions', () => {
         );
       });
 
-      await TransactionTest.setup(watcherAddress, permitSecret, boxes, txUtils);
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
       const transaction = TransactionTest.getInstance();
 
       const res = await transaction.returnPermit(100n);
@@ -286,7 +334,7 @@ describe('Watcher Permit Transactions', () => {
         );
       });
       TransactionTest.reset();
-      await TransactionTest.setup(watcherAddress, permitSecret, boxes, txUtils);
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
       const transaction = TransactionTest.getInstance();
 
       const res = await transaction.returnPermit(1n);
@@ -319,7 +367,7 @@ describe('Watcher Permit Transactions', () => {
         '9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL',
         secret2,
         boxes,
-        txUtils
+        DB
       );
       const secondTransaction = TransactionTest.getInstance();
       const res = await secondTransaction.returnPermit(1n);
@@ -359,7 +407,7 @@ describe('Watcher Permit Transactions', () => {
         );
       });
 
-      await TransactionTest.setup(watcherAddress, permitSecret, boxes, txUtils);
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
       const transaction = TransactionTest.getInstance();
       await TransactionTest.getWatcherState();
       expect(TransactionTest.watcherPermitState).to.be.true;
@@ -388,7 +436,7 @@ describe('Watcher Permit Transactions', () => {
       chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
         throw Error('There is no box with token id');
       });
-      await TransactionTest.setup(watcherAddress, permitSecret, boxes, txUtils);
+      await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
       TransactionTest.getInstance();
       await TransactionTest.getWatcherState();
       expect(TransactionTest.watcherPermitState).to.be.false;

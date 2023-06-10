@@ -40,6 +40,13 @@ const init = async () => {
     logger.debug('Migrations done successfully.');
     watcherDatabase = new WatcherDataBase(dataSource);
     boxesObject = new Boxes(watcherDatabase);
+    await Transaction.setup(
+      getConfig().general.address,
+      getConfig().general.secretKey,
+      boxesObject,
+      watcherDatabase
+    );
+    Transaction.getInstance();
     logger.debug('APIs initialized successfully.');
   };
 
@@ -84,7 +91,7 @@ const init = async () => {
         getConfig().general.address,
         getConfig().general.secretKey,
         boxesObject,
-        txUtils
+        watcherDatabase
       );
       Transaction.getInstance();
 

@@ -29,7 +29,7 @@ const signedTokenTx = wasm.Transaction.from_json(
 initMockedAxios();
 
 describe('Transaction', () => {
-  let watcherDb: WatcherDataBase, txUtils: TransactionUtils, boxes: Boxes;
+  let watcherDb: WatcherDataBase, boxes: Boxes;
   before(async () => {
     const ORM = await loadDataBase();
     await fillORM(ORM);
@@ -38,8 +38,7 @@ describe('Transaction', () => {
     chai.spy.on(boxes, 'getRepoBox', () => {
       return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
     });
-    txUtils = new TransactionUtils(watcherDb);
-    await TransactionTest.setup(userAddress, secret1, boxes, txUtils);
+    await TransactionTest.setup(userAddress, secret1, boxes, watcherDb);
   });
 
   afterEach(() => {
@@ -64,7 +63,11 @@ describe('Transaction', () => {
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedErgTx);
-      chai.spy.on(txUtils, 'submitTransaction', (tx: any) => tx);
+      chai.spy.on(
+        TransactionTest.txUtils,
+        'submitTransaction',
+        (tx: any) => tx
+      );
 
       // run the function
       const amount: AddressBalance = {
@@ -75,7 +78,7 @@ describe('Transaction', () => {
       await TransactionTest.getInstance().withdrawFromWallet(amount, address);
 
       // check the result
-      expect(txUtils.submitTransaction).to.have.called.with(
+      expect(TransactionTest.txUtils.submitTransaction).to.have.called.with(
         signedErgTx,
         TxType.REDEEM
       );
@@ -97,7 +100,11 @@ describe('Transaction', () => {
       sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTokenTx);
-      chai.spy.on(txUtils, 'submitTransaction', (tx: any) => tx);
+      chai.spy.on(
+        TransactionTest.txUtils,
+        'submitTransaction',
+        (tx: any) => tx
+      );
 
       // run the function
       const amount: AddressBalance = {
@@ -114,7 +121,7 @@ describe('Transaction', () => {
       await TransactionTest.getInstance().withdrawFromWallet(amount, address);
 
       // check the result
-      expect(txUtils.submitTransaction).to.have.called.with(
+      expect(TransactionTest.txUtils.submitTransaction).to.have.called.with(
         signedTokenTx,
         TxType.REDEEM
       );

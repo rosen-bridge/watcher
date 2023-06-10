@@ -71,6 +71,7 @@ import {
 
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 import { TokenEntity } from '../../src/database/entities/tokenEntity';
+import { createMemoryDatabase } from '../resources/inMemoryDb';
 
 const observation2Status = {
   observation: observationEntity2,
@@ -838,6 +839,42 @@ describe('WatcherModel tests', () => {
       // check the result
       expect(result).to.have.length(1);
       expect(result[0]).to.eql(addressValidBox);
+    });
+  });
+
+  describe('getActivePermitTransactions', () => {
+    let memoryDb: DataSource;
+    let watcherDb: WatcherDataBase;
+
+    before(async () => {
+      memoryDb = await createMemoryDatabase();
+      watcherDb = new WatcherDataBase(memoryDb);
+    });
+    /**
+     * @target WatcherDataBase.getActivePermitTransactions should get txs
+     * which their 'deleted' field is false
+     * @dependencies
+     * @scenario
+     * - insert two permit txs (one active, one deleted)
+     * - run the function
+     * - check the result
+     * @expected
+     * - should return data with length 1
+     * - data[0] should be equal to the permitEntity
+     */
+    it(`should get txs which their 'deleted' field is false`, async () => {
+      // insert two permit txs (one active, one deleted)
+      await watcherDb.submitTx('mockedTx1', 'mockedTxId1', TxType.PERMIT, 100);
+      const mockedTx1 = (await watcherDb.getActivePermitTransactions())[0];
+      await watcherDb.removeTx(mockedTx1);
+      await watcherDb.submitTx('mockedTx2', 'mockedTxId2', TxType.PERMIT, 100);
+
+      // run the function
+      const data = await watcherDb.getActivePermitTransactions();
+
+      // check the result
+      expect(data).to.have.length(1);
+      expect(data[0].txId).to.eql('mockedTxId2');
     });
   });
 });

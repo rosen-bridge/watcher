@@ -5,10 +5,11 @@ import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
 import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
-import { AddressBalance } from '../ergo/interfaces';
-import { TxType } from '../database/entities/txEntity';
-import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
+import { WatcherDataBase } from '../database/models/watcherModel';
 import { TransactionUtils } from '../utils/watcherUtils';
+import { TxType } from '../database/entities/txEntity';
+import { AddressBalance } from '../ergo/interfaces';
+import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -23,7 +24,9 @@ export type ApiResponse = {
 export class Transaction {
   protected static instance: Transaction | undefined;
   protected static isSetupCalled = false;
+  protected static watcherDatabase: WatcherDataBase;
   static watcherPermitState?: boolean;
+  static watcherUnconfirmedWID?: string;
   static watcherWID?: string;
   static boxes: Boxes;
   static txUtils: TransactionUtils;
@@ -39,19 +42,18 @@ export class Transaction {
    * @param userAddress
    * @param userSecret
    * @param boxes
-   * @param txUtils
+   * @param db
    */
   static setup = async (
     userAddress: string,
     userSecret: wasm.SecretKey,
     boxes: Boxes,
-    txUtils: TransactionUtils
+    db: WatcherDataBase
   ) => {
     if (!Transaction.isSetupCalled) {
       Transaction.watcherPermitState = undefined;
       Transaction.watcherWID = '';
       Transaction.boxes = boxes;
-      Transaction.txUtils = txUtils;
       Transaction.fee = wasm.BoxValue.from_i64(
         wasm.I64.from_str(getConfig().general.fee)
       );
@@ -66,6 +68,9 @@ export class Transaction {
       );
       Transaction.isSetupCalled = true;
       await Transaction.getWatcherState();
+
+      this.watcherDatabase = db;
+      this.txUtils = new TransactionUtils(db);
     }
   };
 
@@ -314,6 +319,16 @@ export class Transaction {
     if (Transaction.watcherPermitState) {
       return { response: "you don't have locked any RSN", status: 500 };
     }
+
+    const activePermitTxs =
+      await Transaction.watcherDatabase.getActivePermitTransactions();
+    if (activePermitTxs.length !== 0) {
+      return {
+        response: `permit transaction [${activePermitTxs[0].txId}] is in queue`,
+        status: 500,
+      };
+    }
+
     const height = await ErgoNetwork.getHeight();
     const repoBox = await Transaction.boxes.getRepoBox();
     const R4 = repoBox.register_value(4);
@@ -458,9 +473,8 @@ export class Transaction {
       Transaction.userSecret,
       inputBoxes
     );
-    await ErgoNetwork.sendTx(signedTx.to_json());
-    Transaction.watcherPermitState = !Transaction.watcherPermitState;
-    Transaction.watcherWID = WIDToken.to_str();
+    await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
+    Transaction.watcherUnconfirmedWID = WIDToken.to_str();
     return { response: signedTx.id().to_str(), status: 200 };
   };
 

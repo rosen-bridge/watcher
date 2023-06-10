@@ -16,6 +16,9 @@ chai.use(spies);
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
 import TransactionTest from '../../src/api/TransactionTest';
+import { Transaction } from '../../src/api/Transaction';
+import { createMemoryDatabase } from '../resources/inMemoryDb';
+import { DataSource } from 'typeorm';
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
 
@@ -41,8 +44,7 @@ describe('Transaction queue tests', () => {
     const ORM = await loadDataBase();
     dataBase = ORM.DB;
     boxes = new Boxes(dataBase);
-    const txUtils = new TransactionUtils(dataBase);
-    await TransactionTest.setup(userAddress, secret1, boxes, txUtils);
+    await TransactionTest.setup(userAddress, secret1, boxes, dataBase);
     transaction = TransactionTest.getInstance();
     dbConnection = new WatcherUtils(dataBase, 0, 100);
     txQueue = new Queue(dataBase, dbConnection);
@@ -223,6 +225,57 @@ describe('Transaction queue tests', () => {
         observation
       );
       expect(dataBase.removeTx).have.been.called.with(txEntity);
+    });
+  });
+
+  describe('processConfirmedTx', () => {
+    let db: DataSource, watcherDb: WatcherDataBase, txQueue: Queue;
+
+    before(async () => {
+      db = await createMemoryDatabase();
+      watcherDb = new WatcherDataBase(db);
+      dbConnection = new WatcherUtils(watcherDb, 0, 100);
+      txQueue = new Queue(watcherDb, dbConnection);
+    });
+
+    /**
+     * @target Queue.processConfirmedTx should set watcherWID
+     * and toggle watcherPermitState when confirmed tx type is PERMIT
+     * @dependencies
+     * @scenario
+     * - mock Transaction variables (permitState and WIDs)
+     * - mock a TxEntity and insert into db
+     * - run test
+     * - check if variables changed
+     * @expected
+     * - watcherWID should equal to mocked value
+     * - watcherPermitState should be true
+     * - txEntity 'deleted' field should be true
+     */
+    it('should set watcherWID and toggle watcherPermitState when confirmed tx type is PERMIT', async () => {
+      // mock Transaction variables (permitState and WIDs)
+      Transaction.watcherPermitState = false;
+      Transaction.watcherWID = undefined;
+      Transaction.watcherUnconfirmedWID = 'mockedWID';
+
+      // mock TxEntity
+      await watcherDb.submitTx(
+        'serializedTx2',
+        'mockedTxId2',
+        TxType.PERMIT,
+        100
+      );
+      const tx = (await watcherDb.getActivePermitTransactions())[0];
+
+      // run test
+      await txQueue.processConfirmedTx(tx);
+
+      // check if variables changed
+      expect(Transaction.watcherPermitState).to.be.equal(true);
+      expect(Transaction.watcherWID).to.be.equal('mockedWID');
+      const dbTxs = await db.getRepository(TxEntity).find();
+      expect(dbTxs.length).to.be.equal(1);
+      expect(dbTxs[0].deleted).to.be.equal(true);
     });
   });
 });

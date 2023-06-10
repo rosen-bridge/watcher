@@ -32,7 +32,7 @@ describe('DetachWID', () => {
       getConfig().general.address,
       getConfig().general.secretKey,
       boxes,
-      txUtils
+      watcherDb
     );
   });
 
