@@ -26,6 +26,7 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { TokenEntity } from '../entities/tokenEntity';
 import { EventStatus } from '../../utils/interfaces';
 import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
+import { RevenueView } from '../entities/revenueView';
 
 class WatcherDataBase {
   private readonly blockRepository: Repository<BlockEntity>;
@@ -37,6 +38,7 @@ class WatcherDataBase {
   private readonly boxRepository: Repository<BoxEntity>;
   private readonly eventTriggerRepository: Repository<EventTriggerEntity>;
   private readonly tokenRepository: Repository<TokenEntity>;
+  private readonly revenueView: Repository<RevenueView>;
 
   constructor(dataSource: DataSource) {
     this.blockRepository = dataSource.getRepository(BlockEntity);
@@ -50,6 +52,7 @@ class WatcherDataBase {
     this.boxRepository = dataSource.getRepository(BoxEntity);
     this.eventTriggerRepository = dataSource.getRepository(EventTriggerEntity);
     this.tokenRepository = dataSource.getRepository(TokenEntity);
+    this.revenueView = dataSource.getRepository(RevenueView);
   }
 
   /**
@@ -747,6 +750,68 @@ class WatcherDataBase {
       )
       .where('ev.id IN (:...ids)', { ids })
       .getRawMany();
+  };
+
+  /**
+   * Returns all revenue with respect to the filters, offset,s and limit
+   * @param fromChain
+   * @param toChain
+   * @param tokenId
+   * @param sourceTxId
+   * @param heightMin
+   * @param heightMax
+   * @param fromBlockTime
+   * @param toBlockTime
+   * @param sorting
+   * @param offset
+   * @param limit
+   */
+  getRevenuesWithFilters = async (
+    fromChain = '',
+    toChain = '',
+    tokenId = '',
+    sourceTxId = '',
+    heightMin: number | undefined = undefined,
+    heightMax: number | undefined = undefined,
+    fromBlockTime: number | undefined = undefined,
+    toBlockTime: number | undefined = undefined,
+    sorting = '',
+    offset = 0,
+    limit = 20
+  ): Promise<RevenueView> => {
+    let qb = this.revenueView.createQueryBuilder('rv').select('*');
+
+    if (fromChain !== '') {
+      qb = qb.andWhere('rv.fromChain = :fromChain', { fromChain });
+    }
+    if (toChain !== '') {
+      qb = qb.andWhere('rv.toChain = :toChain', { toChain });
+    }
+    if (tokenId !== '') {
+      qb = qb.andWhere('rv.tokenId = :tokenId', { tokenId });
+    }
+    if (sourceTxId !== '') {
+      qb = qb.andWhere('rv.lockTxId = :sourceTxId', { sourceTxId });
+    }
+    if (heightMin) {
+      qb = qb.andWhere('rv.height >= :heightMin', { heightMin });
+    }
+    if (heightMax) {
+      qb = qb.andWhere('rv.height <= :heightMax', { heightMax });
+    }
+    if (fromBlockTime) {
+      qb = qb.andWhere('rv.timestamp >= :fromBlockTime', { fromBlockTime });
+    }
+    if (toBlockTime) {
+      qb = qb.andWhere('rv.timestamp <= :toBlockTime', { toBlockTime });
+    }
+    if (sorting !== '' && sorting.toLowerCase() === 'asc') {
+      qb = qb.orderBy('rv.id', 'ASC');
+    } else {
+      qb = qb.orderBy('rv.id', 'DESC');
+    }
+
+    return qb.offset(offset).limit(limit).execute();
   };
 }
 

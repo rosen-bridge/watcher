@@ -538,7 +538,6 @@ export class Transaction {
         candidates,
         height
       );
-      console.log(signed.to_json());
       await Transaction.txUtils.submitTransaction(signed, TxType.REDEEM);
       logger.info(
         `Withdraw tx [${signed.id().to_str()}] submitted to the queue`

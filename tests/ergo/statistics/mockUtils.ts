@@ -123,6 +123,7 @@ firstPermit.boxSerialized = Buffer.from(
 ).toString('base64');
 firstPermit.spendBlock = 'blockHash2';
 firstPermit.spendHeight = 110;
+firstPermit.txId = 'txId';
 
 const secondPermit = new PermitEntity();
 secondPermit.WID = 'WIDStatistics';
@@ -137,6 +138,7 @@ secondPermit.boxSerialized = permitBoxGenerator(
 );
 secondPermit.spendBlock = 'blockHash1';
 secondPermit.spendHeight = 111;
+secondPermit.txId = 'txId2';
 
 const firstStatisticCommitment = new CommitmentEntity();
 firstStatisticCommitment.commitment = 'commitment';
@@ -147,6 +149,7 @@ firstStatisticCommitment.block = 'block';
 firstStatisticCommitment.extractor = 'extractor';
 firstStatisticCommitment.height = 1005;
 firstStatisticCommitment.boxSerialized = '222';
+firstStatisticCommitment.txId = 'txId';
 
 const secondStatisticCommitment = {
   ...firstStatisticCommitment,
@@ -180,6 +183,7 @@ firstStatisticsEventTrigger.sourceBlockId = 'block';
 firstStatisticsEventTrigger.sourceChainHeight = 123456;
 firstStatisticsEventTrigger.eventId =
   'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b';
+firstStatisticsEventTrigger.txId = 'txId';
 
 const secondStatisticsEventTrigger = {
   ...firstStatisticsEventTrigger,

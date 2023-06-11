@@ -1,24 +1,26 @@
-import express from 'express';
 import { loggerFactory } from '../log/Logger';
+import express from 'express';
 import { watcherDatabase } from '../init';
-import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
+import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 
 const logger = loggerFactory(import.meta.url);
-const observationRouter = express.Router();
+const revenueRouter = express.Router();
 
 /**
- * Api for fetching observations
+ * Api for fetching revenues
  */
-observationRouter.get('/', async (req, res) => {
+revenueRouter.get('/', async (req, res) => {
   try {
     const {
-      fromAddress,
-      toAddress,
-      minHeight,
-      maxHeight,
-      sourceTokenId,
+      fromChain,
+      toChain,
+      tokenId,
       sourceTxId,
+      heightMin,
+      heightMax,
+      fromBlockTime,
+      toBlockTime,
       sorting,
       offset,
       limit,
@@ -27,13 +29,15 @@ observationRouter.get('/', async (req, res) => {
     const offsetString = stringifyQueryParam(offset);
     const limitString = stringifyQueryParam(limit);
 
-    const result = await watcherDatabase.getObservationWithFilters(
-      stringifyQueryParam(fromAddress),
-      stringifyQueryParam(toAddress),
-      Number(minHeight),
-      Number(maxHeight),
-      stringifyQueryParam(sourceTokenId),
+    const result = await watcherDatabase.getRevenuesWithFilters(
+      stringifyQueryParam(fromChain),
+      stringifyQueryParam(toChain),
+      stringifyQueryParam(tokenId),
       stringifyQueryParam(sourceTxId),
+      Number(heightMin),
+      Number(heightMax),
+      Number(fromBlockTime),
+      Number(toBlockTime),
       stringifyQueryParam(sorting),
       offsetString === '' ? 0 : Number(offsetString),
       limitString === ''
@@ -42,9 +46,9 @@ observationRouter.get('/', async (req, res) => {
     );
     res.status(200).json(result);
   } catch (e) {
-    logger.warn(`An error occurred while fetching observations: ${e}`);
+    logger.warn(`An error occurred while fetching revenues: ${e}`);
     res.status(500).send({ message: e.message });
   }
 });
 
-export default observationRouter;
+export default revenueRouter;

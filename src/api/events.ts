@@ -3,14 +3,10 @@ import { loggerFactory } from '../log/Logger';
 import { watcherDatabase } from '../init';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { forEach } from 'lodash-es';
+import { stringifyQueryParam } from '../utils/utils';
 
 const logger = loggerFactory(import.meta.url);
 const eventsRouter = express.Router();
-
-const stringifyQueryParam = (param: any) => {
-  if (param === undefined) return '';
-  return String(param);
-};
 
 /**
  * Api for fetching events

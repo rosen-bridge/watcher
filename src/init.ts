@@ -21,6 +21,7 @@ import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
 import eventsRouter from './api/events';
 import withdrawRouter from './api/withdraw';
+import revenueRouter from './api/revenue';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -62,6 +63,7 @@ const init = async () => {
     router.use('/info', generalRouter);
     router.use('/events', eventsRouter);
     router.use('/withdraw', withdrawRouter);
+    router.use('/revenue', revenueRouter);
 
     app.use(router);
     const port = getConfig().general.apiPort;

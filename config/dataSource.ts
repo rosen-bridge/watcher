@@ -22,6 +22,7 @@ import { getConfig } from '../src/config/config';
 import { ObservationStatusEntity } from '../src/database/entities/observationStatusEntity';
 import { TxEntity } from '../src/database/entities/txEntity';
 import { TokenEntity } from '../src/database/entities/tokenEntity';
+import { RevenueView } from '../src/database/entities/revenueView';
 
 import migrations from '../src/database/migrations/watcher';
 const dbType = getConfig().database.type as keyof typeof migrations;
@@ -36,6 +37,7 @@ const dbConfigs = {
     PermitEntity,
     TxEntity,
     TokenEntity,
+    RevenueView,
   ],
   migrations: [
     ...addressExtractorMigrations[dbType],

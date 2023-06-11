@@ -7,6 +7,8 @@ import { watcherModelMigration1684405325176 } from './sqlite/1684405325176-watch
 import { watcherModelMigration1683891492000 } from './sqlite/1683891492000-watcherModelMigration';
 import { watcherModelMigration1685285583000 } from './postgres/1685285583000-watcherModelMigration';
 import { watcherModelMigration1685285582000 } from './sqlite/1685285582000-watcherModelMigration';
+import { watcherModelMigration1686489592340 } from './postgres/1686489592340-watcherModelMigration';
+import { watcherModelMigration1686490574850 } from './sqlite/1686490574850-watcherModelMigration';
 
 export default {
   sqlite: [
@@ -15,11 +17,13 @@ export default {
     watcherModelMigration1684405325176,
     watcherModelMigration1683891492000,
     watcherModelMigration1685285582000,
+    watcherModelMigration1686490574850,
   ],
   postgres: [
     watcherModelMigration1678166758664,
     watcherModelMigration1684405318897,
     watcherModelMigration1683891493000,
     watcherModelMigration1685285583000,
+    watcherModelMigration1686489592340,
   ],
 };

@@ -14,7 +14,6 @@ import { BlockEntity } from '@rosen-bridge/scanner';
 import { PROCEED } from '@rosen-bridge/scanner/dist/entities/blockEntity';
 import * as Constants from '../../src/config/constants';
 import { TokenEntity } from '../../src/database/entities/tokenEntity';
-import { getConfig } from '../../src/config/config';
 
 export const ergoBlockEntity = new BlockEntity();
 ergoBlockEntity.scanner = Constants.ERGO_WATCHER;
@@ -23,6 +22,7 @@ ergoBlockEntity.hash = 'blockHash';
 ergoBlockEntity.height = 1111;
 ergoBlockEntity.parentHash = 'parentHash';
 ergoBlockEntity.status = PROCEED;
+ergoBlockEntity.timestamp = 123456789;
 
 export const cardanoBlockEntity = new BlockEntity();
 cardanoBlockEntity.scanner = Constants.CARDANO_WATCHER;
@@ -31,6 +31,7 @@ cardanoBlockEntity.hash = 'blockHash2';
 cardanoBlockEntity.height = 2222;
 cardanoBlockEntity.parentHash = 'parentHash2';
 cardanoBlockEntity.status = PROCEED;
+cardanoBlockEntity.timestamp = 123456789;
 
 export const firstCommitment: Commitment = {
   WID: 'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b',
@@ -62,6 +63,7 @@ commitmentEntity.block = 'block';
 commitmentEntity.extractor = 'extractor';
 commitmentEntity.height = 105;
 commitmentEntity.boxSerialized = '222';
+commitmentEntity.txId = 'txId222';
 
 export const spentCommitmentEntityOfWID = new CommitmentEntity();
 spentCommitmentEntityOfWID.commitment = 'commitment3';
@@ -73,6 +75,7 @@ spentCommitmentEntityOfWID.extractor = 'extractor';
 spentCommitmentEntityOfWID.height = 105;
 spentCommitmentEntityOfWID.spendHeight = 110;
 spentCommitmentEntityOfWID.boxSerialized = '2223';
+spentCommitmentEntityOfWID.txId = 'txId2223';
 
 export const spentCommitmentEntity = new CommitmentEntity();
 spentCommitmentEntity.commitment = 'commitment';
@@ -85,6 +88,7 @@ spentCommitmentEntity.extractor = 'extractor';
 spentCommitmentEntity.height = 100;
 spentCommitmentEntity.spendHeight = 110;
 spentCommitmentEntity.boxSerialized = '222';
+spentCommitmentEntity.txId = 'txId222';
 
 export const permitEntity = new PermitEntity();
 permitEntity.WID = 'WID';
@@ -94,6 +98,7 @@ permitEntity.extractor = 'extractor';
 permitEntity.boxId = 'boxId';
 permitEntity.boxSerialized =
   '4JFDEBMEAAQABAQEAAQCBAAOIKWZu5SyMPjTrJSFarJMMbI1q0k9NBUJcQKRbGAPu/lpBAQEAAQABAABAQQCBAAEAAQADiAlLna8Y7mrm00/ZhS6SaI5OFo/wqVFsrb+zFCE1sKy9gUCAQHYB9YBsqVzAADWAoyy22MIp3MBAAHWA661tKVzArGl2QEDY5Gx22MIcgNzA9kBA2Ou22MIcgPZAQVNDpOMcgUBcgLWBOTGpwQa1gWypXMEANYG22MIcgXWB65yBtkBB00Ok4xyBwFyApWTjLLbYwhyAXMFAAFzBtGWgwMB73IDk4yy22MIsqRzBwBzCAABsnIEcwkAlXIHloMCAZOMsnIGcwoAAXICk8JyBcKncwvYAdYIwqfRloMFAe9yA5PCcgFyCJPkxnIBBBpyBJOMsttjCLKkcwwAcw0AAbJyBHMOAJVyB9gB1gmycgZzDwCWgwcBk4xyCQFyApPLwnIFcxDmxnIFBRrmxnIFBg6T5MZyBQcOy3IIk+TGcgUEGnIEk4xyCQJzEXMSg409AY5bArpymtNkhnYZ0qi5/xQ4GQwUl5oSqgoknplhlPB0j04CGgEg6nBM+OG41ADB3w+3C5REC0ZdGcNoShXSZQQdxBkrdqcOAQCxOUv5J/07IIrBwF3p+WQnGKX2r1GQ6VhYtAvGgeH+dAA=';
+permitEntity.txId = 'txId';
 
 export const spentPermitEntity = new PermitEntity();
 spentPermitEntity.WID = 'WID';
@@ -104,6 +109,7 @@ spentPermitEntity.boxId = 'boxId2';
 spentPermitEntity.boxSerialized = 'box2';
 spentPermitEntity.spendBlock = 'blockHash2';
 spentPermitEntity.spendHeight = 110;
+spentPermitEntity.txId = 'txId2';
 
 export const plainBox = new BoxEntity();
 plainBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
@@ -165,6 +171,7 @@ eventTriggerEntity.sourceBlockId = 'block';
 eventTriggerEntity.sourceChainHeight = 123456;
 eventTriggerEntity.eventId =
   'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b';
+eventTriggerEntity.txId = 'txId';
 
 export const newEventTriggerEntity = new EventTriggerEntity();
 newEventTriggerEntity.sourceTxId = 'txId2';
@@ -187,6 +194,7 @@ newEventTriggerEntity.sourceBlockId = 'block';
 newEventTriggerEntity.sourceChainHeight = 123457;
 newEventTriggerEntity.eventId =
   'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b';
+newEventTriggerEntity.txId = 'txId2';
 
 export const observationEntity1 = new ObservationEntity();
 observationEntity1.height = 1;
@@ -270,9 +278,13 @@ export const unspentCommitmentDuplicate = new CommitmentEntity();
 export const unspentCommitment2 = new CommitmentEntity();
 export const redeemedCommitment = new CommitmentEntity();
 unspentCommitment.WID = 'WID1';
+unspentCommitment.txId = 'txId1';
 unspentCommitmentDuplicate.WID = unspentCommitment.WID;
+unspentCommitmentDuplicate.txId = unspentCommitment.txId;
 unspentCommitment2.WID = 'WID2';
+unspentCommitment2.txId = 'txId2';
 redeemedCommitment.WID = 'WID3';
+redeemedCommitment.txId = 'txId3';
 redeemedCommitment.spendBlock = 'hash';
 
 const eventTrigger = new EventTriggerEntity();
