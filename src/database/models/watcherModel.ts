@@ -778,7 +778,7 @@ class WatcherDataBase {
     sorting = '',
     offset = 0,
     limit = 20
-  ): Promise<RevenueView> => {
+  ): Promise<RevenueView[]> => {
     let qb = this.revenueView.createQueryBuilder('rv').select('*');
 
     if (fromChain !== '') {
