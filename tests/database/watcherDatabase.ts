@@ -71,8 +71,9 @@ import {
 
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 import { TokenEntity } from '../../src/database/entities/tokenEntity';
-import { createMemoryDatabase } from '../resources/inMemoryDb';
 import { RevenueView } from '../../src/database/entities/revenueView';
+import { RevenueChartEntity } from '../../src/database/entities/revenueChartEntity';
+import { createMemoryDatabase } from '../resources/inMemoryDb';
 
 const observation2Status = {
   observation: observationEntity2,
@@ -112,6 +113,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     TxEntity,
     TokenEntity,
     RevenueView,
+    RevenueChartEntity,
   ];
   const ormConfig = new DataSource({
     type: 'sqlite',

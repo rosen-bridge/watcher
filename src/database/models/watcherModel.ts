@@ -27,6 +27,8 @@ import { TokenEntity } from '../entities/tokenEntity';
 import { EventStatus } from '../../utils/interfaces';
 import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 import { RevenueView } from '../entities/revenueView';
+import { RevenueChartEntity } from '../entities/revenueChartEntity';
+import { PlatformTools } from 'typeorm/platform/PlatformTools';
 
 class WatcherDataBase {
   private readonly blockRepository: Repository<BlockEntity>;
@@ -39,6 +41,7 @@ class WatcherDataBase {
   private readonly eventTriggerRepository: Repository<EventTriggerEntity>;
   private readonly tokenRepository: Repository<TokenEntity>;
   private readonly revenueView: Repository<RevenueView>;
+  private readonly revenueChartRepository: Repository<RevenueChartEntity>;
 
   constructor(dataSource: DataSource) {
     this.blockRepository = dataSource.getRepository(BlockEntity);
@@ -53,6 +56,7 @@ class WatcherDataBase {
     this.eventTriggerRepository = dataSource.getRepository(EventTriggerEntity);
     this.tokenRepository = dataSource.getRepository(TokenEntity);
     this.revenueView = dataSource.getRepository(RevenueView);
+    this.revenueChartRepository = dataSource.getRepository(RevenueChartEntity);
   }
 
   /**
@@ -812,6 +816,43 @@ class WatcherDataBase {
     }
 
     return qb.offset(offset).limit(limit).execute();
+  };
+
+  getRevenueChart = async (period: string, offset: number, limit: number) => {
+    let qb = this.revenueChartRepository.createQueryBuilder('rc');
+    if (period === 'week') {
+      //TODO: Check PlatformTools
+      qb = qb
+        .select([
+          `AVG(revenue.revenue) as avg_revenue`,
+          `${
+            qb.connection.driver instanceof PlatformTools
+              ? 'EXTRACT'
+              : 'strftime'
+          }('%m', DATE_TRUNC('month', revenue.monthly_date)) AS month`,
+          `${
+            qb.connection.driver instanceof PlatformTools
+              ? 'EXTRACT'
+              : 'strftime'
+          }('%Y', DATE_TRUNC('month', revenue.monthly_date)) AS year`,
+        ])
+        .groupBy('month, year')
+        .orderBy('year, month');
+    } else if (period === 'month') {
+      qb = qb
+        .select('avg(revenue) as revenue, month, year')
+        .groupBy('month, year')
+        .orderBy('year', 'DESC')
+        .addOrderBy('month', 'DESC');
+    } else if (period === 'year') {
+      qb = qb
+        .select('avg(revenue) as revenue, year')
+        .groupBy('year')
+        .orderBy('year', 'DESC');
+    } else {
+      // invalid period
+      return;
+    }
   };
 }
 
