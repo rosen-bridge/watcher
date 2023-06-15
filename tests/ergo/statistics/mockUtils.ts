@@ -163,7 +163,7 @@ const thirdStatisticCommitment = {
 };
 
 const firstStatisticsEventTrigger = new EventTriggerEntity();
-firstStatisticsEventTrigger.sourceTxId = 'txId';
+firstStatisticsEventTrigger.sourceTxId = 'txIdStar';
 firstStatisticsEventTrigger.block = 'blockID';
 firstStatisticsEventTrigger.height = 100;
 firstStatisticsEventTrigger.extractor = 'extractor';
@@ -248,7 +248,7 @@ const lastRevenue = {
   bridgeFee: '200',
   networkFee: '1000',
   tokenId: 'tokenIdStar',
-  lockTxId: 'txId',
+  lockTxId: 'txIdStar',
   height: null,
   timestamp: null,
   status: 'Doing',
