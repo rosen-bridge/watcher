@@ -86,7 +86,8 @@ describe('revenueRouter', () => {
      * - check the result
      * @expected
      * - response status should be 200
-     * - response body should have length of zero
+     * - response body should have length of 6
+     * - the last element of body must be correct
      */
     it('Revenue endpoint should return correct revenues with fromChain filter', async () => {
       // send a request to the endpoint
@@ -108,7 +109,8 @@ describe('revenueRouter', () => {
      * - check the result
      * @expected
      * - response status should be 200
-     * - response body should have length of zero
+     * - response body should have length of 6
+     * - the last element of body must be correct
      */
     it('Revenue endpoint should return correct revenues with toChain filter', async () => {
       // send a request to the endpoint
@@ -151,7 +153,8 @@ describe('revenueRouter', () => {
      * - check the result
      * @expected
      * - response status should be 200
-     * - response body should have length of zero
+     * - response body should have length of 6
+     * - the last element of body must be correct
      */
     it('Revenue endpoint should return correct revenues with sourceTxId filter', async () => {
       // send a request to the endpoint
