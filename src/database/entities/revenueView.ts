@@ -1,4 +1,5 @@
 import { ViewEntity, ViewColumn } from 'typeorm';
+import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 
 @ViewEntity({
   name: 'revenue_view',
@@ -22,7 +23,7 @@ import { ViewEntity, ViewColumn } from 'typeorm';
       .addSelect('be.height', 'height')
       .addSelect('be.timestamp', 'timestamp')
       .addSelect(
-        `CASE WHEN "ete"."spendTxId" IS NULL THEN 'Doing' ELSE 'Done' END`,
+        `CASE WHEN "ete"."spendTxId" IS NULL THEN '${DOING_STATUS}' ELSE '${DONE_STATUS}' END`,
         'status'
       )
       .from('permit_entity', 'pe')
