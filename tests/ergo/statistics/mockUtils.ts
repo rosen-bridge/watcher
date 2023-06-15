@@ -174,9 +174,9 @@ firstStatisticsEventTrigger.networkFee = '1000';
 firstStatisticsEventTrigger.bridgeFee = '200';
 firstStatisticsEventTrigger.fromAddress = 'fromAddress';
 firstStatisticsEventTrigger.toAddress = 'toAddress';
-firstStatisticsEventTrigger.fromChain = 'fromChain';
-firstStatisticsEventTrigger.toChain = 'toChain';
-firstStatisticsEventTrigger.sourceChainTokenId = 'tokenId';
+firstStatisticsEventTrigger.fromChain = 'fromChainStar';
+firstStatisticsEventTrigger.toChain = 'toChainStar';
+firstStatisticsEventTrigger.sourceChainTokenId = 'tokenIdStar';
 firstStatisticsEventTrigger.targetChainTokenId = 'targetTokenId';
 firstStatisticsEventTrigger.WIDs = '1,WIDStatistics,3';
 firstStatisticsEventTrigger.sourceBlockId = 'block';
@@ -240,14 +240,14 @@ const lastRevenue = {
   permitTxId: 'txId',
   eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
   lockHeight: 100,
-  fromChain: 'fromChain',
-  toChain: 'toChain',
-  fromAddress: 'fromAddressStar',
+  fromChain: 'fromChainStar',
+  toChain: 'toChainStar',
+  fromAddress: 'fromAddress',
   toAddress: 'toAddress',
   amount: '100',
   bridgeFee: '200',
   networkFee: '1000',
-  tokenId: 'tokenId2',
+  tokenId: 'tokenIdStar',
   lockTxId: 'txId',
   height: null,
   timestamp: null,
@@ -291,6 +291,34 @@ const tokenId2Revenue = {
   ],
 };
 
+const secondTokenId2Revenue = {
+  id: 1,
+  permitTxId: 'txId',
+  eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
+  lockHeight: 100,
+  fromChain: 'fromChain',
+  toChain: 'toChain',
+  fromAddress: 'fromAddressStar',
+  toAddress: 'toAddress',
+  amount: '100',
+  bridgeFee: '200',
+  networkFee: '1000',
+  tokenId: 'tokenId2',
+  lockTxId: 'txId',
+  height: null,
+  timestamp: null,
+  status: 'Doing',
+  nanoErgs: 1100000,
+  tokens: [
+    {
+      tokenId:
+        '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074',
+      amount: 9999,
+      name: '',
+    },
+  ],
+};
+
 export {
   firstPermit,
   secondPermit,
@@ -304,4 +332,5 @@ export {
   firstRevenue,
   lastRevenue,
   tokenId2Revenue,
+  secondTokenId2Revenue,
 };

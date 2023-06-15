@@ -9,6 +9,7 @@ import * as console from 'console';
 import {
   firstRevenue,
   lastRevenue,
+  secondTokenId2Revenue,
   tokenId2Revenue,
 } from '../ergo/statistics/mockUtils';
 
@@ -89,12 +90,13 @@ describe('revenueRouter', () => {
      */
     it('Revenue endpoint should return correct revenues with fromChain filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/revenue?fromChain=none');
+      const res = await request(app).get('/revenue?fromChain=fromChainStar');
 
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.length).to.eql(0);
+      expect(resultParsed.length).to.eql(6);
+      expect(resultParsed[5]).to.eql(lastRevenue);
     });
 
     /**
@@ -110,12 +112,13 @@ describe('revenueRouter', () => {
      */
     it('Revenue endpoint should return correct revenues with toChain filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/revenue?toChain=none');
+      const res = await request(app).get('/revenue?toChain=toChainStar');
 
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.length).to.eql(0);
+      expect(resultParsed.length).to.eql(6);
+      expect(resultParsed[5]).to.eql(lastRevenue);
     });
 
     /**
@@ -136,7 +139,7 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([tokenId2Revenue, lastRevenue]);
+      expect(resultParsed).to.eql([tokenId2Revenue, secondTokenId2Revenue]);
     });
 
     /**
@@ -152,7 +155,7 @@ describe('revenueRouter', () => {
      */
     it('Revenue endpoint should return correct revenues with sourceTxId filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/revenue?sourceTxId=none');
+      const res = await request(app).get('/revenue?sourceTxId=tokenIdStar');
 
       // check the result
       expect(res.status).to.eql(200);
@@ -201,7 +204,7 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.length).to.eql(4);
-      expect(resultParsed[3]).to.eql(tokenId2Revenue);
+      expect(resultParsed[0]).to.eql(tokenId2Revenue);
     });
 
     /**
@@ -245,7 +248,7 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.length).to.eql(4);
-      expect(resultParsed[3]).to.eql(tokenId2Revenue);
+      expect(resultParsed[0]).to.eql(tokenId2Revenue);
     });
 
     /**
@@ -262,7 +265,7 @@ describe('revenueRouter', () => {
      */
     it('Revenue endpoint should return correct revenues when setting offset/limit', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/revenue?offset=4&limit=1');
+      const res = await request(app).get('/revenue?offset=1&limit=1');
 
       // check the result
       expect(res.status).to.eql(200);
