@@ -98,6 +98,15 @@ const parseJson = (string: string, forceBigIntPaths: string[] = []) => {
   return parsedString;
 };
 
+/**
+ * returns the stringified query param
+ * @param param
+ */
+const stringifyQueryParam = (param: any) => {
+  if (param === undefined) return '';
+  return String(param);
+};
+
 export {
   hexStrToUint8Array,
   uint8ArrayToHex,
@@ -107,4 +116,5 @@ export {
   base64ToArrayBuffer,
   ergoTreeToBase58Address,
   parseJson,
+  stringifyQueryParam,
 };

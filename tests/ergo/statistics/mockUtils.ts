@@ -114,7 +114,7 @@ const permitBoxGenerator = (
 
 const firstPermit = new PermitEntity();
 firstPermit.WID = 'WIDStatistics';
-firstPermit.block = 'blockIDStatistics2';
+firstPermit.block = 'blockHash';
 firstPermit.height = 100;
 firstPermit.extractor = 'extractor';
 firstPermit.boxId = 'boxIDStatistics2';
@@ -123,10 +123,11 @@ firstPermit.boxSerialized = Buffer.from(
 ).toString('base64');
 firstPermit.spendBlock = 'blockHash2';
 firstPermit.spendHeight = 110;
+firstPermit.txId = 'txId';
 
 const secondPermit = new PermitEntity();
 secondPermit.WID = 'WIDStatistics';
-secondPermit.block = 'blockIDStatistics1';
+secondPermit.block = 'blockHash2';
 secondPermit.height = 101;
 secondPermit.extractor = 'extractor';
 secondPermit.boxId = 'boxIDStatistics1';
@@ -137,6 +138,7 @@ secondPermit.boxSerialized = permitBoxGenerator(
 );
 secondPermit.spendBlock = 'blockHash1';
 secondPermit.spendHeight = 111;
+secondPermit.txId = 'txId2';
 
 const firstStatisticCommitment = new CommitmentEntity();
 firstStatisticCommitment.commitment = 'commitment';
@@ -147,6 +149,7 @@ firstStatisticCommitment.block = 'block';
 firstStatisticCommitment.extractor = 'extractor';
 firstStatisticCommitment.height = 1005;
 firstStatisticCommitment.boxSerialized = '222';
+firstStatisticCommitment.txId = 'txId';
 
 const secondStatisticCommitment = {
   ...firstStatisticCommitment,
@@ -160,7 +163,7 @@ const thirdStatisticCommitment = {
 };
 
 const firstStatisticsEventTrigger = new EventTriggerEntity();
-firstStatisticsEventTrigger.sourceTxId = 'txId';
+firstStatisticsEventTrigger.sourceTxId = 'txIdStar';
 firstStatisticsEventTrigger.block = 'blockID';
 firstStatisticsEventTrigger.height = 100;
 firstStatisticsEventTrigger.extractor = 'extractor';
@@ -171,15 +174,16 @@ firstStatisticsEventTrigger.networkFee = '1000';
 firstStatisticsEventTrigger.bridgeFee = '200';
 firstStatisticsEventTrigger.fromAddress = 'fromAddress';
 firstStatisticsEventTrigger.toAddress = 'toAddress';
-firstStatisticsEventTrigger.fromChain = 'fromChain';
-firstStatisticsEventTrigger.toChain = 'toChain';
-firstStatisticsEventTrigger.sourceChainTokenId = 'tokenId';
+firstStatisticsEventTrigger.fromChain = 'fromChainStar';
+firstStatisticsEventTrigger.toChain = 'toChainStar';
+firstStatisticsEventTrigger.sourceChainTokenId = 'tokenIdStar';
 firstStatisticsEventTrigger.targetChainTokenId = 'targetTokenId';
 firstStatisticsEventTrigger.WIDs = '1,WIDStatistics,3';
 firstStatisticsEventTrigger.sourceBlockId = 'block';
 firstStatisticsEventTrigger.sourceChainHeight = 123456;
 firstStatisticsEventTrigger.eventId =
   'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b';
+firstStatisticsEventTrigger.txId = 'txId';
 
 const secondStatisticsEventTrigger = {
   ...firstStatisticsEventTrigger,
@@ -197,6 +201,124 @@ const spentEventTrigger = {
   spendHeight: 110,
 };
 
+const firstRevenue = {
+  id: 4,
+  permitTxId: 'txId2',
+  eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
+  lockHeight: 100,
+  fromChain: 'fromChain',
+  toChain: 'toChain',
+  fromAddress: 'fromAddress',
+  toAddress: 'toAddressStar',
+  amount: '100',
+  bridgeFee: '200',
+  networkFee: '1000',
+  tokenId: 'tokenId',
+  lockTxId: 'txId2',
+  height: 2222,
+  timestamp: 123456789,
+  status: 'Doing',
+  nanoErgs: 100000000,
+  tokens: [
+    {
+      tokenId:
+        '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+      amount: 10,
+      name: '',
+    },
+    {
+      tokenId:
+        '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+      amount: 10,
+      name: '',
+    },
+  ],
+};
+
+const lastRevenue = {
+  id: 1,
+  permitTxId: 'txId',
+  eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
+  lockHeight: 100,
+  fromChain: 'fromChainStar',
+  toChain: 'toChainStar',
+  fromAddress: 'fromAddress',
+  toAddress: 'toAddress',
+  amount: '100',
+  bridgeFee: '200',
+  networkFee: '1000',
+  tokenId: 'tokenIdStar',
+  lockTxId: 'txIdStar',
+  height: null,
+  timestamp: null,
+  status: 'Doing',
+  nanoErgs: 1100000,
+  tokens: [
+    {
+      tokenId:
+        '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074',
+      amount: 9999,
+      name: '',
+    },
+  ],
+};
+
+const tokenId2Revenue = {
+  id: 3,
+  permitTxId: 'txId',
+  eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
+  lockHeight: 100,
+  fromChain: 'fromChain',
+  toChain: 'toChain',
+  fromAddress: 'fromAddressStar',
+  toAddress: 'toAddress',
+  amount: '100',
+  bridgeFee: '200',
+  networkFee: '1000',
+  tokenId: 'tokenId2',
+  lockTxId: 'txId',
+  height: 1111,
+  timestamp: 123,
+  status: 'Doing',
+  nanoErgs: 1100000,
+  tokens: [
+    {
+      amount: 1,
+      name: '',
+      tokenId:
+        '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    },
+  ],
+};
+
+const secondTokenId2Revenue = {
+  id: 1,
+  permitTxId: 'txId',
+  eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
+  lockHeight: 100,
+  fromChain: 'fromChain',
+  toChain: 'toChain',
+  fromAddress: 'fromAddressStar',
+  toAddress: 'toAddress',
+  amount: '100',
+  bridgeFee: '200',
+  networkFee: '1000',
+  tokenId: 'tokenId2',
+  lockTxId: 'txId',
+  height: null,
+  timestamp: null,
+  status: 'Doing',
+  nanoErgs: 1100000,
+  tokens: [
+    {
+      tokenId:
+        '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074',
+      amount: 9999,
+      name: '',
+    },
+  ],
+};
+
 export {
   firstPermit,
   secondPermit,
@@ -207,4 +329,8 @@ export {
   secondStatisticsEventTrigger,
   thirdStatisticsEventTrigger,
   spentEventTrigger,
+  firstRevenue,
+  lastRevenue,
+  tokenId2Revenue,
+  secondTokenId2Revenue,
 };

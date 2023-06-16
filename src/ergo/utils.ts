@@ -10,6 +10,7 @@ import { getConfig } from '../config/config';
 import { Transaction } from '../api/Transaction';
 import { watcherDatabase } from '../init';
 import { AddressBalance, TokenInfo } from './interfaces';
+import { RevenueView } from '../database/entities/revenueView';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -380,5 +381,24 @@ export class ErgoUtils {
       return RWT.amount;
     }
     return 0n;
+  };
+
+  /**
+   * Extracts the revenue from the revenue view
+   * @param revenues
+   */
+  static extractRevenueFromView = async (revenues: RevenueView[]) => {
+    const revenuesTransformed = await Promise.all(
+      revenues.map(async ({ boxSerialized, ...rev }) => {
+        const balance = await this.extractBalanceFromBoxes([boxSerialized]);
+        return {
+          ...rev,
+          nanoErgs: balance.nanoErgs,
+          tokens: balance.tokens,
+        };
+      })
+    );
+
+    return revenuesTransformed;
   };
 }
