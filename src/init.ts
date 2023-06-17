@@ -22,6 +22,7 @@ import { tokenNameJob } from './jobs/tokenName';
 import eventsRouter from './api/events';
 import withdrawRouter from './api/withdraw';
 import revenueRouter from './api/revenue';
+import { revenueJob } from './jobs/revenue';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -108,6 +109,8 @@ const init = async () => {
       reveal(watcherUtils, txUtils, boxesObject);
       // Running token name thread
       tokenNameJob([]);
+      // Running revenue thread
+      revenueJob();
 
       logger.debug('Service initialization finished successfully.');
     })

@@ -389,12 +389,15 @@ export class ErgoUtils {
    */
   static extractRevenueFromView = async (revenues: RevenueView[]) => {
     const revenuesTransformed = await Promise.all(
-      revenues.map(async ({ boxSerialized, ...rev }) => {
-        const balance = await this.extractBalanceFromBoxes([boxSerialized]);
+      revenues.map(async ({ tokens, ...rev }) => {
+        // const balance = await this.extractBalanceFromBoxes([boxSerialized]);
+        const tokensArray = tokens.split(',');
         return {
           ...rev,
-          nanoErgs: balance.nanoErgs,
-          tokens: balance.tokens,
+          revenues: tokensArray.map((token) => {
+            const [tokenId, amount] = token.split(':');
+            return { tokenId, amount: BigInt(amount) };
+          }),
         };
       })
     );

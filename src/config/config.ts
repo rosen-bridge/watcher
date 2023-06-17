@@ -77,6 +77,7 @@ class Config {
   commitmentRedeemInterval: number;
   commitmentRevealInterval: number;
   tokenNameInterval: number;
+  revenueInterval: number;
   transactionRemovingTimeout: number;
   transactionConfirmation: number;
   commitmentTimeoutConfirmation: number;
@@ -164,6 +165,12 @@ class Config {
       'observation.validThreshold'
     );
     this.tokenNameInterval = getRequiredNumber('ergo.interval.tokenName');
+    this.revenueInterval = getRequiredNumber('ergo.interval.revenue');
+    if (this.ergoInterval <= this.revenueInterval) {
+      throw new Error(
+        'ImproperlyConfigured. Revenue interval should be less than ErgoScanner interval.'
+      );
+    }
     // TODO verify bigint
     // https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/34
     this.minBoxValue = getRequiredString('ergo.minBoxValue');

@@ -72,7 +72,7 @@ import {
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
 import { TokenEntity } from '../../src/database/entities/tokenEntity';
 import { RevenueView } from '../../src/database/entities/revenueView';
-import { RevenueChartEntity } from '../../src/database/entities/revenueChartEntity';
+import { RevenueEntity } from '../../src/database/entities/revenueEntity';
 import { createMemoryDatabase } from '../resources/inMemoryDb';
 
 const observation2Status = {
@@ -95,6 +95,7 @@ export type ORMType = {
   eventTriggerRepo: Repository<EventTriggerEntity>;
   transactionRepo: Repository<TxEntity>;
   tokenRepo: Repository<TokenEntity>;
+  revenueRepo: Repository<RevenueEntity>;
 };
 
 /**
@@ -113,7 +114,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     TxEntity,
     TokenEntity,
     RevenueView,
-    RevenueChartEntity,
+    RevenueEntity,
   ];
   const ormConfig = new DataSource({
     type: 'sqlite',
@@ -143,6 +144,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
   const eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity);
   const transactionRepo = ormConfig.getRepository(TxEntity);
   const tokenRepo = ormConfig.getRepository(TokenEntity);
+  const revenueRepo = ormConfig.getRepository(RevenueEntity);
   if (clean) {
     for (const entity of entities.reverse()) {
       if (entity === RevenueView) continue;
@@ -164,6 +166,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     eventTriggerRepo: eventTriggerRepo,
     transactionRepo: transactionRepo,
     tokenRepo: tokenRepo,
+    revenueRepo: revenueRepo,
   };
 };
 

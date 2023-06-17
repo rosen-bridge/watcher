@@ -27,7 +27,7 @@ import { TokenEntity } from '../entities/tokenEntity';
 import { EventStatus } from '../../utils/interfaces';
 import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 import { RevenueView } from '../entities/revenueView';
-import { RevenueChartEntity } from '../entities/revenueChartEntity';
+import { RevenueEntity } from '../entities/revenueEntity';
 import { PlatformTools } from 'typeorm/platform/PlatformTools';
 
 class WatcherDataBase {
@@ -41,7 +41,7 @@ class WatcherDataBase {
   private readonly eventTriggerRepository: Repository<EventTriggerEntity>;
   private readonly tokenRepository: Repository<TokenEntity>;
   private readonly revenueView: Repository<RevenueView>;
-  private readonly revenueChartRepository: Repository<RevenueChartEntity>;
+  private readonly revenueRepository: Repository<RevenueEntity>;
 
   constructor(dataSource: DataSource) {
     this.blockRepository = dataSource.getRepository(BlockEntity);
@@ -56,7 +56,7 @@ class WatcherDataBase {
     this.eventTriggerRepository = dataSource.getRepository(EventTriggerEntity);
     this.tokenRepository = dataSource.getRepository(TokenEntity);
     this.revenueView = dataSource.getRepository(RevenueView);
-    this.revenueChartRepository = dataSource.getRepository(RevenueChartEntity);
+    this.revenueRepository = dataSource.getRepository(RevenueEntity);
   }
 
   /**
@@ -819,7 +819,7 @@ class WatcherDataBase {
   };
 
   getRevenueChart = async (period: string, offset: number, limit: number) => {
-    let qb = this.revenueChartRepository.createQueryBuilder('rc');
+    let qb = this.revenueRepository.createQueryBuilder('rc');
     if (period === 'week') {
       //TODO: Check PlatformTools
       qb = qb
@@ -853,6 +853,48 @@ class WatcherDataBase {
       // invalid period
       return;
     }
+  };
+
+  /**
+   * Returns last visited permit id
+   */
+  getLastVisitedPermitId = async (): Promise<number> => {
+    const result = await this.revenueRepository
+      .createQueryBuilder('revenue')
+      .select('MAX(revenue.permitId)', 'max')
+      .getRawOne();
+
+    return result.max;
+  };
+
+  /**
+   * Returns all permits up to a specific id
+   * @param id
+   */
+  getPermitsFromId = async (id: number): Promise<PermitEntity[]> => {
+    return this.permitRepository
+      .createQueryBuilder('p')
+      .select(`id, "boxSerialized"`)
+      .where('p.id > :id', { id })
+      .orderBy('p.id', 'ASC')
+      .execute();
+  };
+
+  /**
+   * Stores the info of permit in chart entity
+   * @param timestamp
+   * @param revenue
+   */
+  storeRevenue = async (
+    tokenId: string,
+    amount: number,
+    permit: PermitEntity
+  ) => {
+    await this.revenueRepository.save({
+      tokenId,
+      amount,
+      permit,
+    });
   };
 }
 
