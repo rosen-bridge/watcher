@@ -1,13 +1,18 @@
 import config from 'config';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
-import { uint8ArrayToHex } from '../utils/utils';
+import * as ecc from 'tiny-secp256k1';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
 import { TokensConfig } from './tokensConfig';
 import { RosenTokens } from '@rosen-bridge/tokens';
 import path from 'path';
 import { NetworkType } from '../types';
+import { mnemonicToSeedSync, generateMnemonic } from 'bip39';
+import { BIP32Factory } from 'bip32';
+import * as process from 'process';
+
+const bip32 = BIP32Factory(ecc);
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_WATCHER,
@@ -97,20 +102,29 @@ class Config {
       this.networkType === 'mainnet'
         ? wasm.NetworkPrefix.Mainnet
         : wasm.NetworkPrefix.Testnet;
-    const secret = getOptionalString('ergo.secret');
-    if (!secret) {
-      const secretKey = wasm.SecretKey.random_dlog();
-      console.warn(
-        'ImproperlyConfigured. ergo.secret key does not exist in the config.' +
-          `you can use {${uint8ArrayToHex(
-            secretKey.to_bytes()
-          ).toString()}} or generate one by yourself`
+
+    if (process.env.NODE_ENV === 'test') {
+      this.secretKey = wasm.SecretKey.dlog_from_bytes(
+        Buffer.from(getOptionalString('ergo.secret'), 'hex')
       );
-      throw new SecretError(
-        `ImproperlyConfigured. ergo.secret doesn't set in config file.`
+    } else {
+      const mnemonic = getOptionalString('ergo.mnemonic');
+      if (!mnemonic) {
+        const randomMnemonic = generateMnemonic(160);
+        console.warn(
+          'ImproperlyConfigured. ergo.mnemonic does not exist in the config.' +
+            `You can use {${randomMnemonic}} or generate one by yourself`
+        );
+        throw new SecretError(
+          `ImproperlyConfigured. ergo.mnemonic doesn't set in config file.`
+        );
+      }
+      const seed = mnemonicToSeedSync(mnemonic);
+      const secret = bip32.fromSeed(seed).derivePath("m/44'/429'/0'/0/0");
+      this.secretKey = wasm.SecretKey.dlog_from_bytes(
+        Uint8Array.from(secret.privateKey ? secret.privateKey : Buffer.from(''))
       );
     }
-    this.secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(secret, 'hex'));
     this.address = this.secretKey.get_address().to_base58(this.networkPrefix);
     this.explorerUrl = getRequiredString('ergo.explorer.url');
     if (!this.explorerUrl) {
