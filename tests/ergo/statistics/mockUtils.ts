@@ -310,6 +310,51 @@ const secondTokenId2Revenue = {
   ],
 };
 
+const revenueWeeklyChart = [
+  {
+    tokenId: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    revenue: 10,
+    week_start_day: '29',
+    week_start_month: '12',
+    week_start_year: '1969',
+  },
+  {
+    tokenId: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    revenue: 5.5,
+    week_start_day: '29',
+    week_start_month: '12',
+    week_start_year: '1969',
+  },
+];
+
+const revenueMonthlyChart = [
+  {
+    tokenId: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    year: '1970',
+    month: '01',
+    revenue: 10,
+  },
+  {
+    tokenId: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    year: '1970',
+    month: '01',
+    revenue: 5.5,
+  },
+];
+
+const revenueYearlyChart = [
+  {
+    tokenId: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    year: '1970',
+    revenue: 10,
+  },
+  {
+    tokenId: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    year: '1970',
+    revenue: 5.5,
+  },
+];
+
 export {
   firstPermit,
   secondPermit,
@@ -324,4 +369,7 @@ export {
   lastRevenue,
   tokenId2Revenue,
   secondTokenId2Revenue,
+  revenueWeeklyChart,
+  revenueMonthlyChart,
+  revenueYearlyChart,
 };
