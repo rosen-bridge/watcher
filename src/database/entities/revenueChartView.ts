@@ -9,15 +9,15 @@ import { ViewEntity, ViewColumn } from 'typeorm';
       .addSelect('re."amount"', 'amount')
       .addSelect(
         `strftime('%d', datetime(be."timestamp"/1000, 'unixepoch'))`,
-        'Day'
+        'day'
       )
       .addSelect(
         `strftime('%m', datetime(be."timestamp"/1000, 'unixepoch'))`,
-        'Month'
+        'month'
       )
       .addSelect(
         `strftime('%Y', datetime(be."timestamp"/1000, 'unixepoch'))`,
-        'Year'
+        'year'
       )
       .from('revenue_entity', 're')
       .innerJoin('permit_entity', 'pe', 're."permitId" = pe.id')
