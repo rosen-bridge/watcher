@@ -19,6 +19,8 @@ export const revenueJobFunction = async () => {
     // store permits info
     for (let i = 0; i < newPermits.length; i++) {
       const permitBox = decodeSerializedBox(newPermits[i].boxSerialized);
+
+      // save tokens as revenues
       const boxTokens = permitBox.tokens();
       for (let j = 0; j < boxTokens.len(); j++) {
         const token = boxTokens.get(j);
@@ -28,6 +30,13 @@ export const revenueJobFunction = async () => {
           newPermits[i]
         );
       }
+
+      // save ergs as revenue
+      await watcherDatabase.storeRevenue(
+        'ERG',
+        permitBox.value().as_i64().as_num(),
+        newPermits[i]
+      );
     }
   }
 };

@@ -55,7 +55,23 @@ revenueRouter.get('/', async (req, res) => {
 });
 
 revenueRouter.get('/chart', async (req, res) => {
-  res.send({ message: 'Not implemented yet' });
+  try {
+    const { period, offset, limit } = req.query;
+    const offsetString = stringifyQueryParam(offset);
+    const limitString = stringifyQueryParam(limit);
+    const result = await watcherDatabase.getRevenueChart(
+      stringifyQueryParam(period),
+      offsetString === '' ? 0 : Number(offsetString),
+      limitString === ''
+        ? DEFAULT_API_LIMIT
+        : Math.min(Number(limitString), MAX_API_LIMIT)
+    );
+
+    res.status(200).send(JsonBI.stringify(result));
+  } catch (e) {
+    logger.warn(`An error occurred while fetching revenues chart data: ${e}`);
+    res.status(500).send({ message: e.message });
+  }
 });
 
 export default revenueRouter;
