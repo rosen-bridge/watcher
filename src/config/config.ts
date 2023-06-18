@@ -10,7 +10,6 @@ import path from 'path';
 import { NetworkType } from '../types';
 import { mnemonicToSeedSync, generateMnemonic } from 'bip39';
 import { BIP32Factory } from 'bip32';
-import * as process from 'process';
 
 const bip32 = BIP32Factory(ecc);
 
