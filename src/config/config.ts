@@ -103,13 +103,17 @@ class Config {
         ? wasm.NetworkPrefix.Mainnet
         : wasm.NetworkPrefix.Testnet;
 
-    if (process.env.NODE_ENV === 'test') {
-      this.secretKey = wasm.SecretKey.dlog_from_bytes(
-        Buffer.from(getOptionalString('ergo.secret'), 'hex')
-      );
-    } else {
-      const mnemonic = getOptionalString('ergo.mnemonic');
-      if (!mnemonic) {
+    const mnemonic = getOptionalString('ergo.mnemonic');
+    if (!mnemonic) {
+      const secret = getOptionalString('ergo.secret');
+      if (secret) {
+        this.secretKey = wasm.SecretKey.dlog_from_bytes(
+          Buffer.from(secret, 'hex')
+        );
+        console.warn(
+          `Using secret key is deprecated. Please use mnemonic instead.`
+        );
+      } else {
         const randomMnemonic = generateMnemonic(160);
         console.warn(
           'ImproperlyConfigured. ergo.mnemonic does not exist in the config.' +
@@ -119,6 +123,7 @@ class Config {
           `ImproperlyConfigured. ergo.mnemonic doesn't set in config file.`
         );
       }
+    } else {
       const seed = mnemonicToSeedSync(mnemonic);
       const secret = bip32.fromSeed(seed).derivePath("m/44'/429'/0'/0/0");
       this.secretKey = wasm.SecretKey.dlog_from_bytes(
