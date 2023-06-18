@@ -390,8 +390,10 @@ export class ErgoUtils {
   static extractRevenueFromView = async (revenues: RevenueView[]) => {
     const revenuesTransformed = await Promise.all(
       revenues.map(async ({ tokens, ...rev }) => {
-        // const balance = await this.extractBalanceFromBoxes([boxSerialized]);
-        const tokensArray = tokens.split(',');
+        let tokensArray = new Array<string>();
+        if (tokens) {
+          tokensArray = tokens.split(',');
+        }
         return {
           ...rev,
           revenues: tokensArray.map((token) => {

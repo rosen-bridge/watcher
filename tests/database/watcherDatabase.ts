@@ -47,6 +47,10 @@ import {
   permitBox,
   permitEntity,
   plainBox,
+  revenue1,
+  revenue2,
+  revenue3,
+  revenue4,
   spentCommitmentEntity,
   spentCommitmentEntityOfWID,
   spentPermitEntity,
@@ -74,6 +78,7 @@ import { TokenEntity } from '../../src/database/entities/tokenEntity';
 import { RevenueView } from '../../src/database/entities/revenueView';
 import { RevenueEntity } from '../../src/database/entities/revenueEntity';
 import { createMemoryDatabase } from '../resources/inMemoryDb';
+import * as console from 'console';
 
 const observation2Status = {
   observation: observationEntity2,
@@ -216,6 +221,7 @@ export const fillORM = async (
       validToken1Record,
       validToken2Record,
     ]);
+  await ORM.revenueRepo.save([revenue1, revenue2, revenue3, revenue4]);
 };
 
 describe('WatcherModel tests', () => {

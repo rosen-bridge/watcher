@@ -218,19 +218,16 @@ const firstRevenue = {
   height: 2222,
   timestamp: 123456789,
   status: 'Doing',
-  nanoErgs: 100000000,
-  tokens: [
+  revenues: [
     {
       tokenId:
         '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
       amount: 10,
-      name: '',
     },
     {
       tokenId:
         '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
       amount: 10,
-      name: '',
     },
   ],
 };
@@ -252,13 +249,11 @@ const lastRevenue = {
   height: null,
   timestamp: null,
   status: 'Doing',
-  nanoErgs: 1100000,
-  tokens: [
+  revenues: [
     {
       tokenId:
         '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074',
       amount: 9999,
-      name: '',
     },
   ],
 };
@@ -280,11 +275,9 @@ const tokenId2Revenue = {
   height: 1111,
   timestamp: 123,
   status: 'Doing',
-  nanoErgs: 1100000,
-  tokens: [
+  revenues: [
     {
       amount: 1,
-      name: '',
       tokenId:
         '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
     },
@@ -308,13 +301,11 @@ const secondTokenId2Revenue = {
   height: null,
   timestamp: null,
   status: 'Doing',
-  nanoErgs: 1100000,
-  tokens: [
+  revenues: [
     {
       tokenId:
         '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074',
       amount: 9999,
-      name: '',
     },
   ],
 };
