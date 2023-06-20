@@ -8,22 +8,6 @@ const logger = loggerFactory(import.meta.url);
 const healthRouter = express.Router();
 
 /**
- * Api for overall health status
- */
-healthRouter.get('/overall', async (req: Request, res: Response) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    res.status(200).json(await healthCheck.getOverallHealthStatus());
-  } catch (e) {
-    logger.warn(`An error occurred while checking overall health status: ${e}`);
-    res.status(500).send({ message: e.message });
-  }
-});
-
-/**
  * Api for detailed health status
  */
 healthRouter.get('/status', async (req: Request, res: Response) => {
