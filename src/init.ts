@@ -22,6 +22,8 @@ import { tokenNameJob } from './jobs/tokenName';
 import eventsRouter from './api/events';
 import withdrawRouter from './api/withdraw';
 import revenueRouter from './api/revenue';
+import { healthCheckStart } from './jobs/healthCheck';
+import { healthRouter } from './api/healthCheck';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -64,6 +66,7 @@ const init = async () => {
     router.use('/events', eventsRouter);
     router.use('/withdraw', withdrawRouter);
     router.use('/revenue', revenueRouter);
+    router.use('/health', healthRouter);
 
     app.use(router);
     const port = getConfig().general.apiPort;
@@ -78,6 +81,7 @@ const init = async () => {
       watcherDatabase = new WatcherDataBase(dataSource);
       logger.debug('Initializing scanners and extractors...');
       scannerInit();
+      healthCheckStart();
 
       await delay(10000);
       watcherUtils = new WatcherUtils(
