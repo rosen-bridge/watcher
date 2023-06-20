@@ -276,6 +276,7 @@ class HealthCheckConfig {
   ergoNodeMaxPeerHeightDifference: number;
   permitWarnCommitmentCount: number;
   permitCriticalCommitmentCount: number;
+  updateInterval: number;
 
   constructor() {
     this.ergWarnThreshold = BigInt(
@@ -314,6 +315,7 @@ class HealthCheckConfig {
     this.permitCriticalCommitmentCount = getRequiredNumber(
       'healthCheck.permit.criticalCommitmentCount'
     );
+    this.updateInterval = getRequiredNumber('healthCheck.interval');
   }
 }
 

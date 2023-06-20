@@ -1,6 +1,7 @@
 import { loggerFactory } from '../log/Logger';
 import { HealthCheck } from '@rosen-bridge/health-check';
 import { healthCheck, healthCheckInit } from '../utils/healthCheck';
+import { getConfig } from '../../src/config/config';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -12,7 +13,10 @@ const healthCheckUpdateJob = async (healthCheck: HealthCheck) => {
       `Health check update job failed for , ${e.message}, ${e.stack}`
     );
   }
-  setTimeout(() => healthCheckUpdateJob(healthCheck), 100 * 1000);
+  setTimeout(
+    () => healthCheckUpdateJob(healthCheck),
+    getConfig().healthCheck.updateInterval * 1000
+  );
 };
 
 const healthCheckStart = () => {

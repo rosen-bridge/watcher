@@ -60,6 +60,7 @@ database:
 api:
   port: 3000 # port used to run express server
 healthCheck:
+  interval: 60 # health check update interval (in seconds)
   asset:
     ergWarnThreshold: 1000000000 # minimum recommended erg balance
     ergCriticalThreshold: 100000000 # minimum required erg balance
