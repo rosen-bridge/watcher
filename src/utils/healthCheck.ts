@@ -8,6 +8,8 @@ import {
   ErgoNodeSyncHealthCheckParam,
   ExplorerWidHealthCheckParam,
   HealthCheck,
+  HealthStatusLevel,
+  LogLevelHealthCheck,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/health-check';
 import { getConfig } from '../config/config';
@@ -19,11 +21,22 @@ import {
   NODE_TYPE,
   EXPLORER_TYPE,
 } from '../config/constants';
+import { loggerFactory } from '../log/Logger';
 
+const logger = loggerFactory(import.meta.url);
 let healthCheck: HealthCheck;
 
 const healthCheckInit = () => {
   healthCheck = new HealthCheck();
+
+  const errorLogHealthCheck = new LogLevelHealthCheck(
+    logger,
+    HealthStatusLevel.UNSTABLE,
+    getConfig().healthCheck.errorLogAllowedCount,
+    getConfig().healthCheck.errorLogDuration,
+    'error'
+  );
+  healthCheck.register(errorLogHealthCheck);
 
   if (getConfig().general.scannerType === NODE_TYPE) {
     const widHealthCheck = new NodeWidHealthCheckParam(

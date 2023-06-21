@@ -79,4 +79,7 @@ healthCheck:
   permit:
     warnCommitmentCount: 100 # warning remaining permits for creating commitment
     criticalCommitmentCount: 10 # critical remaining permits for creating commitment
+  errorLog:
+    maxAllowedCount: 2 # maximum allowed error log lines
+    duration: 100000 # error log duration time check in milliseconds
 

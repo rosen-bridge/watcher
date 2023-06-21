@@ -286,6 +286,8 @@ class HealthCheckConfig {
   permitWarnCommitmentCount: number;
   permitCriticalCommitmentCount: number;
   updateInterval: number;
+  errorLogAllowedCount: number;
+  errorLogDuration: number;
 
   constructor() {
     this.ergWarnThreshold = BigInt(
@@ -325,6 +327,10 @@ class HealthCheckConfig {
       'healthCheck.permit.criticalCommitmentCount'
     );
     this.updateInterval = getRequiredNumber('healthCheck.interval');
+    this.errorLogAllowedCount = getRequiredNumber(
+      'healthCheck.errorLog.maxAllowedCount'
+    );
+    this.errorLogDuration = getRequiredNumber('healthCheck.errorLog.duration');
   }
 }
 
