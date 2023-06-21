@@ -24,12 +24,11 @@ import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { base64ToArrayBuffer } from '../../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { TokenEntity } from '../entities/tokenEntity';
-import { EventStatus } from '../../utils/interfaces';
+import { EventStatus, RevenueChartRecord } from '../../utils/interfaces';
 import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 import { RevenueView } from '../entities/revenueView';
 import { RevenueEntity } from '../entities/revenueEntity';
-import { PlatformTools } from 'typeorm/platform/PlatformTools';
-import { RevenueChartView } from '../entities/revenueChartView';
+import { RevenueChartDataView } from '../entities/revenueChartDataView';
 import { getConfig } from '../../config/config';
 
 class WatcherDataBase {
@@ -44,7 +43,7 @@ class WatcherDataBase {
   private readonly tokenRepository: Repository<TokenEntity>;
   private readonly revenueView: Repository<RevenueView>;
   private readonly revenueRepository: Repository<RevenueEntity>;
-  private readonly revenueChartView: Repository<RevenueChartView>;
+  private readonly revenueChartView: Repository<RevenueChartDataView>;
 
   constructor(dataSource: DataSource) {
     this.blockRepository = dataSource.getRepository(BlockEntity);
@@ -60,7 +59,7 @@ class WatcherDataBase {
     this.tokenRepository = dataSource.getRepository(TokenEntity);
     this.revenueView = dataSource.getRepository(RevenueView);
     this.revenueRepository = dataSource.getRepository(RevenueEntity);
-    this.revenueChartView = dataSource.getRepository(RevenueChartView);
+    this.revenueChartView = dataSource.getRepository(RevenueChartDataView);
   }
 
   /**
@@ -828,33 +827,37 @@ class WatcherDataBase {
    * @param offset
    * @param limit
    */
-  getRevenueChart = async (period: string, offset: number, limit: number) => {
+  getRevenueChart = async (
+    period: string,
+    offset: number,
+    limit: number
+  ): Promise<RevenueChartRecord[]> => {
     let qb = this.revenueChartView.createQueryBuilder('rcv');
     if (period === 'week') {
       const dbType = getConfig().database.type;
       const sqliteQuery = `
       SELECT "tokenId", AVG(amount) AS revenue,
-        STRFTIME('%d', week_start) AS week_start_day,
-        STRFTIME('%m', week_start) AS week_start_month,
-        STRFTIME('%Y', week_start) AS week_start_year
+        STRFTIME('%d', week_start) AS day,
+        STRFTIME('%m', week_start) AS month,
+        STRFTIME('%Y', week_start) AS year
       FROM (
         SELECT "tokenId", amount, DATE(STRFTIME('%Y-%m-%d', year || '-' || month || '-' || day), 'weekday 0', '-6 days') AS week_start
-        FROM revenue_chart_view
+        FROM revenue_chart_data
       ) subquery
-      GROUP BY week_start_day, week_start_month, week_start_year, "tokenId"
-      ORDER BY week_start_year, week_start_month, week_start_day;
+      GROUP BY day, month, year, "tokenId"
+      ORDER BY year, month, day;
       `;
       const pgQuery = `
       SELECT "tokenId", AVG(amount) AS revenue,
-        EXTRACT(day FROM week_start) AS week_start_day,
-        EXTRACT(month FROM week_start) AS week_start_month,
-        EXTRACT(year FROM week_start) AS week_start_year
+        EXTRACT(day FROM week_start) AS day,
+        EXTRACT(month FROM week_start) AS month,
+        EXTRACT(year FROM week_start) AS year
       FROM (
         SELECT "tokenId", amount, DATE_TRUNC('week', TO_DATE(CONCAT(year, '-', month, '-', day), 'YYYY-MM-DD')) AS week_start
-        FROM revenue_chart_view
+        FROM revenue_chart_data
       ) subquery
-      GROUP BY week_start_day, week_start_month, week_start_year, "tokenId"
-      ORDER BY week_start_year, week_start_month, week_start_day;
+      GROUP BY day, month, year, "tokenId"
+      ORDER BY year, month, day;
       `;
 
       if (dbType === 'sqlite') {
@@ -881,38 +884,45 @@ class WatcherDataBase {
   };
 
   /**
-   * Returns last visited permit id
+   * Returns unsaved permit ids
    */
-  getLastVisitedPermitId = async (): Promise<number> => {
-    const result = await this.revenueRepository
-      .createQueryBuilder('revenue')
-      .select('MAX(revenue.permitId)', 'max')
-      .getRawOne();
+  getUnsavedRevenueIds = async (): Promise<Array<number>> => {
+    const unsavedPermits = await this.permitRepository
+      .createQueryBuilder('pe')
+      .select('pe.id', 'id')
+      .leftJoin('revenue_entity', 're', 'pe.id = re."permitId"')
+      .where('re.id IS NULL')
+      .orderBy('pe.id', 'ASC')
+      .getRawMany();
 
-    return result.max;
+    const unsavedPermitIds = unsavedPermits.map(
+      (permit: { id: number }) => permit.id
+    );
+    return unsavedPermitIds;
   };
 
   /**
    * Returns all permits up to a specific id
-   * @param id
+   * @param ids
    */
-  getPermitsFromId = async (id: number): Promise<PermitEntity[]> => {
+  getPermitsById = async (ids: number[]): Promise<PermitEntity[]> => {
     return this.permitRepository
       .createQueryBuilder('p')
       .select(`id, "boxSerialized"`)
-      .where('p.id > :id', { id })
+      .where('p.id IN (:...ids)', { ids })
       .orderBy('p.id', 'ASC')
       .execute();
   };
 
   /**
    * Stores the info of permit in chart entity
-   * @param timestamp
-   * @param revenue
+   * @param tokenId
+   * @param amount
+   * @param permit
    */
   storeRevenue = async (
     tokenId: string,
-    amount: number,
+    amount: string,
     permit: PermitEntity
   ) => {
     await this.revenueRepository.save({

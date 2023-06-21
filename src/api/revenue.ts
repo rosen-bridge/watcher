@@ -59,15 +59,15 @@ revenueRouter.get('/chart', async (req, res) => {
     const { period, offset, limit } = req.query;
     const offsetString = stringifyQueryParam(offset);
     const limitString = stringifyQueryParam(limit);
-    const result = await watcherDatabase.getRevenueChart(
+    const queryResult = await watcherDatabase.getRevenueChart(
       stringifyQueryParam(period),
       offsetString === '' ? 0 : Number(offsetString),
       limitString === ''
         ? DEFAULT_API_LIMIT
         : Math.min(Number(limitString), MAX_API_LIMIT)
     );
-
-    res.status(200).send(JsonBI.stringify(result));
+    const result = ErgoUtils.transformChartData(queryResult);
+    res.status(200).send(result);
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues chart data: ${e}`);
     res.status(500).send({ message: e.message });

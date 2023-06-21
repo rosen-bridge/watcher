@@ -25,23 +25,12 @@ import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
         `CASE WHEN "ete"."spendTxId" IS NULL THEN '${DOING_STATUS}' ELSE '${DONE_STATUS}' END`,
         'status'
       )
-      .addSelect('tokens.tokens', 'tokens')
+      .addSelect('re.tokenId', 'revenueTokenId')
+      .addSelect('re.amount', 'revenueAmount')
       .from('permit_entity', 'pe')
       .leftJoin('event_trigger_entity', 'ete', 'pe."txId" = ete."txId"')
       .leftJoin('block_entity', 'be', 'pe.block = be.hash')
-      .leftJoin(
-        (q) =>
-          q
-            .select('re."permitId"', 'permitId')
-            .addSelect(
-              `string_agg(re."tokenId" || ':' || re.amount, ',')`,
-              'tokens'
-            )
-            .from('revenue_entity', 're')
-            .groupBy('re."permitId"'),
-        'tokens',
-        'pe.id = tokens."permitId"'
-      ),
+      .leftJoin('revenue_entity', 're', 'pe.id = re."permitId"'),
 })
 export class RevenueView {
   @ViewColumn()
@@ -93,5 +82,8 @@ export class RevenueView {
   status!: string;
 
   @ViewColumn()
-  tokens!: string;
+  revenueTokenId!: string;
+
+  @ViewColumn()
+  revenueAmount!: string;
 }

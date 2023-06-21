@@ -32,8 +32,8 @@ describe('revenue Job', () => {
       await revenueJobFunction();
 
       // check the result
-      const lastVisitedPermit = await DB.getLastVisitedPermitId();
-      expect(lastVisitedPermit).to.eql(4);
+      const unsavedPermits = await DB.getUnsavedRevenueIds();
+      expect(unsavedPermits.length).to.eql(0);
     });
   });
 });

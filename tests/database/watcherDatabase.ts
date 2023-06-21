@@ -78,7 +78,7 @@ import { createMemoryDatabase } from '../resources/inMemoryDb';
 import { TokenEntity } from '../../src/database/entities/tokenEntity';
 import { RevenueView } from '../../src/database/entities/revenueView';
 import { RevenueEntity } from '../../src/database/entities/revenueEntity';
-import { RevenueChartView } from '../../src/database/entities/revenueChartView';
+import { RevenueChartDataView } from '../../src/database/entities/revenueChartDataView';
 
 const observation2Status = {
   observation: observationEntity2,
@@ -120,7 +120,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     TokenEntity,
     RevenueView,
     RevenueEntity,
-    RevenueChartView,
+    RevenueChartDataView,
   ];
   const ormConfig = new DataSource({
     type: 'sqlite',
@@ -153,7 +153,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
   const revenueRepo = ormConfig.getRepository(RevenueEntity);
   if (clean) {
     for (const entity of entities.reverse()) {
-      if (entity === RevenueView || entity === RevenueChartView) continue;
+      if (entity === RevenueView || entity === RevenueChartDataView) continue;
       await ormConfig
         .getRepository(entity)
         .createQueryBuilder()

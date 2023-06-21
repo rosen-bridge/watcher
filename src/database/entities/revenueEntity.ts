@@ -11,8 +11,8 @@ export class RevenueEntity {
   @Column()
   tokenId: string;
 
-  @Column()
-  amount: number;
+  @Column({ type: 'bigint' })
+  amount: string;
 
   @ManyToOne(() => PermitEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'permitId' })

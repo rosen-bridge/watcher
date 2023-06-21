@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class watcherModelMigration1686842348431 implements MigrationInterface {
-  name = 'watcherModelMigration1686842348431';
+export class watcherModelMigration1687342318126 implements MigrationInterface {
+  name = 'watcherModelMigration1687342318126';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
@@ -15,15 +15,11 @@ export class watcherModelMigration1686842348431 implements MigrationInterface {
                   WHEN "ete"."spendTxId" IS NULL THEN 'Doing'
                   ELSE 'Done'
                 END AS "status",
-                tokens.tokens
+                re."tokenId" "revenueTokenId", re.amount "revenueAmount"
                 FROM permit_entity pe
                 LEFT JOIN event_trigger_entity ete ON pe."txId" = ete."txId"
                 LEFT JOIN block_entity be ON pe.block = be.hash
-                LEFT JOIN (
-                SELECT "permitId", string_agg("tokenId" || ':' || amount, ',') AS tokens
-                FROM revenue_entity
-                GROUP BY "permitId"
-                ) tokens ON pe.id = tokens."permitId";
+                LEFT JOIN revenue_entity re ON pe.id = re."permitId";
         `);
   }
 

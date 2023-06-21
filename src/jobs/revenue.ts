@@ -9,35 +9,33 @@ const logger = loggerFactory(import.meta.url);
  * Fetches revenue details and stores in the database
  */
 export const revenueJobFunction = async () => {
-  let lastPermit = await watcherDatabase.getLastVisitedPermitId();
-  if (lastPermit === null) {
-    lastPermit = 0;
+  const unsavedRevenues = await watcherDatabase.getUnsavedRevenueIds();
+  if (unsavedRevenues.length === 0) {
+    return;
   }
-  const newPermits = await watcherDatabase.getPermitsFromId(lastPermit);
-  if (newPermits.length > 0) {
-    logger.debug(`Revenue Job: ${newPermits.length} new permits found`);
-    // store permits info
-    for (let i = 0; i < newPermits.length; i++) {
-      const permitBox = decodeSerializedBox(newPermits[i].boxSerialized);
+  const newPermits = await watcherDatabase.getPermitsById(unsavedRevenues);
+  logger.debug(`Revenue Job: ${newPermits.length} new permits found`);
+  // store permits info
+  for (let i = 0; i < newPermits.length; i++) {
+    const permitBox = decodeSerializedBox(newPermits[i].boxSerialized);
 
-      // save tokens as revenues
-      const boxTokens = permitBox.tokens();
-      for (let j = 0; j < boxTokens.len(); j++) {
-        const token = boxTokens.get(j);
-        await watcherDatabase.storeRevenue(
-          token.id().to_str(),
-          token.amount().as_i64().as_num(),
-          newPermits[i]
-        );
-      }
-
-      // save ergs as revenue
+    // save tokens as revenues
+    const boxTokens = permitBox.tokens();
+    for (let j = 0; j < boxTokens.len(); j++) {
+      const token = boxTokens.get(j);
       await watcherDatabase.storeRevenue(
-        'ERG',
-        permitBox.value().as_i64().as_num(),
+        token.id().to_str(),
+        token.amount().as_i64().to_str(),
         newPermits[i]
       );
     }
+
+    // save ergs as revenue
+    await watcherDatabase.storeRevenue(
+      'ERG',
+      permitBox.value().as_i64().to_str(),
+      newPermits[i]
+    );
   }
 };
 

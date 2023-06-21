@@ -7,12 +7,12 @@ import { watcherModelMigration1684405325176 } from './sqlite/1684405325176-watch
 import { watcherModelMigration1683891492000 } from './sqlite/1683891492000-watcherModelMigration';
 import { watcherModelMigration1685285583000 } from './postgres/1685285583000-watcherModelMigration';
 import { watcherModelMigration1685285582000 } from './sqlite/1685285582000-watcherModelMigration';
-import { watcherModelMigration1686489592340 } from './postgres/1686489592340-watcherModelMigration';
-import { watcherModelMigration1686490574850 } from './sqlite/1686490574850-watcherModelMigration';
-import { watcherModelMigration1686842348431 } from './postgres/1686842348431-watcherModelMigration';
-import { watcherModelMigration1686842459848 } from './sqlite/1686842459848-watcherModelMigration';
-import { watcherModelMigration1687082695463 } from './postgres/1687082695463-watcherModelMigration';
-import { watcherModelMigration1687082785210 } from './sqlite/1687082785210-watcherModelMigration';
+import { watcherModelMigration1687342159694 } from './postgres/1687342159694-watcherModelMigration';
+import { watcherModelMigration1687342283693 } from './sqlite/1687342283693-watcherModelMigration';
+import { watcherModelMigration1687342218146 } from './postgres/1687342218146-watcherModelMigration';
+import { watcherModelMigration1687342318126 } from './sqlite/1687342318126-watcherModelMigration';
+import { watcherModelMigration1687342250269 } from './postgres/1687342250269-watcherModelMigration';
+import { watcherModelMigration1687342345843 } from './sqlite/1687342345843-watcherModelMigration';
 
 export default {
   sqlite: [
@@ -21,17 +21,17 @@ export default {
     watcherModelMigration1684405325176,
     watcherModelMigration1683891492000,
     watcherModelMigration1685285582000,
-    watcherModelMigration1686490574850,
-    watcherModelMigration1686842459848,
-    watcherModelMigration1687082785210,
+    watcherModelMigration1687342283693,
+    watcherModelMigration1687342318126,
+    watcherModelMigration1687342345843,
   ],
   postgres: [
     watcherModelMigration1678166758664,
     watcherModelMigration1684405318897,
     watcherModelMigration1683891493000,
     watcherModelMigration1685285583000,
-    watcherModelMigration1686489592340,
-    watcherModelMigration1686842348431,
-    watcherModelMigration1687082695463,
+    watcherModelMigration1687342159694,
+    watcherModelMigration1687342218146,
+    watcherModelMigration1687342250269,
   ],
 };

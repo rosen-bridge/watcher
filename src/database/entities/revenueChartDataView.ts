@@ -1,7 +1,7 @@
 import { ViewEntity, ViewColumn } from 'typeorm';
 
 @ViewEntity({
-  name: 'revenue_chart_view',
+  name: 'revenue_chart_data',
   expression: (connection) =>
     connection
       .createQueryBuilder()
@@ -23,7 +23,7 @@ import { ViewEntity, ViewColumn } from 'typeorm';
       .innerJoin('permit_entity', 'pe', 're."permitId" = pe.id')
       .innerJoin('block_entity', 'be', 'pe.block = be.hash'),
 })
-export class RevenueChartView {
+export class RevenueChartDataView {
   @ViewColumn()
   tokenId!: string;
 

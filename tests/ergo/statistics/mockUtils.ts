@@ -221,12 +221,12 @@ const firstRevenue = {
   revenues: [
     {
       tokenId:
-        '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+        '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
       amount: 10,
     },
     {
       tokenId:
-        '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+        '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
       amount: 10,
     },
   ],
@@ -312,46 +312,34 @@ const secondTokenId2Revenue = {
 
 const revenueWeeklyChart = [
   {
-    tokenId: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
-    revenue: 10,
-    week_start_day: '29',
-    week_start_month: '12',
-    week_start_year: '1969',
+    title: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    data: [{ label: '-259200000', amount: '10' }],
   },
   {
-    tokenId: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
-    revenue: 5.5,
-    week_start_day: '29',
-    week_start_month: '12',
-    week_start_year: '1969',
+    title: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    data: [{ label: '-259200000', amount: '5.5' }],
   },
 ];
 
 const revenueMonthlyChart = [
   {
-    tokenId: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
-    year: '1970',
-    month: '01',
-    revenue: 10,
+    title: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    data: [{ label: '-12600000', amount: '10' }],
   },
   {
-    tokenId: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
-    year: '1970',
-    month: '01',
-    revenue: 5.5,
+    title: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    data: [{ label: '-12600000', amount: '5.5' }],
   },
 ];
 
 const revenueYearlyChart = [
   {
-    tokenId: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
-    year: '1970',
-    revenue: 10,
+    title: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    data: [{ label: '-12600000', amount: '10' }],
   },
   {
-    tokenId: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
-    year: '1970',
-    revenue: 5.5,
+    title: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    data: [{ label: '-12600000', amount: '5.5' }],
   },
 ];
 
