@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express';
 import { getConfig } from '../config/config';
 import { JsonBI } from '../ergo/network/parser';
 import { ErgoUtils } from '../ergo/utils';
+import { healthCheck } from '../utils/healthCheck';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -25,9 +26,10 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       currentBalance: (await ErgoUtils.getWatcherBalance()).nanoErgs,
       network: getConfig().general.networkWatcher,
       permitCount: await ErgoUtils.getPermitCount(getConfig().rosen.RWTId),
-      health: 'OK', // TODO: https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/94
+      health: (await healthCheck.getOverallHealthStatus()).status,
       address: getConfig().general.address,
     };
+    res.set('Content-Type', 'application/json');
     res.status(200).send(JsonBI.stringify(info));
   } catch (e) {
     logger.warn(`An error occurred while fetching general info: ${e}`);

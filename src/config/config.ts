@@ -21,6 +21,7 @@ interface ConfigType {
   rosen: RosenConfig;
   token: RosenTokens;
   database: DatabaseConfig;
+  healthCheck: HealthCheckConfig;
 }
 
 const getRequiredNumber = (path: string) => {
@@ -62,6 +63,7 @@ const getOptionalString = (path: string, defaultValue = '') => {
 class Config {
   networkPrefix: wasm.NetworkPrefix;
   networkType: string;
+  scannerType: string;
   secretKey: wasm.SecretKey;
   address: string;
   explorerUrl: string;
@@ -98,6 +100,14 @@ class Config {
       this.networkType === 'mainnet'
         ? wasm.NetworkPrefix.Mainnet
         : wasm.NetworkPrefix.Testnet;
+
+    this.scannerType = getRequiredString('ergo.type').toLowerCase();
+    if ([Constants.NODE_TYPE].indexOf(this.scannerType) === -1)
+      // TODO: Add explorer scanner type, currently we are not supporting explorer scanner
+      // https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/102
+      throw new Error(
+        "ImproperlyConfigured. ergo.scanner doesn't set correctly in config file"
+      );
     const secret = getOptionalString('ergo.secret');
     if (!secret) {
       const secretKey = wasm.SecretKey.random_dlog();
@@ -269,6 +279,68 @@ class DatabaseConfig {
   }
 }
 
+class HealthCheckConfig {
+  ergWarnThreshold: bigint;
+  ergCriticalThreshold: bigint;
+  ergoScannerWarnDiff: number;
+  ergoScannerCriticalDiff: number;
+  cardanoScannerWarnDiff: number;
+  cardanoScannerCriticalDiff: number;
+  ergoNodeMaxHeightDiff: number;
+  ergoNodeMaxBlockTime: number;
+  ergoNodeMinPeerCount: number;
+  ergoNodeMaxPeerHeightDifference: number;
+  permitWarnCommitmentCount: number;
+  permitCriticalCommitmentCount: number;
+  updateInterval: number;
+  errorLogAllowedCount: number;
+  errorLogDuration: number;
+
+  constructor() {
+    this.ergWarnThreshold = BigInt(
+      getRequiredString('healthCheck.asset.ergWarnThreshold')
+    );
+    this.ergCriticalThreshold = BigInt(
+      getRequiredString('healthCheck.asset.ergCriticalThreshold')
+    );
+    this.ergoScannerWarnDiff = getRequiredNumber(
+      'healthCheck.ergoScanner.warnDifference'
+    );
+    this.ergoScannerCriticalDiff = getRequiredNumber(
+      'healthCheck.ergoScanner.criticalDifference'
+    );
+    this.ergoNodeMaxHeightDiff = getRequiredNumber(
+      'healthCheck.ergoNode.maxHeightDifference'
+    );
+    this.ergoNodeMaxBlockTime = getRequiredNumber(
+      'healthCheck.ergoNode.maxBlockTime'
+    );
+    this.ergoNodeMinPeerCount = getRequiredNumber(
+      'healthCheck.ergoNode.minPeerCount'
+    );
+    this.ergoNodeMaxPeerHeightDifference = getRequiredNumber(
+      'healthCheck.ergoNode.maxPeerHeightDifference'
+    );
+    this.cardanoScannerWarnDiff = getRequiredNumber(
+      'healthCheck.cardanoScanner.warnDifference'
+    );
+    this.cardanoScannerCriticalDiff = getRequiredNumber(
+      'healthCheck.cardanoScanner.criticalDifference'
+    );
+    this.permitWarnCommitmentCount = getRequiredNumber(
+      'healthCheck.permit.warnCommitmentCount'
+    );
+    this.permitCriticalCommitmentCount = getRequiredNumber(
+      'healthCheck.permit.criticalCommitmentCount'
+    );
+    this.updateInterval = getRequiredNumber('healthCheck.interval');
+    this.errorLogAllowedCount = getRequiredNumber(
+      'healthCheck.errorLog.maxAllowedCount'
+    );
+    this.errorLogDuration = getRequiredNumber('healthCheck.errorLog.duration');
+  }
+}
+
 let internalConfig: ConfigType | undefined;
 
 const getConfig = (): ConfigType => {
@@ -283,7 +355,16 @@ const getConfig = (): ConfigType => {
     );
     const token = new TokensConfig(general.rosenTokensPath).tokens;
     const database = new DatabaseConfig();
-    internalConfig = { cardano, logger, general, rosen, token, database };
+    const healthCheck = new HealthCheckConfig();
+    internalConfig = {
+      cardano,
+      logger,
+      general,
+      rosen,
+      token,
+      database,
+      healthCheck,
+    };
   }
   return internalConfig;
 };
