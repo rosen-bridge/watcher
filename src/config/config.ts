@@ -100,7 +100,7 @@ class Config {
         ? wasm.NetworkPrefix.Mainnet
         : wasm.NetworkPrefix.Testnet;
 
-    this.scannerType = getRequiredString('ergo.scanner').toLowerCase();
+    this.scannerType = getRequiredString('ergo.type').toLowerCase();
     if ([Constants.NODE_TYPE].indexOf(this.scannerType) === -1)
       // TODO: Add explorer scanner type, currently we are not supporting explorer scanner
       // https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/102

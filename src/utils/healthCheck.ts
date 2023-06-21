@@ -20,8 +20,10 @@ import {
   KOIOS_TYPE,
   NODE_TYPE,
   EXPLORER_TYPE,
+  ERGO_NATIVE_ASSET,
 } from '../config/constants';
 import { loggerFactory } from '../log/Logger';
+import { scanner } from './scanner';
 
 const logger = loggerFactory(import.meta.url);
 let healthCheck: HealthCheck;
@@ -48,8 +50,8 @@ const healthCheckInit = () => {
     healthCheck.register(widHealthCheck);
 
     const assetHealthCheck = new ErgoNodeAssetHealthCheckParam(
-      'erg',
-      'erg',
+      ERGO_NATIVE_ASSET,
+      ERGO_NATIVE_ASSET,
       getConfig().general.address,
       getConfig().healthCheck.ergWarnThreshold,
       getConfig().healthCheck.ergCriticalThreshold,
@@ -59,7 +61,7 @@ const healthCheckInit = () => {
 
     const ergoScannerSyncCheck = new ErgoNodeScannerHealthCheck(
       dataSource,
-      'ergo-node',
+      scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.nodeUrl
@@ -84,8 +86,8 @@ const healthCheckInit = () => {
     healthCheck.register(widHealthCheck);
 
     const assetHealthCheck = new ErgoExplorerAssetHealthCheckParam(
-      'erg',
-      'erg',
+      ERGO_NATIVE_ASSET,
+      ERGO_NATIVE_ASSET,
       getConfig().general.address,
       getConfig().healthCheck.ergWarnThreshold,
       getConfig().healthCheck.ergCriticalThreshold,
@@ -95,7 +97,7 @@ const healthCheckInit = () => {
 
     const ergoScannerSyncCheck = new ErgoExplorerScannerHealthCheck(
       dataSource,
-      'ergo-explorer',
+      scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.explorerUrl
@@ -108,7 +110,7 @@ const healthCheckInit = () => {
     if (getConfig().cardano.type === OGMIOS_TYPE) {
       cardanoScannerSyncCheck = new CardanoOgmiosScannerHealthCheck(
         dataSource,
-        'cardano-ogmios',
+        scanner.observationScanner.name(),
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
         getConfig().cardano.ogmios!.ip,
@@ -117,7 +119,7 @@ const healthCheckInit = () => {
     } else if (getConfig().cardano.type === KOIOS_TYPE) {
       cardanoScannerSyncCheck = new CardanoKoiosScannerHealthCheck(
         dataSource,
-        'cardano-koios',
+        scanner.observationScanner.name(),
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
         getConfig().cardano.koios!.url

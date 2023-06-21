@@ -8,6 +8,7 @@ export const NODE_TYPE = 'node';
 export const EXPLORER_TYPE = 'explorer';
 export const ERGO_WATCHER = 'ergo';
 export const CARDANO_WATCHER = 'cardano';
+export const ERGO_NATIVE_ASSET = 'erg';
 export const DEFAULT_API_LIMIT = 20;
 export const MAX_API_LIMIT = 100;
 export const DOING_STATUS = 'Doing';

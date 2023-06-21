@@ -41,7 +41,7 @@ healthRouter.get(
 /**
  * Api for updating each parameter health status
  */
-healthRouter.post(
+healthRouter.put(
   '/parameter/:paramName',
   async (req: Request, res: Response) => {
     try {
