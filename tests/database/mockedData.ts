@@ -683,6 +683,6 @@ export const generalInfo = {
   currentBalance: 1100000,
   network: 'ergo',
   permitCount: 0,
-  health: 'OK',
+  health: 'Healthy',
   address: '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH',
 };

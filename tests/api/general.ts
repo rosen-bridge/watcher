@@ -7,6 +7,7 @@ import { initWatcherDB } from '../../src/init';
 import request from 'supertest';
 import JSONBigInt from 'json-bigint';
 import { generalInfo } from '../database/mockedData';
+import { getHealthCheck } from '../../src/utils/healthCheck';
 
 chai.use(spies);
 
@@ -23,6 +24,10 @@ describe('General-Info-Api', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
+      const healthCheck = getHealthCheck();
+      chai.spy.on(healthCheck, 'getOverallHealthStatus', () =>
+        Promise.resolve({ status: 'Healthy' })
+      );
     });
 
     /**
