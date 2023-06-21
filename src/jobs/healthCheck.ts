@@ -1,6 +1,6 @@
 import { loggerFactory } from '../log/Logger';
 import { HealthCheck } from '@rosen-bridge/health-check';
-import { healthCheck, healthCheckInit } from '../utils/healthCheck';
+import { getHealthCheck } from '../utils/healthCheck';
 import { getConfig } from '../config/config';
 
 const logger = loggerFactory(import.meta.url);
@@ -20,8 +20,7 @@ const healthCheckUpdateJob = async (healthCheck: HealthCheck) => {
 };
 
 const healthCheckStart = () => {
-  healthCheckInit();
-  healthCheckUpdateJob(healthCheck);
+  healthCheckUpdateJob(getHealthCheck());
 };
 
 export { healthCheckStart };
