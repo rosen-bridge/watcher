@@ -18,7 +18,7 @@ cardano:
     port: 1337 # ogmios port
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
-  scanner: 'node' # ergo scanner type. options: node, explorer
+  type: 'node' # ergo scanner type. options: node, explorer
   fee: '1100000' # transaction fee
   minBoxValue: '1100000' # minimum box value
   secret: '' # watcher secret.
