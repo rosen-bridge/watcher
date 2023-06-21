@@ -1,17 +1,13 @@
 import config from 'config';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
-import * as ecc from 'tiny-secp256k1';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
 import { TokensConfig } from './tokensConfig';
 import { RosenTokens } from '@rosen-bridge/tokens';
 import path from 'path';
 import { NetworkType } from '../types';
-import { mnemonicToSeedSync, generateMnemonic } from 'bip39';
-import { BIP32Factory } from 'bip32';
-
-const bip32 = BIP32Factory(ecc);
+import { generateMnemonic } from 'bip39';
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_WATCHER,
@@ -123,11 +119,11 @@ class Config {
         );
       }
     } else {
-      const seed = mnemonicToSeedSync(mnemonic);
-      const secret = bip32.fromSeed(seed).derivePath("m/44'/429'/0'/0/0");
-      this.secretKey = wasm.SecretKey.dlog_from_bytes(
-        Uint8Array.from(secret.privateKey ? secret.privateKey : Buffer.from(''))
-      );
+      const seed = wasm.Mnemonic.to_seed(mnemonic, '');
+      const rootSecret = wasm.ExtSecretKey.derive_master(seed);
+      const changePath = wasm.DerivationPath.new(0, new Uint32Array([0]));
+      const secretKeyBytes = rootSecret.derive(changePath).secret_key_bytes();
+      this.secretKey = wasm.SecretKey.dlog_from_bytes(secretKeyBytes);
     }
     this.address = this.secretKey.get_address().to_base58(this.networkPrefix);
     this.explorerUrl = getRequiredString('ergo.explorer.url');
