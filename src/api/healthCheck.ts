@@ -1,7 +1,7 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import { loggerFactory } from '../log/Logger';
-import { healthCheck } from '../../src/utils/healthCheck';
+import { healthCheck } from '../utils/healthCheck';
 import { stringifyQueryParam } from '../utils/utils';
 
 const logger = loggerFactory(import.meta.url);

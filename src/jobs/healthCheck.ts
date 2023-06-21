@@ -1,7 +1,7 @@
 import { loggerFactory } from '../log/Logger';
 import { HealthCheck } from '@rosen-bridge/health-check';
 import { healthCheck, healthCheckInit } from '../utils/healthCheck';
-import { getConfig } from '../../src/config/config';
+import { getConfig } from '../config/config';
 
 const logger = loggerFactory(import.meta.url);
 
