@@ -20,16 +20,36 @@ healthRouter.get('/status', async (req: Request, res: Response) => {
 });
 
 /**
- * Api for detailed health status
+ * Api for checking each health parameter status
  */
-healthRouter.get('/parameter', async (req: Request, res: Response) => {
+healthRouter.get('/parameter/status', async (req: Request, res: Response) => {
   try {
     const { paramId } = req.query;
     res
       .status(200)
       .json(await healthCheck.getHealthStatusFor(stringifyQueryParam(paramId)));
   } catch (e) {
-    logger.warn(`An error occurred while checking health status: ${e}`);
+    logger.warn(
+      `An error occurred while checking parameter [${req.query}] health status: ${e}`
+    );
+    res.status(500).send({ message: e.message });
+  }
+});
+
+/**
+ * Api for updating each parameter health status
+ */
+healthRouter.get('/parameter/update', async (req: Request, res: Response) => {
+  try {
+    const { paramId } = req.query;
+    await healthCheck.updateParam(stringifyQueryParam(paramId));
+    res
+      .status(200)
+      .json(await healthCheck.getHealthStatusFor(stringifyQueryParam(paramId)));
+  } catch (e) {
+    logger.warn(
+      `An error occurred while updating parameter [${req.query}] health status: ${e}`
+    );
     res.status(500).send({ message: e.message });
   }
 });
