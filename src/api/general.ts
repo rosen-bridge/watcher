@@ -29,6 +29,7 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       health: (await healthCheck.getOverallHealthStatus()).status,
       address: getConfig().general.address,
     };
+    res.set('Content-Type', 'application/json');
     res.status(200).send(JsonBI.stringify(info));
   } catch (e) {
     logger.warn(`An error occurred while fetching general info: ${e}`);

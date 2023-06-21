@@ -63,6 +63,7 @@ const getOptionalString = (path: string, defaultValue = '') => {
 class Config {
   networkPrefix: wasm.NetworkPrefix;
   networkType: string;
+  scannerType: string;
   secretKey: wasm.SecretKey;
   address: string;
   explorerUrl: string;
@@ -98,6 +99,14 @@ class Config {
       this.networkType === 'mainnet'
         ? wasm.NetworkPrefix.Mainnet
         : wasm.NetworkPrefix.Testnet;
+
+    this.scannerType = getRequiredString('ergo.scanner').toLowerCase();
+    if ([Constants.NODE_TYPE].indexOf(this.scannerType) === -1)
+      // TODO: Add explorer scanner type, currently we are not supporting explorer scanner
+      // https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/102
+      throw new Error(
+        "ImproperlyConfigured. ergo.scanner doesn't set correctly in config file"
+      );
     const secret = getOptionalString('ergo.secret');
     if (!secret) {
       const secretKey = wasm.SecretKey.random_dlog();
