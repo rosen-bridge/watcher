@@ -107,6 +107,18 @@ const stringifyQueryParam = (param: any) => {
   return String(param);
 };
 
+/**
+ * returns the secret key from the mnemonic
+ * @param mnemonic
+ */
+const convertMnemonicToSecretKey = (mnemonic: string): wasm.SecretKey => {
+  const seed = wasm.Mnemonic.to_seed(mnemonic, '');
+  const rootSecret = wasm.ExtSecretKey.derive_master(seed);
+  const changePath = wasm.DerivationPath.new(0, new Uint32Array([0]));
+  const secretKeyBytes = rootSecret.derive(changePath).secret_key_bytes();
+  return wasm.SecretKey.dlog_from_bytes(secretKeyBytes);
+};
+
 export {
   hexStrToUint8Array,
   uint8ArrayToHex,
@@ -117,4 +129,5 @@ export {
   ergoTreeToBase58Address,
   parseJson,
   stringifyQueryParam,
+  convertMnemonicToSecretKey,
 };

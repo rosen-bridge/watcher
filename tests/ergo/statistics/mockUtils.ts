@@ -343,6 +343,11 @@ const revenueYearlyChart = [
   },
 ];
 
+const testMnemonic =
+  'route like two trophy tank excite cigar hockey sketch pencil curious memory tissue admit december';
+
+const testAddress = '9h9yPqLigT84b4Uv478XP8yxMTMa7gFRa1UstKkf1HgTf761UgR';
+
 export {
   firstPermit,
   secondPermit,
@@ -360,4 +365,6 @@ export {
   revenueWeeklyChart,
   revenueMonthlyChart,
   revenueYearlyChart,
+  testMnemonic,
+  testAddress,
 };

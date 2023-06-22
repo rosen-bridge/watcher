@@ -21,7 +21,7 @@ ergo:
   type: 'node' # ergo scanner type. options: node, explorer
   fee: '1100000' # transaction fee
   minBoxValue: '1100000' # minimum box value
-  secret: '' # watcher secret.
+  mnemonic: '' # watcher mnemonic
   explorer:
     url: 'https://api.ergoplatform.com' # explorer url
     timeout: 20 # explorer request timeout (in seconds)
