@@ -424,10 +424,10 @@ export class ErgoUtils {
   static transformChartData = (chartData: RevenueChartRecord[]) => {
     const chartMap = new Map<string, Array<ChartRecord>>();
     chartData.forEach((record) => {
-      const year = record.year;
-      const month = record.month || '1';
-      const day = record.day || '1';
-      const timestamp = new Date(`${year}-${month}-${day}`).getTime();
+      const year = Number(record.year);
+      const month = Number(record.month) || 1;
+      const day = Number(record.day) || 1;
+      const timestamp = Math.max(Date.UTC(year, month - 1, day), 0);
       const chartRecord: ChartRecord = {
         label: String(timestamp),
         amount: record.revenue.toString(),
