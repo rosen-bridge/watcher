@@ -1,13 +1,14 @@
 import config from 'config';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
-import { uint8ArrayToHex } from '../utils/utils';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
 import { TokensConfig } from './tokensConfig';
 import { RosenTokens } from '@rosen-bridge/tokens';
 import path from 'path';
 import { NetworkType } from '../types';
+import { generateMnemonic } from 'bip39';
+import { convertMnemonicToSecretKey } from '../utils/utils';
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_WATCHER,
@@ -107,20 +108,29 @@ class Config {
       throw new Error(
         "ImproperlyConfigured. ergo.scanner doesn't set correctly in config file"
       );
-    const secret = getOptionalString('ergo.secret');
-    if (!secret) {
-      const secretKey = wasm.SecretKey.random_dlog();
-      console.warn(
-        'ImproperlyConfigured. ergo.secret key does not exist in the config.' +
-          `you can use {${uint8ArrayToHex(
-            secretKey.to_bytes()
-          ).toString()}} or generate one by yourself`
-      );
-      throw new SecretError(
-        `ImproperlyConfigured. ergo.secret doesn't set in config file.`
-      );
+    const mnemonic = getOptionalString('ergo.mnemonic');
+    if (!mnemonic) {
+      const secret = getOptionalString('ergo.secret');
+      if (secret) {
+        this.secretKey = wasm.SecretKey.dlog_from_bytes(
+          Buffer.from(secret, 'hex')
+        );
+        console.warn(
+          `Using secret key is deprecated. Please use mnemonic instead.`
+        );
+      } else {
+        const randomMnemonic = generateMnemonic(160);
+        console.warn(
+          'ImproperlyConfigured. ergo.mnemonic does not exist in the config.' +
+            `You can use {${randomMnemonic}} or generate one by yourself`
+        );
+        throw new SecretError(
+          `ImproperlyConfigured. ergo.mnemonic doesn't set in config file.`
+        );
+      }
+    } else {
+      this.secretKey = convertMnemonicToSecretKey(mnemonic);
     }
-    this.secretKey = wasm.SecretKey.dlog_from_bytes(Buffer.from(secret, 'hex'));
     this.address = this.secretKey.get_address().to_base58(this.networkPrefix);
     this.explorerUrl = getRequiredString('ergo.explorer.url');
     if (!this.explorerUrl) {

@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
-import { parseJson } from '../../src/utils/utils';
+import { convertMnemonicToSecretKey, parseJson } from '../../src/utils/utils';
+import { testMnemonic, testAddress } from '../ergo/statistics/mockUtils';
 
 describe('utils', () => {
   describe('parseJson', () => {
@@ -86,6 +87,25 @@ describe('utils', () => {
       const actual = parseJson(json, ['someString']);
 
       expect(actual).to.deep.equal(expected);
+    });
+  });
+
+  describe('ConvertMnemonicToSecretKey', () => {
+    /**
+     * @target should convert the mnemonic to the correct SecretKey
+     * @dependencies
+     * @scenario
+     * - run the function
+     * - check the result
+     * @expected
+     * - secret key's address should be correct
+     */
+    it('should convert the mnemonic to the correct SecretKey', async () => {
+      // run the function
+      const secret = convertMnemonicToSecretKey(testMnemonic);
+
+      // check the result
+      expect(secret.get_address().to_base58(0)).to.equal(testAddress);
     });
   });
 });
