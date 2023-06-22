@@ -317,7 +317,7 @@ const revenueWeeklyChart = [
   },
   {
     title: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
-    data: [{ label: '0', amount: '5.5' }],
+    data: [{ label: '0', amount: '11' }],
   },
 ];
 
@@ -328,7 +328,7 @@ const revenueMonthlyChart = [
   },
   {
     title: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
-    data: [{ label: '0', amount: '5.5' }],
+    data: [{ label: '0', amount: '11' }],
   },
 ];
 
@@ -339,7 +339,7 @@ const revenueYearlyChart = [
   },
   {
     title: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
-    data: [{ label: '0', amount: '5.5' }],
+    data: [{ label: '0', amount: '11' }],
   },
 ];
 

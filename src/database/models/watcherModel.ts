@@ -3,9 +3,7 @@ import {
   In,
   IsNull,
   LessThan,
-  LessThanOrEqual,
   Like,
-  MoreThanOrEqual,
   Not,
   Repository,
 } from 'typeorm';
@@ -26,12 +24,11 @@ import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { base64ToArrayBuffer } from '../../utils/utils';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { TokenEntity } from '../entities/tokenEntity';
-import { EventStatus, RevenueChartRecord } from '../../utils/interfaces';
+import { EventStatus } from '../../utils/interfaces';
 import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 import { RevenueView } from '../entities/revenueView';
 import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueChartDataView } from '../entities/revenueChartDataView';
-import { getConfig } from '../../config/config';
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -833,10 +830,11 @@ class WatcherDataBase {
   getWeeklyRevenueChartData = async (offset: number, limit: number) => {
     let qb = this.revenueChartView.createQueryBuilder('rcv');
     qb = qb
-      .select(
-        '"tokenId", timestamp/604800000 as week_number, avg(amount) as revenue'
-      )
-      .groupBy('"tokenId", week_number')
+      .select('"tokenId"')
+      .addSelect('timestamp/604800000 as week_number')
+      .addSelect('sum(amount) as revenue')
+      .groupBy('"tokenId"')
+      .addGroupBy('week_number')
       .orderBy('week_number', 'DESC');
 
     return qb.offset(offset).limit(limit).execute();
@@ -855,8 +853,11 @@ class WatcherDataBase {
   ) => {
     let qb = this.revenueChartView.createQueryBuilder('rcv');
     qb = qb
-      .select('"tokenId", year, avg(amount) as revenue')
-      .groupBy('"tokenId", year')
+      .select('"tokenId"')
+      .addSelect('year')
+      .addSelect('sum(amount) as revenue')
+      .groupBy('"tokenId"')
+      .addGroupBy('year')
       .orderBy('year', 'DESC');
     if (period === 'month') {
       qb = qb
