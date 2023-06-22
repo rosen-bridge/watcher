@@ -8,6 +8,7 @@ import { RosenTokens } from '@rosen-bridge/tokens';
 import path from 'path';
 import { NetworkType } from '../types';
 import { generateMnemonic } from 'bip39';
+import { convertMnemonicToSecretKey } from '../utils/utils';
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_WATCHER,
@@ -128,11 +129,7 @@ class Config {
         );
       }
     } else {
-      const seed = wasm.Mnemonic.to_seed(mnemonic, '');
-      const rootSecret = wasm.ExtSecretKey.derive_master(seed);
-      const changePath = wasm.DerivationPath.new(0, new Uint32Array([0]));
-      const secretKeyBytes = rootSecret.derive(changePath).secret_key_bytes();
-      this.secretKey = wasm.SecretKey.dlog_from_bytes(secretKeyBytes);
+      this.secretKey = convertMnemonicToSecretKey(mnemonic);
     }
     this.address = this.secretKey.get_address().to_base58(this.networkPrefix);
     this.explorerUrl = getRequiredString('ergo.explorer.url');
