@@ -44,6 +44,7 @@ export interface RevenueChartRecord {
   year: string;
   month?: string;
   day?: string;
+  week_number?: string;
 }
 
 export interface ChartRecord {

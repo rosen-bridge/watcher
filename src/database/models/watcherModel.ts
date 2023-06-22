@@ -831,48 +831,13 @@ class WatcherDataBase {
    * @param limit
    */
   getWeeklyRevenueChartData = async (offset: number, limit: number) => {
-    const dbType = getConfig().database.type;
-    let qb = this.dataSource
-      .createQueryBuilder()
-      .select(
-        'sq.rev_token_id AS "tokenId", AVG(sq.rev_token_amount) AS revenue'
-      );
-
-    if (dbType === 'sqlite') {
-      qb = qb
-        .addSelect("STRFTIME('%d', week_start) AS day")
-        .addSelect("STRFTIME('%m', week_start) AS month")
-        .addSelect("STRFTIME('%Y', week_start) AS year")
-        .from(
-          (subQuery) =>
-            subQuery
-              .select(
-                `rcd."tokenId" as rev_token_id, rcd.amount AS rev_token_amount, DATE(STRFTIME('%Y-%m-%d', year || '-' || month || '-' || day), 'weekday 0', '-6 days') AS week_start`
-              )
-              .from('revenue_chart_data', 'rcd'),
-          'sq'
-        );
-    } else if (dbType === 'postgres') {
-      qb = qb
-        .addSelect('EXTRACT(day FROM week_start) AS day')
-        .addSelect('EXTRACT(month FROM week_start) AS month')
-        .addSelect('EXTRACT(year FROM week_start) AS year')
-        .from(
-          (subQuery) =>
-            subQuery
-              .select(
-                `rcd."tokenId" as rev_token_id, rcd.amount AS rev_token_amount, DATE_TRUNC('week', TO_DATE(CONCAT(year, '-', month, '-', day), 'YYYY-MM-DD')) AS week_start`
-              )
-              .from('revenue_chart_data', 'rcd'),
-          'sq'
-        );
-    } else {
-      throw new Error(`Unsupported database type: ${dbType}`);
-    }
-
+    let qb = this.revenueChartView.createQueryBuilder('rcv');
     qb = qb
-      .groupBy('day, month, year, sq.rev_token_id')
-      .orderBy('year, month, day');
+      .select(
+        '"tokenId", timestamp/604800000 as week_number, avg(amount) as revenue'
+      )
+      .groupBy('"tokenId", week_number')
+      .orderBy('week_number', 'DESC');
 
     return qb.offset(offset).limit(limit).execute();
   };
@@ -901,62 +866,6 @@ class WatcherDataBase {
     }
     return qb.offset(offset).limit(limit).execute();
   };
-
-  // getRevenueChart = async (
-  //   period: string,
-  //   offset: number,
-  //   limit: number
-  // ): Promise<RevenueChartRecord[]> => {
-  //   let qb = this.revenueChartView.createQueryBuilder('rcv');
-  //   if (period === 'week') {
-  //     const dbType = getConfig().database.type;
-  //     const sqliteQuery = `
-  //     SELECT "tokenId", AVG(amount) AS revenue,
-  //       STRFTIME('%d', week_start) AS day,
-  //       STRFTIME('%m', week_start) AS month,
-  //       STRFTIME('%Y', week_start) AS year
-  //     FROM (
-  //       SELECT "tokenId", amount, DATE(STRFTIME('%Y-%m-%d', year || '-' || month || '-' || day), 'weekday 0', '-6 days') AS week_start
-  //       FROM revenue_chart_data
-  //     ) subquery
-  //     GROUP BY day, month, year, "tokenId"
-  //     ORDER BY year, month, day;
-  //     `;
-  //     const pgQuery = `
-  //     SELECT "tokenId", AVG(amount) AS revenue,
-  //       EXTRACT(day FROM week_start) AS day,
-  //       EXTRACT(month FROM week_start) AS month,
-  //       EXTRACT(year FROM week_start) AS year
-  //     FROM (
-  //       SELECT "tokenId", amount, DATE_TRUNC('week', TO_DATE(CONCAT(year, '-', month, '-', day), 'YYYY-MM-DD')) AS week_start
-  //       FROM revenue_chart_data
-  //     ) subquery
-  //     GROUP BY day, month, year, "tokenId"
-  //     ORDER BY year, month, day;
-  //     `;
-  //
-  //     if (dbType === 'sqlite') {
-  //       return this.revenueChartView.query(sqliteQuery);
-  //     } else if (dbType === 'postgres') {
-  //       return this.revenueChartView.query(pgQuery);
-  //     } else {
-  //       throw new Error(`Unsupported database type ${dbType}`);
-  //     }
-  //   } else if (period === 'month') {
-  //     qb = qb
-  //       .select('"tokenId", year, month, avg(amount) as revenue')
-  //       .groupBy('"tokenId", year, month')
-  //       .orderBy('year, month', 'DESC');
-  //   } else if (period === 'year') {
-  //     qb = qb
-  //       .select('"tokenId", year, avg(amount) as revenue')
-  //       .groupBy('"tokenId", year')
-  //       .orderBy('year', 'DESC');
-  //   } else {
-  //     throw new Error(`Unsupported period ${period}`);
-  //   }
-  //   return qb.offset(offset).limit(limit).execute();
-  // };
 
   /**
    * Returns unsaved permit ids

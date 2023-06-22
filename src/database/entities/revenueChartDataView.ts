@@ -7,6 +7,7 @@ import { ViewEntity, ViewColumn } from 'typeorm';
       .createQueryBuilder()
       .select('re."tokenId"', 'tokenId')
       .addSelect('re."amount"', 'amount')
+      .addSelect('be."timestamp"', 'timestamp')
       .addSelect(
         `strftime('%d', datetime(be."timestamp"/1000, 'unixepoch'))`,
         'day'
@@ -38,4 +39,7 @@ export class RevenueChartDataView {
 
   @ViewColumn()
   year!: number;
+
+  @ViewColumn()
+  timestamp!: number;
 }

@@ -427,7 +427,12 @@ export class ErgoUtils {
       const year = Number(record.year);
       const month = Number(record.month) || 1;
       const day = Number(record.day) || 1;
-      const timestamp = Math.max(Date.UTC(year, month - 1, day), 0);
+      let timestamp = 0;
+      if (!isNaN(year)) {
+        timestamp = Math.max(Date.UTC(year, month - 1, day), 0);
+      } else {
+        timestamp = Number(record.week_number) * 7 * 24 * 60 * 60 * 1000;
+      }
       const chartRecord: ChartRecord = {
         label: String(timestamp),
         amount: record.revenue.toString(),

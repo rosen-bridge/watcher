@@ -6,7 +6,7 @@ export class watcherModelMigration1687342345843 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
             CREATE VIEW "revenue_chart_data" AS
-                SELECT re."tokenId", re."amount",
+                SELECT re."tokenId", re."amount", be."timestamp",
                     strftime('%d', datetime(be."timestamp"/1000, 'unixepoch')) AS day,
                     strftime('%m', datetime(be."timestamp"/1000, 'unixepoch')) AS month,
                     strftime('%Y', datetime(be."timestamp"/1000, 'unixepoch')) AS year
