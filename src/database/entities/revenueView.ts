@@ -7,7 +7,6 @@ import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
     connection
       .createQueryBuilder()
       .select('pe.id', 'id')
-      .addSelect('pe."boxSerialized"', 'boxSerialized')
       .addSelect('pe."txId"', 'permitTxId')
       .addSelect('ete."eventId"', 'eventId')
       .addSelect('ete.height', 'lockHeight')
@@ -26,16 +25,16 @@ import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
         `CASE WHEN "ete"."spendTxId" IS NULL THEN '${DOING_STATUS}' ELSE '${DONE_STATUS}' END`,
         'status'
       )
+      .addSelect('re.tokenId', 'revenueTokenId')
+      .addSelect('re.amount', 'revenueAmount')
       .from('permit_entity', 'pe')
       .leftJoin('event_trigger_entity', 'ete', 'pe."txId" = ete."txId"')
-      .leftJoin('block_entity', 'be', 'pe.block = be.hash'),
+      .leftJoin('block_entity', 'be', 'pe.block = be.hash')
+      .leftJoin('revenue_entity', 're', 'pe.id = re."permitId"'),
 })
 export class RevenueView {
   @ViewColumn()
   id!: number;
-
-  @ViewColumn()
-  boxSerialized!: string;
 
   @ViewColumn()
   permitTxId!: string;
@@ -81,4 +80,10 @@ export class RevenueView {
 
   @ViewColumn()
   status!: string;
+
+  @ViewColumn()
+  revenueTokenId!: string;
+
+  @ViewColumn()
+  revenueAmount!: string;
 }

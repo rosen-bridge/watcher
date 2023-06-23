@@ -47,6 +47,10 @@ import {
   permitBox,
   permitEntity,
   plainBox,
+  revenue1,
+  revenue2,
+  revenue3,
+  revenue4,
   spentCommitmentEntity,
   spentCommitmentEntityOfWID,
   spentPermitEntity,
@@ -70,9 +74,11 @@ import {
 } from '../ergo/statistics/mockUtils';
 
 import txObj from '../ergo/dataset/tx.json' assert { type: 'json' };
-import { TokenEntity } from '../../src/database/entities/tokenEntity';
 import { createMemoryDatabase } from '../resources/inMemoryDb';
+import { TokenEntity } from '../../src/database/entities/tokenEntity';
 import { RevenueView } from '../../src/database/entities/revenueView';
+import { RevenueEntity } from '../../src/database/entities/revenueEntity';
+import { RevenueChartDataView } from '../../src/database/entities/revenueChartDataView';
 
 const observation2Status = {
   observation: observationEntity2,
@@ -94,6 +100,7 @@ export type ORMType = {
   eventTriggerRepo: Repository<EventTriggerEntity>;
   transactionRepo: Repository<TxEntity>;
   tokenRepo: Repository<TokenEntity>;
+  revenueRepo: Repository<RevenueEntity>;
 };
 
 /**
@@ -112,6 +119,8 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     TxEntity,
     TokenEntity,
     RevenueView,
+    RevenueEntity,
+    RevenueChartDataView,
   ];
   const ormConfig = new DataSource({
     type: 'sqlite',
@@ -141,9 +150,10 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
   const eventTriggerRepo = ormConfig.getRepository(EventTriggerEntity);
   const transactionRepo = ormConfig.getRepository(TxEntity);
   const tokenRepo = ormConfig.getRepository(TokenEntity);
+  const revenueRepo = ormConfig.getRepository(RevenueEntity);
   if (clean) {
     for (const entity of entities.reverse()) {
-      if (entity === RevenueView) continue;
+      if (entity === RevenueView || entity === RevenueChartDataView) continue;
       await ormConfig
         .getRepository(entity)
         .createQueryBuilder()
@@ -162,6 +172,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     eventTriggerRepo: eventTriggerRepo,
     transactionRepo: transactionRepo,
     tokenRepo: tokenRepo,
+    revenueRepo: revenueRepo,
   };
 };
 
@@ -173,7 +184,8 @@ export const fillORM = async (
   ORM: ORMType,
   pushExtraUtxo = false,
   saveTokenNames = true,
-  pushExtraObservation = false
+  pushExtraObservation = false,
+  pushRevenues = true
 ) => {
   await ORM.blockRepo.save([ergoBlockEntity, cardanoBlockEntity]);
   const observationArray = [observationEntity2];
@@ -211,6 +223,9 @@ export const fillORM = async (
       validToken1Record,
       validToken2Record,
     ]);
+
+  if (pushRevenues)
+    await ORM.revenueRepo.save([revenue1, revenue2, revenue3, revenue4]);
 };
 
 describe('WatcherModel tests', () => {

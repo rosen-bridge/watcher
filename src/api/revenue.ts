@@ -54,4 +54,39 @@ revenueRouter.get('/', async (req, res) => {
   }
 });
 
+revenueRouter.get('/chart', async (req, res) => {
+  try {
+    const { period, offset, limit } = req.query;
+    const periodString = stringifyQueryParam(period);
+    const offsetString = stringifyQueryParam(offset);
+    const limitString = stringifyQueryParam(limit);
+    const finalOffset = offsetString === '' ? 0 : Number(offsetString);
+    const finalLimit =
+      limitString === ''
+        ? DEFAULT_API_LIMIT
+        : Math.min(Number(limitString), MAX_API_LIMIT);
+
+    let queryResult;
+    if (periodString === 'week') {
+      queryResult = await watcherDatabase.getWeeklyRevenueChartData(
+        finalOffset,
+        finalLimit
+      );
+    } else if (periodString === 'month' || periodString === 'year') {
+      queryResult = await watcherDatabase.getRevenueChartData(
+        periodString,
+        finalOffset,
+        finalLimit
+      );
+    } else {
+      throw new Error('Invalid period');
+    }
+    const result = ErgoUtils.transformChartData(queryResult);
+    res.status(200).send(result);
+  } catch (e) {
+    logger.warn(`An error occurred while fetching revenues chart data: ${e}`);
+    res.status(500).send({ message: e.message });
+  }
+});
+
 export default revenueRouter;

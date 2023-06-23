@@ -23,8 +23,10 @@ import { ObservationStatusEntity } from '../src/database/entities/observationSta
 import { TxEntity } from '../src/database/entities/txEntity';
 import { TokenEntity } from '../src/database/entities/tokenEntity';
 import { RevenueView } from '../src/database/entities/revenueView';
-
+import { RevenueEntity } from '../src/database/entities/revenueEntity';
+import { RevenueChartDataView } from '../src/database/entities/revenueChartDataView';
 import migrations from '../src/database/migrations/watcher';
+
 const dbType = getConfig().database.type as keyof typeof migrations;
 const dbConfigs = {
   entities: [
@@ -38,6 +40,8 @@ const dbConfigs = {
     TxEntity,
     TokenEntity,
     RevenueView,
+    RevenueEntity,
+    RevenueChartDataView,
   ],
   migrations: [
     ...addressExtractorMigrations[dbType],

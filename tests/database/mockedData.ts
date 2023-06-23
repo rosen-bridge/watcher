@@ -14,6 +14,8 @@ import { BlockEntity } from '@rosen-bridge/scanner';
 import { PROCEED } from '@rosen-bridge/scanner/dist/entities/blockEntity';
 import * as Constants from '../../src/config/constants';
 import { TokenEntity } from '../../src/database/entities/tokenEntity';
+import { RevenueEntity } from '../../src/database/entities/revenueEntity';
+import { firstPermit, secondPermit } from '../ergo/statistics/mockUtils';
 
 export const ergoBlockEntity = new BlockEntity();
 ergoBlockEntity.scanner = Constants.ERGO_WATCHER;
@@ -264,6 +266,30 @@ observationEntity4.toAddress = 'addr4';
 observationEntity4.targetChainTokenId = 'targetToken';
 observationEntity4.toChain = 'cardano';
 observationEntity4.requestId = 'reqId4';
+
+export const revenue1 = new RevenueEntity();
+revenue1.tokenId =
+  '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267';
+revenue1.amount = '10';
+revenue1.permit = secondPermit;
+
+export const revenue2 = new RevenueEntity();
+revenue2.tokenId =
+  '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95';
+revenue2.amount = '10';
+revenue2.permit = secondPermit;
+
+export const revenue3 = new RevenueEntity();
+revenue3.tokenId =
+  '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074';
+revenue3.amount = '9999';
+revenue3.permit = permitEntity;
+
+export const revenue4 = new RevenueEntity();
+revenue4.tokenId =
+  '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267';
+revenue4.amount = '1';
+revenue4.permit = firstPermit;
 
 export const observationStatusTimedOut = new ObservationStatusEntity();
 observationStatusTimedOut.status = TxStatus.TIMED_OUT;
@@ -657,6 +683,6 @@ export const generalInfo = {
   currentBalance: 1100000,
   network: 'ergo',
   permitCount: 0,
-  health: 'OK',
+  health: 'Healthy',
   address: '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH',
 };

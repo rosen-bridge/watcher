@@ -9,6 +9,9 @@ import * as console from 'console';
 import {
   firstRevenue,
   lastRevenue,
+  revenueMonthlyChart,
+  revenueWeeklyChart,
+  revenueYearlyChart,
   secondTokenId2Revenue,
   tokenId2Revenue,
 } from '../ergo/statistics/mockUtils';
@@ -49,9 +52,8 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.length).to.eql(10);
+      expect(resultParsed.length).to.eql(4);
       expect(resultParsed[0]).to.eql(firstRevenue);
-      expect(resultParsed[9]).to.eql(lastRevenue);
     });
 
     /**
@@ -73,8 +75,8 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.length).to.eql(10);
-      expect(resultParsed[9]).to.eql(firstRevenue);
+      expect(resultParsed.length).to.eql(4);
+      expect(resultParsed[3]).to.eql(firstRevenue);
     });
 
     /**
@@ -96,8 +98,8 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.length).to.eql(6);
-      expect(resultParsed[5]).to.eql(lastRevenue);
+      const revenueIds = resultParsed.map((revenue: any) => revenue.id);
+      expect(revenueIds).to.eql([3, 1]);
     });
 
     /**
@@ -119,8 +121,8 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.length).to.eql(6);
-      expect(resultParsed[5]).to.eql(lastRevenue);
+      const revenueIds = resultParsed.map((revenue: any) => revenue.id);
+      expect(revenueIds).to.eql([3, 1]);
     });
 
     /**
@@ -141,7 +143,8 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([tokenId2Revenue, secondTokenId2Revenue]);
+      const revenueIds = resultParsed.map((revenue: any) => revenue.id);
+      expect(revenueIds).to.eql([3, 1]);
     });
 
     /**
@@ -163,8 +166,9 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.length).to.eql(6);
-      expect(resultParsed[5]).to.eql(lastRevenue);
+      expect(resultParsed.length).to.eql(2);
+      const revenueIds = resultParsed.map((revenue: any) => revenue.id);
+      expect(revenueIds).to.eql([3, 1]);
     });
 
     /**
@@ -207,8 +211,8 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.length).to.eql(4);
-      expect(resultParsed[0]).to.eql(tokenId2Revenue);
+      expect(resultParsed.length).to.eql(1);
+      expect(resultParsed[0].id).to.eql(3);
     });
 
     /**
@@ -251,8 +255,8 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.length).to.eql(4);
-      expect(resultParsed[0]).to.eql(tokenId2Revenue);
+      expect(resultParsed.length).to.eql(1);
+      expect(resultParsed[0].id).to.eql(3);
     });
 
     /**
@@ -275,7 +279,106 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.length).to.eql(1);
-      expect(resultParsed[0]).to.eql(tokenId2Revenue);
+      expect(resultParsed[0].id).to.eql(4);
+    });
+  });
+
+  describe('GET /revenue/chart', () => {
+    before(async () => {
+      const ORM = await loadDataBase();
+      await fillORM(ORM);
+      initWatcherDB(ORM.DB);
+    });
+
+    /**
+     * @target RevenueChart endpoint should return correct
+     * chart data with weekly period
+     * @dependencies
+     * @scenario
+     * - send a request to the endpoint
+     * - check the result
+     * @expected
+     * - response status should be 200
+     * - response body should have length of 1
+     * - the only element of body must be correct
+     */
+    it('RevenueChart endpoint should return correct chart data with weekly period', async () => {
+      // send a request to the endpoint
+      const res = await request(app).get('/revenue/chart?period=week');
+
+      // check the result
+      expect(res.status).to.eql(200);
+      const resultParsed = JSON.parse(res.text);
+      expect(resultParsed).to.eql(revenueWeeklyChart);
+    });
+
+    /**
+     * @target RevenueChart endpoint should return correct
+     * chart data with monthly period
+     * @dependencies
+     * @scenario
+     * - send a request to the endpoint
+     * - check the result
+     * @expected
+     * - response status should be 200
+     * - response body should have length of 1
+     * - the only element of body must be correct
+     */
+    it('RevenueChart endpoint should return correct chart data with monthly period', async () => {
+      // send a request to the endpoint
+      const res = await request(app).get('/revenue/chart?period=month');
+
+      // check the result
+      expect(res.status).to.eql(200);
+      const resultParsed = JSON.parse(res.text);
+      expect(resultParsed).to.eql(revenueMonthlyChart);
+    });
+
+    /**
+     * @target RevenueChart endpoint should return correct
+     * chart data with yearly period
+     * @dependencies
+     * @scenario
+     * - send a request to the endpoint
+     * - check the result
+     * @expected
+     * - response status should be 200
+     * - response body should have length of 1
+     * - the only element of body must be correct
+     */
+    it('RevenueChart endpoint should return correct chart data with yearly period', async () => {
+      // send a request to the endpoint
+      const res = await request(app).get('/revenue/chart?period=year');
+
+      // check the result
+      expect(res.status).to.eql(200);
+      const resultParsed = JSON.parse(res.text);
+      expect(resultParsed).to.eql(revenueYearlyChart);
+    });
+
+    /**
+     * @target RevenueChart endpoint should return correct
+     * chart data when setting offset/limit
+     * @dependencies
+     * @scenario
+     * - send a request to the endpoint
+     * - check the result
+     * @expected
+     * - response status should be 200
+     * - response body should have length of 1
+     * - the only element of body must be correct
+     */
+    it('RevenueChart endpoint should return correct chart data when setting offset/limit', async () => {
+      // send a request to the endpoint
+      const res = await request(app).get(
+        '/revenue/chart?period=year&offset=1&limit=1'
+      );
+
+      // check the result
+      expect(res.status).to.eql(200);
+      const resultParsed = JSON.parse(res.text);
+      expect(resultParsed.length).to.eql(1);
+      expect(resultParsed[0]).to.eql(revenueYearlyChart[1]);
     });
   });
 });

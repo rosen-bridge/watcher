@@ -1,6 +1,10 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { ErgoBox } from 'ergo-lib-wasm-nodejs';
-import { Observation } from '../utils/interfaces';
+import {
+  ChartRecord,
+  Observation,
+  RevenueChartRecord,
+} from '../utils/interfaces';
 import { bigIntToUint8Array } from '../utils/utils';
 import { ErgoNetwork } from './network/ergoNetwork';
 import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
@@ -388,17 +392,63 @@ export class ErgoUtils {
    * @param revenues
    */
   static extractRevenueFromView = async (revenues: RevenueView[]) => {
-    const revenuesTransformed = await Promise.all(
-      revenues.map(async ({ boxSerialized, ...rev }) => {
-        const balance = await this.extractBalanceFromBoxes([boxSerialized]);
-        return {
-          ...rev,
-          nanoErgs: balance.nanoErgs,
-          tokens: balance.tokens,
-        };
-      })
-    );
+    type RevenueAPIType = Omit<
+      RevenueView,
+      'revenueTokenId' | 'revenueAmount'
+    > & {
+      revenues: {
+        tokenId: string;
+        amount: string;
+      }[];
+    };
 
-    return revenuesTransformed;
+    const revenuesMap = new Map<number, RevenueAPIType>();
+    for (const { revenueTokenId, revenueAmount, ...revenue } of revenues) {
+      const currentRecord = revenuesMap.get(revenue.id);
+      if (currentRecord !== undefined) {
+        currentRecord.revenues.push({
+          tokenId: revenueTokenId,
+          amount: revenueAmount,
+        });
+      } else {
+        revenuesMap.set(revenue.id, {
+          ...revenue,
+          revenues: [{ tokenId: revenueTokenId, amount: revenueAmount }],
+        });
+      }
+    }
+
+    return Array.from(revenuesMap.values());
+  };
+
+  static transformChartData = (chartData: RevenueChartRecord[]) => {
+    const chartMap = new Map<string, Array<ChartRecord>>();
+    chartData.forEach((record) => {
+      const year = Number(record.year);
+      const month = Number(record.month) || 1;
+      const day = Number(record.day) || 1;
+      let timestamp = 0;
+      if (!isNaN(year)) {
+        timestamp = Math.max(Date.UTC(year, month - 1, day), 0);
+      } else {
+        timestamp = Number(record.week_number) * 7 * 24 * 60 * 60 * 1000;
+      }
+      const chartRecord: ChartRecord = {
+        label: String(timestamp),
+        amount: record.revenue.toString(),
+      };
+      const chartRecords = chartMap.get(record.tokenId) || [];
+      chartRecords.push(chartRecord);
+      chartMap.set(record.tokenId, chartRecords);
+    });
+    // transform chartMap to json
+    const jsonObject: { title: string; data: Array<ChartRecord> }[] = [];
+    chartMap.forEach((records, tokenId) => {
+      jsonObject.push({
+        title: tokenId,
+        data: records,
+      });
+    });
+    return jsonObject;
   };
 }

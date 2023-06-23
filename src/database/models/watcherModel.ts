@@ -27,8 +27,11 @@ import { TokenEntity } from '../entities/tokenEntity';
 import { EventStatus } from '../../utils/interfaces';
 import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 import { RevenueView } from '../entities/revenueView';
+import { RevenueEntity } from '../entities/revenueEntity';
+import { RevenueChartDataView } from '../entities/revenueChartDataView';
 
 class WatcherDataBase {
+  private readonly dataSource: DataSource;
   private readonly blockRepository: Repository<BlockEntity>;
   private readonly observationRepository: Repository<ObservationEntity>;
   private readonly txRepository: Repository<TxEntity>;
@@ -39,8 +42,11 @@ class WatcherDataBase {
   private readonly eventTriggerRepository: Repository<EventTriggerEntity>;
   private readonly tokenRepository: Repository<TokenEntity>;
   private readonly revenueView: Repository<RevenueView>;
+  private readonly revenueRepository: Repository<RevenueEntity>;
+  private readonly revenueChartView: Repository<RevenueChartDataView>;
 
   constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
     this.blockRepository = dataSource.getRepository(BlockEntity);
     this.observationRepository = dataSource.getRepository(ObservationEntity);
     this.txRepository = dataSource.getRepository(TxEntity);
@@ -53,6 +59,8 @@ class WatcherDataBase {
     this.eventTriggerRepository = dataSource.getRepository(EventTriggerEntity);
     this.tokenRepository = dataSource.getRepository(TokenEntity);
     this.revenueView = dataSource.getRepository(RevenueView);
+    this.revenueRepository = dataSource.getRepository(RevenueEntity);
+    this.revenueChartView = dataSource.getRepository(RevenueChartDataView);
   }
 
   /**
@@ -812,6 +820,101 @@ class WatcherDataBase {
     }
 
     return qb.offset(offset).limit(limit).execute();
+  };
+
+  /**
+   * Returns chart data with the period of a week
+   * @param offset
+   * @param limit
+   */
+  getWeeklyRevenueChartData = async (offset: number, limit: number) => {
+    let qb = this.revenueChartView.createQueryBuilder('rcv');
+    qb = qb
+      .select('"tokenId"')
+      .addSelect('timestamp/604800000 as week_number')
+      .addSelect('sum(amount) as revenue')
+      .groupBy('"tokenId"')
+      .addGroupBy('week_number')
+      .orderBy('week_number', 'DESC');
+
+    return qb.offset(offset).limit(limit).execute();
+  };
+
+  /**
+   * Returns chart data with the period of month or year
+   * @param period
+   * @param offset
+   * @param limit
+   */
+  getRevenueChartData = async (
+    period: string,
+    offset: number,
+    limit: number
+  ) => {
+    let qb = this.revenueChartView.createQueryBuilder('rcv');
+    qb = qb
+      .select('"tokenId"')
+      .addSelect('year')
+      .addSelect('sum(amount) as revenue')
+      .groupBy('"tokenId"')
+      .addGroupBy('year')
+      .orderBy('year', 'DESC');
+    if (period === 'month') {
+      qb = qb
+        .addSelect('month')
+        .addGroupBy('month')
+        .addOrderBy('month', 'DESC');
+    }
+    return qb.offset(offset).limit(limit).execute();
+  };
+
+  /**
+   * Returns unsaved permit ids
+   */
+  getUnsavedRevenueIds = async (): Promise<Array<number>> => {
+    const unsavedPermits = await this.permitRepository
+      .createQueryBuilder('pe')
+      .select('pe.id', 'id')
+      .leftJoin('revenue_entity', 're', 'pe.id = re."permitId"')
+      .where('re.id IS NULL')
+      .orderBy('pe.id', 'ASC')
+      .getRawMany();
+
+    const unsavedPermitIds = unsavedPermits.map(
+      (permit: { id: number }) => permit.id
+    );
+    return unsavedPermitIds;
+  };
+
+  /**
+   * Returns all permits up to a specific id
+   * @param ids
+   */
+  getPermitsById = async (ids: number[]): Promise<PermitEntity[]> => {
+    return this.permitRepository
+      .createQueryBuilder('p')
+      .select(`id, "boxSerialized"`)
+      .where('p.id IN (:...ids)', { ids })
+      .orderBy('p.id', 'ASC')
+      .execute();
+  };
+
+  /**
+   * Stores the info of permit in chart entity
+   * @param tokenId
+   * @param amount
+   * @param permit
+   */
+  storeRevenue = async (
+    tokenId: string,
+    amount: string,
+    permit: PermitEntity
+  ) => {
+    await this.revenueRepository.save({
+      tokenId,
+      amount,
+      permit,
+    });
   };
 }
 

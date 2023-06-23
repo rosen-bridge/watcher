@@ -37,3 +37,17 @@ export interface EventStatus {
   id: number;
   status: string;
 }
+
+export interface RevenueChartRecord {
+  tokenId: string;
+  revenue: bigint;
+  year: string;
+  month?: string;
+  day?: string;
+  week_number?: string;
+}
+
+export interface ChartRecord {
+  label: string;
+  amount: string;
+}
