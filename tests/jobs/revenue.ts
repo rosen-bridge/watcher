@@ -25,7 +25,7 @@ describe('revenue Job', () => {
      * - run the job
      * - check the result
      * @expected
-     * - last visited permit must be 4
+     * - there must be no unsaved permits
      */
     it('should store all revenues up to permit id 4', async () => {
       // run the job

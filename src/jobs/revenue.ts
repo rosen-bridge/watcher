@@ -2,6 +2,7 @@ import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
 import { watcherDatabase } from '../init';
 import { decodeSerializedBox } from '../ergo/utils';
+import { ERGO_NATIVE_ASSET } from '../config/constants';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -32,7 +33,7 @@ export const revenueJobFunction = async () => {
 
     // save ergs as revenue
     await watcherDatabase.storeRevenue(
-      'ERG',
+      ERGO_NATIVE_ASSET,
       permitBox.value().as_i64().to_str(),
       newPermits[i]
     );
