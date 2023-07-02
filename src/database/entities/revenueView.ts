@@ -1,5 +1,4 @@
 import { ViewEntity, ViewColumn } from 'typeorm';
-import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 
 @ViewEntity({
   name: 'revenue_view',
@@ -9,7 +8,7 @@ import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
       .select('pe.id', 'id')
       .addSelect('pe."txId"', 'permitTxId')
       .addSelect('ete."eventId"', 'eventId')
-      .addSelect('ete.height', 'lockHeight')
+      .addSelect('ete."sourceChainHeight"', 'lockHeight')
       .addSelect('ete."fromChain"', 'fromChain')
       .addSelect('ete."toChain"', 'toChain')
       .addSelect('ete."fromAddress"', 'fromAddress')
@@ -19,16 +18,12 @@ import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
       .addSelect('ete."networkFee"', 'networkFee')
       .addSelect('ete."sourceChainTokenId"', 'tokenId')
       .addSelect('ete."sourceTxId"', 'lockTxId')
-      .addSelect('be.height', 'height')
-      .addSelect('be.timestamp', 'timestamp')
-      .addSelect(
-        `CASE WHEN "ete"."spendTxId" IS NULL THEN '${DOING_STATUS}' ELSE '${DONE_STATUS}' END`,
-        'status'
-      )
-      .addSelect('re.tokenId', 'revenueTokenId')
-      .addSelect('re.amount', 'revenueAmount')
+      .addSelect('pe."height"', 'height')
+      .addSelect('be."timestamp"', 'timestamp')
+      .addSelect('re."tokenId"', 'revenueTokenId')
+      .addSelect('re."amount"', 'revenueAmount')
       .from('permit_entity', 'pe')
-      .leftJoin('event_trigger_entity', 'ete', 'pe."txId" = ete."txId"')
+      .leftJoin('event_trigger_entity', 'ete', 'pe."txId" = ete."spendTxId"')
       .leftJoin('block_entity', 'be', 'pe.block = be.hash')
       .leftJoin('revenue_entity', 're', 'pe.id = re."permitId"'),
 })
@@ -77,9 +72,6 @@ export class RevenueView {
 
   @ViewColumn()
   timestamp!: number;
-
-  @ViewColumn()
-  status!: string;
 
   @ViewColumn()
   revenueTokenId!: string;
