@@ -302,6 +302,8 @@ class HealthCheckConfig {
   ergoNodeMaxPeerHeightDifference: number;
   permitWarnCommitmentCount: number;
   permitCriticalCommitmentCount: number;
+  permitDefaultCommitmentRWT: number;
+  permitThresholdUpdateInterval: number;
   updateInterval: number;
   errorLogAllowedCount: number;
   errorLogDuration: number;
@@ -342,6 +344,12 @@ class HealthCheckConfig {
     );
     this.permitCriticalCommitmentCount = getRequiredNumber(
       'healthCheck.permit.criticalCommitmentCount'
+    );
+    this.permitDefaultCommitmentRWT = getRequiredNumber(
+      'healthCheck.permit.defaultCommitmentRwt'
+    );
+    this.permitThresholdUpdateInterval = getRequiredNumber(
+      'healthCheck.permit.updateThresholdsInterval'
     );
     this.updateInterval = getRequiredNumber('healthCheck.interval');
     this.errorLogAllowedCount = getRequiredNumber(

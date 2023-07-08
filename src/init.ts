@@ -82,7 +82,7 @@ const init = async () => {
       watcherDatabase = new WatcherDataBase(dataSource);
       logger.debug('Initializing scanners and extractors...');
       scannerInit();
-      healthCheckStart();
+      healthCheckStart(boxesObject);
 
       await delay(10000);
       watcherUtils = new WatcherUtils(

@@ -6,10 +6,12 @@ import {
   ErgoNodeAssetHealthCheckParam,
   ErgoNodeScannerHealthCheck,
   ErgoNodeSyncHealthCheckParam,
+  ExplorerPermitHealthCheckParam,
   ExplorerWidHealthCheckParam,
   HealthCheck,
   HealthStatusLevel,
   LogLevelHealthCheck,
+  NodePermitHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/health-check';
 import { getConfig } from '../config/config';
@@ -24,9 +26,12 @@ import {
 } from '../config/constants';
 import { loggerFactory } from '../log/Logger';
 import { scanner } from './scanner';
+import { AbstractPermitHealthCheckParam } from '@rosen-bridge/health-check/dist/lib/params/permitHealthCheck/AbstractPermitHealthCheck';
+import { Transaction } from '../../src/api/Transaction';
 
 const logger = loggerFactory(import.meta.url);
 let healthCheck: HealthCheck | undefined;
+let permitHealthCheckParam: AbstractPermitHealthCheckParam | undefined;
 
 const getHealthCheck = (): HealthCheck => {
   if (healthCheck === undefined) {
@@ -77,6 +82,28 @@ const getHealthCheck = (): HealthCheck => {
         getConfig().general.nodeUrl
       );
       healthCheck.register(ergoNodeSyncCheck);
+
+      if (Transaction.watcherWID) {
+        permitHealthCheckParam = new NodePermitHealthCheckParam(
+          getConfig().rosen.RWTId,
+          getConfig().rosen.watcherPermitAddress,
+          Transaction.watcherWID,
+          BigInt(
+            getConfig().healthCheck.permitWarnCommitmentCount *
+              getConfig().healthCheck.permitDefaultCommitmentRWT
+          ),
+          BigInt(
+            getConfig().healthCheck.permitCriticalCommitmentCount *
+              getConfig().healthCheck.permitDefaultCommitmentRWT
+          ),
+          getConfig().general.nodeUrl
+        );
+        healthCheck.register(permitHealthCheckParam);
+      } else {
+        logger.warn(
+          'Watcher wid is not set, skipping permit health check parameter registration.'
+        );
+      }
     } else if (getConfig().general.scannerType === EXPLORER_TYPE) {
       const widHealthCheck = new ExplorerWidHealthCheckParam(
         getConfig().rosen.RWTRepoAddress,
@@ -104,6 +131,28 @@ const getHealthCheck = (): HealthCheck => {
         getConfig().general.explorerUrl
       );
       healthCheck.register(ergoScannerSyncCheck);
+
+      if (Transaction.watcherWID) {
+        permitHealthCheckParam = new ExplorerPermitHealthCheckParam(
+          getConfig().rosen.RWTId,
+          getConfig().rosen.watcherPermitAddress,
+          Transaction.watcherWID,
+          BigInt(
+            getConfig().healthCheck.permitWarnCommitmentCount *
+              getConfig().healthCheck.permitDefaultCommitmentRWT
+          ),
+          BigInt(
+            getConfig().healthCheck.permitCriticalCommitmentCount *
+              getConfig().healthCheck.permitDefaultCommitmentRWT
+          ),
+          getConfig().general.explorerUrl
+        );
+        healthCheck.register(permitHealthCheckParam);
+      } else {
+        logger.warn(
+          'Watcher wid is not set, skipping permit health check parameter registration.'
+        );
+      }
     }
 
     if (getConfig().general.networkWatcher === CARDANO_WATCHER) {
@@ -133,4 +182,12 @@ const getHealthCheck = (): HealthCheck => {
   return healthCheck;
 };
 
-export { getHealthCheck };
+const getPermitHealthCheckParam = async () => {
+  if (healthCheck) return permitHealthCheckParam;
+  else {
+    await getHealthCheck();
+    return permitHealthCheckParam;
+  }
+};
+
+export { getHealthCheck, getPermitHealthCheckParam };
