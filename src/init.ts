@@ -82,7 +82,6 @@ const init = async () => {
       watcherDatabase = new WatcherDataBase(dataSource);
       logger.debug('Initializing scanners and extractors...');
       scannerInit();
-      healthCheckStart(boxesObject);
 
       await delay(10000);
       watcherUtils = new WatcherUtils(
@@ -115,6 +114,8 @@ const init = async () => {
       tokenNameJob([]);
       // Running revenue thread
       revenueJob();
+      // Starting HealthCheck jobs
+      healthCheckStart(boxesObject);
 
       logger.debug('Service initialization finished successfully.');
     })
