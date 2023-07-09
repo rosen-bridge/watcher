@@ -7,6 +7,7 @@ type RosenConfigType = {
   cleanupNFT: string;
   cleanupConfirm: number;
   watcherPermitAddress: string;
+  WatcherCollateralAddress: string;
   RWTRepoAddress: string;
   fraudAddress: string;
   eventTriggerAddress: string;
@@ -22,6 +23,7 @@ class RosenConfig {
   readonly cleanupNFT: string;
   readonly cleanupConfirm: number;
   readonly watcherPermitAddress: string;
+  readonly watcherCollateralAddress: string;
   readonly RWTRepoAddress: string;
   readonly fraudAddress: string;
   readonly eventTriggerAddress: string;
@@ -44,6 +46,7 @@ class RosenConfig {
       this.cleanupNFT = config.tokens.CleanupNFT;
       this.cleanupConfirm = config.cleanupConfirm;
       this.watcherPermitAddress = config.addresses.WatcherPermit;
+      this.watcherCollateralAddress = config.addresses.WatcherCollateral;
       this.RWTRepoAddress = config.addresses.RWTRepo;
       this.fraudAddress = config.addresses.Fraud;
       this.eventTriggerAddress = config.addresses.WatcherTriggerEvent;

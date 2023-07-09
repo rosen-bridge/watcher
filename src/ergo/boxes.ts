@@ -26,6 +26,7 @@ export class Boxes {
   fee: wasm.BoxValue;
   userAddressContract: wasm.Contract;
   repoAddressContract: wasm.Contract;
+  watcherCollateralContract: wasm.Contract;
   repoAddress: wasm.Address;
 
   constructor(db: WatcherDataBase) {
@@ -46,6 +47,9 @@ export class Boxes {
     this.userAddressContract = wasm.Contract.pay_to_address(userAddress);
     this.repoAddress = wasm.Address.from_base58(rosenConfig.RWTRepoAddress);
     this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
+    this.watcherCollateralContract = wasm.Contract.pay_to_address(
+      wasm.Address.from_base58(rosenConfig.watcherCollateralAddress)
+    );
     this.fee = wasm.BoxValue.from_i64(
       wasm.I64.from_str(getConfig().general.fee)
     );
@@ -515,6 +519,31 @@ export class Boxes {
       );
     }
 
+    return boxBuilder.build();
+  };
+
+  createCollateralBox = (
+    amount: AddressBalance,
+    height: number,
+    wid: string
+  ) => {
+    const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
+      wasm.BoxValue.from_i64(wasm.I64.from_str(amount.nanoErgs.toString())),
+      this.watcherCollateralContract,
+      height
+    );
+    for (const token of amount.tokens) {
+      if (token.amount > 0n) {
+        boxBuilder.add_token(
+          wasm.TokenId.from_str(token.tokenId),
+          wasm.TokenAmount.from_i64(wasm.I64.from_str(token.amount.toString()))
+        );
+      }
+    }
+    boxBuilder.set_register_value(
+      4,
+      wasm.Constant.from_byte_array(Buffer.from(wid))
+    );
     return boxBuilder.build();
   };
 }
