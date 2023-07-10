@@ -1,5 +1,7 @@
 import { output } from '@noble/hashes/_assert';
 import { Buffer } from 'buffer';
+import * as console from 'console';
+import { ErgoBox, ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { hexStrToUint8Array, uint8ArrayToHex } from '../utils/utils';
@@ -126,6 +128,8 @@ export class Transaction {
 
     const permitBoxes = await Transaction.boxes.getPermits(WID, RWTCount);
     const repoBox = await Transaction.boxes.getRepoBox();
+    const widBox = await Transaction.boxes.getWIDBox(WID);
+
     const R4 = repoBox.register_value(4);
     const R5 = repoBox.register_value(5);
     const R6 = repoBox.register_value(6);
@@ -140,150 +144,134 @@ export class Transaction {
 
     const users = R4.to_coll_coll_byte();
 
-    const widBox = await ErgoNetwork.getBoxWithToken(
-      Transaction.userAddress,
-      WID
-    );
-
     const usersCount: Array<string> | undefined = R5.to_i64_str_array();
 
     const widIndex = users.map((user) => uint8ArrayToHex(user)).indexOf(WID);
-    const inputRWTCount = BigInt(usersCount[widIndex]);
-    let newUsers = users;
-    let newUsersCount = usersCount;
-    let needOutputPermitBox = false;
-    if (inputRWTCount == RWTCount) {
-      newUsers = users
-        .slice(0, widIndex)
-        .concat(users.slice(widIndex + 1, users.length));
-      newUsersCount = usersCount
-        .slice(0, widIndex)
-        .concat(usersCount.slice(widIndex + 1, usersCount.length));
-    } else if (inputRWTCount > RWTCount) {
-      newUsersCount[widIndex] = (inputRWTCount - RWTCount).toString();
-      needOutputPermitBox = true;
-    } else {
-      return {
-        response: "You don't have enough RWT locked to extract from repo box",
-        status: 500,
-      };
+    const inputBoxes = [repoBox, permitBoxes[0], widBox];
+    const totalRWT = BigInt(usersCount[widIndex]);
+    if (totalRWT === RWTCount) {
+      // need to add collateral
+      const collateralBoxes =
+        await ErgoNetwork.getCoveringErgAndTokenForAddress(
+          Transaction.boxes.watcherCollateralContract
+            .ergo_tree()
+            .to_base16_bytes(),
+          BigInt(Transaction.minBoxValue.as_i64().to_str()),
+          {},
+          (box) =>
+            Buffer.from(box.register_value(4)?.to_js()).toString('hex') == WID
+        );
+      inputBoxes.push(collateralBoxes.boxes[0]);
     }
-    const RepoRWTCount = repoBox
-      .tokens()
-      .get(1)
-      .amount()
-      .as_i64()
-      .checked_add(wasm.I64.from_str(RWTCount.toString()));
-    const RSNRWTRatio = R6.to_i64_str_array()[0];
-    const RSNTokenCount = repoBox
-      .tokens()
-      .get(2)
-      .amount()
-      .as_i64()
-      .checked_add(
-        wasm.I64.from_str((RWTCount * -BigInt(RSNRWTRatio)).toString())
-      );
-
-    const repoOut = await Transaction.boxes.createRepo(
-      height,
-      RepoRWTCount.to_str(),
-      RSNTokenCount.to_str(),
-      newUsers,
-      newUsersCount,
-      R6,
-      widIndex
+    const usersOut = [...users];
+    const usersCountOut = [...usersCount];
+    if (totalRWT === RWTCount) {
+      usersOut.splice(widIndex);
+      usersCountOut.splice(widIndex);
+    } else {
+      usersCountOut[widIndex] = (
+        BigInt(usersCountOut[widIndex]) - RWTCount
+      ).toString();
+    }
+    const inputRWTCount = permitBoxes
+      .map((box) => BigInt(box.tokens().get(0).amount().as_i64().to_str()))
+      .reduce((a, b) => a + b, 0n);
+    permitBoxes.slice(1).forEach((box) => inputBoxes.push(box));
+    const outputBoxes: Array<ErgoBoxCandidate> = [];
+    outputBoxes.push(
+      await Transaction.boxes.createRepo(
+        height,
+        (
+          BigInt(repoBox.tokens().get(1).amount().as_i64().to_str()) + RWTCount
+        ).toString(),
+        (
+          BigInt(repoBox.tokens().get(2).amount().as_i64().to_str()) - RWTCount
+        ).toString(),
+        usersOut,
+        usersCountOut,
+        repoBox.register_value(6)!,
+        widIndex
+      )
     );
-
-    const inputBoxes = new wasm.ErgoBoxes(repoBox);
-    permitBoxes.forEach((box) => inputBoxes.add(box));
-    inputBoxes.add(widBox);
+    if (inputRWTCount > RWTCount) {
+      outputBoxes.push(
+        await Transaction.boxes.createPermit(
+          height,
+          inputRWTCount - RWTCount,
+          Buffer.from(WID, 'hex')
+        )
+      );
+    }
+    outputBoxes.push(
+      Transaction.boxes.createWIDBox(
+        height,
+        WID,
+        Transaction.minBoxValue.as_i64().to_str(),
+        Transaction.userAddressContract
+      )
+    );
+    const totalErgIn = inputBoxes
+      .map((item) => BigInt(item.value().as_i64().to_str()))
+      .reduce((a, b) => a + b, 0n);
+    const totalErgOut =
+      outputBoxes
+        .map((item) => BigInt(item.value().as_i64().to_str()))
+        .reduce((a, b) => a + b, 0n) +
+      BigInt(Transaction.fee.as_i64().to_str()) +
+      BigInt(Transaction.minBoxValue.as_i64().to_str());
+    if (totalErgOut > totalErgIn) {
+      const userBoxes = await ErgoNetwork.getCoveringErgAndTokenForAddress(
+        Transaction.userAddressContract.ergo_tree().to_base16_bytes(),
+        totalErgOut - totalErgIn
+      );
+      if (!userBoxes.covered) {
+        return {
+          response: `Not enough erg. required [${
+            totalErgOut - totalErgIn
+          }] more Ergs`,
+          status: 500,
+        };
+      }
+      userBoxes.boxes.forEach((box) => inputBoxes.push(box));
+    }
+    // create change box
+    outputBoxes.push(
+      this.createChangeBox(
+        inputBoxes,
+        outputBoxes,
+        Transaction.userAddress,
+        height
+      )
+    );
+    const txInputBoxes = wasm.ErgoBoxes.empty();
+    inputBoxes.forEach((box) => {
+      txInputBoxes.add(box);
+    });
 
     const inputBoxSelection = new wasm.BoxSelection(
-      inputBoxes,
+      txInputBoxes,
       new wasm.ErgoBoxAssetsDataList()
     );
-    const changeTokens = this.inputBoxesTokenMap(inputBoxes, 2);
 
-    let rsnCount = changeTokens.get(Transaction.RSN.to_str());
-    if (rsnCount === undefined) {
-      rsnCount = '0';
-    } else {
-      changeTokens.delete(Transaction.RSN.to_str());
-    }
-
-    const repoValue = BigInt(repoBox.value().as_i64().to_str());
-    const permitValue = permitBoxes
-      .map((permit) => BigInt(permit.value().as_i64().to_str()))
-      .reduce((a, b) => a + b, 0n);
-    const widValue = BigInt(widBox.value().as_i64().to_str());
-    const totalInputValue = repoValue + permitValue + widValue;
-
-    const userOutBoxBuilder = new wasm.ErgoBoxCandidateBuilder(
-      wasm.BoxValue.from_i64(
-        wasm.I64.from_str(
-          (
-            totalInputValue -
-            BigInt(Transaction.fee.as_i64().to_str()) -
-            repoValue -
-            (needOutputPermitBox ? BigInt('1') : BigInt('0')) *
-              BigInt(Transaction.minBoxValue.as_i64().to_str())
-          ).toString()
-        )
-      ),
-      Transaction.userAddressContract,
-      height
-    );
-
-    userOutBoxBuilder.add_token(
-      Transaction.RSN,
-      wasm.TokenAmount.from_i64(
-        wasm.I64.from_str(
-          (RWTCount * BigInt(RSNRWTRatio) + BigInt(rsnCount)).toString()
-        )
-      )
-    );
-
-    for (const [tokenId, tokenAmount] of changeTokens) {
-      if (tokenAmount !== '0') {
-        userOutBoxBuilder.add_token(
-          wasm.TokenId.from_str(tokenId),
-          wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount))
-        );
-      }
-    }
-    const userOutBox = userOutBoxBuilder.build();
-    const outputBoxes = new wasm.ErgoBoxCandidates(repoOut);
-    const permitsRWTCount: bigint = permitBoxes
-      .map((permit) =>
-        BigInt(permit.tokens().get(0).amount().as_i64().to_str())
-      )
-      .reduce((a, b) => a + b, BigInt(0));
-    if (permitsRWTCount > RWTCount) {
-      const permitOut = Transaction.boxes.createPermit(
-        height,
-        permitsRWTCount - RWTCount,
-        hexStrToUint8Array(WID)
-      );
-      outputBoxes.add(permitOut);
-    }
-    outputBoxes.add(userOutBox);
+    const txOutputBoxes = wasm.ErgoBoxCandidates.empty();
+    outputBoxes.forEach((box) => txOutputBoxes.add(box));
 
     const builder = wasm.TxBuilder.new(
       inputBoxSelection,
-      outputBoxes,
+      txOutputBoxes,
       height,
       Transaction.fee,
       Transaction.userAddress
     );
-
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,
-      inputBoxes
+      txInputBoxes
     );
-    await ErgoNetwork.sendTx(signedTx.to_json());
-    Transaction.watcherPermitState = !Transaction.watcherPermitState;
-    Transaction.watcherWID = '';
+    await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
+    const isAlreadyWatcher = totalRWT > RWTCount;
+    Transaction.watcherPermitState = isAlreadyWatcher;
+    Transaction.watcherWID = isAlreadyWatcher ? Transaction.watcherWID : '';
     return { response: signedTx.id().to_str(), status: 200 };
   };
 
@@ -351,16 +339,19 @@ export class Transaction {
         }
       }
     });
+    totalErg -= BigInt(Transaction.fee.as_i64().to_str());
     const changeBuilder = new wasm.ErgoBoxCandidateBuilder(
       wasm.BoxValue.from_i64(wasm.I64.from_str(totalErg.toString())),
       wasm.Contract.pay_to_address(address),
       height
     );
     Object.entries(totalTokens).forEach(([tokenId, tokenAmount]) => {
-      changeBuilder.add_token(
-        wasm.TokenId.from_str(tokenId),
-        wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount.toString()))
-      );
+      if (tokenAmount > 0) {
+        changeBuilder.add_token(
+          wasm.TokenId.from_str(tokenId),
+          wasm.TokenAmount.from_i64(wasm.I64.from_str(tokenAmount.toString()))
+        );
+      }
     });
     return changeBuilder.build();
   };
@@ -404,7 +395,30 @@ export class Transaction {
       );
       inputBoxes.push(widBox);
     }
-
+    const RSNTokenId = Transaction.RSN.to_str();
+    const MinBoxValue = BigInt(Transaction.minBoxValue.as_i64().to_str());
+    const RequiredErg =
+      (WID ? 0n : ErgCollateral) +
+      BigInt(Transaction.fee.as_i64().to_str()) +
+      MinBoxValue +
+      MinBoxValue;
+    const userBoxes = await ErgoNetwork.getCoveringErgAndTokenForAddress(
+      Transaction.userAddress.to_ergo_tree().to_base16_bytes(),
+      RequiredErg,
+      {
+        [RSNTokenId]: RSNCollateral + RSNCount,
+      }
+    );
+    if (userBoxes.covered) {
+      userBoxes.boxes.forEach((box) => inputBoxes.push(box));
+    } else {
+      return {
+        response: `Not enough ERG or RSN. Required [${RequiredErg}] ERG and [${
+          RSNCollateral + RSNCount
+        }] RSN`,
+        status: 500,
+      };
+    }
     // generate RepoOut
     const RepoRWTCount = repoBox
       .tokens()
@@ -449,7 +463,7 @@ export class Transaction {
       await Transaction.boxes.createPermit(
         height,
         RSNCount,
-        repoBox.box_id().as_bytes()
+        WID ? Buffer.from(WID, 'hex') : repoBox.box_id().as_bytes()
       )
     );
     // generate WID box
@@ -462,7 +476,7 @@ export class Transaction {
       )
     );
     // generate collateral if required
-    if (WID === undefined) {
+    if (!WID) {
       outBoxes.push(
         await Transaction.boxes.createCollateralBox(
           {
@@ -503,7 +517,6 @@ export class Transaction {
       Transaction.fee,
       Transaction.userAddress
     );
-
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,

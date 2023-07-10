@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as console from 'console';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
 import {
@@ -74,6 +75,7 @@ export class ErgoNetwork {
       .post('/transactions', tx)
       .then((response) => ({ txId: response.data as string, success: true }))
       .catch((exp) => {
+        console.log(exp);
         logger.info(
           `An error occurred while sending transaction to Node: ${exp}`
         );

@@ -542,7 +542,7 @@ export class Boxes {
     }
     boxBuilder.set_register_value(
       4,
-      wasm.Constant.from_byte_array(Buffer.from(wid))
+      wasm.Constant.from_byte_array(Buffer.from(wid, 'hex'))
     );
     return boxBuilder.build();
   };
