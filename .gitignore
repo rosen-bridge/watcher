@@ -13,3 +13,4 @@ logs/
 config/rosen
 out
 bin
+config/local.yaml
