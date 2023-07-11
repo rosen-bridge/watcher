@@ -301,6 +301,14 @@ export class Transaction {
     return changeTokens;
   };
 
+  /**
+   * get all input and output boxes and create a box contain all remaining erg and tokens to it.
+   * subtract fee amount from ergs and send to selected address
+   * @param inBoxes
+   * @param outBoxes
+   * @param address
+   * @param height
+   */
   private createChangeBox = (
     inBoxes: Array<wasm.ErgoBox>,
     outBoxes: Array<wasm.ErgoBoxCandidate>,

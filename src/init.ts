@@ -82,41 +82,41 @@ const init = async () => {
       watcherDatabase = new WatcherDataBase(dataSource);
       logger.debug('Initializing scanners and extractors...');
       scannerInit();
-      // healthCheckStart();
-      //
-      // await delay(10000);
-      // watcherUtils = new WatcherUtils(
-      //   watcherDatabase,
-      //   getConfig().general.observationConfirmation,
-      //   getConfig().general.observationValidThreshold
-      // );
-      // const txUtils = new TransactionUtils(watcherDatabase);
-      // logger.debug('Initializing statistic object...');
-      // Statistics.setup(watcherDatabase, Transaction.watcherWID);
-      // Statistics.getInstance();
-      // await Transaction.setup(
-      //   getConfig().general.address,
-      //   getConfig().general.secretKey,
-      //   boxesObject,
-      //   watcherDatabase
-      // );
-      // Transaction.getInstance();
-      //
-      // logger.debug('Initializing job threads...');
+      healthCheckStart();
+
+      await delay(10000);
+      watcherUtils = new WatcherUtils(
+        watcherDatabase,
+        getConfig().general.observationConfirmation,
+        getConfig().general.observationValidThreshold
+      );
+      const txUtils = new TransactionUtils(watcherDatabase);
+      logger.debug('Initializing statistic object...');
+      Statistics.setup(watcherDatabase, Transaction.watcherWID);
+      Statistics.getInstance();
+      await Transaction.setup(
+        getConfig().general.address,
+        getConfig().general.secretKey,
+        boxesObject,
+        watcherDatabase
+      );
+      Transaction.getInstance();
+
+      logger.debug('Initializing job threads...');
       // Running transaction checking thread
       transactionQueueJob(watcherDatabase, watcherUtils);
-      // // Running commitment creation thread
-      // creation(watcherUtils, txUtils, boxesObject);
-      // // Running commitment redeem thread
-      // redeem(watcherUtils, txUtils, boxesObject);
-      // // Running trigger event creation thread
-      // reveal(watcherUtils, txUtils, boxesObject);
-      // // Running token name thread
-      // tokenNameJob([]);
-      // // Running revenue thread
-      // revenueJob();
-      //
-      // logger.debug('Service initialization finished successfully.');
+      // Running commitment creation thread
+      creation(watcherUtils, txUtils, boxesObject);
+      // Running commitment redeem thread
+      redeem(watcherUtils, txUtils, boxesObject);
+      // Running trigger event creation thread
+      reveal(watcherUtils, txUtils, boxesObject);
+      // Running token name thread
+      tokenNameJob([]);
+      // Running revenue thread
+      revenueJob();
+
+      logger.debug('Service initialization finished successfully.');
     })
     .catch((e) => {
       logger.error(

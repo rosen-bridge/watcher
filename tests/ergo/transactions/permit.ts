@@ -318,6 +318,7 @@ describe('Watcher Permit Transactions', () => {
      * Expected Output:
      *    returnPermit transaction should be signed in case that we have permit box in output
      */
+    // TODO: https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/113
     // it('it checks case that the return permit transaction have permit box in its output', async () => {
     //   initMockedAxios(1);
     //   chai.spy.on(boxes, 'getPermits', () => {

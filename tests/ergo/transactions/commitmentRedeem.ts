@@ -127,6 +127,7 @@ describe('Commitment redeem transaction tests', () => {
      *   - tokenId should equal to WID
      *   - ergoTree should equal to spent WID box ergoTree
      */
+    // TODO: https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/113
     // it('should create, sign and send a commitment redeem tx without any extra tokens', async () => {
     //   chai.spy.on(txUtils, 'submitTransaction', () => null);
     //   chai.spy.on(boxes, 'createPermit');
@@ -174,6 +175,7 @@ describe('Commitment redeem transaction tests', () => {
      *   - tokenId should equal to WID
      *   - ergoTree should equal to spent WID box ergoTree
      */
+    // TODO: https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/113
     // it('should create, sign and send a commitment redeem tx with extra tokens', async () => {
     //   chai.spy.on(txUtils, 'submitTransaction', () => null);
     //   chai.spy.on(boxes, 'createPermit');
