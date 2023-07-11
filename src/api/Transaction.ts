@@ -270,8 +270,9 @@ export class Transaction {
     );
     await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
     const isAlreadyWatcher = totalRWT > RWTCount;
-    Transaction.watcherPermitState = isAlreadyWatcher;
-    Transaction.watcherWID = isAlreadyWatcher ? Transaction.watcherWID : '';
+    Transaction.watcherUnconfirmedWID = isAlreadyWatcher
+      ? Transaction.watcherWID
+      : '';
     return { response: signedTx.id().to_str(), status: 200 };
   };
 
@@ -410,20 +411,19 @@ export class Transaction {
       BigInt(Transaction.fee.as_i64().to_str()) +
       MinBoxValue +
       MinBoxValue;
+    const RequiredRSN = (WID ? 0n : RSNCollateral) + RSNCount;
     const userBoxes = await ErgoNetwork.getCoveringErgAndTokenForAddress(
       Transaction.userAddress.to_ergo_tree().to_base16_bytes(),
       RequiredErg,
       {
-        [RSNTokenId]: RSNCollateral + RSNCount,
+        [RSNTokenId]: RequiredRSN,
       }
     );
     if (userBoxes.covered) {
       userBoxes.boxes.forEach((box) => inputBoxes.push(box));
     } else {
       return {
-        response: `Not enough ERG or RSN. Required [${RequiredErg}] ERG and [${
-          RSNCollateral + RSNCount
-        }] RSN`,
+        response: `Not enough ERG or RSN. Required [${RequiredErg}] ERG and [${RequiredRSN}] RSN`,
         status: 500,
       };
     }

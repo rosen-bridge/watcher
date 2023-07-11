@@ -29,8 +29,8 @@ export class Queue {
       `The [${tx.type}] transaction with txId: [${tx.txId}] is confirmed, removing the tx from txQueue`
     );
     if (tx.type === TxType.PERMIT) {
-      Transaction.watcherPermitState = !Transaction.watcherPermitState;
       Transaction.watcherWID = Transaction.watcherUnconfirmedWID;
+      Transaction.watcherPermitState = !!Transaction.watcherWID;
     }
     if (tx.observation)
       await this.database.upgradeObservationTxStatus(
