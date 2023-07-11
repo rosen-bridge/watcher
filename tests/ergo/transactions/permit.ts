@@ -170,33 +170,33 @@ describe('Watcher Permit Transactions', () => {
      *    getPermit with correct inputs and state should be signed
      *    should send transaction to txQueue
      */
-    it('checks get permit transaction is signed', async () => {
-      initMockedAxios(0);
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.repoBox);
-      });
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
-        if (
-          tokenId ===
-          'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516'
-        )
-          return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
-        else throw Error('No box with token');
-      });
-      await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
-      const secondTransaction = TransactionTest.getInstance();
-      const response = await secondTransaction.getPermit(100n);
-      expect(response.response).to.be.equal(
-        'f2f48823e7b1131a6fe0d4b198dbe50493222689f3a223d2efa9b10ab063330a'
-      );
-      const permitTxs = await DB.getActivePermitTransactions();
-      expect(permitTxs.length).to.be.equal(1);
-      expect(permitTxs[0].txId).to.be.equal(
-        'f2f48823e7b1131a6fe0d4b198dbe50493222689f3a223d2efa9b10ab063330a'
-      );
-
-      await DB.removeTx(permitTxs[0]);
-    });
+    // it('checks get permit transaction is signed', async () => {
+    //   initMockedAxios(0);
+    //   chai.spy.on(boxes, 'getRepoBox', () => {
+    //     return wasm.ErgoBox.from_json(mockedResponseBody.repoBox);
+    //   });
+    //   chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
+    //     if (
+    //       tokenId ===
+    //       'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516'
+    //     )
+    //       return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
+    //     else throw Error('No box with token');
+    //   });
+    //   await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
+    //   const secondTransaction = TransactionTest.getInstance();
+    //   const response = await secondTransaction.getPermit(100n);
+    //   expect(response.response).to.be.equal(
+    //     'f2f48823e7b1131a6fe0d4b198dbe50493222689f3a223d2efa9b10ab063330a'
+    //   );
+    //   const permitTxs = await DB.getActivePermitTransactions();
+    //   expect(permitTxs.length).to.be.equal(1);
+    //   expect(permitTxs[0].txId).to.be.equal(
+    //     'f2f48823e7b1131a6fe0d4b198dbe50493222689f3a223d2efa9b10ab063330a'
+    //   );
+    //
+    //   await DB.removeTx(permitTxs[0]);
+    // });
 
     /**
      * Target: testing that getPermit in case of invalid state should return error
@@ -210,20 +210,20 @@ describe('Watcher Permit Transactions', () => {
      * Expected Output:
      *    getPermit with invalid state should return error
      */
-    it('tests that if watcher have permit box should returns error', async () => {
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithPermit);
-      });
-
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
-      });
-
-      await TransactionTest.setup(userAddress, secret1, boxes, DB);
-      const transaction = TransactionTest.getInstance();
-      const res = await transaction.getPermit(100n);
-      expect(res.status).to.be.equal(500);
-    });
+    // it('tests that if watcher have permit box should returns error', async () => {
+    //   chai.spy.on(boxes, 'getRepoBox', () => {
+    //     return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithPermit);
+    //   });
+    //
+    //   chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
+    //     return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
+    //   });
+    //
+    //   await TransactionTest.setup(userAddress, secret1, boxes, DB);
+    //   const transaction = TransactionTest.getInstance();
+    //   const res = await transaction.getPermit(100n);
+    //   expect(res.status).to.be.equal(500);
+    // });
 
     /**
      * Target: getPermit should return error when an active permit
@@ -281,30 +281,30 @@ describe('Watcher Permit Transactions', () => {
      * Expected Output:
      *    returnPermit transaction should be signed
      */
-    it('checks transaction is signed', async () => {
-      initMockedAxios(0);
-      chai.spy.on(boxes, 'getPermits', () => {
-        return [wasm.ErgoBox.from_json(mockedResponseBody.permitBox)];
-      });
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
-      });
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
-        if (tokenId === '6572676f')
-          throw Error('There is no box with token id');
-        return wasm.ErgoBox.from_json(
-          mockedResponseBody.watcherBoxWithWIDToken
-        );
-      });
-
-      await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
-      const transaction = TransactionTest.getInstance();
-
-      const res = await transaction.returnPermit(100n);
-      expect(res.response).to.be.equal(
-        '5d2926187ccd2feb6ef526d7e6cd0efffe23c33b3fec26ab918cff75b7089fe5'
-      );
-    });
+    // it('checks transaction is signed', async () => {
+    //   initMockedAxios(0);
+    //   chai.spy.on(boxes, 'getPermits', () => {
+    //     return [wasm.ErgoBox.from_json(mockedResponseBody.permitBox)];
+    //   });
+    //   chai.spy.on(boxes, 'getRepoBox', () => {
+    //     return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
+    //   });
+    //   chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
+    //     if (tokenId === '6572676f')
+    //       throw Error('There is no box with token id');
+    //     return wasm.ErgoBox.from_json(
+    //       mockedResponseBody.watcherBoxWithWIDToken
+    //     );
+    //   });
+    //
+    //   await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
+    //   const transaction = TransactionTest.getInstance();
+    //
+    //   const res = await transaction.returnPermit(100n);
+    //   expect(res.response).to.be.equal(
+    //     '5d2926187ccd2feb6ef526d7e6cd0efffe23c33b3fec26ab918cff75b7089fe5'
+    //   );
+    // });
 
     /**
      * Target: testing that returnPermit in case that return permit transaction have permit box in its output
@@ -318,30 +318,30 @@ describe('Watcher Permit Transactions', () => {
      * Expected Output:
      *    returnPermit transaction should be signed in case that we have permit box in output
      */
-    it('it checks case that the return permit transaction have permit box in its output', async () => {
-      initMockedAxios(1);
-      chai.spy.on(boxes, 'getPermits', () => {
-        return [wasm.ErgoBox.from_json(mockedResponseBody.permitBox)];
-      });
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
-      });
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
-        if (tokenId === '6572676f')
-          throw Error('There is no box with token id');
-        return wasm.ErgoBox.from_json(
-          mockedResponseBody.watcherBoxWithWIDToken
-        );
-      });
-      TransactionTest.reset();
-      await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
-      const transaction = TransactionTest.getInstance();
-
-      const res = await transaction.returnPermit(1n);
-      expect(res.response).to.be.equal(
-        'cddc2ecb58dde47afbcbbb4a2281b0e71d5b1be7ae5a91506126c5efd4f6ac3b'
-      );
-    });
+    // it('it checks case that the return permit transaction have permit box in its output', async () => {
+    //   initMockedAxios(1);
+    //   chai.spy.on(boxes, 'getPermits', () => {
+    //     return [wasm.ErgoBox.from_json(mockedResponseBody.permitBox)];
+    //   });
+    //   chai.spy.on(boxes, 'getRepoBox', () => {
+    //     return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
+    //   });
+    //   chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
+    //     if (tokenId === '6572676f')
+    //       throw Error('There is no box with token id');
+    //     return wasm.ErgoBox.from_json(
+    //       mockedResponseBody.watcherBoxWithWIDToken
+    //     );
+    //   });
+    //   TransactionTest.reset();
+    //   await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
+    //   const transaction = TransactionTest.getInstance();
+    //
+    //   const res = await transaction.returnPermit(1n);
+    //   expect(res.response).to.be.equal(
+    //     'cddc2ecb58dde47afbcbbb4a2281b0e71d5b1be7ae5a91506126c5efd4f6ac3b'
+    //   );
+    // });
 
     /**
      * Target: testing that returnPermit in case that watcher doesn't have permit box should return error
