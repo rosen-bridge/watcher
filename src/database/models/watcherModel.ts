@@ -665,6 +665,7 @@ class WatcherDataBase {
     boxIds: string[],
     exclude = false
   ): Promise<Array<BoxEntity>> => {
+    const boxes = await this.boxRepository.find();
     let qb = this.boxRepository
       .createQueryBuilder('box_entity')
       .where('box_entity.spendBlock is null');

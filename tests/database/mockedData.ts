@@ -659,7 +659,7 @@ export const observation1 = {
 };
 
 export const observation2 = {
-  id: 4,
+  id: 2,
   fromChain: 'ergo',
   toChain: 'cardano',
   fromAddress: 'fromAddress4',
