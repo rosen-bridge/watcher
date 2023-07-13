@@ -26,6 +26,7 @@ export interface Commitment {
   commitment: string;
   WID: string;
   boxId: string;
+  boxSerialized: string;
 }
 
 export interface CommitmentSet {

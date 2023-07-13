@@ -54,8 +54,12 @@ export class CommitmentCreation {
         wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)
       )
     );
+    const RWTRepo = await this.boxes.getRepoBox();
+    const R6 = RWTRepo.register_value(6)?.to_js() as Array<string>;
+    const requiredRWTCount = BigInt(R6[0]);
     const outCommitment = this.boxes.createCommitment(
       height,
+      requiredRWTCount,
       WID,
       observation.requestId,
       eventDigest,
@@ -66,14 +70,13 @@ export class CommitmentCreation {
         BigInt(permit.tokens().get(0).amount().as_i64().to_str())
       )
       .reduce((a, b) => a + b, BigInt(0));
-    if (RWTCount <= 1) {
-      // TODO: Fix this problem
+    if (RWTCount <= requiredRWTCount) {
       logger.warn('Not enough RWT tokens to create a new commitment');
       return {};
     }
     const outPermit = this.boxes.createPermit(
       height,
-      RWTCount - BigInt(1),
+      RWTCount - requiredRWTCount,
       hexStrToUint8Array(WID)
     );
     const inputBoxes = new wasm.ErgoBoxes(permits[0]);
@@ -155,16 +158,13 @@ export class CommitmentCreation {
           WID
         );
         const permits = await this.boxes.getPermits(WID);
-        const WIDBox = await this.boxes.getWIDBox(WID);
+        let WIDBox = await this.boxes.getWIDBox(WID);
         if (WIDBox.tokens().get(0).id().to_str() != WID) {
           logger.info(
             'WID Token is not the first token in WID Box, trying to detach WID token.'
           );
-          DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
-          logger.info(
-            `Skipping the commitment creation due to having a malformed WID box`
-          );
-          continue;
+          await DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
+          WIDBox = await this.boxes.getWIDBox(WID);
         }
         const totalValue = ErgoUtils.getBoxValuesSum([...permits, WIDBox]);
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);

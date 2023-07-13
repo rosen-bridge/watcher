@@ -159,7 +159,6 @@ class WatcherUtils {
         );
         if (!(await this.isMergeHappened(observation))) {
           const uniqueRelatedCommitments = uniqBy(relatedCommitments, 'WID');
-
           if (uniqueRelatedCommitments.length !== relatedCommitments.length) {
             const duplicateWIDs = reduce<ReturnType<typeof countBy>, string[]>(
               countBy(relatedCommitments, 'WID'),
