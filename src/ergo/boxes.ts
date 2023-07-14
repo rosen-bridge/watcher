@@ -297,6 +297,7 @@ export class Boxes {
   /**
    * creates a new commitment box with the required information on registers
    * @param height
+   * @param RWTCount
    * @param WID
    * @param requestId
    * @param eventDigest
@@ -304,6 +305,7 @@ export class Boxes {
    */
   createCommitment = (
     height: number,
+    RWTCount: bigint,
     WID: string,
     requestId: string,
     eventDigest: Uint8Array,
@@ -319,7 +321,7 @@ export class Boxes {
     );
     builder.add_token(
       this.RWTTokenId,
-      wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
+      wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString()))
     );
     builder.set_register_value(
       4,

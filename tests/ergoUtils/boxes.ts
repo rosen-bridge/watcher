@@ -514,6 +514,7 @@ describe('Testing Box Creation', () => {
       );
       const data = boxes.createCommitment(
         10,
+        1n,
         WID,
         firstCommitment.eventId,
         Buffer.from(firstCommitment.commitment, 'hex'),

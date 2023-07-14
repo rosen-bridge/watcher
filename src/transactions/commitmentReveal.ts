@@ -30,12 +30,14 @@ export class CommitmentReveal {
   /**
    * creates the trigger event transaction and submits to the transactionQueue
    * @param commitmentBoxes
+   * @param RWTRepoBox
    * @param observation
    * @param WIDs
    * @param feeBoxes
    */
   triggerEventCreationTx = async (
     commitmentBoxes: Array<wasm.ErgoBox>,
+    RWTRepoBox: wasm.ErgoBox,
     observation: ObservationEntity,
     WIDs: Array<Uint8Array>,
     feeBoxes: Array<wasm.ErgoBox>
@@ -55,14 +57,13 @@ export class CommitmentReveal {
       .slice(1, commitmentBoxes.length)
       .forEach((box) => inputBoxes.add(box));
     feeBoxes.forEach((box) => inputBoxes.add(box));
-    const repoBox = await this.boxes.getRepoBox();
     try {
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,
         inputBoxes,
         [triggerEvent],
         height,
-        new wasm.ErgoBoxes(repoBox)
+        new wasm.ErgoBoxes(RWTRepoBox)
       );
       await this.txUtils.submitTransaction(signed, TxType.TRIGGER, observation);
       logger.info(`Trigger event created with txId [${signed.id().to_str()}]`);
@@ -83,18 +84,22 @@ export class CommitmentReveal {
    * It reproduces the bridge with their WID and check to match the saved commitment
    * @param commitments
    * @param observation
+   * @param requiredRWTCount
    */
   commitmentCheck = (
     commitments: Array<Commitment>,
-    observation: Observation
+    observation: Observation,
+    requiredRWTCount: bigint
   ): Array<Commitment> => {
-    return commitments.filter((commitment) => {
-      return (
-        Buffer.from(
-          ErgoUtils.commitmentFromObservation(observation, commitment.WID)
-        ).toString('hex') === commitment.commitment
-      );
-    });
+    return commitments
+      .filter((commitment) => {
+        return (
+          Buffer.from(
+            ErgoUtils.commitmentFromObservation(observation, commitment.WID)
+          ).toString('hex') === commitment.commitment
+        );
+      })
+      .filter((commitment) => BigInt(commitment.rwtCount) == requiredRWTCount);
   };
 
   /**
@@ -106,13 +111,17 @@ export class CommitmentReveal {
     logger.info(`Starting trigger event creation job`);
     for (const commitmentSet of commitmentSets) {
       try {
+        const RWTRepoBox = await this.boxes.getRepoBox();
+        const requiredRWTCount = BigInt(
+          (RWTRepoBox.register_value(6)?.to_js() as Array<string>)[0]
+        );
         const validCommitments = this.commitmentCheck(
           commitmentSet.commitments,
-          commitmentSet.observation
+          commitmentSet.observation,
+          requiredRWTCount
         );
-        const requiredCommitments = ErgoUtils.requiredCommitmentCount(
-          await this.boxes.getRepoBox()
-        );
+        const requiredCommitments =
+          ErgoUtils.requiredCommitmentCount(RWTRepoBox);
         logger.info(
           `Valid commitments: [${validCommitments.length}/${
             requiredCommitments + 1n
@@ -130,6 +139,7 @@ export class CommitmentReveal {
             );
             await this.triggerEventCreationTx(
               cBoxes,
+              RWTRepoBox,
               commitmentSet.observation,
               WIDs,
               await this.boxes.getUserPaymentBox(

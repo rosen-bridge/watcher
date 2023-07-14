@@ -124,7 +124,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
   ];
   const ormConfig = new DataSource({
     type: 'sqlite',
-    database: './sqlite/watcher-test.sqlite',
+    database: ':memory:',
     entities: entities,
     migrations: [
       ...addressExtractorMigrations.sqlite,
@@ -817,6 +817,11 @@ describe('WatcherModel tests', () => {
     before(async () => {
       const ORM = await loadDataBase();
       await fillORM(ORM, true);
+      DB = ORM.DB;
+      blockRepo = ORM.blockRepo;
+      observationRepo = ORM.observationRepo;
+      observationStatusRepo = ORM.observationStatusRepo;
+      commitmentRepo = ORM.commitmentRepo;
     });
 
     /**
