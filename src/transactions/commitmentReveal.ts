@@ -99,19 +99,7 @@ export class CommitmentReveal {
           ).toString('hex') === commitment.commitment
         );
       })
-      .filter(
-        (commitment) =>
-          BigInt(
-            wasm.ErgoBox.sigma_parse_bytes(
-              Buffer.from(commitment.boxSerialized)
-            )
-              .tokens()
-              .get(0)
-              .amount()
-              .as_i64()
-              .to_str()
-          ) == requiredRWTCount
-      );
+      .filter((commitment) => BigInt(commitment.rwtCount) == requiredRWTCount);
   };
 
   /**

@@ -192,9 +192,9 @@ class WatcherUtils {
           }
 
           readyCommitments.push({
-            commitments: uniqueRelatedCommitments.filter(
-              (commitment) => commitment.spendBlock == null
-            ),
+            commitments: uniqueRelatedCommitments
+              .filter((commitment) => commitment.spendBlock == null)
+              .map((item) => ({ ...item, rwtCount: item.rwtCount ?? '1' })),
             observation: observation,
           });
         }

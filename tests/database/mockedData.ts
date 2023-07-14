@@ -41,8 +41,7 @@ export const firstCommitment: Commitment = {
     'c0666e24aa83e38b3955aae906140bda7f2e1974aca897c28962e7eaebd84026',
   eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
   boxId: '1ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117',
-  boxSerialized:
-    '93010008cd0336100ef59ced80ba5f89c4178ebd57b6c1dd0f3d135ee1db9f62fc634d637041bd47014ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd117e80701100204a00b2ab9da11fc216660e974842cc3b7705e62ebb9e0bf5ff78e53f9cd40abadd11700',
+  rwtCount: '1',
 };
 export const secondCommitment: Commitment = {
   WID: 'ecbde212e49df0e8f65dbaba5f59a6760a8f4c58a3d3451bad68b72ee3588703',
@@ -50,7 +49,7 @@ export const secondCommitment: Commitment = {
     '45891bf7173066ada6f83dc1bfcf2bf0c53ad90f5e4a5778781c82ad68f822e1',
   eventId: '2f4a12a39d3c925c0776131eded109e8430d958cd3cd0fcff13c73f49c57085f',
   boxId: '43d0ead059054f29ca9c831c93613e1ca98e8fbbc8b166c4fa24120a9d489824',
-  boxSerialized: '',
+  rwtCount: '1',
 };
 export const thirdCommitment: Commitment = {
   WID: 'ecbde212e49df0e8f65dbaba5f59a6760a8f4c58a3d3451bad68b72ee3588703',
@@ -58,7 +57,7 @@ export const thirdCommitment: Commitment = {
     'f0fc04ceea089b372c6e312f974be9be0ec8a9fa3568a0a6c155cb7d535186c7',
   eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
   boxId: 'a18dc1f812aa156037c47db5bd7fc9ef85646c97a1abb76b30045b8e5f7e31e2',
-  boxSerialized: '',
+  rwtCount: '1',
 };
 export const commitmentEntity = new CommitmentEntity();
 commitmentEntity.commitment = 'commitment';
