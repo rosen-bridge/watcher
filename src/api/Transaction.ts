@@ -166,8 +166,8 @@ export class Transaction {
     const usersOut = [...users];
     const usersCountOut = [...usersCount];
     if (totalRWT === RWTCount) {
-      usersOut.splice(widIndex);
-      usersCountOut.splice(widIndex);
+      usersOut.splice(widIndex, 1);
+      usersCountOut.splice(widIndex, 1);
     } else {
       usersCountOut[widIndex] = (
         BigInt(usersCountOut[widIndex]) - RWTCount
