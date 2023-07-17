@@ -72,7 +72,7 @@
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
-    "@rosen-bridge/address-extractor": "^1.0.4",
+    "@rosen-bridge/address-extractor": "^2.0.0",
     "@rosen-bridge/health-check": "^1.1.0",
     "@rosen-bridge/observation-extractor": "^2.0.0",
     "@rosen-bridge/scanner": "^2.0.0",
