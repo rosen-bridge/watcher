@@ -23,7 +23,7 @@ import eventsRouter from './api/events';
 import withdrawRouter from './api/withdraw';
 import revenueRouter from './api/revenue';
 import { revenueJob } from './jobs/revenue';
-import { healthCheckStart } from './jobs/healthCheck';
+import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
 
 const logger = loggerFactory(import.meta.url);
@@ -115,7 +115,7 @@ const init = async () => {
       // Running revenue thread
       revenueJob();
       // Starting HealthCheck jobs
-      healthCheckStart(boxesObject);
+      healthCheckJob(boxesObject);
 
       logger.debug('Service initialization finished successfully.');
     })

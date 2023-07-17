@@ -31,16 +31,16 @@ import { Transaction } from '../../src/api/Transaction';
 
 const logger = loggerFactory(import.meta.url);
 
-class HealthCheckObject {
-  private static instance: HealthCheckObject | undefined;
+class HealthCheckSingleton {
+  private static instance: HealthCheckSingleton | undefined;
   private healthCheck: HealthCheck;
   private permitHealthCheckParam: AbstractPermitHealthCheckParam;
 
   static getInstance = () => {
-    if (!HealthCheckObject.instance) {
-      HealthCheckObject.instance = new HealthCheckObject();
+    if (!HealthCheckSingleton.instance) {
+      HealthCheckSingleton.instance = new HealthCheckSingleton();
     }
-    return HealthCheckObject.instance;
+    return HealthCheckSingleton.instance;
   };
 
   private constructor() {
@@ -211,18 +211,18 @@ class HealthCheckObject {
   };
 
   /**
-   * Try to register permit check parameter
    * Then update all existing parameters
    */
-  updateParams = () => {
-    if (!this.permitHealthCheckParam) this.registerPermitHealthCheck();
-    return this.healthCheck.update();
-  };
+  updateParams = () => this.healthCheck.update();
 
   /**
-   * Check if permit health check exists
+   * Try to register permit check parameter
+   * Then check if permit health check exists
    */
-  existsPermitHealthCheck = () => (this.permitHealthCheckParam ? true : false);
+  checkIfPermitCheckExists = () => {
+    if (!this.permitHealthCheckParam) this.registerPermitHealthCheck();
+    return this.permitHealthCheckParam ? true : false;
+  };
 
   /**
    * Updates permit check param with new thresholds
@@ -265,4 +265,4 @@ class HealthCheckObject {
   updateParam = (paramName: string) => this.healthCheck.updateParam(paramName);
 }
 
-export { HealthCheckObject };
+export { HealthCheckSingleton };
