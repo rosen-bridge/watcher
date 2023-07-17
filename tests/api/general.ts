@@ -6,7 +6,7 @@ import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
 import request from 'supertest';
 import { generalInfo } from '../database/mockedData';
-import { HealthCheckObject } from '../../src/utils/healthCheck';
+import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 
 chai.use(spies);
 
@@ -23,7 +23,7 @@ describe('General-Info-Api', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
-      const healthCheck = HealthCheckObject.getInstance();
+      const healthCheck = HealthCheckSingleton.getInstance();
       chai.spy.on(healthCheck, 'getOverallStatus', () =>
         Promise.resolve('Healthy')
       );

@@ -81,7 +81,6 @@ healthCheck:
     warnCommitmentCount: 100 # warning remaining permits for creating commitment
     criticalCommitmentCount: 10 # critical remaining permits for creating commitment
     defaultCommitmentRwt: 100 # default required amount of Rwt tokens to create a commitment
-    updateThresholdsInterval: 1200 # permit check threshold update interval
   errorLog:
     maxAllowedCount: 2 # maximum allowed error log lines
     duration: 100000 # error log duration time check in milliseconds
