@@ -11,6 +11,7 @@ import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxEntity, TxType } from '../entities/txEntity';
 import {
   ObservationStatusEntity,
+  SortedTxStatus,
   TxStatus,
 } from '../entities/observationStatusEntity';
 import { BlockEntity } from '@rosen-bridge/scanner';
@@ -295,7 +296,12 @@ class WatcherDataBase {
           status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
         },
         {
-          status: observationStatus.status + 1,
+          status:
+            SortedTxStatus[
+              SortedTxStatus.findIndex(
+                (status) => status == observationStatus.status
+              ) + 1
+            ],
         }
       );
     else
@@ -339,7 +345,12 @@ class WatcherDataBase {
           status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
         },
         {
-          status: observationStatus.status - 1,
+          status:
+            SortedTxStatus[
+              SortedTxStatus.findIndex(
+                (status) => status == observationStatus.status
+              ) - 1
+            ],
         }
       );
     else
@@ -790,7 +801,7 @@ class WatcherDataBase {
     let qb = this.revenueView.createQueryBuilder('rv').select('*');
 
     if (fromChain !== '') {
-      qb = qb.andWhere('rv.fromChain = :fromChain', { fromChain });
+      qb.andWhere('rv.fromChain = :fromChain', { fromChain });
     }
     if (toChain !== '') {
       qb = qb.andWhere('rv.toChain = :toChain', { toChain });

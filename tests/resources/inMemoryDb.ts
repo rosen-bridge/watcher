@@ -19,8 +19,11 @@ import {
 } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationStatusEntity } from '../../src/database/entities/observationStatusEntity';
 import { TxEntity } from '../../src/database/entities/txEntity';
-import migrations from '../../src/database/migrations/watcher';
+import migrations from '../../src/database/migrations';
 import { TokenEntity } from '../../src/database/entities/tokenEntity';
+import { RevenueView } from '../../src/database/entities/revenueView';
+import { RevenueEntity } from '../../src/database/entities/revenueEntity';
+import { RevenueChartDataView } from '../../src/database/entities/revenueChartDataView';
 
 const createMemoryDatabase = async (): Promise<DataSource> => {
   const entities = [
@@ -33,6 +36,9 @@ const createMemoryDatabase = async (): Promise<DataSource> => {
     ObservationStatusEntity,
     TxEntity,
     TokenEntity,
+    RevenueView,
+    RevenueEntity,
+    RevenueChartDataView,
   ];
 
   return new DataSource({
