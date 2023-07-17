@@ -1,7 +1,8 @@
 import {
-  ErgoNodeScanner,
+  ErgoScanner,
   CardanoKoiosScanner,
   CardanoOgmiosScanner,
+  ErgoNetworkType,
 } from '@rosen-bridge/scanner';
 import {
   ErgoObservationExtractor,
@@ -44,11 +45,8 @@ const createLoggers = () => ({
 const loggers = createLoggers();
 
 class CreateScanner {
-  ergoScanner: ErgoNodeScanner;
-  observationScanner:
-    | ErgoNodeScanner
-    | CardanoKoiosScanner
-    | CardanoOgmiosScanner;
+  ergoScanner: ErgoScanner;
+  observationScanner: ErgoScanner | CardanoKoiosScanner | CardanoOgmiosScanner;
 
   constructor() {
     this.createErgoScanner();
@@ -62,12 +60,13 @@ class CreateScanner {
 
   private createErgoScanner = () => {
     const ergoScannerConfig = {
-      nodeUrl: config.nodeUrl,
+      type: ErgoNetworkType.Node,
+      url: config.nodeUrl,
       timeout: config.nodeTimeout * 1000,
       initialHeight: config.ergoInitialHeight,
       dataSource: dataSource,
     };
-    this.ergoScanner = new ErgoNodeScanner(
+    this.ergoScanner = new ErgoScanner(
       ergoScannerConfig,
       loggers.scannerLogger
     );
