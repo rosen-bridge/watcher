@@ -1,8 +1,8 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import { loggerFactory } from '../log/Logger';
-import { getHealthCheck } from '../utils/healthCheck';
 import { stringifyQueryParam } from '../utils/utils';
+import { HealthCheckSingleton } from '../utils/healthCheck';
 
 const logger = loggerFactory(import.meta.url);
 const healthRouter = express.Router();
@@ -12,7 +12,7 @@ const healthRouter = express.Router();
  */
 healthRouter.get('/status', async (req: Request, res: Response) => {
   try {
-    res.status(200).json(await getHealthCheck().getHealthStatus());
+    res.status(200).json(await HealthCheckSingleton.getInstance().getStatus());
   } catch (e) {
     logger.warn(`An error occurred while checking health status: ${e}`);
     res.status(500).send({ message: e.message });
@@ -28,7 +28,11 @@ healthRouter.get(
     try {
       res
         .status(200)
-        .json(await getHealthCheck().getHealthStatusFor(req.params.paramName));
+        .json(
+          await HealthCheckSingleton.getInstance().getParamStatus(
+            req.params.paramName
+          )
+        );
     } catch (e) {
       logger.warn(
         `An error occurred while checking parameter [${req.query}] health status: ${e}`
@@ -45,13 +49,12 @@ healthRouter.put(
   '/parameter/:paramName',
   async (req: Request, res: Response) => {
     try {
-      await getHealthCheck().updateParam(
-        stringifyQueryParam(req.params.paramName)
-      );
+      const healthCheck = HealthCheckSingleton.getInstance();
+      await healthCheck.updateParam(stringifyQueryParam(req.params.paramName));
       res
         .status(200)
         .json(
-          await getHealthCheck().getHealthStatusFor(
+          await healthCheck.getParamStatus(
             stringifyQueryParam(req.params.paramName)
           )
         );

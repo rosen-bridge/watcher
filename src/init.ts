@@ -23,7 +23,7 @@ import eventsRouter from './api/events';
 import withdrawRouter from './api/withdraw';
 import revenueRouter from './api/revenue';
 import { revenueJob } from './jobs/revenue';
-import { healthCheckStart } from './jobs/healthCheck';
+import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
 
 const logger = loggerFactory(import.meta.url);
@@ -82,7 +82,6 @@ const init = async () => {
       watcherDatabase = new WatcherDataBase(dataSource);
       logger.debug('Initializing scanners and extractors...');
       scannerInit();
-      healthCheckStart();
 
       await delay(10000);
       watcherUtils = new WatcherUtils(
@@ -115,6 +114,8 @@ const init = async () => {
       tokenNameJob([]);
       // Running revenue thread
       revenueJob();
+      // Starting HealthCheck jobs
+      healthCheckJob(boxesObject);
 
       logger.debug('Service initialization finished successfully.');
     })

@@ -302,6 +302,7 @@ class HealthCheckConfig {
   ergoNodeMaxPeerHeightDifference: number;
   permitWarnCommitmentCount: number;
   permitCriticalCommitmentCount: number;
+  permitDefaultCommitmentRWT: number;
   updateInterval: number;
   errorLogAllowedCount: number;
   errorLogDuration: number;
