@@ -1,7 +1,7 @@
-import { WatcherMigration1689485728514 } from './postgres/1689485728514-watcherMigration';
-import { WatcherMigration1689412456937 } from './sqlite/1689412456937-watcherMigration';
+import { WatcherMigration1689672370602 } from './postgres/1689672370602-watcherMigration';
+import { WatcherMigration1689672207771 } from './sqlite/1689672207771-watcherMigration';
 
 export default {
-  sqlite: [WatcherMigration1689412456937],
-  postgres: [WatcherMigration1689485728514],
+  sqlite: [WatcherMigration1689672207771],
+  postgres: [WatcherMigration1689672370602],
 };

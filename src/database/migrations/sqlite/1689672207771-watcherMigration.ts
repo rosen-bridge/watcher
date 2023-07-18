@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class WatcherMigration1689412456937 implements MigrationInterface {
-  name = 'WatcherMigration1689412456937';
+export class WatcherMigration1689672207771 implements MigrationInterface {
+  name = 'WatcherMigration1689672207771';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
@@ -167,7 +167,7 @@ export class WatcherMigration1689412456937 implements MigrationInterface {
     await queryRunner.query(`
             CREATE VIEW "revenue_view" AS
             SELECT "pe"."id" AS "id",
-                "ete"."height" AS "lockHeight",
+                "ete"."sourceChainHeight" AS "lockHeight",
                 "be"."height" AS "height",
                 "be"."timestamp" AS "timestamp",
                 "re"."tokenId" AS "revenueTokenId",
@@ -182,13 +182,9 @@ export class WatcherMigration1689412456937 implements MigrationInterface {
                 ete."bridgeFee" AS "bridgeFee",
                 ete."networkFee" AS "networkFee",
                 ete."sourceChainTokenId" AS "tokenId",
-                ete."sourceTxId" AS "lockTxId",
-                CASE
-                    WHEN "ete"."spendTxId" IS NULL THEN 'Doing'
-                    ELSE 'Done'
-                END AS "status"
+                ete."sourceTxId" AS "lockTxId"
             FROM "permit_entity" "pe"
-                LEFT JOIN "event_trigger_entity" "ete" ON pe."txId" = ete."txId"
+                LEFT JOIN "event_trigger_entity" "ete" ON pe."txId" = ete."spendTxId"
                 LEFT JOIN "block_entity" "be" ON "pe"."block" = "be"."hash"
                 LEFT JOIN "revenue_entity" "re" ON "pe"."id" = re."permitId"
         `);
@@ -207,7 +203,7 @@ export class WatcherMigration1689412456937 implements MigrationInterface {
       [
         'VIEW',
         'revenue_view',
-        'SELECT "pe"."id" AS "id", "ete"."height" AS "lockHeight", "be"."height" AS "height", "be"."timestamp" AS "timestamp", "re"."tokenId" AS "revenueTokenId", "re"."amount" AS "revenueAmount", pe."txId" AS "permitTxId", ete."eventId" AS "eventId", ete."fromChain" AS "fromChain", ete."toChain" AS "toChain", ete."fromAddress" AS "fromAddress", ete."toAddress" AS "toAddress", ete."amount" AS "amount", ete."bridgeFee" AS "bridgeFee", ete."networkFee" AS "networkFee", ete."sourceChainTokenId" AS "tokenId", ete."sourceTxId" AS "lockTxId", CASE WHEN "ete"."spendTxId" IS NULL THEN \'Doing\' ELSE \'Done\' END AS "status" FROM "permit_entity" "pe" LEFT JOIN "event_trigger_entity" "ete" ON pe."txId" = ete."txId"  LEFT JOIN "block_entity" "be" ON "pe"."block" = "be"."hash"  LEFT JOIN "revenue_entity" "re" ON "pe"."id" = re."permitId"',
+        'SELECT "pe"."id" AS "id", "ete"."sourceChainHeight" AS "lockHeight", "be"."height" AS "height", "be"."timestamp" AS "timestamp", "re"."tokenId" AS "revenueTokenId", "re"."amount" AS "revenueAmount", pe."txId" AS "permitTxId", ete."eventId" AS "eventId", ete."fromChain" AS "fromChain", ete."toChain" AS "toChain", ete."fromAddress" AS "fromAddress", ete."toAddress" AS "toAddress", ete."amount" AS "amount", ete."bridgeFee" AS "bridgeFee", ete."networkFee" AS "networkFee", ete."sourceChainTokenId" AS "tokenId", ete."sourceTxId" AS "lockTxId" FROM "permit_entity" "pe" LEFT JOIN "event_trigger_entity" "ete" ON pe."txId" = ete."spendTxId"  LEFT JOIN "block_entity" "be" ON "pe"."block" = "be"."hash"  LEFT JOIN "revenue_entity" "re" ON "pe"."id" = re."permitId"',
       ]
     );
     await queryRunner.query(`

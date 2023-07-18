@@ -183,7 +183,8 @@ firstStatisticsEventTrigger.sourceBlockId = 'block';
 firstStatisticsEventTrigger.sourceChainHeight = 123456;
 firstStatisticsEventTrigger.eventId =
   'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b';
-firstStatisticsEventTrigger.txId = 'txId';
+firstStatisticsEventTrigger.txId = 'createTxId';
+firstStatisticsEventTrigger.spendTxId = 'txId';
 
 const secondStatisticsEventTrigger = {
   ...firstStatisticsEventTrigger,
@@ -205,7 +206,7 @@ const firstRevenue = {
   id: 4,
   permitTxId: 'txId2',
   eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
-  lockHeight: 100,
+  lockHeight: 123457,
   fromChain: 'fromChain',
   toChain: 'toChain',
   fromAddress: 'fromAddress',
@@ -217,7 +218,6 @@ const firstRevenue = {
   lockTxId: 'txId2',
   height: 2222,
   timestamp: 123456789,
-  status: 'Doing',
   revenues: [
     {
       tokenId:
@@ -236,7 +236,7 @@ const lastRevenue = {
   id: 1,
   permitTxId: 'txId',
   eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
-  lockHeight: 100,
+  lockHeight: 123457,
   fromChain: 'fromChainStar',
   toChain: 'toChainStar',
   fromAddress: 'fromAddress',
@@ -248,7 +248,6 @@ const lastRevenue = {
   lockTxId: 'txIdStar',
   height: null,
   timestamp: null,
-  status: 'Doing',
   revenues: [
     {
       tokenId:
@@ -262,7 +261,7 @@ const tokenId2Revenue = {
   id: 3,
   permitTxId: 'txId',
   eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
-  lockHeight: 100,
+  lockHeight: 123457,
   fromChain: 'fromChain',
   toChain: 'toChain',
   fromAddress: 'fromAddressStar',
@@ -274,7 +273,6 @@ const tokenId2Revenue = {
   lockTxId: 'txId',
   height: 1111,
   timestamp: 123,
-  status: 'Doing',
   revenues: [
     {
       amount: 1,
@@ -288,7 +286,7 @@ const secondTokenId2Revenue = {
   id: 1,
   permitTxId: 'txId',
   eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
-  lockHeight: 100,
+  lockHeight: 123457,
   fromChain: 'fromChain',
   toChain: 'toChain',
   fromAddress: 'fromAddressStar',
@@ -300,7 +298,6 @@ const secondTokenId2Revenue = {
   lockTxId: 'txId',
   height: null,
   timestamp: null,
-  status: 'Doing',
   revenues: [
     {
       tokenId:

@@ -47,6 +47,7 @@ revenueRouter.get('/', async (req, res) => {
         : Math.min(Number(limitString), MAX_API_LIMIT)
     );
     const result = await ErgoUtils.extractRevenueFromView(queryResult);
+    res.set('Content-Type', 'application/json');
     res.status(200).send(JsonBI.stringify(result));
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues: ${e}`);
@@ -82,6 +83,7 @@ revenueRouter.get('/chart', async (req, res) => {
       throw new Error('Invalid period');
     }
     const result = ErgoUtils.transformChartData(queryResult);
+    res.set('Content-Type', 'application/json');
     res.status(200).send(result);
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues chart data: ${e}`);

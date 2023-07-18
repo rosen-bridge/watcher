@@ -801,7 +801,7 @@ class WatcherDataBase {
     let qb = this.revenueView.createQueryBuilder('rv').select('*');
 
     if (fromChain !== '') {
-      qb.andWhere('rv.fromChain = :fromChain', { fromChain });
+      qb = qb.andWhere('rv.fromChain = :fromChain', { fromChain });
     }
     if (toChain !== '') {
       qb = qb.andWhere('rv.toChain = :toChain', { toChain });

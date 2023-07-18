@@ -71,6 +71,8 @@ describe('revenueRouter', () => {
     it('Revenue endpoint should return all revenues in reverse order', async () => {
       // send a request to the endpoint
       const res = await request(app).get('/revenue?sorting=asc');
+      console.log('####################');
+      console.log(res.text);
 
       // check the result
       expect(res.status).to.eql(200);
@@ -94,7 +96,8 @@ describe('revenueRouter', () => {
     it('Revenue endpoint should return correct revenues with fromChain filter', async () => {
       // send a request to the endpoint
       const res = await request(app).get('/revenue?fromChain=fromChainStar');
-
+      console.log('####################');
+      console.log(res.text);
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
@@ -138,7 +141,7 @@ describe('revenueRouter', () => {
      */
     it('Revenue endpoint should return correct revenues with tokenId filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/revenue?tokenId=tokenId2');
+      const res = await request(app).get('/revenue?tokenId=tokenIdStar');
 
       // check the result
       expect(res.status).to.eql(200);
