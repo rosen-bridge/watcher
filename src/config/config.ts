@@ -344,9 +344,6 @@ class HealthCheckConfig {
     this.permitCriticalCommitmentCount = getRequiredNumber(
       'healthCheck.permit.criticalCommitmentCount'
     );
-    this.permitDefaultCommitmentRWT = getRequiredNumber(
-      'healthCheck.permit.defaultCommitmentRwt'
-    );
     this.updateInterval = getRequiredNumber('healthCheck.interval');
     this.errorLogAllowedCount = getRequiredNumber(
       'healthCheck.errorLog.maxAllowedCount'

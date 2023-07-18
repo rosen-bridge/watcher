@@ -10,14 +10,16 @@ const logger = loggerFactory(import.meta.url);
  * @param boxes
  */
 const updatePermitCheckThreshold = async (boxes: Boxes) => {
-  if (HealthCheckSingleton.getInstance().checkIfPermitCheckExists()) {
-    const repoBox = await boxes.getRepoBox();
-    const R6 = repoBox.register_value(6);
-    if (!R6) {
-      logger.warn('incorrect repo box format, repo R6 register is undefined.');
-      return;
-    }
-    const commitmentRwt = R6.to_i64_str_array()[0];
+  const repoBox = await boxes.getRepoBox();
+  const R6 = repoBox.register_value(6);
+  if (!R6) {
+    logger.warn('incorrect repo box format, repo R6 register is undefined.');
+    return;
+  }
+  const commitmentRwt = R6.to_i64_str_array()[0];
+  if (
+    HealthCheckSingleton.getInstance().checkIfPermitCheckExists(commitmentRwt)
+  ) {
     HealthCheckSingleton.getInstance().updatePermitHealthCheck(
       BigInt(getConfig().healthCheck.permitWarnCommitmentCount * commitmentRwt),
       BigInt(

@@ -167,7 +167,7 @@ class HealthCheckSingleton {
   /**
    * Registers permit check if watcher wid exists
    */
-  registerPermitHealthCheck = async () => {
+  registerPermitHealthCheck = async (commitmentRwt: number) => {
     if (Transaction.watcherWID) {
       if (getConfig().general.scannerType === NODE_TYPE) {
         this.permitHealthCheckParam = new NodePermitHealthCheckParam(
@@ -175,12 +175,11 @@ class HealthCheckSingleton {
           getConfig().rosen.watcherPermitAddress,
           Transaction.watcherWID,
           BigInt(
-            getConfig().healthCheck.permitWarnCommitmentCount *
-              getConfig().healthCheck.permitDefaultCommitmentRWT
+            getConfig().healthCheck.permitWarnCommitmentCount * commitmentRwt
           ),
           BigInt(
             getConfig().healthCheck.permitCriticalCommitmentCount *
-              getConfig().healthCheck.permitDefaultCommitmentRWT
+              commitmentRwt
           ),
           getConfig().general.nodeUrl
         );
@@ -190,12 +189,11 @@ class HealthCheckSingleton {
           getConfig().rosen.watcherPermitAddress,
           Transaction.watcherWID,
           BigInt(
-            getConfig().healthCheck.permitWarnCommitmentCount *
-              getConfig().healthCheck.permitDefaultCommitmentRWT
+            getConfig().healthCheck.permitWarnCommitmentCount * commitmentRwt
           ),
           BigInt(
             getConfig().healthCheck.permitCriticalCommitmentCount *
-              getConfig().healthCheck.permitDefaultCommitmentRWT
+              commitmentRwt
           ),
           getConfig().general.explorerUrl
         );
@@ -219,8 +217,9 @@ class HealthCheckSingleton {
    * Try to register permit check parameter
    * Then check if permit health check exists
    */
-  checkIfPermitCheckExists = () => {
-    if (!this.permitHealthCheckParam) this.registerPermitHealthCheck();
+  checkIfPermitCheckExists = (commitmentRwt: number) => {
+    if (!this.permitHealthCheckParam)
+      this.registerPermitHealthCheck(commitmentRwt);
     return this.permitHealthCheckParam ? true : false;
   };
 
