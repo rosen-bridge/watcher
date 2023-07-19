@@ -5,15 +5,11 @@ import revenueRouter from '../../src/api/revenue';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
 import request from 'supertest';
-import * as console from 'console';
 import {
   firstRevenue,
-  lastRevenue,
   revenueMonthlyChart,
   revenueWeeklyChart,
   revenueYearlyChart,
-  secondTokenId2Revenue,
-  tokenId2Revenue,
 } from '../ergo/statistics/mockUtils';
 
 chai.use(spies);
@@ -71,8 +67,6 @@ describe('revenueRouter', () => {
     it('Revenue endpoint should return all revenues in reverse order', async () => {
       // send a request to the endpoint
       const res = await request(app).get('/revenue?sorting=asc');
-      console.log('####################');
-      console.log(res.text);
 
       // check the result
       expect(res.status).to.eql(200);
@@ -96,8 +90,7 @@ describe('revenueRouter', () => {
     it('Revenue endpoint should return correct revenues with fromChain filter', async () => {
       // send a request to the endpoint
       const res = await request(app).get('/revenue?fromChain=fromChainStar');
-      console.log('####################');
-      console.log(res.text);
+
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
