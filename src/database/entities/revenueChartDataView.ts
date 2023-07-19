@@ -8,18 +8,9 @@ import { ViewEntity, ViewColumn } from 'typeorm';
       .select('re."tokenId"', 'tokenId')
       .addSelect('re."amount"', 'amount')
       .addSelect('be."timestamp"', 'timestamp')
-      .addSelect(
-        `strftime('%d', datetime(be."timestamp"/1000, 'unixepoch'))`,
-        'day'
-      )
-      .addSelect(
-        `strftime('%m', datetime(be."timestamp"/1000, 'unixepoch'))`,
-        'month'
-      )
-      .addSelect(
-        `strftime('%Y', datetime(be."timestamp"/1000, 'unixepoch'))`,
-        'year'
-      )
+      .addSelect(`be.day`, 'day')
+      .addSelect(`be.month`, 'month')
+      .addSelect(`be.year`, 'year')
       .from('revenue_entity', 're')
       .innerJoin('permit_entity', 'pe', 're."permitId" = pe.id')
       .innerJoin('block_entity', 'be', 'pe.block = be.hash'),

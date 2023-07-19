@@ -5,15 +5,11 @@ import revenueRouter from '../../src/api/revenue';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
 import request from 'supertest';
-import * as console from 'console';
 import {
   firstRevenue,
-  lastRevenue,
   revenueMonthlyChart,
   revenueWeeklyChart,
   revenueYearlyChart,
-  secondTokenId2Revenue,
-  tokenId2Revenue,
 } from '../ergo/statistics/mockUtils';
 
 chai.use(spies);
@@ -138,7 +134,7 @@ describe('revenueRouter', () => {
      */
     it('Revenue endpoint should return correct revenues with tokenId filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/revenue?tokenId=tokenId2');
+      const res = await request(app).get('/revenue?tokenId=tokenIdStar');
 
       // check the result
       expect(res.status).to.eql(200);

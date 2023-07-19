@@ -1,23 +1,34 @@
 import {
   Column,
   Entity,
-  OneToOne,
   Relation,
   PrimaryGeneratedColumn,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 enum TxStatus {
-  TIMED_OUT = 0,
-  NOT_COMMITTED = 1,
-  COMMITMENT_SENT = 2,
-  COMMITTED = 3,
-  REVEAL_SENT = 4,
-  REVEALED = 5,
-  REDEEM_SENT = 6,
-  REDEEMED = 7,
+  TIMED_OUT = 'timeout',
+  NOT_COMMITTED = 'not_committed',
+  COMMITMENT_SENT = 'commitment_sent',
+  COMMITTED = 'committed',
+  REVEAL_SENT = 'reveal_sent',
+  REVEALED = 'revealed',
+  REDEEM_SENT = 'redeem_sent',
+  REDEEMED = 'redeemed',
 }
+
+const SortedTxStatus = [
+  TxStatus.TIMED_OUT,
+  TxStatus.NOT_COMMITTED,
+  TxStatus.COMMITMENT_SENT,
+  TxStatus.COMMITTED,
+  TxStatus.REVEAL_SENT,
+  TxStatus.REVEALED,
+  TxStatus.REDEEM_SENT,
+  TxStatus.REDEEMED,
+];
 
 @Entity()
 class ObservationStatusEntity {
@@ -35,4 +46,4 @@ class ObservationStatusEntity {
   status: TxStatus;
 }
 
-export { TxStatus, ObservationStatusEntity };
+export { TxStatus, ObservationStatusEntity, SortedTxStatus };

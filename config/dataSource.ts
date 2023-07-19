@@ -25,7 +25,7 @@ import { TokenEntity } from '../src/database/entities/tokenEntity';
 import { RevenueView } from '../src/database/entities/revenueView';
 import { RevenueEntity } from '../src/database/entities/revenueEntity';
 import { RevenueChartDataView } from '../src/database/entities/revenueChartDataView';
-import migrations from '../src/database/migrations/watcher';
+import migrations from '../src/database/migrations';
 
 const dbType = getConfig().database.type as keyof typeof migrations;
 const dbConfigs = {
@@ -34,11 +34,11 @@ const dbConfigs = {
     BoxEntity,
     CommitmentEntity,
     EventTriggerEntity,
-    ObservationEntity,
-    ObservationStatusEntity,
     PermitEntity,
-    TxEntity,
+    ObservationEntity,
     TokenEntity,
+    TxEntity,
+    ObservationStatusEntity,
     RevenueView,
     RevenueEntity,
     RevenueChartDataView,

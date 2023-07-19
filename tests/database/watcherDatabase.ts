@@ -28,7 +28,7 @@ import {
 } from '../../src/database/entities/observationStatusEntity';
 import { TxEntity, TxType } from '../../src/database/entities/txEntity';
 
-import migrations from '../../src/database/migrations/watcher';
+import migrations from '../../src/database/migrations';
 
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
 
@@ -314,7 +314,7 @@ describe('WatcherModel tests', () => {
      */
     it('should return status for observation that exist', async () => {
       const res = await DB.checkNewObservation(observationEntity2);
-      expect(res.status).to.be.eql(1);
+      expect(res.status).to.be.eql(TxStatus.NOT_COMMITTED);
     });
 
     /**
@@ -325,7 +325,7 @@ describe('WatcherModel tests', () => {
     it('should set status for observation that is not exist', async () => {
       await observationRepo.insert([observationEntity1]);
       const res = await DB.checkNewObservation(observationEntity1);
-      expect(res.status).to.be.eql(1);
+      expect(res.status).to.be.eql(TxStatus.NOT_COMMITTED);
     });
   });
 

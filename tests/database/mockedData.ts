@@ -200,7 +200,8 @@ newEventTriggerEntity.sourceBlockId = 'block';
 newEventTriggerEntity.sourceChainHeight = 123457;
 newEventTriggerEntity.eventId =
   'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b';
-newEventTriggerEntity.txId = 'txId2';
+newEventTriggerEntity.txId = 'createTxId2';
+newEventTriggerEntity.spendTxId = 'txId2';
 
 export const observationEntity1 = new ObservationEntity();
 observationEntity1.height = 1;
