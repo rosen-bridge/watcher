@@ -46,11 +46,15 @@ export class CommitmentReveal {
     const boxValues = commitmentBoxes
       .map((box) => BigInt(box.value().as_i64().to_str()))
       .reduce((a, b) => a + b, BigInt(0));
+    const tokensCount = commitmentBoxes
+      .map((item) => BigInt(item.tokens().get(0).amount().as_i64().to_str()))
+      .reduce((a, b) => a + b, 0n);
     const triggerEvent = await this.boxes.createTriggerEvent(
       BigInt(boxValues),
       height,
       WIDs,
-      observation
+      observation,
+      tokensCount
     );
     const inputBoxes = new wasm.ErgoBoxes(commitmentBoxes[0]);
     commitmentBoxes

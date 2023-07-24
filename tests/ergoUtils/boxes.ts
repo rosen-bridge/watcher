@@ -539,7 +539,8 @@ describe('Testing Box Creation', () => {
         value,
         10,
         [Buffer.from(WID), Buffer.from(WID)],
-        firstObservation
+        firstObservation,
+        2n
       );
       expect(BigInt(data.value().as_i64().to_str())).to.eql(value);
       expect(data.tokens().len()).to.eq(1);
