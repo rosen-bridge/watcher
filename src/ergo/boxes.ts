@@ -377,12 +377,14 @@ export class Boxes {
    * @param height
    * @param WIDs
    * @param observation
+   * @param watcherPermitCount
    */
   createTriggerEvent = (
     value: bigint,
     height: number,
     WIDs: Array<Uint8Array>,
-    observation: Observation
+    observation: Observation,
+    watcherPermitCount: bigint
   ) => {
     const builder = new wasm.ErgoBoxCandidateBuilder(
       wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
@@ -393,7 +395,9 @@ export class Boxes {
     );
     builder.add_token(
       this.RWTTokenId,
-      wasm.TokenAmount.from_i64(wasm.I64.from_str(WIDs.length.toString()))
+      wasm.TokenAmount.from_i64(
+        wasm.I64.from_str(watcherPermitCount.toString())
+      )
     );
     const eventData = [
       Buffer.from(observation.sourceTxId),
