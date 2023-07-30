@@ -289,22 +289,26 @@ class WatcherDataBase {
       throw new Error(
         `observation with requestId ${observation.requestId} has no status`
       );
-    if (!isRedeemSent)
-      await this.observationStatusEntity.update(
-        {
-          id: observationStatus.id,
-          status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
-        },
-        {
-          status:
-            SortedTxStatus[
-              SortedTxStatus.findIndex(
-                (status) => status == observationStatus.status
-              ) + 1
-            ],
-        }
-      );
-    else
+    if (!isRedeemSent) {
+      if (
+        ![TxStatus.TIMED_OUT, TxStatus.REVEALED].includes(
+          observationStatus.status
+        )
+      )
+        await this.observationStatusEntity.update(
+          {
+            id: observationStatus.id,
+          },
+          {
+            status:
+              SortedTxStatus[
+                SortedTxStatus.findIndex(
+                  (status) => status == observationStatus.status
+                ) + 1
+              ],
+          }
+        );
+    } else
       await this.observationStatusEntity.update(
         {
           id: observationStatus.id,
