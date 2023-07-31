@@ -9,6 +9,7 @@ import path from 'path';
 import { NetworkType } from '../types';
 import { generateMnemonic } from 'bip39';
 import { convertMnemonicToSecretKey } from '../utils/utils';
+import { ErgoNetworkType } from '@rosen-bridge/scanner';
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_WATCHER,
@@ -103,9 +104,11 @@ class Config {
         : wasm.NetworkPrefix.Testnet;
 
     this.scannerType = getRequiredString('ergo.type').toLowerCase();
-    if ([Constants.NODE_TYPE].indexOf(this.scannerType) === -1)
-      // TODO: Add explorer scanner type, currently we are not supporting explorer scanner
-      // https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/102
+    if (
+      ([ErgoNetworkType.Node, ErgoNetworkType.Explorer] as string[]).indexOf(
+        this.scannerType
+      ) === -1
+    )
       throw new Error(
         "ImproperlyConfigured. ergo.scanner doesn't set correctly in config file"
       );

@@ -43,6 +43,7 @@ const createLoggers = () => ({
 });
 
 const loggers = createLoggers();
+const logger = loggerFactory(import.meta.url);
 
 class CreateScanner {
   ergoScanner: ErgoScanner;
@@ -59,13 +60,30 @@ class CreateScanner {
   }
 
   private createErgoScanner = () => {
-    const ergoScannerConfig = {
-      type: ErgoNetworkType.Node,
-      url: config.nodeUrl,
-      timeout: config.nodeTimeout * 1000,
-      initialHeight: config.ergoInitialHeight,
-      dataSource: dataSource,
-    };
+    let ergoScannerConfig;
+    if (config.scannerType === ErgoNetworkType.Node) {
+      ergoScannerConfig = {
+        type: ErgoNetworkType.Node,
+        url: config.nodeUrl,
+        timeout: config.nodeTimeout * 1000,
+        initialHeight: config.ergoInitialHeight,
+        dataSource: dataSource,
+      };
+    } else if (config.scannerType === ErgoNetworkType.Explorer) {
+      ergoScannerConfig = {
+        type: ErgoNetworkType.Explorer,
+        url: config.explorerUrl,
+        timeout: config.explorerTimeout * 1000,
+        initialHeight: config.ergoInitialHeight,
+        dataSource: dataSource,
+      };
+    }
+    if (!ergoScannerConfig) {
+      logger.error(
+        `Scanner type is not correct, available options are [${ErgoNetworkType.Node}], [${ErgoNetworkType.Explorer}].`
+      );
+      throw new Error('Scanner type is not correct');
+    }
     this.ergoScanner = new ErgoScanner(
       ergoScannerConfig,
       loggers.scannerLogger
