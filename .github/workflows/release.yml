@@ -1,0 +1,25 @@
+name: RELEASE
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: Build Watcher
+    permissions: write-all
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Current Branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Project
+        run: |
+
+
