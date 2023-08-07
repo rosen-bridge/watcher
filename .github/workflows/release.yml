@@ -1,0 +1,39 @@
+name: RELEASE
+
+on:
+  release:
+    types:
+      - 'published'
+
+jobs:
+  build:
+    name: Build Watcher
+    permissions: write-all
+    strategy:
+      matrix:
+        node-version: [16.x]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Current Branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Application
+        run: npm run release
+
+      - name: Upload File to Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./bin/index
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
