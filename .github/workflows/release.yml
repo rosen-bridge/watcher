@@ -29,11 +29,13 @@ jobs:
         run: npm ci
 
       - name: Build Application
-        run: npm run release
+        run: | 
+          npm run release
+          mv ./bin/index watcher-service-${{ github.event.release.tag_name }}
 
       - name: Upload File to Assets
         uses: softprops/action-gh-release@v1
         with:
-          files: ./bin/index
+          files: watcher-service-${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
