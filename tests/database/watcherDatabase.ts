@@ -858,10 +858,10 @@ describe('WatcherModel tests', () => {
     it('should return unspent boxes excluding boxIds', async () => {
       // run the function with boxId excluding
       const result = await DB.getUnspentBoxesByBoxIds(['boxId'], true);
-
       // check the result
-      expect(result).to.have.length(1);
-      expect(result[0]).to.eql(addressValidBox);
+      expect(result).to.have.length(2);
+      expect(result[0]).to.eql(spentPlainBox);
+      expect(result[1]).to.eql(addressValidBox);
     });
   });
 
