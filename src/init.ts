@@ -25,6 +25,7 @@ import revenueRouter from './api/revenue';
 import { revenueJob } from './jobs/revenue';
 import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
+import cors from 'cors';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -57,6 +58,7 @@ const init = async () => {
   const initExpress = () => {
     const app = express();
     app.use(express.json());
+    app.use(cors());
 
     const router = Router();
     router.use('/address', addressRouter);
