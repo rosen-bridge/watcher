@@ -11,12 +11,18 @@ jobs:
     permissions: write-all
     strategy:
       matrix:
+        os: [macos-13, ubuntu-latest]
         node-version: [16.x]
-    runs-on: ubuntu-latest
+        include:
+          - os: macos-13
+            platform: macOS
+          - os: ubuntu-latest
+            platform: linux
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout Current Branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -31,11 +37,11 @@ jobs:
       - name: Build Application
         run: | 
           npm run release
-          mv ./bin/index watcher-service-${{ github.event.release.tag_name }}
+          mv ./bin/index watcher-service-${{ github.event.release.tag_name }}-${{ matrix.platform }}
 
       - name: Upload File to Assets
         uses: softprops/action-gh-release@v1
         with:
-          files: watcher-service-${{ github.event.release.tag_name }}
+          files: watcher-service-${{ github.event.release.tag_name }}-*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
