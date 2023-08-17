@@ -53,4 +53,3 @@ jobs:
           files: watcher-service-${{ github.event.release.tag_name }}-*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
