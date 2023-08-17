@@ -88,14 +88,9 @@ class WatcherDataBase {
    */
   getConfirmedObservations = async (confirmation: number, height: number) => {
     const maxHeight = height - confirmation;
-    return await this.observationRepository.find({
-      where: {
-        height: LessThan(maxHeight),
-      },
+    return await this.observationRepository.findBy({
+      height: LessThan(maxHeight),
     });
-    // .createQueryBuilder('observation_entity')
-    // .where('observation_entity.height < :maxHeight', { maxHeight })
-    // .getMany();
   };
 
   /**
@@ -491,10 +486,12 @@ class WatcherDataBase {
     wid: string,
     maxHeight: number
   ): Promise<Array<CommitmentEntity>> => {
-    return await this.commitmentRepository.findBy({
-      WID: wid,
-      height: LessThan(maxHeight),
-      spendHeight: IsNull(),
+    return await this.commitmentRepository.find({
+      where: {
+        WID: wid,
+        height: LessThan(maxHeight),
+        spendHeight: IsNull(),
+      },
     });
   };
 
@@ -503,8 +500,10 @@ class WatcherDataBase {
    * @param wid
    */
   commitmentsByWIDCount = async (wid: string): Promise<number> => {
-    return await this.commitmentRepository.countBy({
-      WID: wid,
+    return await this.commitmentRepository.count({
+      where: {
+        WID: wid,
+      },
     });
   };
 
@@ -513,8 +512,10 @@ class WatcherDataBase {
    * @param wid
    */
   eventTriggersByWIDCount = async (wid: string): Promise<number> => {
-    return await this.eventTriggerRepository.countBy({
-      WIDs: Like(`%${wid}%`),
+    return await this.eventTriggerRepository.count({
+      where: {
+        WIDs: Like(`%${wid}%`),
+      },
     });
   };
 
@@ -543,8 +544,10 @@ class WatcherDataBase {
    * @param wid
    */
   getPermitBoxesByWID = async (wid: string) => {
-    return await this.permitRepository.findBy({
-      WID: wid,
+    return await this.permitRepository.find({
+      where: {
+        WID: wid,
+      },
     });
   };
 
@@ -674,19 +677,20 @@ class WatcherDataBase {
     boxIds: string[],
     exclude = false
   ): Promise<Array<BoxEntity>> => {
-    let condition;
-    if (exclude) condition = { boxId: Not(In(boxIds)) };
-    else condition = { boxId: In(boxIds) };
-    return this.boxRepository.findBy(condition);
+    return this.boxRepository.findBy({
+      boxId: exclude ? Not(In(boxIds)) : In(boxIds),
+    });
   };
 
   /**
    * returns active transaction with 'permit' type
    */
   getActivePermitTransactions = async (): Promise<Array<TxEntity>> => {
-    return await this.txRepository.findBy({
-      type: TxType.PERMIT,
-      deleted: false,
+    return await this.txRepository.find({
+      where: {
+        type: TxType.PERMIT,
+        deleted: false,
+      },
     });
   };
 
