@@ -12,9 +12,9 @@ RUN adduser --disabled-password --home /app --uid 3000 --gecos "ErgoPlatform" er
 USER ergo
 
 COPY --chmod=700 --chown=ergo:ergo package*.json ./
-RUN npm ci && npm install -g yamljs \
-    && npm yaml2json --pretty --save config/default.yaml
+RUN npm ci && npm install yamljs
 COPY --chmod=700 --chown=ergo:ergo . .
+RUN npx yaml2json --pretty --save config/default.yaml
 
 ENV NODE_ENV=production
 EXPOSE 3000
