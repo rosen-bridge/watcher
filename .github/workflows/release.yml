@@ -11,7 +11,7 @@ jobs:
     permissions: write-all
     strategy:
       matrix:
-        os: [macos-13, ubuntu-latest]
+        os: [macos-13, ubuntu-latest, windows-latest]
         node-version: [16.x]
         include:
           - os: macos-13
