@@ -88,10 +88,9 @@ class WatcherDataBase {
    */
   getConfirmedObservations = async (confirmation: number, height: number) => {
     const maxHeight = height - confirmation;
-    return await this.observationRepository
-      .createQueryBuilder('observation_entity')
-      .where('observation_entity.height < :maxHeight', { maxHeight })
-      .getMany();
+    return await this.observationRepository.findBy({
+      height: LessThan(maxHeight),
+    });
   };
 
   /**
@@ -249,11 +248,14 @@ class WatcherDataBase {
    * Returns all stored transactions with no deleted flag
    */
   getAllTxs = async () => {
-    return await this.txRepository
-      .createQueryBuilder('tx_entity')
-      .leftJoinAndSelect('tx_entity.observation', 'observation_entity')
-      .where('tx_entity.deleted = false')
-      .getMany();
+    return await this.txRepository.find({
+      relations: {
+        observation: true,
+      },
+      where: {
+        deleted: false,
+      },
+    });
   };
 
   /**
@@ -414,10 +416,9 @@ class WatcherDataBase {
    * @param height
    */
   getOldSpentCommitments = async (height: number) => {
-    return await this.commitmentRepository
-      .createQueryBuilder('commitment_entity')
-      .where('commitment_entity.spendHeight < :height', { height })
-      .getMany();
+    return await this.commitmentRepository.findBy({
+      spendHeight: LessThan(height),
+    });
   };
 
   /**
@@ -555,21 +556,19 @@ class WatcherDataBase {
    * @param wid
    */
   getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
-    return this.permitRepository
-      .createQueryBuilder('permit_entity')
-      .where('permit_entity.WID = :wid', { wid })
-      .andWhere('permit_entity.spendBlock is null')
-      .getMany();
+    return this.permitRepository.findBy({
+      WID: wid,
+      spendBlock: IsNull(),
+    });
   };
 
   /**
    * Returns all unspent plain boxes
    */
   getUnspentAddressBoxes = async (): Promise<Array<BoxEntity>> => {
-    return this.boxRepository
-      .createQueryBuilder('box_entity')
-      .where('box_entity.spendBlock is null')
-      .getMany();
+    return this.boxRepository.findBy({
+      spendBlock: IsNull(),
+    });
   };
 
   /**
@@ -579,11 +578,10 @@ class WatcherDataBase {
   getUnspentBoxesByAddress = async (
     address: string
   ): Promise<Array<BoxEntity>> => {
-    return this.boxRepository
-      .createQueryBuilder('box_entity')
-      .where('box_entity.spendBlock is null')
-      .andWhere('box_entity.address = :address', { address })
-      .getMany();
+    return this.boxRepository.findBy({
+      spendBlock: IsNull(),
+      address: address,
+    });
   };
 
   /**
@@ -665,10 +663,9 @@ class WatcherDataBase {
    * Returns all unspent permit boxes
    */
   getPermitUnspentBoxes = async (): Promise<Array<PermitEntity>> => {
-    return this.permitRepository
-      .createQueryBuilder('permit_entity')
-      .where('permit_entity.spendBlock is null')
-      .getMany();
+    return this.permitRepository.findBy({
+      spendBlock: IsNull(),
+    });
   };
 
   /**
@@ -680,17 +677,10 @@ class WatcherDataBase {
     boxIds: string[],
     exclude = false
   ): Promise<Array<BoxEntity>> => {
-    let qb = this.boxRepository
-      .createQueryBuilder('box_entity')
-      .where('box_entity.spendBlock is null');
-
-    if (exclude) {
-      qb = qb.andWhere('box_entity.boxId not in (:...boxIds)', { boxIds });
-    } else {
-      qb = qb.andWhere('box_entity.boxId in (:...boxIds)', { boxIds });
-    }
-
-    return qb.getMany();
+    return this.boxRepository.findBy({
+      spendBlock: IsNull(),
+      boxId: exclude ? Not(In(boxIds)) : In(boxIds),
+    });
   };
 
   /**
@@ -766,13 +756,21 @@ class WatcherDataBase {
    * @param ids
    */
   getEventsStatus = async (ids: number[]): Promise<Array<EventStatus>> => {
-    return this.eventTriggerRepository
-      .createQueryBuilder('ev')
-      .select(
-        `ev.id, CASE WHEN ev.spendBlock IS NULL THEN '${DOING_STATUS}' ELSE '${DONE_STATUS}' END as status`
-      )
-      .where('ev.id IN (:...ids)', { ids })
-      .getRawMany();
+    const events = await this.eventTriggerRepository.find({
+      where: {
+        id: In(ids),
+      },
+      select: {
+        id: true,
+        spendBlock: true,
+      },
+    });
+    return events.map(
+      (event: { id: number; spendBlock?: string | null | undefined }) => ({
+        id: event.id,
+        status: event.spendBlock ? DONE_STATUS : DOING_STATUS,
+      })
+    );
   };
 
   /**
@@ -846,7 +844,7 @@ class WatcherDataBase {
     let qb = this.revenueChartView.createQueryBuilder('rcv');
     qb = qb
       .select('"tokenId"')
-      .addSelect('timestamp/604800000 as week_number')
+      .addSelect('timestamp/604800 as week_number')
       .addSelect('sum(amount) as revenue')
       .groupBy('"tokenId"')
       .addGroupBy('week_number')
@@ -906,12 +904,14 @@ class WatcherDataBase {
    * @param ids
    */
   getPermitsById = async (ids: number[]): Promise<PermitEntity[]> => {
-    return this.permitRepository
-      .createQueryBuilder('p')
-      .select(`id, "boxSerialized"`)
-      .where('p.id IN (:...ids)', { ids })
-      .orderBy('p.id', 'ASC')
-      .execute();
+    return this.permitRepository.find({
+      where: {
+        id: In(ids),
+      },
+      order: {
+        id: 'ASC',
+      },
+    });
   };
 
   /**

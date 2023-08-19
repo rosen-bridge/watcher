@@ -845,23 +845,22 @@ describe('WatcherModel tests', () => {
     });
 
     /**
-     * @target WatcherDataBase.getUnspentBoxesByBoxIds should return
-     * unspent boxes excluding boxIds
+     * @target WatcherDataBase.getUnspentBoxesByBoxIds should return unspent boxes excluding boxIds
      * @dependencies
      * @scenario
      * - run the function with boxId excluding
      * - check the result
      * @expected
-     * - should return data with length 1
+     * - should return one unspent box excluding the specified boxId
      * - data[0] should be equal to the addressValidBox
      */
     it('should return unspent boxes excluding boxIds', async () => {
       // run the function with boxId excluding
       const result = await DB.getUnspentBoxesByBoxIds(['boxId'], true);
-
       // check the result
       expect(result).to.have.length(1);
       expect(result[0]).to.eql(addressValidBox);
+      expect(result[0].boxId).to.not.eql('boxId');
     });
   });
 

@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Relation,
+} from 'typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 export enum TxType {
@@ -11,7 +17,7 @@ export enum TxType {
 
 @Entity()
 export class TxEntity {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()

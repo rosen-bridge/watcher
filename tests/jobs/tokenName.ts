@@ -30,7 +30,7 @@ describe('tokenName', () => {
      */
     it('should store all names of UTXO tokens in DB', async () => {
       // run the job
-      await tokenNameJobFunction([]);
+      await tokenNameJobFunction(['boxId2']);
 
       // check the tokens stored in DB
       const tokens = await DB.getTokenEntity([
