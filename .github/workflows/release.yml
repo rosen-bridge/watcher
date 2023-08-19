@@ -11,13 +11,15 @@ jobs:
     permissions: write-all
     strategy:
       matrix:
-        os: [macos-13, ubuntu-latest]
+        os: [macos-13, ubuntu-latest, windows-latest]
         node-version: [16.x]
         include:
           - os: macos-13
             platform: macOS
           - os: ubuntu-latest
             platform: linux
+          - os: windows-latest
+            platform: Windows
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -35,9 +37,15 @@ jobs:
         run: npm ci
 
       - name: Build Application
-        run: | 
-          npm run release
-          mv ./bin/index watcher-service-${{ github.event.release.tag_name }}-${{ matrix.platform }}
+        run: npm run release
+
+      - name: MacOS/Linux Move and Rename Release file
+        if: ${{ matrix.platform != 'Windows' }}
+        run: mv ./bin/index watcher-service-${{ github.event.release.tag_name }}-${{ matrix.platform }}
+
+      - name: Windows Move and Rename Release file
+        if: ${{ matrix.platform == 'Windows' }}
+        run: mv ./bin/index.exe watcher-service-${{ github.event.release.tag_name }}-${{ matrix.platform }}.exe
 
       - name: Upload File to Assets
         uses: softprops/action-gh-release@v1
