@@ -678,6 +678,7 @@ class WatcherDataBase {
     exclude = false
   ): Promise<Array<BoxEntity>> => {
     return this.boxRepository.findBy({
+      spendBlock: IsNull(),
       boxId: exclude ? Not(In(boxIds)) : In(boxIds),
     });
   };
