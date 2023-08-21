@@ -6,7 +6,6 @@ import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 import { Transaction } from '../api/Transaction';
 import { hexStrToUint8Array } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';

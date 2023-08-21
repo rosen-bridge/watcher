@@ -234,7 +234,7 @@ class WatcherUtils {
       commitment.eventId
     );
     return (
-      !!eventTrigger &&
+      eventTrigger !== null &&
       commitment.height < eventTrigger.height &&
       !eventTrigger.WIDs.split(',').includes(commitment.WID)
     );
