@@ -5,6 +5,11 @@ export class WatcherMigration1692612814917 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
+            UPDATE "observation_status_entity"
+            SET status = 'timeout'
+            WHERE status IN ('redeem_sent', 'redeemed')
+    `);
+    await queryRunner.query(`
             CREATE TABLE "temporary_observation_status_entity" (
                 "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
                 "observationId" integer,

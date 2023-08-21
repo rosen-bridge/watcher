@@ -5,6 +5,11 @@ export class WatcherMigration1692612522380 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
+            UPDATE "observation_status_entity"
+            SET status = 'timeout'
+            WHERE status IN ('redeem_sent', 'redeemed')
+    `);
+    await queryRunner.query(`
             ALTER TYPE "public"."observation_status_entity_status_enum"
             RENAME TO "observation_status_entity_status_enum_old"
         `);

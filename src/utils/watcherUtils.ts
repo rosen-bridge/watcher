@@ -233,13 +233,11 @@ class WatcherUtils {
     const eventTrigger = await this.dataBase.eventTriggerByEventId(
       commitment.eventId
     );
-    if (
-      !eventTrigger ||
-      commitment.height >= eventTrigger.height ||
-      eventTrigger.WIDs.split(',').includes(commitment.WID)
-    )
-      return false;
-    return true;
+    return (
+      !!eventTrigger &&
+      commitment.height < eventTrigger.height &&
+      !eventTrigger.WIDs.split(',').includes(commitment.WID)
+    );
   };
 }
 
