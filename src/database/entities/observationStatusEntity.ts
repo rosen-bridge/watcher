@@ -15,8 +15,6 @@ enum TxStatus {
   COMMITTED = 'committed',
   REVEAL_SENT = 'reveal_sent',
   REVEALED = 'revealed',
-  REDEEM_SENT = 'redeem_sent',
-  REDEEMED = 'redeemed',
 }
 
 const SortedTxStatus = [
@@ -26,8 +24,6 @@ const SortedTxStatus = [
   TxStatus.COMMITTED,
   TxStatus.REVEAL_SENT,
   TxStatus.REVEALED,
-  TxStatus.REDEEM_SENT,
-  TxStatus.REDEEMED,
 ];
 
 @Entity()

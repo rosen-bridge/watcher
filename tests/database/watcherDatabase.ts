@@ -449,21 +449,6 @@ describe('WatcherModel tests', () => {
       const res = await DB.upgradeObservationTxStatus(obs[0]);
       expect(res.status).to.eql(TxStatus.TIMED_OUT);
     });
-
-    /**
-     * Target: testing upgradeObservationTxStatus
-     * Expected Output:
-     *    The function should upgrade the status from COMMITED to REDEEM_SENT
-     */
-    it('should upgrade the observation txStatus from COMMITED to REDEEM_SENT', async () => {
-      await observationRepo.insert(observationEntity3);
-      await observationStatusRepo.insert({
-        observation: observationEntity3,
-        status: TxStatus.COMMITTED,
-      });
-      const res = await DB.upgradeObservationTxStatus(observationEntity3, true);
-      expect(res.status).to.eql(TxStatus.REDEEM_SENT);
-    });
   });
 
   describe('downgradeObservationTxStatus', () => {
@@ -490,19 +475,6 @@ describe('WatcherModel tests', () => {
       const res = await DB.downgradeObservationTxStatus(obs[0]);
       expect(res.status).to.eql(TxStatus.REVEALED);
     });
-
-    /**
-     * Target: testing downgradeObservationTxStatus
-     * Expected Output:
-     *    The function should downgrade the status from REDEEM_SENT to COMMITED
-     */
-    it('should downgrade the observation txStatus', async () => {
-      const res = await DB.downgradeObservationTxStatus(
-        observationEntity3,
-        true
-      );
-      expect(res.status).to.eql(TxStatus.COMMITTED);
-    });
   });
 
   describe('updateObservationTxStatus', () => {
@@ -515,21 +487,6 @@ describe('WatcherModel tests', () => {
       const obs = await DB.getConfirmedObservations(0, 100);
       const res = await DB.updateObservationTxStatus(obs[0], TxStatus.REVEALED);
       expect(res.status).to.eql(TxStatus.REVEALED);
-    });
-  });
-
-  describe('getObservationsByStatus', () => {
-    /**
-     * Target: testing getObservationsByStatus
-     * Expected Output:
-     *    The function should return one commited observation
-     */
-    it('should return one commited observation', async () => {
-      const data = await DB.getObservationsByStatus(TxStatus.COMMITTED);
-      expect(data).to.have.length(1);
-      expect(data[0].observation.requestId).to.equal(
-        observationEntity3.requestId
-      );
     });
   });
 
@@ -733,6 +690,18 @@ describe('WatcherModel tests', () => {
       const data = await DB.eventTriggerBySourceTxId(
         eventTriggerEntity.sourceTxId
       );
+      expect(data).to.eql(eventTriggerEntity);
+    });
+  });
+
+  describe('eventTriggerByEventId', () => {
+    /**
+     * Target: testing eventTriggerByEventId
+     * Expected Output:
+     *    The function should return one unspent trigger box
+     */
+    it('should find one unspent event trigger box', async () => {
+      const data = await DB.eventTriggerByEventId(eventTriggerEntity.eventId);
       expect(data).to.eql(eventTriggerEntity);
     });
   });

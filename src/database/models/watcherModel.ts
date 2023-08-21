@@ -188,21 +188,6 @@ class WatcherDataBase {
   };
 
   /**
-   * gets observations by status
-   * @param observation
-   */
-  getObservationsByStatus = async (
-    status: TxStatus
-  ): Promise<ObservationStatusEntity[]> => {
-    return await this.observationStatusEntity.find({
-      relations: ['observation'],
-      where: {
-        status: status,
-      },
-    });
-  };
-
-  /**
    * Stores a transaction in tx queue, the queue will process the transaction automatically afterward
    * @param tx
    * @param requestId
@@ -280,44 +265,29 @@ class WatcherDataBase {
   /**
    * Upgrades the observation TxStatus, it means it had progressed creating transactions
    * @param observation
-   * @param isRedeemSent true if this upgrade is due to sending commitment redeem transaction
    */
-  upgradeObservationTxStatus = async (
-    observation: ObservationEntity,
-    isRedeemSent = false
-  ) => {
+  upgradeObservationTxStatus = async (observation: ObservationEntity) => {
     const observationStatus = await this.getStatusForObservations(observation);
     if (observationStatus === null)
       throw new Error(
         `observation with requestId ${observation.requestId} has no status`
       );
-    if (!isRedeemSent) {
-      if (
-        ![TxStatus.TIMED_OUT, TxStatus.REVEALED].includes(
-          observationStatus.status
-        )
+    if (
+      ![TxStatus.TIMED_OUT, TxStatus.REVEALED].includes(
+        observationStatus.status
       )
-        await this.observationStatusEntity.update(
-          {
-            id: observationStatus.id,
-          },
-          {
-            status:
-              SortedTxStatus[
-                SortedTxStatus.findIndex(
-                  (status) => status == observationStatus.status
-                ) + 1
-              ],
-          }
-        );
-    } else
+    )
       await this.observationStatusEntity.update(
         {
           id: observationStatus.id,
-          status: TxStatus.COMMITTED,
         },
         {
-          status: TxStatus.REDEEM_SENT,
+          status:
+            SortedTxStatus[
+              SortedTxStatus.findIndex(
+                (status) => status == observationStatus.status
+              ) + 1
+            ],
         }
       );
     const updatedStatus = await this.getStatusForObservations(observation);
@@ -333,22 +303,21 @@ class WatcherDataBase {
   /**
    * Downgrades the observation TxStatus, it means it had problems creating or sending transactions
    * @param observation
-   * @param isRedeemSent true if this downgrade is about a commitment redeem transaction
    */
-  downgradeObservationTxStatus = async (
-    observation: ObservationEntity,
-    isRedeemSent = false
-  ) => {
+  downgradeObservationTxStatus = async (observation: ObservationEntity) => {
     const observationStatus = await this.getStatusForObservations(observation);
     if (observationStatus === null)
       throw new Error(
         `observation with requestId ${observation.requestId} has no status`
       );
-    if (!isRedeemSent)
+    if (
+      ![TxStatus.TIMED_OUT, TxStatus.REVEALED].includes(
+        observationStatus.status
+      )
+    )
       await this.observationStatusEntity.update(
         {
           id: observationStatus.id,
-          status: Not(In([TxStatus.TIMED_OUT, TxStatus.REVEALED])),
         },
         {
           status:
@@ -357,16 +326,6 @@ class WatcherDataBase {
                 (status) => status == observationStatus.status
               ) - 1
             ],
-        }
-      );
-    else
-      await this.observationStatusEntity.update(
-        {
-          id: observationStatus.id,
-          status: TxStatus.REDEEM_SENT,
-        },
-        {
-          status: TxStatus.COMMITTED,
         }
       );
     const updatedStatus = await this.getStatusForObservations(observation);
@@ -594,6 +553,20 @@ class WatcherDataBase {
     return await this.eventTriggerRepository.findOne({
       where: {
         sourceTxId: sourceTxId,
+      },
+    });
+  };
+
+  /**
+   * Returns an eventTriggerEntity with the specified eventId
+   * @param eventId
+   */
+  eventTriggerByEventId = async (
+    eventId: string
+  ): Promise<EventTriggerEntity | null> => {
+    return await this.eventTriggerRepository.findOne({
+      where: {
+        eventId: eventId,
       },
     });
   };
