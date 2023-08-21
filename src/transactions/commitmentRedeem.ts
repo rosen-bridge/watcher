@@ -6,7 +6,6 @@ import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 import { Transaction } from '../api/Transaction';
 import { hexStrToUint8Array } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
@@ -46,7 +45,6 @@ export class CommitmentRedeem {
    */
   redeemCommitmentTx = async (
     WID: string,
-    observation: ObservationEntity,
     WIDBox: wasm.ErgoBox,
     commitmentBox: wasm.ErgoBox,
     feeBoxes: Array<wasm.ErgoBox>,
@@ -60,11 +58,6 @@ export class CommitmentRedeem {
       height,
       RWTCount,
       hexStrToUint8Array(WID)
-    );
-    const permitHash = ErgoUtils.contractHash(
-      wasm.Contract.pay_to_address(
-        wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)
-      )
     );
     const inputBoxes = new wasm.ErgoBoxes(commitmentBox);
     inputBoxes.add(WIDBox);
@@ -96,11 +89,7 @@ export class CommitmentRedeem {
       for (let i = 0; i < signed.outputs().len(); i++) {
         const box = signed.outputs().get(i);
         if (box.tokens().len() > 0 && boxHaveAsset(box, WID)) {
-          await this.txUtils.submitTransaction(
-            signed,
-            TxType.REDEEM,
-            observation
-          );
+          await this.txUtils.submitTransaction(signed, TxType.REDEEM);
           logger.info(
             `Redeem tx [${signed.id().to_str()}] submitted to the queue`
           );
@@ -126,7 +115,7 @@ export class CommitmentRedeem {
 
   /**
    * Extracts timeout commitments (commitments with confirmation higher than redeem confirmation)
-   * and creates the redeem transaction
+   * and creates the redeem transaction for invalid ones
    */
   job = async () => {
     if (!Transaction.watcherWID) {
@@ -136,18 +125,16 @@ export class CommitmentRedeem {
     const commitments = await this.watcherUtils.allTimeoutCommitments(
       this.redeemConfirmation
     );
-    const commitedObservations =
-      await this.watcherUtils.allCommitedObservations();
     const WID = Transaction.watcherWID;
     logger.info(`Starting commitment redeem job`);
     let WIDBox = await this.boxes.getWIDBox(WID);
     for (const commitment of commitments) {
-      const observationStatus = commitedObservations.find(
-        (obs) => obs.observation.requestId === commitment.eventId
+      const isCommitmentValid = await this.watcherUtils.isCommitmentValid(
+        commitment
       );
-      if (!observationStatus) {
+      if (isCommitmentValid) {
         logger.debug(
-          `Skipping commitment [${commitment.id}] redeem: Corresponding observation [${commitment.eventId}] is not in 'COMMITED' status`
+          `Skipping commitment [${commitment.id}] redeem: The commitment is timed out but its still valid`
         );
         continue;
       }
@@ -176,7 +163,6 @@ export class CommitmentRedeem {
         }
         WIDBox = await this.redeemCommitmentTx(
           WID,
-          observationStatus.observation,
           WIDBox,
           decodeSerializedBox(commitment.boxSerialized),
           feeBoxes,

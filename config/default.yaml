@@ -32,7 +32,7 @@ ergo:
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
     confirmation: 10 # required block confirmations for sent transactions
-    commitmentTimeoutConfirmation: 25 # required block confirmations for a commitment to redeem
+    commitmentTimeoutConfirmation: 720 # required block confirmations for a commitment to redeem
   interval:
     scanner: 180 # scanner update interval (in seconds)
     revenue: 120 # revenue update interval (in seconds)

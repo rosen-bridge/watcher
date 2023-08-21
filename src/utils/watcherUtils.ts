@@ -220,12 +220,24 @@ class WatcherUtils {
   };
 
   /**
-   * returns all observation with active commitment
+   * Check timed out commitments to be valid, a commitment is not valid if:
+   *    1 - Not triggered after the specified period
+   *    2 - Created after the related trigger
+   *    3 - It's a duplicate commitment and a valid one merged to create the trigger (WID exists in trigger)
+   * @param commitment
+   * @returns true if the commitment is still valid and false otherwise
    */
-  allCommitedObservations = async (): Promise<
-    Array<ObservationStatusEntity>
-  > => {
-    return await this.dataBase.getObservationsByStatus(TxStatus.COMMITTED);
+  isCommitmentValid = async (
+    commitment: CommitmentEntity
+  ): Promise<boolean> => {
+    const eventTrigger = await this.dataBase.eventTriggerByEventId(
+      commitment.eventId
+    );
+    return (
+      eventTrigger !== null &&
+      commitment.height < eventTrigger.height &&
+      !eventTrigger.WIDs.split(',').includes(commitment.WID)
+    );
   };
 }
 
@@ -250,10 +262,7 @@ class TransactionUtils {
     const height = await ErgoNetwork.getHeight();
     let requestId = undefined;
     if (observation) {
-      await this.dataBase.upgradeObservationTxStatus(
-        observation,
-        txType === TxType.REDEEM
-      );
+      await this.dataBase.upgradeObservationTxStatus(observation);
       requestId = observation.requestId;
     }
     await this.dataBase.submitTx(
