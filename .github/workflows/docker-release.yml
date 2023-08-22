@@ -2,7 +2,7 @@ name: Build and Push Docker Image
 on:
   release:
     types:
-      - created
+      - 'published'
 
 jobs:
   build:
@@ -44,4 +44,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/rosen-bridge/watcher:${{ matrix.versions }}
+          tags: ghcr.io/rosen-bridge/watcher-service:${{ matrix.versions }}
