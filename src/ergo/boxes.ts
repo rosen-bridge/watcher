@@ -291,6 +291,11 @@ export class Boxes {
       );
     }
     builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([WID]));
+    // The R5 register is needed for commitment redeem transaction
+    builder.set_register_value(
+      5,
+      wasm.Constant.from_coll_coll_byte([Buffer.from('00', 'hex')])
+    );
     return builder.build();
   };
 
