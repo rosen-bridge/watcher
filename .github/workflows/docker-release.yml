@@ -24,7 +24,7 @@ jobs:
       - name: Download Contracts
         uses: rosen-bridge/operation@V0.1
         with:
-          type: ${{secrets.RELEASE_NAME}}
+          type: ${{ vars.RELEASE_NAME }}
 
       - name: Move Contracts files
         run: |
