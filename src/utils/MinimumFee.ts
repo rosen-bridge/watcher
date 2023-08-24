@@ -11,7 +11,7 @@ class MinimumFee {
 
   /**
    * gets minimum fee config for an observation
-   * @param observation the event trigger
+   * @param observation
    */
   static getEventFeeConfig = async (
     observation: ObservationEntity
