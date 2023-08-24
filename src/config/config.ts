@@ -21,7 +21,7 @@ interface ConfigType {
   cardano: CardanoConfig;
   general: Config;
   rosen: RosenConfig;
-  token: RosenTokens;
+  token: TokensConfig;
   database: DatabaseConfig;
   healthCheck: HealthCheckConfig;
 }
@@ -367,7 +367,7 @@ const getConfig = (): ConfigType => {
       general.networkType,
       general.rosenConfigPath
     );
-    const token = new TokensConfig(general.rosenTokensPath).tokens;
+    const token = new TokensConfig(general.rosenTokensPath);
     const database = new DatabaseConfig();
     const healthCheck = new HealthCheckConfig();
     internalConfig = {

@@ -92,7 +92,7 @@ class CreateScanner {
       this.observationScanner = this.ergoScanner;
       const observationExtractor = new ErgoObservationExtractor(
         dataSource,
-        tokensConfig,
+        tokensConfig.tokens,
         rosenConfig.lockAddress,
         loggers.observationExtractorLogger
       );
@@ -150,7 +150,7 @@ class CreateScanner {
         );
         const observationExtractor = new CardanoOgmiosObservationExtractor(
           dataSource,
-          tokensConfig,
+          tokensConfig.tokens,
           rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
@@ -167,7 +167,7 @@ class CreateScanner {
         );
         const observationExtractor = new CardanoKoiosObservationExtractor(
           dataSource,
-          tokensConfig,
+          tokensConfig.tokens,
           rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );

@@ -1,8 +1,9 @@
 import fs from 'fs';
-import { RosenTokens } from '@rosen-bridge/tokens';
+import { RosenTokens, TokenMap } from '@rosen-bridge/tokens';
 
 class TokensConfig {
   readonly tokens: RosenTokens;
+  readonly tokenMap: TokenMap;
 
   constructor(tokensPath: string) {
     if (!fs.existsSync(tokensPath)) {
@@ -10,6 +11,7 @@ class TokensConfig {
     } else {
       const tokensJson: string = fs.readFileSync(tokensPath, 'utf8');
       this.tokens = JSON.parse(tokensJson);
+      this.tokenMap = new TokenMap(this.tokens);
     }
   }
 }
