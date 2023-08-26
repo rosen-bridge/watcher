@@ -19,6 +19,8 @@ import { getConfig } from '../config/config';
 import { scanner } from './scanner';
 import { loggerFactory } from '../log/Logger';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
+import { BridgeMinimumFee } from '@rosen-bridge/minimum-fee';
+import MinimumFee from './MinimumFee';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -65,6 +67,8 @@ class WatcherUtils {
     }
     // check observation trigger created
     if (await this.isMergeHappened(observation)) return false;
+    // validate observation amount
+    if (!(await this.hasValidAmount(observation))) return false;
     // check this watcher have created the commitment lately
     const relatedCommitments = await this.dataBase.commitmentsByEventId(
       observation.requestId
@@ -73,6 +77,18 @@ class WatcherUtils {
       relatedCommitments.filter(
         (commitment) => commitment.WID === Transaction.watcherWID
       ).length <= 0
+    );
+  };
+
+  /**
+   * returns false if the observation amount be less than (bridgeFee + networkFee)
+   * @param observation
+   */
+  hasValidAmount = async (observation: ObservationEntity): Promise<boolean> => {
+    const feeConfig = await MinimumFee.getEventFeeConfig(observation);
+    return (
+      BigInt(observation.amount) >=
+      BigInt(feeConfig.bridgeFee) + BigInt(feeConfig.networkFee)
     );
   };
 
@@ -152,7 +168,8 @@ class WatcherUtils {
       );
       if (
         observationStatus !== null &&
-        observationStatus.status === TxStatus.COMMITTED
+        observationStatus.status === TxStatus.COMMITTED &&
+        (await this.hasValidAmount(observation))
       ) {
         const relatedCommitments = await this.dataBase.commitmentsByEventId(
           observation.requestId

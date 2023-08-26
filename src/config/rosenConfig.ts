@@ -4,10 +4,11 @@ import path from 'path';
 type RosenConfigType = {
   RSN: string;
   guardNFT: string;
+  rsnRatioNFT: string;
   cleanupNFT: string;
   cleanupConfirm: number;
   watcherPermitAddress: string;
-  WatcherCollateralAddress: string;
+  watcherCollateralAddress: string;
   RWTRepoAddress: string;
   fraudAddress: string;
   eventTriggerAddress: string;
@@ -20,6 +21,7 @@ type RosenConfigType = {
 class RosenConfig {
   readonly RSN: string;
   readonly guardNFT: string;
+  readonly rsnRatioNFT: string;
   readonly cleanupNFT: string;
   readonly cleanupConfirm: number;
   readonly watcherPermitAddress: string;
@@ -43,6 +45,7 @@ class RosenConfig {
       const config = JSON.parse(configJson);
       this.RSN = config.tokens.RSN;
       this.guardNFT = config.tokens.GuardNFT;
+      this.rsnRatioNFT = config.tokens.rsnRatioNFT;
       this.cleanupNFT = config.tokens.CleanupNFT;
       this.cleanupConfirm = config.cleanupConfirm;
       this.watcherPermitAddress = config.addresses.WatcherPermit;

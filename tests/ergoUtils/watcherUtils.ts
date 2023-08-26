@@ -27,6 +27,8 @@ import { NoObservationStatus } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
 import TransactionTest from '../../src/api/TransactionTest';
+import MinimumFee from '../../src/utils/MinimumFee';
+import { Fee } from '@rosen-bridge/minimum-fee';
 
 chai.use(spies);
 
@@ -77,6 +79,7 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
         () => observationStatusNotCommitted
       );
       chai.spy.on(watcherUtils, 'isMergeHappened', () => false);
+      chai.spy.on(watcherUtils, 'hasValidAmount', () => true);
       const data = await watcherUtils.allReadyObservations();
       expect(data).to.have.length(1);
     });
@@ -197,6 +200,7 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
         redeemedCommitment,
       ]);
       chai.spy.on(dataBase, 'eventTriggerBySourceTxId', () => null);
+      chai.spy.on(watcherUtils, 'hasValidAmount', () => true);
       const data = await watcherUtils.allReadyCommitmentSets();
       expect(data).to.have.length(1);
       expect(data[0].commitments).to.have.length(2);
@@ -258,6 +262,39 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
      *    2- calling function
      *    3- validate output
      * Expected Output:
+     *    It should return nothing since the observation amount is not valid
+     */
+    it('should not return commitment set, observation is invalid', async () => {
+      chai.spy.on(dataBase, 'getLastBlockHeight', () => 15);
+      chai.spy.on(dataBase, 'getConfirmedObservations', () => [
+        observationEntity1,
+      ]);
+      chai.spy.on(
+        dataBase,
+        'getStatusForObservations',
+        () => observationStatusCommitted
+      );
+      chai.spy.on(dataBase, 'commitmentsByEventId', () => [
+        unspentCommitment,
+        unspentCommitment2,
+        redeemedCommitment,
+      ]);
+      chai.spy.on(dataBase, 'eventTriggerBySourceTxId', () => null);
+      chai.spy.on(watcherUtils, 'hasValidAmount', () => false);
+
+      const data = await watcherUtils.allReadyCommitmentSets();
+      expect(data).to.have.length(0);
+    });
+
+    /**
+     * Target: testing allReadyCommitmentSets
+     * Dependencies:
+     *    watcherDatabase
+     * Test Procedure:
+     *    1- Mocking environment
+     *    2- calling function
+     *    3- validate output
+     * Expected Output:
      *    The function should return all ready commitments along with the related observation for trigger creation
      *    It should return nothing since one of the commitments is merged to create the trigger
      */
@@ -281,6 +318,8 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
         () => eventTriggerEntity
       );
       chai.spy.on(dataBase, 'updateObservationTxStatus', () => undefined);
+      chai.spy.on(watcherUtils, 'hasValidAmount', () => true);
+
       const data = await watcherUtils.allReadyCommitmentSets();
       expect(dataBase.updateObservationTxStatus).to.have.been.called.with(
         observationEntity1,
@@ -317,6 +356,7 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
         unspentCommitmentDuplicate,
       ]);
       chai.spy.on(dataBase, 'eventTriggerBySourceTxId', () => null);
+      chai.spy.on(watcherUtils, 'hasValidAmount', () => true);
 
       const data = await watcherUtils.allReadyCommitmentSets();
       const actual = data[0].commitments.length;
@@ -327,6 +367,27 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
   });
 
   describe('isObservationValid', () => {
+    /**
+     * Target: testing isObservationValid
+     * Dependencies:
+     *    watcherDatabase
+     * Expected Output:
+     *    The function should return false since the observation amount is not valid
+     */
+    it('should return false since the observation amount is not valid', async () => {
+      chai.spy.on(
+        dataBase,
+        'getStatusForObservations',
+        () => observationStatusNotCommitted
+      );
+      chai.spy.on(dataBase, 'getLastBlockHeight', () => 15);
+      chai.spy.on(dataBase, 'commitmentsByEventId', () => [commitmentEntity]);
+      chai.spy.on(watcherUtils, 'hasValidAmount', () => false);
+
+      const data = await watcherUtils.isObservationValid(observationEntity1);
+      expect(data).to.be.false;
+    });
+
     /**
      * Target: testing isObservationValid
      * Dependencies:
@@ -362,6 +423,8 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
       );
       chai.spy.on(dataBase, 'getLastBlockHeight', () => 15);
       chai.spy.on(dataBase, 'commitmentsByEventId', () => [commitmentEntity]);
+      chai.spy.on(watcherUtils, 'hasValidAmount', () => true);
+
       const data = await watcherUtils.isObservationValid(observationEntity1);
       expect(data).to.be.false;
     });
@@ -410,6 +473,50 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
         () => observationStatusRevealed
       );
       const data = await watcherUtils.isMergeHappened(observationEntity1);
+      expect(data).to.be.true;
+    });
+  });
+
+  describe('hasValidAmount', () => {
+    afterEach(() => {
+      chai.spy.restore();
+    });
+
+    /**
+     * Target: testing hasValidAmount
+     * Dependencies:
+     * Expected Output:
+     *   The function should return false since the bridgeFee + networkFee is greater than amount of observation
+     */
+    it('should return false since the bridgeFee + networkFee is greater than amount of observation', async () => {
+      const fee: Fee = {
+        bridgeFee: 100000n,
+        networkFee: 100000n,
+        rsnRatio: 0n,
+        feeRatio: 0n,
+      };
+      chai.spy.on(MinimumFee, 'getEventFeeConfig', () => fee);
+
+      const data = await watcherUtils.hasValidAmount(observationEntity1);
+      expect(data).to.be.false;
+    });
+
+    /**
+     * Target: testing hasValidAmount
+     * Dependencies:
+     * Expected Output:
+     *   The function should return true since the bridgeFee + networkFee is less than amount of observation
+     */
+    it('should return true since the bridgeFee + networkFee is less than amount of observation', async () => {
+      const fee: Fee = {
+        bridgeFee: 2n,
+        networkFee: 2n,
+        rsnRatio: 0n,
+        feeRatio: 0n,
+      };
+      chai.spy.on(MinimumFee, 'getEventFeeConfig', () => fee);
+
+      const data = await watcherUtils.hasValidAmount(observationEntity1);
       expect(data).to.be.true;
     });
   });
