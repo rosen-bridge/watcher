@@ -45,7 +45,7 @@ class RosenConfig {
       const config = JSON.parse(configJson);
       this.RSN = config.tokens.RSN;
       this.guardNFT = config.tokens.GuardNFT;
-      this.rsnRatioNFT = config.tokens.rsnRatioNFT;
+      this.rsnRatioNFT = config.tokens.RSNRatioNFT;
       this.cleanupNFT = config.tokens.CleanupNFT;
       this.cleanupConfirm = config.cleanupConfirm;
       this.watcherPermitAddress = config.addresses.WatcherPermit;
