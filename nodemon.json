@@ -1,6 +1,0 @@
-{
-  "watch": ["src"],
-  "ext": ".ts,.js",
-  "ignore": [],
-  "exec": "ts-node --experimental-specifier-resolution=node ./src/index.ts"
-}

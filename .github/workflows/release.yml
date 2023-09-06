@@ -21,6 +21,9 @@ jobs:
           - os: windows-latest
             platform: Windows
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./services/watcher
 
     steps:
       - name: Checkout Current Branch
