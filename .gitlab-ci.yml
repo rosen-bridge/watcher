@@ -14,6 +14,7 @@ installation_16:
     policy: push
     paths:
       - node_modules
+      - '**/node_modules'
   script:
     - npm ci
 
@@ -26,6 +27,8 @@ type_check:
     policy: pull
     paths:
       - node_modules
+      - '**/node_modules'
+      - '**/dist'
   script:
     - npm run type-check
 
@@ -38,6 +41,8 @@ lint:
     policy: pull
     paths:
       - node_modules
+      - '**/node_modules'
+      - '**/dist'
   script:
     - npm run lint
 
@@ -50,6 +55,8 @@ test:
     policy: pull
     paths:
       - node_modules
+      - '**/node_modules'
+      - '**/dist'
   script:
     - npm run test
 
@@ -61,6 +68,7 @@ installation_18:
     policy: push
     paths:
       - node_modules
+      - '**/node_modules'
   script:
     - npm ci
 
@@ -73,6 +81,8 @@ coverage:
     policy: pull
     paths:
       - node_modules
+      - '**/node_modules'
+      - '**/dist'
   script:
     - npm run coverage
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
@@ -80,4 +90,4 @@ coverage:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
+        path: '**/coverage/cobertura-coverage.xml'

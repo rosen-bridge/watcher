@@ -1,7 +1,8 @@
-yarn.lock
-src/config/*.json
+services/watcher/src/config/*.json
+services/watcher/config/local.yaml
+services/watcher/config/rosen
 
-/sqlite
+sqlite/
 .idea
 node_modules
 .nyc_output
@@ -10,9 +11,8 @@ dir
 build
 dist
 logs/
-config/rosen
 out
 bin
-config/local.yaml
 .DS_Store
 .env
+yarn.lock
