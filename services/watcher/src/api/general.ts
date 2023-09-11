@@ -13,6 +13,7 @@ interface GeneralInfo {
   permitCount: bigint;
   health: string;
   address: string;
+  rsnTokenId: string;
 }
 
 const generalRouter = express.Router();
@@ -28,6 +29,7 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       permitCount: await ErgoUtils.getPermitCount(getConfig().rosen.RWTId),
       health: await HealthCheckSingleton.getInstance().getOverallStatus(),
       address: getConfig().general.address,
+      rsnTokenId: getConfig().rosen.RSN,
     };
     res.set('Content-Type', 'application/json');
     res.status(200).send(JsonBI.stringify(info));
