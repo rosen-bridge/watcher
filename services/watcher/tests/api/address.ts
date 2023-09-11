@@ -6,7 +6,11 @@ import { default as addressRouter } from '../../src/api/address';
 import request from 'supertest';
 import { initWatcherDB } from '../../src/init';
 import JSONBigInt from 'json-bigint';
-import { validBox0Token, validBox1Token } from '../database/mockedData';
+import {
+  validBox0Token,
+  validBox1Token,
+  validTwoBoxErgAmount,
+} from '../database/mockedData';
 
 chai.use(spies);
 
@@ -44,7 +48,11 @@ describe('addressRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       expect(res.text).to.equal(
-        JSONBigInt.stringify([validBox1Token, validBox0Token])
+        JSONBigInt.stringify([
+          validTwoBoxErgAmount,
+          validBox1Token,
+          validBox0Token,
+        ])
       );
     });
 
@@ -65,7 +73,11 @@ describe('addressRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       expect(res.text).to.equal(
-        JSONBigInt.stringify([validBox0Token, validBox1Token])
+        JSONBigInt.stringify([
+          validTwoBoxErgAmount,
+          validBox0Token,
+          validBox1Token,
+        ])
       );
     });
 
@@ -127,7 +139,7 @@ describe('addressRouter', () => {
 
       // check the result
       expect(res.status).to.equal(200);
-      expect(res.text).to.equal(JSONBigInt.stringify([validBox0Token]));
+      expect(res.text).to.equal(JSONBigInt.stringify([validBox1Token]));
     });
   });
 });

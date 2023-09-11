@@ -156,6 +156,12 @@ export const validBox1Token = {
   name: 'Test',
 };
 
+export const validTwoBoxErgAmount = {
+  amount: 1861100000,
+  tokenId: 'erg',
+  name: 'Ergo',
+};
+
 export const eventTriggerEntity = new EventTriggerEntity();
 eventTriggerEntity.sourceTxId = 'txId';
 eventTriggerEntity.block = 'blockID';

@@ -37,7 +37,9 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    let { tokens } = await ErgoUtils.getWatcherBalance();
+    const balance = await ErgoUtils.getWatcherBalance();
+    let tokens = balance.tokens;
+    tokens.push({ amount: balance.nanoErgs, tokenId: 'erg', name: 'Ergo' });
     const { tokenId, tokenName, sortByAmount } = req.query;
     if (tokenId) {
       tokens = tokens.filter((token) => token.tokenId === (tokenId as string));
@@ -54,7 +56,11 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
         )
       );
     } else {
-      tokens = tokens.sort((a, b) => a.tokenId.localeCompare(b.tokenId));
+      tokens = tokens.sort((a, b) =>
+        a.tokenId.length == b.tokenId.length
+          ? a.tokenId.localeCompare(b.tokenId)
+          : a.tokenId.length - b.tokenId.length
+      );
     }
     const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
