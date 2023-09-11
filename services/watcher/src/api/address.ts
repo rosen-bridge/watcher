@@ -7,6 +7,7 @@ import { watcherDatabase } from '../init';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
+import { ERGO_NATIVE_ASSET, ERGO_NATIVE_ASSET_NAME } from '../config/constants';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -39,7 +40,11 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
   try {
     const balance = await ErgoUtils.getWatcherBalance();
     let tokens = balance.tokens;
-    tokens.push({ amount: balance.nanoErgs, tokenId: 'erg', name: 'Ergo' });
+    tokens.push({
+      amount: balance.nanoErgs,
+      tokenId: ERGO_NATIVE_ASSET,
+      name: ERGO_NATIVE_ASSET_NAME,
+    });
     const { tokenId, tokenName, sortByAmount } = req.query;
     if (tokenId) {
       tokens = tokens.filter((token) => token.tokenId === (tokenId as string));

@@ -158,8 +158,8 @@ export const validBox1Token = {
 
 export const validTwoBoxErgAmount = {
   amount: 1861100000,
-  tokenId: 'erg',
-  name: 'Ergo',
+  tokenId: Constants.ERGO_NATIVE_ASSET,
+  name: Constants.ERGO_NATIVE_ASSET_NAME,
 };
 
 export const eventTriggerEntity = new EventTriggerEntity();
