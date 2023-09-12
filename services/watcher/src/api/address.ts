@@ -61,6 +61,8 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
         )
       );
     } else {
+      // erg size it shorter than all token ids (64 character).
+      // so sorting according to size then tokenId.
       tokens = tokens.sort((a, b) =>
         a.tokenId.length == b.tokenId.length
           ? a.tokenId.localeCompare(b.tokenId)

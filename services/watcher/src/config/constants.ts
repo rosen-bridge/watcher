@@ -13,4 +13,4 @@ export const DEFAULT_API_LIMIT = 20;
 export const MAX_API_LIMIT = 100;
 export const DOING_STATUS = 'Doing';
 export const DONE_STATUS = 'Done';
-export const ERGO_NATIVE_ASSET_NAME = 'Ergo';
+export const ERGO_NATIVE_ASSET_NAME = 'ERG';
