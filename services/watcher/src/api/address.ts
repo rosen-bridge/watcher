@@ -7,6 +7,7 @@ import { watcherDatabase } from '../init';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
+import { ERGO_NATIVE_ASSET, ERGO_NATIVE_ASSET_NAME } from '../config/constants';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -37,7 +38,13 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-    let { tokens } = await ErgoUtils.getWatcherBalance();
+    const balance = await ErgoUtils.getWatcherBalance();
+    let tokens = balance.tokens;
+    tokens.push({
+      amount: balance.nanoErgs,
+      tokenId: ERGO_NATIVE_ASSET,
+      name: ERGO_NATIVE_ASSET_NAME,
+    });
     const { tokenId, tokenName, sortByAmount } = req.query;
     if (tokenId) {
       tokens = tokens.filter((token) => token.tokenId === (tokenId as string));
@@ -54,7 +61,13 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
         )
       );
     } else {
-      tokens = tokens.sort((a, b) => a.tokenId.localeCompare(b.tokenId));
+      // erg size it shorter than all token ids (64 character).
+      // so sorting according to size then tokenId.
+      tokens = tokens.sort((a, b) =>
+        a.tokenId.length == b.tokenId.length
+          ? a.tokenId.localeCompare(b.tokenId)
+          : a.tokenId.length - b.tokenId.length
+      );
     }
     const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
