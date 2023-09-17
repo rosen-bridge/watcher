@@ -377,7 +377,10 @@ export class ErgoUtils {
    * @returns permit count
    */
   static getPermitCount = async (RWTId: string): Promise<bigint> => {
-    const permitBoxes = await watcherDatabase.getPermitUnspentBoxes();
+    if (!Transaction.watcherWID) return 0n;
+    const permitBoxes = await watcherDatabase.getPermitUnspentBoxes(
+      Transaction.watcherWID
+    );
     const serializedUTXOs = permitBoxes.map((box) => box.boxSerialized);
     const { tokens } = await this.extractBalanceFromBoxes(serializedUTXOs);
     const RWT = tokens.find((token) => token.tokenId === RWTId);

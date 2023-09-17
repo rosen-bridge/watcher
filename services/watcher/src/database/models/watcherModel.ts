@@ -635,8 +635,9 @@ class WatcherDataBase {
   /**
    * Returns all unspent permit boxes
    */
-  getPermitUnspentBoxes = async (): Promise<Array<PermitEntity>> => {
+  getPermitUnspentBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
     return this.permitRepository.findBy({
+      WID: wid,
       spendBlock: IsNull(),
     });
   };
