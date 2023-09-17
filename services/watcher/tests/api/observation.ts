@@ -42,7 +42,10 @@ describe('observationRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
-      expect(parsedResult).to.deep.equal([observation2, observation1]);
+      expect(parsedResult).to.deep.equal({
+        items: [observation2, observation1],
+        total: 2,
+      });
     });
 
     /**
@@ -65,7 +68,7 @@ describe('observationRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
-      expect(parsedResult).to.deep.equal([observation1]);
+      expect(parsedResult).to.deep.equal({ items: [observation1], total: 1 });
     });
 
     /**
@@ -86,7 +89,7 @@ describe('observationRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
-      expect(parsedResult).to.deep.equal([observation2]);
+      expect(parsedResult).to.deep.equal({ items: [observation2], total: 1 });
     });
 
     /**
@@ -107,7 +110,7 @@ describe('observationRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
-      expect(parsedResult).to.deep.equal([observation2]);
+      expect(parsedResult).to.deep.equal({ items: [observation2], total: 1 });
     });
 
     /**
@@ -128,7 +131,7 @@ describe('observationRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
-      expect(parsedResult).to.deep.equal([observation1]);
+      expect(parsedResult).to.deep.equal({ items: [observation1], total: 1 });
     });
 
     /**
@@ -151,7 +154,7 @@ describe('observationRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
-      expect(parsedResult).to.deep.equal([observation1]);
+      expect(parsedResult).to.deep.equal({ items: [observation1], total: 1 });
     });
 
     /**
@@ -172,7 +175,7 @@ describe('observationRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
-      expect(parsedResult).to.deep.equal([observation2]);
+      expect(parsedResult).to.deep.equal({ items: [observation2], total: 1 });
     });
 
     /**
@@ -193,7 +196,7 @@ describe('observationRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
-      expect(parsedResult).to.deep.equal([observation1]);
+      expect(parsedResult).to.deep.equal({ items: [observation1], total: 2 });
     });
   });
 });

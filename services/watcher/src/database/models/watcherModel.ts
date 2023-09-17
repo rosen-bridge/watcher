@@ -116,36 +116,37 @@ class WatcherDataBase {
     sorting = '',
     offset = 0,
     limit = 20
-  ) => {
+  ): Promise<PagedItemData<ObservationEntity>> => {
     let qb = this.observationRepository.createQueryBuilder('ob').select('*');
     if (sourceTxId !== '') {
       qb = qb.andWhere('ob.sourceTxId = :sourceTxId', { sourceTxId });
-      return qb.execute();
-    }
-    if (fromAddress !== '') {
-      qb = qb.andWhere('ob.fromAddress = :fromAddress', { fromAddress });
-    }
-    if (toAddress !== '') {
-      qb = qb.andWhere('ob.toAddress = :toAddress', { toAddress });
-    }
-    if (minHeight) {
-      qb = qb.andWhere('ob.height >= :minHeight', { minHeight });
-    }
-    if (maxHeight) {
-      qb = qb.andWhere('ob.height <= :maxHeight', { maxHeight });
-    }
-    if (sourceTokenId !== '') {
-      qb = qb.andWhere('ob.sourceChainTokenId = :sourceTokenId', {
-        sourceTokenId,
-      });
-    }
-    if (sorting !== '' && sorting.toLowerCase() === 'asc') {
-      qb = qb.orderBy('ob.id', 'ASC');
     } else {
-      qb = qb.orderBy('ob.id', 'DESC');
+      if (fromAddress !== '') {
+        qb = qb.andWhere('ob.fromAddress = :fromAddress', { fromAddress });
+      }
+      if (toAddress !== '') {
+        qb = qb.andWhere('ob.toAddress = :toAddress', { toAddress });
+      }
+      if (minHeight) {
+        qb = qb.andWhere('ob.height >= :minHeight', { minHeight });
+      }
+      if (maxHeight) {
+        qb = qb.andWhere('ob.height <= :maxHeight', { maxHeight });
+      }
+      if (sourceTokenId !== '') {
+        qb = qb.andWhere('ob.sourceChainTokenId = :sourceTokenId', {
+          sourceTokenId,
+        });
+      }
+      if (sorting !== '' && sorting.toLowerCase() === 'asc') {
+        qb = qb.orderBy('ob.id', 'ASC');
+      } else {
+        qb = qb.orderBy('ob.id', 'DESC');
+      }
     }
-
-    return qb.offset(offset).limit(limit).execute();
+    const total = await qb.getCount();
+    const items = await qb.offset(offset).limit(limit).execute();
+    return { items, total };
   };
 
   /**
@@ -722,10 +723,7 @@ class WatcherDataBase {
       qb = qb.orderBy('ev.id', 'DESC');
     }
     const total = await qb.getCount();
-    const items = (await qb
-      .offset(offset)
-      .limit(limit)
-      .execute()) as Array<EventTriggerEntity>;
+    const items = await qb.offset(offset).limit(limit).execute();
     return { items, total };
   };
 
