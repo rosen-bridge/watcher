@@ -46,9 +46,11 @@ revenueRouter.get('/', async (req, res) => {
         ? DEFAULT_API_LIMIT
         : Math.min(Number(limitString), MAX_API_LIMIT)
     );
-    const result = await ErgoUtils.extractRevenueFromView(queryResult);
+    const result = await ErgoUtils.extractRevenueFromView(queryResult.items);
     res.set('Content-Type', 'application/json');
-    res.status(200).send(JsonBI.stringify(result));
+    res
+      .status(200)
+      .send(JsonBI.stringify({ items: result, total: queryResult.total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues: ${e}`);
     res.status(500).send({ message: e.message });

@@ -775,7 +775,7 @@ class WatcherDataBase {
     sorting = '',
     offset = 0,
     limit = 20
-  ): Promise<RevenueView[]> => {
+  ): Promise<PagedItemData<RevenueView>> => {
     let qb = this.revenueView.createQueryBuilder('rv').select('*');
 
     if (fromChain !== '') {
@@ -802,13 +802,18 @@ class WatcherDataBase {
     if (toBlockTime) {
       qb = qb.andWhere('rv.timestamp <= :toBlockTime', { toBlockTime });
     }
+    const distinctIds = await qb
+      .clone()
+      .select('COUNT(DISTINCT(id))', 'cnt')
+      .execute();
+    const total = distinctIds.length > 0 ? distinctIds[0].cnt : 0;
     if (sorting !== '' && sorting.toLowerCase() === 'asc') {
       qb = qb.orderBy('rv.id', 'ASC');
     } else {
       qb = qb.orderBy('rv.id', 'DESC');
     }
-
-    return qb.offset(offset).limit(limit).execute();
+    const items = await qb.offset(offset).limit(limit).execute();
+    return { items, total };
   };
 
   /**
