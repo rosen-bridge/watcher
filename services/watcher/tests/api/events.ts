@@ -51,13 +51,16 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([
-        thirdStatisticsEventTrigger,
-        secondStatisticsEventTrigger,
-        firstStatisticsEventTrigger,
-        newEventTriggerEntity,
-        eventTriggerEntity,
-      ]);
+      expect(resultParsed).to.eql({
+        items: [
+          thirdStatisticsEventTrigger,
+          secondStatisticsEventTrigger,
+          firstStatisticsEventTrigger,
+          newEventTriggerEntity,
+          eventTriggerEntity,
+        ],
+        total: 5,
+      });
     });
 
     /**
@@ -80,7 +83,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([eventTriggerEntity]);
+      expect(resultParsed).to.eql({ items: [eventTriggerEntity], total: 1 });
     });
 
     /**
@@ -103,7 +106,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([newEventTriggerEntity]);
+      expect(resultParsed).to.eql({ items: [newEventTriggerEntity], total: 1 });
     });
 
     /**
@@ -126,7 +129,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([eventTriggerEntity]);
+      expect(resultParsed).to.eql({ items: [eventTriggerEntity], total: 1 });
     });
 
     /**
@@ -149,7 +152,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([newEventTriggerEntity]);
+      expect(resultParsed).to.eql({ items: [newEventTriggerEntity], total: 1 });
     });
 
     /**
@@ -170,7 +173,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([]);
+      expect(resultParsed).to.eql({ items: [], total: 0 });
     });
 
     /**
@@ -191,13 +194,16 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([
-        eventTriggerEntity,
-        newEventTriggerEntity,
-        firstStatisticsEventTrigger,
-        secondStatisticsEventTrigger,
-        thirdStatisticsEventTrigger,
-      ]);
+      expect(resultParsed).to.eql({
+        items: [
+          eventTriggerEntity,
+          newEventTriggerEntity,
+          firstStatisticsEventTrigger,
+          secondStatisticsEventTrigger,
+          thirdStatisticsEventTrigger,
+        ],
+        total: 5,
+      });
     });
 
     /**
@@ -218,10 +224,10 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql([
-        secondStatisticsEventTrigger,
-        firstStatisticsEventTrigger,
-      ]);
+      expect(resultParsed).to.eql({
+        items: [secondStatisticsEventTrigger, firstStatisticsEventTrigger],
+        total: 5,
+      });
     });
   });
 

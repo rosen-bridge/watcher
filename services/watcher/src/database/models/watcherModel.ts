@@ -30,6 +30,7 @@ import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 import { RevenueView } from '../entities/revenueView';
 import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueChartDataView } from '../entities/revenueChartDataView';
+import { PagedItemData } from '../../types/items';
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -688,7 +689,7 @@ class WatcherDataBase {
     sorting = '',
     offset = 0,
     limit = 20
-  ): Promise<EventTriggerEntity[]> => {
+  ): Promise<PagedItemData<EventTriggerEntity>> => {
     let qb = this.eventTriggerRepository.createQueryBuilder('ev').select('*');
 
     if (fromAddress !== '') {
@@ -720,8 +721,12 @@ class WatcherDataBase {
     } else {
       qb = qb.orderBy('ev.id', 'DESC');
     }
-
-    return qb.offset(offset).limit(limit).execute();
+    const total = await qb.getCount();
+    const items = (await qb
+      .offset(offset)
+      .limit(limit)
+      .execute()) as Array<EventTriggerEntity>;
+    return { items, total };
   };
 
   /**
