@@ -7,6 +7,8 @@ import { initWatcherDB } from '../../src/init';
 import request from 'supertest';
 import { generalInfo } from '../database/mockedData';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
+import { Transaction } from '../../src/api/Transaction';
+import sinon from 'sinon';
 
 chai.use(spies);
 
@@ -29,6 +31,11 @@ describe('General-Info-Api', () => {
       );
     });
 
+    afterEach(() => {
+      sinon.restore();
+      chai.spy.restore();
+    });
+
     /**
      * @target General info endpoint should return valid data
      * @dependencies
@@ -41,6 +48,10 @@ describe('General-Info-Api', () => {
      */
     it('General info endpoint should return valid data', async () => {
       // send a request to the endpoint
+      chai.spy.on(Transaction, 'getInstance', () => ({
+        getCollateral: () => Promise.resolve({ erg: 20n, rsn: 10n }),
+      }));
+
       const res = await request(app).get('/info');
 
       // check the result

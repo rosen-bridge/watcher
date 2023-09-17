@@ -366,6 +366,28 @@ export class Transaction {
   };
 
   /**
+   * get Erg and RSN collateral
+   * CAUTION: this function removed in watcher refactor
+   */
+  getCollateral = async () => {
+    const repoBox = await Transaction.boxes.getRepoBox();
+    const R6 = repoBox.register_value(6);
+    if (R6) {
+      const R6Params = R6.to_js() as Array<string>;
+      const ErgCollateral = BigInt(R6Params[4]);
+      const RSNCollateral = BigInt(R6Params[5]);
+      return {
+        erg: ErgCollateral,
+        rsn: RSNCollateral,
+      };
+    }
+    return {
+      erg: 0n,
+      rsn: 0n,
+    };
+  };
+
+  /**
    * getting watcher permit transaction
    * @param RSNCount
    */
@@ -392,9 +414,9 @@ export class Transaction {
         status: 500,
       };
     }
-    const R6Params = R6.to_js() as Array<string>;
-    const ErgCollateral = BigInt(R6Params[4]);
-    const RSNCollateral = BigInt(R6Params[5]);
+    const collateral = await this.getCollateral();
+    const ErgCollateral = collateral.erg;
+    const RSNCollateral = collateral.rsn;
 
     const inputBoxes = [repoBox];
     if (WID) {

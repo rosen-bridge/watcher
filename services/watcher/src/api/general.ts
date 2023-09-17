@@ -4,6 +4,7 @@ import { getConfig } from '../config/config';
 import { JsonBI } from '../ergo/network/parser';
 import { ErgoUtils } from '../ergo/utils';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
+import { Transaction } from './Transaction';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -14,6 +15,10 @@ interface GeneralInfo {
   health: string;
   address: string;
   rsnTokenId: string;
+  collateral: {
+    erg: string;
+    rsn: string;
+  };
 }
 
 const generalRouter = express.Router();
@@ -23,6 +28,7 @@ const generalRouter = express.Router();
  */
 generalRouter.get('/', async (req: Request, res: Response) => {
   try {
+    const collateral = await Transaction.getInstance().getCollateral();
     const info: GeneralInfo = {
       currentBalance: (await ErgoUtils.getWatcherBalance()).nanoErgs,
       network: getConfig().general.networkWatcher,
@@ -30,6 +36,10 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       health: await HealthCheckSingleton.getInstance().getOverallStatus(),
       address: getConfig().general.address,
       rsnTokenId: getConfig().rosen.RSN,
+      collateral: {
+        erg: collateral.erg.toString(),
+        rsn: collateral.rsn.toString(),
+      },
     };
     res.set('Content-Type', 'application/json');
     res.status(200).send(JsonBI.stringify(info));
