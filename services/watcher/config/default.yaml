@@ -22,13 +22,13 @@ ergo:
   fee: '1100000' # transaction fee
   minBoxValue: '1100000' # minimum box value
   mnemonic: '' # watcher mnemonic
+  initialHeight: 0 # scanner initial height
   explorer:
     url: 'https://api.ergoplatform.com' # explorer url
     timeout: 20 # explorer request timeout (in seconds)
   node:
     url: '' # node url
     timeout: 10 # node request timeout (in seconds)
-    initialHeight: 0 # scanner initial height
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
     confirmation: 10 # required block confirmations for sent transactions
