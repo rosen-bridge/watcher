@@ -150,7 +150,7 @@ class Config {
       );
     }
     this.nodeTimeout = getRequiredNumber('ergo.node.timeout');
-    this.ergoInitialHeight = getRequiredNumber('ergo.node.initialHeight');
+    this.ergoInitialHeight = getRequiredNumber('ergo.initialHeight');
     this.ergoInterval = getRequiredNumber('ergo.interval.scanner');
     this.networkWatcher = getRequiredString('network') as NetworkType;
     if (!supportedNetworks.includes(this.networkWatcher)) {
