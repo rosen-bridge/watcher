@@ -116,6 +116,30 @@ export class Transaction {
   };
 
   /**
+   * calculate total permit for current user
+   * @returns
+   */
+  getTotalPermit = async (): Promise<bigint> => {
+    const WID = Transaction.watcherWID!;
+    const repoBox = await Transaction.boxes.getRepoBox();
+    const R4 = repoBox.register_value(4);
+    const R5 = repoBox.register_value(5);
+    if (!R4 || !R5) {
+      throw Error('Invalid repoBox found');
+    }
+    try {
+      const widIndex = R4.to_coll_coll_byte()
+        .map((user) => uint8ArrayToHex(user))
+        .indexOf(WID);
+      if (widIndex < 0) return 0n;
+      const usersCount: Array<string> | undefined = R5.to_i64_str_array();
+      return BigInt(usersCount[widIndex]);
+    } catch {
+      throw Error('Repo box register types or values are invalid');
+    }
+  };
+
+  /**
    * generating returning permit transaction and send it to the network
    * @param RWTCount
    */
