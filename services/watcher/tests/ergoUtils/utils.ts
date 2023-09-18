@@ -441,6 +441,7 @@ describe('Testing ergoUtils', () => {
        */
       it('should get watcher permit count successfully', async () => {
         // run the function
+        Transaction.watcherWID = 'WID';
         const result = await ErgoUtils.getPermitCount(permitMockRWT);
 
         // check the result

@@ -774,7 +774,7 @@ describe('WatcherModel tests', () => {
      */
     it('should get all unspent permit boxes', async () => {
       // run the function
-      const data = await DB.getPermitUnspentBoxes();
+      const data = await DB.getPermitUnspentBoxes('WID');
 
       // check the result
       expect(data).to.have.length(1);
