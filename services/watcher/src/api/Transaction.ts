@@ -115,6 +115,10 @@ export class Transaction {
     return '';
   };
 
+  /**
+   * calculate total permit for current user
+   * @returns
+   */
   getTotalPermit = async (): Promise<bigint> => {
     const WID = Transaction.watcherWID!;
     const repoBox = await Transaction.boxes.getRepoBox();
