@@ -1,7 +1,8 @@
 import { loggerFactory } from '../log/Logger';
 import express from 'express';
-import { AddressBalance } from '../ergo/interfaces';
+import { AddressBalance, TokenInfo } from '../ergo/interfaces';
 import { Transaction } from './Transaction';
+import { ERGO_NATIVE_ASSET } from '../config/constants';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -18,14 +19,15 @@ interface WithdrawBody {
  * @returns WithdrawBody object with BigInts
  */
 const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
-  const nanoErgs = BigInt(reqBody.amount.nanoErgs);
-  const tokens = reqBody.amount.tokens.map((token: any) => {
-    return {
-      tokenId: token.tokenId,
-      amount: BigInt(token.amount),
-    };
+  let nanoErgs = 0n;
+  const tokens: Array<Omit<TokenInfo, 'name'>> = [];
+  reqBody.tokens.forEach((token: any) => {
+    if (token.tokenId === ERGO_NATIVE_ASSET) {
+      nanoErgs = BigInt(token.amount);
+    } else {
+      tokens.push({ tokenId: token.tokenId, amount: BigInt(token.amount) });
+    }
   });
-
   return {
     amount: {
       nanoErgs,
