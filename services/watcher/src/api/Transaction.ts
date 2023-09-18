@@ -173,6 +173,8 @@ export class Transaction {
     const widIndex = users.map((user) => uint8ArrayToHex(user)).indexOf(WID);
     const inputBoxes = [repoBox, permitBoxes[0], widBox];
     const totalRWT = BigInt(usersCount[widIndex]);
+    const usersOut = [...users];
+    const usersCountOut = [...usersCount];
     if (totalRWT === RWTCount) {
       // need to add collateral
       const collateralBoxes =
@@ -186,10 +188,6 @@ export class Transaction {
             Buffer.from(box.register_value(4)?.to_js()).toString('hex') == WID
         );
       inputBoxes.push(collateralBoxes.boxes[0]);
-    }
-    const usersOut = [...users];
-    const usersCountOut = [...usersCount];
-    if (totalRWT === RWTCount) {
       usersOut.splice(widIndex, 1);
       usersCountOut.splice(widIndex, 1);
     } else {
@@ -217,6 +215,7 @@ export class Transaction {
         widIndex
       )
     );
+    let burnToken: { [tokenId: string]: bigint } = {};
     if (inputRWTCount > RWTCount) {
       outputBoxes.push(
         await Transaction.boxes.createPermit(
@@ -225,15 +224,17 @@ export class Transaction {
           Buffer.from(WID, 'hex')
         )
       );
+      outputBoxes.push(
+        Transaction.boxes.createWIDBox(
+          height,
+          WID,
+          Transaction.minBoxValue.as_i64().to_str(),
+          Transaction.userAddressContract
+        )
+      );
+    } else {
+      burnToken = { [WID]: -1n };
     }
-    outputBoxes.push(
-      Transaction.boxes.createWIDBox(
-        height,
-        WID,
-        Transaction.minBoxValue.as_i64().to_str(),
-        Transaction.userAddressContract
-      )
-    );
     const totalErgIn = inputBoxes
       .map((item) => BigInt(item.value().as_i64().to_str()))
       .reduce((a, b) => a + b, 0n);
@@ -264,7 +265,8 @@ export class Transaction {
         inputBoxes,
         outputBoxes,
         Transaction.userAddress,
-        height
+        height,
+        burnToken
       )
     );
     const txInputBoxes = wasm.ErgoBoxes.empty();
@@ -287,6 +289,16 @@ export class Transaction {
       Transaction.fee,
       Transaction.userAddress
     );
+    const burnTokensWasm = new wasm.Tokens();
+    Object.entries(burnToken).forEach(([tokenId, amount]) => {
+      burnTokensWasm.add(
+        new wasm.Token(
+          wasm.TokenId.from_str(tokenId),
+          wasm.TokenAmount.from_i64(wasm.I64.from_str((-amount).toString()))
+        )
+      );
+    });
+    builder.set_token_burn_permit(burnTokensWasm);
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,
@@ -333,14 +345,16 @@ export class Transaction {
    * @param outBoxes
    * @param address
    * @param height
+   * @param burnTokens: array of tokens to burn. amount must be negative for burning
    */
   private createChangeBox = (
     inBoxes: Array<wasm.ErgoBox>,
     outBoxes: Array<wasm.ErgoBoxCandidate>,
     address: wasm.Address,
-    height: number
+    height: number,
+    burnTokens: { [tokenId: string]: bigint } = {}
   ) => {
-    const totalTokens: { [tokenId: string]: bigint } = {};
+    const totalTokens: { [tokenId: string]: bigint } = { ...burnTokens };
     let totalErg = 0n;
     inBoxes.forEach((item) => {
       totalErg += BigInt(item.value().as_i64().to_str());
@@ -526,7 +540,8 @@ export class Transaction {
         height,
         WID ? WID : repoBox.box_id().to_str(),
         Transaction.minBoxValue.as_i64().to_str(),
-        wasm.Contract.pay_to_address(Transaction.userAddress)
+        wasm.Contract.pay_to_address(Transaction.userAddress),
+        !WID
       )
     );
     // generate collateral if required

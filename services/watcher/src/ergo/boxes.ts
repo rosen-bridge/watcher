@@ -5,7 +5,11 @@ import {
   decodeSerializedBox,
   ErgoUtils,
 } from './utils';
-import { bigIntToUint8Array, hexStrToUint8Array } from '../utils/utils';
+import {
+  bigIntToUint8Array,
+  hexStrToUint8Array,
+  strToUint8Array,
+} from '../utils/utils';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { Observation } from '../utils/interfaces';
 import { ErgoNetwork } from './network/ergoNetwork';
@@ -488,7 +492,8 @@ export class Boxes {
     height: number,
     WID: string,
     ergAmount: string,
-    contract?: wasm.Contract
+    contract?: wasm.Contract,
+    issueNewWID = false
   ): wasm.ErgoBoxCandidate => {
     const WIDBuilder = new wasm.ErgoBoxCandidateBuilder(
       wasm.BoxValue.from_i64(wasm.I64.from_str(ergAmount)),
@@ -503,6 +508,29 @@ export class Boxes {
       wasm.TokenId.from_str(WID),
       wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
     );
+    if (issueNewWID) {
+      const address = getConfig().general.address;
+      WIDBuilder.set_register_value(
+        4,
+        wasm.Constant.from_byte_array(
+          strToUint8Array(`WID-${address.substring(address.length - 7)}`)
+        )
+      );
+      WIDBuilder.set_register_value(
+        5,
+        wasm.Constant.from_byte_array(
+          strToUint8Array(`Rosen Watcher ID (${address})`)
+        )
+      );
+      WIDBuilder.set_register_value(
+        6,
+        wasm.Constant.from_byte_array(strToUint8Array('0'))
+      );
+      WIDBuilder.set_register_value(
+        7,
+        wasm.Constant.from_byte_array(strToUint8Array('1'))
+      );
+    }
     return WIDBuilder.build();
   };
 
