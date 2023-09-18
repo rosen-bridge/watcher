@@ -692,7 +692,10 @@ export const permitMockRWT =
 export const generalInfo = {
   currentBalance: 1100000,
   network: 'ergo',
-  permitCount: 0,
+  permitCount: {
+    active: 0,
+    total: 10000,
+  },
   health: 'Healthy',
   address: '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH',
   rsnTokenId:

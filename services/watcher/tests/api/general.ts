@@ -50,6 +50,7 @@ describe('General-Info-Api', () => {
       // send a request to the endpoint
       chai.spy.on(Transaction, 'getInstance', () => ({
         getCollateral: () => Promise.resolve({ erg: 20n, rsn: 10n }),
+        getTotalPermit: () => Promise.resolve(10000n),
       }));
 
       const res = await request(app).get('/info');

@@ -115,6 +115,22 @@ export class Transaction {
     return '';
   };
 
+  getTotalPermit = async (): Promise<bigint> => {
+    const WID = Transaction.watcherWID!;
+    const repoBox = await Transaction.boxes.getRepoBox();
+    const R4 = repoBox.register_value(4);
+    const R5 = repoBox.register_value(5);
+    if (!R4 || !R5) {
+      throw Error('Invalid repoBox found');
+    }
+    const widIndex = R4.to_coll_coll_byte()
+      .map((user) => uint8ArrayToHex(user))
+      .indexOf(WID);
+    if (widIndex < 0) return 0n;
+    const usersCount: Array<string> | undefined = R5.to_i64_str_array();
+    return BigInt(usersCount[widIndex]);
+  };
+
   /**
    * generating returning permit transaction and send it to the network
    * @param RWTCount
