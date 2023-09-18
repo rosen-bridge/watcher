@@ -127,12 +127,16 @@ export class Transaction {
     if (!R4 || !R5) {
       throw Error('Invalid repoBox found');
     }
-    const widIndex = R4.to_coll_coll_byte()
-      .map((user) => uint8ArrayToHex(user))
-      .indexOf(WID);
-    if (widIndex < 0) return 0n;
-    const usersCount: Array<string> | undefined = R5.to_i64_str_array();
-    return BigInt(usersCount[widIndex]);
+    try {
+      const widIndex = R4.to_coll_coll_byte()
+        .map((user) => uint8ArrayToHex(user))
+        .indexOf(WID);
+      if (widIndex < 0) return 0n;
+      const usersCount: Array<string> | undefined = R5.to_i64_str_array();
+      return BigInt(usersCount[widIndex]);
+    } catch {
+      throw Error('Repo box is invalid');
+    }
   };
 
   /**
