@@ -135,7 +135,7 @@ export class Transaction {
       const usersCount: Array<string> | undefined = R5.to_i64_str_array();
       return BigInt(usersCount[widIndex]);
     } catch {
-      throw Error('Repo box is invalid');
+      throw Error('Repo box register types or values are invalid');
     }
   };
 
