@@ -48,11 +48,10 @@ describe('addressRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       expect(res.text).to.equal(
-        JSONBigInt.stringify([
-          validTwoBoxErgAmount,
-          validBox1Token,
-          validBox0Token,
-        ])
+        JSONBigInt.stringify({
+          items: [validTwoBoxErgAmount, validBox1Token, validBox0Token],
+          total: 3,
+        })
       );
     });
 
@@ -73,11 +72,10 @@ describe('addressRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       expect(res.text).to.equal(
-        JSONBigInt.stringify([
-          validTwoBoxErgAmount,
-          validBox0Token,
-          validBox1Token,
-        ])
+        JSONBigInt.stringify({
+          items: [validTwoBoxErgAmount, validBox0Token, validBox1Token],
+          total: 3,
+        })
       );
     });
 
@@ -99,7 +97,9 @@ describe('addressRouter', () => {
 
       // check the result
       expect(res.status).to.equal(200);
-      expect(res.text).to.equal(JSONBigInt.stringify([validBox0Token]));
+      expect(res.text).to.equal(
+        JSONBigInt.stringify({ items: [validBox0Token], total: 1 })
+      );
     });
 
     /**
@@ -120,7 +120,7 @@ describe('addressRouter', () => {
 
       // check the result
       expect(res.status).to.equal(200);
-      expect(res.text).to.equal('[]');
+      expect(res.text).to.equal(JSONBigInt.stringify({ items: [], total: 0 }));
     });
 
     /**
@@ -139,7 +139,9 @@ describe('addressRouter', () => {
 
       // check the result
       expect(res.status).to.equal(200);
-      expect(res.text).to.equal(JSONBigInt.stringify([validBox1Token]));
+      expect(res.text).to.equal(
+        JSONBigInt.stringify({ items: [validBox1Token], total: 3 })
+      );
     });
   });
 });

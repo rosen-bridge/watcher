@@ -71,9 +71,10 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     }
     const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+    const total = tokens.length;
     tokens = tokens.slice(offset, offset + limit);
 
-    res.status(200).send(JsonBI.stringify(tokens));
+    res.status(200).send(JsonBI.stringify({ items: tokens, total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching assets: ${e}`);
     res.status(500).send({ message: e.message });

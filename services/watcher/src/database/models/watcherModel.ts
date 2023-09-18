@@ -30,6 +30,7 @@ import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
 import { RevenueView } from '../entities/revenueView';
 import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueChartDataView } from '../entities/revenueChartDataView';
+import { PagedItemData } from '../../types/items';
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -115,36 +116,37 @@ class WatcherDataBase {
     sorting = '',
     offset = 0,
     limit = 20
-  ) => {
+  ): Promise<PagedItemData<ObservationEntity>> => {
     let qb = this.observationRepository.createQueryBuilder('ob').select('*');
     if (sourceTxId !== '') {
       qb = qb.andWhere('ob.sourceTxId = :sourceTxId', { sourceTxId });
-      return qb.execute();
-    }
-    if (fromAddress !== '') {
-      qb = qb.andWhere('ob.fromAddress = :fromAddress', { fromAddress });
-    }
-    if (toAddress !== '') {
-      qb = qb.andWhere('ob.toAddress = :toAddress', { toAddress });
-    }
-    if (minHeight) {
-      qb = qb.andWhere('ob.height >= :minHeight', { minHeight });
-    }
-    if (maxHeight) {
-      qb = qb.andWhere('ob.height <= :maxHeight', { maxHeight });
-    }
-    if (sourceTokenId !== '') {
-      qb = qb.andWhere('ob.sourceChainTokenId = :sourceTokenId', {
-        sourceTokenId,
-      });
-    }
-    if (sorting !== '' && sorting.toLowerCase() === 'asc') {
-      qb = qb.orderBy('ob.id', 'ASC');
     } else {
-      qb = qb.orderBy('ob.id', 'DESC');
+      if (fromAddress !== '') {
+        qb = qb.andWhere('ob.fromAddress = :fromAddress', { fromAddress });
+      }
+      if (toAddress !== '') {
+        qb = qb.andWhere('ob.toAddress = :toAddress', { toAddress });
+      }
+      if (minHeight) {
+        qb = qb.andWhere('ob.height >= :minHeight', { minHeight });
+      }
+      if (maxHeight) {
+        qb = qb.andWhere('ob.height <= :maxHeight', { maxHeight });
+      }
+      if (sourceTokenId !== '') {
+        qb = qb.andWhere('ob.sourceChainTokenId = :sourceTokenId', {
+          sourceTokenId,
+        });
+      }
+      if (sorting !== '' && sorting.toLowerCase() === 'asc') {
+        qb = qb.orderBy('ob.id', 'ASC');
+      } else {
+        qb = qb.orderBy('ob.id', 'DESC');
+      }
     }
-
-    return qb.offset(offset).limit(limit).execute();
+    const total = await qb.getCount();
+    const items = await qb.offset(offset).limit(limit).execute();
+    return { items, total };
   };
 
   /**
@@ -689,7 +691,7 @@ class WatcherDataBase {
     sorting = '',
     offset = 0,
     limit = 20
-  ): Promise<EventTriggerEntity[]> => {
+  ): Promise<PagedItemData<EventTriggerEntity>> => {
     let qb = this.eventTriggerRepository.createQueryBuilder('ev').select('*');
 
     if (fromAddress !== '') {
@@ -721,8 +723,9 @@ class WatcherDataBase {
     } else {
       qb = qb.orderBy('ev.id', 'DESC');
     }
-
-    return qb.offset(offset).limit(limit).execute();
+    const total = await qb.getCount();
+    const items = await qb.offset(offset).limit(limit).execute();
+    return { items, total };
   };
 
   /**
@@ -773,7 +776,7 @@ class WatcherDataBase {
     sorting = '',
     offset = 0,
     limit = 20
-  ): Promise<RevenueView[]> => {
+  ): Promise<PagedItemData<RevenueView>> => {
     let qb = this.revenueView.createQueryBuilder('rv').select('*');
 
     if (fromChain !== '') {
@@ -800,13 +803,18 @@ class WatcherDataBase {
     if (toBlockTime) {
       qb = qb.andWhere('rv.timestamp <= :toBlockTime', { toBlockTime });
     }
+    const distinctIds = await qb
+      .clone()
+      .select('COUNT(DISTINCT(id))', 'cnt')
+      .execute();
+    const total = distinctIds.length > 0 ? distinctIds[0].cnt : 0;
     if (sorting !== '' && sorting.toLowerCase() === 'asc') {
       qb = qb.orderBy('rv.id', 'ASC');
     } else {
       qb = qb.orderBy('rv.id', 'DESC');
     }
-
-    return qb.offset(offset).limit(limit).execute();
+    const items = await qb.offset(offset).limit(limit).execute();
+    return { items, total };
   };
 
   /**
