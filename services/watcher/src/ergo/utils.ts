@@ -355,7 +355,7 @@ export class ErgoUtils {
       nanoErgs: this.getBoxValuesSum(boxes),
       tokens: tokens.map((token) => ({
         ...token,
-        name: tokensInfoMap.get(token.tokenId) || '',
+        name: tokensInfoMap.get(token.tokenId),
       })),
     };
   };
