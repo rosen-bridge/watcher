@@ -9,9 +9,6 @@ jobs:
     name: Build and Push Docker Image
     permissions: write-all
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./services/watcher
     strategy:
       matrix:
         versions:
@@ -31,8 +28,9 @@ jobs:
 
       - name: Move Contracts files
         run: |
+          cd ./services/watcher
           mkdir -p ./config/rosen
-          mv {tokens,contracts}*.json ./config/rosen
+          mv ../../{tokens,contracts}*.json ./config/rosen/
           mv ./docker/*.yaml ./config/
 
       - name: Login to Docker Registry
