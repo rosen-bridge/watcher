@@ -51,6 +51,7 @@ describe('General-Info-Api', () => {
       chai.spy.on(Transaction, 'getInstance', () => ({
         getCollateral: () => Promise.resolve({ erg: 20n, rsn: 10n }),
         getTotalPermit: () => Promise.resolve(10000n),
+        getRequiredPermitsCountPerEvent: () => Promise.resolve(10000n),
       }));
 
       const res = await request(app).get('/info');
