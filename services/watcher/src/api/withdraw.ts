@@ -3,6 +3,7 @@ import express from 'express';
 import { AddressBalance, TokenInfo } from '../ergo/interfaces';
 import { Transaction } from './Transaction';
 import { ERGO_NATIVE_ASSET } from '../config/constants';
+import { BoxValue } from 'ergo-lib-wasm-nodejs';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -28,6 +29,10 @@ const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
       tokens.push({ tokenId: token.tokenId, amount: BigInt(token.amount) });
     }
   });
+  nanoErgs =
+    nanoErgs === 0n
+      ? BigInt(BoxValue.SAFE_USER_MIN().as_i64().to_str())
+      : nanoErgs;
   return {
     amount: {
       nanoErgs,

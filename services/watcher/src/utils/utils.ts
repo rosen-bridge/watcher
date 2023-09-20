@@ -6,6 +6,14 @@ import { get, set } from 'lodash-es';
 import { JsonBI } from '../ergo/network/parser';
 
 /**
+ * return Uint8Array of a string
+ * @param str
+ */
+const strToUint8Array = (str: string): Uint8Array => {
+  return Uint8Array.from(Buffer.from(str));
+};
+
+/**
  * returns the decoded input hex string
  * @param str
  */
@@ -120,6 +128,7 @@ const convertMnemonicToSecretKey = (mnemonic: string): wasm.SecretKey => {
 };
 
 export {
+  strToUint8Array,
   hexStrToUint8Array,
   uint8ArrayToHex,
   delay,

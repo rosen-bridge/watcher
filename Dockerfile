@@ -12,8 +12,8 @@ USER ergo
 WORKDIR /app
 # TODO: Add layer optimizations when at least one package is added to the monorepo
 # https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/131
-COPY --chmod=700 --chown=ergo:ergo ../.. .
-RUN npm ci && npm run postinstall
+COPY --chmod=700 --chown=ergo:ergo . .
+RUN npm ci
 
 WORKDIR /app/services/watcher
 
