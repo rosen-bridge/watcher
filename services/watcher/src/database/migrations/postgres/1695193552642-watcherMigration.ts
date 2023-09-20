@@ -11,7 +11,7 @@ export class WatcherMigration1695193552642 implements MigrationInterface {
             CREATE TABLE "token_entity" (
                 "tokenId" varchar PRIMARY KEY NOT NULL,
                 "tokenName" varchar NOT NULL,
-                "decimal" integer NOT NULL
+                "decimals" integer NOT NULL
             )
         `);
   }

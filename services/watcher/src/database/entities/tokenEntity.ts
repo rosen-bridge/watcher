@@ -9,5 +9,5 @@ export class TokenEntity {
   tokenName: string;
 
   @Column()
-  decimal: number;
+  decimals: number;
 }

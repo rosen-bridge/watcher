@@ -40,8 +40,8 @@ export const tokenNameJobFunction = async (
     if (!tokensInfoMap.has(tokenId)) {
       const fetchedInfo = await ErgoNetwork.getTokenInfo(tokenId);
       const name = fetchedInfo.name || '';
-      const decimal = fetchedInfo.decimals || 0;
-      await watcherDatabase.insertTokenEntity(tokenId, name, decimal);
+      const decimals = fetchedInfo.decimals || 0;
+      await watcherDatabase.insertTokenEntity(tokenId, name, decimals);
     }
   }
   return [...validCheckedBoxIds, ...newUTXOs.map((box) => box.boxId)];

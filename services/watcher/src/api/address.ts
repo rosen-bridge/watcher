@@ -5,7 +5,11 @@ import { generateSK } from '../utils/utils';
 import { loggerFactory } from '../log/Logger';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
-import { ERGO_NATIVE_ASSET, ERGO_NATIVE_ASSET_NAME } from '../config/constants';
+import {
+  ERGO_DECIMALS,
+  ERGO_NATIVE_ASSET,
+  ERGO_NATIVE_ASSET_NAME,
+} from '../config/constants';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -41,7 +45,7 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     tokens.push({
       amount: balance.nanoErgs,
       tokenId: ERGO_NATIVE_ASSET,
-      decimals: 9,
+      decimals: ERGO_DECIMALS,
       name: ERGO_NATIVE_ASSET_NAME,
     });
     const { tokenId, tokenName, sortByAmount } = req.query;

@@ -359,7 +359,7 @@ export class ErgoUtils {
         return {
           ...token,
           name: tokenInfo?.tokenName,
-          decimals: tokenInfo?.decimal ?? 0,
+          decimals: tokenInfo?.decimals ?? 0,
         };
       }),
     };
