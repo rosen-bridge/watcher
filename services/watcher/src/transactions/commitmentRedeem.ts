@@ -144,10 +144,7 @@ export class CommitmentRedeem {
             'WID Token is not the first token in WID Box, trying to detach WID token.'
           );
           DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
-          logger.info(
-            `Skipping the commitment [${commitment.id}] redeem due to having a malformed WID box`
-          );
-          continue;
+          WIDBox = await this.boxes.getWIDBox(WID);
         }
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
         const requiredValue =
