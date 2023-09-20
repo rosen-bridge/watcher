@@ -11,6 +11,7 @@ const logger = loggerFactory(import.meta.url);
 interface GeneralInfo {
   currentBalance: bigint;
   network: string;
+  permitPerEvent: bigint;
   permitCount: {
     active: bigint;
     total: bigint;
@@ -35,6 +36,8 @@ generalRouter.get('/', async (req: Request, res: Response) => {
     const info: GeneralInfo = {
       currentBalance: (await ErgoUtils.getWatcherBalance()).nanoErgs,
       network: getConfig().general.networkWatcher,
+      permitPerEvent:
+        await Transaction.getInstance().getRequiredPermitCountPerEvent(),
       permitCount: {
         active: await ErgoUtils.getPermitCount(getConfig().rosen.RWTId),
         total: await Transaction.getInstance().getTotalPermit(),

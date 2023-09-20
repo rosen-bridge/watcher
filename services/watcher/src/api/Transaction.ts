@@ -116,6 +116,21 @@ export class Transaction {
   };
 
   /**
+   * Get required permit count
+   */
+  getRequiredPermitCountPerEvent = async () => {
+    const repoBox = await Transaction.boxes.getRepoBox();
+    const R6 = repoBox.register_value(6);
+    if (R6) {
+      const r6Values = R6.to_js() as Array<string>;
+      if (r6Values.length > 0) {
+        return BigInt(r6Values[0]);
+      }
+    }
+    throw Error('Invalid repo box');
+  };
+
+  /**
    * calculate total permit for current user
    * @returns
    */

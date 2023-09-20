@@ -692,6 +692,7 @@ export const permitMockRWT =
 export const generalInfo = {
   currentBalance: 1100000,
   network: 'ergo',
+  permitPerEvent: 10000,
   permitCount: {
     active: 0,
     total: 10000,
