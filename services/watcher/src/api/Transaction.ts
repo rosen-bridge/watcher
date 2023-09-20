@@ -122,7 +122,7 @@ export class Transaction {
     const repoBox = await Transaction.boxes.getRepoBox();
     const R6 = repoBox.register_value(6);
     if (R6) {
-      const r6Values = R6.to_js() as Array<string>;
+      const r6Values: string[] = R6.to_js();
       if (r6Values.length > 0) {
         return BigInt(r6Values[0]);
       }
