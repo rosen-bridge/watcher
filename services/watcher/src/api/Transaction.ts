@@ -118,7 +118,7 @@ export class Transaction {
   /**
    * Get required permit count
    */
-  getRequiredPermitCountPerEvent = async () => {
+  getRequiredPermitsCountPerEvent = async () => {
     const repoBox = await Transaction.boxes.getRepoBox();
     const R6 = repoBox.register_value(6);
     if (R6) {
