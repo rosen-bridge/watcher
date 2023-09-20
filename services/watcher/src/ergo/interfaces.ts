@@ -1,6 +1,7 @@
 export interface TokenInfo {
   tokenId: string;
   amount: bigint;
+  decimals?: number;
   name?: string;
 }
 

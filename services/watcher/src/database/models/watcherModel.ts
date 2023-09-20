@@ -626,12 +626,17 @@ class WatcherDataBase {
   };
 
   /**
-   * Stores the name of a token by its id
+   * Stores the name and decimals of a token by its id
    * @param tokenId
    * @param tokenName
+   * @param decimals
    */
-  insertTokenEntity = async (tokenId: string, tokenName: string) => {
-    await this.tokenRepository.insert({ tokenId, tokenName });
+  insertTokenEntity = async (
+    tokenId: string,
+    tokenName: string,
+    decimals: number
+  ) => {
+    await this.tokenRepository.insert({ tokenId, tokenName, decimals });
   };
 
   /**

@@ -148,17 +148,20 @@ export const validBox0Token = {
   tokenId: '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508',
   amount: 24109n,
   name: 'RSN',
+  decimals: 0,
 };
 
 export const validBox1Token = {
   tokenId: '050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f',
   amount: 1n,
   name: 'Test',
+  decimals: 0,
 };
 
 export const validTwoBoxErgAmount = {
   amount: 1861100000,
   tokenId: Constants.ERGO_NATIVE_ASSET,
+  decimals: Constants.ERGO_DECIMALS,
   name: Constants.ERGO_NATIVE_ASSET_NAME,
 };
 
@@ -331,16 +334,19 @@ eventTrigger.height = 111;
 export const tokenRecord = new TokenEntity();
 tokenRecord.tokenId = 'tokenId';
 tokenRecord.tokenName = 'tokenName';
+tokenRecord.decimals = 0;
 
 export const validToken1Record = new TokenEntity();
 validToken1Record.tokenId =
   '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508';
 validToken1Record.tokenName = 'RSN';
+validToken1Record.decimals = 0;
 
 export const validToken2Record = new TokenEntity();
 validToken2Record.tokenId =
   '050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f';
 validToken2Record.tokenName = 'Test';
+validToken2Record.decimals = 0;
 
 export const commitmentTxJson = {
   id: '555f7d54e7073f3ad6f0a587bf8c4f748e9a82b0868362b12a28854de968ea48',

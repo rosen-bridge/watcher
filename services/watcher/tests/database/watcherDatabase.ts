@@ -747,9 +747,14 @@ describe('WatcherModel tests', () => {
       const tokenRecord2 = new TokenEntity();
       tokenRecord2.tokenId = 'tokenId2';
       tokenRecord2.tokenName = 'tokenName2';
+      tokenRecord2.decimals = 0;
 
       // insert the tokenRecord
-      await DB.insertTokenEntity(tokenRecord2.tokenId, tokenRecord2.tokenName);
+      await DB.insertTokenEntity(
+        tokenRecord2.tokenId,
+        tokenRecord2.tokenName,
+        tokenRecord2.decimals
+      );
 
       // run getTokenEntity with new tokenRecord id
       const data = await DB.getTokenEntity([tokenRecord2.tokenId]);
