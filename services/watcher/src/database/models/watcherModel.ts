@@ -626,7 +626,7 @@ class WatcherDataBase {
   };
 
   /**
-   * Stores the name of a token by its id
+   * Stores the name and decimals of a token by its id
    * @param tokenId
    * @param tokenName
    * @param decimals

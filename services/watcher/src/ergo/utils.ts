@@ -15,7 +15,7 @@ import { Transaction } from '../api/Transaction';
 import { watcherDatabase } from '../init';
 import { AddressBalance, TokenInfo } from './interfaces';
 import { RevenueView } from '../database/entities/revenueView';
-import { TokenEntity } from 'src/database/entities/tokenEntity';
+import { TokenEntity } from '../database/entities/tokenEntity';
 
 const txFee = parseInt(getConfig().general.fee);
 
