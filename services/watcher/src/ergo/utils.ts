@@ -15,6 +15,7 @@ import { Transaction } from '../api/Transaction';
 import { watcherDatabase } from '../init';
 import { AddressBalance, TokenInfo } from './interfaces';
 import { RevenueView } from '../database/entities/revenueView';
+import { TokenEntity } from 'src/database/entities/tokenEntity';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -347,16 +348,20 @@ export class ErgoUtils {
     const tokensInfo = await watcherDatabase.getTokenEntity(
       tokens.map((token) => token.tokenId)
     );
-    const tokensInfoMap = new Map<string, string>();
+    const tokensInfoMap = new Map<string, TokenEntity>();
     tokensInfo.forEach((token) => {
-      tokensInfoMap.set(token.tokenId, token.tokenName);
+      tokensInfoMap.set(token.tokenId, token);
     });
     return {
       nanoErgs: this.getBoxValuesSum(boxes),
-      tokens: tokens.map((token) => ({
-        ...token,
-        name: tokensInfoMap.get(token.tokenId),
-      })),
+      tokens: tokens.map((token) => {
+        const tokenInfo = tokensInfoMap.get(token.tokenId);
+        return {
+          ...token,
+          name: tokenInfo?.tokenName,
+          decimals: tokenInfo?.decimal ?? 0,
+        };
+      }),
     };
   };
 

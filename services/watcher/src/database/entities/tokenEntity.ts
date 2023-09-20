@@ -7,4 +7,7 @@ export class TokenEntity {
 
   @Column()
   tokenName: string;
+
+  @Column()
+  decimal: number;
 }

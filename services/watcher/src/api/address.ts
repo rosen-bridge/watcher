@@ -3,10 +3,8 @@ import { getConfig } from '../config/config';
 import { validationResult, check } from 'express-validator';
 import { generateSK } from '../utils/utils';
 import { loggerFactory } from '../log/Logger';
-import { watcherDatabase } from '../init';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
-import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { ERGO_NATIVE_ASSET, ERGO_NATIVE_ASSET_NAME } from '../config/constants';
 
 const logger = loggerFactory(import.meta.url);
@@ -43,6 +41,7 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     tokens.push({
       amount: balance.nanoErgs,
       tokenId: ERGO_NATIVE_ASSET,
+      decimals: 9,
       name: ERGO_NATIVE_ASSET_NAME,
     });
     const { tokenId, tokenName, sortByAmount } = req.query;
