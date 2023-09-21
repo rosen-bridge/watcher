@@ -18,6 +18,7 @@ RUN npm ci
 WORKDIR /app/services/watcher
 
 ENV NODE_ENV=production
+ENV SERVICE_PORT=3000
 EXPOSE 3000
 
 ENTRYPOINT ["npm", "run", "start"]
