@@ -9,11 +9,6 @@ jobs:
     name: Build and Push Docker Image
     permissions: write-all
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        versions:
-          - latest
-          - ${{ github.ref_name }}
 
     steps:
       - name: Checkout the Code
@@ -33,6 +28,12 @@ jobs:
           mv ../../{tokens,contracts}*.json ./config/rosen/
           mv ./docker/*.yaml ./config/
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Login to Docker Registry
         uses: docker/login-action@v2
         with:
@@ -40,9 +41,16 @@ jobs:
           username: rosen-bridge
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Docker Metadata action
+        uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/rosen-bridge/watcher-service
+
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
-          tags: ghcr.io/rosen-bridge/watcher-service:${{ matrix.versions }}
+          tags: ${{ steps.meta.outputs.tags }}
