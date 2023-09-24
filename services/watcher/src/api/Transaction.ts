@@ -697,6 +697,5 @@ export class Transaction {
       }
       throw e;
     }
-    return '';
   };
 }
