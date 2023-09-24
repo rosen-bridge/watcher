@@ -49,7 +49,7 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.items.length).to.eql(4);
-      expect(resultParsed.total).to.eql(4);
+      expect(resultParsed.total).to.eql(8);
       expect(resultParsed.items[0]).to.eql(firstRevenue);
     });
 
@@ -73,7 +73,7 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.items.length).to.eql(4);
-      expect(resultParsed.total).to.eql(4);
+      expect(resultParsed.total).to.eql(8);
       expect(resultParsed.items[3]).to.eql(firstRevenue);
     });
 
@@ -96,7 +96,7 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.total).to.eql(2);
+      expect(resultParsed.total).to.eql(6);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
       expect(revenueIds).to.eql([3, 1]);
     });
@@ -120,7 +120,7 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.total).to.eql(2);
+      expect(resultParsed.total).to.eql(6);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
       expect(revenueIds).to.eql([3, 1]);
     });
@@ -143,9 +143,9 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.total).to.eql(2);
+      expect(resultParsed.total).to.eql(8);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
-      expect(revenueIds).to.eql([3, 1]);
+      expect(revenueIds).to.eql([4, 3, 2, 1]);
     });
 
     /**
@@ -168,7 +168,7 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.items.length).to.eql(2);
-      expect(resultParsed.total).to.eql(2);
+      expect(resultParsed.total).to.eql(6);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
       expect(revenueIds).to.eql([3, 1]);
     });
@@ -214,7 +214,7 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.items.length).to.eql(1);
-      expect(resultParsed.total).to.eql(1);
+      expect(resultParsed.total).to.eql(3);
       expect(resultParsed.items[0].id).to.eql(3);
     });
 
@@ -259,7 +259,7 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.items.length).to.eql(1);
-      expect(resultParsed.total).to.eql(1);
+      expect(resultParsed.total).to.eql(3);
       expect(resultParsed.items[0].id).to.eql(3);
     });
 
@@ -283,8 +283,8 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.items.length).to.eql(1);
-      expect(resultParsed.total).to.eql(4);
-      expect(resultParsed.items[0].id).to.eql(4);
+      expect(resultParsed.total).to.eql(8);
+      expect(resultParsed.items[0].id).to.eql(3);
     });
   });
 

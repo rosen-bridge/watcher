@@ -31,10 +31,9 @@ revenueRouter.get('/', async (req, res) => {
     const offsetString = stringifyQueryParam(offset);
     const limitString = stringifyQueryParam(limit);
 
-    const queryResult = await watcherDatabase.getRevenuesWithFilters(
+    const revenueRows = await watcherDatabase.getRevenuesWithFilters(
       stringifyQueryParam(fromChain),
       stringifyQueryParam(toChain),
-      stringifyQueryParam(tokenId),
       stringifyQueryParam(sourceTxId),
       Number(heightMin),
       Number(heightMax),
@@ -46,11 +45,18 @@ revenueRouter.get('/', async (req, res) => {
         ? DEFAULT_API_LIMIT
         : Math.min(Number(limitString), MAX_API_LIMIT)
     );
-    const result = await ErgoUtils.extractRevenueFromView(queryResult.items);
-    res.set('Content-Type', 'application/json');
+    const tokens = await watcherDatabase.getRevenueTokens(
+      revenueRows.items.map((item) => item.id)
+    );
+    const result = await ErgoUtils.extractRevenueFromView(
+      revenueRows.items,
+      tokens
+    );
+
     res
       .status(200)
-      .send(JsonBI.stringify({ items: result, total: queryResult.total }));
+      .contentType('application/json')
+      .send(JsonBI.stringify({ items: result, total: revenueRows.total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues: ${e}`);
     res.status(500).send({ message: e.message });
