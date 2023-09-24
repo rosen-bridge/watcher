@@ -636,7 +636,10 @@ export class Transaction {
    * @param amount to withdraw
    * @param toAddress destination address
    */
-  withdrawFromWallet = async (amount: AddressBalance, toAddress: string) => {
+  withdrawFromWallet = async (
+    amount: AddressBalance,
+    toAddress: string
+  ): Promise<string> => {
     const assetsMap = new Map<string, bigint>();
     amount.tokens.forEach((token) => {
       assetsMap.set(token.tokenId, token.amount);
@@ -675,6 +678,7 @@ export class Transaction {
       logger.info(
         `Withdraw tx [${signed.id().to_str()}] submitted to the queue`
       );
+      return signed.id().to_str();
     } catch (e) {
       if (e instanceof ChangeBoxCreationError) {
         logger.warn(
@@ -692,5 +696,6 @@ export class Transaction {
       }
       throw e;
     }
+    return '';
   };
 }
