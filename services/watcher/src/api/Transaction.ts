@@ -635,7 +635,7 @@ export class Transaction {
    * Withdraw from the wallet of the watcher
    * @param amount to withdraw
    * @param toAddress destination address
-   * @returns txId if succeed or empty string in case of failure
+   * @returns txId
    */
   withdrawFromWallet = async (
     amount: AddressBalance,
