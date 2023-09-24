@@ -151,6 +151,13 @@ export const validBox0Token = {
   decimals: 0,
 };
 
+export const validEmptyRSNToken = {
+  amount: 0n,
+  tokenId: 'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516',
+  name: 'RSN',
+  decimals: 3,
+};
+
 export const validBox1Token = {
   tokenId: '050f0548c00fc4a0302e2953de3f967cb18c7cb5a4c526b163bfe4670a926a2f',
   amount: 1n,
@@ -341,6 +348,12 @@ validToken1Record.tokenId =
   '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508';
 validToken1Record.tokenName = 'RSN';
 validToken1Record.decimals = 0;
+
+export const validRSNTokenRecord = new TokenEntity();
+validRSNTokenRecord.tokenId =
+  'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516';
+validRSNTokenRecord.tokenName = 'RSN';
+validRSNTokenRecord.decimals = 3;
 
 export const validToken2Record = new TokenEntity();
 validToken2Record.tokenId =

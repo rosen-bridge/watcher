@@ -56,6 +56,7 @@ import {
   spentPermitEntity,
   spentPlainBox,
   tokenRecord,
+  validRSNTokenRecord,
   validToken1Record,
   validToken2Record,
 } from './mockedData';
@@ -222,6 +223,7 @@ export const fillORM = async (
       tokenRecord,
       validToken1Record,
       validToken2Record,
+      validRSNTokenRecord,
     ]);
 
   if (pushRevenues)
