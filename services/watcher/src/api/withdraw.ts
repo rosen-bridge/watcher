@@ -57,12 +57,12 @@ withdrawRouter.post('/', async (req, res) => {
       res
         .status(200)
         .contentType('application/json')
-        .send(`{"txId": "${txId}", "status": "OK"}`);
+        .send(JSON.stringify({ txId, status: 'OK' }));
     } else {
       res
         .status(200)
         .contentType('application/json')
-        .send(`{"status": "Fail"}`);
+        .send(JSON.stringify({ status: 'Fail' }));
     }
   } catch (e) {
     logger.warn(`An error occurred while withdrawing from wallet: ${e}`);
