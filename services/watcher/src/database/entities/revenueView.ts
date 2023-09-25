@@ -7,6 +7,7 @@ import { ViewEntity, ViewColumn } from 'typeorm';
       .createQueryBuilder()
       .select('pe.id', 'id')
       .addSelect('pe."txId"', 'permitTxId')
+      .addSelect('pe.WID', 'wid')
       .addSelect('ete."eventId"', 'eventId')
       .addSelect('ete.sourceChainHeight', 'lockHeight')
       .addSelect('ete."fromChain"', 'fromChain')
@@ -20,12 +21,9 @@ import { ViewEntity, ViewColumn } from 'typeorm';
       .addSelect('ete."sourceTxId"', 'lockTxId')
       .addSelect('be.height', 'height')
       .addSelect('be.timestamp', 'timestamp')
-      .addSelect('re.tokenId', 'revenueTokenId')
-      .addSelect('re.amount', 'revenueAmount')
       .from('permit_entity', 'pe')
-      .leftJoin('event_trigger_entity', 'ete', 'pe."txId" = ete."spendTxId"')
-      .leftJoin('block_entity', 'be', 'pe.block = be.hash')
-      .leftJoin('revenue_entity', 're', 'pe.id = re."permitId"'),
+      .innerJoin('event_trigger_entity', 'ete', 'pe."txId" = ete."spendTxId"')
+      .leftJoin('block_entity', 'be', 'pe.block = be.hash'),
 })
 export class RevenueView {
   @ViewColumn()
@@ -33,6 +31,9 @@ export class RevenueView {
 
   @ViewColumn()
   permitTxId!: string;
+
+  @ViewColumn()
+  wid!: string;
 
   @ViewColumn()
   eventId!: string;
@@ -72,10 +73,4 @@ export class RevenueView {
 
   @ViewColumn()
   timestamp!: number;
-
-  @ViewColumn()
-  revenueTokenId!: string;
-
-  @ViewColumn()
-  revenueAmount!: string;
 }
