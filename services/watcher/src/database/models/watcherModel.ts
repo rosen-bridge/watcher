@@ -817,7 +817,6 @@ class WatcherDataBase {
   /**
    * get list of all revenue tokens for selected list of permits
    * @param permitIds
-   * @returns
    */
   getRevenueTokens = async (
     permitIds: Array<number>
