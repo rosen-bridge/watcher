@@ -6,6 +6,7 @@ import {
   Like,
   Not,
   Repository,
+  Transaction,
 } from 'typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxEntity, TxType } from '../entities/txEntity';
@@ -770,6 +771,7 @@ class WatcherDataBase {
    * @param limit
    */
   getRevenuesWithFilters = async (
+    wid: string,
     fromChain = '',
     toChain = '',
     sourceTxId = '',
@@ -781,7 +783,11 @@ class WatcherDataBase {
     offset = 0,
     limit = 20
   ): Promise<PagedItemData<RevenueView>> => {
-    let qb = this.revenueView.createQueryBuilder('rv').select('*').distinct();
+    let qb = this.revenueView
+      .createQueryBuilder('rv')
+      .select('*')
+      .distinct()
+      .where('rv.wid = :wid', { wid });
 
     if (fromChain !== '') {
       qb = qb.andWhere('rv.fromChain = :fromChain', { fromChain });

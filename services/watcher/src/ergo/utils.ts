@@ -17,6 +17,11 @@ import { AddressBalance, TokenInfo } from './interfaces';
 import { RevenueView } from '../database/entities/revenueView';
 import { TokenEntity } from '../database/entities/tokenEntity';
 import { RevenueEntity } from '../database/entities/revenueEntity';
+import {
+  ERGO_DECIMALS,
+  ERGO_NATIVE_ASSET,
+  ERGO_NATIVE_ASSET_NAME,
+} from '../config/constants';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -369,10 +374,18 @@ export class ErgoUtils {
     });
     return tokens.map((token) => {
       const tokenInfo = tokensInfoMap.get(token.tokenId);
+      const name =
+        token.tokenId === ERGO_NATIVE_ASSET
+          ? ERGO_NATIVE_ASSET_NAME
+          : tokenInfo?.tokenName || '';
+      const decimals =
+        token.tokenId === ERGO_NATIVE_ASSET
+          ? ERGO_DECIMALS
+          : tokenInfo?.decimals || 0;
       return {
         ...token,
-        name: tokenInfo?.tokenName,
-        decimals: tokenInfo?.decimals,
+        name: name === '' ? undefined : name,
+        decimals: decimals,
       };
     });
   };
@@ -415,18 +428,15 @@ export class ErgoUtils {
     revenues: Array<RevenueView>,
     tokens: Array<RevenueEntity>
   ) => {
-    const tokenMap = new Map<
-      number,
-      Array<{ tokenId: string; amount: string }>
-    >();
+    const tokenMap = new Map<number, Array<TokenInfo>>();
     tokens.forEach((token) => {
       if (tokenMap.has(token.permit.id)) {
         tokenMap
           .get(token.permit.id)
-          ?.push({ tokenId: token.tokenId, amount: token.amount });
+          ?.push({ tokenId: token.tokenId, amount: BigInt(token.amount) });
       } else {
         tokenMap.set(token.permit.id, [
-          { tokenId: token.tokenId, amount: token.amount },
+          { tokenId: token.tokenId, amount: BigInt(token.amount) },
         ]);
       }
     });

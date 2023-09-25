@@ -7,6 +7,7 @@ import { ViewEntity, ViewColumn } from 'typeorm';
       .createQueryBuilder()
       .select('pe.id', 'id')
       .addSelect('pe."txId"', 'permitTxId')
+      .addSelect('pe.WID', 'wid')
       .addSelect('ete."eventId"', 'eventId')
       .addSelect('ete.sourceChainHeight', 'lockHeight')
       .addSelect('ete."fromChain"', 'fromChain')
@@ -30,6 +31,9 @@ export class RevenueView {
 
   @ViewColumn()
   permitTxId!: string;
+
+  @ViewColumn()
+  wid!: string;
 
   @ViewColumn()
   eventId!: string;
