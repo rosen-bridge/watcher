@@ -440,13 +440,15 @@ export class ErgoUtils {
         ]);
       }
     });
-    return revenues.map((revenue) => {
-      const rowTokens = tokenMap.get(revenue.id) || [];
-      return {
-        ...revenue,
-        revenues: rowTokens,
-      };
-    });
+    return Promise.all(
+      revenues.map(async (revenue) => {
+        const rowTokens = tokenMap.get(revenue.id) || [];
+        return {
+          ...revenue,
+          revenues: await ErgoUtils.fillTokensDetails(rowTokens),
+        };
+      })
+    );
   };
 
   static transformChartData = (chartData: RevenueChartRecord[]) => {

@@ -205,6 +205,7 @@ const spentEventTrigger = {
 const firstRevenue = {
   id: 4,
   permitTxId: 'txId2',
+  wid: 'WIDStatistics',
   eventId: 'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b',
   lockHeight: 123457,
   fromChain: 'fromChain',
@@ -223,11 +224,13 @@ const firstRevenue = {
       tokenId:
         '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
       amount: 10,
+      decimals: 0,
     },
     {
       tokenId:
         '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
       amount: 10,
+      decimals: 0,
     },
   ],
 };

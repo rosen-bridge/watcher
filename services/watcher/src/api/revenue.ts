@@ -31,6 +31,7 @@ revenueRouter.get('/', async (req, res) => {
     const offsetString = stringifyQueryParam(offset);
     const limitString = stringifyQueryParam(limit);
     const wid = Transaction.watcherWID || '';
+    console.log('##################', wid);
     const revenueRows = await watcherDatabase.getRevenuesWithFilters(
       wid,
       stringifyQueryParam(fromChain),
@@ -53,9 +54,6 @@ revenueRouter.get('/', async (req, res) => {
       revenueRows.items,
       tokens
     );
-    for (const revenue of result) {
-      revenue.revenues = await ErgoUtils.fillTokensDetails(revenue.revenues);
-    }
 
     res
       .status(200)
