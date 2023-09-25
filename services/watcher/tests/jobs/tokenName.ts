@@ -4,7 +4,11 @@ import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
 import { tokenNameJobFunction } from '../../src/jobs/tokenName';
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
-import { validToken1Record, validToken2Record } from '../database/mockedData';
+import {
+  validRSNTokenRecord,
+  validToken1Record,
+  validToken2Record,
+} from '../database/mockedData';
 
 chai.use(spies);
 

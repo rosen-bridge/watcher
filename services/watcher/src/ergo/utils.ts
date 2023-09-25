@@ -346,6 +346,20 @@ export class ErgoUtils {
   ): Promise<AddressBalance> => {
     const boxes = serializedBoxes.map((box) => decodeSerializedBox(box));
     const tokens = this.getBoxAssetsSum(boxes);
+    return {
+      nanoErgs: this.getBoxValuesSum(boxes),
+      tokens: tokens,
+    };
+  };
+
+  /**
+   * fill token name and decimals for list of extracted tokens
+   * @param tokens
+   * @returns
+   */
+  static fillTokensDetails = async (
+    tokens: Array<TokenInfo>
+  ): Promise<Array<TokenInfo>> => {
     const tokensInfo = await watcherDatabase.getTokenEntity(
       tokens.map((token) => token.tokenId)
     );
@@ -353,17 +367,14 @@ export class ErgoUtils {
     tokensInfo.forEach((token) => {
       tokensInfoMap.set(token.tokenId, token);
     });
-    return {
-      nanoErgs: this.getBoxValuesSum(boxes),
-      tokens: tokens.map((token) => {
-        const tokenInfo = tokensInfoMap.get(token.tokenId);
-        return {
-          ...token,
-          name: tokenInfo?.tokenName,
-          decimals: tokenInfo?.decimals ?? 0,
-        };
-      }),
-    };
+    return tokens.map((token) => {
+      const tokenInfo = tokensInfoMap.get(token.tokenId);
+      return {
+        ...token,
+        name: tokenInfo?.tokenName,
+        decimals: tokenInfo?.decimals,
+      };
+    });
   };
 
   /**
