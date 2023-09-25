@@ -42,6 +42,10 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
   try {
     const balance = await ErgoUtils.getWatcherBalance();
     let tokens = balance.tokens;
+    if (!tokens.some((item) => item.tokenId === getConfig().rosen.RSN)) {
+      tokens.push({ amount: 0n, tokenId: getConfig().rosen.RSN });
+    }
+    tokens = await ErgoUtils.fillTokensDetails(tokens);
     tokens.push({
       amount: balance.nanoErgs,
       tokenId: ERGO_NATIVE_ASSET,
