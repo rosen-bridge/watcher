@@ -31,7 +31,6 @@ revenueRouter.get('/', async (req, res) => {
     const offsetString = stringifyQueryParam(offset);
     const limitString = stringifyQueryParam(limit);
     const wid = Transaction.watcherWID || '';
-    console.log('##################', wid);
     const revenueRows = await watcherDatabase.getRevenuesWithFilters(
       wid,
       stringifyQueryParam(fromChain),
