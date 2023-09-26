@@ -64,8 +64,8 @@ api:
 healthCheck:
   interval: 60 # health check update interval (in seconds)
   asset:
-    ergWarnThreshold: 1000000000 # minimum recommended erg balance
-    ergCriticalThreshold: 100000000 # minimum required erg balance
+    ergWarnThreshold: 2 # minimum recommended erg balance
+    ergCriticalThreshold: 1 # minimum required erg balance
   ergoScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 100 # critical difference between existing and scanned blocks height
