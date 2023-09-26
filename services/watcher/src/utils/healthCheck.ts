@@ -1,4 +1,5 @@
 import {
+  AbstractPermitHealthCheckParam,
   CardanoKoiosScannerHealthCheck,
   CardanoOgmiosScannerHealthCheck,
   ErgoExplorerAssetHealthCheckParam,
@@ -26,7 +27,6 @@ import {
 } from '../config/constants';
 import { loggerFactory } from '../log/Logger';
 import { scanner } from './scanner';
-import { AbstractPermitHealthCheckParam } from '@rosen-bridge/health-check/dist/lib/params/permitHealthCheck/AbstractPermitHealthCheck';
 import { Transaction } from '../../src/api/Transaction';
 
 const logger = loggerFactory(import.meta.url);
@@ -82,7 +82,8 @@ class HealthCheckSingleton {
       getConfig().general.address,
       getConfig().healthCheck.ergWarnThreshold,
       getConfig().healthCheck.ergCriticalThreshold,
-      getConfig().general.nodeUrl
+      getConfig().general.nodeUrl,
+      9
     );
     this.healthCheck.register(assetHealthCheck);
 
@@ -123,7 +124,8 @@ class HealthCheckSingleton {
       getConfig().general.address,
       getConfig().healthCheck.ergWarnThreshold,
       getConfig().healthCheck.ergCriticalThreshold,
-      getConfig().general.explorerUrl
+      getConfig().general.explorerUrl,
+      9
     );
     this.healthCheck.register(assetHealthCheck);
 
@@ -174,28 +176,20 @@ class HealthCheckSingleton {
           getConfig().rosen.RWTId,
           getConfig().rosen.watcherPermitAddress,
           Transaction.watcherWID,
-          BigInt(
-            getConfig().healthCheck.permitWarnCommitmentCount * commitmentRwt
-          ),
-          BigInt(
-            getConfig().healthCheck.permitCriticalCommitmentCount *
-              commitmentRwt
-          ),
-          getConfig().general.nodeUrl
+          BigInt(getConfig().healthCheck.permitWarnCommitmentCount),
+          BigInt(getConfig().healthCheck.permitCriticalCommitmentCount),
+          getConfig().general.nodeUrl,
+          commitmentRwt
         );
       } else if (getConfig().general.scannerType === EXPLORER_TYPE) {
         this.permitHealthCheckParam = new ExplorerPermitHealthCheckParam(
           getConfig().rosen.RWTId,
           getConfig().rosen.watcherPermitAddress,
           Transaction.watcherWID,
-          BigInt(
-            getConfig().healthCheck.permitWarnCommitmentCount * commitmentRwt
-          ),
-          BigInt(
-            getConfig().healthCheck.permitCriticalCommitmentCount *
-              commitmentRwt
-          ),
-          getConfig().general.explorerUrl
+          BigInt(getConfig().healthCheck.permitWarnCommitmentCount),
+          BigInt(getConfig().healthCheck.permitCriticalCommitmentCount),
+          getConfig().general.explorerUrl,
+          commitmentRwt
         );
       }
       if (this.permitHealthCheckParam) {
