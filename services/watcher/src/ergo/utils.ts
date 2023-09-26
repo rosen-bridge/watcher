@@ -16,6 +16,12 @@ import { watcherDatabase } from '../init';
 import { AddressBalance, TokenInfo } from './interfaces';
 import { RevenueView } from '../database/entities/revenueView';
 import { TokenEntity } from '../database/entities/tokenEntity';
+import { RevenueEntity } from '../database/entities/revenueEntity';
+import {
+  ERGO_DECIMALS,
+  ERGO_NATIVE_ASSET,
+  ERGO_NATIVE_ASSET_NAME,
+} from '../config/constants';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -368,10 +374,18 @@ export class ErgoUtils {
     });
     return tokens.map((token) => {
       const tokenInfo = tokensInfoMap.get(token.tokenId);
+      const name =
+        token.tokenId === ERGO_NATIVE_ASSET
+          ? ERGO_NATIVE_ASSET_NAME
+          : tokenInfo?.tokenName || '';
+      const decimals =
+        token.tokenId === ERGO_NATIVE_ASSET
+          ? ERGO_DECIMALS
+          : tokenInfo?.decimals || 0;
       return {
         ...token,
-        name: tokenInfo?.tokenName,
-        decimals: tokenInfo?.decimals,
+        name: name === '' ? undefined : name,
+        decimals: decimals,
       };
     });
   };
@@ -410,34 +424,31 @@ export class ErgoUtils {
    * Extracts the revenue from the revenue view
    * @param revenues
    */
-  static extractRevenueFromView = async (revenues: RevenueView[]) => {
-    type RevenueAPIType = Omit<
-      RevenueView,
-      'revenueTokenId' | 'revenueAmount'
-    > & {
-      revenues: {
-        tokenId: string;
-        amount: string;
-      }[];
-    };
-
-    const revenuesMap = new Map<number, RevenueAPIType>();
-    for (const { revenueTokenId, revenueAmount, ...revenue } of revenues) {
-      const currentRecord = revenuesMap.get(revenue.id);
-      if (currentRecord !== undefined) {
-        currentRecord.revenues.push({
-          tokenId: revenueTokenId,
-          amount: revenueAmount,
-        });
+  static extractRevenueFromView = async (
+    revenues: Array<RevenueView>,
+    tokens: Array<RevenueEntity>
+  ) => {
+    const tokenMap = new Map<number, Array<TokenInfo>>();
+    tokens.forEach((token) => {
+      if (tokenMap.has(token.permit.id)) {
+        tokenMap
+          .get(token.permit.id)
+          ?.push({ tokenId: token.tokenId, amount: BigInt(token.amount) });
       } else {
-        revenuesMap.set(revenue.id, {
-          ...revenue,
-          revenues: [{ tokenId: revenueTokenId, amount: revenueAmount }],
-        });
+        tokenMap.set(token.permit.id, [
+          { tokenId: token.tokenId, amount: BigInt(token.amount) },
+        ]);
       }
-    }
-
-    return Array.from(revenuesMap.values());
+    });
+    return Promise.all(
+      revenues.map(async (revenue) => {
+        const rowTokens = tokenMap.get(revenue.id) || [];
+        return {
+          ...revenue,
+          revenues: await ErgoUtils.fillTokensDetails(rowTokens),
+        };
+      })
+    );
   };
 
   static transformChartData = (chartData: RevenueChartRecord[]) => {
