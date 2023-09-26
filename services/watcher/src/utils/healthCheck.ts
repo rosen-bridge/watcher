@@ -24,6 +24,7 @@ import {
   NODE_TYPE,
   EXPLORER_TYPE,
   ERGO_NATIVE_ASSET,
+  ERGO_DECIMALS,
 } from '../config/constants';
 import { loggerFactory } from '../log/Logger';
 import { scanner } from './scanner';
@@ -83,7 +84,7 @@ class HealthCheckSingleton {
       getConfig().healthCheck.ergWarnThreshold,
       getConfig().healthCheck.ergCriticalThreshold,
       getConfig().general.nodeUrl,
-      9
+      ERGO_DECIMALS
     );
     this.healthCheck.register(assetHealthCheck);
 
@@ -125,7 +126,7 @@ class HealthCheckSingleton {
       getConfig().healthCheck.ergWarnThreshold,
       getConfig().healthCheck.ergCriticalThreshold,
       getConfig().general.explorerUrl,
-      9
+      ERGO_DECIMALS
     );
     this.healthCheck.register(assetHealthCheck);
 
