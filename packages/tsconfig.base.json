@@ -4,8 +4,6 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "inlineSources": true,
     "strictPropertyInitialization": false
