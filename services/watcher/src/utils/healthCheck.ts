@@ -151,7 +151,7 @@ class HealthCheckSingleton {
         scanner.observationScanner.name(),
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
-        getConfig().cardano.ogmios!.ip,
+        getConfig().cardano.ogmios!.host,
         getConfig().cardano.ogmios!.port,
         getConfig().cardano.ogmios?.useTls
       );

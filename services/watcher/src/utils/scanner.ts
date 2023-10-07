@@ -140,7 +140,7 @@ class CreateScanner {
       if (cardanoConfig.ogmios) {
         this.observationScanner = new CardanoOgmiosScanner(
           {
-            nodeHostOrIp: cardanoConfig.ogmios.ip,
+            nodeHostOrIp: cardanoConfig.ogmios.host,
             useTls: cardanoConfig.ogmios.useTls,
             nodePort: cardanoConfig.ogmios.port,
             dataSource: dataSource,

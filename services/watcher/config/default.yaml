@@ -14,7 +14,7 @@ cardano:
     timeout: 10 # koios request timeout (in seconds)
     url: 'https://api.koios.rest/api/v0' # koios url
   ogmios:
-    ip: '' # ogmios node ip address
+    host: '' # ogmios node host address
     port: 1337 # ogmios port
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
