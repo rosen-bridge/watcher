@@ -233,6 +233,7 @@ class CardanoConfig {
     port: number;
     initialSlot: number;
     initialHash: string;
+    useTls?: boolean;
   };
   koios?: {
     url: string;
@@ -249,7 +250,8 @@ class CardanoConfig {
         const port = getRequiredNumber('cardano.ogmios.port');
         const initialSlot = getRequiredNumber('cardano.initial.slot');
         const initialHash = getRequiredString('cardano.initial.hash');
-        this.ogmios = { ip, port, initialHash, initialSlot };
+        const useTls = config.get<boolean>('cardano.ogmios.useTls');
+        this.ogmios = { ip, port, initialHash, initialSlot, useTls };
       } else if (this.type === Constants.KOIOS_TYPE) {
         const url = getRequiredString('cardano.koios.url');
         const interval = getRequiredNumber('cardano.koios.interval');
