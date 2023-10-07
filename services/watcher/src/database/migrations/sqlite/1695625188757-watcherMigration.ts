@@ -16,26 +16,6 @@ export class WatcherMigration1695625188757 implements MigrationInterface {
             DROP VIEW "revenue_view"
         `);
     await queryRunner.query(`
-            CREATE TABLE "temporary_token_entity" (
-                "tokenId" varchar PRIMARY KEY NOT NULL,
-                "tokenName" varchar NOT NULL,
-                "decimals" integer NOT NULL
-            )
-        `);
-    await queryRunner.query(`
-            INSERT INTO "temporary_token_entity"("tokenId", "tokenName")
-            SELECT "tokenId",
-                "tokenName"
-            FROM "token_entity"
-        `);
-    await queryRunner.query(`
-            DROP TABLE "token_entity"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "temporary_token_entity"
-                RENAME TO "token_entity"
-        `);
-    await queryRunner.query(`
             CREATE VIEW "revenue_view" AS
             SELECT "pe"."id" AS "id",
                 "pe"."WID" AS "wid",
@@ -88,25 +68,6 @@ export class WatcherMigration1695625188757 implements MigrationInterface {
     );
     await queryRunner.query(`
             DROP VIEW "revenue_view"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "token_entity"
-                RENAME TO "temporary_token_entity"
-        `);
-    await queryRunner.query(`
-            CREATE TABLE "token_entity" (
-                "tokenId" varchar PRIMARY KEY NOT NULL,
-                "tokenName" varchar NOT NULL
-            )
-        `);
-    await queryRunner.query(`
-            INSERT INTO "token_entity"("tokenId", "tokenName")
-            SELECT "tokenId",
-                "tokenName"
-            FROM "temporary_token_entity"
-        `);
-    await queryRunner.query(`
-            DROP TABLE "temporary_token_entity"
         `);
     await queryRunner.query(`
             CREATE VIEW "revenue_view" AS
