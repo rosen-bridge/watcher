@@ -16,6 +16,7 @@ cardano:
   ogmios:
     host: '' # ogmios node host address
     port: 1337 # ogmios port
+    useTls: false # connect to ogmios using https or not
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer
