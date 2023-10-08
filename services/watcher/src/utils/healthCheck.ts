@@ -153,7 +153,7 @@ class HealthCheckSingleton {
         getConfig().healthCheck.cardanoScannerCriticalDiff,
         getConfig().cardano.ogmios!.host,
         getConfig().cardano.ogmios!.port,
-        getConfig().cardano.ogmios?.useTls
+        getConfig().cardano.ogmios!.useTls
       );
     } else if (getConfig().cardano.type === KOIOS_TYPE) {
       cardanoScannerSyncCheck = new CardanoKoiosScannerHealthCheck(
