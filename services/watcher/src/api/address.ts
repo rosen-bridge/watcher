@@ -51,6 +51,7 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
       tokenId: ERGO_NATIVE_ASSET,
       decimals: ERGO_DECIMALS,
       name: ERGO_NATIVE_ASSET_NAME,
+      isNative: true,
     });
     const { tokenId, tokenName, sortByAmount } = req.query;
     if (tokenId) {

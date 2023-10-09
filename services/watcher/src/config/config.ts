@@ -229,10 +229,11 @@ class LoggerConfig {
 class CardanoConfig {
   type: string;
   ogmios?: {
-    ip: string;
+    host: string;
     port: number;
     initialSlot: number;
     initialHash: string;
+    useTls?: boolean;
   };
   koios?: {
     url: string;
@@ -245,11 +246,12 @@ class CardanoConfig {
     this.type = config.get<string>('cardano.type');
     if (network === Constants.CARDANO_WATCHER) {
       if (this.type === Constants.OGMIOS_TYPE) {
-        const ip = getRequiredString('cardano.ogmios.ip');
+        const host = getRequiredString('cardano.ogmios.host');
         const port = getRequiredNumber('cardano.ogmios.port');
         const initialSlot = getRequiredNumber('cardano.initial.slot');
         const initialHash = getRequiredString('cardano.initial.hash');
-        this.ogmios = { ip, port, initialHash, initialSlot };
+        const useTls = config.get<boolean>('cardano.ogmios.useTls');
+        this.ogmios = { host, port, initialHash, initialSlot, useTls };
       } else if (this.type === Constants.KOIOS_TYPE) {
         const url = getRequiredString('cardano.koios.url');
         const interval = getRequiredNumber('cardano.koios.interval');
