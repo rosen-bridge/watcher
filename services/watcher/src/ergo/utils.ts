@@ -386,6 +386,7 @@ export class ErgoUtils {
         ...token,
         name: name === '' ? undefined : name,
         decimals: decimals,
+        isNative: token.tokenId === ERGO_NATIVE_ASSET_NAME,
       };
     });
   };
@@ -433,10 +434,18 @@ export class ErgoUtils {
       if (tokenMap.has(token.permit.id)) {
         tokenMap
           .get(token.permit.id)
-          ?.push({ tokenId: token.tokenId, amount: BigInt(token.amount) });
+          ?.push({
+            tokenId: token.tokenId,
+            amount: BigInt(token.amount),
+            isNative: token.tokenId === ERGO_NATIVE_ASSET,
+          });
       } else {
         tokenMap.set(token.permit.id, [
-          { tokenId: token.tokenId, amount: BigInt(token.amount) },
+          {
+            tokenId: token.tokenId,
+            amount: BigInt(token.amount),
+            isNative: token.tokenId === ERGO_NATIVE_ASSET,
+          },
         ]);
       }
     });
