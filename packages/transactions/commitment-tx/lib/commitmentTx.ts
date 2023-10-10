@@ -2,7 +2,7 @@ import { AbstractLogger } from '@rosen-bridge/abstract-logger';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { blake2b } from 'blakejs';
-import * as ergo from 'ergo-lib-wasm-nodejs';
+import * as ergoLib from 'ergo-lib-wasm-nodejs';
 
 class CommitmentTx {
   private static _instance?: CommitmentTx;
@@ -42,7 +42,7 @@ class CommitmentTx {
     CommitmentTx._instance.permitScriptHash = Buffer.from(
       blake2b(
         Buffer.from(
-          ergo.Address.from_base58(permitAddress)
+          ergoLib.Address.from_base58(permitAddress)
             .to_ergo_tree()
             .to_base16_bytes(),
           'hex'
