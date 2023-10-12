@@ -432,13 +432,11 @@ export class ErgoUtils {
     const tokenMap = new Map<number, Array<TokenInfo>>();
     tokens.forEach((token) => {
       if (tokenMap.has(token.permit.id)) {
-        tokenMap
-          .get(token.permit.id)
-          ?.push({
-            tokenId: token.tokenId,
-            amount: BigInt(token.amount),
-            isNative: token.tokenId === ERGO_NATIVE_ASSET,
-          });
+        tokenMap.get(token.permit.id)?.push({
+          tokenId: token.tokenId,
+          amount: BigInt(token.amount),
+          isNative: token.tokenId === ERGO_NATIVE_ASSET,
+        });
       } else {
         tokenMap.set(token.permit.id, [
           {
