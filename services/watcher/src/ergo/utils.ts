@@ -16,6 +16,12 @@ import { watcherDatabase } from '../init';
 import { AddressBalance, TokenInfo } from './interfaces';
 import { RevenueView } from '../database/entities/revenueView';
 import { TokenEntity } from '../database/entities/tokenEntity';
+import { RevenueEntity } from '../database/entities/revenueEntity';
+import {
+  ERGO_DECIMALS,
+  ERGO_NATIVE_ASSET,
+  ERGO_NATIVE_ASSET_NAME,
+} from '../config/constants';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -345,6 +351,20 @@ export class ErgoUtils {
   ): Promise<AddressBalance> => {
     const boxes = serializedBoxes.map((box) => decodeSerializedBox(box));
     const tokens = this.getBoxAssetsSum(boxes);
+    return {
+      nanoErgs: this.getBoxValuesSum(boxes),
+      tokens: tokens,
+    };
+  };
+
+  /**
+   * fill token name and decimals for list of extracted tokens
+   * @param tokens
+   * @returns
+   */
+  static fillTokensDetails = async (
+    tokens: Array<TokenInfo>
+  ): Promise<Array<TokenInfo>> => {
     const tokensInfo = await watcherDatabase.getTokenEntity(
       tokens.map((token) => token.tokenId)
     );
@@ -352,17 +372,23 @@ export class ErgoUtils {
     tokensInfo.forEach((token) => {
       tokensInfoMap.set(token.tokenId, token);
     });
-    return {
-      nanoErgs: this.getBoxValuesSum(boxes),
-      tokens: tokens.map((token) => {
-        const tokenInfo = tokensInfoMap.get(token.tokenId);
-        return {
-          ...token,
-          name: tokenInfo?.tokenName,
-          decimals: tokenInfo?.decimals ?? 0,
-        };
-      }),
-    };
+    return tokens.map((token) => {
+      const tokenInfo = tokensInfoMap.get(token.tokenId);
+      const name =
+        token.tokenId === ERGO_NATIVE_ASSET
+          ? ERGO_NATIVE_ASSET_NAME
+          : tokenInfo?.tokenName || '';
+      const decimals =
+        token.tokenId === ERGO_NATIVE_ASSET
+          ? ERGO_DECIMALS
+          : tokenInfo?.decimals || 0;
+      return {
+        ...token,
+        name: name === '' ? undefined : name,
+        decimals: decimals,
+        isNative: token.tokenId === ERGO_NATIVE_ASSET_NAME,
+      };
+    });
   };
 
   /**
@@ -399,34 +425,37 @@ export class ErgoUtils {
    * Extracts the revenue from the revenue view
    * @param revenues
    */
-  static extractRevenueFromView = async (revenues: RevenueView[]) => {
-    type RevenueAPIType = Omit<
-      RevenueView,
-      'revenueTokenId' | 'revenueAmount'
-    > & {
-      revenues: {
-        tokenId: string;
-        amount: string;
-      }[];
-    };
-
-    const revenuesMap = new Map<number, RevenueAPIType>();
-    for (const { revenueTokenId, revenueAmount, ...revenue } of revenues) {
-      const currentRecord = revenuesMap.get(revenue.id);
-      if (currentRecord !== undefined) {
-        currentRecord.revenues.push({
-          tokenId: revenueTokenId,
-          amount: revenueAmount,
+  static extractRevenueFromView = async (
+    revenues: Array<RevenueView>,
+    tokens: Array<RevenueEntity>
+  ) => {
+    const tokenMap = new Map<number, Array<TokenInfo>>();
+    tokens.forEach((token) => {
+      if (tokenMap.has(token.permit.id)) {
+        tokenMap.get(token.permit.id)?.push({
+          tokenId: token.tokenId,
+          amount: BigInt(token.amount),
+          isNative: token.tokenId === ERGO_NATIVE_ASSET,
         });
       } else {
-        revenuesMap.set(revenue.id, {
-          ...revenue,
-          revenues: [{ tokenId: revenueTokenId, amount: revenueAmount }],
-        });
+        tokenMap.set(token.permit.id, [
+          {
+            tokenId: token.tokenId,
+            amount: BigInt(token.amount),
+            isNative: token.tokenId === ERGO_NATIVE_ASSET,
+          },
+        ]);
       }
-    }
-
-    return Array.from(revenuesMap.values());
+    });
+    return Promise.all(
+      revenues.map(async (revenue) => {
+        const rowTokens = tokenMap.get(revenue.id) || [];
+        return {
+          ...revenue,
+          revenues: await ErgoUtils.fillTokensDetails(rowTokens),
+        };
+      })
+    );
   };
 
   static transformChartData = (chartData: RevenueChartRecord[]) => {

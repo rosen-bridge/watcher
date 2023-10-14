@@ -11,6 +11,7 @@ import {
   revenueWeeklyChart,
   revenueYearlyChart,
 } from '../ergo/statistics/mockUtils';
+import { Transaction } from '../../src/api/Transaction';
 
 chai.use(spies);
 
@@ -27,6 +28,7 @@ describe('revenueRouter', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
+      Transaction.watcherWID = 'WIDStatistics';
     });
 
     /**
@@ -48,7 +50,7 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.items.length).to.eql(4);
+      expect(resultParsed.items.length).to.eql(2);
       expect(resultParsed.total).to.eql(4);
       expect(resultParsed.items[0]).to.eql(firstRevenue);
     });
@@ -72,9 +74,9 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.items.length).to.eql(4);
+      expect(resultParsed.items.length).to.eql(2);
       expect(resultParsed.total).to.eql(4);
-      expect(resultParsed.items[3]).to.eql(firstRevenue);
+      expect(resultParsed.items[1]).to.eql(firstRevenue);
     });
 
     /**
@@ -96,9 +98,9 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.total).to.eql(2);
+      expect(resultParsed.total).to.eql(3);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
-      expect(revenueIds).to.eql([3, 1]);
+      expect(revenueIds).to.eql([3]);
     });
 
     /**
@@ -120,9 +122,9 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.total).to.eql(2);
+      expect(resultParsed.total).to.eql(3);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
-      expect(revenueIds).to.eql([3, 1]);
+      expect(revenueIds).to.eql([3]);
     });
 
     /**
@@ -143,9 +145,9 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.total).to.eql(2);
+      expect(resultParsed.total).to.eql(4);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
-      expect(revenueIds).to.eql([3, 1]);
+      expect(revenueIds).to.eql([4, 3]);
     });
 
     /**
@@ -167,10 +169,10 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.items.length).to.eql(2);
-      expect(resultParsed.total).to.eql(2);
+      expect(resultParsed.items.length).to.eql(1);
+      expect(resultParsed.total).to.eql(3);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
-      expect(revenueIds).to.eql([3, 1]);
+      expect(revenueIds).to.eql([3]);
     });
 
     /**
@@ -214,7 +216,7 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.items.length).to.eql(1);
-      expect(resultParsed.total).to.eql(1);
+      expect(resultParsed.total).to.eql(3);
       expect(resultParsed.items[0].id).to.eql(3);
     });
 
@@ -259,7 +261,7 @@ describe('revenueRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.items.length).to.eql(1);
-      expect(resultParsed.total).to.eql(1);
+      expect(resultParsed.total).to.eql(3);
       expect(resultParsed.items[0].id).to.eql(3);
     });
 
@@ -284,7 +286,7 @@ describe('revenueRouter', () => {
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed.items.length).to.eql(1);
       expect(resultParsed.total).to.eql(4);
-      expect(resultParsed.items[0].id).to.eql(4);
+      expect(resultParsed.items[0].id).to.eql(3);
     });
   });
 

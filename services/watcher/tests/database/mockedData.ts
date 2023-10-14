@@ -149,6 +149,15 @@ export const validBox0Token = {
   amount: 24109n,
   name: 'RSN',
   decimals: 0,
+  isNative: false,
+};
+
+export const validEmptyRSNToken = {
+  amount: 0n,
+  tokenId: 'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516',
+  name: 'RSN',
+  decimals: 3,
+  isNative: false,
 };
 
 export const validBox1Token = {
@@ -156,6 +165,7 @@ export const validBox1Token = {
   amount: 1n,
   name: 'Test',
   decimals: 0,
+  isNative: false,
 };
 
 export const validTwoBoxErgAmount = {
@@ -163,6 +173,7 @@ export const validTwoBoxErgAmount = {
   tokenId: Constants.ERGO_NATIVE_ASSET,
   decimals: Constants.ERGO_DECIMALS,
   name: Constants.ERGO_NATIVE_ASSET_NAME,
+  isNative: true,
 };
 
 export const eventTriggerEntity = new EventTriggerEntity();
@@ -341,6 +352,12 @@ validToken1Record.tokenId =
   '844e3cf44b3181b4cacbccbf7596d341f41147d73daf4b565ecaac983aba2508';
 validToken1Record.tokenName = 'RSN';
 validToken1Record.decimals = 0;
+
+export const validRSNTokenRecord = new TokenEntity();
+validRSNTokenRecord.tokenId =
+  'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516';
+validRSNTokenRecord.tokenName = 'RSN';
+validRSNTokenRecord.decimals = 3;
 
 export const validToken2Record = new TokenEntity();
 validToken2Record.tokenId =
@@ -708,7 +725,7 @@ export const generalInfo = {
   rsnTokenId:
     'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516',
   collateral: {
-    erg: '20',
-    rsn: '10',
+    erg: 20,
+    rsn: 10,
   },
 };

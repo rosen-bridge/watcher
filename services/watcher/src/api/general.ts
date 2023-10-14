@@ -20,8 +20,8 @@ interface GeneralInfo {
   address: string;
   rsnTokenId: string;
   collateral: {
-    erg: string;
-    rsn: string;
+    erg: bigint;
+    rsn: bigint;
   };
 }
 
@@ -46,8 +46,8 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       address: getConfig().general.address,
       rsnTokenId: getConfig().rosen.RSN,
       collateral: {
-        erg: collateral.erg.toString(),
-        rsn: collateral.rsn.toString(),
+        erg: collateral.erg,
+        rsn: collateral.rsn,
       },
     };
     res.set('Content-Type', 'application/json');

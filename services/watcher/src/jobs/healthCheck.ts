@@ -20,12 +20,7 @@ const updatePermitCheckThreshold = async (boxes: Boxes) => {
   if (
     HealthCheckSingleton.getInstance().checkIfPermitCheckExists(commitmentRwt)
   ) {
-    HealthCheckSingleton.getInstance().updatePermitHealthCheck(
-      BigInt(getConfig().healthCheck.permitWarnCommitmentCount * commitmentRwt),
-      BigInt(
-        getConfig().healthCheck.permitCriticalCommitmentCount * commitmentRwt
-      )
-    );
+    HealthCheckSingleton.getInstance().updatePermitHealthCheck(commitmentRwt);
   }
 };
 

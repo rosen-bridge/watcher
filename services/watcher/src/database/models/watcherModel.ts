@@ -6,6 +6,7 @@ import {
   Like,
   Not,
   Repository,
+  Transaction,
 } from 'typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxEntity, TxType } from '../entities/txEntity';
@@ -770,9 +771,9 @@ class WatcherDataBase {
    * @param limit
    */
   getRevenuesWithFilters = async (
+    wid: string,
     fromChain = '',
     toChain = '',
-    tokenId = '',
     sourceTxId = '',
     heightMin: number | undefined = undefined,
     heightMax: number | undefined = undefined,
@@ -782,16 +783,17 @@ class WatcherDataBase {
     offset = 0,
     limit = 20
   ): Promise<PagedItemData<RevenueView>> => {
-    let qb = this.revenueView.createQueryBuilder('rv').select('*');
+    let qb = this.revenueView
+      .createQueryBuilder('rv')
+      .select('*')
+      .distinct()
+      .where('rv.wid = :wid', { wid });
 
     if (fromChain !== '') {
       qb = qb.andWhere('rv.fromChain = :fromChain', { fromChain });
     }
     if (toChain !== '') {
       qb = qb.andWhere('rv.toChain = :toChain', { toChain });
-    }
-    if (tokenId !== '') {
-      qb = qb.andWhere('rv.tokenId = :tokenId', { tokenId });
     }
     if (sourceTxId !== '') {
       qb = qb.andWhere('rv.lockTxId = :sourceTxId', { sourceTxId });
@@ -808,20 +810,30 @@ class WatcherDataBase {
     if (toBlockTime) {
       qb = qb.andWhere('rv.timestamp <= :toBlockTime', { toBlockTime });
     }
-    const distinctIds = await qb
-      .clone()
-      .select('COUNT(DISTINCT(id))', 'cnt')
-      .execute();
-    const total = distinctIds.length > 0 ? distinctIds[0].cnt : 0;
     if (sorting !== '' && sorting.toLowerCase() === 'asc') {
       qb = qb.orderBy('rv.id', 'ASC');
     } else {
       qb = qb.orderBy('rv.id', 'DESC');
     }
+    const total = await qb.getCount();
     const items = await qb.offset(offset).limit(limit).execute();
     return { items, total };
   };
 
+  /**
+   * get list of all revenue tokens for selected list of permits
+   * @param permitIds
+   */
+  getRevenueTokens = async (
+    permitIds: Array<number>
+  ): Promise<Array<RevenueEntity>> => {
+    return this.revenueRepository.find({
+      where: {
+        permit: In(permitIds),
+      },
+      relations: ['permit'],
+    });
+  };
   /**
    * Returns chart data with the period of a week
    * @param offset

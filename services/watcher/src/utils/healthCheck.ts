@@ -1,4 +1,5 @@
 import {
+  AbstractPermitHealthCheckParam,
   CardanoKoiosScannerHealthCheck,
   CardanoOgmiosScannerHealthCheck,
   ErgoExplorerAssetHealthCheckParam,
@@ -23,10 +24,10 @@ import {
   NODE_TYPE,
   EXPLORER_TYPE,
   ERGO_NATIVE_ASSET,
+  ERGO_DECIMALS,
 } from '../config/constants';
 import { loggerFactory } from '../log/Logger';
 import { scanner } from './scanner';
-import { AbstractPermitHealthCheckParam } from '@rosen-bridge/health-check/dist/lib/params/permitHealthCheck/AbstractPermitHealthCheck';
 import { Transaction } from '../../src/api/Transaction';
 
 const logger = loggerFactory(import.meta.url);
@@ -82,7 +83,8 @@ class HealthCheckSingleton {
       getConfig().general.address,
       getConfig().healthCheck.ergWarnThreshold,
       getConfig().healthCheck.ergCriticalThreshold,
-      getConfig().general.nodeUrl
+      getConfig().general.nodeUrl,
+      ERGO_DECIMALS
     );
     this.healthCheck.register(assetHealthCheck);
 
@@ -123,7 +125,8 @@ class HealthCheckSingleton {
       getConfig().general.address,
       getConfig().healthCheck.ergWarnThreshold,
       getConfig().healthCheck.ergCriticalThreshold,
-      getConfig().general.explorerUrl
+      getConfig().general.explorerUrl,
+      ERGO_DECIMALS
     );
     this.healthCheck.register(assetHealthCheck);
 
@@ -148,8 +151,9 @@ class HealthCheckSingleton {
         scanner.observationScanner.name(),
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
-        getConfig().cardano.ogmios!.ip,
-        getConfig().cardano.ogmios!.port
+        getConfig().cardano.ogmios!.host,
+        getConfig().cardano.ogmios!.port,
+        getConfig().cardano.ogmios!.useTls
       );
     } else if (getConfig().cardano.type === KOIOS_TYPE) {
       cardanoScannerSyncCheck = new CardanoKoiosScannerHealthCheck(
@@ -167,35 +171,27 @@ class HealthCheckSingleton {
   /**
    * Registers permit check if watcher wid exists
    */
-  registerPermitHealthCheck = async (commitmentRwt: number) => {
+  registerPermitHealthCheck = async (commitmentRwt: bigint) => {
     if (Transaction.watcherWID) {
       if (getConfig().general.scannerType === NODE_TYPE) {
         this.permitHealthCheckParam = new NodePermitHealthCheckParam(
           getConfig().rosen.RWTId,
           getConfig().rosen.watcherPermitAddress,
           Transaction.watcherWID,
-          BigInt(
-            getConfig().healthCheck.permitWarnCommitmentCount * commitmentRwt
-          ),
-          BigInt(
-            getConfig().healthCheck.permitCriticalCommitmentCount *
-              commitmentRwt
-          ),
-          getConfig().general.nodeUrl
+          BigInt(getConfig().healthCheck.permitWarnCommitmentCount),
+          BigInt(getConfig().healthCheck.permitCriticalCommitmentCount),
+          getConfig().general.nodeUrl,
+          commitmentRwt
         );
       } else if (getConfig().general.scannerType === EXPLORER_TYPE) {
         this.permitHealthCheckParam = new ExplorerPermitHealthCheckParam(
           getConfig().rosen.RWTId,
           getConfig().rosen.watcherPermitAddress,
           Transaction.watcherWID,
-          BigInt(
-            getConfig().healthCheck.permitWarnCommitmentCount * commitmentRwt
-          ),
-          BigInt(
-            getConfig().healthCheck.permitCriticalCommitmentCount *
-              commitmentRwt
-          ),
-          getConfig().general.explorerUrl
+          BigInt(getConfig().healthCheck.permitWarnCommitmentCount),
+          BigInt(getConfig().healthCheck.permitCriticalCommitmentCount),
+          getConfig().general.explorerUrl,
+          commitmentRwt
         );
       }
       if (this.permitHealthCheckParam) {
@@ -217,7 +213,7 @@ class HealthCheckSingleton {
    * Try to register permit check parameter
    * Then check if permit health check exists
    */
-  checkIfPermitCheckExists = (commitmentRwt: number) => {
+  checkIfPermitCheckExists = (commitmentRwt: bigint) => {
     if (!this.permitHealthCheckParam)
       this.registerPermitHealthCheck(commitmentRwt);
     return this.permitHealthCheckParam ? true : false;
@@ -228,14 +224,8 @@ class HealthCheckSingleton {
    * @param warnThreshold
    * @param criticalThreshold
    */
-  updatePermitHealthCheck = (
-    warnThreshold: bigint,
-    criticalThreshold: bigint
-  ) =>
-    this.permitHealthCheckParam.updateThresholds(
-      warnThreshold,
-      criticalThreshold
-    );
+  updatePermitHealthCheck = (rwtPerCommitment: bigint) =>
+    this.permitHealthCheckParam.updateRwtPerCommitment(rwtPerCommitment);
 
   /**
    * Returns overall health status

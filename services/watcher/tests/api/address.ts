@@ -9,6 +9,7 @@ import JSONBigInt from 'json-bigint';
 import {
   validBox0Token,
   validBox1Token,
+  validEmptyRSNToken,
   validTwoBoxErgAmount,
 } from '../database/mockedData';
 
@@ -49,8 +50,13 @@ describe('addressRouter', () => {
       expect(res.status).to.equal(200);
       expect(res.text).to.equal(
         JSONBigInt.stringify({
-          items: [validTwoBoxErgAmount, validBox1Token, validBox0Token],
-          total: 3,
+          items: [
+            validTwoBoxErgAmount,
+            validBox1Token,
+            validBox0Token,
+            validEmptyRSNToken,
+          ],
+          total: 4,
         })
       );
     });
@@ -73,8 +79,13 @@ describe('addressRouter', () => {
       expect(res.status).to.equal(200);
       expect(res.text).to.equal(
         JSONBigInt.stringify({
-          items: [validTwoBoxErgAmount, validBox0Token, validBox1Token],
-          total: 3,
+          items: [
+            validTwoBoxErgAmount,
+            validBox0Token,
+            validBox1Token,
+            validEmptyRSNToken,
+          ],
+          total: 4,
         })
       );
     });
@@ -140,7 +151,7 @@ describe('addressRouter', () => {
       // check the result
       expect(res.status).to.equal(200);
       expect(res.text).to.equal(
-        JSONBigInt.stringify({ items: [validBox1Token], total: 3 })
+        JSONBigInt.stringify({ items: [validBox1Token], total: 4 })
       );
     });
   });
