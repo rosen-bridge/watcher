@@ -171,7 +171,7 @@ class HealthCheckSingleton {
   /**
    * Registers permit check if watcher wid exists
    */
-  registerPermitHealthCheck = async (commitmentRwt: number) => {
+  registerPermitHealthCheck = async (commitmentRwt: bigint) => {
     if (Transaction.watcherWID) {
       if (getConfig().general.scannerType === NODE_TYPE) {
         this.permitHealthCheckParam = new NodePermitHealthCheckParam(
@@ -213,7 +213,7 @@ class HealthCheckSingleton {
    * Try to register permit check parameter
    * Then check if permit health check exists
    */
-  checkIfPermitCheckExists = (commitmentRwt: number) => {
+  checkIfPermitCheckExists = (commitmentRwt: bigint) => {
     if (!this.permitHealthCheckParam)
       this.registerPermitHealthCheck(commitmentRwt);
     return this.permitHealthCheckParam ? true : false;
@@ -224,14 +224,8 @@ class HealthCheckSingleton {
    * @param warnThreshold
    * @param criticalThreshold
    */
-  updatePermitHealthCheck = (
-    warnThreshold: bigint,
-    criticalThreshold: bigint
-  ) =>
-    this.permitHealthCheckParam.updateThresholds(
-      warnThreshold,
-      criticalThreshold
-    );
+  updatePermitHealthCheck = (rwtPerCommitment: bigint) =>
+    this.permitHealthCheckParam.updateRwtPerCommitment(rwtPerCommitment);
 
   /**
    * Returns overall health status
