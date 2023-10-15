@@ -10,11 +10,11 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc --build tsconfig.build.json",
-    "coverage": "vitest run --coverage",
+    "coverage": "npm run test -- --coverage",
     "lint": "eslint --fix . && npm run prettify",
     "prettify": "prettier --write . --ignore-path ./.gitignore",
     "release": "npm run build && npm publish --access public",
-    "test": "vitest",
+    "test": "NODE_OPTIONS=--experimental-specifier-resolution=node vitest",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
