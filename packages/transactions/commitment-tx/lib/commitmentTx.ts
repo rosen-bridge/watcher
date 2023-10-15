@@ -146,7 +146,7 @@ export class CommitmentTxBuilder {
    * @return {CommitmentTxBuilder}
    * @memberof CommitmentTxBuilder
    */
-  addPermits(permits: Array<ergoLib.ErgoBox>): CommitmentTxBuilder {
+  addPermits = (permits: Array<ergoLib.ErgoBox>): CommitmentTxBuilder => {
     const currentBoxIds = new Set(
       this.permits.map((permit) => permit.box_id().to_str())
     );
@@ -167,7 +167,7 @@ export class CommitmentTxBuilder {
       `added new permits=[${permits}]: this.permits=[${this.permits}`
     );
     return this;
-  }
+  };
 
   /**
    * sets widBox for the current instance
