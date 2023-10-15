@@ -27,18 +27,21 @@ describe('CommitmentTx', () => {
 
   describe('newBuilder', () => {
     /**
-     * @target should throw exception when CommitmentTx._instance is not yet
-     * initialized
+     * @target should create a new instance of CommitmentTxBuilder with the set
+     * properties and passed arguments
      * @dependencies
      * - None
      * @scenario
-     * - call CommitmentTx.getInstance without calling CommitmentTx.init
-     * - check CommitmentTx.getInstance to throw an exception
+     * - call CommitmentTx.getInstance after calling CommitmentTx.init
+     * - call CommitmentTx.newBuilder on returned CommitmentTx instance to get a
+     * new instance of CommitmentTxBuilder
+     * - check returned CommitmentTxBuilder instance to have correct properties
+     * set
      * @expected
-     * - CommitmentTx.getInstance should throw an exception
+     * - returned CommitmentTxBuilder should have correct properties set
      */
-    it(`should throw exception when CommitmentTx._instance is not yet
-    initialized`, async () => {
+    it(`should create a new instance of CommitmentTxBuilder with the set
+    properties and passed arguments`, async () => {
       CommitmentTx.init(
         commitmentTxParams.permitAddress,
         commitmentTxParams.commitmentAddress,
@@ -65,6 +68,9 @@ describe('CommitmentTx', () => {
         commitmentTxParams.rwtRepo
       );
       expect(commitmentTxBuilder['observation']).toEqual(observationEntity1);
+      expect(commitmentTxBuilder['eventId']).toEqual(
+        observationEntity1.requestId
+      );
     });
   });
 });
