@@ -2,7 +2,6 @@ import { AbstractLogger } from '@rosen-bridge/abstract-logger';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { blake2b } from 'blakejs';
-import { error } from 'console';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
 
 export class CommitmentTx {
@@ -106,7 +105,7 @@ export class CommitmentTx {
 export class CommitmentTxBuilder {
   private eventId: string;
   private wid: string;
-  private permits: Array<ergoLib.ErgoBox>;
+  private permits: Array<ergoLib.ErgoBox> = [];
   private widBox: ergoLib.ErgoBox;
   private height: number;
   private boxIterator: {
