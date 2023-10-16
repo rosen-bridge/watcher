@@ -5,7 +5,7 @@ import {
   observationEntity1,
   samplePermitBoxes,
   widBox,
-} from './commitmentTx.mock';
+} from './commitmentTxTestData';
 import { blake2b } from 'blakejs';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
 import JsonBigInt from '@rosen-bridge/json-bigint';
