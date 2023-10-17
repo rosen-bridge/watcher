@@ -309,6 +309,13 @@ export class CommitmentTxBuilder {
     return boxBuilder.build();
   };
 
+  /**
+   * calculates event digest for this instance's observation and wid
+   *
+   * @readonly
+   * @private
+   * @memberof CommitmentTxBuilder
+   */
   private get eventDigest() {
     const content = Buffer.concat([
       Buffer.from(this.observation.sourceTxId),
