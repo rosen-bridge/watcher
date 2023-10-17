@@ -16,7 +16,7 @@ const updatePermitCheckThreshold = async (boxes: Boxes) => {
     logger.warn('incorrect repo box format, repo R6 register is undefined.');
     return;
   }
-  const commitmentRwt = R6.to_i64_str_array()[0];
+  const commitmentRwt = BigInt(R6.to_i64_str_array()[0]);
   if (
     HealthCheckSingleton.getInstance().checkIfPermitCheckExists(commitmentRwt)
   ) {
