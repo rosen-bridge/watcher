@@ -235,7 +235,9 @@ export class CommitmentTxBuilder {
    */
   private createPermitBox = (rwtCount: bigint): ergoLib.ErgoBoxCandidate => {
     const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
-      ergoLib.BoxValue.SAFE_USER_MIN(),
+      ergoLib.BoxValue.from_i64(
+        ergoLib.I64.from_str(this.permitBoxValue.toString())
+      ),
       ergoLib.Contract.pay_to_address(
         ergoLib.Address.from_base58(this.permitAddress)
       ),
@@ -266,7 +268,9 @@ export class CommitmentTxBuilder {
    */
   private createCommitmentBox = (): ergoLib.ErgoBoxCandidate => {
     const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
-      ergoLib.BoxValue.SAFE_USER_MIN(),
+      ergoLib.BoxValue.from_i64(
+        ergoLib.I64.from_str(this.commitmentBoxValue.toString())
+      ),
       ergoLib.Contract.pay_to_address(
         ergoLib.Address.from_base58(this.commitmentAddress)
       ),
