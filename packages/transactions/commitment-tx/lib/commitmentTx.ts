@@ -164,7 +164,11 @@ export class CommitmentTxBuilder {
 
     this.permits = this.permits.concat(permits);
     this.logger?.debug(
-      `added new permits=[${permits}]: this.permits=[${this.permits}`
+      `added new permits=[${permits.map((permit) =>
+        permit.box_id().to_str()
+      )}]: this.permits=[${this.permits.map((permit) =>
+        permit.box_id().to_str()
+      )}}`
     );
     return this;
   };
@@ -178,7 +182,9 @@ export class CommitmentTxBuilder {
    */
   setWidBox = (widBox: ergoLib.ErgoBox): CommitmentTxBuilder => {
     this.widBox = widBox;
-    this.logger?.debug(`new value set for widBox=[${this.widBox}]`);
+    this.logger?.debug(
+      `new value set for widBox=[${this.widBox.box_id().to_str()}]`
+    );
     return this;
   };
 
