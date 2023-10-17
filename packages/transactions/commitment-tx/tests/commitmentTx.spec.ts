@@ -1,14 +1,13 @@
-import { describe, expect, it, beforeEach } from 'vitest';
-import { CommitmentTx, CommitmentTxBuilder } from '../lib';
+import JsonBigInt from '@rosen-bridge/json-bigint';
+import * as ergoLib from 'ergo-lib-wasm-nodejs';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { CommitmentTx, CommitmentTxBuilder, toPermitScriptHash } from '../lib';
 import {
   commitmentTxParams,
   observationEntity1,
   samplePermitBoxes,
   widBox,
 } from './commitmentTxTestData';
-import { blake2b } from 'blakejs';
-import * as ergoLib from 'ergo-lib-wasm-nodejs';
-import JsonBigInt from '@rosen-bridge/json-bigint';
 
 describe('CommitmentTx', () => {
   beforeEach(() => {
@@ -81,18 +80,10 @@ describe('CommitmentTxBuilder', () => {
   let commitmentTxBuilder: CommitmentTxBuilder;
 
   beforeEach(() => {
-    const permitScriptHash = Buffer.from(
-      blake2b(
-        Buffer.from(
-          ergoLib.Address.from_base58(commitmentTxParams.permitAddress)
-            .to_ergo_tree()
-            .to_base16_bytes(),
-          'hex'
-        ),
-        undefined,
-        32
-      )
-    ).toString('hex');
+    const permitScriptHash = toPermitScriptHash(
+      commitmentTxParams.permitAddress
+    );
+
     commitmentTxBuilder = new CommitmentTxBuilder(
       commitmentTxParams.permitAddress,
       permitScriptHash,

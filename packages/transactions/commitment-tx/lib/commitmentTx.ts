@@ -53,18 +53,7 @@ export class CommitmentTx {
       logger
     );
 
-    CommitmentTx._instance.permitScriptHash = Buffer.from(
-      blake2b(
-        Buffer.from(
-          ergoLib.Address.from_base58(permitAddress)
-            .to_ergo_tree()
-            .to_base16_bytes(),
-          'hex'
-        ),
-        undefined,
-        32
-      )
-    ).toString('hex');
+    CommitmentTx._instance.permitScriptHash = toPermitScriptHash(permitAddress);
   };
 
   /**
@@ -220,3 +209,25 @@ export class CommitmentTxBuilder {
     return this;
   };
 }
+
+/**
+ * calculates permitScriptHash for passed permitAddress
+ *
+ * @param {string} permitAddress
+ * @return {*}  {string}
+ */
+export const toPermitScriptHash = (permitAddress: string): string => {
+  const permitScriptHash = Buffer.from(
+    blake2b(
+      Buffer.from(
+        ergoLib.Address.from_base58(permitAddress)
+          .to_ergo_tree()
+          .to_base16_bytes(),
+        'hex'
+      ),
+      undefined,
+      32
+    )
+  ).toString('hex');
+  return permitScriptHash;
+};
