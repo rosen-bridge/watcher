@@ -14,7 +14,7 @@
     "lint": "eslint --fix . && npm run prettify",
     "prettify": "prettier --write . --ignore-path ./.gitignore",
     "release": "npm run build && npm publish --access public",
-    "test": "NODE_OPTIONS=--experimental-specifier-resolution=node vitest",
+    "test": " vitest",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {

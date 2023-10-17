@@ -49,7 +49,9 @@ describe('CommitmentTx', () => {
     initialized`, async () => {
       CommitmentTx.init(
         commitmentTxParams.permitAddress,
+        commitmentTxParams.permitBoxValue,
         commitmentTxParams.commitmentAddress,
+        commitmentTxParams.commitmentBoxValue,
         commitmentTxParams.rwt,
         commitmentTxParams.txFee,
         commitmentTxParams.rwtRepo
@@ -61,11 +63,17 @@ describe('CommitmentTx', () => {
       expect(commitmentTxBuilder['permitAddress']).toEqual(
         commitmentTxParams.permitAddress
       );
+      expect(commitmentTxBuilder['permitBoxValue']).toEqual(
+        commitmentTxParams.permitBoxValue
+      );
       expect(commitmentTxBuilder['permitScriptHash']).toEqual(
         commitmentTxParams.permitScriptHash
       );
       expect(commitmentTxBuilder['commitmentAddress']).toEqual(
         commitmentTxParams.commitmentAddress
+      );
+      expect(commitmentTxBuilder['commitmentBoxValue']).toEqual(
+        commitmentTxParams.commitmentBoxValue
       );
       expect(commitmentTxBuilder['rwt']).toEqual(commitmentTxParams.rwt);
       expect(commitmentTxBuilder['txFee']).toEqual(commitmentTxParams.txFee);
@@ -95,8 +103,10 @@ describe('CommitmentTxBuilder', () => {
     ).toString('hex');
     commitmentTxBuilder = new CommitmentTxBuilder(
       commitmentTxParams.permitAddress,
+      commitmentTxParams.permitBoxValue,
       permitScriptHash,
       commitmentTxParams.commitmentAddress,
+      commitmentTxParams.commitmentBoxValue,
       commitmentTxParams.rwt,
       commitmentTxParams.txFee,
       commitmentTxParams.rwtRepo,
