@@ -1,7 +1,7 @@
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CommitmentTx, CommitmentTxBuilder, toPermitScriptHash } from '../lib';
+import { CommitmentTx, CommitmentTxBuilder, toScriptHash } from '../lib';
 import {
   commitmentTxParams,
   observationEntity1,
@@ -80,9 +80,7 @@ describe('CommitmentTxBuilder', () => {
   let commitmentTxBuilder: CommitmentTxBuilder;
 
   beforeEach(() => {
-    const permitScriptHash = toPermitScriptHash(
-      commitmentTxParams.permitAddress
-    );
+    const permitScriptHash = toScriptHash(commitmentTxParams.permitAddress);
 
     commitmentTxBuilder = new CommitmentTxBuilder(
       commitmentTxParams.permitAddress,
