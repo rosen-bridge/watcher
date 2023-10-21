@@ -53,18 +53,7 @@ export class CommitmentTx {
       logger
     );
 
-    CommitmentTx._instance.permitScriptHash = Buffer.from(
-      blake2b(
-        Buffer.from(
-          ergoLib.Address.from_base58(permitAddress)
-            .to_ergo_tree()
-            .to_base16_bytes(),
-          'hex'
-        ),
-        undefined,
-        32
-      )
-    ).toString('hex');
+    CommitmentTx._instance.permitScriptHash = toScriptHash(permitAddress);
   };
 
   /**
@@ -104,6 +93,12 @@ export class CommitmentTx {
 
 export class CommitmentTxBuilder {
   private eventId: string;
+  private wid: string;
+  private permits: Array<ergoLib.ErgoBox> = [];
+  private widBox: ergoLib.ErgoBox;
+  private height: number;
+  private boxIterator: Iterator<ergoLib.ErgoBox, undefined>;
+
   constructor(
     private permitAddress: string,
     private permitScriptHash: string,
@@ -116,4 +111,114 @@ export class CommitmentTxBuilder {
   ) {
     this.eventId = observation.requestId;
   }
+
+  /**
+   * sets wid for the current instance
+   *
+   * @param {string} wid
+   * @return {CommitmentTxBuilder}
+   * @memberof CommitmentTxBuilder
+   */
+  setWid = (wid: string): CommitmentTxBuilder => {
+    this.wid = wid;
+    this.logger?.debug(`new value set for wid=[${this.wid}]`);
+    return this;
+  };
+
+  /**
+   * adds new permits to current instance's set of permits. throws exception if
+   * try to add repetitive permits.
+   *
+   * @param {Array<ergoLib.ErgoBox>} permits
+   * @return {CommitmentTxBuilder}
+   * @memberof CommitmentTxBuilder
+   */
+  addPermits = (permits: Array<ergoLib.ErgoBox>): CommitmentTxBuilder => {
+    const currentBoxIds = new Set(
+      this.permits.map((permit) => permit.box_id().to_str())
+    );
+
+    for (const box of permits) {
+      if (currentBoxIds.has(box.box_id().to_str())) {
+        throw new Error(
+          `box with boxId=[${box
+            .box_id()
+            .to_str()}] already included in permits`
+        );
+      }
+      currentBoxIds.add(box.box_id().to_str());
+    }
+
+    this.permits = this.permits.concat(permits);
+    this.logger?.debug(
+      `added new permits=[${permits.map((permit) =>
+        permit.box_id().to_str()
+      )}]: this.permits=[${this.permits.map((permit) =>
+        permit.box_id().to_str()
+      )}}`
+    );
+    return this;
+  };
+
+  /**
+   * sets widBox for the current instance
+   *
+   * @param {ergoLib.ErgoBox} widBox
+   * @return {CommitmentTxBuilder}
+   * @memberof CommitmentTxBuilder
+   */
+  setWidBox = (widBox: ergoLib.ErgoBox): CommitmentTxBuilder => {
+    this.widBox = widBox;
+    this.logger?.debug(
+      `new value set for widBox=[${this.widBox.box_id().to_str()}]`
+    );
+    return this;
+  };
+
+  /**
+   * sets boxIterator for the current instance
+   */
+
+  setBoxIterator = (
+    boxIterator: Iterator<ergoLib.ErgoBox, undefined>
+  ): CommitmentTxBuilder => {
+    this.boxIterator = boxIterator;
+    return this;
+  };
+
+  /**
+   * sets creation height for the current instance
+   *
+   * @param {number} height
+   * @return {CommitmentTxBuilder}
+   * @memberof CommitmentTxBuilder
+   */
+  setCreationHeight = (height: number): CommitmentTxBuilder => {
+    if (height < 1) {
+      throw new Error('creation height must be a positive integer');
+    }
+    this.height = height;
+    this.logger?.debug(`new value set for height=[${this.height}]`);
+    return this;
+  };
 }
+
+/**
+ * calculates scriptHash for passed Address
+ *
+ * @param {string} address
+ * @return {*}  {string}
+ */
+export const toScriptHash = (address: string): string => {
+  const permitScriptHash = Buffer.from(
+    blake2b(
+      Buffer.from(
+        ergoLib.Address.from_base58(address).to_ergo_tree().to_base16_bytes(),
+        'hex'
+      ),
+      undefined,
+      32
+    )
+  ).toString('hex');
+  return permitScriptHash;
+};
