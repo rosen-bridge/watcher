@@ -97,9 +97,7 @@ export class CommitmentTxBuilder {
   private permits: Array<ergoLib.ErgoBox> = [];
   private widBox: ergoLib.ErgoBox;
   private height: number;
-  private boxIterator: {
-    next: () => Promise<ergoLib.ErgoBox | undefined>;
-  };
+  private boxIterator: Iterator<ergoLib.ErgoBox, undefined>;
 
   constructor(
     private permitAddress: string,
@@ -179,16 +177,11 @@ export class CommitmentTxBuilder {
 
   /**
    * sets boxIterator for the current instance
-   *
-   * @param {({
-   *     next: () => Promise<ergoLib.ErgoBox | undefined>;
-   *   })} boxIterator
-   * @return {CommitmentTxBuilder}
-   * @memberof CommitmentTxBuilder
    */
-  setBoxIterator = (boxIterator: {
-    next: () => Promise<ergoLib.ErgoBox | undefined>;
-  }): CommitmentTxBuilder => {
+
+  setBoxIterator = (
+    boxIterator: Iterator<ergoLib.ErgoBox, undefined>
+  ): CommitmentTxBuilder => {
     this.boxIterator = boxIterator;
     return this;
   };

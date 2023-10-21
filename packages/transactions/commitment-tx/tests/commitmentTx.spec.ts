@@ -234,8 +234,11 @@ describe('CommitmentTxBuilder', () => {
      */
     it(`should set boxIterator for the current instance`, async () => {
       const boxIterator = {
-        next: async (): Promise<ergoLib.ErgoBox | undefined> => {
-          return ergoLib.ErgoBox.from_json(JsonBigInt.stringify(widBox));
+        next: (): IteratorResult<ergoLib.ErgoBox, undefined> => {
+          return {
+            value: ergoLib.ErgoBox.from_json(JsonBigInt.stringify(widBox)),
+            done: false,
+          };
         },
       };
 
