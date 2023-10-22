@@ -1,8 +1,7 @@
 import JsonBigInt from '@rosen-bridge/json-bigint';
-import { blake2b } from 'blakejs';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CommitmentTx, CommitmentTxBuilder } from '../lib';
+import { CommitmentTx, CommitmentTxBuilder, toScriptHash } from '../lib';
 import {
   commitmentTxParams,
   observationEntity1,
@@ -35,18 +34,21 @@ describe('CommitmentTx', () => {
 
   describe('newBuilder', () => {
     /**
-     * @target should throw exception when CommitmentTx._instance is not yet
-     * initialized
+     * @target should create a new instance of CommitmentTxBuilder with the set
+     * properties and passed arguments
      * @dependencies
      * - None
      * @scenario
-     * - call CommitmentTx.getInstance without calling CommitmentTx.init
-     * - check CommitmentTx.getInstance to throw an exception
+     * - call CommitmentTx.getInstance after calling CommitmentTx.init
+     * - call CommitmentTx.newBuilder on returned CommitmentTx instance to get a
+     * new instance of CommitmentTxBuilder
+     * - check returned CommitmentTxBuilder instance to have correct properties
+     * set
      * @expected
-     * - CommitmentTx.getInstance should throw an exception
+     * - returned CommitmentTxBuilder should have correct properties set
      */
-    it(`should throw exception when CommitmentTx._instance is not yet
-    initialized`, async () => {
+    it(`should create a new instance of CommitmentTxBuilder with the set
+    properties and passed arguments`, async () => {
       CommitmentTx.init(
         commitmentTxParams.permitAddress,
         commitmentTxParams.permitBoxValue,
@@ -81,6 +83,9 @@ describe('CommitmentTx', () => {
         commitmentTxParams.rwtRepo
       );
       expect(commitmentTxBuilder['observation']).toEqual(observationEntity1);
+      expect(commitmentTxBuilder['eventId']).toEqual(
+        observationEntity1.requestId
+      );
     });
   });
 });
@@ -89,18 +94,7 @@ describe('CommitmentTxBuilder', () => {
   let commitmentTxBuilder: CommitmentTxBuilder;
 
   beforeEach(() => {
-    const permitScriptHash = Buffer.from(
-      blake2b(
-        Buffer.from(
-          ergoLib.Address.from_base58(commitmentTxParams.permitAddress)
-            .to_ergo_tree()
-            .to_base16_bytes(),
-          'hex'
-        ),
-        undefined,
-        32
-      )
-    ).toString('hex');
+    const permitScriptHash = toScriptHash(commitmentTxParams.permitAddress);
 
     commitmentTxBuilder = new CommitmentTxBuilder(
       commitmentTxParams.permitAddress,
@@ -256,8 +250,11 @@ describe('CommitmentTxBuilder', () => {
      */
     it(`should set boxIterator for the current instance`, async () => {
       const boxIterator = {
-        next: async (): Promise<ergoLib.ErgoBox | undefined> => {
-          return ergoLib.ErgoBox.from_json(JsonBigInt.stringify(widBox));
+        next: (): IteratorResult<ergoLib.ErgoBox, undefined> => {
+          return {
+            value: ergoLib.ErgoBox.from_json(JsonBigInt.stringify(widBox)),
+            done: false,
+          };
         },
       };
 
@@ -300,7 +297,7 @@ describe('CommitmentTxBuilder', () => {
      */
     it(`should create permit box from instance's properties`, async () => {
       const r4 = ergoLib.Constant.decode_from_base16(
-        samplePermitBoxes[0].additionalRegisters.R4.serializedValue
+        samplePermitBoxes[0].additionalRegisters.R4
       ).to_coll_coll_byte();
       const wid = Buffer.from(r4[0]).toString('hex');
       commitmentTxBuilder.setWid(wid);
@@ -351,7 +348,7 @@ describe('CommitmentTxBuilder', () => {
      */
     it(`should create a commitment box from instance's properties`, async () => {
       const r4 = ergoLib.Constant.decode_from_base16(
-        samplePermitBoxes[0].additionalRegisters.R4.serializedValue
+        samplePermitBoxes[0].additionalRegisters.R4
       ).to_coll_coll_byte();
       const wid = Buffer.from(r4[0]).toString('hex');
       commitmentTxBuilder.setWid(wid);

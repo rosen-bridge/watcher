@@ -60,18 +60,7 @@ export class CommitmentTx {
       logger
     );
 
-    CommitmentTx._instance.permitScriptHash = Buffer.from(
-      blake2b(
-        Buffer.from(
-          ergoLib.Address.from_base58(permitAddress)
-            .to_ergo_tree()
-            .to_base16_bytes(),
-          'hex'
-        ),
-        undefined,
-        32
-      )
-    ).toString('hex');
+    CommitmentTx._instance.permitScriptHash = toScriptHash(permitAddress);
   };
 
   /**
@@ -117,9 +106,7 @@ export class CommitmentTxBuilder {
   private permits: Array<ergoLib.ErgoBox> = [];
   private widBox: ergoLib.ErgoBox;
   private height: number;
-  private boxIterator: {
-    next: () => Promise<ergoLib.ErgoBox | undefined>;
-  };
+  private boxIterator: Iterator<ergoLib.ErgoBox, undefined>;
 
   constructor(
     private permitAddress: string,
@@ -175,7 +162,11 @@ export class CommitmentTxBuilder {
 
     this.permits = this.permits.concat(permits);
     this.logger?.debug(
-      `added new permits=[${permits}]: this.permits=[${this.permits}`
+      `added new permits=[${permits.map((permit) =>
+        permit.box_id().to_str()
+      )}]: this.permits=[${this.permits.map((permit) =>
+        permit.box_id().to_str()
+      )}}`
     );
     return this;
   };
@@ -189,22 +180,19 @@ export class CommitmentTxBuilder {
    */
   setWidBox = (widBox: ergoLib.ErgoBox): CommitmentTxBuilder => {
     this.widBox = widBox;
-    this.logger?.debug(`new value set for widBox=[${this.widBox}]`);
+    this.logger?.debug(
+      `new value set for widBox=[${this.widBox.box_id().to_str()}]`
+    );
     return this;
   };
 
   /**
    * sets boxIterator for the current instance
-   *
-   * @param {({
-   *     next: () => Promise<ergoLib.ErgoBox | undefined>;
-   *   })} boxIterator
-   * @return {CommitmentTxBuilder}
-   * @memberof CommitmentTxBuilder
    */
-  setBoxIterator = (boxIterator: {
-    next: () => Promise<ergoLib.ErgoBox | undefined>;
-  }): CommitmentTxBuilder => {
+
+  setBoxIterator = (
+    boxIterator: Iterator<ergoLib.ErgoBox, undefined>
+  ): CommitmentTxBuilder => {
     this.boxIterator = boxIterator;
     return this;
   };
@@ -339,3 +327,23 @@ export class CommitmentTxBuilder {
     return blake2b(content, undefined, 32);
   }
 }
+
+/**
+ * calculates scriptHash for passed Address
+ *
+ * @param {string} address
+ * @return {*}  {string}
+ */
+export const toScriptHash = (address: string): string => {
+  const permitScriptHash = Buffer.from(
+    blake2b(
+      Buffer.from(
+        ergoLib.Address.from_base58(address).to_ergo_tree().to_base16_bytes(),
+        'hex'
+      ),
+      undefined,
+      32
+    )
+  ).toString('hex');
+  return permitScriptHash;
+};
