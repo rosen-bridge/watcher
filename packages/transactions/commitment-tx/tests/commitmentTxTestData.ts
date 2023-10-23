@@ -76,7 +76,7 @@ export const sampleRwtRepoboxInfo = {
 export const commitmentTxParams = {
   permitAddress:
     'EE7687i4URb4YuSGSQXPCbAjMfN4dUt5Qx8BqKZJiZhDY8fdnSUwcAGqAsqfn1tW1byXB8nDrgkFzkAFgaaempKxfcPtDzAbnu9QfknzmtfnLYHdxPPg7Qtjy7jK5yUpPQ2M4Ps3h5kH57xWDJxcKviEMY11rQnxATjTKTQgGtfzsAPpqsUyT2ZpVYsFzUGJ4nSj4WaDZSU1Hovv6dPkSTArLQSjp38wE72ae6hbNJwXGkqgfBtdVXcZVtnqevw9xUNcE6i942CQ9hVMfbdRobnsaLgsDLQomsh8jLMXqkMde5qH2vGBUqnLKgjxCZaa7vStpPXT5EuzLn9napGwUcbJjgRk69FsRSfCrcydZbYxw4Gnh6ZB9at2USpwL1HdVkHVh8M6Kbw6ppRfeG4JeFsUw33H4sSRk6UPqfuFcRUf7Cec2vmPezXTPT7CXQqEeCjxmWXqfyEQUfnCwpiH5fQ9A8CQ3jTyFhxBTpoGDdtiVCmhqhKxjh9M7gcjpr1dUjGMCWxjir94ejfq24XQrSscrZuUT5NVHTWAkzQ',
-  permitBoxValue: 2_00_000n,
+  permitBoxValue: 10_000_000_000n,
   commitmentAddress:
     'EE7687i4URb4YuSGSQXPCbAjMfN4dUt5Qx8BqKZJiZhDY8fdnSUwcAGqAsqfn1tW1byXB8nDrgkFzkAFgaaempKxfcPtDzAbnu9QfknzmtfnLYHdxPPg7Qtjy7jK5yUpPQ2M4Ps3h5kH57xWDJxcKviEMY11rQnxATjTKTQgGtfzsAPpqsUyT2ZpVYsFzUGJ4nSj4WaDZSU1Hovv6dPkSTArLQSjp38wE72ae6hbNJwXGkqgfBtdVXcZVtnqevw9xUNcE6i942CQ9hVMfbdRobnsaLgsDLQomsh8jLMXqkMde5qH2vGBUqnLKgjxCZaa7vStpPXT5EuzLn9napGwUcbJjgRk69FsRSfCrcydZbYxw4Gnh6ZB9at2USpwL1HdVkHVh8M6Kbw6ppRfeG4JeFsUw33H4sSRk6UPqfuFcRUf7Cec2vmPezXTPT7CXQqEeCjxmWXqfyEQUfnCwpiH5fQ9A8CQ3jTyFhxBTpoGDdtiVCmhqhKxjh9M7gcjpr1dUjGMCWxjir94ejfq24XQrSscrZuUT5NVHTWAkzQ',
   commitmentBoxValue: 4_000_000n,
@@ -128,6 +128,25 @@ observationEntity1.toChain = 'cardano';
 observationEntity1.requestId = '32ab59cd';
 
 export const widBox = {
+  boxId: '2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655',
+  value: 998900000,
+  ergoTree:
+    '0008cd024a9f60d062702fc582987b6cc0ab9e8fc30f3ad6e9493d84ae3247a6f1c229db',
+  creationHeight: 204200,
+  assets: [
+    {
+      tokenId:
+        'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b',
+      amount: 1,
+    },
+  ],
+  additionalRegisters: {},
+  transactionId:
+    '929498ec7995b0ca8627bfad272961b9f1e83cfdd9481b796b8c419190430643',
+  index: 2,
+};
+
+export const widBox2 = {
   boxId: '1b869d3719d62f14a914d21bcd3b4d4cca09cfe898fa033a094674544d5be835',
   value: 27720,
   ergoTree:
