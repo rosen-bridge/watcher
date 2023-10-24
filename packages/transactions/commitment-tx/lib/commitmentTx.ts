@@ -256,6 +256,10 @@ export class CommitmentTxBuilder {
         Uint8Array.from(Buffer.from(this.wid, 'hex')),
       ])
     );
+    boxBuilder.set_register_value(
+      5,
+      ergoLib.Constant.from_coll_coll_byte([Buffer.from('00', 'hex')])
+    );
 
     return boxBuilder.build();
   };
@@ -344,14 +348,19 @@ export class CommitmentTxBuilder {
    * build an unsigned transaction which spends wid and permit boxes to generate
    * a commitment, wid and residual permit boxes
    *
-   *
    * @param {number} creationHeight
-   * @return {Promise<ergoLib.UnsignedTransaction>}
+   * @return {Promise<{
+   *     unsignedTx: ergoLib.UnsignedTransaction;
+   *     inputBoxes: ergoLib.ErgoBox[];
+   *   }>}
    * @memberof CommitmentTxBuilder
    */
   build = async (
     creationHeight: number
-  ): Promise<ergoLib.UnsignedTransaction> => {
+  ): Promise<{
+    unsignedTx: ergoLib.UnsignedTransaction;
+    inputBoxes: ergoLib.ErgoBox[];
+  }> => {
     const residualRwtCount =
       this.permits
         .map((permit) =>
@@ -359,9 +368,10 @@ export class CommitmentTxBuilder {
         )
         .reduce((sum, val) => sum + val, 0n) -
       this.rwtRepo.getCommitmentRwtCount();
+
     const outputBoxes: ergoLib.ErgoBoxCandidate[] = [
       this.createCommitmentBox(),
-      ...(residualRwtCount > 0 ? [this.createPermitBox(residualRwtCount)] : []),
+      this.createPermitBox(residualRwtCount),
       this.getOutputWidBox(creationHeight),
     ];
 
@@ -425,7 +435,9 @@ export class CommitmentTxBuilder {
       ergoLib.Address.from_base58(this.changeAddress)
     );
 
-    return txBuilder.build();
+    const unsignedTx = txBuilder.build();
+
+    return { unsignedTx, inputBoxes };
   };
 
   /**

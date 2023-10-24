@@ -516,7 +516,7 @@ describe('CommitmentTxBuilder', () => {
         'getChangeBox'
       );
 
-      const unsignedTx = await commitmentTxBuilder.build(height);
+      const { unsignedTx } = await commitmentTxBuilder.build(height);
 
       const residualRwtCount =
         permitBoxes
