@@ -168,9 +168,9 @@ export class Boxes {
     const selectedBoxes: wasm.ErgoBox[] = [];
     let totalValue = BigInt(0);
     for (const box of boxes) {
-      if (boxIdsToOmit.includes(box.box_id().to_str())) continue;
       let unspentBox = await ErgoNetwork.trackMemPool(box);
       if (unspentBox) unspentBox = await this.dataBase.trackTxQueue(unspentBox);
+      if (boxIdsToOmit.includes(unspentBox.box_id().to_str())) continue;
       const isBoxNotSelected = selectedBoxes.every(
         (box) => box.box_id().to_str() !== unspentBox.box_id().to_str()
       );
