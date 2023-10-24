@@ -370,8 +370,8 @@ export class CommitmentTxBuilder {
       this.rwtRepo.getCommitmentRwtCount();
 
     const outputBoxes: ergoLib.ErgoBoxCandidate[] = [
-      this.createCommitmentBox(),
       this.createPermitBox(residualRwtCount),
+      this.createCommitmentBox(),
       this.getOutputWidBox(creationHeight),
     ];
 
