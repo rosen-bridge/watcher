@@ -40,6 +40,18 @@ observationRouter.get('/', async (req, res) => {
         ? DEFAULT_API_LIMIT
         : Math.min(Number(limitString), MAX_API_LIMIT)
     );
+    const statusMap = new Map<number, string>();
+    (
+      await watcherDatabase.getObservationsStatus(
+        result.items.map((item) => item.id)
+      )
+    ).forEach((item) => statusMap.set(item.observation.id, item.status));
+    result.items = result.items.map((item) => {
+      return {
+        ...item,
+        status: statusMap.get(item.id) || '',
+      };
+    });
     res.status(200).json(result);
   } catch (e) {
     logger.warn(`An error occurred while fetching observations: ${e}`);

@@ -38,7 +38,7 @@ class WatcherDataBase {
   private readonly blockRepository: Repository<BlockEntity>;
   private readonly observationRepository: Repository<ObservationEntity>;
   private readonly txRepository: Repository<TxEntity>;
-  private readonly observationStatusEntity: Repository<ObservationStatusEntity>;
+  private readonly observationStatusRepository: Repository<ObservationStatusEntity>;
   private readonly commitmentRepository: Repository<CommitmentEntity>;
   private readonly permitRepository: Repository<PermitEntity>;
   private readonly boxRepository: Repository<BoxEntity>;
@@ -53,7 +53,7 @@ class WatcherDataBase {
     this.blockRepository = dataSource.getRepository(BlockEntity);
     this.observationRepository = dataSource.getRepository(ObservationEntity);
     this.txRepository = dataSource.getRepository(TxEntity);
-    this.observationStatusEntity = dataSource.getRepository(
+    this.observationStatusRepository = dataSource.getRepository(
       ObservationStatusEntity
     );
     this.commitmentRepository = dataSource.getRepository(CommitmentEntity);
@@ -151,6 +151,21 @@ class WatcherDataBase {
   };
 
   /**
+   *
+   * @param observationIds get status of a list of observations
+   */
+  getObservationsStatus = (
+    observationIds: Array<number>
+  ): Promise<Array<ObservationStatusEntity>> => {
+    return this.observationStatusRepository.find({
+      where: {
+        observation: In(observationIds),
+      },
+      relations: ['observation'],
+    });
+  };
+
+  /**
    * setting NOT_COMMITTED status for new observations that doesn't have status and return last status
    * @param observation
    */
@@ -159,7 +174,7 @@ class WatcherDataBase {
   ): Promise<ObservationStatusEntity> => {
     const observationStatus = await this.getStatusForObservations(observation);
     if (!observationStatus) {
-      await this.observationStatusEntity.insert({
+      await this.observationStatusRepository.insert({
         observation: observation,
         status: TxStatus.NOT_COMMITTED,
       });
@@ -183,7 +198,7 @@ class WatcherDataBase {
   getStatusForObservations = async (
     observation: ObservationEntity
   ): Promise<ObservationStatusEntity | null> => {
-    return await this.observationStatusEntity.findOne({
+    return await this.observationStatusRepository.findOne({
       where: {
         observation: observation,
       },
@@ -280,7 +295,7 @@ class WatcherDataBase {
         observationStatus.status
       )
     )
-      await this.observationStatusEntity.update(
+      await this.observationStatusRepository.update(
         {
           id: observationStatus.id,
         },
@@ -318,7 +333,7 @@ class WatcherDataBase {
         observationStatus.status
       )
     )
-      await this.observationStatusEntity.update(
+      await this.observationStatusRepository.update(
         {
           id: observationStatus.id,
         },
@@ -355,7 +370,7 @@ class WatcherDataBase {
       throw new Error(
         `observation with requestId ${observation.requestId} has no status`
       );
-    await this.observationStatusEntity.update(
+    await this.observationStatusRepository.update(
       {
         id: observationStatus.id,
       },
