@@ -235,7 +235,7 @@ class WatcherDataBase {
           `observation with requestId ${observation.requestId} has no status`
         );
     }
-    const time = new Date().getTime();
+    const time = Math.floor(new Date().getTime() / 1000);
     return await this.txRepository.insert({
       txId: txId,
       txSerialized: tx,
