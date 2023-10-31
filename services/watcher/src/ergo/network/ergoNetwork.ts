@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { max } from 'lodash-es';
+import { max, min } from 'lodash-es';
 
 import {
   ExplorerBoxes,
@@ -74,9 +74,16 @@ export class ErgoNetwork {
     return nodeClient
       .post('/transactions', tx)
       .then((response) => ({ txId: response.data as string, success: true }))
-      .catch((exp) => {
-        logger.info(
-          `An error occurred while sending transaction to Node: ${exp}`
+      .catch((error) => {
+        if (axios.isAxiosError(error) && error.response) {
+          console.log(error);
+          logger.warn(
+            `Error with code ${error.response?.data.error} occurred while sending transaction to Node: ${error.response?.data.detail}`
+          );
+          return { success: false };
+        }
+        logger.warn(
+          `An error occurred while sending transaction to Node: ${error}`
         );
         return { success: false };
       });
@@ -408,5 +415,39 @@ export class ErgoNetwork {
     const netHeight = await this.getHeight();
     const maxInputsHeight = max(inputs.map((box) => box.creation_height()))!;
     return Math.max(netHeight, maxInputsHeight);
+  };
+
+  /**
+   * Checks all tx inputs are still unspent
+   * @param inputs
+   */
+  static checkOutputHeight = async (
+    inputs: wasm.Inputs,
+    outputs: wasm.ErgoBoxes
+  ) => {
+    try {
+      const inputBoxes = await Promise.all(
+        Array(inputs.len())
+          .fill('')
+          .map(async (item, index) => {
+            return await ErgoNetwork.explorerBoxById(
+              inputs.get(index).box_id().to_str()
+            );
+          })
+      );
+      const maxInputsHeight = max(inputBoxes.map((box) => box.creationHeight));
+      const minOuputsHeight = min(
+        Array(outputs.len())
+          .fill('')
+          .map((item, index) => outputs.get(index).creation_height())
+      );
+      return maxInputsHeight! <= minOuputsHeight!;
+    } catch (e) {
+      if (e.response && e.response.status == 404) return false;
+      logger.warn(
+        `An error occurred while checking transaction output heights using Explorer: ${e.message}`
+      );
+      throw ConnectionError;
+    }
   };
 }
