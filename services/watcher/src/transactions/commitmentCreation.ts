@@ -48,7 +48,8 @@ export class CommitmentCreation {
     feeBoxes: Array<wasm.ErgoBox>,
     requiredValue: bigint
   ) => {
-    const height = await ErgoNetwork.getHeight();
+    const allInputs = [...permits, WIDBox, ...feeBoxes];
+    const height = await ErgoNetwork.getMaxHeight(allInputs);
     const permitHash = ErgoUtils.contractHash(
       wasm.Contract.pay_to_address(
         wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)

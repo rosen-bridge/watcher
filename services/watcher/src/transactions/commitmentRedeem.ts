@@ -50,7 +50,8 @@ export class CommitmentRedeem {
     feeBoxes: Array<wasm.ErgoBox>,
     requiredValue: bigint
   ): Promise<wasm.ErgoBox> => {
-    const height = await ErgoNetwork.getHeight();
+    const allInputs = [WIDBox, commitmentBox, ...feeBoxes];
+    const height = await ErgoNetwork.getMaxHeight(allInputs);
     const RWTCount = BigInt(
       commitmentBox.tokens().get(0).amount().as_i64().to_str()
     );

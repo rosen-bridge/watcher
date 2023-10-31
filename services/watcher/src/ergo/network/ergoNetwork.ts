@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as wasm from 'ergo-lib-wasm-nodejs';
+import { max } from 'lodash-es';
 
 import {
   ExplorerBoxes,
@@ -395,5 +396,17 @@ export class ErgoNetwork {
       );
       return token.data;
     }
+  };
+
+  /**
+   * Computes maximum of network height and input boxes creation height
+   * Prevents tx outputs to have height less than the tx inputs
+   * @param inputs
+   * @returns max height
+   */
+  static getMaxHeight = async (inputs: wasm.ErgoBox[]): Promise<number> => {
+    const netHeight = await this.getHeight();
+    const maxInputsHeight = max(inputs.map((box) => box.creation_height()))!;
+    return Math.max(netHeight, maxInputsHeight);
   };
 }
