@@ -115,7 +115,7 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(boxes, 'createWIDBox');
       chai.spy.on(ErgoUtils, 'getExtraTokenCount');
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
-      sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
+      sinon.stub(ErgoNetwork, 'getMaxHeight').resolves(111);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);
       await cc.createCommitmentTx(
         WID,
