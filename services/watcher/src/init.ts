@@ -1,4 +1,6 @@
 import express, { Router } from 'express';
+import cors from 'cors';
+
 import addressRouter from './api/address';
 import permitRouter from './api/permit';
 import observationRouter from './api/observation';
@@ -25,7 +27,7 @@ import revenueRouter from './api/revenue';
 import { revenueJob } from './jobs/revenue';
 import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
-import cors from 'cors';
+import txAssetRouter from './api/txAsset';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -70,6 +72,7 @@ const init = async () => {
     router.use('/withdraw', withdrawRouter);
     router.use('/revenue', revenueRouter);
     router.use('/health', healthRouter);
+    router.use('/txAssets', txAssetRouter);
 
     app.use(router);
     const port = getConfig().general.apiPort;

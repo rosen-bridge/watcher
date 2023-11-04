@@ -192,17 +192,8 @@ export class Transaction {
     const usersCountOut = [...usersCount];
     if (totalRWT === RWTCount) {
       // need to add collateral
-      const collateralBoxes =
-        await ErgoNetwork.getCoveringErgAndTokenForAddress(
-          Transaction.boxes.watcherCollateralContract
-            .ergo_tree()
-            .to_base16_bytes(),
-          BigInt(Transaction.minBoxValue.as_i64().to_str()),
-          {},
-          (box) =>
-            Buffer.from(box.register_value(4)?.to_js()).toString('hex') == WID
-        );
-      inputBoxes.push(collateralBoxes.boxes[0]);
+      const collateralBox = await Transaction.boxes.getCollateralBox(WID);
+      inputBoxes.push(collateralBox);
       usersOut.splice(widIndex, 1);
       usersCountOut.splice(widIndex, 1);
     } else {
@@ -437,6 +428,17 @@ export class Transaction {
     return {
       erg: 0n,
       rsn: 0n,
+    };
+  };
+
+  /**
+   * get locked Erg and RSN collateral for a specific wid
+   */
+  getWidCollateral = async (wid: string) => {
+    const collateralBox = await Transaction.boxes.getCollateralBox(wid);
+    return {
+      erg: BigInt(collateralBox.value().as_i64().to_str()),
+      rsn: BigInt(collateralBox.tokens().get(0).amount().as_i64().to_str()),
     };
   };
 

@@ -273,6 +273,20 @@ export class Boxes {
   };
 
   /**
+   * getting collateral of a watcher from network with its wid
+   */
+  getCollateralBox = async (wid: string): Promise<wasm.ErgoBox> => {
+    const collateralBoxes = await ErgoNetwork.getCoveringErgAndTokenForAddress(
+      this.watcherCollateralContract.ergo_tree().to_base16_bytes(),
+      BigInt(this.minBoxValue.as_i64().to_str()),
+      {},
+      (box) =>
+        Buffer.from(box.register_value(4)?.to_js()).toString('hex') == wid
+    );
+    return collateralBoxes.boxes[0];
+  };
+
+  /**
    * creates a new permit box with required data
    * @param height
    * @param RWTCount
