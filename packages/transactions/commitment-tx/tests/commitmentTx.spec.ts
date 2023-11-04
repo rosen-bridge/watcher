@@ -510,12 +510,8 @@ describe('CommitmentTxBuilder', () => {
         commitmentTxBuilder as any,
         'getExtraTokensBox'
       );
-      const getChangeBoxSpy = vi.spyOn(
-        commitmentTxBuilder as any,
-        'getChangeBox'
-      );
 
-      const { unsignedTx } = await commitmentTxBuilder.build(height);
+      const { unsignedTx } = await commitmentTxBuilder.build();
 
       const residualRwtCount =
         permitBoxes
@@ -554,7 +550,6 @@ describe('CommitmentTxBuilder', () => {
       expect(createCommitmentBoxSpy).toHaveBeenCalled();
       expect(getOutputWidBoxSpy).toHaveBeenCalled();
       expect(getExtraTokensBoxSpy).toHaveBeenCalled();
-      expect(getChangeBoxSpy).toHaveBeenCalled();
 
       expect(outputBoxIds).toContainEqual(
         toFakeErgoBox(commitmentTxBuilder['createCommitmentBox']())

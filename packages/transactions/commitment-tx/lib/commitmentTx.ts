@@ -343,9 +343,7 @@ export class CommitmentTxBuilder {
    *   }>}
    * @memberof CommitmentTxBuilder
    */
-  build = async (
-    creationHeight: number
-  ): Promise<{
+  build = async (): Promise<{
     unsignedTx: ergoLib.UnsignedTransaction;
     inputBoxes: ergoLib.ErgoBox[];
   }> => {
@@ -360,7 +358,6 @@ export class CommitmentTxBuilder {
     const outputBoxes: ergoLib.ErgoBoxCandidate[] = [
       this.createPermitBox(residualRwtCount),
       this.createCommitmentBox(),
-      this.getOutputWidBox(creationHeight),
     ];
 
     const inputBoxes: ergoLib.ErgoBox[] = [this.widBox, ...this.permits];
@@ -377,10 +374,7 @@ export class CommitmentTxBuilder {
       .reduce((sum, val) => sum + val, 0n);
 
     let totalInputValue = 0n;
-    while (
-      totalInputValue !== requiredValue &&
-      totalInputValue - requiredValue < safeMinBoxValue
-    ) {
+    while (totalInputValue - requiredValue < safeMinBoxValue) {
       const box = await this.boxIterator.next().value;
       if (!box) {
         throw new Error(
@@ -394,18 +388,14 @@ export class CommitmentTxBuilder {
     const extraTokensBox = this.getExtraTokensBox(
       inputBoxes,
       outputBoxes,
-      creationHeight
+      totalInputValue - requiredValue
     );
     if (extraTokensBox.tokens().len() > 0) {
+      outputBoxes.push(this.getOutputWidBox());
       outputBoxes.push(extraTokensBox);
     } else {
       requiredValue -= safeMinBoxValue;
-    }
-
-    if (totalInputValue - requiredValue > 0) {
-      outputBoxes.push(
-        this.getChangeBox(totalInputValue - requiredValue, creationHeight)
-      );
+      outputBoxes.push(this.getOutputWidBox(totalInputValue - requiredValue));
     }
 
     const inputErgoBoxes = ergoLib.ErgoBoxes.empty();
@@ -418,7 +408,7 @@ export class CommitmentTxBuilder {
         new ergoLib.ErgoBoxAssetsDataList()
       ),
       ergoBoxCandidates,
-      creationHeight,
+      this.height,
       ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(this.txFee)),
       ergoLib.Address.from_base58(this.changeAddress)
     );
@@ -437,25 +427,28 @@ export class CommitmentTxBuilder {
    * @memberof CommitmentTxBuilder
    */
   private getOutputWidBox = (
-    creationHeight: number
+    changeValue?: bigint
   ): ergoLib.ErgoBoxCandidate => {
     const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
-      ergoLib.BoxValue.SAFE_USER_MIN(),
+      changeValue
+        ? ergoLib.BoxValue.from_i64(
+            ergoLib.I64.from_str(changeValue.toString())
+          )
+        : ergoLib.BoxValue.SAFE_USER_MIN(),
       ergoLib.Contract.new(this.widBox.ergo_tree()),
-      creationHeight
+      this.height
     );
     boxBuilder.add_token(
       ergoLib.TokenId.from_str(this.wid),
       ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str('1'))
     );
-    boxBuilder.set_value(boxBuilder.calc_min_box_value());
 
     return boxBuilder.build();
   };
 
   /**
    * creates an output box with remaining tokens to be used in commitment
-   * transaction
+   * transaction and the change value
    *
    * @private
    * @param {ergoLib.ErgoBoxCandidate[]} inputBoxes
@@ -466,13 +459,16 @@ export class CommitmentTxBuilder {
   private getExtraTokensBox = (
     inputBoxes: ergoLib.ErgoBox[],
     outputBoxes: ergoLib.ErgoBoxCandidate[],
-    creationHeight: number
+    changeValue: bigint
   ): ergoLib.ErgoBoxCandidate => {
     const tokens = new Map<string, bigint>();
     for (const box of inputBoxes) {
       for (let i = 0; i < box.tokens().len(); i++) {
         const token = box.tokens().get(i);
         const tokenId = token.id().to_str();
+        if (tokenId === this.wid) {
+          continue;
+        }
         const tokenAmount = BigInt(token.amount().as_i64().to_str());
         tokens.set(tokenId, tokenAmount + (tokens.get(tokenId) || 0n));
       }
@@ -488,11 +484,11 @@ export class CommitmentTxBuilder {
     }
 
     const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
-      ergoLib.BoxValue.SAFE_USER_MIN(),
+      ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(changeValue.toString())),
       ergoLib.Contract.pay_to_address(
         ergoLib.Address.from_base58(this.changeAddress)
       ),
-      creationHeight
+      this.height
     );
 
     tokens.forEach((amount, id) => {
@@ -504,29 +500,6 @@ export class CommitmentTxBuilder {
       }
     });
 
-    return boxBuilder.build();
-  };
-
-  /**
-   * creates a change box for this.changeAddress
-   *
-   * @private
-   * @param {bigint} value
-   * @param {number} height
-   * @return {ergoLib.ErgoBoxCandidate}
-   * @memberof CommitmentTxBuilder
-   */
-  private getChangeBox = (
-    value: bigint,
-    height: number
-  ): ergoLib.ErgoBoxCandidate => {
-    const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
-      ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(value.toString())),
-      ergoLib.Contract.pay_to_address(
-        ergoLib.Address.from_base58(this.changeAddress)
-      ),
-      height
-    );
     return boxBuilder.build();
   };
 
