@@ -273,7 +273,7 @@ export class CommitmentTxBuilder {
       )
     );
     this.logger?.debug(
-      `added rwt token to commitment box with id=[${this.rwt}]`
+      `added rwt token to commitment box with amount=[${this.rwtRepo.getCommitmentRwtCount()}]`
     );
 
     boxBuilder.set_register_value(
@@ -291,7 +291,9 @@ export class CommitmentTxBuilder {
       ergoLib.Constant.from_byte_array(this.eventDigest)
     );
     this.logger?.debug(
-      `output commitment box R6 register value: eventDigest=[${this.eventDigest}]`
+      `output commitment box R6 register value: eventDigest=[${Buffer.from(
+        this.eventDigest
+      ).toString('hex')}]`
     );
 
     boxBuilder.set_register_value(
