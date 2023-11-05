@@ -42,7 +42,8 @@ export class CommitmentReveal {
     WIDs: Array<Uint8Array>,
     feeBoxes: Array<wasm.ErgoBox>
   ) => {
-    const height = await ErgoNetwork.getHeight();
+    const allInputs = [...commitmentBoxes, RWTRepoBox, ...feeBoxes];
+    const height = await ErgoNetwork.getMaxHeight(allInputs);
     const boxValues = commitmentBoxes
       .map((box) => BigInt(box.value().as_i64().to_str()))
       .reduce((a, b) => a + b, BigInt(0));
