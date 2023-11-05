@@ -8,13 +8,17 @@ import {
   unavailableTxId,
   unconfirmedTxId,
 } from '../objects/axios';
+import { JsonBI } from '../../../src/ergo/network/parser';
 
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { expect } from 'chai';
-import { JsonBI } from '../../../src/ergo/network/parser';
+import chai, { expect } from 'chai';
+import spies from 'chai-spies';
+import sinon from 'sinon';
+chai.use(spies);
+
 import commitmentTxObj from '../transactions/dataset/commitmentTx.json' assert { type: 'json' };
 import txObj from '../dataset/tx.json' assert { type: 'json' };
-import sinon from 'sinon';
+import wrongOutHeightTx from '../dataset/wrongOutHeightTx.json' assert { type: 'json' };
 
 initMockedAxios();
 const commitmentTx = wasm.Transaction.from_json(
@@ -342,6 +346,57 @@ describe('Ergo Network(API)', () => {
       );
       expect(data).to.true;
       sinon.restore();
+    });
+  });
+
+  describe('checkOutputHeight', () => {
+    beforeEach(() => {
+      chai.spy.on(ErgoNetwork, 'explorerBoxById', () => {
+        return { creationHeight: 200000 } as any;
+      });
+    });
+    afterEach(() => {
+      chai.spy.restore();
+    });
+
+    /**
+     * @target checkOutputHeight should return false since output box height is smaller than the input boxes
+     * @dependencies
+     * - ErgoNetwork.explorerBoxById
+     * @scenario
+     * - mock tx wight wrong output boxes height
+     * - call function
+     * - validate result
+     * @expected
+     * - it should return false
+     */
+    it('should return false since output box height is smaller than the input boxes', async () => {
+      const tx = wasm.Transaction.from_json(JsonBI.stringify(wrongOutHeightTx));
+      const res = await ErgoNetwork.checkOutputHeight(
+        tx.inputs(),
+        tx.outputs()
+      );
+      expect(res).to.equal(false);
+    });
+
+    /**
+     * @target checkOutputHeight should return true since output boxes height is greater than the input boxes
+     * @dependencies
+     * - ErgoNetwork.explorerBoxById
+     * @scenario
+     * - mock tx wight wrong output boxes height
+     * - call function
+     * - validate result
+     * @expected
+     * - it should return true
+     */
+    it('should return true since output boxes height is greater than the input boxes', async () => {
+      const tx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
+      const res = await ErgoNetwork.checkOutputHeight(
+        tx.inputs(),
+        tx.outputs()
+      );
+      expect(res).to.equal(true);
     });
   });
 });

@@ -76,7 +76,6 @@ export class ErgoNetwork {
       .then((response) => ({ txId: response.data as string, success: true }))
       .catch((error) => {
         if (axios.isAxiosError(error) && error.response) {
-          console.log(error);
           logger.warn(
             `Error with code ${error.response?.data.error} occurred while sending transaction to Node: ${error.response?.data.detail}`
           );
@@ -418,8 +417,10 @@ export class ErgoNetwork {
   };
 
   /**
-   * Checks all tx inputs are still unspent
+   * Checks the output height of the transaction boxes are greater than all inputs
    * @param inputs
+   * @param outputs
+   * @return min(outboxes.height) >= max(inboxes.height)
    */
   static checkOutputHeight = async (
     inputs: wasm.Inputs,
@@ -436,12 +437,12 @@ export class ErgoNetwork {
           })
       );
       const maxInputsHeight = max(inputBoxes.map((box) => box.creationHeight));
-      const minOuputsHeight = min(
+      const minOutputsHeight = min(
         Array(outputs.len())
           .fill('')
           .map((item, index) => outputs.get(index).creation_height())
       );
-      return maxInputsHeight! <= minOuputsHeight!;
+      return maxInputsHeight! <= minOutputsHeight!;
     } catch (e) {
       if (e.response && e.response.status == 404) return false;
       logger.warn(
