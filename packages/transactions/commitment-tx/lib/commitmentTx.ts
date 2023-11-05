@@ -3,7 +3,7 @@ import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { blake2b } from 'blakejs';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
-import { bigIntToUint8Array } from './utils';
+import { bigIntToUint8Array, hexToUint8Array } from './utils';
 
 export class CommitmentTx {
   private static _instance?: CommitmentTx;
@@ -237,12 +237,13 @@ export class CommitmentTxBuilder {
       ergoLib.TokenId.from_str(this.rwt),
       ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(rwtCount.toString()))
     );
+    this.logger?.debug(
+      `rwtCount=[${rwtCount}] rwt tokens added to output permit box`
+    );
 
     boxBuilder.set_register_value(
       4,
-      ergoLib.Constant.from_coll_coll_byte([
-        Uint8Array.from(Buffer.from(this.wid, 'hex')),
-      ])
+      ergoLib.Constant.from_coll_coll_byte([hexToUint8Array(this.wid)])
     );
     boxBuilder.set_register_value(
       5,
@@ -276,31 +277,33 @@ export class CommitmentTxBuilder {
         ergoLib.I64.from_str(this.rwtRepo.getCommitmentRwtCount().toString())
       )
     );
+    this.logger?.debug(
+      `added rwt token to commitment box with amount=[${this.rwtRepo.getCommitmentRwtCount()}]`
+    );
 
     boxBuilder.set_register_value(
       4,
-      ergoLib.Constant.from_coll_coll_byte([
-        Uint8Array.from(Buffer.from(this.wid, 'hex')),
-      ])
+      ergoLib.Constant.from_coll_coll_byte([hexToUint8Array(this.wid)])
     );
 
     boxBuilder.set_register_value(
       5,
-      ergoLib.Constant.from_coll_coll_byte([
-        Uint8Array.from(Buffer.from(this.eventId, 'hex')),
-      ])
+      ergoLib.Constant.from_coll_coll_byte([hexToUint8Array(this.eventId)])
     );
 
     boxBuilder.set_register_value(
       6,
       ergoLib.Constant.from_byte_array(this.eventDigest)
     );
+    this.logger?.debug(
+      `output commitment box R6 register value: eventDigest=[${Buffer.from(
+        this.eventDigest
+      ).toString('hex')}]`
+    );
 
     boxBuilder.set_register_value(
       7,
-      ergoLib.Constant.from_byte_array(
-        Uint8Array.from(Buffer.from(this.permitScriptHash, 'hex'))
-      )
+      ergoLib.Constant.from_byte_array(hexToUint8Array(this.permitScriptHash))
     );
 
     return boxBuilder.build();
