@@ -1,9 +1,15 @@
 import { AbstractLogger } from '@rosen-bridge/abstract-logger';
+import { selectErgoBoxes } from '@rosen-bridge/ergo-box-selection';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { blake2b } from 'blakejs';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
-import { bigIntToUint8Array, hexToUint8Array } from './utils';
+import {
+  bigIntToUint8Array,
+  hexToUint8Array,
+  toErgoBoxProxyIterator,
+} from './utils';
 
 export class CommitmentTx {
   private static _instance?: CommitmentTx;
@@ -365,40 +371,63 @@ export class CommitmentTxBuilder {
 
     const inputBoxes: ergoLib.ErgoBox[] = [this.widBox, ...this.permits];
 
+    const outputValue = outputBoxes
+      .map((box) => BigInt(box.value().as_i64().to_str()))
+      .reduce((sum, val) => sum + val, 0n);
+    const inputValue = inputBoxes
+      .map((box) => BigInt(box.value().as_i64().to_str()))
+      .reduce((sum, val) => sum + val, 0n);
     const safeMinBoxValue = BigInt(
       ergoLib.BoxValue.SAFE_USER_MIN().as_i64().to_str()
     );
-    let requiredValue = BigInt(this.txFee) + safeMinBoxValue;
-    requiredValue += outputBoxes
-      .map((box) => BigInt(box.value().as_i64().to_str()))
-      .reduce((sum, val) => sum + val, 0n);
-    requiredValue -= inputBoxes
-      .map((box) => BigInt(box.value().as_i64().to_str()))
-      .reduce((sum, val) => sum + val, 0n);
+    const requiredValue =
+      outputValue - inputValue + BigInt(this.txFee) + 2n * safeMinBoxValue;
 
-    let totalInputValue = 0n;
-    while (totalInputValue - requiredValue < safeMinBoxValue) {
-      const box = await this.boxIterator.next().value;
-      if (!box) {
+    let payBoxes: ergoLib.ErgoBox[] = [];
+    if (requiredValue > 0) {
+      const { covered, boxes: payProxyBoxes } = await selectErgoBoxes(
+        { nativeToken: requiredValue, tokens: [] },
+        [],
+        new Map(),
+        toErgoBoxProxyIterator(this.boxIterator),
+        this.logger
+      );
+
+      if (!covered) {
         throw new Error(
           `boxes in box iterator are not enough to cover value=[${requiredValue}]`
         );
       }
-      inputBoxes.push(box);
-      totalInputValue += BigInt(box.value().as_i64().to_str());
+
+      payBoxes = payProxyBoxes.map((proxyBox) =>
+        ergoLib.ErgoBox.from_json(JsonBigInt.stringify(proxyBox))
+      );
     }
+    if (payBoxes.length > 0) {
+      this.logger?.debug(
+        `boxes with following ids where selected from box iterator: [${payBoxes
+          .map((box) => box.box_id().to_str())
+          .join(', ')}]`
+      );
+    }
+    const payBoxesValue = payBoxes
+      .map((box) => BigInt(box.value().as_i64().to_str()))
+      .reduce((sum, val) => sum + val, 0n);
+    inputBoxes.push(...payBoxes);
+
+    let changeValue = payBoxesValue - requiredValue + safeMinBoxValue;
 
     const extraTokensBox = this.getExtraTokensBox(
       inputBoxes,
       outputBoxes,
-      totalInputValue - requiredValue
+      changeValue
     );
     if (extraTokensBox.tokens().len() > 0) {
       outputBoxes.push(this.getOutputWidBox());
       outputBoxes.push(extraTokensBox);
     } else {
-      requiredValue -= safeMinBoxValue;
-      outputBoxes.push(this.getOutputWidBox(totalInputValue - requiredValue));
+      changeValue += safeMinBoxValue;
+      outputBoxes.push(this.getOutputWidBox(changeValue));
     }
 
     const inputErgoBoxes = ergoLib.ErgoBoxes.empty();
@@ -417,6 +446,14 @@ export class CommitmentTxBuilder {
     );
 
     const unsignedTx = txBuilder.build();
+    this.logger?.info(
+      `unsigned commitment transaction built with id=[${unsignedTx
+        .id()
+        .to_str()}]`
+    );
+    this.logger?.debug(
+      `built unsigned commitment transaction in json format: [${unsignedTx.to_json()}]`
+    );
 
     return { unsignedTx, inputBoxes };
   };
@@ -499,6 +536,10 @@ export class CommitmentTxBuilder {
         boxBuilder.add_token(
           ergoLib.TokenId.from_str(id),
           ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(amount.toString()))
+        );
+      } else if (amount < 0) {
+        throw new Error(
+          `there is ${-amount} more tokens with id=${id} in outputs than inputs`
         );
       }
     });
