@@ -27,6 +27,7 @@ export interface ExplorerBox {
   value: bigint;
   assets?: Array<Asset>;
   spentTransactionId: string;
+  creationHeight: number;
 }
 
 export interface ExplorerBoxes {

@@ -63,6 +63,28 @@ export class Queue {
     }
   };
 
+  private validateTxInputsAndOutputs = async (
+    tx: wasm.Transaction
+  ): Promise<boolean> => {
+    if (!(await ErgoNetwork.checkTxInputs(tx.id().to_str(), tx.inputs()))) {
+      logger.info(
+        `Tx [${tx
+          .id()
+          .to_str()}] inputs are spent or not valid, skipped sending, it will be removed soon.`
+      );
+      return false;
+    }
+    if (!(await ErgoNetwork.checkOutputHeight(tx.inputs(), tx.outputs()))) {
+      logger.info(
+        `Tx [${tx
+          .id()
+          .to_str()}] output heights are not valid, skipped sending, it will be removed soon.`
+      );
+      return false;
+    }
+    return true;
+  };
+
   /**
    * Removes invalid and timed out transaction from tx queue after enough confirmation,
    * and updates the related observation status
@@ -100,21 +122,13 @@ export class Queue {
       if (result.success) {
         await this.database.setTxUpdateHeight(tx, currentHeight);
         logger.info(
-          `The [${tx.type}] transaction with txId: [${tx.txId}] sent succcessfully`
+          `The [${tx.type}] transaction with txId: [${tx.txId}] sent successfully`
         );
       } else {
-        if (
-          !(await ErgoNetwork.checkTxInputs(
-            signedTx.id().to_str(),
-            signedTx.inputs()
-          ))
-        ) {
-          logger.info(
-            `Tx [${tx.txId}] inputs are not valid, skipping the transaction sending`
-          );
+        if (!(await this.validateTxInputsAndOutputs(signedTx))) {
           this.resetTxStatus(tx, currentHeight);
         } else {
-          logger.warn(`Error occurred while sending tx [${tx.id}]`);
+          logger.warn(`Error occurred while sending tx [${tx.txId}]`);
         }
       }
     } else {
