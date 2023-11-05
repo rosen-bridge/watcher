@@ -51,7 +51,9 @@ describe('CommitmentTx', () => {
     properties and passed arguments`, async () => {
       CommitmentTx.init(
         commitmentTxParams.permitAddress,
+        commitmentTxParams.permitBoxValue,
         commitmentTxParams.commitmentAddress,
+        commitmentTxParams.commitmentBoxValue,
         commitmentTxParams.rwt,
         commitmentTxParams.txFee,
         commitmentTxParams.rwtRepo
@@ -63,11 +65,17 @@ describe('CommitmentTx', () => {
       expect(commitmentTxBuilder['permitAddress']).toEqual(
         commitmentTxParams.permitAddress
       );
+      expect(commitmentTxBuilder['permitBoxValue']).toEqual(
+        commitmentTxParams.permitBoxValue
+      );
       expect(commitmentTxBuilder['permitScriptHash']).toEqual(
         commitmentTxParams.permitScriptHash
       );
       expect(commitmentTxBuilder['commitmentAddress']).toEqual(
         commitmentTxParams.commitmentAddress
+      );
+      expect(commitmentTxBuilder['commitmentBoxValue']).toEqual(
+        commitmentTxParams.commitmentBoxValue
       );
       expect(commitmentTxBuilder['rwt']).toEqual(commitmentTxParams.rwt);
       expect(commitmentTxBuilder['txFee']).toEqual(commitmentTxParams.txFee);
@@ -90,8 +98,10 @@ describe('CommitmentTxBuilder', () => {
 
     commitmentTxBuilder = new CommitmentTxBuilder(
       commitmentTxParams.permitAddress,
+      commitmentTxParams.permitBoxValue,
       permitScriptHash,
       commitmentTxParams.commitmentAddress,
+      commitmentTxParams.commitmentBoxValue,
       commitmentTxParams.rwt,
       commitmentTxParams.txFee,
       commitmentTxParams.rwtRepo,
@@ -269,6 +279,120 @@ describe('CommitmentTxBuilder', () => {
       const newHeight = 171717;
       commitmentTxBuilder.setCreationHeight(newHeight);
       expect(commitmentTxBuilder['height']).toEqual(newHeight);
+    });
+  });
+
+  describe('createPermitBox', () => {
+    /**
+     * @target should create permit box from instance's properties
+     * @dependencies
+     * - None
+     * @scenario
+     * - call setWid
+     * - call setCreationHeight
+     * - call createPermitBox with a value for rwtCount
+     * - check returned box to have the right properties set
+     * @expected
+     * - returned box should have the right properties set
+     */
+    it(`should create permit box from instance's properties`, async () => {
+      const r4 = ergoLib.Constant.decode_from_base16(
+        samplePermitBoxes[0].additionalRegisters.R4
+      ).to_coll_coll_byte();
+      const wid = Buffer.from(r4[0]).toString('hex');
+      commitmentTxBuilder.setWid(wid);
+
+      const height = 100;
+      commitmentTxBuilder.setCreationHeight(height);
+
+      const rwtCount = 20n;
+      const permitBox = commitmentTxBuilder['createPermitBox'](rwtCount);
+
+      expect(permitBox.value().as_i64().to_str()).toEqual(
+        commitmentTxBuilder['permitBoxValue'].toString()
+      );
+
+      expect(
+        ergoLib.Address.recreate_from_ergo_tree(
+          permitBox.ergo_tree()
+        ).to_base58(ergoLib.NetworkPrefix.Mainnet)
+      ).toEqual(commitmentTxBuilder['permitAddress']);
+
+      expect(permitBox.creation_height()).toEqual(
+        commitmentTxBuilder['height']
+      );
+
+      expect(permitBox.tokens().get(0).id().to_str()).toEqual(
+        commitmentTxBuilder['rwt']
+      );
+      expect(permitBox.tokens().get(0).amount().as_i64().to_str()).toEqual(
+        rwtCount.toString()
+      );
+
+      expect(permitBox.register_value(4)?.to_coll_coll_byte()).toEqual(r4);
+    });
+  });
+
+  describe('createCommitmentBox', () => {
+    /**
+     * @target should create a commitment box from instance's properties
+     * @dependencies
+     * - None
+     * @scenario
+     * - call setWid
+     * - call setCreationHeight
+     * - call createCommitmentBox
+     * - check returned box to have the right properties set
+     * @expected
+     * - returned box should have the right properties set
+     */
+    it(`should create a commitment box from instance's properties`, async () => {
+      const r4 = ergoLib.Constant.decode_from_base16(
+        samplePermitBoxes[0].additionalRegisters.R4
+      ).to_coll_coll_byte();
+      const wid = Buffer.from(r4[0]).toString('hex');
+      commitmentTxBuilder.setWid(wid);
+
+      const height = 100;
+      commitmentTxBuilder.setCreationHeight(height);
+
+      const commitmentBox = commitmentTxBuilder['createCommitmentBox']();
+
+      expect(commitmentBox.value().as_i64().to_str()).toEqual(
+        commitmentTxBuilder['commitmentBoxValue'].toString()
+      );
+
+      expect(
+        ergoLib.Address.recreate_from_ergo_tree(
+          commitmentBox.ergo_tree()
+        ).to_base58(ergoLib.NetworkPrefix.Mainnet)
+      ).toEqual(commitmentTxBuilder['commitmentAddress']);
+
+      expect(commitmentBox.creation_height()).toEqual(
+        commitmentTxBuilder['height']
+      );
+
+      expect(commitmentBox.tokens().get(0).id().to_str()).toEqual(
+        commitmentTxBuilder['rwt']
+      );
+      expect(commitmentBox.tokens().get(0).amount().as_i64().to_str()).toEqual(
+        commitmentTxBuilder['rwtRepo'].getCommitmentRwtCount().toString()
+      );
+
+      expect(commitmentBox.register_value(4)?.to_coll_coll_byte()).toEqual(r4);
+      expect(
+        Buffer.from(
+          commitmentBox.register_value(5)!.to_coll_coll_byte()[0]
+        ).toString('hex')
+      ).toEqual(commitmentTxBuilder['eventId']);
+      expect(commitmentBox.register_value(6)?.to_byte_array()).toEqual(
+        commitmentTxBuilder['eventDigest']
+      );
+      expect(
+        Buffer.from(commitmentBox.register_value(7)!.to_byte_array()).toString(
+          'hex'
+        )
+      ).toEqual(commitmentTxBuilder['permitScriptHash']);
     });
   });
 });
