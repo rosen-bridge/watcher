@@ -512,7 +512,7 @@ export class Transaction {
         if (box.box_id().to_str() != widBox.box_id().to_str())
           inputBoxes.push(box);
       });
-    } else userBoxes.boxes.forEach((box) => inputBoxes.push(box));
+    } else inputBoxes.push(...userBoxes.boxes);
 
     // generate RepoOut
     const RepoRWTCount = repoBox
