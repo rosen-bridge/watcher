@@ -1,10 +1,9 @@
-import { output } from '@noble/hashes/_assert';
 import { Buffer } from 'buffer';
-import * as console from 'console';
-import { ErgoBox, ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
-import { ErgoNetwork } from '../ergo/network/ergoNetwork';
+import { ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { hexStrToUint8Array, uint8ArrayToHex } from '../utils/utils';
+
+import { ErgoNetwork } from '../ergo/network/ergoNetwork';
+import { uint8ArrayToHex } from '../utils/utils';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
 import { loggerFactory } from '../log/Logger';
@@ -14,6 +13,7 @@ import { TransactionUtils } from '../utils/watcherUtils';
 import { TxType } from '../database/entities/txEntity';
 import { AddressBalance } from '../ergo/interfaces';
 import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
+import { DetachWID } from '../transactions/detachWID';
 
 const logger = loggerFactory(import.meta.url);
 
@@ -472,13 +472,6 @@ export class Transaction {
     const RSNCollateral = collateral.rsn;
 
     const inputBoxes = [repoBox];
-    if (WID) {
-      const widBox = await ErgoNetwork.getBoxWithToken(
-        Transaction.userAddress,
-        WID
-      );
-      inputBoxes.push(widBox);
-    }
     const RSNTokenId = Transaction.RSN.to_str();
     const MinBoxValue = BigInt(Transaction.minBoxValue.as_i64().to_str());
     const RequiredErg =
@@ -494,14 +487,33 @@ export class Transaction {
         [RSNTokenId]: RequiredRSN,
       }
     );
-    if (userBoxes.covered) {
-      userBoxes.boxes.forEach((box) => inputBoxes.push(box));
-    } else {
+    if (!userBoxes.covered) {
       return {
         response: `Not enough ERG or RSN. Required [${RequiredErg}] ERG and [${RequiredRSN}] RSN`,
         status: 500,
       };
     }
+    if (WID) {
+      const widBox = await Transaction.boxes.getWIDBox(WID);
+      if (widBox.tokens().get(0).id().to_str() != WID) {
+        await DetachWID.detachWIDtx(
+          Transaction.txUtils,
+          Transaction.boxes,
+          WID,
+          widBox
+        );
+        return {
+          response: `WID box is not in valid format (WID token is not the first token), please wait for the correction transaction`,
+          status: 500,
+        };
+      }
+      inputBoxes.push(widBox);
+      userBoxes.boxes.forEach((box) => {
+        if (box.box_id().to_str() != widBox.box_id().to_str())
+          inputBoxes.push(box);
+      });
+    } else inputBoxes.push(...userBoxes.boxes);
+
     // generate RepoOut
     const RepoRWTCount = repoBox
       .tokens()
