@@ -3,6 +3,7 @@ import { loggerFactory } from '../log/Logger';
 import { watcherDatabase } from '../init';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
+import { TxStatus } from '../database/entities/observationStatusEntity';
 
 const logger = loggerFactory(import.meta.url);
 const observationRouter = express.Router();
@@ -49,7 +50,7 @@ observationRouter.get('/', async (req, res) => {
     result.items = result.items.map((item) => {
       return {
         ...item,
-        status: statusMap.get(item.id) || '',
+        status: statusMap.get(item.id) || TxStatus.NOT_COMMITTED,
       };
     });
     res.status(200).json(result);
