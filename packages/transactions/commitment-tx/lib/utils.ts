@@ -1,8 +1,4 @@
-import {
-  ErgoBoxProxy,
-  Registers,
-  TokenAmountProxy,
-} from '@rosen-bridge/ergo-box-selection';
+import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
 
 /**
@@ -27,43 +23,6 @@ export const hexToUint8Array = (hex: string): Uint8Array =>
   Uint8Array.from(Buffer.from(hex, 'hex'));
 
 /**
- * converts an ErgoBox to ErgoBoxProxy for use with
- * '@rosen-bridge/ergo-box-selection' library
- *
- * @param {ergoLib.ErgoBox} box
- * @return {ErgoBoxProxy}
- */
-export const toErgoBoxProxy = (box: ergoLib.ErgoBox): ErgoBoxProxy => {
-  const assets: TokenAmountProxy[] = [];
-  for (let i = 0; i < box.tokens().len(); i++) {
-    const token = box.tokens().get(i);
-    assets.push({
-      tokenId: token.id().to_str(),
-      amount: token.amount().as_i64().to_str(),
-    });
-  }
-
-  const additionalRegisters: Registers = {};
-  for (let i = 4; i <= 9; i++) {
-    const value = box.register_value(i);
-    if (value != undefined) {
-      additionalRegisters[`R${i}`] = value.encode_to_base16();
-    }
-  }
-
-  return {
-    boxId: box.box_id().to_str(),
-    transactionId: box.tx_id().to_str(),
-    index: box.index(),
-    ergoTree: box.ergo_tree().to_base16_bytes(),
-    creationHeight: box.creation_height(),
-    value: box.value().as_i64().to_str(),
-    assets,
-    additionalRegisters,
-  };
-};
-
-/**
  * converts an ErgoBox iterator to ErgoBoxProxy iterator for use with
  * '@rosen-bridge/ergo-box-selection' library
  *
@@ -78,7 +37,7 @@ export const toErgoBoxProxyIterator = (
       const { value } = boxIterator.next();
       return value != undefined
         ? {
-            value: toErgoBoxProxy(value),
+            value: value.to_js_eip12(),
             done: false,
           }
         : { value: undefined, done: true };
