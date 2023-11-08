@@ -9,17 +9,13 @@ import { WatcherDataBase } from '../database/models/watcherModel';
 import { TxType } from '../database/entities/txEntity';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { NoObservationStatus } from '../errors/errors';
-import {
-  ObservationStatusEntity,
-  TxStatus,
-} from '../database/entities/observationStatusEntity';
+import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
 import { loggerFactory } from '../log/Logger';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
-import { BridgeMinimumFee } from '@rosen-bridge/minimum-fee';
 import MinimumFee from './MinimumFee';
 
 const logger = loggerFactory(import.meta.url);
@@ -159,7 +155,10 @@ class WatcherUtils {
     observation: ObservationEntity,
     relatedCommitments: CommitmentEntity[]
   ) => {
-    const duplicateWIDs = reduce<ReturnType<typeof countBy>, string[]>(
+    const duplicateCommitmentWithWid = reduce<
+      ReturnType<typeof countBy>,
+      string[]
+    >(
       countBy(relatedCommitments, 'WID'),
       (currentDuplicateWIDs, commitmentsCount, wid) =>
         commitmentsCount > 1
@@ -170,12 +169,12 @@ class WatcherUtils {
 
     if (
       Transaction.watcherWID &&
-      duplicateWIDs.includes(Transaction.watcherWID)
+      duplicateCommitmentWithWid.includes(Transaction.watcherWID)
     ) {
       logger.warn(
         `It seems that current watcher (and probably some other watchers) created duplicate commitments. It may cause some issues.`,
         {
-          duplicateWIDs,
+          duplicateCommitmentWithWid,
           eventId: observation.requestId,
         }
       );
@@ -183,7 +182,7 @@ class WatcherUtils {
       logger.info(
         `There seems to be some duplicate commitments created by other watchers. It may cause some issues.`,
         {
-          duplicateWIDs,
+          duplicateCommitmentWithWid,
           eventId: observation.requestId,
         }
       );
