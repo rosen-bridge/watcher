@@ -1,10 +1,11 @@
 import chai, { expect } from 'chai';
 import spies from 'chai-spies';
 import express, { Router } from 'express';
+import request from 'supertest';
+
 import eventsRouter from '../../src/api/events';
 import { initWatcherDB } from '../../src/init';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
-import request from 'supertest';
 import {
   eventTriggerEntity,
   newEventTriggerEntity,
@@ -15,6 +16,7 @@ import {
   spentEventTrigger,
   thirdStatisticsEventTrigger,
 } from '../ergo/statistics/mockUtils';
+import { addLockTokenInfo } from './testUtils';
 
 chai.use(spies);
 
@@ -52,13 +54,13 @@ describe('eventsRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed).to.eql({
-        items: [
+        items: addLockTokenInfo([
           thirdStatisticsEventTrigger,
           secondStatisticsEventTrigger,
           firstStatisticsEventTrigger,
           newEventTriggerEntity,
           eventTriggerEntity,
-        ],
+        ]),
         total: 5,
       });
     });
@@ -83,7 +85,10 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({ items: [eventTriggerEntity], total: 1 });
+      expect(resultParsed).to.eql({
+        items: addLockTokenInfo([eventTriggerEntity]),
+        total: 1,
+      });
     });
 
     /**
@@ -106,7 +111,10 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({ items: [newEventTriggerEntity], total: 1 });
+      expect(resultParsed).to.eql({
+        items: addLockTokenInfo([newEventTriggerEntity]),
+        total: 1,
+      });
     });
 
     /**
@@ -129,7 +137,10 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({ items: [eventTriggerEntity], total: 1 });
+      expect(resultParsed).to.eql({
+        items: addLockTokenInfo([eventTriggerEntity]),
+        total: 1,
+      });
     });
 
     /**
@@ -152,7 +163,10 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({ items: [newEventTriggerEntity], total: 1 });
+      expect(resultParsed).to.eql({
+        items: addLockTokenInfo([newEventTriggerEntity]),
+        total: 1,
+      });
     });
 
     /**
@@ -195,13 +209,13 @@ describe('eventsRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed).to.eql({
-        items: [
+        items: addLockTokenInfo([
           eventTriggerEntity,
           newEventTriggerEntity,
           firstStatisticsEventTrigger,
           secondStatisticsEventTrigger,
           thirdStatisticsEventTrigger,
-        ],
+        ]),
         total: 5,
       });
     });
@@ -225,7 +239,10 @@ describe('eventsRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed).to.eql({
-        items: [secondStatisticsEventTrigger, firstStatisticsEventTrigger],
+        items: addLockTokenInfo([
+          secondStatisticsEventTrigger,
+          firstStatisticsEventTrigger,
+        ]),
         total: 5,
       });
     });

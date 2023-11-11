@@ -234,7 +234,7 @@ observationEntity1.fromChain = 'ergo';
 observationEntity1.networkFee = '1000';
 observationEntity1.sourceBlockId = 'block';
 observationEntity1.sourceTxId = 'txId';
-observationEntity1.sourceChainTokenId = 'sourceToken';
+observationEntity1.sourceChainTokenId = 'tokenId';
 observationEntity1.toAddress = 'addr1';
 observationEntity1.targetChainTokenId = 'targetToken';
 observationEntity1.toChain = 'cardano';
@@ -251,7 +251,7 @@ observationEntity2.fromChain = 'ergo';
 observationEntity2.networkFee = '1000';
 observationEntity2.sourceBlockId = 'block';
 observationEntity2.sourceTxId = 'txId';
-observationEntity2.sourceChainTokenId = 'sourceToken';
+observationEntity2.sourceChainTokenId = 'tokenId';
 observationEntity2.toAddress = 'addr1';
 observationEntity2.targetChainTokenId = 'targetToken';
 observationEntity2.toChain = 'cardano';
@@ -268,7 +268,7 @@ observationEntity3.fromChain = 'ergo';
 observationEntity3.networkFee = '1000';
 observationEntity3.sourceBlockId = 'block';
 observationEntity3.sourceTxId = 'txId3';
-observationEntity3.sourceChainTokenId = 'sourceToken';
+observationEntity3.sourceChainTokenId = 'tokenId';
 observationEntity3.toAddress = 'addr3';
 observationEntity3.targetChainTokenId = 'targetToken';
 observationEntity3.toChain = 'cardano';
@@ -285,7 +285,7 @@ observationEntity4.fromChain = 'ergo';
 observationEntity4.networkFee = '1000';
 observationEntity4.sourceBlockId = 'block';
 observationEntity4.sourceTxId = 'txId4';
-observationEntity4.sourceChainTokenId = 'sourceToken4';
+observationEntity4.sourceChainTokenId = 'tokenId2';
 observationEntity4.toAddress = 'addr4';
 observationEntity4.targetChainTokenId = 'targetToken';
 observationEntity4.toChain = 'cardano';
@@ -682,7 +682,7 @@ export const observation1 = {
   amount: '10',
   networkFee: '1000',
   bridgeFee: '100',
-  sourceChainTokenId: 'sourceToken',
+  sourceChainTokenId: 'tokenId',
   targetChainTokenId: 'targetToken',
   sourceTxId: 'txId',
   sourceBlockId: 'block',
@@ -701,7 +701,7 @@ export const observation2 = {
   amount: '5',
   networkFee: '1000',
   bridgeFee: '100',
-  sourceChainTokenId: 'sourceToken4',
+  sourceChainTokenId: 'tokenId2',
   targetChainTokenId: 'targetToken',
   sourceTxId: 'txId4',
   sourceBlockId: 'block',
