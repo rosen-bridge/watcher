@@ -5,6 +5,7 @@ import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
+import { TxStatus } from '../database/entities/observationStatusEntity';
 
 const logger = loggerFactory(import.meta.url);
 const observationRouter = express.Router();
@@ -42,7 +43,18 @@ observationRouter.get('/', async (req, res) => {
         ? DEFAULT_API_LIMIT
         : Math.min(Number(limitString), MAX_API_LIMIT)
     );
-    res.set('Content-Type', 'application/json');
+    const statusMap = new Map<number, string>();
+    (
+      await watcherDatabase.getObservationsStatus(
+        result.items.map((item) => item.id)
+      )
+    ).forEach((item) => statusMap.set(item.observation.id, item.status));
+    result.items = result.items.map((item) => {
+      return {
+        ...item,
+        status: statusMap.get(item.id) || TxStatus.NOT_COMMITTED,
+      };
+    });
     res
       .status(200)
       .send(JsonBI.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));

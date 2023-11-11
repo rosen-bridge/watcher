@@ -9,17 +9,13 @@ import { WatcherDataBase } from '../database/models/watcherModel';
 import { TxType } from '../database/entities/txEntity';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { NoObservationStatus } from '../errors/errors';
-import {
-  ObservationStatusEntity,
-  TxStatus,
-} from '../database/entities/observationStatusEntity';
+import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
 import { loggerFactory } from '../log/Logger';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
-import { BridgeMinimumFee } from '@rosen-bridge/minimum-fee';
 import MinimumFee from './MinimumFee';
 
 const logger = loggerFactory(import.meta.url);
@@ -151,6 +147,49 @@ class WatcherUtils {
   };
 
   /**
+   * Checks the duplicate commitment and logs to inform watcher
+   * @param observation
+   * @param relatedCommitments
+   */
+  checkDuplicateCommitments = (
+    observation: ObservationEntity,
+    relatedCommitments: CommitmentEntity[]
+  ) => {
+    const duplicateCommitmentWithWid = reduce<
+      ReturnType<typeof countBy>,
+      string[]
+    >(
+      countBy(relatedCommitments, 'WID'),
+      (currentDuplicateWIDs, commitmentsCount, wid) =>
+        commitmentsCount > 1
+          ? [...currentDuplicateWIDs, wid]
+          : currentDuplicateWIDs,
+      []
+    );
+
+    if (
+      Transaction.watcherWID &&
+      duplicateCommitmentWithWid.includes(Transaction.watcherWID)
+    ) {
+      logger.warn(
+        `It seems that current watcher (and probably some other watchers) created duplicate commitments. It may cause some issues.`,
+        {
+          duplicateCommitmentWithWid,
+          eventId: observation.requestId,
+        }
+      );
+    } else {
+      logger.info(
+        `There seems to be some duplicate commitments created by other watchers. It may cause some issues.`,
+        {
+          duplicateCommitmentWithWid,
+          eventId: observation.requestId,
+        }
+      );
+    }
+  };
+
+  /**
    * Returns sets of commitments that are ready to be merged into event trigger
    */
   allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
@@ -163,58 +202,36 @@ class WatcherUtils {
       height
     );
     for (const observation of observations) {
-      const observationStatus = await this.dataBase.getStatusForObservations(
-        observation
-      );
-      if (
-        observationStatus !== null &&
-        observationStatus.status === TxStatus.COMMITTED &&
-        (await this.hasValidAmount(observation))
-      ) {
-        const relatedCommitments = await this.dataBase.commitmentsByEventId(
-          observation.requestId
+      try {
+        const observationStatus = await this.dataBase.getStatusForObservations(
+          observation
         );
-        if (!(await this.isMergeHappened(observation))) {
-          const uniqueRelatedCommitments = uniqBy(relatedCommitments, 'WID');
-          if (uniqueRelatedCommitments.length !== relatedCommitments.length) {
-            const duplicateWIDs = reduce<ReturnType<typeof countBy>, string[]>(
-              countBy(relatedCommitments, 'WID'),
-              (currentDuplicateWIDs, commitmentsCount, wid) =>
-                commitmentsCount > 1
-                  ? [...currentDuplicateWIDs, wid]
-                  : currentDuplicateWIDs,
-              []
-            );
-
-            if (
-              Transaction.watcherWID &&
-              duplicateWIDs.includes(Transaction.watcherWID)
-            ) {
-              logger.warn(
-                `It seems that current watcher (and probably some other watchers) created duplicate commitments. It may cause some issues.`,
-                {
-                  duplicateWIDs,
-                  eventId: observation.requestId,
-                }
-              );
-            } else {
-              logger.info(
-                `There seems to be some duplicate commitments created by other watchers. It may cause some issues.`,
-                {
-                  duplicateWIDs,
-                  eventId: observation.requestId,
-                }
-              );
+        if (
+          observationStatus !== null &&
+          observationStatus.status === TxStatus.COMMITTED &&
+          (await this.hasValidAmount(observation))
+        ) {
+          const relatedCommitments = await this.dataBase.commitmentsByEventId(
+            observation.requestId
+          );
+          if (!(await this.isMergeHappened(observation))) {
+            const uniqueRelatedCommitments = uniqBy(relatedCommitments, 'WID');
+            if (uniqueRelatedCommitments.length !== relatedCommitments.length) {
+              this.checkDuplicateCommitments(observation, relatedCommitments);
             }
-          }
 
-          readyCommitments.push({
-            commitments: uniqueRelatedCommitments
-              .filter((commitment) => commitment.spendBlock == null)
-              .map((item) => ({ ...item, rwtCount: item.rwtCount ?? '1' })),
-            observation: observation,
-          });
+            readyCommitments.push({
+              commitments: uniqueRelatedCommitments
+                .filter((commitment) => commitment.spendBlock == null)
+                .map((item) => ({ ...item, rwtCount: item.rwtCount ?? '1' })),
+              observation: observation,
+            });
+          }
         }
+      } catch (e) {
+        logger.error(
+          `An Error occurred while processing event [${observation.requestId}] for trigger transaction: [${e}]`
+        );
       }
     }
     return readyCommitments;
