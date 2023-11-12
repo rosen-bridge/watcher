@@ -401,31 +401,16 @@ describe('CommitmentTxBuilder', () => {
 
   describe('build', () => {
     /**
-     * @target should build an unsigned transaction which spends wid and permit
-     * boxes to generate a commitment, wid, residual permit boxes and extra
-     * tokens.
+     * @target should build an unsigned transaction to generate a commitment and
+     * extra tokens.
      * @dependencies
-     * - None
      * @scenario
-     * - call setWid
-     * - call setWidBox
-     * - call addPermits
-     * - call setChangeAddress
-     * - call setCreationHeight
+     * - setup box data
      * - call setBoxIterator with an iterator that generates a box with an extra
      *   token
      * - call build
-     * - check createPermitBox to have been called
-     * - check createCommitmentBox to have been called
-     * - check getOutputWidBox to have been called
-     * - check getExtraTokensBox to have been called
-     * - check getChangeBox to have been called
-     * - check transaction output boxes to include the commitment box
-     * - check transaction output boxes to include the permit box with right
-     *   amount of rwt
-     * - check transaction output boxes to include the wid box
-     * - check transaction output boxes to include the extra tokens box with the
-     *   right token id and amount
+     * - check expected functions to have been called
+     * - check transaction output boxes
      * @expected
      * - createPermitBox should have been called
      * - createCommitmentBox should have been called
@@ -439,8 +424,9 @@ describe('CommitmentTxBuilder', () => {
      * - transaction output boxes should include the extra tokens box with the
      *   right token id and amount
      */
-    it(`should build an unsigned transaction which spends wid and permit boxes
-    to generate a commitment, wid, residual permit boxes and extra tokens.`, async () => {
+    it(`should build an unsigned transaction to generate a commitment and extra
+    tokens.`, async () => {
+      // setup box data
       const wid = widBox.assets[0].tokenId;
       commitmentTxBuilder.setWid(wid);
 
@@ -460,6 +446,8 @@ describe('CommitmentTxBuilder', () => {
       const height = 100;
       commitmentTxBuilder.setCreationHeight(height);
 
+      // call setBoxIterator with an iterator that generates a box with an extra
+      // token
       const extraTokenId =
         'abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234';
       const extraTokenAmount = 3000n;
@@ -512,6 +500,7 @@ describe('CommitmentTxBuilder', () => {
         'getExtraTokensBox'
       );
 
+      // call build
       const { unsignedTx } = await commitmentTxBuilder.build();
 
       const residualRwtCount =
@@ -547,11 +536,13 @@ describe('CommitmentTxBuilder', () => {
         return false;
       })[0];
 
-      expect(createPermitBoxSpy).toHaveBeenCalled();
-      expect(createCommitmentBoxSpy).toHaveBeenCalled();
-      expect(getOutputWidBoxSpy).toHaveBeenCalled();
-      expect(getExtraTokensBoxSpy).toHaveBeenCalled();
+      // check expected functions to have been called
+      expect(createPermitBoxSpy).toHaveBeenCalledOnce();
+      expect(createCommitmentBoxSpy).toHaveBeenCalledOnce();
+      expect(getOutputWidBoxSpy).toHaveBeenCalledOnce();
+      expect(getExtraTokensBoxSpy).toHaveBeenCalledOnce();
 
+      // check transaction output boxes
       expect(outputBoxIds).toContainEqual(
         toFakeErgoBox(commitmentTxBuilder['createCommitmentBox']())
           .box_id()
@@ -577,27 +568,16 @@ describe('CommitmentTxBuilder', () => {
     });
 
     /**
-     * @target should build an unsigned transaction which spends wid and permit
-     * boxes to generate a commitment, wid and residual permit boxes.
+     * @target should build an unsigned transaction to generate a commitment and
+     * no extra tokens.
      * @dependencies
-     * - None
      * @scenario
-     * - call setWid
-     * - call setWidBox
-     * - call addPermits
-     * - call setChangeAddress
-     * - call setCreationHeight
-     * - call setBoxIterator with an iterator that generates a box with an extra
-     * token
+     * - setup transaction data
+     * - call setBoxIterator with an iterator that generates a box with no extra
+     *   tokens
      * - call build
-     * - check createPermitBox to have been called
-     * - check createCommitmentBox to have been called
-     * - check getOutputWidBox to have been called
-     * - check getChangeBox to have been called
-     * - check transaction output boxes to include the commitment box
-     * - check transaction output boxes to include the permit box with right
-     *   amount of rwt
-     * - check transaction output boxes to include the wid box
+     * - check expected functions to have been called
+     * - check transaction output boxes
      * @expected
      * - createPermitBox should have been called
      * - createCommitmentBox should have been called
@@ -608,8 +588,9 @@ describe('CommitmentTxBuilder', () => {
      *   amount of rwt
      * - transaction output boxes should include the wid box
      */
-    it(`should build an unsigned transaction which spends wid and permit boxes
-    to generate a commitment, wid and residual permit boxes`, async () => {
+    it(`should build an unsigned transaction to generate a commitment and no
+    extra tokens.`, async () => {
+      // setup transaction data
       const wid = widBox.assets[0].tokenId;
       commitmentTxBuilder.setWid(wid);
 
@@ -629,6 +610,8 @@ describe('CommitmentTxBuilder', () => {
       const height = 100;
       commitmentTxBuilder.setCreationHeight(height);
 
+      // call setBoxIterator with an iterator that generates a box with no extra
+      // tokens
       const boxIterator = {
         next: (): IteratorResult<ergoLib.ErgoBox, undefined> => {
           const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
@@ -672,6 +655,7 @@ describe('CommitmentTxBuilder', () => {
         'getExtraTokensBox'
       );
 
+      // call build
       const { unsignedTx } = await commitmentTxBuilder.build();
 
       const residualRwtCount =
@@ -699,11 +683,13 @@ describe('CommitmentTxBuilder', () => {
         (box) => box.tokens().len() && box.tokens().get(0).id().to_str() === wid
       )[0];
 
-      expect(createPermitBoxSpy).toHaveBeenCalled();
-      expect(createCommitmentBoxSpy).toHaveBeenCalled();
-      expect(getOutputWidBoxSpy).toHaveBeenCalled();
-      expect(getExtraTokensBoxSpy).toHaveBeenCalled();
+      // check expected functions to have been called
+      expect(createPermitBoxSpy).toHaveBeenCalledOnce();
+      expect(createCommitmentBoxSpy).toHaveBeenCalledOnce();
+      expect(getOutputWidBoxSpy).toHaveBeenCalledOnce();
+      expect(getExtraTokensBoxSpy).toHaveBeenCalledOnce();
 
+      // check transaction output boxes
       expect(outputBoxIds).toContainEqual(
         toFakeErgoBox(commitmentTxBuilder['createCommitmentBox']())
           .box_id()
