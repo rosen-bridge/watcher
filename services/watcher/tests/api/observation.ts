@@ -5,9 +5,7 @@ import observationRouter from '../../src/api/observation';
 import { initWatcherDB } from '../../src/init';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import request from 'supertest';
-import { observation1, observation2 } from '../database/mockedData';
-import { addLockTokenInfo } from './testUtils';
-import { TxStatus } from '../../src/database/entities/observationStatusEntity';
+import { observations } from './testDataEvents';
 
 chai.use(spies);
 
@@ -25,13 +23,6 @@ describe('observationRouter', () => {
       await fillORM(ORM, false, true, true);
       initWatcherDB(ORM.DB);
     });
-
-    const addStatus = (observations: Array<any>) => {
-      return observations.map((observation) => ({
-        ...observation,
-        status: TxStatus.NOT_COMMITTED,
-      }));
-    };
 
     /**
      * @target Observations endpoint should return
@@ -52,7 +43,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: addStatus(addLockTokenInfo([observation2, observation1])),
+        items: observations.slice().reverse(),
         total: 2,
       });
     });
@@ -78,7 +69,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: addStatus(addLockTokenInfo([observation1])),
+        items: [observations[0]],
         total: 1,
       });
     });
@@ -102,7 +93,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: addStatus(addLockTokenInfo([observation2])),
+        items: [observations[1]],
         total: 1,
       });
     });
@@ -126,7 +117,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: addStatus(addLockTokenInfo([observation2])),
+        items: [observations[1]],
         total: 1,
       });
     });
@@ -150,7 +141,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: addStatus(addLockTokenInfo([observation1])),
+        items: [observations[0]],
         total: 1,
       });
     });
@@ -174,7 +165,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: addStatus(addLockTokenInfo([observation1])),
+        items: [observations[0]],
         total: 1,
       });
     });
@@ -198,7 +189,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: addStatus(addLockTokenInfo([observation2])),
+        items: [observations[1]],
         total: 1,
       });
     });
@@ -222,7 +213,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: addStatus(addLockTokenInfo([observation1])),
+        items: [observations[0]],
         total: 2,
       });
     });
