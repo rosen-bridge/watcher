@@ -283,8 +283,12 @@ class WatcherDataBase {
    * @param isValid
    */
   setTxValidStatus = async (tx: TxEntity, isValid: boolean) => {
-    tx.isValid = isValid;
-    return this.txRepository.save(tx);
+    return this.txRepository.update(
+      {
+        id: tx.id,
+      },
+      { isValid }
+    );
   };
 
   /**
@@ -292,8 +296,13 @@ class WatcherDataBase {
    * @param tx
    */
   removeTx = async (tx: TxEntity) => {
-    tx.deleted = true;
-    return this.txRepository.save(tx);
+    await this.txRepository.update(
+      {
+        id: tx.id,
+      },
+      { deleted: true }
+    );
+    return this.txRepository.findOneBy({ id: tx.id });
   };
 
   /**
@@ -714,7 +723,6 @@ class WatcherDataBase {
       where: {
         type: TxType.PERMIT,
         deleted: false,
-        isValid: true,
       },
     });
   };

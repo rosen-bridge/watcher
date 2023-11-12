@@ -154,7 +154,6 @@ export class Queue {
     } else if (txStatus > getConfig().general.transactionConfirmation) {
       await this.processConfirmedTx(tx);
     } else {
-      await this.database.setTxValidStatus(tx, true);
       await this.database.setTxUpdateHeight(tx, currentHeight);
     }
   };
