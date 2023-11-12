@@ -92,6 +92,7 @@ export class Queue {
    * @param currentHeight
    */
   private resetTxStatus = async (tx: TxEntity, currentHeight: number) => {
+    await this.database.setTxValidStatus(tx, false);
     if (
       currentHeight - tx.updateBlock >
       getConfig().general.transactionRemovingTimeout
@@ -120,6 +121,7 @@ export class Queue {
     if (await this.verifyTx(tx)) {
       const result = await ErgoNetwork.sendTx(signedTx.to_json());
       if (result.success) {
+        await this.database.setTxValidStatus(tx, true);
         await this.database.setTxUpdateHeight(tx, currentHeight);
         logger.info(
           `The [${tx.type}] transaction with txId: [${tx.txId}] sent successfully`

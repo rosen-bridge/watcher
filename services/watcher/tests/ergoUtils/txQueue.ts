@@ -75,6 +75,7 @@ describe('Transaction queue tests', () => {
       txEntity.type = TxType.COMMITMENT;
       chai.spy.on(dataBase, 'getAllTxs', () => [txEntity]);
       chai.spy.on(dataBase, 'setTxUpdateHeight', () => undefined);
+      chai.spy.on(dataBase, 'setTxValidStatus', () => undefined);
       chai.spy.on(ErgoNetwork, 'getConfNum', () => -1);
       chai.spy.on(ErgoNetwork, 'getHeight', () => height);
       chai.spy.on(ErgoNetwork, 'sendTx', () => {
@@ -96,6 +97,7 @@ describe('Transaction queue tests', () => {
       txEntity.type = TxType.TRIGGER;
       chai.spy.on(dataBase, 'getAllTxs', () => [txEntity]);
       chai.spy.on(dataBase, 'setTxUpdateHeight', () => undefined);
+      chai.spy.on(dataBase, 'setTxValidStatus', () => undefined);
       chai.spy.on(ErgoNetwork, 'getConfNum', () => -1);
       chai.spy.on(ErgoNetwork, 'getHeight', () => height);
       chai.spy.on(ErgoNetwork, 'sendTx', () => {
@@ -153,6 +155,7 @@ describe('Transaction queue tests', () => {
       txEntity.type = TxType.TRIGGER;
       chai.spy.on(dataBase, 'getAllTxs', () => [txEntity]);
       chai.spy.on(dataBase, 'setTxUpdateHeight', () => undefined);
+      chai.spy.on(dataBase, 'setTxValidStatus', () => undefined);
       chai.spy.on(ErgoNetwork, 'getConfNum', () => -1);
       chai.spy.on(ErgoNetwork, 'getHeight', () => height);
       chai.spy.on(ErgoNetwork, 'sendTx');
@@ -161,6 +164,7 @@ describe('Transaction queue tests', () => {
       await txQueue.job();
       expect(ErgoNetwork.sendTx).have.not.been.called;
       expect(dataBase.setTxUpdateHeight).have.not.been.called;
+      expect(dataBase.setTxValidStatus).have.been.called;
     });
 
     /**
@@ -172,6 +176,7 @@ describe('Transaction queue tests', () => {
       txEntity.type = TxType.COMMITMENT;
       chai.spy.on(dataBase, 'getAllTxs', () => [txEntity]);
       chai.spy.on(dataBase, 'setTxUpdateHeight', () => undefined);
+      chai.spy.on(dataBase, 'setTxValidStatus', () => undefined);
       chai.spy.on(ErgoNetwork, 'getConfNum', () => 0);
       chai.spy.on(ErgoNetwork, 'getHeight', () => height);
       chai.spy.on(ErgoNetwork, 'sendTx');
@@ -212,6 +217,7 @@ describe('Transaction queue tests', () => {
       chai.spy.on(dataBase, 'getAllTxs', () => [txEntity]);
       chai.spy.on(dataBase, 'downgradeObservationTxStatus', () => undefined);
       chai.spy.on(dataBase, 'removeTx', () => undefined);
+      chai.spy.on(dataBase, 'setTxValidStatus', () => undefined);
       chai.spy.on(ErgoNetwork, 'getConfNum', () => -1);
       chai.spy.on(ErgoNetwork, 'getHeight', () => height + 1000);
       chai.spy.on(ErgoNetwork, 'sendTx', () => {

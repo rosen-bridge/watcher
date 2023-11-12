@@ -244,6 +244,7 @@ class WatcherDataBase {
       observation: observation,
       type: txType,
       deleted: false,
+      isValid: true,
     });
   };
 
@@ -262,12 +263,46 @@ class WatcherDataBase {
   };
 
   /**
+   * Returns all stored transactions with no deleted flag and valid flag
+   */
+  getValidTxs = async () => {
+    return await this.txRepository.find({
+      relations: {
+        observation: true,
+      },
+      where: {
+        deleted: false,
+        isValid: true,
+      },
+    });
+  };
+
+  /**
+   * Set status for a transaction
+   * @param tx set tx status
+   * @param isValid
+   */
+  setTxValidStatus = async (tx: TxEntity, isValid: boolean) => {
+    return this.txRepository.update(
+      {
+        id: tx.id,
+      },
+      { isValid }
+    );
+  };
+
+  /**
    * Removes one specified transaction (Just toggles the removed flag)
    * @param tx
    */
   removeTx = async (tx: TxEntity) => {
-    tx.deleted = true;
-    return this.txRepository.save(tx);
+    await this.txRepository.update(
+      {
+        id: tx.id,
+      },
+      { deleted: true }
+    );
+    return this.txRepository.findOneBy({ id: tx.id });
   };
 
   /**
@@ -599,7 +634,7 @@ class WatcherDataBase {
     box: wasm.ErgoBox,
     tokenId?: string
   ): Promise<wasm.ErgoBox> => {
-    const txs: Array<TxEntity> = await this.getAllTxs();
+    const txs: Array<TxEntity> = await this.getValidTxs();
     const map = new Map<string, wasm.ErgoBox>();
     const address: string = box.ergo_tree().to_base16_bytes();
     for (const tx of txs) {
