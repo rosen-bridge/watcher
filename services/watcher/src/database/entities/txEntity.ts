@@ -43,4 +43,7 @@ export class TxEntity {
 
   @Column()
   deleted: boolean;
+
+  @Column({ default: true })
+  isValid: boolean;
 }

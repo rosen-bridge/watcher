@@ -244,6 +244,7 @@ class WatcherDataBase {
       observation: observation,
       type: txType,
       deleted: false,
+      isValid: true,
     });
   };
 
@@ -259,6 +260,31 @@ class WatcherDataBase {
         deleted: false,
       },
     });
+  };
+
+  /**
+   * Returns all stored transactions with no deleted flag and valid flag
+   */
+  getValidTxs = async () => {
+    return await this.txRepository.find({
+      relations: {
+        observation: true,
+      },
+      where: {
+        deleted: false,
+        isValid: true,
+      },
+    });
+  };
+
+  /**
+   * Set status for a transaction
+   * @param tx set tx status
+   * @param isValid
+   */
+  setTxValidStatus = async (tx: TxEntity, isValid: boolean) => {
+    tx.isValid = isValid;
+    return this.txRepository.save(tx);
   };
 
   /**
@@ -599,7 +625,7 @@ class WatcherDataBase {
     box: wasm.ErgoBox,
     tokenId?: string
   ): Promise<wasm.ErgoBox> => {
-    const txs: Array<TxEntity> = await this.getAllTxs();
+    const txs: Array<TxEntity> = await this.getValidTxs();
     const map = new Map<string, wasm.ErgoBox>();
     const address: string = box.ergo_tree().to_base16_bytes();
     for (const tx of txs) {
@@ -688,6 +714,7 @@ class WatcherDataBase {
       where: {
         type: TxType.PERMIT,
         deleted: false,
+        isValid: true,
       },
     });
   };
