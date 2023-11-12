@@ -401,7 +401,7 @@ describe('WatcherModel tests', () => {
     it('should remove a tx', async () => {
       const txs = await DB.getAllTxs();
       const data = await DB.removeTx(txs[0]);
-      expect(data.deleted).to.true;
+      expect(data!.deleted).to.true;
     });
 
     /**
