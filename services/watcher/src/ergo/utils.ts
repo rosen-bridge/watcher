@@ -412,7 +412,7 @@ export class ErgoUtils {
     if (tokenDetail.length) {
       name = tokenDetail[0][chain].name;
       decimals = tokenDetail[0][chain].decimals;
-      isNativeToken = tokenDetail[0][chain].metaData.residency === 'native';
+      isNativeToken = tokenDetail[0][chain].metaData.type === 'native';
     }
 
     return {

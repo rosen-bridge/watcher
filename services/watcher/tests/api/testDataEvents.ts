@@ -122,7 +122,7 @@ const events = [
     spendTxId: 'txId2',
     lockToken: {
       decimals: 6,
-      isNative: true,
+      isNative: false,
       name: 'test token 10',
       tokenId: 'tokenId',
     },
@@ -184,7 +184,7 @@ const observations = [
       tokenId: 'tokenId',
       name: 'test token 10',
       decimals: 6,
-      isNative: true,
+      isNative: false,
     },
   },
   {
