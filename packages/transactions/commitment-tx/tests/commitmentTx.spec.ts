@@ -401,8 +401,8 @@ describe('CommitmentTxBuilder', () => {
 
   describe('build', () => {
     /**
-     * @target should build an unsigned transaction to generate a commitment and
-     * extra tokens.
+     * @target should build an unsigned transaction to generate a commitment
+     * when there are residual tokens.
      * @dependencies
      * @scenario
      * - setup box data
@@ -421,11 +421,11 @@ describe('CommitmentTxBuilder', () => {
      * - transaction output boxes should include the permit box with right
      *   amount of rwt
      * - transaction output boxes should include the wid box
-     * - transaction output boxes should include the extra tokens box with the
-     *   right token id and amount
+     * - transaction output boxes should include the residual tokens box with
+     *   the right token id and amount
      */
-    it(`should build an unsigned transaction to generate a commitment and extra
-    tokens.`, async () => {
+    it(`should build an unsigned transaction to generate a commitment when there
+    are residual tokens.`, async () => {
       // setup box data
       const wid = widBox.assets[0].tokenId;
       commitmentTxBuilder.setWid(wid);
@@ -568,8 +568,8 @@ describe('CommitmentTxBuilder', () => {
     });
 
     /**
-     * @target should build an unsigned transaction to generate a commitment and
-     * no extra tokens.
+     * @target should build an unsigned transaction to generate a commitment
+     * when there are no residual tokens.
      * @dependencies
      * @scenario
      * - setup transaction data
@@ -588,8 +588,8 @@ describe('CommitmentTxBuilder', () => {
      *   amount of rwt
      * - transaction output boxes should include the wid box
      */
-    it(`should build an unsigned transaction to generate a commitment and no
-    extra tokens.`, async () => {
+    it(`should build an unsigned transaction to generate a commitment when there
+    are no residual tokens.`, async () => {
       // setup transaction data
       const wid = widBox.assets[0].tokenId;
       commitmentTxBuilder.setWid(wid);
