@@ -22,7 +22,8 @@ export const revenueJobFunction = async () => {
 
     // save tokens as revenues
     const boxTokens = permitBox.tokens();
-    for (let j = 0; j < boxTokens.len(); j++) {
+    // To ignore the RWT token as the first token in permit box
+    for (let j = 1; j < boxTokens.len(); j++) {
       const token = boxTokens.get(j);
       await watcherDatabase.storeRevenue(
         token.id().to_str(),
