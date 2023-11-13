@@ -1,6 +1,6 @@
 import { loggerFactory } from '../log/Logger';
 import express from 'express';
-import { AddressBalance, TokenInfo } from '../ergo/interfaces';
+import { AddressBalance, TokenData } from '../ergo/interfaces';
 import { Transaction } from './Transaction';
 import { ERGO_NATIVE_ASSET } from '../config/constants';
 import { BoxValue } from 'ergo-lib-wasm-nodejs';
@@ -21,7 +21,7 @@ interface WithdrawBody {
  */
 const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
   let nanoErgs = 0n;
-  const tokens: Array<Omit<TokenInfo, 'name'>> = [];
+  const tokens: Array<Omit<TokenData, 'name'>> = [];
   reqBody.tokens.forEach((token: any) => {
     if (token.tokenId === ERGO_NATIVE_ASSET) {
       nanoErgs = BigInt(token.amount);

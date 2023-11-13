@@ -5,8 +5,7 @@ import observationRouter from '../../src/api/observation';
 import { initWatcherDB } from '../../src/init';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import request from 'supertest';
-import { observation1, observation2 } from '../database/mockedData';
-import { TxStatus } from '../../src/database/entities/observationStatusEntity';
+import { observations } from './testDataEvents';
 
 chai.use(spies);
 
@@ -44,10 +43,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: [observation2, observation1].map((observation) => ({
-          ...observation,
-          status: TxStatus.NOT_COMMITTED,
-        })),
+        items: observations.slice().reverse(),
         total: 2,
       });
     });
@@ -73,7 +69,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: [{ ...observation1, status: TxStatus.NOT_COMMITTED }],
+        items: [observations[0]],
         total: 1,
       });
     });
@@ -97,7 +93,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: [{ ...observation2, status: TxStatus.NOT_COMMITTED }],
+        items: [observations[1]],
         total: 1,
       });
     });
@@ -121,7 +117,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: [{ ...observation2, status: TxStatus.NOT_COMMITTED }],
+        items: [observations[1]],
         total: 1,
       });
     });
@@ -145,7 +141,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: [{ ...observation1, status: TxStatus.NOT_COMMITTED }],
+        items: [observations[0]],
         total: 1,
       });
     });
@@ -163,15 +159,13 @@ describe('observationRouter', () => {
      */
     it('Observations endpoint should return correct observations with sourceTokenId filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get(
-        '/observation?sourceTokenId=sourceToken'
-      );
+      const res = await request(app).get('/observation?sourceTokenId=tokenId');
 
       // check the result
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: [{ ...observation1, status: TxStatus.NOT_COMMITTED }],
+        items: [observations[0]],
         total: 1,
       });
     });
@@ -195,7 +189,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: [{ ...observation2, status: TxStatus.NOT_COMMITTED }],
+        items: [observations[1]],
         total: 1,
       });
     });
@@ -219,7 +213,7 @@ describe('observationRouter', () => {
       expect(res.status).to.equal(200);
       const parsedResult = JSON.parse(res.text);
       expect(parsedResult).to.deep.equal({
-        items: [{ ...observation1, status: TxStatus.NOT_COMMITTED }],
+        items: [observations[0]],
         total: 2,
       });
     });

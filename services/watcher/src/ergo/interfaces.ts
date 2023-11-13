@@ -1,4 +1,4 @@
-export interface TokenInfo {
+export interface TokenData {
   tokenId: string;
   amount: bigint;
   decimals?: number;
@@ -8,5 +8,5 @@ export interface TokenInfo {
 
 export interface AddressBalance {
   nanoErgs: bigint;
-  tokens: Array<TokenInfo>;
+  tokens: Array<TokenData>;
 }
