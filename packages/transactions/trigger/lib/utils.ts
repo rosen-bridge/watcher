@@ -8,7 +8,7 @@ import * as ergoLib from 'ergo-lib-wasm-nodejs';
  * @return {string}
  */
 export const toScriptHash = (address: string): string => {
-  const permitScriptHash = Buffer.from(
+  const scriptHash = Buffer.from(
     blake2b(
       Buffer.from(
         ergoLib.Address.from_base58(address).to_ergo_tree().to_base16_bytes(),
@@ -18,5 +18,5 @@ export const toScriptHash = (address: string): string => {
       32
     )
   ).toString('hex');
-  return permitScriptHash;
+  return scriptHash;
 };
