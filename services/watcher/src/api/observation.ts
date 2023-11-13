@@ -55,6 +55,7 @@ observationRouter.get('/', async (req, res) => {
         status: statusMap.get(item.id) || TxStatus.NOT_COMMITTED,
       };
     });
+    res.set('Content-Type', 'application/json');
     res
       .status(200)
       .send(JsonBI.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));

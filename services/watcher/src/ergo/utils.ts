@@ -405,12 +405,21 @@ export class ErgoUtils {
     const tokenMap = getConfig().token.tokenMap;
     const tokenDetail = tokenMap.search(chain, {
       [tokenMap.getIdKey(chain)]: tokenId,
-    })[0][chain];
+    });
+    let name = 'Unsupported token';
+    let decimals = 0;
+    let isNativeToken = false;
+    if (tokenDetail.length) {
+      name = tokenDetail[0][chain].name;
+      decimals = tokenDetail[0][chain].decimals;
+      isNativeToken = tokenDetail[0][chain].metaData.residency === 'native';
+    }
+
     return {
       tokenId: tokenId,
-      name: tokenDetail.name,
-      decimals: tokenDetail.decimals,
-      isNative: tokenDetail.metaData.residency == 'native',
+      name: name,
+      decimals: decimals,
+      isNative: isNativeToken,
     };
   };
 
