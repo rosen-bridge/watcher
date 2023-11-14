@@ -30,5 +30,12 @@
   },
   "engines": {
     "node": ">=18.12.0"
+  },
+  "dependencies": {
+    "@rosen-bridge/abstract-logger": "^1.0.0",
+    "@rosen-bridge/observation-extractor": "^2.2.3",
+    "@rosen-bridge/rwt-repo": "^0.2.1",
+    "blakejs": "^1.2.1",
+    "ergo-lib-wasm-nodejs": "^0.26.0"
   }
 }
