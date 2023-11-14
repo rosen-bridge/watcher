@@ -40,7 +40,7 @@ export class TriggerTx {
     logger?: AbstractLogger
   ): void {
     if (TriggerTx._instance != undefined) {
-      return;
+      throw new Error('The singleton instance is already initialized.');
     }
 
     TriggerTx._instance = new TriggerTx(
