@@ -1,9 +1,15 @@
 import { AbstractLogger } from '@rosen-bridge/abstract-logger';
+import { selectErgoBoxes } from '@rosen-bridge/ergo-box-selection';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { blake2b } from 'blakejs';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
-import { bigIntToUint8Array, hexToUint8Array } from './utils';
+import {
+  bigIntToUint8Array,
+  hexToUint8Array,
+  toErgoBoxProxyIterator,
+} from './utils';
 
 export class CommitmentTx {
   private static _instance?: CommitmentTx;
@@ -106,6 +112,7 @@ export class CommitmentTxBuilder {
   private permits: Array<ergoLib.ErgoBox> = [];
   private widBox: ergoLib.ErgoBox;
   private height: number;
+  private changeAddress: string;
   private boxIterator: Iterator<ergoLib.ErgoBox, undefined>;
 
   constructor(
@@ -244,6 +251,10 @@ export class CommitmentTxBuilder {
       4,
       ergoLib.Constant.from_coll_coll_byte([hexToUint8Array(this.wid)])
     );
+    boxBuilder.set_register_value(
+      5,
+      ergoLib.Constant.from_coll_coll_byte([Buffer.from('00', 'hex')])
+    );
 
     return boxBuilder.build();
   };
@@ -328,6 +339,222 @@ export class CommitmentTxBuilder {
       Buffer.from(this.wid, 'hex'),
     ]);
     return blake2b(content, undefined, 32);
+  }
+
+  /**
+   * build an unsigned transaction which spends wid and permit boxes to generate
+   * a commitment, wid and residual permit boxes
+   *
+   * @param {number} creationHeight
+   * @return {Promise<{
+   *     unsignedTx: ergoLib.UnsignedTransaction;
+   *     inputBoxes: ergoLib.ErgoBox[];
+   *   }>}
+   * @memberof CommitmentTxBuilder
+   */
+  build = async (): Promise<{
+    unsignedTx: ergoLib.UnsignedTransaction;
+    inputBoxes: ergoLib.ErgoBox[];
+  }> => {
+    const residualRwtCount =
+      this.permits
+        .map((permit) =>
+          BigInt(permit.tokens().get(0).amount().as_i64().to_str())
+        )
+        .reduce((sum, val) => sum + val, 0n) -
+      this.rwtRepo.getCommitmentRwtCount();
+
+    const outputBoxes: ergoLib.ErgoBoxCandidate[] = [
+      this.createPermitBox(residualRwtCount),
+      this.createCommitmentBox(),
+    ];
+
+    const inputBoxes: ergoLib.ErgoBox[] = [this.widBox, ...this.permits];
+
+    const outputValue = outputBoxes
+      .map((box) => BigInt(box.value().as_i64().to_str()))
+      .reduce((sum, val) => sum + val, 0n);
+    const inputValue = inputBoxes
+      .map((box) => BigInt(box.value().as_i64().to_str()))
+      .reduce((sum, val) => sum + val, 0n);
+    const safeMinBoxValue = BigInt(
+      ergoLib.BoxValue.SAFE_USER_MIN().as_i64().to_str()
+    );
+    const requiredValue =
+      outputValue - inputValue + BigInt(this.txFee) + 2n * safeMinBoxValue;
+
+    let payBoxes: ergoLib.ErgoBox[] = [];
+    if (requiredValue > 0) {
+      const { covered, boxes: payProxyBoxes } = await selectErgoBoxes(
+        { nativeToken: requiredValue, tokens: [] },
+        [],
+        new Map(),
+        toErgoBoxProxyIterator(this.boxIterator),
+        this.logger
+      );
+
+      if (!covered) {
+        throw new Error(
+          `boxes in box iterator are not enough to cover value=[${requiredValue}]`
+        );
+      }
+
+      payBoxes = payProxyBoxes.map((proxyBox) =>
+        ergoLib.ErgoBox.from_json(JsonBigInt.stringify(proxyBox))
+      );
+    }
+    if (payBoxes.length > 0) {
+      this.logger?.debug(
+        `boxes with following ids where selected from box iterator: [${payBoxes
+          .map((box) => box.box_id().to_str())
+          .join(', ')}]`
+      );
+    }
+    const payBoxesValue = payBoxes
+      .map((box) => BigInt(box.value().as_i64().to_str()))
+      .reduce((sum, val) => sum + val, 0n);
+    inputBoxes.push(...payBoxes);
+
+    let changeValue = payBoxesValue - requiredValue + safeMinBoxValue;
+
+    const extraTokensBox = this.getExtraTokensBox(
+      inputBoxes,
+      outputBoxes,
+      changeValue
+    );
+    if (extraTokensBox.tokens().len() > 0) {
+      outputBoxes.push(this.getOutputWidBox());
+      outputBoxes.push(extraTokensBox);
+    } else {
+      changeValue += safeMinBoxValue;
+      outputBoxes.push(this.getOutputWidBox(changeValue));
+    }
+
+    const inputErgoBoxes = ergoLib.ErgoBoxes.empty();
+    inputBoxes.forEach((box) => inputErgoBoxes.add(box));
+    const ergoBoxCandidates = ergoLib.ErgoBoxCandidates.empty();
+    outputBoxes.forEach((box) => ergoBoxCandidates.add(box));
+    const txBuilder = ergoLib.TxBuilder.new(
+      new ergoLib.BoxSelection(
+        inputErgoBoxes,
+        new ergoLib.ErgoBoxAssetsDataList()
+      ),
+      ergoBoxCandidates,
+      this.height,
+      ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(this.txFee)),
+      ergoLib.Address.from_base58(this.changeAddress)
+    );
+
+    const unsignedTx = txBuilder.build();
+    this.logger?.info(
+      `unsigned commitment transaction built with id=[${unsignedTx
+        .id()
+        .to_str()}]`
+    );
+    this.logger?.debug(
+      `built unsigned commitment transaction in json format: [${unsignedTx.to_json()}]`
+    );
+
+    return { unsignedTx, inputBoxes };
+  };
+
+  /**
+   * creates an output wid box to be used in commitment transaction
+   *
+   * @private
+   * @param {number} creationHeight
+   * @return {ergoLib.ErgoBoxCandidate}
+   * @memberof CommitmentTxBuilder
+   */
+  private getOutputWidBox = (
+    changeValue?: bigint
+  ): ergoLib.ErgoBoxCandidate => {
+    const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+      changeValue
+        ? ergoLib.BoxValue.from_i64(
+            ergoLib.I64.from_str(changeValue.toString())
+          )
+        : ergoLib.BoxValue.SAFE_USER_MIN(),
+      ergoLib.Contract.new(this.widBox.ergo_tree()),
+      this.height
+    );
+    boxBuilder.add_token(
+      ergoLib.TokenId.from_str(this.wid),
+      ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str('1'))
+    );
+
+    return boxBuilder.build();
+  };
+
+  /**
+   * creates an output box with remaining tokens to be used in commitment
+   * transaction and the change value
+   *
+   * @private
+   * @param {ergoLib.ErgoBoxCandidate[]} inputBoxes
+   * @param {number} creationHeight
+   * @return {ergoLib.ErgoBoxCandidate}
+   * @memberof CommitmentTxBuilder
+   */
+  private getExtraTokensBox = (
+    inputBoxes: ergoLib.ErgoBox[],
+    outputBoxes: ergoLib.ErgoBoxCandidate[],
+    changeValue: bigint
+  ): ergoLib.ErgoBoxCandidate => {
+    const tokens = new Map<string, bigint>();
+    for (const box of inputBoxes) {
+      for (let i = 0; i < box.tokens().len(); i++) {
+        const token = box.tokens().get(i);
+        const tokenId = token.id().to_str();
+        if (tokenId === this.wid) {
+          continue;
+        }
+        const tokenAmount = BigInt(token.amount().as_i64().to_str());
+        tokens.set(tokenId, tokenAmount + (tokens.get(tokenId) || 0n));
+      }
+    }
+
+    for (const box of outputBoxes) {
+      for (let i = 0; i < box.tokens().len(); i++) {
+        const token = box.tokens().get(i);
+        const tokenId = token.id().to_str();
+        const tokenAmount = BigInt(token.amount().as_i64().to_str());
+        tokens.set(tokenId, (tokens.get(tokenId) || 0n) - tokenAmount);
+      }
+    }
+
+    const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+      ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(changeValue.toString())),
+      ergoLib.Contract.pay_to_address(
+        ergoLib.Address.from_base58(this.changeAddress)
+      ),
+      this.height
+    );
+
+    tokens.forEach((amount, id) => {
+      if (amount > 0) {
+        boxBuilder.add_token(
+          ergoLib.TokenId.from_str(id),
+          ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(amount.toString()))
+        );
+      } else if (amount < 0) {
+        throw new Error(
+          `there is ${-amount} more tokens with id=${id} in outputs than inputs`
+        );
+      }
+    });
+
+    return boxBuilder.build();
+  };
+
+  /**
+   * sets change address to be used in commitment transaction
+   *
+   * @param {string} address
+   * @memberof CommitmentTxBuilder
+   */
+  setChangeAddress(address: string) {
+    this.changeAddress = address;
   }
 }
 

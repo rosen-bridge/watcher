@@ -1,8 +1,9 @@
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CommitmentTx, CommitmentTxBuilder, toScriptHash } from '../lib';
 import {
+  changeAddress,
   commitmentTxParams,
   observationEntity1,
   samplePermitBoxes,
@@ -94,6 +95,8 @@ describe('CommitmentTxBuilder', () => {
   let commitmentTxBuilder: CommitmentTxBuilder;
 
   beforeEach(() => {
+    vi.resetAllMocks();
+
     const permitScriptHash = toScriptHash(commitmentTxParams.permitAddress);
 
     commitmentTxBuilder = new CommitmentTxBuilder(
@@ -393,6 +396,316 @@ describe('CommitmentTxBuilder', () => {
           'hex'
         )
       ).toEqual(commitmentTxBuilder['permitScriptHash']);
+    });
+  });
+
+  describe('build', () => {
+    /**
+     * @target should build an unsigned transaction to generate a commitment
+     * when there are residual tokens.
+     * @dependencies
+     * @scenario
+     * - setup box data
+     * - call setBoxIterator with an iterator that generates a box with an extra
+     *   token
+     * - call build
+     * - check expected functions to have been called
+     * - check transaction output boxes
+     * @expected
+     * - createPermitBox should have been called
+     * - createCommitmentBox should have been called
+     * - getOutputWidBox should have been called
+     * - getExtraTokensBox should have been called
+     * - getChangeBox should have been called
+     * - transaction output boxes should include the commitment box
+     * - transaction output boxes should include the permit box with right
+     *   amount of rwt
+     * - transaction output boxes should include the wid box
+     * - transaction output boxes should include the residual tokens box with
+     *   the right token id and amount
+     */
+    it(`should build an unsigned transaction to generate a commitment when there
+    are residual tokens.`, async () => {
+      // setup box data
+      const wid = widBox.assets[0].tokenId;
+      commitmentTxBuilder.setWid(wid);
+
+      commitmentTxBuilder.setWidBox(
+        ergoLib.ErgoBox.from_json(JsonBigInt.stringify(widBox))
+      );
+
+      const permitBoxes = samplePermitBoxes
+        .slice(0, 2)
+        .map((boxJson) =>
+          ergoLib.ErgoBox.from_json(JsonBigInt.stringify(boxJson))
+        );
+      commitmentTxBuilder.addPermits(permitBoxes);
+
+      commitmentTxBuilder.setChangeAddress(changeAddress);
+
+      const height = 100;
+      commitmentTxBuilder.setCreationHeight(height);
+
+      // call setBoxIterator with an iterator that generates a box with an extra
+      // token
+      const extraTokenId =
+        'abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234';
+      const extraTokenAmount = 3000n;
+      const boxIterator = {
+        next: (): IteratorResult<ergoLib.ErgoBox, undefined> => {
+          const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+            ergoLib.BoxValue.from_i64(ergoLib.I64.from_str('20000000000')),
+            ergoLib.Contract.pay_to_address(
+              ergoLib.Address.from_base58(changeAddress)
+            ),
+            height - 10
+          );
+          boxBuilder.add_token(
+            ergoLib.TokenId.from_str(extraTokenId),
+            ergoLib.TokenAmount.from_i64(
+              ergoLib.I64.from_str(extraTokenAmount.toString())
+            )
+          );
+
+          const fakeTxId = ergoLib.TxId.from_str(
+            '8c494da0242fd04ecb4efd3d9de11813848c79b38592f29d579836dfbc459f96'
+          );
+          const fakeBoxIndex = 0;
+
+          const box = ergoLib.ErgoBox.from_box_candidate(
+            boxBuilder.build(),
+            fakeTxId,
+            fakeBoxIndex
+          );
+
+          return { value: box, done: false };
+        },
+      };
+      commitmentTxBuilder.setBoxIterator(boxIterator);
+
+      const createPermitBoxSpy = vi.spyOn(
+        commitmentTxBuilder as any,
+        'createPermitBox'
+      );
+      const createCommitmentBoxSpy = vi.spyOn(
+        commitmentTxBuilder as any,
+        'createCommitmentBox'
+      );
+      const getOutputWidBoxSpy = vi.spyOn(
+        commitmentTxBuilder as any,
+        'getOutputWidBox'
+      );
+      const getExtraTokensBoxSpy = vi.spyOn(
+        commitmentTxBuilder as any,
+        'getExtraTokensBox'
+      );
+
+      // call build
+      const { unsignedTx } = await commitmentTxBuilder.build();
+
+      const residualRwtCount =
+        permitBoxes
+          .map((permit) =>
+            BigInt(permit.tokens().get(0).amount().as_i64().to_str())
+          )
+          .reduce((sum, val) => sum + val, 0n) -
+        commitmentTxBuilder['rwtRepo'].getCommitmentRwtCount();
+
+      const fakeTxId = ergoLib.TxId.from_str(
+        '8c494da0242fd04ecb4efd3d9de11813848c79b38592f29d579836dfbc459f96'
+      );
+      const fakeBoxIndex = 0;
+      const toFakeErgoBox = (box: ergoLib.ErgoBoxCandidate) =>
+        ergoLib.ErgoBox.from_box_candidate(box, fakeTxId, fakeBoxIndex);
+      const outputBoxes: ergoLib.ErgoBoxCandidate[] = [];
+      for (let i = 0; i < unsignedTx.output_candidates().len(); i++) {
+        outputBoxes.push(unsignedTx.output_candidates().get(i));
+      }
+      const outputBoxIds = outputBoxes.map((box) =>
+        toFakeErgoBox(box).box_id().to_str()
+      );
+      const widOutputBox = outputBoxes.filter(
+        (box) => box.tokens().len() && box.tokens().get(0).id().to_str() === wid
+      )[0];
+      const extraTokenBox = outputBoxes.filter((box) => {
+        for (let i = 0; i < box.tokens().len(); i++) {
+          if (box.tokens().get(i).id().to_str() === extraTokenId) {
+            return true;
+          }
+        }
+        return false;
+      })[0];
+
+      // check expected functions to have been called
+      expect(createPermitBoxSpy).toHaveBeenCalledOnce();
+      expect(createCommitmentBoxSpy).toHaveBeenCalledOnce();
+      expect(getOutputWidBoxSpy).toHaveBeenCalledOnce();
+      expect(getExtraTokensBoxSpy).toHaveBeenCalledOnce();
+
+      // check transaction output boxes
+      expect(outputBoxIds).toContainEqual(
+        toFakeErgoBox(commitmentTxBuilder['createCommitmentBox']())
+          .box_id()
+          .to_str()
+      );
+
+      expect(outputBoxIds).toContainEqual(
+        toFakeErgoBox(commitmentTxBuilder['createPermitBox'](residualRwtCount))
+          .box_id()
+          .to_str()
+      );
+
+      expect(widOutputBox.tokens().get(0).id().to_str()).toEqual(wid);
+      expect(widOutputBox.tokens().get(0).amount().as_i64().to_str()).toEqual(
+        '1'
+      );
+
+      expect(extraTokenBox.tokens().len()).toEqual(1);
+      expect(extraTokenBox.tokens().get(0).id().to_str()).toEqual(extraTokenId);
+      expect(extraTokenBox.tokens().get(0).amount().as_i64().to_str()).toEqual(
+        extraTokenAmount.toString()
+      );
+    });
+
+    /**
+     * @target should build an unsigned transaction to generate a commitment
+     * when there are no residual tokens.
+     * @dependencies
+     * @scenario
+     * - setup transaction data
+     * - call setBoxIterator with an iterator that generates a box with no extra
+     *   tokens
+     * - call build
+     * - check expected functions to have been called
+     * - check transaction output boxes
+     * @expected
+     * - createPermitBox should have been called
+     * - createCommitmentBox should have been called
+     * - getOutputWidBox should have been called
+     * - getChangeBox should have been called
+     * - transaction output boxes should include the commitment box
+     * - transaction output boxes should include the permit box with right
+     *   amount of rwt
+     * - transaction output boxes should include the wid box
+     */
+    it(`should build an unsigned transaction to generate a commitment when there
+    are no residual tokens.`, async () => {
+      // setup transaction data
+      const wid = widBox.assets[0].tokenId;
+      commitmentTxBuilder.setWid(wid);
+
+      commitmentTxBuilder.setWidBox(
+        ergoLib.ErgoBox.from_json(JsonBigInt.stringify(widBox))
+      );
+
+      const permitBoxes = samplePermitBoxes
+        .slice(0, 2)
+        .map((boxJson) =>
+          ergoLib.ErgoBox.from_json(JsonBigInt.stringify(boxJson))
+        );
+      commitmentTxBuilder.addPermits(permitBoxes);
+
+      commitmentTxBuilder.setChangeAddress(changeAddress);
+
+      const height = 100;
+      commitmentTxBuilder.setCreationHeight(height);
+
+      // call setBoxIterator with an iterator that generates a box with no extra
+      // tokens
+      const boxIterator = {
+        next: (): IteratorResult<ergoLib.ErgoBox, undefined> => {
+          const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+            ergoLib.BoxValue.from_i64(ergoLib.I64.from_str('20000000000')),
+            ergoLib.Contract.pay_to_address(
+              ergoLib.Address.from_base58(changeAddress)
+            ),
+            height - 10
+          );
+
+          const fakeTxId = ergoLib.TxId.from_str(
+            '8c494da0242fd04ecb4efd3d9de11813848c79b38592f29d579836dfbc459f96'
+          );
+          const fakeBoxIndex = 0;
+
+          const box = ergoLib.ErgoBox.from_box_candidate(
+            boxBuilder.build(),
+            fakeTxId,
+            fakeBoxIndex
+          );
+
+          return { value: box, done: false };
+        },
+      };
+      commitmentTxBuilder.setBoxIterator(boxIterator);
+
+      const createPermitBoxSpy = vi.spyOn(
+        commitmentTxBuilder as any,
+        'createPermitBox'
+      );
+      const createCommitmentBoxSpy = vi.spyOn(
+        commitmentTxBuilder as any,
+        'createCommitmentBox'
+      );
+      const getOutputWidBoxSpy = vi.spyOn(
+        commitmentTxBuilder as any,
+        'getOutputWidBox'
+      );
+      const getExtraTokensBoxSpy = vi.spyOn(
+        commitmentTxBuilder as any,
+        'getExtraTokensBox'
+      );
+
+      // call build
+      const { unsignedTx } = await commitmentTxBuilder.build();
+
+      const residualRwtCount =
+        permitBoxes
+          .map((permit) =>
+            BigInt(permit.tokens().get(0).amount().as_i64().to_str())
+          )
+          .reduce((sum, val) => sum + val, 0n) -
+        commitmentTxBuilder['rwtRepo'].getCommitmentRwtCount();
+
+      const fakeTxId = ergoLib.TxId.from_str(
+        '8c494da0242fd04ecb4efd3d9de11813848c79b38592f29d579836dfbc459f96'
+      );
+      const fakeBoxIndex = 0;
+      const toFakeErgoBox = (box: ergoLib.ErgoBoxCandidate) =>
+        ergoLib.ErgoBox.from_box_candidate(box, fakeTxId, fakeBoxIndex);
+      const outputBoxes: ergoLib.ErgoBoxCandidate[] = [];
+      for (let i = 0; i < unsignedTx.output_candidates().len(); i++) {
+        outputBoxes.push(unsignedTx.output_candidates().get(i));
+      }
+      const outputBoxIds = outputBoxes.map((box) =>
+        toFakeErgoBox(box).box_id().to_str()
+      );
+      const widOutputBox = outputBoxes.filter(
+        (box) => box.tokens().len() && box.tokens().get(0).id().to_str() === wid
+      )[0];
+
+      // check expected functions to have been called
+      expect(createPermitBoxSpy).toHaveBeenCalledOnce();
+      expect(createCommitmentBoxSpy).toHaveBeenCalledOnce();
+      expect(getOutputWidBoxSpy).toHaveBeenCalledOnce();
+      expect(getExtraTokensBoxSpy).toHaveBeenCalledOnce();
+
+      // check transaction output boxes
+      expect(outputBoxIds).toContainEqual(
+        toFakeErgoBox(commitmentTxBuilder['createCommitmentBox']())
+          .box_id()
+          .to_str()
+      );
+
+      expect(outputBoxIds).toContainEqual(
+        toFakeErgoBox(commitmentTxBuilder['createPermitBox'](residualRwtCount))
+          .box_id()
+          .to_str()
+      );
+
+      expect(widOutputBox.tokens().get(0).id().to_str()).toEqual(wid);
+      expect(widOutputBox.tokens().get(0).amount().as_i64().to_str()).toEqual(
+        '1'
+      );
     });
   });
 });
