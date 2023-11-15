@@ -1,5 +1,4 @@
 import JsonBigInt from '@rosen-bridge/json-bigint';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { ErgoNetworkType } from '@rosen-bridge/scanner';
 import { blake2b } from 'blakejs';
@@ -77,10 +76,10 @@ export const triggerTxParams = {
   triggerAddress:
     'BRNzuPCshtnBeoxCJ8iQiVbfd6yZNTf3KfxSfpsfDeC18pKRVoNNgDUo91X8TQRdLcnRwFHCU7doEUu4vciu5sfQbKyyd5FQD2x4X24eJFyR52vTtE4sVP46utpskdbwB9C3By3ueXBuDF6gmT6o83tN5b9wPjXtdpJowqgu2ZLDruYsqEdrPgGLsE1rfvBJM2NCYH9Gcp2UvJSGMiCu1p4XiLg1HpFhvcUz4wFwYFPBdUwoZVjERf6VVHv2hWzybdfxLBSEBPGys9xLPX4ck8Ms2LgBdX9GsAiXDnmrJ4A1NHqbJUZzUBfHEBUUUR94nJCoGfyAaFvDBafbouRuxe1MkArntvv6j6CQYe436e4hfZmrnC8aHGUaMvXQjtCwp4sF3yXe6c7Gf8GKw9LT1Tsk6AbMy4nP1X8jmaztJJhc8f7yopXSPEGM7JyNBNHyvp',
   permitAddress:
-    'EE7687i4URb4YuSGSQXPCbAjMfN4dUt5Qx8BqKZJiZhDY8fdnSUwcAGqAsqfn1tW1byXB8nDrgkFzkAFgaaempKxfcPtDzAbnu9QfknzmtfnLYHdxPPg7Qtjy7jK5yUpPQ2M4Ps3h5kH57xWDJxcKviEMY11rQnxATjTKTQgGtfzsAPpqsUyT2ZpVYsFzUGJ4nSj4WaDZSU1Hovv6dPkSTArLQSjp38wE72ae6hbNJwXGkqgfBtdVXcZVtnqevw9xUNcE6i942CQ9hVMfbdRobnsaLgsDLQomsh8jLMXqkMde5qH2vGBUqnLKgjxCZaa7vStpPXT5EuzLn9napGwUcbJjgRk69FsRSfCrcydZbYxw4Gnh6ZB9at2USpwL1HdVkHVh8M6Kbw6ppRfeG4JeFsUw33H4sSRk6UPqfuFcRUf7Cec2vmPezXTPT7CXQqEeCjxmWXqfyEQUfnCwpiH5fQ9A8CQ3jTyFhxBTpoGDdtiVCmhqhKxjh9M7gcjpr1dUjGMCWxjir94ejfq24XQrSscrZuUT5NVHTWAkzQ',
+    'FxMs5S8B9DA3Ecw7taWSSRefYESRzAmeznhb9sdp7KR2ZCe9NMzHj4PRWLimyFLvAv2nD3QtmPneFoWjVqJsgSMjV5wijdkz14a5WogmvKSbUe4WjVWuW7GLEnSnMaVZ56cdLk53pzZ7exKc5hhiAjeFJDzjjm1Dqt1RoEWgkUJuaW6Mm9FMiJhq9WYJVVEDzpkL6VYhrYWMLG3J5tB1ji7aTwTGmaCapEtRo7RCmMMMYhBssBxY4putUJxHV4RsD6k9pYMuz2jrsSRWZrUbtTLkhiifSpPCEmHNrPJiSFQSVDWr3gfqmPgkJxbxTGyz7vexUCcLqGHxMaBGsPoaSod9GNqo62Gik8eRUjr8zkuYU6tD9hfPUHCzEr6xyGbrGtrmczigHmD8a1HXh1DKu4xt8eMGws5CCgq6cFZpssQEakHtPnD3kTmsKNjM6KpnReWguNxqYERZYLhfGqTZ4vNFEmj88qTJWUzVu65DbpcGu6vzpZ93BfJ7KA7a1v',
   permitBoxValue: 2_00_000n,
   commitmentAddress:
-    'EE7687i4URb4YuSGSQXPCbAjMfN4dUt5Qx8BqKZJiZhDY8fdnSUwcAGqAsqfn1tW1byXB8nDrgkFzkAFgaaempKxfcPtDzAbnu9QfknzmtfnLYHdxPPg7Qtjy7jK5yUpPQ2M4Ps3h5kH57xWDJxcKviEMY11rQnxATjTKTQgGtfzsAPpqsUyT2ZpVYsFzUGJ4nSj4WaDZSU1Hovv6dPkSTArLQSjp38wE72ae6hbNJwXGkqgfBtdVXcZVtnqevw9xUNcE6i942CQ9hVMfbdRobnsaLgsDLQomsh8jLMXqkMde5qH2vGBUqnLKgjxCZaa7vStpPXT5EuzLn9napGwUcbJjgRk69FsRSfCrcydZbYxw4Gnh6ZB9at2USpwL1HdVkHVh8M6Kbw6ppRfeG4JeFsUw33H4sSRk6UPqfuFcRUf7Cec2vmPezXTPT7CXQqEeCjxmWXqfyEQUfnCwpiH5fQ9A8CQ3jTyFhxBTpoGDdtiVCmhqhKxjh9M7gcjpr1dUjGMCWxjir94ejfq24XQrSscrZuUT5NVHTWAkzQ',
+    '4YCK14N7W9YbyjptY8DSQeeQamjxynHZsRaxXZN7TTHDJtMR5qtkMQzzkkNu9SXkYjVYpgcRuHXg7MiEY5PUYwyhPSaKGhPWrCvYjV9oTuwWRrSdBgVh9qsw5jAhS38ft9b8daJqTHsrqMmguCDuqu6wQ7p8nd6ZrCXkih9QL6HtdoFkYATQQ4NnVaZepHV6EQ7jF5G5SiHnMzXr8ea3NqDkybhtMxsA1p8TXrt2FyDvXUeS5hoApNHvL56bxTypBnw2bi6PHnFyVTWwbZn91nqt3vQxRzVAu4kpxfmkMvnwfcDQPMKvsrVAavJKPc17DgRdumezfxU1ktQBj5mTwghdbC3AsCEQyMHG3SsLM8Gi68rr9GWs4C3msumYQfKMhcyNMAcibkW7VfGgMFBCJ1QXmJAm4P9x2ZP8WELKU4eYHXD3CbDMBwYBTkQFGm5pWsQdFRw1fa7hs4cZxQYp4vghFjVtHV5r9TXy8VhvCPKw9jv4TLdqPEG3GZ4paU9vqetHFPuHkXoK55Jwa3LW78mjqzotNuBK4BVGcwJiqp3XUpfuwLX9TVqeaTh3oogRPZLvNGV4uS8HoqCge7rqGDFSMXZAViQyL9A9tSiUVzyvL28ugGWDxpsUoe3bhGRipTEMcAkdFqGCvrhpxCow7VJS5sXj5y4CbsBMJ3bV1opihoqUmeYoZi5FZJPka4vA29dDS2qftsvWngEXEmWaCbxNfUiEGKY6shJHGczY3kf7qWhU9tYgWeA2DEjKzCB2rd2uGDSfk73RBbMZk1R6g59rkucuTTz1YJCLmSxuogBjzuZVYG8C4Lx4VR3ysSHFDikBmEaYoV6Kpt8aNdrEgb75Bfs6YLqVKeQX3KPPm4nFmY9i1GxpzJCGxPyR8Rni9ivZSt11S7orzWZFAKSX3CEzCHKrCci6NmoWo5JiTZNpN3fCDd',
   commitmentBoxValue: 4_000_000n,
   rwt: '3825b2b4acaaaba626440113153246c65ddb2e9df406c4a56418b5842c9f839a',
   txFee: '50',
@@ -109,22 +108,27 @@ triggerTxParams.rwtRepo['box'] = ergoLib.ErgoBox.from_json(
   JsonBigInt.stringify(sampleRwtRepoboxInfo)
 );
 
-export const observationEntity1 = new ObservationEntity();
-observationEntity1.height = 1;
-observationEntity1.amount = '10';
-observationEntity1.extractor = 'observation-extractor';
-observationEntity1.bridgeFee = '100';
-observationEntity1.fromAddress = 'fromAddress';
-observationEntity1.block = 'blockHash';
-observationEntity1.fromChain = 'ergo';
-observationEntity1.networkFee = '1000';
-observationEntity1.sourceBlockId = 'block';
-observationEntity1.sourceTxId = 'txId';
-observationEntity1.sourceChainTokenId = 'sourceToken';
-observationEntity1.toAddress = 'addr1';
-observationEntity1.targetChainTokenId = 'targetToken';
-observationEntity1.toChain = 'cardano';
-observationEntity1.requestId = '32ab59cd';
+export const observationEntity1 = {
+  id: 12,
+  requestId: 'abcd',
+  extractor: 'abcdef',
+  block: 'abcd12',
+  sourceTxId:
+    'd2fcec9822293180e08a4a599c9b8610d73f81edcfa37b92ec33c3ab3c66d322',
+  fromChain: 'ergo',
+  toChain: 'cardano',
+  fromAddress: '9gcrKn7L5Ln3rRsjFoSEkEsovUdb5JR5d6o2vHQV5FCXXNkkEAD',
+  toAddress:
+    'addr1q9nwglllt7j00yf40wveac2tgtmxxy7y06nturs6l83wn9g37djlnz5hmmmkxenxl8mwql6h96gu7ztphgxjf0ngwhfqwadm7d',
+  amount: '4881434757',
+  bridgeFee: '2000000000',
+  networkFee: '800000000',
+  sourceChainTokenId: 'erg',
+  targetChainTokenId: 'asset12dzcylmey8mzqf4lqx7lu3tlnevwrtq4vurj82',
+  sourceBlockId:
+    '9a6222a3aedc6cb130abc4b034ac892ec954fdd1aa4faf7912a52c9ecf9099e6',
+  height: 1081640,
+};
 
 export const changeAddress =
   '3Wz6tWxrJu6rPspDGCbB9SzmmhN6nMpfyrhTdJLtCdE6UKV2uJZu';
