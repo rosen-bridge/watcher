@@ -61,8 +61,9 @@ export class TriggerTxBuilder {
    * @return {TriggerTxBuilder}
    */
   addCommitment = (commitment: ergoLib.ErgoBox): TriggerTxBuilder => {
-    this.validateCommitment(commitment);
+    const wid = this.validateCommitment(commitment);
     this.commitments.push(commitment);
+    this.wids.push(wid);
     this.logger?.debug(
       `added new commitment with boxId=[${commitment
         .box_id()
@@ -79,8 +80,9 @@ export class TriggerTxBuilder {
    *
    * @private
    * @param {ergoLib.ErgoBox} commitment
+   * @return {string} the wid of passed commitment
    */
-  private validateCommitment = (commitment: ergoLib.ErgoBox): void => {
+  private validateCommitment = (commitment: ergoLib.ErgoBox): string => {
     if (
       this.commitments.some(
         (box) => box.box_id().to_str() === commitment.box_id().to_str()
@@ -138,6 +140,8 @@ export class TriggerTxBuilder {
         `commitment doesn't have the correct event digest for wid=[${wid}] and observationId=[${this.observation.id}]`
       );
     }
+
+    return wid;
   };
 
   /**
