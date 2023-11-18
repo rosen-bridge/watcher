@@ -2,8 +2,8 @@ import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { ErgoNetworkType } from '@rosen-bridge/scanner';
-import { blake2b } from 'blakejs';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
+import { toScriptHash } from '../lib/utils';
 
 export const sampleRwtRepoboxInfo = {
   boxId: 'e95d2f7eab31c379345a5325949509789f690f90bac6f7c56c6e3c2a958869a2',
@@ -93,18 +93,7 @@ export const triggerTxParams = {
   ),
   permitScriptHash: '',
 };
-triggerTxParams.permitScriptHash = Buffer.from(
-  blake2b(
-    Buffer.from(
-      ergoLib.Address.from_base58(triggerTxParams.permitAddress)
-        .to_ergo_tree()
-        .to_base16_bytes(),
-      'hex'
-    ),
-    undefined,
-    32
-  )
-).toString('hex');
+triggerTxParams.permitScriptHash = toScriptHash(triggerTxParams.permitAddress);
 triggerTxParams.rwtRepo['box'] = ergoLib.ErgoBox.from_json(
   JsonBigInt.stringify(sampleRwtRepoboxInfo)
 );
