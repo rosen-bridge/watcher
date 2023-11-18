@@ -9,6 +9,7 @@ import {
   sampleRwtRepoboxInfo,
   triggerTxParams,
 } from './triggerTxTestData';
+import { hexToUint8Array, uint8ArrayToHex } from '../lib/utils';
 
 describe('TriggerTxBuilder', () => {
   let triggerTxBuilder: TriggerTxBuilder;
@@ -124,6 +125,67 @@ describe('TriggerTxBuilder', () => {
           .map((box) => box.box_id().to_str())
           .sort()
       ).toEqual(commitments.map((box) => box.box_id().to_str()).sort());
+    });
+  });
+
+  describe('createTriggerBox', () => {
+    /**
+     * @target should create a trigger box from instance's properties
+     * @dependencies
+     * @scenario
+     * - setup triggerTxBuilder instance
+     * - call createTriggerBox
+     * - check returned box to have the right properties set
+     * @expected
+     * - returned box should have the right properties set
+     */
+    it(`should create a trigger box from instance's properties`, async () => {
+      const height = 100;
+      triggerTxBuilder.setCreationHeight(height);
+
+      const commitments = sampleCommitmentBoxes
+        .slice(0, 3)
+        .map((boxInfo) =>
+          ergoLib.ErgoBox.from_json(JsonBigInt.stringify(boxInfo))
+        );
+      commitments.forEach((commitment) =>
+        triggerTxBuilder.addCommitment(commitment)
+      );
+
+      const rsnValue =
+        BigInt(triggerTxBuilder['wids'].length) *
+        triggerTxBuilder['rwtRepo'].getCommitmentRwtCount();
+      const value = 10_000_000_000n;
+      const triggerBox = triggerTxBuilder['createTriggerBox'](rsnValue, value);
+
+      expect(triggerBox.value().as_i64().to_str()).toEqual(value.toString());
+
+      expect(
+        ergoLib.Address.recreate_from_ergo_tree(
+          triggerBox.ergo_tree()
+        ).to_base58(ergoLib.NetworkPrefix.Mainnet)
+      ).toEqual(triggerTxBuilder['triggerAddress']);
+
+      expect(triggerBox.creation_height()).toEqual(height);
+
+      expect(triggerBox.tokens().get(0).id().to_str()).toEqual(
+        triggerTxBuilder['rwt']
+      );
+      expect(triggerBox.tokens().get(0).amount().as_i64().to_str()).toEqual(
+        rsnValue.toString()
+      );
+
+      expect(triggerBox.register_value(4)?.to_coll_coll_byte()).toEqual(
+        triggerTxBuilder['wids'].map((wid) => hexToUint8Array(wid))
+      );
+
+      expect(triggerBox.register_value(5)!.to_coll_coll_byte()).toEqual(
+        triggerTxBuilder['eventData'].map((data) => new Uint8Array(data))
+      );
+
+      expect(
+        uint8ArrayToHex(triggerBox.register_value(6)!.to_byte_array())
+      ).toEqual(triggerTxBuilder['permitScriptHash']);
     });
   });
 });
