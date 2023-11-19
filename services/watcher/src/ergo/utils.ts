@@ -21,6 +21,7 @@ import {
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
   ERGO_NATIVE_ASSET_NAME,
+  ERGO_WATCHER,
 } from '../config/constants';
 import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
@@ -531,10 +532,13 @@ export class ErgoUtils {
       chartMap.set(record.tokenId, chartRecords);
     });
     // transform chartMap to json
-    const jsonObject: { title: string; data: Array<ChartRecord> }[] = [];
+    const jsonObject: {
+      title: Omit<TokenData, 'amount'>;
+      data: Array<ChartRecord>;
+    }[] = [];
     chartMap.forEach((records, tokenId) => {
       jsonObject.push({
-        title: tokenId,
+        title: this.tokenDetailByTokenMap(tokenId, ERGO_WATCHER),
         data: records,
       });
     });
