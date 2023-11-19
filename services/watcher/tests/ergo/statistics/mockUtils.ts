@@ -314,11 +314,23 @@ const secondTokenId2Revenue = {
 
 const revenueWeeklyChart = [
   {
-    title: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    title: {
+      decimals: 6,
+      isNativeToken: false,
+      name: 'test token 3',
+      tokenId:
+        '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    },
     data: [{ label: '123379200000', amount: '10' }],
   },
   {
-    title: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    title: {
+      decimals: 0,
+      isNativeToken: false,
+      name: 'Unsupported token',
+      tokenId:
+        '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    },
     data: [
       { label: '123379200000', amount: '10' },
       { label: '0', amount: '1' },
@@ -328,22 +340,46 @@ const revenueWeeklyChart = [
 
 const revenueMonthlyChart = [
   {
-    title: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    title: {
+      decimals: 6,
+      isNativeToken: false,
+      name: 'test token 3',
+      tokenId:
+        '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    },
     data: [{ label: '0', amount: '10' }],
   },
   {
-    title: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    title: {
+      decimals: 0,
+      isNativeToken: false,
+      name: 'Unsupported token',
+      tokenId:
+        '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    },
     data: [{ label: '0', amount: '11' }],
   },
 ];
 
 const revenueYearlyChart = [
   {
-    title: '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    title: {
+      decimals: 6,
+      isNativeToken: false,
+      name: 'test token 3',
+      tokenId:
+        '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
+    },
     data: [{ label: '0', amount: '10' }],
   },
   {
-    title: '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    title: {
+      decimals: 0,
+      isNativeToken: false,
+      name: 'Unsupported token',
+      tokenId:
+        '3c6cb596273a737c3e111c31d3ec868b84676b7bad82f9888ad574b44edef267',
+    },
     data: [{ label: '0', amount: '11' }],
   },
 ];

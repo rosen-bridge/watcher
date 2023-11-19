@@ -27,7 +27,7 @@ export const scannerInit = () => {
   const config = allConfig.general;
   const cardanoConfig = allConfig.cardano;
   scanningJob(config.ergoInterval, scanner.ergoScanner).then(() => null);
-  if (config.networkWatcher === Constants.CARDANO_WATCHER) {
+  if (config.networkWatcher === Constants.CARDANO_CHAIN_NAME) {
     if (cardanoConfig.ogmios)
       (scanner.observationScanner as CardanoOgmiosScanner).start();
     else if (cardanoConfig.koios) {
