@@ -26,7 +26,7 @@ const events = [
     spendTxId: 'txId',
     lockToken: {
       decimals: 6,
-      isNative: false,
+      isNativeToken: false,
       name: 'test token 12',
       tokenId: 'tokenIdStar',
     },
@@ -58,7 +58,7 @@ const events = [
     spendTxId: 'txId',
     lockToken: {
       decimals: 6,
-      isNative: false,
+      isNativeToken: false,
       name: 'test token 12',
       tokenId: 'tokenIdStar',
     },
@@ -90,7 +90,7 @@ const events = [
     spendTxId: 'txId',
     lockToken: {
       decimals: 6,
-      isNative: false,
+      isNativeToken: false,
       name: 'test token 12',
       tokenId: 'tokenIdStar',
     },
@@ -122,7 +122,7 @@ const events = [
     spendTxId: 'txId2',
     lockToken: {
       decimals: 6,
-      isNative: false,
+      isNativeToken: false,
       name: 'test token 10',
       tokenId: 'tokenId',
     },
@@ -154,7 +154,7 @@ const events = [
     spendTxId: null,
     lockToken: {
       decimals: 6,
-      isNative: false,
+      isNativeToken: false,
       name: 'test token 11',
       tokenId: 'tokenId2',
     },
@@ -184,7 +184,7 @@ const observations = [
       tokenId: 'tokenId',
       name: 'test token 10',
       decimals: 6,
-      isNative: false,
+      isNativeToken: false,
     },
   },
   {
@@ -209,7 +209,7 @@ const observations = [
       tokenId: 'tokenId2',
       name: 'test token 11',
       decimals: 6,
-      isNative: false,
+      isNativeToken: false,
     },
   },
 ];

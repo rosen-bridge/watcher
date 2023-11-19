@@ -3,7 +3,7 @@ export interface TokenData {
   amount: bigint;
   decimals?: number;
   name?: string;
-  isNative?: boolean;
+  isNativeToken?: boolean;
 }
 
 export interface AddressBalance {
