@@ -1,5 +1,7 @@
 import { AbstractLogger } from '@rosen-bridge/abstract-logger';
+import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
+import { TriggerTxBuilder } from './triggerTxBuilder';
 
 export class TriggerTx {
   private static _instance?: TriggerTx;
@@ -29,7 +31,7 @@ export class TriggerTx {
    * @param {AbstractLogger} [logger]
    * @return {void}
    */
-  static init(
+  static init = (
     triggerAddress: string,
     commitmentAddress: string,
     permitAddress: string,
@@ -38,7 +40,7 @@ export class TriggerTx {
     txFee: string,
     rwtRepo: RWTRepo,
     logger?: AbstractLogger
-  ): void {
+  ): void => {
     if (TriggerTx._instance != undefined) {
       throw new Error('The singleton instance is already initialized.');
     }
@@ -53,5 +55,38 @@ export class TriggerTx {
       rwtRepo,
       logger
     );
-  }
+  };
+
+  /**
+   * return the singleton instance of TriggerTx
+   *
+   * @static
+   * @return {TriggerTx}
+   */
+  static getInstance = (): TriggerTx => {
+    if (!this._instance) {
+      throw new Error('TriggerTx instance is not initialized yet');
+    }
+    return this._instance;
+  };
+
+  /**
+   * creates a new instance of TriggerTxBuilder
+   *
+   * @param {ObservationEntity} observation
+   * @return {TriggerTxBuilder}
+   */
+  newBuilder = (observation: ObservationEntity): TriggerTxBuilder => {
+    return new TriggerTxBuilder(
+      this.triggerAddress,
+      this.commitmentAddress,
+      this.permitAddress,
+      this.changeAddress,
+      this.rwt,
+      this.txFee,
+      this.rwtRepo,
+      observation,
+      this.logger
+    );
+  };
 }
