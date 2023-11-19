@@ -18,7 +18,7 @@ import {
 import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
 import {
-  CARDANO_WATCHER,
+  CARDANO_CHAIN_NAME,
   OGMIOS_TYPE,
   KOIOS_TYPE,
   NODE_TYPE,
@@ -60,7 +60,7 @@ class HealthCheckSingleton {
     } else if (getConfig().general.scannerType === EXPLORER_TYPE) {
       this.registerErgoExplorerHealthCheckParams();
     }
-    if (getConfig().general.networkWatcher === CARDANO_WATCHER) {
+    if (getConfig().general.networkWatcher === CARDANO_CHAIN_NAME) {
       this.registerCardanoHealthCheckParams();
     }
   }

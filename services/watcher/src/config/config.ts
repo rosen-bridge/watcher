@@ -12,8 +12,8 @@ import { convertMnemonicToSecretKey } from '../utils/utils';
 import { ErgoNetworkType } from '@rosen-bridge/scanner';
 
 const supportedNetworks: Array<NetworkType> = [
-  Constants.ERGO_WATCHER,
-  Constants.CARDANO_WATCHER,
+  Constants.ERGO_CHAIN_NAME,
+  Constants.CARDANO_CHAIN_NAME,
 ];
 
 interface ConfigType {
@@ -244,7 +244,7 @@ class CardanoConfig {
 
   constructor(network: string) {
     this.type = config.get<string>('cardano.type');
-    if (network === Constants.CARDANO_WATCHER) {
+    if (network === Constants.CARDANO_CHAIN_NAME) {
       if (this.type === Constants.OGMIOS_TYPE) {
         const host = getRequiredString('cardano.ogmios.host');
         const port = getRequiredNumber('cardano.ogmios.port');

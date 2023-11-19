@@ -18,7 +18,7 @@ import { RevenueEntity } from '../../src/database/entities/revenueEntity';
 import { firstPermit, secondPermit } from '../ergo/statistics/mockUtils';
 
 export const ergoBlockEntity = new BlockEntity();
-ergoBlockEntity.scanner = Constants.ERGO_WATCHER;
+ergoBlockEntity.scanner = Constants.ERGO_CHAIN_NAME;
 ergoBlockEntity.id = 1;
 ergoBlockEntity.hash = 'blockHash';
 ergoBlockEntity.height = 1111;
@@ -27,7 +27,7 @@ ergoBlockEntity.status = PROCEED;
 ergoBlockEntity.timestamp = 123;
 
 export const cardanoBlockEntity = new BlockEntity();
-cardanoBlockEntity.scanner = Constants.CARDANO_WATCHER;
+cardanoBlockEntity.scanner = Constants.CARDANO_CHAIN_NAME;
 cardanoBlockEntity.id = 2;
 cardanoBlockEntity.hash = 'blockHash2';
 cardanoBlockEntity.height = 2222;

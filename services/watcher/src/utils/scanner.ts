@@ -51,7 +51,7 @@ class CreateScanner {
 
   constructor() {
     this.createErgoScanner();
-    if (config.networkWatcher === Constants.CARDANO_WATCHER)
+    if (config.networkWatcher === Constants.CARDANO_CHAIN_NAME)
       this.createCardanoScanner();
     if (!this.observationScanner)
       throw Error(
@@ -88,7 +88,7 @@ class CreateScanner {
       ergoScannerConfig,
       loggers.scannerLogger
     );
-    if (config.networkWatcher === Constants.ERGO_WATCHER) {
+    if (config.networkWatcher === Constants.ERGO_CHAIN_NAME) {
       this.observationScanner = this.ergoScanner;
       const observationExtractor = new ErgoObservationExtractor(
         dataSource,
