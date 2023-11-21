@@ -60,16 +60,33 @@ export class TriggerTxBuilder {
    * @param {ergoLib.ErgoBox} commitment
    * @return {TriggerTxBuilder}
    */
-  addCommitment = (commitment: ergoLib.ErgoBox): TriggerTxBuilder => {
-    const wid = this.validateCommitment(commitment);
-    this.commitments.push(commitment);
-    this.wids.push(wid);
+  addCommitment = (commitments: Array<ergoLib.ErgoBox>): TriggerTxBuilder => {
+    const currentWids = new Set(this.wids);
+    const validCommitments: Array<ergoLib.ErgoBox> = [];
+    const validWids: Array<string> = [];
+    for (const commitment of commitments) {
+      const wid = this.validateCommitment(commitment);
+      if (currentWids.has(wid)) {
+        throw new Error(
+          `the commitment with boxId=[${commitment
+            .box_id()
+            .to_str()}] has a repetitive wid=[${wid}]`
+        );
+      }
+      currentWids.add(wid);
+      validCommitments.push(commitment);
+      validWids.push(wid);
+    }
+    this.commitments.push(...validCommitments);
+    this.wids.push(...validWids);
     this.logger?.debug(
-      `added new commitment with boxId=[${commitment
-        .box_id()
-        .to_str()}]: this.commitments=[${this.commitments.map((commitment) =>
+      `added new commitments with boxIds=[${validCommitments
+        .map((commitment) => commitment.box_id().to_str())
+        .join(', ')}] and wids=[${this.wids.join(
+        ', '
+      )}]: this.commitments=[${this.commitments.map((commitment) =>
         commitment.box_id().to_str()
-      )}}`
+      )}]`
     );
 
     return this;
@@ -101,13 +118,17 @@ export class TriggerTxBuilder {
         .to_base16_bytes() !== commitment.ergo_tree().to_base16_bytes()
     ) {
       throw new Error(
-        `commitment should have the commitment address=${this.commitmentAddress}`
+        `commitment with boxId=[${commitment
+          .box_id()
+          .to_str()}] doesn't have the right commitment address`
       );
     }
 
     if (commitment.tokens().get(0).id().to_str() !== this.rwt) {
       throw new Error(
-        `commitment's first token should be rwt with tokenId=${this.rwt}`
+        `commitment with boxId=[${commitment
+          .box_id()
+          .to_str()}] should have rwt as the first token`
       );
     }
 
@@ -116,7 +137,14 @@ export class TriggerTxBuilder {
       this.rwtRepo.getCommitmentRwtCount().toString()
     ) {
       throw new Error(
-        `commitment should have ${this.rwtRepo.getCommitmentRwtCount()} rwt tokens`
+        `commitment with boxId=[${commitment
+          .box_id()
+          .to_str()}] should have [${this.rwtRepo.getCommitmentRwtCount()}] rwt tokens buts has [${commitment
+          .tokens()
+          .get(0)
+          .amount()
+          .as_i64()
+          .to_str()}]`
       );
     }
 

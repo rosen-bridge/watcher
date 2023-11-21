@@ -88,7 +88,7 @@ describe('TriggerTxBuilder', () => {
       const commitment = ergoLib.ErgoBox.from_json(
         JsonBigInt.stringify(sampleCommitmentBoxes[0])
       );
-      triggerTxBuilder.addCommitment(commitment);
+      triggerTxBuilder.addCommitment([commitment]);
 
       expect(
         triggerTxBuilder['commitments']
@@ -109,15 +109,12 @@ describe('TriggerTxBuilder', () => {
      */
     it(`should contain both the passed commitment and already existing
     commitments when called more than once`, async () => {
-      const commitments = sampleCommitmentBoxes
-        .slice(0, 3)
-        .map((boxInfo) =>
-          ergoLib.ErgoBox.from_json(JsonBigInt.stringify(boxInfo))
-        );
-
-      commitments.forEach((commitment) =>
-        triggerTxBuilder.addCommitment(commitment)
+      const commitments = sampleCommitmentBoxes.map((boxInfo) =>
+        ergoLib.ErgoBox.from_json(JsonBigInt.stringify(boxInfo))
       );
+
+      triggerTxBuilder.addCommitment(commitments.slice(0, 2));
+      triggerTxBuilder.addCommitment(commitments.slice(2));
 
       expect(
         triggerTxBuilder['commitments']
