@@ -1,8 +1,12 @@
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TriggerTxBuilder } from '../lib';
-import { sampleCommitmentBoxes } from './triggerTxBuilderTestData';
+import {
+  getPayBoxIterator,
+  sampleCommitmentBoxes,
+  toFakeErgoBox,
+} from './triggerTxBuilderTestData';
 import {
   changeAddress,
   observationEntity1,
@@ -10,6 +14,7 @@ import {
   triggerTxParams,
 } from './triggerTxTestData';
 import { hexToUint8Array, uint8ArrayToHex } from '../lib/utils';
+import { mockedErgoExplorerClientFactory } from './mocked/ergoExplorerClient.mock';
 
 describe('TriggerTxBuilder', () => {
   let triggerTxBuilder: TriggerTxBuilder;
@@ -186,6 +191,82 @@ describe('TriggerTxBuilder', () => {
       expect(
         uint8ArrayToHex(triggerBox.register_value(6)!.to_byte_array())
       ).toEqual(triggerTxBuilder['permitScriptHash']);
+    });
+  });
+
+  describe('build', () => {
+    /**
+     * @target should build an unsigned transaction to generate a trigger box
+     * @dependencies
+     * - ErgoExplorerClientFactory
+     * @scenario
+     * - mock ErgoExplorerClientFactory
+     * - setup TriggerTxBuilder instance
+     * - call build
+     * - check expected functions to have been called
+     * - check transaction output boxes
+     * @expected
+     * - createTriggerBox should have been called
+     * - transaction output boxes should include the trigger box
+     * - trigger box should have right amount of Ergs
+     */
+    it(`should build an unsigned transaction to generate a commitment when there
+    are no residual tokens.`, async () => {
+      // mock ErgoExplorerClientFactory
+      const mockedExplorerClient = mockedErgoExplorerClientFactory(
+        ''
+      ) as unknown as ReturnType<
+        typeof triggerTxBuilder['rwtRepo']['explorerClient']
+      >;
+      triggerTxBuilder['rwtRepo']['explorerClient'] = mockedExplorerClient;
+
+      // setup TriggerTxBuilder instance
+      const height = 100;
+      triggerTxBuilder.setCreationHeight(height);
+
+      triggerTxBuilder.setBoxIterator(getPayBoxIterator(height, changeAddress));
+
+      const commitments = sampleCommitmentBoxes.map((boxInfo) =>
+        ergoLib.ErgoBox.from_json(JsonBigInt.stringify(boxInfo))
+      );
+      commitments.forEach((commitment) =>
+        triggerTxBuilder.addCommitment(commitment)
+      );
+
+      const commitmentsValue = commitments
+        .map((box) => BigInt(box.value().as_i64().to_str()))
+        .reduce((sum, val) => sum + val, 0n);
+      const rwtCount = commitments
+        .map((commitment) =>
+          BigInt(commitment.tokens().get(0).amount().as_i64().to_str())
+        )
+        .reduce((sum, val) => sum + val, 0n);
+
+      const createTriggerBoxSpy = vi.spyOn(
+        triggerTxBuilder as any,
+        'createTriggerBox'
+      );
+
+      // call build
+      const { unsignedTx } = await triggerTxBuilder.build();
+
+      const triggerBox = unsignedTx.output_candidates().get(0);
+
+      // check expected functions to have been called
+      expect(createTriggerBoxSpy).toHaveBeenCalledOnce();
+
+      // check transaction output boxes
+      expect(toFakeErgoBox(triggerBox).box_id().to_str()).toEqual(
+        toFakeErgoBox(
+          triggerTxBuilder['createTriggerBox'](rwtCount, commitmentsValue)
+        )
+          .box_id()
+          .to_str()
+      );
+
+      expect(triggerBox.value().as_i64().to_str()).toEqual(
+        commitmentsValue.toString()
+      );
     });
   });
 });

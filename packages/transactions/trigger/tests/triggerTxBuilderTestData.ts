@@ -1,3 +1,5 @@
+import * as ergoLib from 'ergo-lib-wasm-nodejs';
+
 export const sampleCommitmentBoxes = [
   {
     boxId: '42636eba19db880449c099149cf6b30b914696d845fd1991ecbd0e97f49a84e9',
@@ -114,4 +116,62 @@ export const sampleCommitmentBoxes = [
       'e5ebf67bbdf3dc4d8a1c41f51b3966c60110eb1c9d1102c8896a0528a5996197',
     index: 1,
   },
+  {
+    boxId: '7fe5a2aae01fc548156945d05bc86f7b530234130734d5d6ff486e4173583284',
+    value: 1100000,
+    ergoTree:
+      '101c04000e20420b2e9fb2bcddedff650be63b1acbc26bc0bddd255b00325087aa5595a89a3a040002000402040004000400040004000400040604040402050205c801040004000400050004020400040004000400040204000400d80ad601b2a4730000d6027301d60393cbc272017202d604e4c6a7041ad6059572037201b2a5730200d606e4c67205041ad607e4c67205051ad608b072078301027303d901083c0e0eb38c7208018c720802d609b472087304b17208d60ab2a5730500957203d803d60bb2b5a5d9010b63d801d60dc6720b041aede6720d93e4720d7204730600d60cb2db6308720b730700d60db2db6308a7730800d19683050193cbc2720be4c6a7070e938c720c018c720d01938c720c028c720d02efae7206d9010e0e93720483010e720e93cbb37209b27204730900e4c6a7060ed801d60bcbc2720a9593720b7202d80ad60cb5a4d9010c6393c2a7c2720cd60db1720cd60e7e720d05d60fb2db6501fe730a00d610e4c6720f0611d611b27210730b00d6129ab27210730c009d9cb27210730d00997eb1e4c6720f041a05730e730fd613b2db6308a7731000d614b27210731100d615b2db63087205731200d196830b0192c1720ab0ad720cd9011663c172167313d90116599a8c7216018c72160293b1b5720cd901166393e4c67216041a72047314ae7206d901160e9383010e7216720493e4c67205060ee4c6a7070e93b17206720d93cbb37209b27204731500e4c6a7060e93e4c6a7051a83010ecbb2720773160091720e958f7211721272117212938c7213027214938c7215029c7214720e938c7215018c721301d802d60cb2db6308720a731700d60db2db6308a7731800d19683060193c5a7c57201938c720c018c720d01938c720c028c720d0293e4c6720a041a7204938cb2db6308b2a4731900731a0001b27204731b0093720be4c6a7070e',
+    assets: [
+      {
+        tokenId:
+          '3825b2b4acaaaba626440113153246c65ddb2e9df406c4a56418b5842c9f839a',
+        amount: 10000,
+      },
+    ],
+    additionalRegisters: {
+      R6: '0e202f66a9dbdba2c21825cec7d4a36c3621ce3b3bfb9226a9f760919020b0c73477',
+      R4: '1a01208abd3c4a0e14dd3632919a758ccfee875cfcf8ea7e0ec85844d4188834fd602d',
+      R5: '1a0120e3f380f49bb76b52acaf4917b30252b014240c8ecd3600934f7ced8acb5d1041',
+      R7: '0e20aedb01e6a2594d7dacf6f63b2f3247e3b1ecf01409960758934d2fb4c3004f07',
+    },
+    creationHeight: 1081658,
+    transactionId:
+      '434f15635bdf48915a214b858da2a517639a586de305b46410392e4b921693f0',
+    index: 1,
+  },
 ];
+
+export const getPayBoxIterator = (height: number, changeAddress: string) => {
+  return {
+    next: (): IteratorResult<ergoLib.ErgoBox, undefined> => {
+      const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+        ergoLib.BoxValue.from_i64(ergoLib.I64.from_str('20000000000')),
+        ergoLib.Contract.pay_to_address(
+          ergoLib.Address.from_base58(changeAddress)
+        ),
+        height
+      );
+
+      const fakeTxId = ergoLib.TxId.from_str(
+        '8c494da0242fd04ecb4efd3d9de11813848c79b38592f29d579836dfbc459f96'
+      );
+      const fakeBoxIndex = 0;
+
+      const box = ergoLib.ErgoBox.from_box_candidate(
+        boxBuilder.build(),
+        fakeTxId,
+        fakeBoxIndex
+      );
+
+      return { value: box, done: false };
+    },
+  };
+};
+
+export const toFakeErgoBox = (box: ergoLib.ErgoBoxCandidate) => {
+  const fakeTxId = ergoLib.TxId.from_str(
+    '8c494da0242fd04ecb4efd3d9de11813848c79b38592f29d579836dfbc459f96'
+  );
+  const fakeBoxIndex = 0;
+  return ergoLib.ErgoBox.from_box_candidate(box, fakeTxId, fakeBoxIndex);
+};

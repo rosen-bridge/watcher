@@ -1,11 +1,20 @@
 import { AbstractLogger } from '@rosen-bridge/abstract-logger';
+import {
+  createChangeBox,
+  selectErgoBoxes,
+} from '@rosen-bridge/ergo-box-selection';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { blake2b } from 'blakejs';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
 import {
   bigIntToUint8Array,
+  fromErgoBoxCandidateProxy,
+  getTotalValue,
   hexToUint8Array,
+  toErgoBoxCandidateProxy,
+  toErgoBoxProxyIterator,
   toScriptHash,
   uint8ArrayToHex,
 } from './utils';
@@ -238,4 +247,122 @@ export class TriggerTxBuilder {
       bigIntToUint8Array(BigInt(this.observation.height)),
     ];
   }
+
+  /**
+   * builds an unsigned transaction which spends commitment boxes to generate a
+   * trigger box
+   *
+   * @return {Promise<{
+   *     unsignedTx: ergoLib.UnsignedTransaction;
+   *     inputBoxes: ergoLib.ErgoBox[];
+   *     dataInputBoxes: ergoLib.ErgoBox[];
+   *   }>}
+   */
+  build = async (): Promise<{
+    unsignedTx: ergoLib.UnsignedTransaction;
+    inputBoxes: ergoLib.ErgoBox[];
+    dataInputBoxes: ergoLib.ErgoBox[];
+  }> => {
+    const inputBoxes: ergoLib.ErgoBox[] = [...this.commitments];
+
+    await this.rwtRepo.updateBox(false);
+    const rwtRepoBox = this.rwtRepo['box'];
+    if (rwtRepoBox == undefined) {
+      throw new Error('Could not get corresponding RWTRepo box');
+    }
+    const dataInputBoxes: ergoLib.ErgoBox[] = [rwtRepoBox];
+
+    const rwtCount = this.commitments
+      .map((commitment) =>
+        BigInt(commitment.tokens().get(0).amount().as_i64().to_str())
+      )
+      .reduce((sum, val) => sum + val, 0n);
+    const safeMinBoxValue = BigInt(
+      ergoLib.BoxValue.SAFE_USER_MIN().as_i64().to_str()
+    );
+    const commitmentsValue = getTotalValue(this.commitments);
+    const outputBoxes: ergoLib.ErgoBoxCandidate[] = [
+      this.createTriggerBox(rwtCount, commitmentsValue),
+    ];
+    const outputValue = getTotalValue(outputBoxes);
+    const inputValue = getTotalValue(inputBoxes);
+    const requiredValue =
+      outputValue - inputValue + BigInt(this.txFee) + safeMinBoxValue;
+
+    if (requiredValue > 0) {
+      const { covered, boxes: payProxyBoxes } = await selectErgoBoxes(
+        { nativeToken: requiredValue, tokens: [] },
+        [],
+        new Map(),
+        toErgoBoxProxyIterator(this.boxIterator),
+        this.logger
+      );
+
+      if (!covered) {
+        throw new Error(
+          `boxes in box iterator are not enough to cover value=[${requiredValue}]`
+        );
+      }
+
+      if (payProxyBoxes.length > 0) {
+        this.logger?.debug(
+          `boxes with following ids where selected from box iterator: [${payProxyBoxes
+            .map((box) => box.boxId)
+            .join(', ')}]`
+        );
+      }
+
+      inputBoxes.push(
+        ...payProxyBoxes.map((proxyBox) =>
+          ergoLib.ErgoBox.from_json(JsonBigInt.stringify(proxyBox))
+        )
+      );
+    }
+
+    const changeBoxProxy = createChangeBox(
+      this.changeAddress,
+      this.creationHeight,
+      inputBoxes.map((box) => box.to_js_eip12()),
+      outputBoxes.map((box) => toErgoBoxCandidateProxy(box)),
+      BigInt(this.txFee),
+      []
+    );
+    if (changeBoxProxy != undefined) {
+      const changeBox = fromErgoBoxCandidateProxy(changeBoxProxy);
+      outputBoxes.push(changeBox);
+    }
+
+    const inputErgoBoxes = ergoLib.ErgoBoxes.empty();
+    inputBoxes.forEach((box) => inputErgoBoxes.add(box));
+    const dataInputs = new ergoLib.DataInputs();
+    dataInputBoxes.forEach((box) =>
+      dataInputs.add(
+        new ergoLib.DataInput(ergoLib.ErgoBox.from_json(box.to_json()).box_id())
+      )
+    );
+    const outputErgoCandidateBoxes = ergoLib.ErgoBoxCandidates.empty();
+    outputBoxes.forEach((box) => outputErgoCandidateBoxes.add(box));
+    const txBuilder = ergoLib.TxBuilder.new(
+      new ergoLib.BoxSelection(
+        inputErgoBoxes,
+        new ergoLib.ErgoBoxAssetsDataList()
+      ),
+      outputErgoCandidateBoxes,
+      this.creationHeight,
+      ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(this.txFee)),
+      ergoLib.Address.from_base58(this.changeAddress)
+    );
+    txBuilder.set_data_inputs(dataInputs);
+    const unsignedTx = txBuilder.build();
+    this.logger?.info(
+      `unsigned commitment transaction built with id=[${unsignedTx
+        .id()
+        .to_str()}]`
+    );
+    this.logger?.debug(
+      `built unsigned commitment transaction in json format: [${unsignedTx.to_json()}]`
+    );
+
+    return { unsignedTx, inputBoxes, dataInputBoxes };
+  };
 }
