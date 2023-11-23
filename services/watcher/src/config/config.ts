@@ -240,6 +240,7 @@ class CardanoConfig {
     timeout: number;
     initialHeight: number;
     interval: number;
+    authToken?: string;
   };
 
   constructor(network: string) {
@@ -257,7 +258,10 @@ class CardanoConfig {
         const interval = getRequiredNumber('cardano.koios.interval');
         const timeout = getRequiredNumber('cardano.koios.timeout');
         const initialHeight = getRequiredNumber('cardano.initial.height');
-        this.koios = { url, initialHeight, interval, timeout };
+        const authToken = config.has('cardano.koios.authToken')
+          ? config.get<string>('cardano.koios.authToken')
+          : undefined;
+        this.koios = { url, initialHeight, interval, timeout, authToken };
       } else {
         throw new Error(
           `Improperly configured. cardano configuration type is invalid available choices are '${Constants.OGMIOS_TYPE}', '${Constants.KOIOS_TYPE}'`

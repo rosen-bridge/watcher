@@ -1,5 +1,5 @@
 services/watcher/src/config/*.json
-services/watcher/config/local.yaml
+services/watcher/config/local*.yaml
 services/watcher/config/rosen
 services/watcher/sqlite/
 
