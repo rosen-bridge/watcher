@@ -30,6 +30,8 @@ const events = [
       name: 'test token 12',
       tokenId: 'tokenIdStar',
     },
+    result: null,
+    paymentTxId: null,
   },
   {
     id: 4,
@@ -62,6 +64,8 @@ const events = [
       name: 'test token 12',
       tokenId: 'tokenIdStar',
     },
+    result: null,
+    paymentTxId: null,
   },
   {
     id: 3,
@@ -94,6 +98,8 @@ const events = [
       name: 'test token 12',
       tokenId: 'tokenIdStar',
     },
+    result: null,
+    paymentTxId: null,
   },
   {
     id: 2,
@@ -126,6 +132,8 @@ const events = [
       name: 'test token 10',
       tokenId: 'tokenId',
     },
+    result: null,
+    paymentTxId: null,
   },
   {
     id: 1,
@@ -158,6 +166,8 @@ const events = [
       name: 'test token 11',
       tokenId: 'tokenId2',
     },
+    result: null,
+    paymentTxId: null,
   },
 ];
 
