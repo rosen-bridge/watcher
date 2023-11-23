@@ -118,6 +118,8 @@ class CreateScanner {
       dataSource,
       rosenConfig.eventTriggerAddress,
       rosenConfig.RWTId,
+      rosenConfig.watcherPermitAddress,
+      rosenConfig.fraudAddress,
       loggers.eventTriggerExtractorLogger
     );
     const plainExtractor = new ErgoUTXOExtractor(
@@ -164,7 +166,8 @@ class CreateScanner {
             timeout: cardanoConfig.koios.timeout * 1000,
             initialHeight: cardanoConfig.koios.initialHeight,
           },
-          loggers.scannerLogger
+          loggers.scannerLogger,
+          cardanoConfig.koios.authToken
         );
         const observationExtractor = new CardanoKoiosObservationExtractor(
           dataSource,
