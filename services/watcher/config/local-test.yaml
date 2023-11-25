@@ -9,3 +9,6 @@ ergo:
 path:
   addresses: tests/config
   tokens: tests/config/tokens.test.json
+logs:
+  - type: 'console'
+    level: 'error'
