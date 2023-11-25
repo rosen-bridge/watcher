@@ -1,7 +1,7 @@
 {
   "idKeys": {
     "ergo": "tokenId",
-    "cardano": "fingerprint"
+    "cardano": "tokenId"
   },
   "tokens": [
     {
@@ -15,7 +15,7 @@
         }
       },
       "cardano": {
-        "fingerprint": "asset1ycg2zvfj5x7zt4md3zkd0j5tekxs52kmwxpw05",
+        "tokenId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2.646f6765",
         "policyId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
         "assetName": "646f6765",
         "unit": "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc37e",
@@ -38,7 +38,7 @@
         }
       },
       "cardano": {
-        "fingerprint": "asset12y0ewmxggeglymjpmp9mjf5qzh4kgwj9chtkpv",
+        "tokenId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2.7369676d61",
         "policyId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
         "assetName": "7369676d61",
         "unit": "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc37e",
@@ -61,7 +61,7 @@
         }
       },
       "cardano": {
-        "fingerprint": "finger_print2",
+        "tokenId": "policy_id2.",
         "policyId": "policy_id2",
         "assetName": "",
         "unit": "",
@@ -84,7 +84,7 @@
         }
       },
       "cardano": {
-        "fingerprint": "finger_print3",
+        "tokenId": "policy_id3.",
         "policyId": "policy_id3",
         "assetName": "",
         "unit": "",
@@ -107,7 +107,7 @@
         }
       },
       "cardano": {
-        "fingerprint": "finger_print4",
+        "tokenId": "policy_id4.",
         "policyId": "policy_id4",
         "assetName": "",
         "unit": "",
