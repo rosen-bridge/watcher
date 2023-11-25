@@ -8,10 +8,10 @@ import { ChangeBoxCreationError } from '../errors/errors';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export class CommitmentReveal {
   watcherUtils: WatcherUtils;

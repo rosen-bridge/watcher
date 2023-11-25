@@ -1,10 +1,10 @@
 import { watcherDatabase } from '../init';
 import { decodeSerializedBox, ErgoUtils } from '../ergo/utils';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 /**
  * Fetches token names of the new UTXOs

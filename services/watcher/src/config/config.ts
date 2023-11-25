@@ -10,6 +10,7 @@ import { NetworkType } from '../types';
 import { generateMnemonic } from 'bip39';
 import { convertMnemonicToSecretKey } from '../utils/utils';
 import { ErgoNetworkType } from '@rosen-bridge/scanner';
+import { TransportOptions } from '@rosen-bridge/winston-logger';
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
@@ -208,21 +209,42 @@ class Config {
 }
 
 class LoggerConfig {
-  path: string;
-  level: string;
-  maxSize: string;
-  maxFiles: string;
-  datePattern: string;
+  transports: TransportOptions[];
 
   constructor() {
-    this.path = getRequiredString('logs.path');
-    this.level = getRequiredString('logs.level');
-    this.maxSize = getRequiredString('logs.maxSize');
-    this.maxFiles = getRequiredString('logs.maxFiles');
-    this.datePattern = getOptionalString(
-      'logs.datePattern',
-      this.level === 'debug' ? 'YYYY-MM-DD-HH' : 'YYYY-MM-DD'
-    );
+    const logs = config.get<TransportOptions[]>('logs');
+    const wrongLogTypeIndex = logs.findIndex((log) => {
+      const logTypeValidation = ['console', 'file', 'loki'].includes(log.type);
+      let loggerChecks = true;
+      if (log.type === 'loki') {
+        loggerChecks =
+          log.host != undefined &&
+          typeof log.host === 'string' &&
+          log.level != undefined &&
+          typeof log.level === 'string' &&
+          (log.serviceName ? typeof log.serviceName === 'string' : true) &&
+          (log.basicAuth ? typeof log.basicAuth === 'string' : true);
+      } else if (log.type === 'file') {
+        loggerChecks =
+          log.path != undefined &&
+          typeof log.path === 'string' &&
+          log.level != undefined &&
+          typeof log.level === 'string' &&
+          log.maxSize != undefined &&
+          typeof log.maxSize === 'string' &&
+          log.maxFiles != undefined &&
+          typeof log.maxFiles === 'string';
+      }
+      return !(loggerChecks && logTypeValidation);
+    });
+    if (wrongLogTypeIndex >= 0) {
+      throw new Error(
+        `unexpected config at path ${`logs[${wrongLogTypeIndex}]`}: ${JSON.stringify(
+          logs[wrongLogTypeIndex]
+        )}`
+      );
+    }
+    this.transports = logs;
   }
 }
 

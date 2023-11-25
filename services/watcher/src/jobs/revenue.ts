@@ -1,10 +1,10 @@
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
 import { watcherDatabase } from '../init';
 import { decodeSerializedBox } from '../ergo/utils';
 import { ERGO_NATIVE_ASSET } from '../config/constants';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 /**
  * Fetches revenue details and stores in the database

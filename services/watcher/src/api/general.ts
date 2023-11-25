@@ -1,12 +1,12 @@
-import { loggerFactory } from '../log/Logger';
 import express, { Request, Response } from 'express';
 import { getConfig } from '../config/config';
 import { JsonBI } from '../ergo/network/parser';
 import { ErgoUtils } from '../ergo/utils';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 import { Transaction } from './Transaction';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 interface GeneralInfo {
   currentBalance: bigint;

@@ -1,10 +1,10 @@
 import { CommitmentCreation } from '../transactions/commitmentCreation';
 import { Boxes } from '../ergo/boxes';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 let commitmentCreatorObj: CommitmentCreation;
 
