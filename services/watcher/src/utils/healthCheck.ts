@@ -26,11 +26,11 @@ import {
   ERGO_NATIVE_ASSET,
   ERGO_DECIMALS,
 } from '../config/constants';
-import { loggerFactory } from '../log/Logger';
 import { scanner } from './scanner';
 import { Transaction } from '../../src/api/Transaction';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;

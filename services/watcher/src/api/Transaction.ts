@@ -6,7 +6,6 @@ import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { uint8ArrayToHex } from '../utils/utils';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { TransactionUtils } from '../utils/watcherUtils';
@@ -14,8 +13,9 @@ import { TxType } from '../database/entities/txEntity';
 import { AddressBalance } from '../ergo/interfaces';
 import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 import { DetachWID } from '../transactions/detachWID';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export type ApiResponse = {
   response: string;

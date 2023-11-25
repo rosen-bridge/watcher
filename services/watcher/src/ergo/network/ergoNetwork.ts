@@ -13,11 +13,11 @@ import {
 import { JsonBI } from './parser';
 import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
-import { loggerFactory } from '../../log/Logger';
 import { getConfig } from '../../config/config';
 import { ExplorerBox, ErgoAssetInfo } from '../network/types';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export const explorerApi = axios.create({
   baseURL: getConfig().general.explorerUrl,

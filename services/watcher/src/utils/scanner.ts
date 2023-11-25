@@ -18,8 +18,8 @@ import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 
 import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
-import { loggerFactory } from '../log/Logger';
 import * as Constants from '../config/constants';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const allConfig = getConfig();
 const {
@@ -34,16 +34,24 @@ const {
  * @returns loggers object
  */
 const createLoggers = () => ({
-  commitmentExtractorLogger: loggerFactory('commitment-extractor'),
-  eventTriggerExtractorLogger: loggerFactory('event-trigger-extractor'),
-  observationExtractorLogger: loggerFactory('observation-extractor'),
-  permitExtractorLogger: loggerFactory('permit-extractor'),
-  plainExtractorLogger: loggerFactory('plain-extractor'),
-  scannerLogger: loggerFactory('scanner'),
+  commitmentExtractorLogger: WinstonLogger.getInstance().getLogger(
+    'commitment-extractor'
+  ),
+  eventTriggerExtractorLogger: WinstonLogger.getInstance().getLogger(
+    'event-trigger-extractor'
+  ),
+  observationExtractorLogger: WinstonLogger.getInstance().getLogger(
+    'observation-extractor'
+  ),
+  permitExtractorLogger:
+    WinstonLogger.getInstance().getLogger('permit-extractor'),
+  plainExtractorLogger:
+    WinstonLogger.getInstance().getLogger('plain-extractor'),
+  scannerLogger: WinstonLogger.getInstance().getLogger('scanner'),
 });
 
 const loggers = createLoggers();
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 class CreateScanner {
   ergoScanner: ErgoScanner;

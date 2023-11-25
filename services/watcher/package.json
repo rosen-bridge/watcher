@@ -76,6 +76,7 @@
     "@rosen-bridge/observation-extractor": "^3.0.0",
     "@rosen-bridge/scanner": "2.3.0",
     "@rosen-bridge/watcher-data-extractor": "3.1.0",
+    "@rosen-bridge/winston-logger": "0.2.1",
     "axios": "^0.26.1",
     "bip39": "^3.1.0",
     "blakejs": "^1.2.1",
@@ -93,8 +94,6 @@
     "sqlite3": "^5.0.2",
     "supertest": "^6.3.0",
     "tsconfig-paths": "^4.0.0",
-    "typeorm": "^0.3.6",
-    "winston": "^3.8.2",
-    "winston-daily-rotate-file": "^4.7.1"
+    "typeorm": "^0.3.6"
   }
 }

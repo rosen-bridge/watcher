@@ -14,11 +14,11 @@ import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
-import { loggerFactory } from '../log/Logger';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 import MinimumFee from './MinimumFee';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 class WatcherUtils {
   dataBase: WatcherDataBase;

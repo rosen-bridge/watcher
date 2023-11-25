@@ -1,9 +1,9 @@
 import { Request, Response, Router } from 'express';
 import { ApiResponse, Transaction } from './Transaction';
 import { body, validationResult } from 'express-validator';
-import { loggerFactory } from '../log/Logger';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const permitRouter = Router();
 

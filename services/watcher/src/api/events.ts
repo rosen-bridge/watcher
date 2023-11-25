@@ -1,12 +1,12 @@
 import express from 'express';
-import { loggerFactory } from '../log/Logger';
 import { watcherDatabase } from '../init';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 const eventsRouter = express.Router();
 
 /**

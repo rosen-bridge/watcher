@@ -1,10 +1,10 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { loggerFactory } from '../log/Logger';
 import { stringifyQueryParam } from '../utils/utils';
 import { HealthCheckSingleton } from '../utils/healthCheck';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 const healthRouter = express.Router();
 
 /**

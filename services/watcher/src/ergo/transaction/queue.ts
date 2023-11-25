@@ -4,11 +4,11 @@ import { WatcherDataBase } from '../../database/models/watcherModel';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { base64ToArrayBuffer } from '../../utils/utils';
 import { WatcherUtils } from '../../utils/watcherUtils';
-import { loggerFactory } from '../../log/Logger';
 import { getConfig } from '../../config/config';
 import { Transaction } from '../../api/Transaction';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export class Queue {
   database: WatcherDataBase;
