@@ -42,3 +42,12 @@ export const bigIntToUint8Array = (num: bigint): Uint8Array => {
 export const uint8ArrayToHex = (bytes: Uint8Array): string => {
   return Buffer.from(bytes).toString('hex');
 };
+
+/**
+ * converts a hex string to Uint8Array bytes
+ *
+ * @param {string} hex
+ * @return {Uint8Array}
+ */
+export const hexToUint8Array = (hex: string): Uint8Array =>
+  Uint8Array.from(Buffer.from(hex, 'hex'));

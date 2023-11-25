@@ -55,12 +55,12 @@ export class TriggerTxBuilder {
   };
 
   /**
-   * adds new commitment to current instance's set of commitments.
+   * adds new commitments to current instance's set of commitments.
    *
-   * @param {ergoLib.ErgoBox} commitment
+   * @param {Array<ergoLib.ErgoBox>} commitments
    * @return {TriggerTxBuilder}
    */
-  addCommitment = (commitments: Array<ergoLib.ErgoBox>): TriggerTxBuilder => {
+  addCommitments = (commitments: Array<ergoLib.ErgoBox>): TriggerTxBuilder => {
     const currentWids = new Set(this.wids);
     const validCommitments: Array<ergoLib.ErgoBox> = [];
     const validWids: Array<string> = [];
@@ -95,7 +95,6 @@ export class TriggerTxBuilder {
   /**
    * validates the passed commitment box
    *
-   * @private
    * @param {ergoLib.ErgoBox} commitment
    * @return {string} the wid of passed commitment
    */
