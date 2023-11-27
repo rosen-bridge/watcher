@@ -1,4 +1,4 @@
-import { AbstractLogger } from '@rosen-bridge/abstract-logger';
+import { AbstractLogger, DummyLogger } from '@rosen-bridge/abstract-logger';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { blake2b } from 'blakejs';
@@ -26,7 +26,7 @@ export class TriggerTxBuilder {
     private txFee: string,
     private rwtRepo: RWTRepo,
     private observation: ObservationEntity,
-    private logger?: AbstractLogger
+    private logger: AbstractLogger = new DummyLogger()
   ) {
     this.permitScriptHash = toScriptHash(permitAddress);
   }
@@ -235,15 +235,26 @@ export class TriggerTxBuilder {
         this.wids.map((wid) => hexToUint8Array(wid))
       )
     );
+    this.logger?.debug(
+      `added wids to R4 register of trigger box: wids=[${this.wids}]`
+    );
 
     boxBuilder.set_register_value(
       5,
       ergoLib.Constant.from_coll_coll_byte(this.eventData)
     );
+    this.logger?.debug(
+      `added event data to R5 register of trigger box: event-data=[${this.eventData.map(
+        (data) => uint8ArrayToHex(data)
+      )}]`
+    );
 
     boxBuilder.set_register_value(
       6,
       ergoLib.Constant.from_byte_array(hexToUint8Array(this.permitScriptHash))
+    );
+    this.logger?.debug(
+      `added permit script hash to R6 register of trigger box: permit-script-hash=[${this.permitScriptHash}]`
     );
 
     return boxBuilder.build();
