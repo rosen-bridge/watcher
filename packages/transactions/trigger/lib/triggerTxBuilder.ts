@@ -42,7 +42,7 @@ export class TriggerTxBuilder {
       throw new Error('creation height must be a positive integer');
     }
     this.creationHeight = height;
-    this.logger?.debug(`new value set for height=[${this.creationHeight}]`);
+    this.logger.debug(`new value set for height=[${this.creationHeight}]`);
     return this;
   };
 
@@ -84,7 +84,7 @@ export class TriggerTxBuilder {
     }
     this.commitments.push(...validCommitments);
     this.wids.push(...validWids);
-    this.logger?.debug(
+    this.logger.debug(
       `added new commitments with boxIds=[${validCommitments
         .map((commitment) => commitment.box_id().to_str())
         .join(', ')}] and wids=[${this.wids.join(
@@ -225,7 +225,7 @@ export class TriggerTxBuilder {
       ergoLib.TokenId.from_str(this.rwt),
       ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(rwtCount.toString()))
     );
-    this.logger?.debug(
+    this.logger.debug(
       `added rwt tokens to trigger box with amount=[${rwtCount}]`
     );
 
@@ -235,7 +235,7 @@ export class TriggerTxBuilder {
         this.wids.map((wid) => hexToUint8Array(wid))
       )
     );
-    this.logger?.debug(
+    this.logger.debug(
       `added wids to R4 register of trigger box: wids=[${this.wids}]`
     );
 
@@ -243,7 +243,7 @@ export class TriggerTxBuilder {
       5,
       ergoLib.Constant.from_coll_coll_byte(this.eventData)
     );
-    this.logger?.debug(
+    this.logger.debug(
       `added event data to R5 register of trigger box: event-data=[${this.eventData.map(
         (data) => uint8ArrayToHex(data)
       )}]`
@@ -253,7 +253,7 @@ export class TriggerTxBuilder {
       6,
       ergoLib.Constant.from_byte_array(hexToUint8Array(this.permitScriptHash))
     );
-    this.logger?.debug(
+    this.logger.debug(
       `added permit script hash to R6 register of trigger box: permit-script-hash=[${this.permitScriptHash}]`
     );
 
