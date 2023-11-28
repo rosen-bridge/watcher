@@ -159,6 +159,15 @@ export class Transaction {
    * @param RWTCount
    */
   returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
+    const activePermitTxs =
+      await Transaction.watcherDatabase.getActivePermitTransactions();
+    if (activePermitTxs.length !== 0) {
+      return {
+        response: `permit transaction [${activePermitTxs[0].txId}] is in queue`,
+        status: 500,
+      };
+    }
+
     if (!Transaction.watcherPermitState) {
       return { response: "you don't have permit box", status: 500 };
     }
@@ -168,6 +177,18 @@ export class Transaction {
     const permitBoxes = await Transaction.boxes.getPermits(WID, RWTCount);
     const repoBox = await Transaction.boxes.getRepoBox();
     const widBox = await Transaction.boxes.getWIDBox(WID);
+    if (widBox.tokens().get(0).id().to_str() != WID) {
+      await DetachWID.detachWIDtx(
+        Transaction.txUtils,
+        Transaction.boxes,
+        WID,
+        widBox
+      );
+      return {
+        response: `WID box is not in valid format (WID token is not the first token), please wait for the correction transaction`,
+        status: 500,
+      };
+    }
 
     const R4 = repoBox.register_value(4);
     const R5 = repoBox.register_value(5);
