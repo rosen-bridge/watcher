@@ -244,9 +244,7 @@ export class TriggerTxBuilder {
       ergoLib.Constant.from_coll_coll_byte(this.eventData)
     );
     this.logger.debug(
-      `added event data to R5 register of trigger box: event-data=[${this.eventData.map(
-        (data) => uint8ArrayToHex(data)
-      )}]`
+      `added event data to R5 register of trigger box: event-data=[${this.rawEventData}]`
     );
 
     boxBuilder.set_register_value(
@@ -274,6 +272,23 @@ export class TriggerTxBuilder {
       Buffer.from(this.observation.targetChainTokenId),
       Buffer.from(this.observation.sourceBlockId),
       bigIntToUint8Array(BigInt(this.observation.height)),
+    ];
+  }
+
+  private get rawEventData() {
+    return [
+      this.observation.sourceTxId,
+      this.observation.fromChain,
+      this.observation.toChain,
+      this.observation.fromAddress,
+      this.observation.toAddress,
+      this.observation.amount,
+      this.observation.bridgeFee,
+      this.observation.networkFee,
+      this.observation.sourceChainTokenId,
+      this.observation.targetChainTokenId,
+      this.observation.sourceBlockId,
+      this.observation.height,
     ];
   }
 }
