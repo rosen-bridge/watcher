@@ -29,8 +29,12 @@ export class Queue {
       `The [${tx.type}] transaction with txId: [${tx.txId}] is confirmed, removing the tx from txQueue`
     );
     if (tx.type === TxType.PERMIT) {
+      logger.debug(
+        `WID: [${Transaction.watcherWID}], Unconfirmed WID: [${Transaction.watcherUnconfirmedWID}]`
+      );
       Transaction.watcherWID = Transaction.watcherUnconfirmedWID;
       Transaction.watcherPermitState = !!Transaction.watcherWID;
+      logger.debug(`permit state: [${Transaction.watcherPermitState}]`);
     }
     if (tx.observation)
       await this.database.upgradeObservationTxStatus(tx.observation);
@@ -92,6 +96,9 @@ export class Queue {
    * @param currentHeight
    */
   private resetTxStatus = async (tx: TxEntity, currentHeight: number) => {
+    logger.debug(
+      `Updating ${tx.type} transaction with txId [${tx.txId}] status to invalid`
+    );
     await this.database.setTxValidStatus(tx, false);
     if (
       currentHeight - tx.updateBlock >
@@ -121,21 +128,26 @@ export class Queue {
     if (await this.verifyTx(tx)) {
       const result = await ErgoNetwork.sendTx(signedTx.to_json());
       if (result.success) {
+        logger.debug(
+          `Updating ${tx.type} transaction with txId [${tx.txId}] status to valid`
+        );
         await this.database.setTxValidStatus(tx, true);
         await this.database.setTxUpdateHeight(tx, currentHeight);
         logger.info(
-          `The [${tx.type}] transaction with txId: [${tx.txId}] sent successfully`
+          `The ${tx.type} transaction with txId [${tx.txId}] sent successfully`
         );
       } else {
         if (!(await this.validateTxInputsAndOutputs(signedTx))) {
           this.resetTxStatus(tx, currentHeight);
         } else {
-          logger.warn(`Error occurred while sending tx [${tx.txId}]`);
+          logger.warn(
+            `Error occurred while sending ${tx.type} tx [${tx.txId}]`
+          );
         }
       }
     } else {
       logger.info(
-        `Tx [${tx.txId} observation or commitments are not valid, skipping the transaction sending]`
+        `Tx [${tx.txId}] of type ${tx.type} observation or commitments are not valid, skipping the transaction sending]`
       );
       this.resetTxStatus(tx, currentHeight);
     }
@@ -148,10 +160,15 @@ export class Queue {
    */
   private processTx = async (tx: TxEntity, currentHeight: number) => {
     const txStatus = await ErgoNetwork.getConfNum(tx.txId);
-    logger.info(`Tx [${tx.txId}] confirmation: [${txStatus}]`);
+    logger.info(
+      `Processing ${tx.type} tx [${tx.txId}] with confirmation [${txStatus}]`
+    );
     if (txStatus === -1) {
       await this.processUnConfirmedTx(tx, currentHeight);
     } else if (txStatus > getConfig().general.transactionConfirmation) {
+      logger.debug(
+        `Updating ${tx.type} transaction with txId [${tx.txId}] status to valid`
+      );
       await this.database.setTxValidStatus(tx, true);
       await this.processConfirmedTx(tx);
     } else {
@@ -172,7 +189,7 @@ export class Queue {
         await this.processTx(tx, currentHeight);
       } catch (e) {
         logger.warn(
-          `An error occurred while processing tx [${tx.txId}]: ${e.message} - ${e.stack}`
+          `An error occurred while processing tx [${tx.txId}] with type ${tx.type}: ${e.message} - ${e.stack}`
         );
       }
     }

@@ -61,7 +61,7 @@ permitRouter.post(
         res.status(response.status).send({ message: response.response });
       }
     } catch (e) {
-      logger.warn(`An error occurred while locking RSN: ${e}`);
+      logger.warn(`An error occurred while returning permits: ${e}`);
       res.status(500).send({ message: e.message });
     }
   }
