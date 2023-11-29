@@ -259,7 +259,7 @@ describe('Watcher Permit Transactions', () => {
       await TransactionTest.setup(userAddress, secret1, boxes, DB);
       const transaction = TransactionTest.getInstance();
       const res = await transaction.getPermit(100n);
-      expect(res.status).to.be.equal(500);
+      expect(res.status).to.be.equal(400);
 
       await DB.removeTx(mockedTx);
     });
@@ -372,7 +372,7 @@ describe('Watcher Permit Transactions', () => {
       );
       const secondTransaction = TransactionTest.getInstance();
       const res = await secondTransaction.returnPermit(1n);
-      expect(res.status).to.be.equal(500);
+      expect(res.status).to.be.equal(400);
     });
   });
 
