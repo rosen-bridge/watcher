@@ -1,9 +1,14 @@
-import { AbstractLogger } from '@rosen-bridge/abstract-logger';
+import { AbstractLogger, DummyLogger } from '@rosen-bridge/abstract-logger';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { blake2b } from 'blakejs';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
-import { bigIntToUint8Array, toScriptHash, uint8ArrayToHex } from './utils';
+import {
+  bigIntToUint8Array,
+  hexToUint8Array,
+  toScriptHash,
+  uint8ArrayToHex,
+} from './utils';
 
 export class TriggerTxBuilder {
   private permitScriptHash: string;
@@ -21,7 +26,7 @@ export class TriggerTxBuilder {
     private txFee: string,
     private rwtRepo: RWTRepo,
     private observation: ObservationEntity,
-    private logger?: AbstractLogger
+    private logger: AbstractLogger = new DummyLogger()
   ) {
     this.permitScriptHash = toScriptHash(permitAddress);
   }
@@ -37,7 +42,7 @@ export class TriggerTxBuilder {
       throw new Error('creation height must be a positive integer');
     }
     this.creationHeight = height;
-    this.logger?.debug(`new value set for height=[${this.creationHeight}]`);
+    this.logger.debug(`new value set for height=[${this.creationHeight}]`);
     return this;
   };
 
@@ -79,7 +84,7 @@ export class TriggerTxBuilder {
     }
     this.commitments.push(...validCommitments);
     this.wids.push(...validWids);
-    this.logger?.debug(
+    this.logger.debug(
       `added new commitments with boxIds=[${validCommitments
         .map((commitment) => commitment.box_id().to_str())
         .join(', ')}] and wids=[${this.wids.join(
@@ -196,4 +201,94 @@ export class TriggerTxBuilder {
     ]);
     return blake2b(content, undefined, 32);
   };
+
+  /**
+   * creates the trigger box
+   *
+   * @param {bigint} rwtCount
+   * @param {bigint} value
+   * @return {ergoLib.ErgoBoxCandidate}
+   */
+  private createTriggerBox = (
+    rwtCount: bigint,
+    value: bigint
+  ): ergoLib.ErgoBoxCandidate => {
+    const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+      ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(value.toString())),
+      ergoLib.Contract.pay_to_address(
+        ergoLib.Address.from_base58(this.triggerAddress)
+      ),
+      this.creationHeight
+    );
+
+    boxBuilder.add_token(
+      ergoLib.TokenId.from_str(this.rwt),
+      ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(rwtCount.toString()))
+    );
+    this.logger.debug(
+      `added rwt tokens to trigger box with amount=[${rwtCount}]`
+    );
+
+    boxBuilder.set_register_value(
+      4,
+      ergoLib.Constant.from_coll_coll_byte(
+        this.wids.map((wid) => hexToUint8Array(wid))
+      )
+    );
+    this.logger.debug(
+      `added wids to R4 register of trigger box: wids=[${this.wids}]`
+    );
+
+    boxBuilder.set_register_value(
+      5,
+      ergoLib.Constant.from_coll_coll_byte(this.eventData)
+    );
+    this.logger.debug(
+      `added event data to R5 register of trigger box: event-data=[${this.rawEventData}]`
+    );
+
+    boxBuilder.set_register_value(
+      6,
+      ergoLib.Constant.from_byte_array(hexToUint8Array(this.permitScriptHash))
+    );
+    this.logger.debug(
+      `added permit script hash to R6 register of trigger box: permit-script-hash=[${this.permitScriptHash}]`
+    );
+
+    return boxBuilder.build();
+  };
+
+  private get eventData() {
+    return [
+      Buffer.from(this.observation.sourceTxId),
+      Buffer.from(this.observation.fromChain),
+      Buffer.from(this.observation.toChain),
+      Buffer.from(this.observation.fromAddress),
+      Buffer.from(this.observation.toAddress),
+      bigIntToUint8Array(BigInt(this.observation.amount)),
+      bigIntToUint8Array(BigInt(this.observation.bridgeFee)),
+      bigIntToUint8Array(BigInt(this.observation.networkFee)),
+      Buffer.from(this.observation.sourceChainTokenId),
+      Buffer.from(this.observation.targetChainTokenId),
+      Buffer.from(this.observation.sourceBlockId),
+      bigIntToUint8Array(BigInt(this.observation.height)),
+    ];
+  }
+
+  private get rawEventData() {
+    return [
+      this.observation.sourceTxId,
+      this.observation.fromChain,
+      this.observation.toChain,
+      this.observation.fromAddress,
+      this.observation.toAddress,
+      this.observation.amount,
+      this.observation.bridgeFee,
+      this.observation.networkFee,
+      this.observation.sourceChainTokenId,
+      this.observation.targetChainTokenId,
+      this.observation.sourceBlockId,
+      this.observation.height,
+    ];
+  }
 }
