@@ -1,4 +1,5 @@
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
+import { hexToUint8Array } from '../lib/utils';
 
 export const sampleCommitmentBoxes = [
   {
@@ -175,3 +176,66 @@ export const toFakeErgoBox = (box: ergoLib.ErgoBoxCandidate) => {
   const fakeBoxIndex = 0;
   return ergoLib.ErgoBox.from_box_candidate(box, fakeTxId, fakeBoxIndex);
 };
+export const sampleWid =
+  'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
+
+export function createCommitmentErgoBox(
+  commitmentAddress: string,
+  rwt: string,
+  rwtAmount: bigint,
+  permitScriptHash: string,
+  wid?: string,
+  eventId?: string,
+  eventDigest?: Uint8Array,
+  value = 1_100_000n,
+  height = 1000,
+  txId = '8c494da0242fd04ecb4efd3d9de11813848c79b38592f29d579836dfbc459f96',
+  index = 1
+): ergoLib.ErgoBox {
+  const boxBuilder = new ergoLib.ErgoBoxCandidateBuilder(
+    ergoLib.BoxValue.from_i64(ergoLib.I64.from_str(value.toString())),
+    ergoLib.Contract.pay_to_address(
+      ergoLib.Address.from_base58(commitmentAddress)
+    ),
+    height
+  );
+
+  boxBuilder.add_token(
+    ergoLib.TokenId.from_str(rwt),
+    ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(rwtAmount.toString()))
+  );
+
+  if (wid != undefined) {
+    boxBuilder.set_register_value(
+      4,
+      ergoLib.Constant.from_coll_coll_byte([hexToUint8Array(wid)])
+    );
+
+    if (eventId != undefined) {
+      boxBuilder.set_register_value(
+        5,
+        ergoLib.Constant.from_coll_coll_byte([hexToUint8Array(eventId)])
+      );
+
+      if (eventDigest != undefined) {
+        boxBuilder.set_register_value(
+          6,
+          ergoLib.Constant.from_byte_array(eventDigest)
+        );
+
+        boxBuilder.set_register_value(
+          7,
+          ergoLib.Constant.from_byte_array(hexToUint8Array(permitScriptHash))
+        );
+      }
+    }
+  }
+
+  const boxCandidate = boxBuilder.build();
+
+  return ergoLib.ErgoBox.from_box_candidate(
+    boxCandidate,
+    ergoLib.TxId.from_str(txId),
+    index
+  );
+}

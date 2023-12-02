@@ -1,8 +1,8 @@
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
 import { ErgoNetworkType } from '@rosen-bridge/scanner';
-import { blake2b } from 'blakejs';
 import * as ergoLib from 'ergo-lib-wasm-nodejs';
+import { toScriptHash } from '../lib/utils';
 
 export const rwtRepoAddress =
   '5qwczr7KdspNWq5dg6FZJZSDJ9YGcYDsCVi53E6M9gPamGjQTee9Zp5HLbJXQvWJ49ksh9Ao9YK3VcjHZjVVN2rP74YoYUwCo1xY25jJQRvmqF7tMJdUYAWxB1mg3U5xrcYy6oKhev7TNtnzgWW9831r6yx5B9jmBDj7FoC36s8y7DeKQPsG1HaZLBnyLyR8iKWRUeASSFg8QXMksZdE1ZgsnF218aEmjbeEmnj2DcjwQgatAhJKRzN24PNStzk2D41UL3Xe5FSTyVw7p3u6vXim2hDSKj3qAcGboaVv9SKayhbezzdYxiuKodcyggY63H39cUhgYFwHWahpNhVZBjWP4Q4yAm7ebxjfF2RFFjW8njZNGS1SERo5dqRZZcQ79faKeXmNkZ47TnHB8qQHhwxg4BVEWppfWUyoTbSFdBHGxZufej126i8P3QZaTT7Wi28iC8HA9xTj8ZT7A5facme2TGCFjVucYjRzPLd8PXHqjPq9hoAvUjRQi9pV6uppFppuhAPoNrCyi8JA2yTEcohaokoYLmRgp86QKW4AgCADJKhTczSoHz5wsDbbzTsGeoajPwPEosM2dDazqBobiuhnX5x1m4iegB4QWYJkeNWxPdXCWgxK3fTqGDhKdS6jja9nKUMtixmaLPrwLF22S61NcifoxwEfgTKT11UnmtGMCXkkTDkcreuGUkhZMAG7Kqy3MeuMvJin8f6fb6Mivr6A6ad6rqKChyPiFWr2YaeVbdeidGbQrW9FfjvYhRrTkwBBMcRac6eazjmVqYbe9Mqy1znj8t5PpdyndoGZHPmSbYo9ZF3ZTbjh9qT3kKPQ6TVc772NGyrYWaupPsbk7MJYTBZ5WWtnHbxQyqSLAEmeq4csX3pr5kcgQCoqkqY3UkgoFRBjsTDFp61FiAc6KdivhAh4AvWB5jAYKfqps6XwgQrCRqifD8XN6k6k41Cs6UeMU5FzH4fMqEwBTDyAsCigVaY7gz3eMdDrARc1Ec23rEYepqtuBeWe2ienoMgYazHwp27DvinbAyppFziYmf1n898UXpNqsD5ctyZxQ54n67mEXUAuYq7nJMEsTQpYSX9P4dh6qP9geDbYRbFwpN27gJG5HwqwhFwk1n4ytVxVrc7nHqUe86c5gPXb1DZTgJc9YC9b3yQhE6gcNk83Yn8vkrHvHXPE7wgzxQHgV1iMBtk8DkoFCBbHcd3X4MTskaSNKYcWgx4QPSf2GAg2xcsgRePe6ZKRuRLqoZ8dJKyZRc911UUxkY7qd4ZaBrp8ymmWy2s3mjbN3CY9uqXTLTdokNVUzdvAcrC8SKUAqbX567RN9TcuE5FmagD7RFpmy6eVME1MWSvdscheeoXWcvMCYPwVAvotnFrsypXmnZHXgEdNLQVsk19iNQKYG7Lxu51msGC7gKmVGaiifzrB';
@@ -93,18 +93,7 @@ export const triggerTxParams = {
   ),
   permitScriptHash: '',
 };
-triggerTxParams.permitScriptHash = Buffer.from(
-  blake2b(
-    Buffer.from(
-      ergoLib.Address.from_base58(triggerTxParams.permitAddress)
-        .to_ergo_tree()
-        .to_base16_bytes(),
-      'hex'
-    ),
-    undefined,
-    32
-  )
-).toString('hex');
+triggerTxParams.permitScriptHash = toScriptHash(triggerTxParams.permitAddress);
 triggerTxParams.rwtRepo['box'] = ergoLib.ErgoBox.from_json(
   JsonBigInt.stringify(sampleRwtRepoboxInfo)
 );

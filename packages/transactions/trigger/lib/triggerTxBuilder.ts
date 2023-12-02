@@ -1,4 +1,4 @@
-import { AbstractLogger } from '@rosen-bridge/abstract-logger';
+import { AbstractLogger, DummyLogger } from '@rosen-bridge/abstract-logger';
 import {
   createChangeBox,
   selectErgoBoxes,
@@ -35,7 +35,7 @@ export class TriggerTxBuilder {
     private txFee: string,
     private rwtRepo: RWTRepo,
     private observation: ObservationEntity,
-    private logger?: AbstractLogger
+    private logger: AbstractLogger = new DummyLogger()
   ) {
     this.permitScriptHash = toScriptHash(permitAddress);
   }
@@ -51,7 +51,7 @@ export class TriggerTxBuilder {
       throw new Error('creation height must be a positive integer');
     }
     this.creationHeight = height;
-    this.logger?.debug(`new value set for height=[${this.creationHeight}]`);
+    this.logger.debug(`new value set for height=[${this.creationHeight}]`);
     return this;
   };
 
@@ -69,21 +69,38 @@ export class TriggerTxBuilder {
   };
 
   /**
-   * adds new commitment to current instance's set of commitments.
+   * adds new commitments to current instance's set of commitments.
    *
-   * @param {ergoLib.ErgoBox} commitment
+   * @param {Array<ergoLib.ErgoBox>} commitments
    * @return {TriggerTxBuilder}
    */
-  addCommitment = (commitment: ergoLib.ErgoBox): TriggerTxBuilder => {
-    const wid = this.validateCommitment(commitment);
-    this.commitments.push(commitment);
-    this.wids.push(wid);
-    this.logger?.debug(
-      `added new commitment with boxId=[${commitment
-        .box_id()
-        .to_str()}]: this.commitments=[${this.commitments.map((commitment) =>
+  addCommitments = (commitments: Array<ergoLib.ErgoBox>): TriggerTxBuilder => {
+    const currentWids = new Set(this.wids);
+    const validCommitments: Array<ergoLib.ErgoBox> = [];
+    const validWids: Array<string> = [];
+    for (const commitment of commitments) {
+      const wid = this.validateCommitment(commitment);
+      if (currentWids.has(wid)) {
+        throw new Error(
+          `the commitment with boxId=[${commitment
+            .box_id()
+            .to_str()}] has a repetitive wid=[${wid}]`
+        );
+      }
+      currentWids.add(wid);
+      validCommitments.push(commitment);
+      validWids.push(wid);
+    }
+    this.commitments.push(...validCommitments);
+    this.wids.push(...validWids);
+    this.logger.debug(
+      `added new commitments with boxIds=[${validCommitments
+        .map((commitment) => commitment.box_id().to_str())
+        .join(', ')}] and wids=[${this.wids.join(
+        ', '
+      )}]: this.commitments=[${this.commitments.map((commitment) =>
         commitment.box_id().to_str()
-      )}}`
+      )}]`
     );
 
     return this;
@@ -92,7 +109,6 @@ export class TriggerTxBuilder {
   /**
    * validates the passed commitment box
    *
-   * @private
    * @param {ergoLib.ErgoBox} commitment
    * @return {string} the wid of passed commitment
    */
@@ -115,13 +131,17 @@ export class TriggerTxBuilder {
         .to_base16_bytes() !== commitment.ergo_tree().to_base16_bytes()
     ) {
       throw new Error(
-        `commitment should have the commitment address=${this.commitmentAddress}`
+        `commitment with boxId=[${commitment
+          .box_id()
+          .to_str()}] doesn't have the right commitment address`
       );
     }
 
     if (commitment.tokens().get(0).id().to_str() !== this.rwt) {
       throw new Error(
-        `commitment's first token should be rwt with tokenId=${this.rwt}`
+        `commitment with boxId=[${commitment
+          .box_id()
+          .to_str()}] should have rwt as the first token`
       );
     }
 
@@ -130,7 +150,14 @@ export class TriggerTxBuilder {
       this.rwtRepo.getCommitmentRwtCount().toString()
     ) {
       throw new Error(
-        `commitment should have ${this.rwtRepo.getCommitmentRwtCount()} rwt tokens`
+        `commitment with boxId=[${commitment
+          .box_id()
+          .to_str()}] should have [${this.rwtRepo.getCommitmentRwtCount()}] rwt tokens buts has [${commitment
+          .tokens()
+          .get(0)
+          .amount()
+          .as_i64()
+          .to_str()}]`
       );
     }
 
@@ -207,7 +234,7 @@ export class TriggerTxBuilder {
       ergoLib.TokenId.from_str(this.rwt),
       ergoLib.TokenAmount.from_i64(ergoLib.I64.from_str(rwtCount.toString()))
     );
-    this.logger?.debug(
+    this.logger.debug(
       `added rwt tokens to trigger box with amount=[${rwtCount}]`
     );
 
@@ -217,15 +244,24 @@ export class TriggerTxBuilder {
         this.wids.map((wid) => hexToUint8Array(wid))
       )
     );
+    this.logger.debug(
+      `added wids to R4 register of trigger box: wids=[${this.wids}]`
+    );
 
     boxBuilder.set_register_value(
       5,
       ergoLib.Constant.from_coll_coll_byte(this.eventData)
     );
+    this.logger.debug(
+      `added event data to R5 register of trigger box: event-data=[${this.rawEventData}]`
+    );
 
     boxBuilder.set_register_value(
       6,
       ergoLib.Constant.from_byte_array(hexToUint8Array(this.permitScriptHash))
+    );
+    this.logger.debug(
+      `added permit script hash to R6 register of trigger box: permit-script-hash=[${this.permitScriptHash}]`
     );
 
     return boxBuilder.build();
@@ -365,4 +401,20 @@ export class TriggerTxBuilder {
 
     return { unsignedTx, inputBoxes, dataInputBoxes };
   };
+  private get rawEventData() {
+    return [
+      this.observation.sourceTxId,
+      this.observation.fromChain,
+      this.observation.toChain,
+      this.observation.fromAddress,
+      this.observation.toAddress,
+      this.observation.amount,
+      this.observation.bridgeFee,
+      this.observation.networkFee,
+      this.observation.sourceChainTokenId,
+      this.observation.targetChainTokenId,
+      this.observation.sourceBlockId,
+      this.observation.height,
+    ];
+  }
 }
