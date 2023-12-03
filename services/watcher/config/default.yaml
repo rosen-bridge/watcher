@@ -1,8 +1,8 @@
 ---
 network: '' # which scanner network used in this watcher ergo/cardano
 observation:
-  confirmation: 15 # number of required block confirmations to create the commitment after observing an event
-  validThreshold: 720 # observations that have not been triggered won't be processed after this period (in blocks)
+  confirmation: 60 # number of required block confirmations to create the commitment after observing an event
+  validThreshold: 4320 # observations that have not been triggered won't be processed after this period (in blocks)
 cardano:
   type: '' # options: koios, ogmios
   initial:
@@ -33,7 +33,7 @@ ergo:
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
     confirmation: 10 # required block confirmations for sent transactions
-    commitmentTimeoutConfirmation: 720 # required block confirmations for a commitment to redeem
+    commitmentTimeoutConfirmation: 4320 # required block confirmations for a commitment to redeem
   interval:
     scanner: 180 # scanner update interval (in seconds)
     revenue: 120 # revenue update interval (in seconds)
