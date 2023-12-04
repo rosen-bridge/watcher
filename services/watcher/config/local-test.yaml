@@ -1,0 +1,14 @@
+---
+network: ergo
+ergo:
+  networkType: Mainnet
+  secret: 30ec2689d8920095a34193de5b313dc84b178fd827d568be96f85bba12b69db0
+  node:
+    url: ''
+  mnemonic: ''
+path:
+  addresses: tests/config
+  tokens: tests/config/tokens.test.json
+logs:
+  - type: 'console'
+    level: 'error'

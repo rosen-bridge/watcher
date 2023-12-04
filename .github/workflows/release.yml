@@ -1,0 +1,61 @@
+name: RELEASE
+
+on:
+  release:
+    types:
+      - 'published'
+
+jobs:
+  build:
+    name: Build Watcher
+    permissions: write-all
+    strategy:
+      matrix:
+        os: [macos-13, ubuntu-latest, windows-latest]
+        node-version: [16.x]
+        include:
+          - os: macos-13
+            platform: macOS
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: Windows
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Current Branch
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Application
+        run: |
+          cd ./services/watcher
+          npm run release
+
+      - name: MacOS/Linux Move and Rename Release file
+        if: ${{ matrix.platform != 'Windows' }}
+        run: |
+          cd ./services/watcher
+          mv ./bin/index watcher-service-${{ github.event.release.tag_name }}-${{ matrix.platform }}
+
+      - name: Windows Move and Rename Release file
+        if: ${{ matrix.platform == 'Windows' }}
+        run: |
+          cd ./services/watcher
+          mv ./bin/index.exe watcher-service-${{ github.event.release.tag_name }}-${{ matrix.platform }}.exe
+
+      - name: Upload File to Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./services/watcher/watcher-service-${{ github.event.release.tag_name }}-*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
