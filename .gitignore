@@ -16,3 +16,6 @@ bin
 .DS_Store
 .env
 yarn.lock
+
+# TypeScript cache
+*.tsbuildinfo
