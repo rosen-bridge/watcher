@@ -1,10 +1,10 @@
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
 import { watcherDatabase } from '../init';
 import { decodeSerializedBox } from '../ergo/utils';
 import { ERGO_NATIVE_ASSET } from '../config/constants';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 /**
  * Fetches revenue details and stores in the database
@@ -22,7 +22,8 @@ export const revenueJobFunction = async () => {
 
     // save tokens as revenues
     const boxTokens = permitBox.tokens();
-    for (let j = 0; j < boxTokens.len(); j++) {
+    // To ignore the RWT token as the first token in permit box
+    for (let j = 1; j < boxTokens.len(); j++) {
       const token = boxTokens.get(j);
       await watcherDatabase.storeRevenue(
         token.id().to_str(),

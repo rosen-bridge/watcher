@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import { getConfig } from '../config/config';
 import { validationResult, check } from 'express-validator';
 import { generateSK } from '../utils/utils';
-import { loggerFactory } from '../log/Logger';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import {
@@ -10,8 +9,9 @@ import {
   ERGO_NATIVE_ASSET,
   ERGO_NATIVE_ASSET_NAME,
 } from '../config/constants';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const addressRouter = express.Router();
 
@@ -51,7 +51,7 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
       tokenId: ERGO_NATIVE_ASSET,
       decimals: ERGO_DECIMALS,
       name: ERGO_NATIVE_ASSET_NAME,
-      isNative: true,
+      isNativeToken: true,
     });
     const { tokenId, tokenName, sortByAmount } = req.query;
     if (tokenId) {

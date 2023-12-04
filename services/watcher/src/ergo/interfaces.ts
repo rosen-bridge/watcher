@@ -1,12 +1,12 @@
-export interface TokenInfo {
+export interface TokenData {
   tokenId: string;
   amount: bigint;
   decimals?: number;
   name?: string;
-  isNative?: boolean;
+  isNativeToken?: boolean;
 }
 
 export interface AddressBalance {
   nanoErgs: bigint;
-  tokens: Array<TokenInfo>;
+  tokens: Array<TokenData>;
 }

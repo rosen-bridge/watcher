@@ -15,7 +15,6 @@ import { delay } from './utils/utils';
 import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
 import Statistics from './statistics/statistics';
 import { statisticsRouter } from './statistics/apis';
-import { loggerFactory } from './log/Logger';
 import { getConfig } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
@@ -26,8 +25,9 @@ import { revenueJob } from './jobs/revenue';
 import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
 import cors from 'cors';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;

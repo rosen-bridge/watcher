@@ -8,11 +8,11 @@ import { hexStrToUint8Array } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
 import { DetachWID } from './detachWID';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export class CommitmentCreation {
   watcherUtils: WatcherUtils;
@@ -48,7 +48,8 @@ export class CommitmentCreation {
     feeBoxes: Array<wasm.ErgoBox>,
     requiredValue: bigint
   ) => {
-    const height = await ErgoNetwork.getHeight();
+    const allInputs = [...permits, WIDBox, ...feeBoxes];
+    const height = await ErgoNetwork.getMaxHeight(allInputs);
     const permitHash = ErgoUtils.contractHash(
       wasm.Contract.pay_to_address(
         wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)
@@ -170,7 +171,7 @@ export class CommitmentCreation {
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
         const requiredValue =
           BigInt(getConfig().general.fee) +
-          BigInt(getConfig().general.minBoxValue) * BigInt(3);
+          BigInt(getConfig().general.minBoxValue) * BigInt(4);
         let feeBoxes: Array<wasm.ErgoBox> = [];
         if (totalValue < requiredValue) {
           logger.debug(
@@ -188,7 +189,7 @@ export class CommitmentCreation {
           permits,
           WIDBox,
           feeBoxes,
-          requiredValue
+          requiredValue - BigInt(getConfig().general.minBoxValue)
         );
       } catch (e) {
         logger.warn(

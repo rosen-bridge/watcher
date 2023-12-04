@@ -81,8 +81,7 @@ describe('Commitment reveal transaction tests', () => {
     it('Should create, sign and send a trigger event transaction', async () => {
       chai.spy.on(txUtils, 'submitTransaction', () => null);
       chai.spy.on(boxes, 'createTriggerEvent');
-      // chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
-      sinon.stub(ErgoNetwork, 'getHeight').resolves(111);
+      sinon.stub(ErgoNetwork, 'getMaxHeight').resolves(111);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);
       await cr.triggerEventCreationTx(
         commitments,

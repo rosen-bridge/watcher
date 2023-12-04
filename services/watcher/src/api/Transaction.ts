@@ -1,21 +1,21 @@
-import { output } from '@noble/hashes/_assert';
 import { Buffer } from 'buffer';
-import * as console from 'console';
-import { ErgoBox, ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
-import { ErgoNetwork } from '../ergo/network/ergoNetwork';
+import { ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { hexStrToUint8Array, uint8ArrayToHex } from '../utils/utils';
+
+import { ErgoNetwork } from '../ergo/network/ergoNetwork';
+import { uint8ArrayToHex } from '../utils/utils';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { TransactionUtils } from '../utils/watcherUtils';
 import { TxType } from '../database/entities/txEntity';
 import { AddressBalance } from '../ergo/interfaces';
 import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
+import { DetachWID } from '../transactions/detachWID';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export type ApiResponse = {
   response: string;
@@ -159,8 +159,17 @@ export class Transaction {
    * @param RWTCount
    */
   returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
+    const activePermitTxs =
+      await Transaction.watcherDatabase.getActivePermitTransactions();
+    if (activePermitTxs.length !== 0) {
+      return {
+        response: `permit transaction [${activePermitTxs[0].txId}] is in queue`,
+        status: 400,
+      };
+    }
+
     if (!Transaction.watcherPermitState) {
-      return { response: "you don't have permit box", status: 500 };
+      return { response: 'No permit found', status: 400 };
     }
     const WID = Transaction.watcherWID!;
     const height = await ErgoNetwork.getHeight();
@@ -168,6 +177,25 @@ export class Transaction {
     const permitBoxes = await Transaction.boxes.getPermits(WID, RWTCount);
     const repoBox = await Transaction.boxes.getRepoBox();
     const widBox = await Transaction.boxes.getWIDBox(WID);
+    if (widBox.tokens().get(0).id().to_str() != WID) {
+      try {
+        await DetachWID.detachWIDtx(
+          Transaction.txUtils,
+          Transaction.boxes,
+          WID,
+          widBox
+        );
+        return {
+          response: `WID box is not in valid format (WID token is not the first token), please wait for the correction transaction`,
+          status: 400,
+        };
+      } catch (e) {
+        return {
+          response: `WID box is not in valid format, but an error in creating correction transaction: ${e}`,
+          status: 500,
+        };
+      }
+    }
 
     const R4 = repoBox.register_value(4);
     const R5 = repoBox.register_value(5);
@@ -269,7 +297,7 @@ export class Transaction {
           response: `Not enough erg. required [${
             totalErgOut - totalErgIn
           }] more Ergs`,
-          status: 500,
+          status: 400,
         };
       }
       userBoxes.boxes.forEach((box) => inputBoxes.push(box));
@@ -450,7 +478,7 @@ export class Transaction {
     if (activePermitTxs.length !== 0) {
       return {
         response: `permit transaction [${activePermitTxs[0].txId}] is in queue`,
-        status: 500,
+        status: 400,
       };
     }
 
@@ -472,13 +500,6 @@ export class Transaction {
     const RSNCollateral = collateral.rsn;
 
     const inputBoxes = [repoBox];
-    if (WID) {
-      const widBox = await ErgoNetwork.getBoxWithToken(
-        Transaction.userAddress,
-        WID
-      );
-      inputBoxes.push(widBox);
-    }
     const RSNTokenId = Transaction.RSN.to_str();
     const MinBoxValue = BigInt(Transaction.minBoxValue.as_i64().to_str());
     const RequiredErg =
@@ -494,14 +515,33 @@ export class Transaction {
         [RSNTokenId]: RequiredRSN,
       }
     );
-    if (userBoxes.covered) {
-      userBoxes.boxes.forEach((box) => inputBoxes.push(box));
-    } else {
+    if (!userBoxes.covered) {
       return {
         response: `Not enough ERG or RSN. Required [${RequiredErg}] ERG and [${RequiredRSN}] RSN`,
-        status: 500,
+        status: 400,
       };
     }
+    if (WID) {
+      const widBox = await Transaction.boxes.getWIDBox(WID);
+      if (widBox.tokens().get(0).id().to_str() != WID) {
+        await DetachWID.detachWIDtx(
+          Transaction.txUtils,
+          Transaction.boxes,
+          WID,
+          widBox
+        );
+        return {
+          response: `WID box is not in valid format (WID token is not the first token), please wait for the correction transaction`,
+          status: 400,
+        };
+      }
+      inputBoxes.push(widBox);
+      userBoxes.boxes.forEach((box) => {
+        if (box.box_id().to_str() != widBox.box_id().to_str())
+          inputBoxes.push(box);
+      });
+    } else inputBoxes.push(...userBoxes.boxes);
+
     // generate RepoOut
     const RepoRWTCount = repoBox
       .tokens()

@@ -8,10 +8,10 @@ import { ChangeBoxCreationError } from '../errors/errors';
 import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export class CommitmentReveal {
   watcherUtils: WatcherUtils;
@@ -42,7 +42,8 @@ export class CommitmentReveal {
     WIDs: Array<Uint8Array>,
     feeBoxes: Array<wasm.ErgoBox>
   ) => {
-    const height = await ErgoNetwork.getHeight();
+    const allInputs = [...commitmentBoxes, RWTRepoBox, ...feeBoxes];
+    const height = await ErgoNetwork.getMaxHeight(allInputs);
     const boxValues = commitmentBoxes
       .map((box) => BigInt(box.value().as_i64().to_str()))
       .reduce((a, b) => a + b, BigInt(0));

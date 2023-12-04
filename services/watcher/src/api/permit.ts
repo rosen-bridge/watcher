@@ -1,9 +1,9 @@
 import { Request, Response, Router } from 'express';
 import { ApiResponse, Transaction } from './Transaction';
 import { body, validationResult } from 'express-validator';
-import { loggerFactory } from '../log/Logger';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const permitRouter = Router();
 
@@ -61,7 +61,7 @@ permitRouter.post(
         res.status(response.status).send({ message: response.response });
       }
     } catch (e) {
-      logger.warn(`An error occurred while locking RSN: ${e}`);
+      logger.warn(`An error occurred while returning permits: ${e}`);
       res.status(500).send({ message: e.message });
     }
   }

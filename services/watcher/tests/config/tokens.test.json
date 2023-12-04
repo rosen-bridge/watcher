@@ -1,31 +1,122 @@
 {
   "idKeys": {
     "ergo": "tokenId",
-    "cardano": "fingerprint"
+    "cardano": "tokenId"
   },
   "tokens": [
     {
       "ergo": {
         "tokenId": "0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95",
-        "tokenName": "test token3"
+        "name": "test token 3",
+        "decimals": 6,
+        "metaData": {
+          "type": "EIP-004",
+          "residency": "native"
+        }
       },
       "cardano": {
-        "fingerprint": "asset1ycg2zvfj5x7zt4md3zkd0j5tekxs52kmwxpw05",
+        "tokenId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2.646f6765",
         "policyId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
         "assetName": "646f6765",
-        "unit": "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc37e"
+        "unit": "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc37e",
+        "name": "wrappedToken 1",
+        "decimals": 6,
+        "metaData": {
+          "type": "CIP26",
+          "residency": "wrapped"
+        }
       }
     },
     {
       "ergo": {
         "tokenId": "1114c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95",
-        "tokenName": "test token5"
+        "name": "test token5",
+        "decimals": 6,
+        "metaData": {
+          "type": "EIP-004",
+          "residency": "wrapped"
+        }
       },
       "cardano": {
-        "fingerprint": "asset12y0ewmxggeglymjpmp9mjf5qzh4kgwj9chtkpv",
+        "tokenId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2.7369676d61",
         "policyId": "ace7bcc2ce705679149746620de3a84660ce57573df54b5a096e39a2",
         "assetName": "7369676d61",
-        "unit": "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc37e"
+        "unit": "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc37e",
+        "name": "cardano test token 1",
+        "decimals": 6,
+        "metaData": {
+          "type": "CIP26",
+          "residency": "native"
+        }
+      }
+    },
+    {
+      "ergo": {
+        "tokenId": "tokenId",
+        "name": "test token 10",
+        "decimals": 6,
+        "metaData": {
+          "type": "EIP-004",
+          "residency": "native"
+        }
+      },
+      "cardano": {
+        "tokenId": "policy_id2.",
+        "policyId": "policy_id2",
+        "assetName": "",
+        "unit": "",
+        "name": "wrappedToken 2",
+        "decimals": 6,
+        "metaData": {
+          "type": "CIP26",
+          "residency": "wrapped"
+        }
+      }
+    },
+    {
+      "ergo": {
+        "tokenId": "tokenId2",
+        "name": "test token 11",
+        "decimals": 6,
+        "metaData": {
+          "type": "EIP-004",
+          "residency": "wrapped"
+        }
+      },
+      "cardano": {
+        "tokenId": "policy_id3.",
+        "policyId": "policy_id3",
+        "assetName": "",
+        "unit": "",
+        "name": "cardano test token 2",
+        "decimals": 6,
+        "metaData": {
+          "type": "CIP26",
+          "residency": "native"
+        }
+      }
+    },
+    {
+      "ergo": {
+        "tokenId": "tokenIdStar",
+        "name": "test token 12",
+        "decimals": 6,
+        "metaData": {
+          "type": "EIP-004",
+          "residency": "wrapped"
+        }
+      },
+      "cardano": {
+        "tokenId": "policy_id4.",
+        "policyId": "policy_id4",
+        "assetName": "",
+        "unit": "",
+        "name": "cardano test token 3",
+        "decimals": 6,
+        "metaData": {
+          "type": "CIP26",
+          "residency": "native"
+        }
       }
     }
   ]

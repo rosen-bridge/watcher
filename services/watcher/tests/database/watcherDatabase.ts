@@ -249,7 +249,7 @@ describe('WatcherModel tests', () => {
      *    The function should return the ergo chain last block height
      */
     it('Should return the last block height on ergo', async () => {
-      const res = await DB.getLastBlockHeight(Constants.ERGO_WATCHER);
+      const res = await DB.getLastBlockHeight(Constants.ERGO_CHAIN_NAME);
       expect(res).to.eql(ergoBlockEntity.height);
     });
 
@@ -259,7 +259,7 @@ describe('WatcherModel tests', () => {
      *    The function should return the cardano chain last block height
      */
     it('Should return the last block height on cardano', async () => {
-      const res = await DB.getLastBlockHeight(Constants.CARDANO_WATCHER);
+      const res = await DB.getLastBlockHeight(Constants.CARDANO_CHAIN_NAME);
       expect(res).to.eql(cardanoBlockEntity.height);
     });
 
@@ -401,7 +401,7 @@ describe('WatcherModel tests', () => {
     it('should remove a tx', async () => {
       const txs = await DB.getAllTxs();
       const data = await DB.removeTx(txs[0]);
-      expect(data.deleted).to.true;
+      expect(data!.deleted).to.true;
     });
 
     /**

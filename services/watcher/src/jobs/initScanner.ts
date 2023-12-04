@@ -5,11 +5,11 @@ import {
 } from '@rosen-bridge/scanner';
 
 import * as Constants from '../config/constants';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
 import { scanner } from '../utils/scanner';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   try {
@@ -27,7 +27,7 @@ export const scannerInit = () => {
   const config = allConfig.general;
   const cardanoConfig = allConfig.cardano;
   scanningJob(config.ergoInterval, scanner.ergoScanner).then(() => null);
-  if (config.networkWatcher === Constants.CARDANO_WATCHER) {
+  if (config.networkWatcher === Constants.CARDANO_CHAIN_NAME) {
     if (cardanoConfig.ogmios)
       (scanner.observationScanner as CardanoOgmiosScanner).start();
     else if (cardanoConfig.koios) {
