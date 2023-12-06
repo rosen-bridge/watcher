@@ -1,10 +1,10 @@
 import { Queue } from '../ergo/transaction/queue';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { WatcherUtils } from '../utils/watcherUtils';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 let transactionQueue: Queue;
 

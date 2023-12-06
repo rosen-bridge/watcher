@@ -18,7 +18,7 @@ import { RevenueEntity } from '../../src/database/entities/revenueEntity';
 import { firstPermit, secondPermit } from '../ergo/statistics/mockUtils';
 
 export const ergoBlockEntity = new BlockEntity();
-ergoBlockEntity.scanner = Constants.ERGO_WATCHER;
+ergoBlockEntity.scanner = Constants.ERGO_CHAIN_NAME;
 ergoBlockEntity.id = 1;
 ergoBlockEntity.hash = 'blockHash';
 ergoBlockEntity.height = 1111;
@@ -27,7 +27,7 @@ ergoBlockEntity.status = PROCEED;
 ergoBlockEntity.timestamp = 123;
 
 export const cardanoBlockEntity = new BlockEntity();
-cardanoBlockEntity.scanner = Constants.CARDANO_WATCHER;
+cardanoBlockEntity.scanner = Constants.CARDANO_CHAIN_NAME;
 cardanoBlockEntity.id = 2;
 cardanoBlockEntity.hash = 'blockHash2';
 cardanoBlockEntity.height = 2222;
@@ -149,7 +149,7 @@ export const validBox0Token = {
   amount: 24109n,
   name: 'RSN',
   decimals: 0,
-  isNative: false,
+  isNativeToken: false,
 };
 
 export const validEmptyRSNToken = {
@@ -157,7 +157,7 @@ export const validEmptyRSNToken = {
   tokenId: 'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516',
   name: 'RSN',
   decimals: 3,
-  isNative: false,
+  isNativeToken: false,
 };
 
 export const validBox1Token = {
@@ -165,7 +165,7 @@ export const validBox1Token = {
   amount: 1n,
   name: 'Test',
   decimals: 0,
-  isNative: false,
+  isNativeToken: false,
 };
 
 export const validTwoBoxErgAmount = {
@@ -173,7 +173,7 @@ export const validTwoBoxErgAmount = {
   tokenId: Constants.ERGO_NATIVE_ASSET,
   decimals: Constants.ERGO_DECIMALS,
   name: Constants.ERGO_NATIVE_ASSET_NAME,
-  isNative: true,
+  isNativeToken: true,
 };
 
 export const eventTriggerEntity = new EventTriggerEntity();
@@ -234,7 +234,7 @@ observationEntity1.fromChain = 'ergo';
 observationEntity1.networkFee = '1000';
 observationEntity1.sourceBlockId = 'block';
 observationEntity1.sourceTxId = 'txId';
-observationEntity1.sourceChainTokenId = 'sourceToken';
+observationEntity1.sourceChainTokenId = 'tokenId';
 observationEntity1.toAddress = 'addr1';
 observationEntity1.targetChainTokenId = 'targetToken';
 observationEntity1.toChain = 'cardano';
@@ -251,7 +251,7 @@ observationEntity2.fromChain = 'ergo';
 observationEntity2.networkFee = '1000';
 observationEntity2.sourceBlockId = 'block';
 observationEntity2.sourceTxId = 'txId';
-observationEntity2.sourceChainTokenId = 'sourceToken';
+observationEntity2.sourceChainTokenId = 'tokenId';
 observationEntity2.toAddress = 'addr1';
 observationEntity2.targetChainTokenId = 'targetToken';
 observationEntity2.toChain = 'cardano';
@@ -268,7 +268,7 @@ observationEntity3.fromChain = 'ergo';
 observationEntity3.networkFee = '1000';
 observationEntity3.sourceBlockId = 'block';
 observationEntity3.sourceTxId = 'txId3';
-observationEntity3.sourceChainTokenId = 'sourceToken';
+observationEntity3.sourceChainTokenId = 'tokenId';
 observationEntity3.toAddress = 'addr3';
 observationEntity3.targetChainTokenId = 'targetToken';
 observationEntity3.toChain = 'cardano';
@@ -285,7 +285,7 @@ observationEntity4.fromChain = 'ergo';
 observationEntity4.networkFee = '1000';
 observationEntity4.sourceBlockId = 'block';
 observationEntity4.sourceTxId = 'txId4';
-observationEntity4.sourceChainTokenId = 'sourceToken4';
+observationEntity4.sourceChainTokenId = 'tokenId2';
 observationEntity4.toAddress = 'addr4';
 observationEntity4.targetChainTokenId = 'targetToken';
 observationEntity4.toChain = 'cardano';
@@ -682,7 +682,7 @@ export const observation1 = {
   amount: '10',
   networkFee: '1000',
   bridgeFee: '100',
-  sourceChainTokenId: 'sourceToken',
+  sourceChainTokenId: 'tokenId',
   targetChainTokenId: 'targetToken',
   sourceTxId: 'txId',
   sourceBlockId: 'block',
@@ -701,7 +701,7 @@ export const observation2 = {
   amount: '5',
   networkFee: '1000',
   bridgeFee: '100',
-  sourceChainTokenId: 'sourceToken4',
+  sourceChainTokenId: 'tokenId2',
   targetChainTokenId: 'targetToken',
   sourceTxId: 'txId4',
   sourceBlockId: 'block',

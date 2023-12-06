@@ -38,7 +38,7 @@ class WatcherDataBase {
   private readonly blockRepository: Repository<BlockEntity>;
   private readonly observationRepository: Repository<ObservationEntity>;
   private readonly txRepository: Repository<TxEntity>;
-  private readonly observationStatusEntity: Repository<ObservationStatusEntity>;
+  private readonly observationStatusRepository: Repository<ObservationStatusEntity>;
   private readonly commitmentRepository: Repository<CommitmentEntity>;
   private readonly permitRepository: Repository<PermitEntity>;
   private readonly boxRepository: Repository<BoxEntity>;
@@ -53,7 +53,7 @@ class WatcherDataBase {
     this.blockRepository = dataSource.getRepository(BlockEntity);
     this.observationRepository = dataSource.getRepository(ObservationEntity);
     this.txRepository = dataSource.getRepository(TxEntity);
-    this.observationStatusEntity = dataSource.getRepository(
+    this.observationStatusRepository = dataSource.getRepository(
       ObservationStatusEntity
     );
     this.commitmentRepository = dataSource.getRepository(CommitmentEntity);
@@ -151,6 +151,21 @@ class WatcherDataBase {
   };
 
   /**
+   *
+   * @param observationIds get status of a list of observations
+   */
+  getObservationsStatus = (
+    observationIds: Array<number>
+  ): Promise<Array<ObservationStatusEntity>> => {
+    return this.observationStatusRepository.find({
+      where: {
+        observation: In(observationIds),
+      },
+      relations: ['observation'],
+    });
+  };
+
+  /**
    * setting NOT_COMMITTED status for new observations that doesn't have status and return last status
    * @param observation
    */
@@ -159,7 +174,7 @@ class WatcherDataBase {
   ): Promise<ObservationStatusEntity> => {
     const observationStatus = await this.getStatusForObservations(observation);
     if (!observationStatus) {
-      await this.observationStatusEntity.insert({
+      await this.observationStatusRepository.insert({
         observation: observation,
         status: TxStatus.NOT_COMMITTED,
       });
@@ -183,7 +198,7 @@ class WatcherDataBase {
   getStatusForObservations = async (
     observation: ObservationEntity
   ): Promise<ObservationStatusEntity | null> => {
-    return await this.observationStatusEntity.findOne({
+    return await this.observationStatusRepository.findOne({
       where: {
         observation: observation,
       },
@@ -220,7 +235,7 @@ class WatcherDataBase {
           `observation with requestId ${observation.requestId} has no status`
         );
     }
-    const time = new Date().getTime();
+    const time = Math.floor(new Date().getTime() / 1000);
     return await this.txRepository.insert({
       txId: txId,
       txSerialized: tx,
@@ -229,6 +244,7 @@ class WatcherDataBase {
       observation: observation,
       type: txType,
       deleted: false,
+      isValid: true,
     });
   };
 
@@ -247,12 +263,46 @@ class WatcherDataBase {
   };
 
   /**
+   * Returns all stored transactions with no deleted flag and valid flag
+   */
+  getValidTxs = async () => {
+    return await this.txRepository.find({
+      relations: {
+        observation: true,
+      },
+      where: {
+        deleted: false,
+        isValid: true,
+      },
+    });
+  };
+
+  /**
+   * Set status for a transaction
+   * @param tx set tx status
+   * @param isValid
+   */
+  setTxValidStatus = async (tx: TxEntity, isValid: boolean) => {
+    return this.txRepository.update(
+      {
+        id: tx.id,
+      },
+      { isValid }
+    );
+  };
+
+  /**
    * Removes one specified transaction (Just toggles the removed flag)
    * @param tx
    */
   removeTx = async (tx: TxEntity) => {
-    tx.deleted = true;
-    return this.txRepository.save(tx);
+    await this.txRepository.update(
+      {
+        id: tx.id,
+      },
+      { deleted: true }
+    );
+    return this.txRepository.findOneBy({ id: tx.id });
   };
 
   /**
@@ -280,7 +330,7 @@ class WatcherDataBase {
         observationStatus.status
       )
     )
-      await this.observationStatusEntity.update(
+      await this.observationStatusRepository.update(
         {
           id: observationStatus.id,
         },
@@ -318,7 +368,7 @@ class WatcherDataBase {
         observationStatus.status
       )
     )
-      await this.observationStatusEntity.update(
+      await this.observationStatusRepository.update(
         {
           id: observationStatus.id,
         },
@@ -355,7 +405,7 @@ class WatcherDataBase {
       throw new Error(
         `observation with requestId ${observation.requestId} has no status`
       );
-    await this.observationStatusEntity.update(
+    await this.observationStatusRepository.update(
       {
         id: observationStatus.id,
       },
@@ -584,7 +634,7 @@ class WatcherDataBase {
     box: wasm.ErgoBox,
     tokenId?: string
   ): Promise<wasm.ErgoBox> => {
-    const txs: Array<TxEntity> = await this.getAllTxs();
+    const txs: Array<TxEntity> = await this.getValidTxs();
     const map = new Map<string, wasm.ErgoBox>();
     const address: string = box.ergo_tree().to_base16_bytes();
     for (const tx of txs) {

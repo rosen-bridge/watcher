@@ -1,6 +1,6 @@
 import { BridgeMinimumFee, Fee } from '@rosen-bridge/minimum-fee';
 import { getConfig } from '../config/config';
-import { ERGO_WATCHER } from '../config/constants';
+import { ERGO_CHAIN_NAME } from '../config/constants';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 class MinimumFee {
@@ -22,7 +22,7 @@ class MinimumFee {
         [tokenMap.getIdKey(observation.fromChain)]:
           observation.sourceChainTokenId,
       })[0],
-      ERGO_WATCHER
+      ERGO_CHAIN_NAME
     );
     return await MinimumFee.bridgeMinimumFee.getFee(
       tokenId,

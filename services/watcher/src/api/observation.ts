@@ -1,10 +1,13 @@
 import express from 'express';
-import { loggerFactory } from '../log/Logger';
 import { watcherDatabase } from '../init';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
+import { ErgoUtils } from '../ergo/utils';
+import { JsonBI } from '../ergo/network/parser';
+import { TxStatus } from '../database/entities/observationStatusEntity';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 const observationRouter = express.Router();
 
 /**
@@ -40,7 +43,22 @@ observationRouter.get('/', async (req, res) => {
         ? DEFAULT_API_LIMIT
         : Math.min(Number(limitString), MAX_API_LIMIT)
     );
-    res.status(200).json(result);
+    const statusMap = new Map<number, string>();
+    (
+      await watcherDatabase.getObservationsStatus(
+        result.items.map((item) => item.id)
+      )
+    ).forEach((item) => statusMap.set(item.observation.id, item.status));
+    result.items = result.items.map((item) => {
+      return {
+        ...item,
+        status: statusMap.get(item.id) || TxStatus.NOT_COMMITTED,
+      };
+    });
+    res.set('Content-Type', 'application/json');
+    res
+      .status(200)
+      .send(JsonBI.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));
   } catch (e) {
     logger.warn(`An error occurred while fetching observations: ${e}`);
     res.status(500).send({ message: e.message });

@@ -1,10 +1,12 @@
 import { watcherDatabase } from '../init';
 import { decodeSerializedBox, ErgoUtils } from '../ergo/utils';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { loggerFactory } from '../log/Logger';
 import { getConfig } from '../config/config';
+import WinstonLogger from '@rosen-bridge/winston-logger';
+import { ERGO_CHAIN_NAME } from '../config/constants';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+let initialized = false;
 
 /**
  * Fetches token names of the new UTXOs
@@ -52,6 +54,31 @@ export const tokenNameJobFunction = async (
  * @param boxIds
  */
 export const tokenNameJob = async (boxIds: string[]) => {
+  if (!initialized) {
+    try {
+      const tokenMap = getConfig().token.tokenMap;
+      const chains = tokenMap.getAllChains();
+      const idKeyErgo = tokenMap.getIdKey(ERGO_CHAIN_NAME);
+      for (const chain of chains) {
+        const tokensData = tokenMap.getTokens(ERGO_CHAIN_NAME, chain);
+        const allTokenIds = tokensData.map((token) => token[idKeyErgo]);
+        const existingTokenIds = (
+          await watcherDatabase.getTokenEntity(allTokenIds)
+        ).map((token) => token.tokenId);
+        for (const tokenData of tokensData) {
+          if (!existingTokenIds.find((id) => id === tokenData[idKeyErgo]))
+            await watcherDatabase.insertTokenEntity(
+              tokenData[idKeyErgo],
+              tokenData.name,
+              tokenData.decimals
+            );
+        }
+      }
+      initialized = true;
+    } catch (e) {
+      logger.warn(`token info initialization failed with error: ${e}`);
+    }
+  }
   let newBoxIds: string[] = [];
   try {
     newBoxIds = await tokenNameJobFunction(boxIds);

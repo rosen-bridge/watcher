@@ -168,13 +168,14 @@ export class Boxes {
     const selectedBoxes: wasm.ErgoBox[] = [];
     let totalValue = BigInt(0);
     for (const box of boxes) {
-      if (boxIdsToOmit.includes(box.box_id().to_str())) continue;
       let unspentBox = await ErgoNetwork.trackMemPool(box);
       if (unspentBox) unspentBox = await this.dataBase.trackTxQueue(unspentBox);
+      if (!unspentBox || boxIdsToOmit.includes(unspentBox.box_id().to_str()))
+        continue;
       const isBoxNotSelected = selectedBoxes.every(
         (box) => box.box_id().to_str() !== unspentBox.box_id().to_str()
       );
-      if (unspentBox && isBoxNotSelected) {
+      if (isBoxNotSelected) {
         totalValue = totalValue + BigInt(unspentBox.value().as_i64().to_str());
         selectedBoxes.push(unspentBox);
         if (totalValue >= requiredValue) break;

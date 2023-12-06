@@ -1,20 +1,17 @@
 import chai, { expect } from 'chai';
 import spies from 'chai-spies';
 import express, { Router } from 'express';
+import request from 'supertest';
+
 import eventsRouter from '../../src/api/events';
 import { initWatcherDB } from '../../src/init';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
-import request from 'supertest';
 import {
   eventTriggerEntity,
   newEventTriggerEntity,
 } from '../database/mockedData';
-import {
-  firstStatisticsEventTrigger,
-  secondStatisticsEventTrigger,
-  spentEventTrigger,
-  thirdStatisticsEventTrigger,
-} from '../ergo/statistics/mockUtils';
+import { spentEventTrigger } from '../ergo/statistics/mockUtils';
+import { events } from './testDataEvents';
 
 chai.use(spies);
 
@@ -51,16 +48,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({
-        items: [
-          thirdStatisticsEventTrigger,
-          secondStatisticsEventTrigger,
-          firstStatisticsEventTrigger,
-          newEventTriggerEntity,
-          eventTriggerEntity,
-        ],
-        total: 5,
-      });
+      expect(resultParsed).to.eql({ items: events, total: 5 });
     });
 
     /**
@@ -83,7 +71,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({ items: [eventTriggerEntity], total: 1 });
+      expect(resultParsed).to.eql({ items: [events[4]], total: 1 });
     });
 
     /**
@@ -106,7 +94,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({ items: [newEventTriggerEntity], total: 1 });
+      expect(resultParsed).to.eql({ items: [events[3]], total: 1 });
     });
 
     /**
@@ -129,7 +117,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({ items: [eventTriggerEntity], total: 1 });
+      expect(resultParsed).to.eql({ items: [events[4]], total: 1 });
     });
 
     /**
@@ -152,7 +140,10 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({ items: [newEventTriggerEntity], total: 1 });
+      expect(resultParsed).to.eql({
+        items: [events[3]],
+        total: 1,
+      });
     });
 
     /**
@@ -195,13 +186,7 @@ describe('eventsRouter', () => {
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
       expect(resultParsed).to.eql({
-        items: [
-          eventTriggerEntity,
-          newEventTriggerEntity,
-          firstStatisticsEventTrigger,
-          secondStatisticsEventTrigger,
-          thirdStatisticsEventTrigger,
-        ],
+        items: events.slice().reverse(),
         total: 5,
       });
     });
@@ -224,10 +209,7 @@ describe('eventsRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed).to.eql({
-        items: [secondStatisticsEventTrigger, firstStatisticsEventTrigger],
-        total: 5,
-      });
+      expect(resultParsed).to.eql({ items: [events[1], events[2]], total: 5 });
     });
   });
 

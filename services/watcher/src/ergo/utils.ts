@@ -13,7 +13,7 @@ import { Buffer } from 'buffer';
 import { getConfig } from '../config/config';
 import { Transaction } from '../api/Transaction';
 import { watcherDatabase } from '../init';
-import { AddressBalance, TokenInfo } from './interfaces';
+import { AddressBalance, TokenData } from './interfaces';
 import { RevenueView } from '../database/entities/revenueView';
 import { TokenEntity } from '../database/entities/tokenEntity';
 import { RevenueEntity } from '../database/entities/revenueEntity';
@@ -21,7 +21,11 @@ import {
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
   ERGO_NATIVE_ASSET_NAME,
+  ERGO_CHAIN_NAME,
 } from '../config/constants';
+import { PagedItemData } from '../types/items';
+import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
+import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 const txFee = parseInt(getConfig().general.fee);
 
@@ -327,7 +331,7 @@ export class ErgoUtils {
    * @param boxes
    * @returns sum of box assets
    */
-  static getBoxAssetsSum = (boxes: Array<wasm.ErgoBox>): Array<TokenInfo> => {
+  static getBoxAssetsSum = (boxes: Array<wasm.ErgoBox>): Array<TokenData> => {
     const assets = new Map<string, bigint>();
     boxes.forEach((box) => {
       for (let i = 0; i < box.tokens().len(); i++) {
@@ -363,8 +367,8 @@ export class ErgoUtils {
    * @returns
    */
   static fillTokensDetails = async (
-    tokens: Array<TokenInfo>
-  ): Promise<Array<TokenInfo>> => {
+    tokens: Array<TokenData>
+  ): Promise<Array<TokenData>> => {
     const tokensInfo = await watcherDatabase.getTokenEntity(
       tokens.map((token) => token.tokenId)
     );
@@ -386,9 +390,58 @@ export class ErgoUtils {
         ...token,
         name: name === '' ? undefined : name,
         decimals: decimals,
-        isNative: token.tokenId === ERGO_NATIVE_ASSET_NAME,
+        isNativeToken: token.tokenId === ERGO_NATIVE_ASSET_NAME,
       };
     });
+  };
+
+  /**
+   * Returns full token data by searching on token map
+   * @param tokenId
+   * @param amount
+   * @param chain
+   * @returns TokenData
+   */
+  static tokenDetailByTokenMap = (tokenId: string, chain: string) => {
+    const tokenMap = getConfig().token.tokenMap;
+    const tokenDetail = tokenMap.search(chain, {
+      [tokenMap.getIdKey(chain)]: tokenId,
+    });
+    let name = 'Unsupported token';
+    let decimals = 0;
+    let isNativeToken = false;
+    if (tokenDetail.length) {
+      name = tokenDetail[0][chain].name;
+      decimals = tokenDetail[0][chain].decimals;
+      isNativeToken = tokenDetail[0][chain].metaData.type === 'native';
+    }
+
+    return {
+      tokenId: tokenId,
+      name: name,
+      decimals: decimals,
+      isNativeToken,
+    };
+  };
+
+  /**
+   * Fill token info in events and observations
+   * @param pagedItems
+   * @returns pagedItems with token info
+   */
+  static fillTokenDetailsInEvents = (
+    pagedItems: PagedItemData<EventTriggerEntity | ObservationEntity>
+  ) => {
+    return {
+      ...pagedItems,
+      items: pagedItems.items.map((item) => ({
+        ...item,
+        lockToken: ErgoUtils.tokenDetailByTokenMap(
+          item.sourceChainTokenId,
+          getConfig().general.networkWatcher
+        ),
+      })),
+    };
   };
 
   /**
@@ -429,20 +482,20 @@ export class ErgoUtils {
     revenues: Array<RevenueView>,
     tokens: Array<RevenueEntity>
   ) => {
-    const tokenMap = new Map<number, Array<TokenInfo>>();
+    const tokenMap = new Map<number, Array<TokenData>>();
     tokens.forEach((token) => {
       if (tokenMap.has(token.permit.id)) {
         tokenMap.get(token.permit.id)?.push({
           tokenId: token.tokenId,
           amount: BigInt(token.amount),
-          isNative: token.tokenId === ERGO_NATIVE_ASSET,
+          isNativeToken: token.tokenId === ERGO_NATIVE_ASSET,
         });
       } else {
         tokenMap.set(token.permit.id, [
           {
             tokenId: token.tokenId,
             amount: BigInt(token.amount),
-            isNative: token.tokenId === ERGO_NATIVE_ASSET,
+            isNativeToken: token.tokenId === ERGO_NATIVE_ASSET,
           },
         ]);
       }
@@ -479,10 +532,13 @@ export class ErgoUtils {
       chartMap.set(record.tokenId, chartRecords);
     });
     // transform chartMap to json
-    const jsonObject: { title: string; data: Array<ChartRecord> }[] = [];
+    const jsonObject: {
+      title: Omit<TokenData, 'amount'>;
+      data: Array<ChartRecord>;
+    }[] = [];
     chartMap.forEach((records, tokenId) => {
       jsonObject.push({
-        title: tokenId,
+        title: this.tokenDetailByTokenMap(tokenId, ERGO_CHAIN_NAME),
         data: records,
       });
     });

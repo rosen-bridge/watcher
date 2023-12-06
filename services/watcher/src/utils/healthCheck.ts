@@ -18,7 +18,7 @@ import {
 import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
 import {
-  CARDANO_WATCHER,
+  CARDANO_CHAIN_NAME,
   OGMIOS_TYPE,
   KOIOS_TYPE,
   NODE_TYPE,
@@ -26,11 +26,11 @@ import {
   ERGO_NATIVE_ASSET,
   ERGO_DECIMALS,
 } from '../config/constants';
-import { loggerFactory } from '../log/Logger';
 import { scanner } from './scanner';
 import { Transaction } from '../../src/api/Transaction';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url);
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
@@ -60,7 +60,7 @@ class HealthCheckSingleton {
     } else if (getConfig().general.scannerType === EXPLORER_TYPE) {
       this.registerErgoExplorerHealthCheckParams();
     }
-    if (getConfig().general.networkWatcher === CARDANO_WATCHER) {
+    if (getConfig().general.networkWatcher === CARDANO_CHAIN_NAME) {
       this.registerCardanoHealthCheckParams();
     }
   }

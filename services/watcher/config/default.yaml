@@ -1,8 +1,8 @@
 ---
 network: '' # which scanner network used in this watcher ergo/cardano
 observation:
-  confirmation: 15 # number of required block confirmations to create the commitment after observing an event
-  validThreshold: 720 # observations that have not been triggered won't be processed after this period (in blocks)
+  confirmation: 60 # number of required block confirmations to create the commitment after observing an event
+  validThreshold: 4320 # observations that have not been triggered won't be processed after this period (in blocks)
 cardano:
   type: '' # options: koios, ogmios
   initial:
@@ -12,7 +12,7 @@ cardano:
   koios:
     interval: 10 # koios scanning interval (in seconds)
     timeout: 10 # koios request timeout (in seconds)
-    url: 'https://api.koios.rest/api/v0' # koios url
+    url: 'https://api.koios.rest/api/v1' # koios url
   ogmios:
     host: '' # ogmios node host address
     port: 1337 # ogmios port
@@ -33,7 +33,7 @@ ergo:
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
     confirmation: 10 # required block confirmations for sent transactions
-    commitmentTimeoutConfirmation: 720 # required block confirmations for a commitment to redeem
+    commitmentTimeoutConfirmation: 4320 # required block confirmations for a commitment to redeem
   interval:
     scanner: 180 # scanner update interval (in seconds)
     revenue: 120 # revenue update interval (in seconds)
@@ -47,11 +47,13 @@ path:
   addresses: config/rosen # addresses path
   # tokens: config/rosen/tokens.json # default tokens path.
 logs:
-  path: logs/ # logs path
-  level: info # logging level
-  maxSize: 20m # maximum file size for rotation
-  maxFiles: 14d # maximum rotated files available
-  # datePattern: 'YYYY-MM-DD' # log rotation date pattern
+  - type: 'file' # [file, console]
+    path: './logs/' # path to log files (only for rotateFile type)
+    maxSize: '20m' # maximum size of each log file (20 MB) (only for rotateFile type)
+    maxFiles: '14d' # maximum number of log files (14 days) (only for rotateFile type)
+    level: 'info' # [debug, info, warn, error]
+  - type: 'console'
+    level: 'info'
 database:
   type: 'sqlite' # options: postgres, sqlite
   path: './sqlite/watcher.sqlite' # database path (for sqlite)

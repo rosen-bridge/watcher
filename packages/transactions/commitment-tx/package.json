@@ -33,10 +33,10 @@
   },
   "dependencies": {
     "@rosen-bridge/abstract-logger": "^0.3.0",
+    "@rosen-bridge/observation-extractor": "^4.0.0",
+    "@rosen-bridge/rwt-repo": "^1.0.0",
     "@rosen-bridge/ergo-box-selection": "^0.1.0",
     "@rosen-bridge/json-bigint": "^0.1.0",
-    "@rosen-bridge/observation-extractor": "^2.1.9",
-    "@rosen-bridge/rwt-repo": "^0.2.0-be148ea5",
     "blakejs": "^1.2.1",
     "ergo-lib-wasm-nodejs": "^0.24.1"
   }
