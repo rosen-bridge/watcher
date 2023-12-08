@@ -26,7 +26,9 @@ import {
 import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 const txFee = parseInt(getConfig().general.fee);
 
 export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
@@ -191,6 +193,8 @@ export class ErgoUtils {
     dataInputs: wasm.ErgoBoxes = wasm.ErgoBoxes.from_boxes_json([])
   ) => {
     const tx = builder.build();
+    logger.debug(tx.to_json());
+
     const secrets = new wasm.SecretKeys();
     secrets.add(secret);
     const wallet = wasm.Wallet.from_secrets(secrets);
