@@ -193,7 +193,11 @@ export class ErgoUtils {
     dataInputs: wasm.ErgoBoxes = wasm.ErgoBoxes.from_boxes_json([])
   ) => {
     const tx = builder.build();
-    logger.debug(tx.to_json());
+    logger.debug(
+      `Tx with txId: [${tx
+        .id()
+        .to_str()}] built successfully, tx json format: [${tx.to_json()}]`
+    );
 
     const secrets = new wasm.SecretKeys();
     secrets.add(secret);
