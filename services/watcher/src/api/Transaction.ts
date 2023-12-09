@@ -200,7 +200,6 @@ export class Transaction {
         BigInt(usersCountOut[widIndex]) - RWTCount
       ).toString();
     }
-    inputBoxes.push(permitBox);
     const outputBoxes: Array<ErgoBoxCandidate> = [];
     outputBoxes.push(
       await Transaction.boxes.createRepo(
@@ -321,6 +320,7 @@ export class Transaction {
       Transaction.userSecret,
       txInputBoxes
     );
+    await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
     return { tx: signedTx, remainingRwt: totalRwt - inputRwtCount };
   };
 
@@ -368,7 +368,7 @@ export class Transaction {
     try {
       let tx: wasm.Transaction,
         remainingRwt = RWTCount;
-      const unlockTxs: Array<wasm.Transaction> = [];
+      const unlockTxIds: Array<string> = [];
       for (const permitBox of permitBoxes) {
         const permitRwt = BigInt(
           permitBox.tokens().get(0).amount().as_i64().to_str()
@@ -382,17 +382,14 @@ export class Transaction {
         ));
         repoBox = tx.outputs().get(0);
         widBox = tx.outputs().get(1);
-        unlockTxs.push(tx);
-      }
-      for (const tx of unlockTxs) {
-        await Transaction.txUtils.submitTransaction(tx, TxType.PERMIT);
+        unlockTxIds.push(tx.id().to_str());
       }
       const isAlreadyWatcher = remainingRwt > 0;
       Transaction.watcherUnconfirmedWID = isAlreadyWatcher
         ? Transaction.watcherWID
         : '';
       return {
-        response: unlockTxs.map((tx) => tx.id().to_str()).join(', '),
+        response: `[${unlockTxIds.join(', ')}]`,
         status: 200,
       };
     } catch (e) {
