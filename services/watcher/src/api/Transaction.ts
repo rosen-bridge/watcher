@@ -321,6 +321,11 @@ export class Transaction {
       txInputBoxes
     );
     await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
+    logger.info(
+      `Unlock transaction for ${RWTCount} RWT with txId [${signedTx
+        .id()
+        .to_str()}] submitted to the queue`
+    );
     return { tx: signedTx, remainingRwt: totalRwt - inputRwtCount };
   };
 
@@ -373,8 +378,16 @@ export class Transaction {
         const permitRwt = BigInt(
           permitBox.tokens().get(0).amount().as_i64().to_str()
         );
+        const unlockingRwt = RWTCount > permitRwt ? permitRwt : RWTCount;
+        logger.debug(
+          `Unlocking ${unlockingRwt} locked in permitBox: [${
+            permitBox.box_id().to_str
+          }], using widBox: [${widBox
+            .box_id()
+            .to_str()}] and repoBox: [${repoBox.box_id().to_str()}]`
+        );
         ({ tx, remainingRwt } = await this.returnPermitTx(
-          RWTCount > permitRwt ? permitRwt : RWTCount,
+          unlockingRwt,
           permitBox,
           repoBox,
           widBox,
@@ -393,6 +406,7 @@ export class Transaction {
         status: 200,
       };
     } catch (e) {
+      logger.warn('Unlock operation exited incomplete');
       if (e instanceof NotEnoughFund) {
         return {
           response: `Not enough ERG to complete the unlock operation`,
@@ -401,7 +415,7 @@ export class Transaction {
       } else {
         return {
           response: e.message,
-          status: 400,
+          status: 500,
         };
       }
     }
