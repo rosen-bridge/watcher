@@ -18,7 +18,7 @@ import WinstonLogger from '@rosen-bridge/winston-logger';
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export type ApiResponse = {
-  response: string;
+  response: string | string[];
   status: number;
 };
 
@@ -402,7 +402,7 @@ export class Transaction {
         ? Transaction.watcherWID
         : '';
       return {
-        response: `[${unlockTxIds.join(', ')}]`,
+        response: unlockTxIds,
         status: 200,
       };
     } catch (e) {
