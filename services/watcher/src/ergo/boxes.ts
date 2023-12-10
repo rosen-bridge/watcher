@@ -143,7 +143,7 @@ export class Boxes {
         )[0];
       if (!WID)
         throw new NoWID(
-          'WID box is not found. Cannot sign the transaction. Please check that the box containing the WID is created after the scanner initial height.'
+          'WID box is not found. Cannot sign the transaction. Please check that the scanner to be synced.'
         );
       return await this.dataBase.trackTxQueue(
         await ErgoNetwork.trackMemPool(WID, wid),
