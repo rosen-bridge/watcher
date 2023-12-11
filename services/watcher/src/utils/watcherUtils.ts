@@ -306,6 +306,7 @@ class TransactionUtils {
       height,
       requestId
     );
+    logger.debug(`tx submitted to the queue successfully: [${tx.to_json()}]`);
   };
 }
 

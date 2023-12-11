@@ -177,7 +177,6 @@ export class Transaction {
 
     const widIndex = users.map((user) => uint8ArrayToHex(user)).indexOf(wid);
     const inputBoxes = [repoBox, permitBox, widBox];
-    if (feeBox) inputBoxes.push(feeBox);
     const totalRwt = BigInt(usersCount[widIndex]);
     const usersOut = [...users];
     const usersCountOut = [...usersCount];
@@ -190,9 +189,16 @@ export class Transaction {
             .to_base16_bytes(),
           BigInt(Transaction.minBoxValue.as_i64().to_str()),
           {},
-          (box) =>
-            Buffer.from(box.register_value(4)?.to_js()).toString('hex') == wid
+          (box) => {
+            const collateralWid = Buffer.from(
+              box.register_value(4)?.to_js()
+            ).toString('hex');
+            logger.debug(`Collateral find for wid: [${collateralWid}]`);
+            return collateralWid == wid;
+          }
         );
+      if (collateralBoxes.boxes.length == 0)
+        throw Error('Collateral box for this wid is not found');
       inputBoxes.push(collateralBoxes.boxes[0]);
       usersOut.splice(widIndex, 1);
       usersCountOut.splice(widIndex, 1);
@@ -260,6 +266,7 @@ export class Transaction {
         )
       );
     }
+    if (feeBox) inputBoxes.push(feeBox);
     const totalErgIn = inputBoxes
       .map((item) => BigInt(item.value().as_i64().to_str()))
       .reduce((a, b) => a + b, 0n);
