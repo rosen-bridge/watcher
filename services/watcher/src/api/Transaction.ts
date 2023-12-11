@@ -155,14 +155,14 @@ export class Transaction {
   };
 
   returnPermitTx = async (
+    height: number,
     RWTCount: bigint,
     permitBox: wasm.ErgoBox,
     repoBox: wasm.ErgoBox,
     widBox: wasm.ErgoBox,
-    wid: string
+    wid: string,
+    feeBox: wasm.ErgoBox | undefined
   ): Promise<{ tx: wasm.Transaction; remainingRwt: bigint }> => {
-    const height = await ErgoNetwork.getHeight();
-
     const R4 = repoBox.register_value(4);
     const R5 = repoBox.register_value(5);
     const R6 = repoBox.register_value(6);
@@ -177,6 +177,7 @@ export class Transaction {
 
     const widIndex = users.map((user) => uint8ArrayToHex(user)).indexOf(wid);
     const inputBoxes = [repoBox, permitBox, widBox];
+    if (feeBox) inputBoxes.push(feeBox);
     const totalRwt = BigInt(usersCount[widIndex]);
     const usersOut = [...users];
     const usersCountOut = [...usersCount];
@@ -249,7 +250,7 @@ export class Transaction {
     } else {
       // All tokens should be unlocked and no need to create a new permit box
       // But it already has some permits so needs the wid token
-      logger.debug(`Creating a new wid box permit rwts are all returned`);
+      logger.debug(`Creating a new wid box, all permits are returned`);
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
@@ -269,9 +270,11 @@ export class Transaction {
       BigInt(Transaction.fee.as_i64().to_str()) +
       BigInt(Transaction.minBoxValue.as_i64().to_str());
     if (totalErgOut > totalErgIn) {
+      const existingBoxIds = [widBox.box_id().to_str()];
+      if (feeBox) existingBoxIds.push(feeBox.box_id().to_str());
       const userBoxes = await Transaction.boxes.getUserPaymentBox(
         totalErgOut - totalErgIn,
-        [widBox.box_id().to_str()]
+        existingBoxIds
       );
       userBoxes.forEach((box) => inputBoxes.push(box));
     }
@@ -351,6 +354,8 @@ export class Transaction {
     const permitBoxes = await Transaction.boxes.getPermits(WID, RWTCount);
     let repoBox = await Transaction.boxes.getRepoBox();
     let widBox = await Transaction.boxes.getWIDBox(WID);
+    const height = await ErgoNetwork.getHeight();
+
     if (widBox.tokens().get(0).id().to_str() != WID) {
       try {
         await DetachWID.detachWIDtx(
@@ -372,7 +377,8 @@ export class Transaction {
     }
     try {
       let tx: wasm.Transaction,
-        remainingRwt = RWTCount;
+        remainingRwt = RWTCount,
+        feeBox: wasm.ErgoBox | undefined = undefined;
       const unlockTxIds: Array<string> = [];
       for (const permitBox of permitBoxes) {
         const permitRwt = BigInt(
@@ -380,21 +386,24 @@ export class Transaction {
         );
         const unlockingRwt = RWTCount > permitRwt ? permitRwt : RWTCount;
         logger.debug(
-          `Unlocking ${unlockingRwt} locked in permitBox: [${
-            permitBox.box_id().to_str
-          }], using widBox: [${widBox
+          `Unlocking ${unlockingRwt} locked in permitBox: [${permitBox
+            .box_id()
+            .to_str()}], using widBox: [${widBox
             .box_id()
             .to_str()}] and repoBox: [${repoBox.box_id().to_str()}]`
         );
         ({ tx, remainingRwt } = await this.returnPermitTx(
+          height,
           unlockingRwt,
           permitBox,
           repoBox,
           widBox,
-          WID
+          WID,
+          feeBox
         ));
         repoBox = tx.outputs().get(0);
         widBox = tx.outputs().get(1);
+        feeBox = tx.outputs().len() > 3 ? tx.outputs().get(2) : undefined;
         unlockTxIds.push(tx.id().to_str());
       }
       const isAlreadyWatcher = remainingRwt > 0;
@@ -406,7 +415,7 @@ export class Transaction {
         status: 200,
       };
     } catch (e) {
-      logger.warn('Unlock operation exited incomplete');
+      logger.warn(`Unlock operation exited incomplete by error: ${e.message}`);
       if (e instanceof NotEnoughFund) {
         return {
           response: `Not enough ERG to complete the unlock operation`,
