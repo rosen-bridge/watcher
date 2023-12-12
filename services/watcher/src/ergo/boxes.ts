@@ -19,6 +19,9 @@ import { NotEnoughFund, NoWID } from '../errors/errors';
 import { getConfig } from '../config/config';
 import { AddressBalance } from './interfaces';
 import { JsonBI } from './network/parser';
+import WinstonLogger from '@rosen-bridge/winston-logger';
+
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export class Boxes {
   dataBase: WatcherDataBase;
@@ -143,7 +146,7 @@ export class Boxes {
         )[0];
       if (!WID)
         throw new NoWID(
-          'WID box is not found. Cannot sign the transaction. Please check that the box containing the WID is created after the scanner initial height.'
+          'WID box is not found. Cannot sign the transaction. Please check that the scanner to be synced.'
         );
       return await this.dataBase.trackTxQueue(
         await ErgoNetwork.trackMemPool(WID, wid),
@@ -479,6 +482,9 @@ export class Boxes {
     );
     repoBuilder.set_register_value(6, R6);
     R7 && repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
+    const boxVal = repoBuilder.calc_min_box_value();
+    logger.debug(`calculated value for repo: [${boxVal.as_i64().to_str()}]`);
+    if (boxVal > this.minBoxValue) repoBuilder.set_value(boxVal);
     return repoBuilder.build();
   };
 

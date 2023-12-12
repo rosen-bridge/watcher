@@ -15,6 +15,7 @@ import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
 import { getConfig } from '../../config/config';
 import { ExplorerBox, ErgoAssetInfo } from '../network/types';
+import { MAX_API_LIMIT } from '../../config/constants';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -125,13 +126,18 @@ export class ErgoNetwork {
       return tokenRemain + bigIntMax(amount, 0n) > 0;
     };
     while (offset < total && remaining()) {
-      const boxes = await this.getBoxesForAddress(tree, offset, 10);
+      const boxes = await this.getBoxesForAddress(tree, offset, MAX_API_LIMIT);
       const ergoBoxes = wasm.ErgoBoxes.from_boxes_json(
         boxes.items.map((box) => JsonBI.stringify(box).toString())
       );
+      logger.debug(
+        `total boxes: ${total}, offset: ${offset}, number of current boxes: ${boxes.items.length}`
+      );
       for (let i = 0; i < ergoBoxes.len(); i++) {
         const box = ergoBoxes.get(i);
+        logger.debug(`processing box with boxId: [${box.box_id().to_str()}]`);
         if (filter(box)) {
+          logger.debug(`added box with boxId: [${box.box_id().to_str()}]`);
           res.push(box);
           amount -= BigInt(box.value().as_i64().to_str());
           if (box.tokens().len() > 0) {
@@ -148,7 +154,7 @@ export class ErgoNetwork {
           if (!remaining()) break;
         }
       }
-      offset += 10;
+      offset += MAX_API_LIMIT;
     }
     return {
       boxes: res,

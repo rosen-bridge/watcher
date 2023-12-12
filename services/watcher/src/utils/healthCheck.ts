@@ -161,7 +161,8 @@ class HealthCheckSingleton {
         scanner.observationScanner.name(),
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
-        getConfig().cardano.koios!.url
+        getConfig().cardano.koios!.url,
+        getConfig().cardano.koios!.authToken
       );
     }
     if (cardanoScannerSyncCheck)
