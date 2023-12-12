@@ -306,6 +306,11 @@ class TransactionUtils {
       height,
       requestId
     );
+    logger.debug(
+      `tx submitted to the queue successfully: [${Buffer.from(
+        tx.sigma_serialize_bytes()
+      ).toString('hex')}]`
+    );
   };
 }
 
