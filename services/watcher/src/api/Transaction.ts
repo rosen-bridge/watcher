@@ -190,10 +190,14 @@ export class Transaction {
           BigInt(Transaction.minBoxValue.as_i64().to_str()),
           {},
           (box) => {
+            if (!box.register_value(4)) {
+              logger.debug('Skipping collateral box without wid information');
+              return false;
+            }
             const collateralWid = Buffer.from(
               box.register_value(4)?.to_js()
             ).toString('hex');
-            logger.debug(`Collateral find for wid: [${collateralWid}]`);
+            logger.debug(`Collateral is found for wid: [${collateralWid}]`);
             return collateralWid == wid;
           }
         );
@@ -219,7 +223,7 @@ export class Transaction {
         ).toString(),
         usersOut,
         usersCountOut,
-        repoBox.register_value(6)!,
+        R6,
         widIndex
       )
     );
@@ -256,7 +260,9 @@ export class Transaction {
     } else {
       // All tokens should be unlocked and no need to create a new permit box
       // But it already has some permits so needs the wid token
-      logger.debug(`Creating a new wid box, all permits are returned`);
+      logger.debug(
+        `Creating a new wid box for other permits, all permits in the existing box are returned`
+      );
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
