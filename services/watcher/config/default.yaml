@@ -64,6 +64,7 @@ database:
   # name: '' # database name (for postgres)
 api:
   port: 3000 # port used to run express server
+  allowedOrigins: [] # list of allowed origins for CORS requests
 healthCheck:
   interval: 60 # health check update interval (in seconds)
   asset:
