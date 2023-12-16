@@ -17,6 +17,9 @@ cardano:
     host: '' # ogmios node host address
     port: 1337 # ogmios port
     useTls: false # connect to ogmios using https or not
+  blockfrost:
+    interval: 10 # blockfrost scanning interval (in seconds)
+    timeout: 10 # blockfrost request timeout (in seconds)
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer

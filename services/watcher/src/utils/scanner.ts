@@ -3,11 +3,13 @@ import {
   CardanoKoiosScanner,
   CardanoOgmiosScanner,
   ErgoNetworkType,
+  CardanoBlockFrostScanner,
 } from '@rosen-bridge/scanner';
 import {
   ErgoObservationExtractor,
   CardanoKoiosObservationExtractor,
   CardanoOgmiosObservationExtractor,
+  CardanoBlockFrostObservationExtractor,
 } from '@rosen-bridge/observation-extractor';
 import {
   CommitmentExtractor,
@@ -55,7 +57,11 @@ const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 class CreateScanner {
   ergoScanner: ErgoScanner;
-  observationScanner: ErgoScanner | CardanoKoiosScanner | CardanoOgmiosScanner;
+  observationScanner:
+    | ErgoScanner
+    | CardanoKoiosScanner
+    | CardanoOgmiosScanner
+    | CardanoBlockFrostScanner;
 
   constructor() {
     this.createErgoScanner();
@@ -178,6 +184,24 @@ class CreateScanner {
           cardanoConfig.koios.authToken
         );
         const observationExtractor = new CardanoKoiosObservationExtractor(
+          dataSource,
+          tokensConfig.tokens,
+          rosenConfig.lockAddress,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (cardanoConfig.blockfrost) {
+        this.observationScanner = new CardanoBlockFrostScanner(
+          {
+            dataSource: dataSource,
+            projectId: cardanoConfig.blockfrost.projectId,
+            timeout: cardanoConfig.blockfrost.timeout * 1000,
+            initialHeight: cardanoConfig.blockfrost.initialHeight,
+            blockFrostUrl: cardanoConfig.blockfrost.url,
+          },
+          loggers.scannerLogger
+        );
+        const observationExtractor = new CardanoBlockFrostObservationExtractor(
           dataSource,
           tokensConfig.tokens,
           rosenConfig.lockAddress,

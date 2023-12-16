@@ -277,6 +277,13 @@ class CardanoConfig {
     interval: number;
     authToken?: string;
   };
+  blockfrost?: {
+    projectId: string;
+    timeout: number;
+    initialHeight: number;
+    interval: number;
+    url?: string;
+  };
 
   constructor(network: string) {
     this.type = config.get<string>('cardano.type');
@@ -297,6 +304,15 @@ class CardanoConfig {
           ? config.get<string>('cardano.koios.authToken')
           : undefined;
         this.koios = { url, initialHeight, interval, timeout, authToken };
+      } else if (this.type === Constants.BLOCKFROST_TYPE) {
+        const projectId = getRequiredString('cardano.blockfrost.projectId');
+        const interval = getRequiredNumber('cardano.blockfrost.interval');
+        const timeout = getRequiredNumber('cardano.blockfrost.timeout');
+        const initialHeight = getRequiredNumber('cardano.initial.height');
+        const url = config.has('cardano.blockfrost.url')
+          ? config.get<string>('cardano.blockfrost.url')
+          : undefined;
+        this.blockfrost = { projectId, initialHeight, interval, timeout, url };
       } else {
         throw new Error(
           `Improperly configured. cardano configuration type is invalid available choices are '${Constants.OGMIOS_TYPE}', '${Constants.KOIOS_TYPE}'`

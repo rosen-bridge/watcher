@@ -110,19 +110,19 @@ const init = async () => {
 
       logger.debug('Initializing job threads...');
       // Running transaction checking thread
-      transactionQueueJob(watcherDatabase, watcherUtils);
-      // Running commitment creation thread
-      creation(watcherUtils, txUtils, boxesObject);
-      // Running commitment redeem thread
-      redeem(watcherUtils, txUtils, boxesObject);
-      // Running trigger event creation thread
-      reveal(watcherUtils, txUtils, boxesObject);
-      // Running token name thread
-      tokenNameJob([]);
-      // Running revenue thread
-      revenueJob();
-      // Starting HealthCheck jobs
-      healthCheckJob(boxesObject);
+      // transactionQueueJob(watcherDatabase, watcherUtils);
+      // // Running commitment creation thread
+      // creation(watcherUtils, txUtils, boxesObject);
+      // // Running commitment redeem thread
+      // redeem(watcherUtils, txUtils, boxesObject);
+      // // Running trigger event creation thread
+      // reveal(watcherUtils, txUtils, boxesObject);
+      // // Running token name thread
+      // tokenNameJob([]);
+      // // Running revenue thread
+      // revenueJob();
+      // // Starting HealthCheck jobs
+      // healthCheckJob(boxesObject);
 
       logger.debug('Service initialization finished successfully.');
     })
