@@ -4,12 +4,14 @@ import {
   CardanoOgmiosScanner,
   ErgoNetworkType,
   CardanoBlockFrostScanner,
+  CardanoGraphQLScanner,
 } from '@rosen-bridge/scanner';
 import {
   ErgoObservationExtractor,
   CardanoKoiosObservationExtractor,
   CardanoOgmiosObservationExtractor,
   CardanoBlockFrostObservationExtractor,
+  CardanoGraphQLObservationExtractor,
 } from '@rosen-bridge/observation-extractor';
 import {
   CommitmentExtractor,
@@ -61,7 +63,8 @@ class CreateScanner {
     | ErgoScanner
     | CardanoKoiosScanner
     | CardanoOgmiosScanner
-    | CardanoBlockFrostScanner;
+    | CardanoBlockFrostScanner
+    | CardanoGraphQLScanner;
 
   constructor() {
     this.createErgoScanner();
@@ -202,6 +205,23 @@ class CreateScanner {
           loggers.scannerLogger
         );
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
+          dataSource,
+          tokensConfig.tokens,
+          rosenConfig.lockAddress,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (cardanoConfig.graphQL) {
+        this.observationScanner = new CardanoGraphQLScanner(
+          {
+            dataSource: dataSource,
+            graphQLUri: cardanoConfig.graphQL.uri,
+            timeout: cardanoConfig.graphQL.timeout * 1000,
+            initialHeight: cardanoConfig.graphQL.initialHeight,
+          },
+          loggers.scannerLogger
+        );
+        const observationExtractor = new CardanoGraphQLObservationExtractor(
           dataSource,
           tokensConfig.tokens,
           rosenConfig.lockAddress,

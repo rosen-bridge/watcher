@@ -1,4 +1,5 @@
 import {
+  CardanoGraphQLScanner,
   CardanoBlockFrostScanner,
   CardanoKoiosScanner,
   CardanoOgmiosScanner,
@@ -40,6 +41,11 @@ export const scannerInit = () => {
       scanningJob(
         cardanoConfig.blockfrost.interval,
         scanner.observationScanner as CardanoBlockFrostScanner
+      ).then(() => null);
+    } else if (cardanoConfig.graphQL) {
+      scanningJob(
+        cardanoConfig.graphQL.interval,
+        scanner.observationScanner as CardanoGraphQLScanner
       ).then(() => null);
     } else {
       throw new Error(

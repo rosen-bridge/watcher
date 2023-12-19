@@ -5,6 +5,7 @@ export const TRIGGER_EXTRACTOR_NAME = 'watcher-trigger-extractor';
 export const OGMIOS_TYPE = 'ogmios';
 export const KOIOS_TYPE = 'koios';
 export const BLOCKFROST_TYPE = 'blockfrost';
+export const GRAPHQL_TYPE = 'graphql';
 export const NODE_TYPE = 'node';
 export const EXPLORER_TYPE = 'explorer';
 export const ERGO_CHAIN_NAME = 'ergo';

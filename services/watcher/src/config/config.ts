@@ -284,6 +284,12 @@ class CardanoConfig {
     interval: number;
     url?: string;
   };
+  graphQL?: {
+    uri: string;
+    timeout: number;
+    initialHeight: number;
+    interval: number;
+  };
 
   constructor(network: string) {
     this.type = config.get<string>('cardano.type');
@@ -313,6 +319,13 @@ class CardanoConfig {
           ? config.get<string>('cardano.blockfrost.url')
           : undefined;
         this.blockfrost = { projectId, initialHeight, interval, timeout, url };
+      } else if (this.type === Constants.GRAPHQL_TYPE) {
+        const uri = getRequiredString('cardano.graphQL.uri');
+        const interval = getRequiredNumber('cardano.graphQL.interval');
+        const timeout = getRequiredNumber('cardano.graphQL.timeout');
+        const initialHeight = getRequiredNumber('cardano.initial.height');
+
+        this.graphQL = { uri, initialHeight, interval, timeout };
       } else {
         throw new Error(
           `Improperly configured. cardano configuration type is invalid available choices are '${Constants.OGMIOS_TYPE}', '${Constants.KOIOS_TYPE}'`

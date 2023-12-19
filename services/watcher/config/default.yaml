@@ -20,6 +20,9 @@ cardano:
   blockfrost:
     interval: 10 # blockfrost scanning interval (in seconds)
     timeout: 10 # blockfrost request timeout (in seconds)
+  graphQL:
+    interval: 10 # blockfrost scanning interval (in seconds)
+    timeout: 10 # blockfrost request timeout (in seconds)
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer
