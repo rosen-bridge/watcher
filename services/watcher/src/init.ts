@@ -58,7 +58,12 @@ const init = async () => {
   const initExpress = () => {
     const app = express();
     app.use(express.json());
-    app.use(cors());
+    const allowedOrigins = getConfig().general.apiAllowedOrigins;
+    app.use(
+      cors({
+        origin: allowedOrigins.includes('*') ? '*' : allowedOrigins,
+      })
+    );
 
     const router = Router();
     router.use('/address', addressRouter);

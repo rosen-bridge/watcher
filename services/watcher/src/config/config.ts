@@ -92,6 +92,7 @@ class Config {
   rosenConfigPath: string;
   rosenTokensPath: string;
   apiPort: number;
+  apiAllowedOrigins: string[];
 
   constructor() {
     this.networkType = getRequiredString('ergo.network').toLowerCase();
@@ -205,6 +206,18 @@ class Config {
       path.join(this.rosenConfigPath, 'tokens.json')
     );
     this.apiPort = getOptionalNumber('api.port', 3000);
+    this.apiAllowedOrigins = config.get<string[]>('api.allowedOrigins');
+    if (
+      !Array.isArray(this.apiAllowedOrigins) ||
+      this.apiAllowedOrigins.some((origin) => typeof origin !== 'string')
+    ) {
+      throw new Error('ImproperlyConfigured. Api allowed origins is invalid.');
+    }
+    if (this.apiAllowedOrigins.find((origin) => origin === '*')) {
+      console.warn(
+        'An allowed origin header with value "*" will cause all origins to be able to request this service, which may cause security issues'
+      );
+    }
   }
 }
 
