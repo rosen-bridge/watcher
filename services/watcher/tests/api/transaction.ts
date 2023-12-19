@@ -32,7 +32,7 @@ describe('Transaction', () => {
   let watcherDb: WatcherDataBase, boxes: Boxes;
   before(async () => {
     const ORM = await loadDataBase();
-    await fillORM(ORM);
+    await fillORM(ORM, true);
     watcherDb = ORM.DB;
     boxes = new Boxes(watcherDb);
     chai.spy.on(boxes, 'getRepoBox', () => {
@@ -144,7 +144,7 @@ describe('Transaction', () => {
 
       // run the function and expect the error
       const amount: AddressBalance = {
-        nanoErgs: 1200000n,
+        nanoErgs: 1861100000n,
         tokens: [],
       };
       const address = '9gwWZGZgZhGjp1ZKNQ5rtxNELamz6trq9tigDsKRy71boWq3Fqq';
@@ -152,7 +152,7 @@ describe('Transaction', () => {
         TransactionTest.getInstance().withdrawFromWallet(amount, address)
       ).to.rejectedWith(
         NotEnoughFund,
-        'Not enough fund to create the transaction. Uncovered value: 100000, Uncovered assets: []'
+        'Not enough fund to create the transaction. Uncovered value: 2200000, Uncovered assets: []'
       );
     });
 
