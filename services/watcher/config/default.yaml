@@ -10,9 +10,9 @@ cardano:
     hash: '' # initial block hash, only used for ogmios
     height: -1 # initial height of scanning, only used for koios
   koios:
-    interval: 10 # koios scanning interval (in seconds)
+    interval: 20 # koios scanning interval (in seconds)
     timeout: 10 # koios request timeout (in seconds)
-    url: 'https://api.koios.rest/api/v1' # koios url
+    url: 'https://api.koios.rest/api/beta' # koios url
   ogmios:
     host: '' # ogmios node host address
     port: 1337 # ogmios port
@@ -20,8 +20,8 @@ cardano:
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer
-  fee: '1100000' # transaction fee
-  minBoxValue: '1100000' # minimum box value
+  fee: '2000000' # transaction fee
+  minBoxValue: '2000000' # minimum box value
   mnemonic: '' # watcher mnemonic
   initialHeight: 0 # scanner initial height
   explorer:
@@ -82,8 +82,8 @@ healthCheck:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 600 # critical difference between existing and scanned blocks height
   permit:
-    warnCommitmentCount: 100 # warning remaining permits for creating commitment
-    criticalCommitmentCount: 10 # critical remaining permits for creating commitment
+    warnCommitmentCount: 4 # warning remaining permits for creating commitment
+    criticalCommitmentCount: 0 # critical remaining permits for creating commitment
   errorLog:
     maxAllowedCount: 2 # maximum allowed error log lines
     duration: 100000 # error log duration time check in milliseconds
