@@ -5,7 +5,7 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { uint8ArrayToHex } from '../utils/utils';
 import { Boxes } from '../ergo/boxes';
-import { ErgoUtils } from '../ergo/utils';
+import { ErgoUtils, bigintMax } from '../ergo/utils';
 import { getConfig } from '../config/config';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { TransactionUtils } from '../utils/watcherUtils';
@@ -769,6 +769,9 @@ export class Transaction {
     amount: AddressBalance,
     toAddress: string
   ): Promise<string> => {
+    const config = getConfig();
+    const fee = BigInt(config.general.fee);
+    const minBoxValue = BigInt(config.general.minBoxValue);
     const assetsMap = new Map<string, bigint>();
     amount.tokens.forEach((token) => {
       assetsMap.set(token.tokenId, token.amount);
@@ -776,7 +779,7 @@ export class Transaction {
 
     try {
       const coveringBoxes = await Transaction.boxes.getCoveringBoxes(
-        amount.nanoErgs,
+        amount.nanoErgs + fee + minBoxValue,
         assetsMap
       );
       const height = await ErgoNetwork.getHeight();
@@ -791,7 +794,11 @@ export class Transaction {
       // create output box
       const userBox = Transaction.boxes.createCustomBox(
         wasm.Contract.pay_to_address(address),
-        amount,
+        {
+          nanoErgs:
+            amount.nanoErgs > minBoxValue ? amount.nanoErgs : minBoxValue,
+          tokens: [...amount.tokens],
+        },
         height
       );
       const candidates = [userBox];
