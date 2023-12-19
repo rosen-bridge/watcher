@@ -5,7 +5,7 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { uint8ArrayToHex } from '../utils/utils';
 import { Boxes } from '../ergo/boxes';
-import { ErgoUtils, bigintMax } from '../ergo/utils';
+import { ErgoUtils } from '../ergo/utils';
 import { getConfig } from '../config/config';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { TransactionUtils } from '../utils/watcherUtils';
