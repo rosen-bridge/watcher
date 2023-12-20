@@ -4,7 +4,7 @@ observation:
   confirmation: 60 # number of required block confirmations to create the commitment after observing an event
   validThreshold: 4320 # observations that have not been triggered won't be processed after this period (in blocks)
 cardano:
-  type: '' # options: koios, ogmios
+  type: '' # options: koios, ogmios, blockfrost
   initial:
     slot: -1 # initial block global slot, only used for ogmios
     hash: '' # initial block hash, only used for ogmios
@@ -17,6 +17,11 @@ cardano:
     host: '' # ogmios node host address
     port: 1337 # ogmios port
     useTls: false # connect to ogmios using https or not
+  blockfrost:
+    url: '' # url to connect to blockfrost
+    projectId: '' # blockfrost project Id
+    timeout: 10 # blockfrost request timeout
+    interval: 20 # blockfrost check timeout
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer
