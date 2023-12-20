@@ -431,6 +431,10 @@ describe('TriggerTxBuilder', () => {
       const { unsignedTx } = await triggerTxBuilder.build();
 
       const triggerBox = unsignedTx.output_candidates().get(0);
+      const txInputcommitments = [];
+      for (let i = 0; i < commitments.length; i++) {
+        txInputcommitments.push(unsignedTx.inputs().get(i));
+      }
 
       // check expected functions to have been called
       expect(createTriggerBoxSpy).toHaveBeenCalledOnce();
@@ -447,6 +451,11 @@ describe('TriggerTxBuilder', () => {
       expect(triggerBox.value().as_i64().to_str()).toEqual(
         commitmentsValue.toString()
       );
+
+      // check transaction input boxes
+      expect(
+        txInputcommitments.map((box) => box.box_id().to_str()).sort()
+      ).toEqual(commitments.map((box) => box.box_id().to_str()).sort());
     });
   });
 });
