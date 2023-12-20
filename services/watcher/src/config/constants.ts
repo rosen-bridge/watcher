@@ -4,6 +4,7 @@ export const COMMITMENT_EXTRACTOR_NAME = 'watcher-commitment-extractor';
 export const TRIGGER_EXTRACTOR_NAME = 'watcher-trigger-extractor';
 export const OGMIOS_TYPE = 'ogmios';
 export const KOIOS_TYPE = 'koios';
+export const BLOCK_FROST_TYPE = 'blockfrost';
 export const NODE_TYPE = 'node';
 export const EXPLORER_TYPE = 'explorer';
 export const ERGO_CHAIN_NAME = 'ergo';

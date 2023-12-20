@@ -6,6 +6,8 @@ ergo:
   node:
     url: ''
   mnemonic: ''
+  fee: '1100000'
+  minBoxValue: '1100000'
 path:
   addresses: tests/config
   tokens: tests/config/tokens.test.json

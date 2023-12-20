@@ -301,7 +301,7 @@ export class TriggerTxBuilder {
   }> => {
     const inputBoxes: ergoLib.ErgoBox[] = [...this.commitments];
 
-    await this.rwtRepo.updateBox(false);
+    await this.rwtRepo.updateAndGetBox(false);
     const rwtRepoBox = this.rwtRepo['box'];
     if (rwtRepoBox == undefined) {
       throw new Error('Could not get corresponding RWTRepo box');
