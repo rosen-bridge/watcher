@@ -4,12 +4,14 @@ import {
   CardanoOgmiosScanner,
   ErgoNetworkType,
   CardanoBlockFrostScanner,
+  CardanoGraphQLScanner,
 } from '@rosen-bridge/scanner';
 import {
   ErgoObservationExtractor,
   CardanoKoiosObservationExtractor,
   CardanoOgmiosObservationExtractor,
   CardanoBlockFrostObservationExtractor,
+  CardanoGraphQLObservationExtractor,
 } from '@rosen-bridge/observation-extractor';
 import {
   CommitmentExtractor,
@@ -50,6 +52,8 @@ const createLoggers = () => ({
   plainExtractorLogger:
     WinstonLogger.getInstance().getLogger('plain-extractor'),
   scannerLogger: WinstonLogger.getInstance().getLogger('scanner'),
+  cardanoScannerLogger:
+    WinstonLogger.getInstance().getLogger('cardano-scanner'),
 });
 
 const loggers = createLoggers();
@@ -61,7 +65,8 @@ class CreateScanner {
     | ErgoScanner
     | CardanoKoiosScanner
     | CardanoOgmiosScanner
-    | CardanoBlockFrostScanner;
+    | CardanoBlockFrostScanner
+    | CardanoGraphQLScanner;
 
   constructor() {
     this.createErgoScanner();
@@ -163,7 +168,7 @@ class CreateScanner {
             initialHash: cardanoConfig.ogmios.initialHash,
             initialSlot: cardanoConfig.ogmios.initialSlot,
           },
-          loggers.scannerLogger
+          loggers.cardanoScannerLogger
         );
         const observationExtractor = new CardanoOgmiosObservationExtractor(
           dataSource,
@@ -180,7 +185,7 @@ class CreateScanner {
             timeout: cardanoConfig.koios.timeout * 1000,
             initialHeight: cardanoConfig.koios.initialHeight,
           },
-          loggers.scannerLogger,
+          loggers.cardanoScannerLogger,
           cardanoConfig.koios.authToken
         );
         const observationExtractor = new CardanoKoiosObservationExtractor(
@@ -191,14 +196,33 @@ class CreateScanner {
         );
         this.observationScanner.registerExtractor(observationExtractor);
       } else if (cardanoConfig.blockfrost) {
-        this.observationScanner = new CardanoBlockFrostScanner({
-          dataSource,
-          initialHeight: cardanoConfig.blockfrost.initialHeight,
-          projectId: cardanoConfig.blockfrost.projectId,
-          timeout: cardanoConfig.blockfrost.timeout,
-          blockFrostUrl: cardanoConfig.blockfrost.url,
-        });
+        this.observationScanner = new CardanoBlockFrostScanner(
+          {
+            dataSource,
+            initialHeight: cardanoConfig.blockfrost.initialHeight,
+            projectId: cardanoConfig.blockfrost.projectId,
+            timeout: cardanoConfig.blockfrost.timeout,
+            blockFrostUrl: cardanoConfig.blockfrost.url,
+          },
+          loggers.cardanoScannerLogger
+        );
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
+          dataSource,
+          tokensConfig.tokens,
+          rosenConfig.lockAddress,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (cardanoConfig.graphql) {
+        this.observationScanner = new CardanoGraphQLScanner(
+          {
+            dataSource,
+            initialHeight: cardanoConfig.graphql.initialHeight,
+            graphQLUri: cardanoConfig.graphql.uri,
+          },
+          loggers.cardanoScannerLogger
+        );
+        const observationExtractor = new CardanoGraphQLObservationExtractor(
           dataSource,
           tokensConfig.tokens,
           rosenConfig.lockAddress,

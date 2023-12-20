@@ -4,7 +4,6 @@ import { SecretError } from '../errors/errors';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
 import { TokensConfig } from './tokensConfig';
-import { RosenTokens } from '@rosen-bridge/tokens';
 import path from 'path';
 import { NetworkType } from '../types';
 import { generateMnemonic } from 'bip39';
@@ -284,6 +283,12 @@ class CardanoConfig {
     interval: number;
     projectId: string;
   };
+  graphql?: {
+    uri: string;
+    timeout: number;
+    initialHeight: number;
+    interval: number;
+  };
 
   constructor(network: string) {
     this.type = config.get<string>('cardano.type');
@@ -313,6 +318,12 @@ class CardanoConfig {
         const initialHeight = getRequiredNumber('cardano.initial.height');
         const projectId = config.get<string>('cardano.blockfrost.projectId');
         this.blockfrost = { url, timeout, initialHeight, interval, projectId };
+      } else if (this.type === Constants.GRAPHQL_TYPE) {
+        const uri = getRequiredString('cardano.graphql.url');
+        const interval = getRequiredNumber('cardano.graphql.interval');
+        const timeout = getRequiredNumber('cardano.graphql.timeout');
+        const initialHeight = getRequiredNumber('cardano.initial.height');
+        this.graphql = { uri, timeout, initialHeight, interval };
       } else {
         throw new Error(
           `Improperly configured. cardano configuration type is invalid available choices are '${Constants.OGMIOS_TYPE}', '${Constants.KOIOS_TYPE}'`

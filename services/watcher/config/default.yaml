@@ -22,6 +22,10 @@ cardano:
     projectId: '' # blockfrost project Id
     timeout: 10 # blockfrost request timeout
     interval: 20 # blockfrost check timeout
+  graphql:
+    url: '' # graphql instance url
+    timeout: 10 # graphql request timeout
+    interval: 20 # graphql check timeout
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer
