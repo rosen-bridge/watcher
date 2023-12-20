@@ -23,7 +23,7 @@ cardano:
     timeout: 10 # blockfrost request timeout
     interval: 20 # blockfrost check timeout
   graphql:
-    url: '' # graphql instance url
+    uri: '' # graphql instance url
     timeout: 10 # graphql request timeout
     interval: 20 # graphql check timeout
 ergo:
