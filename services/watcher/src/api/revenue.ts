@@ -77,13 +77,16 @@ revenueRouter.get('/chart', async (req, res) => {
         : Math.min(Number(limitString), MAX_API_LIMIT);
 
     let queryResult;
+    const wid = Transaction.watcherWID || '';
     if (periodString === 'week') {
       queryResult = await watcherDatabase.getWeeklyRevenueChartData(
+        wid,
         finalOffset,
         finalLimit
       );
     } else if (periodString === 'month' || periodString === 'year') {
       queryResult = await watcherDatabase.getRevenueChartData(
+        wid,
         periodString,
         finalOffset,
         finalLimit

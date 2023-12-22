@@ -521,6 +521,7 @@ export class ErgoUtils {
 
   static transformChartData = (chartData: RevenueChartRecord[]) => {
     const chartMap = new Map<string, Array<ChartRecord>>();
+    const labels: Array<string> = [];
     chartData.forEach((record) => {
       const year = Number(record.year);
       const month = Number(record.month) || 1;
@@ -535,6 +536,7 @@ export class ErgoUtils {
         label: String(timestamp),
         amount: record.revenue.toString(),
       };
+      if (!labels.includes(String(timestamp))) labels.push(String(timestamp));
       const chartRecords = chartMap.get(record.tokenId) || [];
       chartRecords.push(chartRecord);
       chartMap.set(record.tokenId, chartRecords);
@@ -545,9 +547,14 @@ export class ErgoUtils {
       data: Array<ChartRecord>;
     }[] = [];
     chartMap.forEach((records, tokenId) => {
+      const filledRecords = labels.map((timestamp) => {
+        const filtered = records.filter((rec) => rec.label === timestamp);
+        if (filtered.length) return filtered[0];
+        return { label: timestamp, amount: '0' };
+      });
       jsonObject.push({
         title: this.tokenDetailByTokenMap(tokenId, ERGO_CHAIN_NAME),
-        data: records,
+        data: filledRecords,
       });
     });
     return jsonObject;

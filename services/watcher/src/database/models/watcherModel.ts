@@ -889,17 +889,23 @@ class WatcherDataBase {
    * @param offset
    * @param limit
    */
-  getWeeklyRevenueChartData = async (offset: number, limit: number) => {
-    let qb = this.revenueChartView.createQueryBuilder('rcv');
-    qb = qb
+  getWeeklyRevenueChartData = async (
+    wid: string,
+    offset: number,
+    limit: number
+  ) => {
+    return this.revenueChartView
+      .createQueryBuilder('rcv')
       .select('"tokenId"')
       .addSelect('timestamp/604800 as week_number')
       .addSelect('sum(amount) as revenue')
+      .where('wid = :wid', { wid })
       .groupBy('"tokenId"')
       .addGroupBy('week_number')
-      .orderBy('week_number', 'DESC');
-
-    return qb.offset(offset).limit(limit).execute();
+      .orderBy('week_number', 'DESC')
+      .offset(offset)
+      .limit(limit)
+      .execute();
   };
 
   /**
@@ -909,15 +915,17 @@ class WatcherDataBase {
    * @param limit
    */
   getRevenueChartData = async (
+    wid: string,
     period: string,
     offset: number,
     limit: number
   ) => {
-    let qb = this.revenueChartView.createQueryBuilder('rcv');
-    qb = qb
+    let qb = this.revenueChartView
+      .createQueryBuilder('rcv')
       .select('"tokenId"')
       .addSelect('year')
       .addSelect('sum(amount) as revenue')
+      .where('wid = :wid', { wid })
       .groupBy('"tokenId"')
       .addGroupBy('year')
       .orderBy('year', 'DESC');
