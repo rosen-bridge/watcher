@@ -11,6 +11,7 @@ import { ViewEntity, ViewColumn } from 'typeorm';
       .addSelect(`be.day`, 'day')
       .addSelect(`be.month`, 'month')
       .addSelect(`be.year`, 'year')
+      .addSelect('pe.WID', 'wid')
       .from('revenue_entity', 're')
       .innerJoin('permit_entity', 'pe', 're."permitId" = pe.id')
       .innerJoin('block_entity', 'be', 'pe.block = be.hash'),
@@ -27,6 +28,9 @@ export class RevenueChartDataView {
 
   @ViewColumn()
   month!: number;
+
+  @ViewColumn()
+  wid!: string;
 
   @ViewColumn()
   year!: number;
