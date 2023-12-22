@@ -6,41 +6,43 @@ export class WatcherMigration1703244656364 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
       `
-            DELETE FROM "typeorm_metadata"
-            WHERE "type" = ?
-                AND "name" = ?
-        `,
-      ['VIEW', 'revenue_chart_data']
+        DELETE FROM "typeorm_metadata"
+        WHERE "type" = $1
+            AND "name" = $2
+            AND "schema" = $3
+    `,
+      ['VIEW', 'revenue_chart_data', 'public']
     );
     await queryRunner.query(`
-            DROP VIEW "revenue_chart_data"
-        `);
+        DROP VIEW "revenue_chart_data"
+    `);
     await queryRunner.query(`
-            CREATE VIEW "revenue_chart_data" AS
-            SELECT "pe"."WID" AS "wid",
-                "be"."year" AS "year",
-                "be"."month" AS "month",
-                "be"."day" AS "day",
-                re."tokenId" AS "tokenId",
-                re."amount" AS "amount",
-                be."timestamp" AS "timestamp"
-            FROM "revenue_entity" "re"
-                INNER JOIN "permit_entity" "pe" ON re."permitId" = "pe"."id"
-                INNER JOIN "block_entity" "be" ON "pe"."block" = "be"."hash"
-        `);
+        CREATE VIEW "revenue_chart_data" AS
+        SELECT "pe"."WID" AS "wid",
+            "be"."year" AS "year",
+            "be"."month" AS "month",
+            "be"."day" AS "day",
+            re."tokenId" AS "tokenId",
+            re."amount" AS "amount",
+            be."timestamp" AS "timestamp"
+        FROM "revenue_entity" "re"
+            INNER JOIN "permit_entity" "pe" ON re."permitId" = "pe"."id"
+            INNER JOIN "block_entity" "be" ON "pe"."block" = "be"."hash"
+    `);
     await queryRunner.query(
       `
-            INSERT INTO "typeorm_metadata"(
-                    "database",
-                    "schema",
-                    "table",
-                    "type",
-                    "name",
-                    "value"
-                )
-            VALUES (NULL, NULL, NULL, ?, ?, ?)
-        `,
+        INSERT INTO "typeorm_metadata"(
+                "database",
+                "schema",
+                "table",
+                "type",
+                "name",
+                "value"
+            )
+        VALUES (DEFAULT, $1, DEFAULT, $2, $3, $4)
+    `,
       [
+        'public',
         'VIEW',
         'revenue_chart_data',
         'SELECT "pe"."WID" AS "wid", "be"."year" AS "year", "be"."month" AS "month", "be"."day" AS "day", re."tokenId" AS "tokenId", re."amount" AS "amount", be."timestamp" AS "timestamp" FROM "revenue_entity" "re" INNER JOIN "permit_entity" "pe" ON re."permitId" = "pe"."id"  INNER JOIN "block_entity" "be" ON "pe"."block" = "be"."hash"',
@@ -51,40 +53,42 @@ export class WatcherMigration1703244656364 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
       `
-            DELETE FROM "typeorm_metadata"
-            WHERE "type" = ?
-                AND "name" = ?
-        `,
-      ['VIEW', 'revenue_chart_data']
+        DELETE FROM "typeorm_metadata"
+        WHERE "type" = $1
+            AND "name" = $2
+            AND "schema" = $3
+    `,
+      ['VIEW', 'revenue_chart_data', 'public']
     );
     await queryRunner.query(`
-            DROP VIEW "revenue_chart_data"
-        `);
+        DROP VIEW "revenue_chart_data"
+    `);
     await queryRunner.query(`
-            CREATE VIEW "revenue_chart_data" AS
-            SELECT "be"."year" AS "year",
-                "be"."month" AS "month",
-                "be"."day" AS "day",
-                re."tokenId" AS "tokenId",
-                re."amount" AS "amount",
-                be."timestamp" AS "timestamp"
-            FROM "revenue_entity" "re"
-                INNER JOIN "permit_entity" "pe" ON re."permitId" = "pe"."id"
-                INNER JOIN "block_entity" "be" ON "pe"."block" = "be"."hash"
-        `);
+        CREATE VIEW "revenue_chart_data" AS
+        SELECT "be"."year" AS "year",
+            "be"."month" AS "month",
+            "be"."day" AS "day",
+            re."tokenId" AS "tokenId",
+            re."amount" AS "amount",
+            be."timestamp" AS "timestamp"
+        FROM "revenue_entity" "re"
+            INNER JOIN "permit_entity" "pe" ON re."permitId" = "pe"."id"
+            INNER JOIN "block_entity" "be" ON "pe"."block" = "be"."hash"
+    `);
     await queryRunner.query(
       `
-            INSERT INTO "typeorm_metadata"(
-                    "database",
-                    "schema",
-                    "table",
-                    "type",
-                    "name",
-                    "value"
-                )
-            VALUES (NULL, NULL, NULL, ?, ?, ?)
-        `,
+        INSERT INTO "typeorm_metadata"(
+                "database",
+                "schema",
+                "table",
+                "type",
+                "name",
+                "value"
+            )
+        VALUES (DEFAULT, $1, DEFAULT, $2, $3, $4)
+    `,
       [
+        'public',
         'VIEW',
         'revenue_chart_data',
         'SELECT "be"."year" AS "year", "be"."month" AS "month", "be"."day" AS "day", re."tokenId" AS "tokenId", re."amount" AS "amount", be."timestamp" AS "timestamp" FROM "revenue_entity" "re" INNER JOIN "permit_entity" "pe" ON re."permitId" = "pe"."id"  INNER JOIN "block_entity" "be" ON "pe"."block" = "be"."hash"',
