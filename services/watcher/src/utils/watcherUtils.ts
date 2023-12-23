@@ -138,9 +138,9 @@ class WatcherUtils {
         observation
       );
       if (observationStatus.status === TxStatus.NOT_COMMITTED) {
-        if (await this.isObservationValid(observation)) {
-          validObservations.push(observation);
-        }
+        // if (await this.isObservationValid(observation)) {
+        validObservations.push(observation);
+        // }
       }
     }
     return validObservations;
