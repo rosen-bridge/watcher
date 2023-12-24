@@ -88,7 +88,7 @@ const init = async () => {
       initExpress();
       watcherDatabase = new WatcherDataBase(dataSource);
       logger.debug('Initializing scanners and extractors...');
-      // scannerInit();
+      scannerInit();
 
       await delay(10000);
       watcherUtils = new WatcherUtils(
@@ -110,19 +110,19 @@ const init = async () => {
 
       logger.debug('Initializing job threads...');
       // Running transaction checking thread
-      // transactionQueueJob(watcherDatabase, watcherUtils);
-      // // Running commitment creation thread
+      transactionQueueJob(watcherDatabase, watcherUtils);
+      // Running commitment creation thread
       creation(watcherUtils, txUtils, boxesObject);
-      // // Running commitment redeem thread
-      // redeem(watcherUtils, txUtils, boxesObject);
-      // // Running trigger event creation thread
-      // reveal(watcherUtils, txUtils, boxesObject);
-      // // Running token name thread
-      // tokenNameJob([]);
-      // // Running revenue thread
-      // revenueJob();
-      // // Starting HealthCheck jobs
-      // healthCheckJob(boxesObject);
+      // Running commitment redeem thread
+      redeem(watcherUtils, txUtils, boxesObject);
+      // Running trigger event creation thread
+      reveal(watcherUtils, txUtils, boxesObject);
+      // Running token name thread
+      tokenNameJob([]);
+      // Running revenue thread
+      revenueJob();
+      // Starting HealthCheck jobs
+      healthCheckJob(boxesObject);
 
       logger.debug('Service initialization finished successfully.');
     })
