@@ -204,6 +204,7 @@ export class Transaction {
         );
       if (collateralBoxes.boxes.length == 0)
         throw Error('Collateral box for this wid is not found');
+      if (!collateralBoxes.covered) throw Error('Collateral is not covered');
       collateralBoxes.boxes.forEach((box) => inputBoxes.push(box));
       usersOut.splice(widIndex, 1);
       usersCountOut.splice(widIndex, 1);
