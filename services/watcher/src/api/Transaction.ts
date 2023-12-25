@@ -182,13 +182,14 @@ export class Transaction {
     const usersCountOut = [...usersCount];
     if (totalRwt === RWTCount) {
       // need to add collateral
+      const collateral = await Transaction.getInstance().getCollateral();
       const collateralBoxes =
         await ErgoNetwork.getCoveringErgAndTokenForAddress(
           Transaction.boxes.watcherCollateralContract
             .ergo_tree()
             .to_base16_bytes(),
-          BigInt(Transaction.minBoxValue.as_i64().to_str()),
-          {},
+          collateral.erg,
+          { [getConfig().rosen.RSN]: collateral.rsn },
           (box) => {
             if (!box.register_value(4)) {
               logger.debug('Skipping collateral box without wid information');
@@ -203,7 +204,8 @@ export class Transaction {
         );
       if (collateralBoxes.boxes.length == 0)
         throw Error('Collateral box for this wid is not found');
-      inputBoxes.push(collateralBoxes.boxes[0]);
+      if (!collateralBoxes.covered) throw Error('Collateral is not covered');
+      collateralBoxes.boxes.forEach((box) => inputBoxes.push(box));
       usersOut.splice(widIndex, 1);
       usersCountOut.splice(widIndex, 1);
     } else {
