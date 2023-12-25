@@ -319,7 +319,7 @@ class CardanoConfig {
         const projectId = config.get<string>('cardano.blockfrost.projectId');
         this.blockfrost = { url, timeout, initialHeight, interval, projectId };
       } else if (this.type === Constants.GRAPHQL_TYPE) {
-        const uri = getRequiredString('cardano.graphql.url');
+        const uri = getRequiredString('cardano.graphql.uri');
         const interval = getRequiredNumber('cardano.graphql.interval');
         const timeout = getRequiredNumber('cardano.graphql.timeout');
         const initialHeight = getRequiredNumber('cardano.initial.height');
