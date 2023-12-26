@@ -1,5 +1,5 @@
 {
-  "name": "permit-tx",
+  "name": "@rosen-bridge/permit-tx",
   "version": "0.1.0",
   "description": "a package for managing permit transactions",
   "repository": "git+https://github.com/rosen-bridge/watcher.git",
