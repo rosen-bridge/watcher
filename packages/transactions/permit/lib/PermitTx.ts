@@ -4,7 +4,7 @@ import { GetPermitBuilder } from './GetPermitBuilder';
 import { ReturnPermitBuilder } from './ReturnPermitBuilder';
 
 export class PermitTx {
-  private static _instance?: PermitTx;
+  private static instance?: PermitTx;
 
   private constructor(
     private permitAddress: string,
@@ -40,11 +40,11 @@ export class PermitTx {
     rwtRepo: RWTRepo,
     logger?: AbstractLogger
   ): void => {
-    if (PermitTx._instance != undefined) {
+    if (PermitTx.instance != undefined) {
       throw new Error('The singleton instance is already initialized.');
     }
 
-    PermitTx._instance = new PermitTx(
+    PermitTx.instance = new PermitTx(
       permitAddress,
       collateralAddress,
       changeAddress,
@@ -63,10 +63,10 @@ export class PermitTx {
    * @return {PermitTx}
    */
   static getInstance = (): PermitTx => {
-    if (!this._instance) {
+    if (!this.instance) {
       throw new Error('PermitTx instance is not initialized yet');
     }
-    return this._instance;
+    return this.instance;
   };
 
   /**
