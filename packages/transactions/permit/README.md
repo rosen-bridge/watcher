@@ -1,4 +1,4 @@
-# permit-tx
+# @rosen-bridge/permit-tx
 
 ## Table of contents
 
@@ -14,11 +14,11 @@ a package for managing permit transactions
 npm:
 
 ```sh
-npm i permit-tx
+npm i @rosen-bridge/permit-tx
 ```
 
 yarn:
 
 ```sh
-yarn add permit-tx
+yarn add @rosen-bridge/permit-tx
 ```
