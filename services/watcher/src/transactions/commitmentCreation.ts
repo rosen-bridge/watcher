@@ -159,6 +159,11 @@ export class CommitmentCreation {
           WID
         );
         const permits = await this.boxes.getPermits(WID);
+        logger.debug(
+          `Using permit boxes in commitment creation tx: [${permits.map((box) =>
+            box.box_id().to_str()
+          )}]`
+        );
         let WIDBox = await this.boxes.getWIDBox(WID);
         if (WIDBox.tokens().get(0).id().to_str() != WID) {
           logger.info(
@@ -168,7 +173,9 @@ export class CommitmentCreation {
           WIDBox = await this.boxes.getWIDBox(WID);
         }
         const totalValue = ErgoUtils.getBoxValuesSum([...permits, WIDBox]);
-        logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
+        logger.info(
+          `Using WID Box [${WIDBox.box_id().to_str()}] in commitment creation tx`
+        );
         const requiredValue =
           BigInt(getConfig().general.fee) +
           BigInt(getConfig().general.minBoxValue) * BigInt(4);
@@ -180,6 +187,11 @@ export class CommitmentCreation {
           feeBoxes = await this.boxes.getUserPaymentBox(
             requiredValue - totalValue,
             [WIDBox.box_id().to_str()]
+          );
+          logger.debug(
+            `Using extra fee boxes in commitment creation tx: [${feeBoxes.map(
+              (box) => box.box_id().to_str()
+            )}] with extra erg [${ErgoUtils.getBoxValuesSum(feeBoxes)}]`
           );
         }
         await this.createCommitmentTx(
