@@ -1,7 +1,7 @@
 import { AbstractLogger } from '@rosen-bridge/abstract-logger';
 import { RWTRepo } from '@rosen-bridge/rwt-repo';
-import { GetPermitBuilder } from './GetPermitBuilder';
-import { ReturnPermitBuilder } from './ReturnPermitBuilder';
+import { GetPermitBuilder } from './getPermitBuilder';
+import { ReturnPermitBuilder } from './returnPermitBuilder';
 
 export class PermitTx {
   private static _instance?: PermitTx;
@@ -12,7 +12,7 @@ export class PermitTx {
     private changeAddress: string,
     private rsn: string,
     private rwt: string,
-    private txFee: string,
+    private txFee: bigint,
     private rwtRepo: RWTRepo,
     private logger?: AbstractLogger
   ) {}
@@ -36,7 +36,7 @@ export class PermitTx {
     changeAddress: string,
     rsn: string,
     rwt: string,
-    txFee: string,
+    txFee: bigint,
     rwtRepo: RWTRepo,
     logger?: AbstractLogger
   ): void => {

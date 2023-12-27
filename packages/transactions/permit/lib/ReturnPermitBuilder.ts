@@ -8,7 +8,7 @@ export class ReturnPermitBuilder {
     private changeAddress: string,
     private rsn: string,
     private rwt: string,
-    private txFee: string,
+    private txFee: bigint,
     private rwtRepo: RWTRepo,
     private logger?: AbstractLogger
   ) {}

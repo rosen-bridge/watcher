@@ -1,3 +1,3 @@
-export * from './GetPermitBuilder';
-export * from './PermitTx';
-export * from './ReturnPermitBuilder';
+export * from './getPermitBuilder';
+export * from './permitTx';
+export * from './returnPermitBuilder';
