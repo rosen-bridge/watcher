@@ -47,6 +47,8 @@ describe('revenueRouter', () => {
       // send a request to the endpoint
       const res = await request(app).get('/revenue');
 
+      console.warn(res);
+
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
@@ -93,14 +95,14 @@ describe('revenueRouter', () => {
      */
     it('Revenue endpoint should return correct revenues with fromChain filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/revenue?fromChain=fromChainStar');
+      const res = await request(app).get('/revenue?fromChain=ergo');
 
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.total).to.eql(3);
+      expect(resultParsed.total).to.eql(4);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
-      expect(revenueIds).to.eql([3]);
+      expect(revenueIds).to.eql([4, 3]);
     });
 
     /**

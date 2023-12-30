@@ -520,10 +520,11 @@ export class ErgoUtils {
       }
     });
     return Promise.all(
-      revenues.map(async (revenue) => {
+      revenues.map(async ({ tokenId, ...revenue }) => {
         const rowTokens = tokenMap.get(revenue.id) || [];
         return {
           ...revenue,
+          lockToken: this.tokenDetailByTokenMap(tokenId, revenue.fromChain),
           revenues: await ErgoUtils.fillTokensDetails(rowTokens),
         };
       })
