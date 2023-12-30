@@ -20,6 +20,7 @@ jobs:
         uses: rosen-bridge/operation@V0.1
         with:
           type: ${{ vars.RELEASE_NAME }}
+          tag:  ${{ vars.RELEASE_TAG }}
 
       - name: Move Contracts files
         run: |
