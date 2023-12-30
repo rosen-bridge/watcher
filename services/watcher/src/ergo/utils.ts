@@ -27,6 +27,7 @@ import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { JsonBI } from './network/parser';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 const txFee = parseInt(getConfig().general.fee);
@@ -109,10 +110,20 @@ export class ErgoUtils {
       value += BigInt(box.value().as_i64().to_str());
       processBox(box, tokens, widToken, 1);
     });
+    logger.debug(
+      `input value is ${value} and input tokens are [${JsonBI.stringify(
+        tokens
+      )}]`
+    );
     candidates.forEach((candidate) => {
       value -= BigInt(candidate.value().as_i64().to_str());
       processBox(candidate, tokens, widToken, -1);
     });
+    logger.debug(
+      `remained value is ${value} and remained tokens are [${JsonBI.stringify(
+        tokens
+      )}]`
+    );
 
     if (
       value > BigInt(txFee + wasm.BoxValue.SAFE_USER_MIN().as_i64().as_num())
@@ -509,10 +520,11 @@ export class ErgoUtils {
       }
     });
     return Promise.all(
-      revenues.map(async (revenue) => {
+      revenues.map(async ({ tokenId, ...revenue }) => {
         const rowTokens = tokenMap.get(revenue.id) || [];
         return {
           ...revenue,
+          lockToken: this.tokenDetailByTokenMap(tokenId, revenue.fromChain),
           revenues: await ErgoUtils.fillTokensDetails(rowTokens),
         };
       })

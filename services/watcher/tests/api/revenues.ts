@@ -93,7 +93,7 @@ describe('revenueRouter', () => {
      */
     it('Revenue endpoint should return correct revenues with fromChain filter', async () => {
       // send a request to the endpoint
-      const res = await request(app).get('/revenue?fromChain=fromChainStar');
+      const res = await request(app).get('/revenue?fromChain=ergo');
 
       // check the result
       expect(res.status).to.eql(200);
