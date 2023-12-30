@@ -47,8 +47,6 @@ describe('revenueRouter', () => {
       // send a request to the endpoint
       const res = await request(app).get('/revenue');
 
-      console.warn(res);
-
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
@@ -100,9 +98,9 @@ describe('revenueRouter', () => {
       // check the result
       expect(res.status).to.eql(200);
       const resultParsed = JSON.parse(res.text);
-      expect(resultParsed.total).to.eql(4);
+      expect(resultParsed.total).to.eql(3);
       const revenueIds = resultParsed.items.map((revenue: any) => revenue.id);
-      expect(revenueIds).to.eql([4, 3]);
+      expect(revenueIds).to.eql([3]);
     });
 
     /**
