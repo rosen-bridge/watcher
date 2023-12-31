@@ -11,6 +11,7 @@ let commitmentRedeemObj: CommitmentRedeem;
 const redeemJob = async () => {
   try {
     await commitmentRedeemObj.job();
+    await commitmentRedeemObj.deadlockJob();
   } catch (e) {
     logger.warn(`Redeem Job failed with error: ${e.message} - ${e.stack}`);
   }

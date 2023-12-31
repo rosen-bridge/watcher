@@ -254,6 +254,43 @@ class WatcherUtils {
   };
 
   /**
+   * returns all timeout commitments
+   */
+  lastCommitment = async (): Promise<CommitmentEntity> => {
+    const lastCommitment = await this.dataBase.lastCommitmentByWID(
+      Transaction.watcherWID!
+    );
+    if (!lastCommitment)
+      throw Error('There is no available unspent commitment');
+    return lastCommitment;
+  };
+
+  /**
+   * Returns all confirmed observations to create new commitments
+   */
+  hasMissedObservation = async (): Promise<boolean> => {
+    const height = await this.dataBase.getLastBlockHeight(
+      scanner.observationScanner.name()
+    );
+    const observations = await this.dataBase.getConfirmedObservations(
+      this.observationConfirmation,
+      height
+    );
+    let seenNotCommitted = false;
+    for (const observation of observations) {
+      const observationStatus = await this.dataBase.checkNewObservation(
+        observation
+      );
+      if (observationStatus.status === TxStatus.NOT_COMMITTED) {
+        seenNotCommitted = true;
+      }
+      if (observationStatus.status === TxStatus.COMMITTED && seenNotCommitted)
+        return true;
+    }
+    return false;
+  };
+
+  /**
    * Check timed out commitments to be valid, a commitment is not valid if:
    *    1 - Not triggered after the specified period
    *    2 - Created after the related trigger
