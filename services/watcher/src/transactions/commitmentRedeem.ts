@@ -9,7 +9,6 @@ import { TxType } from '../database/entities/txEntity';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import { DetachWID } from './detachWID';
-import { boxHaveAsset } from '../ergo/utils';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -49,7 +48,7 @@ export class CommitmentRedeem {
     commitmentBox: wasm.ErgoBox,
     feeBoxes: Array<wasm.ErgoBox>,
     requiredValue: bigint
-  ): Promise<wasm.ErgoBox> => {
+  ) => {
     const allInputs = [WIDBox, commitmentBox, ...feeBoxes];
     const height = await ErgoNetwork.getMaxHeight(allInputs);
     const RWTCount = BigInt(
@@ -87,17 +86,8 @@ export class CommitmentRedeem {
         candidates,
         height
       );
-      for (let i = 0; i < signed.outputs().len(); i++) {
-        const box = signed.outputs().get(i);
-        if (box.tokens().len() > 0 && boxHaveAsset(box, WID)) {
-          await this.txUtils.submitTransaction(signed, TxType.REDEEM);
-          logger.info(
-            `Redeem tx [${signed.id().to_str()}] submitted to the queue`
-          );
-          return box;
-        }
-      }
-      throw Error(`Impossible case: No WID box found in output`);
+      await this.txUtils.submitTransaction(signed, TxType.REDEEM);
+      logger.info(`Redeem tx [${signed.id().to_str()}] submitted to the queue`);
     } catch (e) {
       if (e instanceof ChangeBoxCreationError) {
         throw Error(
@@ -128,7 +118,6 @@ export class CommitmentRedeem {
     );
     const WID = Transaction.watcherWID;
     logger.info(`Starting commitment redeem job`);
-    let WIDBox = await this.boxes.getWIDBox(WID);
     for (const commitment of commitments) {
       const isCommitmentValid = await this.watcherUtils.isCommitmentValid(
         commitment
@@ -140,11 +129,12 @@ export class CommitmentRedeem {
         continue;
       }
       try {
+        let WIDBox = await this.boxes.getWIDBox(WID);
         if (WIDBox.tokens().get(0).id().to_str() != WID) {
           logger.info(
             'WID Token is not the first token in WID Box, trying to detach WID token.'
           );
-          DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
+          await DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
           WIDBox = await this.boxes.getWIDBox(WID);
         }
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
@@ -159,7 +149,7 @@ export class CommitmentRedeem {
             ]))
           );
         }
-        WIDBox = await this.redeemCommitmentTx(
+        await this.redeemCommitmentTx(
           WID,
           WIDBox,
           decodeSerializedBox(commitment.boxSerialized),
@@ -175,5 +165,56 @@ export class CommitmentRedeem {
     logger.info(`Commitment redeem job is done`, {
       count: commitments.length,
     });
+  };
+
+  /**
+   * Redeem the last unspent commitment if there is a missed uncommitted observation
+   */
+  deadlockJob = async () => {
+    if (!Transaction.watcherWID) {
+      logger.warn('Watcher WID is not set. Cannot run commitment redeem job.');
+      return;
+    }
+    if (!(await this.watcherUtils.hasMissedObservation())) {
+      logger.info('There is no missed observations');
+      return;
+    }
+    const commitment = await this.watcherUtils.lastCommitment();
+    const WID = Transaction.watcherWID;
+    logger.info(`Starting commitment redeem job`);
+    try {
+      let WIDBox = await this.boxes.getWIDBox(WID);
+      if (WIDBox.tokens().get(0).id().to_str() != WID) {
+        logger.info(
+          'WID Token is not the first token in WID Box, trying to detach WID token.'
+        );
+        await DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
+        WIDBox = await this.boxes.getWIDBox(WID);
+      }
+      logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
+      const requiredValue =
+        BigInt(getConfig().general.fee) +
+        BigInt(getConfig().general.minBoxValue) * 2n;
+      const feeBoxes: wasm.ErgoBox[] = [];
+      if (BigInt(WIDBox.value().as_i64().to_str()) < requiredValue) {
+        feeBoxes.push(
+          ...(await this.boxes.getUserPaymentBox(requiredValue, [
+            WIDBox.box_id().to_str(),
+          ]))
+        );
+      }
+      await this.redeemCommitmentTx(
+        WID,
+        WIDBox,
+        decodeSerializedBox(commitment.boxSerialized),
+        feeBoxes,
+        requiredValue
+      );
+    } catch (e) {
+      logger.warn(
+        `Skipping the commitment [${commitment.id}] redeem due to occurred error: ${e.message} - ${e.stack}`
+      );
+    }
+    logger.info(`Resolve deadlock job is done`);
   };
 }

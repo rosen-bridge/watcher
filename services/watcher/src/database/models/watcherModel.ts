@@ -490,6 +490,24 @@ class WatcherDataBase {
   };
 
   /**
+   * Returns last commitment with specific wid
+   * @param wid
+   */
+  lastCommitmentByWID = async (
+    wid: string
+  ): Promise<CommitmentEntity | null> => {
+    return await this.commitmentRepository.findOne({
+      where: {
+        WID: wid,
+        spendHeight: IsNull(),
+      },
+      order: {
+        id: 'DESC',
+      },
+    });
+  };
+
+  /**
    * returns commitments before a certain height with specific wid
    * @param wid
    * @param maxHeight
