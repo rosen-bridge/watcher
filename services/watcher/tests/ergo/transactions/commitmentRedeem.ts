@@ -358,15 +358,15 @@ describe('Commitment redeem transaction tests', () => {
       chai.spy.on(watcherUtils, 'allCommitedObservations', () => [
         { observation: observation, status: TxStatus.COMMITTED },
       ]);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox2);
+      chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
       chai.spy.on(boxes, 'getUserPaymentBox', () => [feeBox1]);
       chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
-      chai.spy.on(cr, 'redeemCommitmentTx', () => WIDBox);
+      chai.spy.on(cr, 'redeemCommitmentTx');
       await cr.job();
       expect(cr.redeemCommitmentTx).to.have.been.called.twice;
       expect(DetachWID.detachWIDtx).to.not.have.been.called();
-      expect(boxes.getUserPaymentBox).to.have.called.once;
+      expect(boxes.getUserPaymentBox).to.have.called.twice;
     });
 
     /**

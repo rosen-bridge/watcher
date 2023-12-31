@@ -142,11 +142,20 @@ export class CommitmentRedeem {
           BigInt(getConfig().general.fee) +
           BigInt(getConfig().general.minBoxValue) * 2n;
         const feeBoxes: wasm.ErgoBox[] = [];
-        if (BigInt(WIDBox.value().as_i64().to_str()) < requiredValue) {
+        const widBoxValue = BigInt(WIDBox.value().as_i64().to_str());
+        if (widBoxValue < requiredValue) {
+          logger.debug(
+            `Require more than WID box Ergs. Total: [${widBoxValue}], Required: [${requiredValue}]`
+          );
           feeBoxes.push(
             ...(await this.boxes.getUserPaymentBox(requiredValue, [
               WIDBox.box_id().to_str(),
             ]))
+          );
+          logger.debug(
+            `Using extra fee boxes in commitment redeem tx: [${feeBoxes.map(
+              (box) => box.box_id().to_str()
+            )}] with extra erg [${ErgoUtils.getBoxValuesSum(feeBoxes)}]`
           );
         }
         await this.redeemCommitmentTx(
@@ -175,14 +184,17 @@ export class CommitmentRedeem {
       logger.warn('Watcher WID is not set. Cannot run commitment redeem job.');
       return;
     }
-    if (!(await this.watcherUtils.hasMissedObservation())) {
-      logger.info('There is no missed observations');
-      return;
-    }
-    const commitment = await this.watcherUtils.lastCommitment();
-    const WID = Transaction.watcherWID;
-    logger.info(`Starting commitment redeem job`);
     try {
+      if (!(await this.watcherUtils.hasMissedObservation())) {
+        logger.info('There is no missed observations');
+        return;
+      }
+      const commitment = await this.watcherUtils.lastCommitment();
+      logger.debug(
+        `Redeeming last commitment with boxId [${commitment.boxId}]`
+      );
+      const WID = Transaction.watcherWID;
+      logger.info(`Starting commitment redeem job`);
       let WIDBox = await this.boxes.getWIDBox(WID);
       if (WIDBox.tokens().get(0).id().to_str() != WID) {
         logger.info(
@@ -196,11 +208,20 @@ export class CommitmentRedeem {
         BigInt(getConfig().general.fee) +
         BigInt(getConfig().general.minBoxValue) * 2n;
       const feeBoxes: wasm.ErgoBox[] = [];
-      if (BigInt(WIDBox.value().as_i64().to_str()) < requiredValue) {
+      const widBoxValue = BigInt(WIDBox.value().as_i64().to_str());
+      if (widBoxValue < requiredValue) {
+        logger.debug(
+          `Require more than WID box Ergs. Total: [${widBoxValue}], Required: [${requiredValue}]`
+        );
         feeBoxes.push(
           ...(await this.boxes.getUserPaymentBox(requiredValue, [
             WIDBox.box_id().to_str(),
           ]))
+        );
+        logger.debug(
+          `Using extra fee boxes in commitment redeem tx: [${feeBoxes.map(
+            (box) => box.box_id().to_str()
+          )}] with extra erg [${ErgoUtils.getBoxValuesSum(feeBoxes)}]`
         );
       }
       await this.redeemCommitmentTx(
@@ -212,7 +233,7 @@ export class CommitmentRedeem {
       );
     } catch (e) {
       logger.warn(
-        `Skipping the commitment [${commitment.id}] redeem due to occurred error: ${e.message} - ${e.stack}`
+        `Skipping the last commitment redeem due to occurred error: ${e.message} - ${e.stack}`
       );
     }
     logger.info(`Resolve deadlock job is done`);
