@@ -7,5 +7,6 @@ export default defineConfig({
       reporter: ['cobertura', 'text', 'text-summary'],
     },
     passWithNoTests: true,
+    singleThread: true,
   },
 });

@@ -26,14 +26,14 @@
     "eslint-config-prettier": "^8.5.0",
     "prettier": "2.7.1",
     "typescript": "^5.0.0",
-    "vitest": "^0.26.2"
+    "vitest": "^0.34.6"
   },
   "engines": {
     "node": ">=18.12.0"
   },
   "dependencies": {
-    "@rosen-bridge/json-bigint": "^0.1.0",
     "@rosen-bridge/abstract-logger": "^1.0.0",
+    "@rosen-bridge/json-bigint": "^0.1.0",
     "@rosen-bridge/observation-extractor": "^4.1.1",
     "@rosen-bridge/rwt-repo": "^2.0.0",
     "blakejs": "^1.2.1",
