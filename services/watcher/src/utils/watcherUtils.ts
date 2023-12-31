@@ -71,7 +71,8 @@ class WatcherUtils {
     );
     return (
       relatedCommitments.filter(
-        (commitment) => commitment.WID === Transaction.watcherWID
+        (commitment) =>
+          commitment.WID === Transaction.watcherWID && !commitment.spendHeight
       ).length <= 0
     );
   };
