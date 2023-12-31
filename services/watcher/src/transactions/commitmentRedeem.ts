@@ -186,15 +186,12 @@ export class CommitmentRedeem {
     }
     try {
       if (!(await this.watcherUtils.hasMissedObservation())) {
-        logger.info('There is no missed observations');
+        logger.debug('There is no missed observations');
         return;
       }
       const commitment = await this.watcherUtils.lastCommitment();
-      logger.debug(
-        `Redeeming last commitment with boxId [${commitment.boxId}]`
-      );
+      logger.info(`Redeeming last commitment with boxId [${commitment.boxId}]`);
       const WID = Transaction.watcherWID;
-      logger.info(`Starting commitment redeem job`);
       let WIDBox = await this.boxes.getWIDBox(WID);
       if (WIDBox.tokens().get(0).id().to_str() != WID) {
         logger.info(

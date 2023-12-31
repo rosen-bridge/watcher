@@ -255,7 +255,6 @@ class WatcherUtils {
 
   /**
    * returns all timeout commitments
-   * @param timeoutConfirmation number of confirmation so that a commitment become timeout
    */
   lastCommitment = async (): Promise<CommitmentEntity> => {
     const lastCommitment = await this.dataBase.lastCommitmentByWID(
