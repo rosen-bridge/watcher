@@ -5,6 +5,7 @@ export default defineConfig({
     coverage: {
       all: true,
       reporter: ['cobertura', 'text', 'text-summary'],
+      provider: 'istanbul',
     },
     passWithNoTests: true,
     singleThread: true,
