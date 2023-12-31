@@ -152,8 +152,8 @@ export class CommitmentCreation {
     }
     const WID = Transaction.watcherWID;
     logger.info(`Starting commitment creation job`);
-    for (const observation of observations) {
-      try {
+    try {
+      for (const observation of observations) {
         const commitment = ErgoUtils.commitmentFromObservation(
           observation,
           WID
@@ -203,11 +203,11 @@ export class CommitmentCreation {
           feeBoxes,
           requiredValue - BigInt(getConfig().general.minBoxValue)
         );
-      } catch (e) {
-        logger.warn(
-          `Skipping the commitment creation due to occurred error: ${e.message} - ${e.stack}`
-        );
       }
+    } catch (e) {
+      logger.warn(
+        `Skipping the commitment creation due to occurred error: ${e.message} - ${e.stack}`
+      );
     }
     logger.info(`Commitment creation job is done`, {
       count: observations.length,
