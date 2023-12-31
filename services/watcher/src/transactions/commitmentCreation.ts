@@ -72,8 +72,7 @@ export class CommitmentCreation {
       )
       .reduce((a, b) => a + b, BigInt(0));
     if (RWTCount <= requiredRWTCount) {
-      logger.warn('Not enough RWT tokens to create a new commitment');
-      return {};
+      throw new Error('Not enough RWT tokens to create a new commitment');
     }
     const outPermit = this.boxes.createPermit(
       height,
@@ -122,19 +121,17 @@ export class CommitmentCreation {
       );
     } catch (e) {
       if (e instanceof ChangeBoxCreationError) {
-        logger.warn(
+        throw new Error(
           "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."
         );
       }
       if (e instanceof NotEnoughFund) {
         // TODO: Send notification (https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/33)
-        logger.warn(
+        throw new Error(
           'Transaction build failed due to ERG insufficiency in the watcher.'
         );
       }
-      logger.warn(
-        `Skipping the commitment creation due to occurred error: ${e.message} - ${e.stack}`
-      );
+      throw e;
     }
   };
 

@@ -31,10 +31,10 @@ ergo:
   initialHeight: 0 # scanner initial height
   explorer:
     url: 'https://api.ergoplatform.com' # explorer url
-    timeout: 20 # explorer request timeout (in seconds)
+    timeout: 60 # explorer request timeout (in seconds)
   node:
     url: '' # node url
-    timeout: 10 # node request timeout (in seconds)
+    timeout: 60 # node request timeout (in seconds)
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
     confirmation: 10 # required block confirmations for sent transactions

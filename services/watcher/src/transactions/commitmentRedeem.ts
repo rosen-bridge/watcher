@@ -180,6 +180,15 @@ export class CommitmentRedeem {
    * Redeem the last unspent commitment if there is a missed uncommitted observation
    */
   deadlockJob = async () => {
+    const availablePermits =
+      ((await ErgoUtils.getPermitCount(getConfig().rosen.RWTId)) - 1n) /
+      (await Transaction.getInstance().getRequiredPermitsCountPerEvent());
+    if (availablePermits >= 1) {
+      logger.debug(
+        `Still have [${availablePermits}] available permits, aborting last commit redeem job`
+      );
+      return;
+    }
     if (!Transaction.watcherWID) {
       logger.warn('Watcher WID is not set. Cannot run commitment redeem job.');
       return;
