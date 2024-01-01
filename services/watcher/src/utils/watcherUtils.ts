@@ -99,12 +99,15 @@ class WatcherUtils {
       observation
     );
     if (observationStatus === null)
-      observationStatus = await this.dataBase.checkNewObservation(observation, Transaction.watcherWID)
-      if(observationStatus === null){
-        throw new NoObservationStatus(
-          `observation with requestId ${observation.requestId} has no status`
-        );
-      }
+      observationStatus = await this.dataBase.checkNewObservation(
+        observation,
+        Transaction.watcherWID
+      );
+    if (observationStatus === null) {
+      throw new NoObservationStatus(
+        `observation with requestId ${observation.requestId} has no status`
+      );
+    }
     if (observationStatus.status == TxStatus.REVEALED) return true;
     const eventTrigger = await this.dataBase.eventTriggerBySourceTxId(
       observation.sourceTxId
@@ -291,7 +294,13 @@ class WatcherUtils {
         seenNotCommitted = true;
       }
       if (observationStatus.status === TxStatus.COMMITTED && seenNotCommitted)
-        return true;
+        if (
+          (
+            await this.dataBase.commitmentsByEventId(observation.requestId)
+          ).filter((commitment) => commitment.WID == Transaction.watcherWID)
+            .length
+        )
+          return true;
     }
     return false;
   };
