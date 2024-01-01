@@ -225,11 +225,14 @@ class WatcherDataBase {
         },
       })
     ).map((item) => item.id);
-    await this.observationStatusRepository.delete({
-      observation: {
-        id: In(observationIds),
+    await this.observationStatusRepository.update(
+      {
+        observation: {
+          id: In(observationIds),
+        },
       },
-    });
+      { status: TxStatus.NOT_COMMITTED }
+    );
   };
 
   /**

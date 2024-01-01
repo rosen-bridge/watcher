@@ -37,7 +37,7 @@ ergo:
     timeout: 60 # node request timeout (in seconds)
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
-    confirmation: 10 # required block confirmations for sent transactions
+    confirmation: 4 # required block confirmations for sent transactions
     commitmentTimeoutConfirmation: 4320 # required block confirmations for a commitment to redeem
   interval:
     scanner: 180 # scanner update interval (in seconds)
@@ -45,7 +45,7 @@ ergo:
     transaction: 120 # processing transaction interval (in seconds)
     tokenName: 180 # token name check interval (in seconds)
     commitment:
-      creation: 20 # commitment creation interval (in seconds)
+      creation: 120 # commitment creation interval (in seconds)
       reveal: 180 # commitment reveal interval (in seconds)
       redeem: 3600 # commitment reveal interval (in seconds)
 path:

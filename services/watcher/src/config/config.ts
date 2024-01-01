@@ -178,15 +178,13 @@ class Config {
     this.transactionConfirmation = getRequiredNumber(
       'ergo.transaction.confirmation'
     );
-    this.commitmentTimeoutConfirmation = getRequiredNumber(
-      'ergo.transaction.commitmentTimeoutConfirmation'
-    );
+    this.commitmentTimeoutConfirmation =
+      getRequiredNumber('ergo.transaction.commitmentTimeoutConfirmation') * 5;
     this.transactionRemovingTimeout = getRequiredNumber(
       'ergo.transaction.timeout'
     );
-    this.observationConfirmation = getRequiredNumber(
-      'observation.confirmation'
-    );
+    this.observationConfirmation =
+      getRequiredNumber('observation.confirmation') * 5;
     this.observationValidThreshold = getRequiredNumber(
       'observation.validThreshold'
     );
