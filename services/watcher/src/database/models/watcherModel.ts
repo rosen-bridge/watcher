@@ -89,8 +89,14 @@ class WatcherDataBase {
    */
   getConfirmedObservations = async (confirmation: number, height: number) => {
     const maxHeight = height - confirmation;
-    return await this.observationRepository.findBy({
-      height: LessThan(maxHeight),
+    return await this.observationRepository.find({
+      where:{
+        height: LessThan(maxHeight),
+      },
+      order: {
+        height: 'ASC',
+        requestId: 'ASC'
+      }
     });
   };
 
