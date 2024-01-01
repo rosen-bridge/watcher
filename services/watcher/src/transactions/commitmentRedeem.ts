@@ -180,6 +180,12 @@ export class CommitmentRedeem {
    * Redeem the last unspent commitment if there is a missed uncommitted observation
    */
   deadlockJob = async () => {
+    const activeTx =
+      await this.watcherUtils.dataBase.getActiveCommitTransactions();
+    if (activeTx.length > 0) {
+      logger.debug('Has unconfirmed commitment or redeem transactions');
+      return;
+    }
     const availablePermits =
       ((await ErgoUtils.getPermitCount(getConfig().rosen.RWTId)) - 1n) /
       (await Transaction.getInstance().getRequiredPermitsCountPerEvent());

@@ -315,7 +315,7 @@ describe('WatcherModel tests', () => {
      *    The function should return status for observation that exist
      */
     it('should return status for observation that exist', async () => {
-      const res = await DB.checkNewObservation(observationEntity2);
+      const res = await DB.checkNewObservation(observationEntity2, undefined);
       expect(res.status).to.be.eql(TxStatus.NOT_COMMITTED);
     });
 
@@ -326,7 +326,7 @@ describe('WatcherModel tests', () => {
      */
     it('should set status for observation that is not exist', async () => {
       await observationRepo.insert([observationEntity1]);
-      const res = await DB.checkNewObservation(observationEntity1);
+      const res = await DB.checkNewObservation(observationEntity1, undefined);
       expect(res.status).to.be.eql(TxStatus.NOT_COMMITTED);
     });
   });
@@ -508,11 +508,11 @@ describe('WatcherModel tests', () => {
     /**
      * Target: testing commitmentsByEventId
      * Expected Output:
-     *    The function should return two commitments with the event id
+     *    The function should return one unspent commitment with the event id
      */
-    it('should return two commitments with specified event id', async () => {
+    it('should return one unspent commitment with specified event id', async () => {
       const data = await DB.commitmentsByEventId('eventId');
-      expect(data).to.have.length(2);
+      expect(data).to.have.length(1);
     });
   });
 

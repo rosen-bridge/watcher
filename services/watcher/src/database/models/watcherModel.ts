@@ -6,7 +6,6 @@ import {
   Like,
   Not,
   Repository,
-  Transaction,
 } from 'typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxEntity, TxType } from '../entities/txEntity';
@@ -90,8 +89,14 @@ class WatcherDataBase {
    */
   getConfirmedObservations = async (confirmation: number, height: number) => {
     const maxHeight = height - confirmation;
-    return await this.observationRepository.findBy({
-      height: LessThan(maxHeight),
+    return await this.observationRepository.find({
+      where: {
+        height: LessThan(maxHeight),
+      },
+      order: {
+        height: 'ASC',
+        requestId: 'ASC',
+      },
     });
   };
 
@@ -170,14 +175,35 @@ class WatcherDataBase {
    * @param observation
    */
   checkNewObservation = async (
-    observation: ObservationEntity
+    observation: ObservationEntity,
+    wid: string | undefined
   ): Promise<ObservationStatusEntity> => {
     const observationStatus = await this.getStatusForObservations(observation);
     if (!observationStatus) {
-      await this.observationStatusRepository.insert({
-        observation: observation,
-        status: TxStatus.NOT_COMMITTED,
-      });
+      if (
+        wid &&
+        (await this.commitmentRepository.findOne({
+          where: {
+            WID: wid,
+            eventId: observation.requestId,
+            spendBlock: IsNull(),
+          },
+        }))
+      ) {
+        // found an unspent commitment by watcher wid for this observation
+        // insert observation is COMMITTED
+        await this.observationStatusRepository.insert({
+          observation: observation,
+          status: TxStatus.COMMITTED,
+        });
+      } else {
+        // there is no wid or no commitment is found for this observation
+        // insert observation is NOT_COMMITTED
+        await this.observationStatusRepository.insert({
+          observation: observation,
+          status: TxStatus.NOT_COMMITTED,
+        });
+      }
       const insertedStatus = await this.getStatusForObservations(observation);
       if (insertedStatus === null) {
         throw new Error(
@@ -189,6 +215,28 @@ class WatcherDataBase {
     } else {
       return observationStatus;
     }
+  };
+
+  /**
+   * updating observation status to not committed for specified events
+   * @param eventIds
+   */
+  updateObservationStatusForEventIds = async (eventIds: Array<string>) => {
+    const observationIds = (
+      await this.observationRepository.find({
+        where: {
+          requestId: In(eventIds),
+        },
+      })
+    ).map((item) => item.id);
+    await this.observationStatusRepository.update(
+      {
+        observation: {
+          id: In(observationIds),
+        },
+      },
+      { status: TxStatus.NOT_COMMITTED }
+    );
   };
 
   /**
@@ -465,6 +513,7 @@ class WatcherDataBase {
     return await this.commitmentRepository.find({
       where: {
         eventId: eventId,
+        spendHeight: IsNull(),
       },
     });
   };
@@ -496,15 +545,23 @@ class WatcherDataBase {
   lastCommitmentByWID = async (
     wid: string
   ): Promise<CommitmentEntity | null> => {
-    return await this.commitmentRepository.findOne({
-      where: {
-        WID: wid,
-        spendHeight: IsNull(),
-      },
-      order: {
-        id: 'DESC',
-      },
-    });
+    const instance = await this.commitmentRepository
+      .createQueryBuilder('co')
+      .select()
+      .innerJoin('observation_entity', 'ob', 'ob."requestId" = co."eventId"')
+      .where('co."WID"= :wid', { wid })
+      .andWhere('co."spendHeight" IS NULL')
+      .orderBy('ob.height', 'DESC')
+      .addOrderBy('ob.requestId', 'DESC')
+      .getOne();
+    if (instance) {
+      return await this.commitmentRepository.findOne({
+        where: {
+          id: instance?.id,
+        },
+      });
+    }
+    return null;
   };
 
   /**
@@ -740,6 +797,18 @@ class WatcherDataBase {
     return await this.txRepository.find({
       where: {
         type: TxType.PERMIT,
+        deleted: false,
+      },
+    });
+  };
+
+  /**
+   * returns active transaction with 'commitment' or 'redeem' type
+   */
+  getActiveCommitTransactions = async (): Promise<Array<TxEntity>> => {
+    return await this.txRepository.find({
+      where: {
+        type: In([TxType.COMMITMENT, TxType.REDEEM]),
         deleted: false,
       },
     });

@@ -95,13 +95,19 @@ class WatcherUtils {
   isMergeHappened = async (
     observation: ObservationEntity
   ): Promise<boolean> => {
-    const observationStatus = await this.dataBase.getStatusForObservations(
+    let observationStatus = await this.dataBase.getStatusForObservations(
       observation
     );
     if (observationStatus === null)
+      observationStatus = await this.dataBase.checkNewObservation(
+        observation,
+        Transaction.watcherWID
+      );
+    if (observationStatus === null) {
       throw new NoObservationStatus(
         `observation with requestId ${observation.requestId} has no status`
       );
+    }
     if (observationStatus.status == TxStatus.REVEALED) return true;
     const eventTrigger = await this.dataBase.eventTriggerBySourceTxId(
       observation.sourceTxId
@@ -135,7 +141,8 @@ class WatcherUtils {
     const validObservations: Array<ObservationEntity> = [];
     for (const observation of observations) {
       const observationStatus = await this.dataBase.checkNewObservation(
-        observation
+        observation,
+        Transaction.watcherWID
       );
       if (observationStatus.status === TxStatus.NOT_COMMITTED) {
         if (await this.isObservationValid(observation)) {
@@ -221,9 +228,10 @@ class WatcherUtils {
             }
 
             readyCommitments.push({
-              commitments: uniqueRelatedCommitments
-                .filter((commitment) => commitment.spendBlock == null)
-                .map((item) => ({ ...item, rwtCount: item.rwtCount ?? '1' })),
+              commitments: uniqueRelatedCommitments.map((item) => ({
+                ...item,
+                rwtCount: item.rwtCount ?? '1',
+              })),
               observation: observation,
             });
           }
@@ -279,13 +287,20 @@ class WatcherUtils {
     let seenNotCommitted = false;
     for (const observation of observations) {
       const observationStatus = await this.dataBase.checkNewObservation(
-        observation
+        observation,
+        Transaction.watcherWID
       );
       if (observationStatus.status === TxStatus.NOT_COMMITTED) {
         seenNotCommitted = true;
       }
       if (observationStatus.status === TxStatus.COMMITTED && seenNotCommitted)
-        return true;
+        if (
+          (
+            await this.dataBase.commitmentsByEventId(observation.requestId)
+          ).filter((commitment) => commitment.WID == Transaction.watcherWID)
+            .length
+        )
+          return true;
     }
     return false;
   };

@@ -89,6 +89,7 @@ class Config {
   transactionCheckingInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
+  redeemSwapEnabled: boolean;
   rosenConfigPath: string;
   rosenTokensPath: string;
   apiPort: number;
@@ -177,18 +178,18 @@ class Config {
     this.transactionConfirmation = getRequiredNumber(
       'ergo.transaction.confirmation'
     );
-    this.commitmentTimeoutConfirmation = getRequiredNumber(
-      'ergo.transaction.commitmentTimeoutConfirmation'
-    );
+    // TODO: Fix confirmation thresholds
+    this.commitmentTimeoutConfirmation =
+      getRequiredNumber('ergo.transaction.commitmentTimeoutConfirmation') * 5;
     this.transactionRemovingTimeout = getRequiredNumber(
       'ergo.transaction.timeout'
     );
-    this.observationConfirmation = getRequiredNumber(
-      'observation.confirmation'
-    );
+    this.observationConfirmation =
+      getRequiredNumber('observation.confirmation') * 5;
     this.observationValidThreshold = getRequiredNumber(
       'observation.validThreshold'
     );
+    this.redeemSwapEnabled = config.get<boolean>('redeemSwapEnabled');
     this.tokenNameInterval = getRequiredNumber('ergo.interval.tokenName');
     this.revenueInterval = getRequiredNumber('ergo.interval.revenue');
     if (this.ergoInterval <= this.revenueInterval) {

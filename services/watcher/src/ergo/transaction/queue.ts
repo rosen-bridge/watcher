@@ -7,6 +7,7 @@ import { WatcherUtils } from '../../utils/watcherUtils';
 import { getConfig } from '../../config/config';
 import { Transaction } from '../../api/Transaction';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { TxStatus } from '../../database/entities/observationStatusEntity';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -36,8 +37,25 @@ export class Queue {
       Transaction.watcherPermitState = !!Transaction.watcherWID;
       logger.debug(`permit state: [${Transaction.watcherPermitState}]`);
     }
-    if (tx.observation)
-      await this.database.upgradeObservationTxStatus(tx.observation);
+    if (tx.type === TxType.REDEEM) {
+      // process transaction commitments
+      const signedTx = wasm.Transaction.sigma_parse_bytes(
+        base64ToArrayBuffer(tx.txSerialized)
+      );
+      const inputs = signedTx.inputs();
+      const inputIds = Array(inputs.len())
+        .fill('')
+        .map((item, index) => inputs.get(index).box_id().to_str());
+      const events = (await this.database.findCommitmentsById(inputIds)).map(
+        (item) => item.eventId
+      );
+      await this.database.updateObservationStatusForEventIds(events);
+    }
+    if (tx.observation) {
+      if (await this.database.getObservationsStatus([tx.observation.id])) {
+        await this.database.upgradeObservationTxStatus(tx.observation);
+      }
+    }
     await this.database.removeTx(tx);
   };
 
