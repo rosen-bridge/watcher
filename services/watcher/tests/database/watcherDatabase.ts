@@ -512,7 +512,7 @@ describe('WatcherModel tests', () => {
      */
     it('should return two commitments with specified event id', async () => {
       const data = await DB.commitmentsByEventId('eventId');
-      expect(data).to.have.length(2);
+      expect(data).to.have.length(1);
     });
   });
 

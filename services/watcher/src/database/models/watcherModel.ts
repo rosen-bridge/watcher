@@ -488,6 +488,7 @@ class WatcherDataBase {
     return await this.commitmentRepository.find({
       where: {
         eventId: eventId,
+        spendHeight: IsNull()
       },
     });
   };
