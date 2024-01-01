@@ -315,7 +315,7 @@ describe('WatcherModel tests', () => {
      *    The function should return status for observation that exist
      */
     it('should return status for observation that exist', async () => {
-      const res = await DB.checkNewObservation(observationEntity2);
+      const res = await DB.checkNewObservation(observationEntity2, undefined);
       expect(res.status).to.be.eql(TxStatus.NOT_COMMITTED);
     });
 
@@ -326,7 +326,7 @@ describe('WatcherModel tests', () => {
      */
     it('should set status for observation that is not exist', async () => {
       await observationRepo.insert([observationEntity1]);
-      const res = await DB.checkNewObservation(observationEntity1);
+      const res = await DB.checkNewObservation(observationEntity1, undefined);
       expect(res.status).to.be.eql(TxStatus.NOT_COMMITTED);
     });
   });

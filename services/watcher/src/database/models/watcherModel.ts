@@ -794,6 +794,18 @@ class WatcherDataBase {
   };
 
   /**
+   * returns active transaction with 'commitment' or 'redeem' type
+   */
+  getActiveCommitTransactions = async (): Promise<Array<TxEntity>> => {
+    return await this.txRepository.find({
+      where: {
+        type: In([TxType.COMMITMENT, TxType.REDEEM]),
+        deleted: false,
+      },
+    });
+  };
+
+  /**
    * Returns all event triggers matching the filters, with respect to offset and limit
    * @param fromAddress
    * @param toAddress
