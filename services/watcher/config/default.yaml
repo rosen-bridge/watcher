@@ -47,7 +47,7 @@ ergo:
     commitment:
       creation: 120 # commitment creation interval (in seconds)
       reveal: 180 # commitment reveal interval (in seconds)
-      redeem: 3600 # commitment reveal interval (in seconds)
+      redeem: 120 # commitment reveal interval (in seconds)
 path:
   addresses: config/rosen # addresses path
   # tokens: config/rosen/tokens.json # default tokens path.
