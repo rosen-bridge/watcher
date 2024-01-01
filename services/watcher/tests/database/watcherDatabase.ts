@@ -508,9 +508,9 @@ describe('WatcherModel tests', () => {
     /**
      * Target: testing commitmentsByEventId
      * Expected Output:
-     *    The function should return two commitments with the event id
+     *    The function should return one unspent commitment with the event id
      */
-    it('should return two commitments with specified event id', async () => {
+    it('should return one unspent commitment with specified event id', async () => {
       const data = await DB.commitmentsByEventId('eventId');
       expect(data).to.have.length(1);
     });
