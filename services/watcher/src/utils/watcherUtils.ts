@@ -135,7 +135,8 @@ class WatcherUtils {
     const validObservations: Array<ObservationEntity> = [];
     for (const observation of observations) {
       const observationStatus = await this.dataBase.checkNewObservation(
-        observation
+        observation,
+        Transaction.watcherWID
       );
       if (observationStatus.status === TxStatus.NOT_COMMITTED) {
         if (await this.isObservationValid(observation)) {
@@ -279,7 +280,8 @@ class WatcherUtils {
     let seenNotCommitted = false;
     for (const observation of observations) {
       const observationStatus = await this.dataBase.checkNewObservation(
-        observation
+        observation,
+        Transaction.watcherWID
       );
       if (observationStatus.status === TxStatus.NOT_COMMITTED) {
         seenNotCommitted = true;

@@ -175,14 +175,32 @@ class WatcherDataBase {
    * @param observation
    */
   checkNewObservation = async (
-    observation: ObservationEntity
+    observation: ObservationEntity,
+    wid: string | undefined
   ): Promise<ObservationStatusEntity> => {
     const observationStatus = await this.getStatusForObservations(observation);
     if (!observationStatus) {
-      await this.observationStatusRepository.insert({
-        observation: observation,
-        status: TxStatus.NOT_COMMITTED,
-      });
+      if (wid && await this.commitmentRepository.findOne({
+        where: {
+          WID: wid,
+          eventId: observation.requestId,
+          spendBlock: IsNull()
+        }
+      })) {
+        // found an unspent commitment by watcher wid for this observation
+        // insert observation is COMMITTED
+        await this.observationStatusRepository.insert({
+          observation: observation,
+          status: TxStatus.COMMITTED,
+        });
+      } else {
+        // there is no wid or no commitment is found for this observation
+        // insert observation is NOT_COMMITTED
+        await this.observationStatusRepository.insert({
+          observation: observation,
+          status: TxStatus.NOT_COMMITTED,
+        });
+      }
       const insertedStatus = await this.getStatusForObservations(observation);
       if (insertedStatus === null) {
         throw new Error(
