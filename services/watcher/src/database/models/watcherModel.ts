@@ -226,7 +226,9 @@ class WatcherDataBase {
       })
     ).map((item) => item.id);
     await this.observationStatusRepository.delete({
-      id: In(observationIds),
+      observation: {
+        id: In(observationIds),
+      },
     });
   };
 
