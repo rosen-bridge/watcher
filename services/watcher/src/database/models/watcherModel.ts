@@ -217,7 +217,11 @@ class WatcherDataBase {
     }
   };
 
-  deleteObservationStatusForEventIds = async (eventIds: Array<string>) => {
+  /**
+   * updating observation status to not committed for specified events
+   * @param eventIds
+   */
+  updateObservationStatusForEventIds = async (eventIds: Array<string>) => {
     const observationIds = (
       await this.observationRepository.find({
         where: {

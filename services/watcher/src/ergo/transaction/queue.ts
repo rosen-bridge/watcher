@@ -49,7 +49,7 @@ export class Queue {
       const events = (await this.database.findCommitmentsById(inputIds)).map(
         (item) => item.eventId
       );
-      this.database.deleteObservationStatusForEventIds(events);
+      await this.database.updateObservationStatusForEventIds(events);
     }
     if (tx.observation) {
       if (await this.database.getObservationsStatus([tx.observation.id])) {
