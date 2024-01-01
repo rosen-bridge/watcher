@@ -31,5 +31,7 @@ export const redeem = (
     boxes,
     getConfig().general.commitmentTimeoutConfirmation
   );
-  redeemJob();
+  setTimeout(() => {
+    redeemJob();
+  }, 30000);
 };
