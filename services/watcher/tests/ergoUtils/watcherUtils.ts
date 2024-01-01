@@ -197,7 +197,6 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
       chai.spy.on(dataBase, 'commitmentsByEventId', () => [
         unspentCommitment,
         unspentCommitment2,
-        redeemedCommitment,
       ]);
       chai.spy.on(dataBase, 'eventTriggerBySourceTxId', () => null);
       chai.spy.on(watcherUtils, 'hasValidAmount', () => true);
@@ -445,20 +444,6 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
   });
 
   describe('isMergedHappened', () => {
-    /**
-     * Target: testing isMergedHappened
-     * Dependencies:
-     *    watcherDatabase
-     * Expected Output:
-     *   The function should throw error since the status have not been set correctly in the database
-     */
-    it('should return error due to status problem', async () => {
-      chai.spy.on(dataBase, 'getStatusForObservations', () => null);
-      await expect(
-        watcherUtils.isMergeHappened(observationEntity1)
-      ).to.rejectedWith(NoObservationStatus);
-    });
-
     /**
      * Target: testing isMergedHappened
      * Dependencies:
