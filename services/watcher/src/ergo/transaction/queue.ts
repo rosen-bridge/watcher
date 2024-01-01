@@ -7,6 +7,7 @@ import { WatcherUtils } from '../../utils/watcherUtils';
 import { getConfig } from '../../config/config';
 import { Transaction } from '../../api/Transaction';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { TxStatus } from 'src/database/entities/observationStatusEntity';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -36,8 +37,16 @@ export class Queue {
       Transaction.watcherPermitState = !!Transaction.watcherWID;
       logger.debug(`permit state: [${Transaction.watcherPermitState}]`);
     }
-    if (tx.observation)
-      await this.database.upgradeObservationTxStatus(tx.observation);
+    if (tx.observation) {
+      if (tx.type === TxType.REDEEM) {
+        this.database.updateObservationTxStatus(
+          tx.observation,
+          TxStatus.NOT_COMMITTED
+        );
+      } else {
+        await this.database.upgradeObservationTxStatus(tx.observation);
+      }
+    }
     await this.database.removeTx(tx);
   };
 

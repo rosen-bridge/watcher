@@ -32,6 +32,7 @@ import { RevenueView } from '../entities/revenueView';
 import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueChartDataView } from '../entities/revenueChartDataView';
 import { PagedItemData } from '../../types/items';
+import { observation } from 'tests/ergoUtils/txQueue';
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -496,15 +497,22 @@ class WatcherDataBase {
   lastCommitmentByWID = async (
     wid: string
   ): Promise<CommitmentEntity | null> => {
-    return await this.commitmentRepository.findOne({
-      where: {
-        WID: wid,
-        spendHeight: IsNull(),
-      },
-      order: {
-        id: 'DESC',
-      },
-    });
+    const instance = await this.commitmentRepository
+      .createQueryBuilder('co')
+      .select()
+      .innerJoin('observation_entity', 'ob', 'ob."requestId" = co."eventId"')
+      .where('co."WID"= :wid', { wid })
+      .andWhere('co."spendHeight" IS NULL')
+      .orderBy('ob.height', 'DESC')
+      .getOne();
+    if (instance) {
+      return await this.commitmentRepository.findOne({
+        where: {
+          id: instance?.id,
+        },
+      });
+    }
+    return null;
   };
 
   /**
