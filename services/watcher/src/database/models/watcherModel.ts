@@ -90,13 +90,13 @@ class WatcherDataBase {
   getConfirmedObservations = async (confirmation: number, height: number) => {
     const maxHeight = height - confirmation;
     return await this.observationRepository.find({
-      where:{
+      where: {
         height: LessThan(maxHeight),
       },
       order: {
         height: 'ASC',
-        requestId: 'ASC'
-      }
+        requestId: 'ASC',
+      },
     });
   };
 
@@ -180,13 +180,16 @@ class WatcherDataBase {
   ): Promise<ObservationStatusEntity> => {
     const observationStatus = await this.getStatusForObservations(observation);
     if (!observationStatus) {
-      if (wid && await this.commitmentRepository.findOne({
-        where: {
-          WID: wid,
-          eventId: observation.requestId,
-          spendBlock: IsNull()
-        }
-      })) {
+      if (
+        wid &&
+        (await this.commitmentRepository.findOne({
+          where: {
+            WID: wid,
+            eventId: observation.requestId,
+            spendBlock: IsNull(),
+          },
+        }))
+      ) {
         // found an unspent commitment by watcher wid for this observation
         // insert observation is COMMITTED
         await this.observationStatusRepository.insert({
@@ -212,6 +215,19 @@ class WatcherDataBase {
     } else {
       return observationStatus;
     }
+  };
+
+  deleteObservationStatusForEventIds = async (eventIds: Array<string>) => {
+    const observationIds = (
+      await this.observationRepository.find({
+        where: {
+          requestId: In(eventIds),
+        },
+      })
+    ).map((item) => item.id);
+    await this.observationStatusRepository.delete({
+      id: In(observationIds),
+    });
   };
 
   /**
@@ -488,7 +504,7 @@ class WatcherDataBase {
     return await this.commitmentRepository.find({
       where: {
         eventId: eventId,
-        spendHeight: IsNull()
+        spendHeight: IsNull(),
       },
     });
   };

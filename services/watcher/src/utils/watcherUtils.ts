@@ -95,13 +95,16 @@ class WatcherUtils {
   isMergeHappened = async (
     observation: ObservationEntity
   ): Promise<boolean> => {
-    const observationStatus = await this.dataBase.getStatusForObservations(
+    let observationStatus = await this.dataBase.getStatusForObservations(
       observation
     );
     if (observationStatus === null)
-      throw new NoObservationStatus(
-        `observation with requestId ${observation.requestId} has no status`
-      );
+      observationStatus = await this.dataBase.checkNewObservation(observation, Transaction.watcherWID)
+      if(observationStatus === null){
+        throw new NoObservationStatus(
+          `observation with requestId ${observation.requestId} has no status`
+        );
+      }
     if (observationStatus.status == TxStatus.REVEALED) return true;
     const eventTrigger = await this.dataBase.eventTriggerBySourceTxId(
       observation.sourceTxId
@@ -222,7 +225,10 @@ class WatcherUtils {
             }
 
             readyCommitments.push({
-              commitments: uniqueRelatedCommitments.map((item) => ({ ...item, rwtCount: item.rwtCount ?? '1' })),
+              commitments: uniqueRelatedCommitments.map((item) => ({
+                ...item,
+                rwtCount: item.rwtCount ?? '1',
+              })),
               observation: observation,
             });
           }

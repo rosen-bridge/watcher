@@ -37,13 +37,22 @@ export class Queue {
       Transaction.watcherPermitState = !!Transaction.watcherWID;
       logger.debug(`permit state: [${Transaction.watcherPermitState}]`);
     }
+    if (tx.type === TxType.REDEEM) {
+      // process transaction commitments
+      const signedTx = wasm.Transaction.sigma_parse_bytes(
+        base64ToArrayBuffer(tx.txSerialized)
+      );
+      const inputs = signedTx.inputs();
+      const inputIds = Array(inputs.len())
+        .fill('')
+        .map((item, index) => inputs.get(index).box_id().to_str());
+      const events = (await this.database.findCommitmentsById(inputIds)).map(
+        (item) => item.eventId
+      );
+      this.database.deleteObservationStatusForEventIds(events);
+    }
     if (tx.observation) {
-      if (tx.type === TxType.REDEEM) {
-        this.database.updateObservationTxStatus(
-          tx.observation,
-          TxStatus.NOT_COMMITTED
-        );
-      } else {
+      if (await this.database.getObservationsStatus([tx.observation.id])) {
         await this.database.upgradeObservationTxStatus(tx.observation);
       }
     }
