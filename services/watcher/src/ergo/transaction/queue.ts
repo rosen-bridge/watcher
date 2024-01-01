@@ -7,7 +7,7 @@ import { WatcherUtils } from '../../utils/watcherUtils';
 import { getConfig } from '../../config/config';
 import { Transaction } from '../../api/Transaction';
 import WinstonLogger from '@rosen-bridge/winston-logger';
-import { TxStatus } from 'src/database/entities/observationStatusEntity';
+import { TxStatus } from '../../database/entities/observationStatusEntity';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 

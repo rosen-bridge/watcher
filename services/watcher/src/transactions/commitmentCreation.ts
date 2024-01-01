@@ -11,7 +11,6 @@ import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import { DetachWID } from './detachWID';
 import WinstonLogger from '@rosen-bridge/winston-logger';
-import { TxStatus } from 'src/database/entities/observationStatusEntity';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -134,14 +133,6 @@ export class CommitmentCreation {
       }
       throw e;
     }
-  };
-
-  updateCommittedStatus = async (wid: string) => {
-    const observations =
-      await this.watcherUtils.dataBase.getObservationsStatusAndConfirm(
-        TxStatus.COMMITTED,
-        getConfig().general.observationConfirmation
-      );
   };
 
   /**

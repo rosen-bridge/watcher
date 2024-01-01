@@ -6,7 +6,6 @@ import {
   Like,
   Not,
   Repository,
-  Transaction,
 } from 'typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxEntity, TxType } from '../entities/txEntity';
@@ -32,7 +31,6 @@ import { RevenueView } from '../entities/revenueView';
 import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueChartDataView } from '../entities/revenueChartDataView';
 import { PagedItemData } from '../../types/items';
-import { observation } from 'tests/ergoUtils/txQueue';
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -504,6 +502,7 @@ class WatcherDataBase {
       .where('co."WID"= :wid', { wid })
       .andWhere('co."spendHeight" IS NULL')
       .orderBy('ob.height', 'DESC')
+      .addOrderBy('ob.requestId', 'DESC')
       .getOne();
     if (instance) {
       return await this.commitmentRepository.findOne({

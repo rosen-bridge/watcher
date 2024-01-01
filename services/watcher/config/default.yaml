@@ -92,4 +92,4 @@ healthCheck:
   errorLog:
     maxAllowedCount: 2 # maximum allowed error log lines
     duration: 100000 # error log duration time check in milliseconds
-redeemSwapEnabled: true # if set true when no permit left, system automatically redeem new commitments and commit again for old commitments
+redeemSwapEnabled: true # if set true when no permit left, system automatically redeem new commitments and commit again for old observations
