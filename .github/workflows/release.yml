@@ -44,18 +44,16 @@ jobs:
       - name: MacOS/Linux Move and Rename Release file
         if: ${{ matrix.platform != 'Windows' }}
         run: |
-          cd ./services/watcher
           mv ./bin/index watcher-service-${{ github.event.release.tag_name }}-${{ matrix.platform }}
 
       - name: Windows Move and Rename Release file
         if: ${{ matrix.platform == 'Windows' }}
         run: |
-          cd ./services/watcher
           mv ./bin/index.exe watcher-service-${{ github.event.release.tag_name }}-${{ matrix.platform }}.exe
 
       - name: Upload File to Assets
         uses: softprops/action-gh-release@v1
         with:
-          files: ./services/watcher/watcher-service-${{ github.event.release.tag_name }}-*
+          files: watcher-service-${{ github.event.release.tag_name }}-*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
