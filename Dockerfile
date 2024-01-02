@@ -9,13 +9,11 @@ RUN adduser --disabled-password --home /app --uid 3000 --gecos "ErgoPlatform" er
     && chown -R ergo:ergo /app/ && umask 0077
 USER ergo
 
-WORKDIR /app
+WORKDIR /app/services/watcher
 # TODO: Add layer optimizations when at least one package is added to the monorepo
 # https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/131
 COPY --chmod=700 --chown=ergo:ergo . .
 RUN npm ci
-
-WORKDIR /app/services/watcher
 
 ENV NODE_ENV=production
 ENV SERVICE_PORT=3000
