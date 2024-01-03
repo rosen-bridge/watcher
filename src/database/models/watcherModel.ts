@@ -1,9 +1,11 @@
 import {
+  And,
   DataSource,
   In,
   IsNull,
   LessThan,
   Like,
+  MoreThan,
   Not,
   Repository,
 } from 'typeorm';
@@ -86,18 +88,36 @@ class WatcherDataBase {
    * ignores observations which have created commitments
    * @param confirmation
    * @param height
+   * @param maxConfirmation
+   * @param onlyNotCommitted
    */
-  getConfirmedObservations = async (confirmation: number, height: number) => {
+  getConfirmedObservations = async (confirmation: number, height: number, maxConfirmation?: number, onlyNotCommitted = false) => {
     const maxHeight = height - confirmation;
-    return await this.observationRepository.find({
+    const minHeight = height - (maxConfirmation ? maxConfirmation : height);
+    const observations = await this.observationRepository.find({
       where: {
-        height: LessThan(maxHeight),
+        height: And(LessThan(maxHeight), MoreThan(minHeight)),
       },
       order: {
         height: 'ASC',
         requestId: 'ASC',
       },
     });
+    if(onlyNotCommitted){
+      const invalidIds: Set<number> = new Set();
+      (await this.observationStatusRepository.find({
+        where:{
+          observation:{
+            id: In(observations.map(item => item.id))
+          }
+        },
+        relations: ['observation']
+      })).forEach(item => {
+        if(item.status !== TxStatus.NOT_COMMITTED) invalidIds.add(item.observation.id)
+      })
+      return observations.filter(item => !invalidIds.has(item.id))
+    }
+    return observations
   };
 
   /**
