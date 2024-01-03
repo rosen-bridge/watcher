@@ -209,8 +209,6 @@ class WatcherUtils {
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
       height,
-      undefined,
-      true
     );
     for (const observation of observations) {
       try {
