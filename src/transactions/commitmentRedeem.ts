@@ -109,13 +109,19 @@ export class CommitmentRedeem {
    * and creates the redeem transaction for invalid ones
    */
   job = async () => {
+    const activeTx =
+      await this.watcherUtils.dataBase.getActiveCommitTransactions();
+    if (activeTx.length > 0) {
+      logger.debug('Has unconfirmed commitment or redeem transactions');
+      return;
+    }
     if (!Transaction.watcherWID) {
       logger.warn('Watcher WID is not set. Cannot run commitment redeem job.');
       return;
     }
-    const commitments = await this.watcherUtils.allTimeoutCommitments(
+    const commitments = [...await this.watcherUtils.allTimeoutCommitments(
       this.redeemConfirmation
-    );
+    ), ...await this.watcherUtils.allTriggeredInvalidCommitments()];
     const WID = Transaction.watcherWID;
     logger.info(`Starting commitment redeem job`);
     for (const commitment of commitments) {
