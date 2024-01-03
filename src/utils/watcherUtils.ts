@@ -277,6 +277,7 @@ class WatcherUtils {
     const result : Array<CommitmentEntity> = [];
     const commitments = (await this.dataBase.commitmentsByWIDAndMaxHeight(Transaction.watcherWID!, height))
     for(const commitment of commitments){
+      // TODO must improve this part without issue.
       const event = await this.dataBase.eventTriggerByEventId(commitment.eventId);
       if(event !== null && (commitment.height >= event.height || event.spendBlock !== undefined)){
         result.push(commitment)
