@@ -208,7 +208,7 @@ class WatcherUtils {
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
-      height,
+      height
     );
     for (const observation of observations) {
       try {
@@ -264,25 +264,33 @@ class WatcherUtils {
   };
 
   /**
-   * 
+   *
    * @param wid get list of all commitments which triggered before creation or trigger is spent
-   * @returns 
+   * @returns
    */
   allTriggeredInvalidCommitments = async () => {
     const height = await this.dataBase.getLastBlockHeight(
       scanner.ergoScanner.name()
     );
-    const result : Array<CommitmentEntity> = [];
-    const commitments = (await this.dataBase.commitmentsByWIDAndMaxHeight(Transaction.watcherWID!, height))
-    for(const commitment of commitments){
+    const result: Array<CommitmentEntity> = [];
+    const commitments = await this.dataBase.commitmentsByWIDAndMaxHeight(
+      Transaction.watcherWID!,
+      height
+    );
+    for (const commitment of commitments) {
       // TODO must improve this part without issue.
-      const event = await this.dataBase.eventTriggerByEventId(commitment.eventId);
-      if(event !== null && (commitment.height >= event.height || event.spendBlock !== undefined)){
-        result.push(commitment)
+      const event = await this.dataBase.eventTriggerByEventId(
+        commitment.eventId
+      );
+      if (
+        event !== null &&
+        (commitment.height >= event.height || event.spendBlock !== undefined)
+      ) {
+        result.push(commitment);
       }
     }
-    return commitments;
-  }
+    return result;
+  };
 
   /**
    * returns all timeout commitments
