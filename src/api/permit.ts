@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import { ApiResponse, Transaction } from './Transaction';
 import { body, validationResult } from 'express-validator';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { authenticateKey } from './authentication';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -13,6 +14,7 @@ const permitRouter = Router();
  */
 permitRouter.post(
   '',
+  authenticateKey,
   body('count').notEmpty().withMessage('key count is required!').isString(),
   async (req: Request, res: Response) => {
     try {
@@ -43,6 +45,7 @@ permitRouter.post(
  */
 permitRouter.post(
   '/return',
+  authenticateKey,
   body('count').notEmpty().withMessage('key count is required!').isString(),
   async (req: Request, res: Response) => {
     try {
