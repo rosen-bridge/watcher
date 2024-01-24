@@ -7,3 +7,10 @@ database:
   user: 'POSTGRES_USER'
   password: 'POSTGRES_PASSWORD'
   name: 'POSTGRES_DB'
+ergo:
+  mnemonic: 'MNEMONIC'
+cardano:
+  koios:
+    authToken: 'KOIOS_AUTH_TOKEN'
+log:
+  basicAuth: 'LOKI_BASIC_AUTH'
