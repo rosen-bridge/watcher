@@ -228,12 +228,12 @@ class LoggerConfig {
 
   constructor() {
     const logs = config.get<TransportOptions[]>('logs');
-    const clonedLog = cloneDeep(logs);
-    const wrongLogTypeIndex = clonedLog.findIndex((log) => {
+    const clonedLogs = cloneDeep(logs);
+    const wrongLogTypeIndex = clonedLogs.findIndex((log) => {
       const logTypeValidation = ['console', 'file', 'loki'].includes(log.type);
       let loggerChecks = true;
       if (log.type === 'loki') {
-        const overrideLokiBasicAuth = getOptionalString('lokiBasicAuth');
+        const overrideLokiBasicAuth = getOptionalString('overrideLokiBasicAuth');
         if (overrideLokiBasicAuth !== '') log.basicAuth = overrideLokiBasicAuth;
         loggerChecks =
           log.host != undefined &&
@@ -262,7 +262,7 @@ class LoggerConfig {
         )}`
       );
     }
-    this.transports = clonedLog;
+    this.transports = clonedLogs;
   }
 }
 
