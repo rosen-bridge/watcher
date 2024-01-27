@@ -14,5 +14,4 @@ cardano:
     authToken: 'KOIOS_AUTH_TOKEN'
   blockfrost:
     projectId: 'BLOCKFROST_PROJECT_ID'
-log:
-  basicAuth: 'LOKI_BASIC_AUTH'
+lokiBasicAuth: 'LOKI_BASIC_AUTH'

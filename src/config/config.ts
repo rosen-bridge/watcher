@@ -4,7 +4,7 @@ import { SecretError } from '../errors/errors';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
 import { TokensConfig } from './tokensConfig';
-import { RosenTokens } from '@rosen-bridge/tokens';
+import { cloneDeep } from 'lodash-es';
 import path from 'path';
 import { NetworkType } from '../types';
 import { generateMnemonic } from 'bip39';
@@ -228,10 +228,13 @@ class LoggerConfig {
 
   constructor() {
     const logs = config.get<TransportOptions[]>('logs');
-    const wrongLogTypeIndex = logs.findIndex((log) => {
+    const clonedLog = cloneDeep(logs);
+    const wrongLogTypeIndex = clonedLog.findIndex((log) => {
       const logTypeValidation = ['console', 'file', 'loki'].includes(log.type);
       let loggerChecks = true;
       if (log.type === 'loki') {
+        const overrideLokiBasicAuth = getOptionalString('lokiBasicAuth');
+        if (overrideLokiBasicAuth !== '') log.basicAuth = overrideLokiBasicAuth;
         loggerChecks =
           log.host != undefined &&
           typeof log.host === 'string' &&
@@ -259,7 +262,7 @@ class LoggerConfig {
         )}`
       );
     }
-    this.transports = logs;
+    this.transports = clonedLog;
   }
 }
 
