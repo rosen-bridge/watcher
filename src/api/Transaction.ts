@@ -344,7 +344,7 @@ export class Transaction {
         .id()
         .to_str()}] submitted to the queue`
     );
-    return { tx: signedTx, remainingRwt: totalRwt - inputRwtCount };
+    return { tx: signedTx, remainingRwt: totalRwt - RWTCount };
   };
 
   /**
@@ -393,13 +393,15 @@ export class Transaction {
     try {
       let tx: wasm.Transaction,
         remainingRwt = RWTCount,
+        remainingUnlock = RWTCount,
         feeBox: wasm.ErgoBox | undefined = undefined;
       const unlockTxIds: Array<string> = [];
       for (const permitBox of permitBoxes) {
         const permitRwt = BigInt(
           permitBox.tokens().get(0).amount().as_i64().to_str()
         );
-        const unlockingRwt = RWTCount > permitRwt ? permitRwt : RWTCount;
+        const unlockingRwt =
+          remainingUnlock > permitRwt ? permitRwt : remainingUnlock;
         logger.debug(
           `Unlocking ${unlockingRwt} locked in permitBox: [${permitBox
             .box_id()
@@ -419,6 +421,7 @@ export class Transaction {
         repoBox = tx.outputs().get(0);
         widBox = tx.outputs().get(1);
         feeBox = tx.outputs().len() > 3 ? tx.outputs().get(2) : undefined;
+        remainingUnlock -= unlockingRwt;
         unlockTxIds.push(tx.id().to_str());
       }
       const isAlreadyWatcher = remainingRwt > 0;

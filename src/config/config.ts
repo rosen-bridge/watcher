@@ -4,7 +4,7 @@ import { SecretError } from '../errors/errors';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
 import { TokensConfig } from './tokensConfig';
-import { RosenTokens } from '@rosen-bridge/tokens';
+import { cloneDeep } from 'lodash-es';
 import path from 'path';
 import { NetworkType } from '../types';
 import { generateMnemonic } from 'bip39';
@@ -179,14 +179,15 @@ class Config {
     this.transactionConfirmation = getRequiredNumber(
       'ergo.transaction.confirmation'
     );
-    // TODO: Fix confirmation thresholds
-    this.commitmentTimeoutConfirmation =
-      getRequiredNumber('ergo.transaction.commitmentTimeoutConfirmation') * 5;
+    this.commitmentTimeoutConfirmation = getRequiredNumber(
+      'ergo.transaction.commitmentTimeoutConfirmation'
+    );
     this.transactionRemovingTimeout = getRequiredNumber(
       'ergo.transaction.timeout'
     );
-    this.observationConfirmation =
-      getRequiredNumber('observation.confirmation') * 5;
+    this.observationConfirmation = getRequiredNumber(
+      'observation.confirmation'
+    );
     this.observationValidThreshold = getRequiredNumber(
       'observation.validThreshold'
     );
@@ -229,10 +230,13 @@ class LoggerConfig {
 
   constructor() {
     const logs = config.get<TransportOptions[]>('logs');
-    const wrongLogTypeIndex = logs.findIndex((log) => {
+    const clonedLogs = cloneDeep(logs);
+    const wrongLogTypeIndex = clonedLogs.findIndex((log) => {
       const logTypeValidation = ['console', 'file', 'loki'].includes(log.type);
       let loggerChecks = true;
       if (log.type === 'loki') {
+        const overrideLokiBasicAuth = getOptionalString('overrideLokiBasicAuth');
+        if (overrideLokiBasicAuth !== '') log.basicAuth = overrideLokiBasicAuth;
         loggerChecks =
           log.host != undefined &&
           typeof log.host === 'string' &&
@@ -260,7 +264,7 @@ class LoggerConfig {
         )}`
       );
     }
-    this.transports = logs;
+    this.transports = clonedLogs;
   }
 }
 
