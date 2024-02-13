@@ -26,6 +26,8 @@ const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 export class Boxes {
   dataBase: WatcherDataBase;
   repoNFTId: wasm.TokenId;
+  repoConfigNFT: wasm.TokenId;
+  AWC: wasm.TokenId;
   RWTTokenId: wasm.TokenId;
   RSN: wasm.TokenId;
   watcherPermitContract: wasm.Contract;
@@ -35,6 +37,7 @@ export class Boxes {
   repoAddressContract: wasm.Contract;
   watcherCollateralContract: wasm.Contract;
   repoAddress: wasm.Address;
+  repoConfigAddress: wasm.Address;
 
   constructor(db: WatcherDataBase) {
     const rosenConfig = getConfig().rosen;
@@ -42,6 +45,8 @@ export class Boxes {
     this.repoNFTId = wasm.TokenId.from_str(rosenConfig.RepoNFT);
     this.RWTTokenId = wasm.TokenId.from_str(rosenConfig.RWTId);
     this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
+    this.AWC = wasm.TokenId.from_str(rosenConfig.AWC);
+    this.repoConfigNFT = wasm.TokenId.from_str(rosenConfig.repoConfigNFT);
     const watcherPermitAddress = wasm.Address.from_base58(
       rosenConfig.watcherPermitAddress
     );
@@ -56,6 +61,9 @@ export class Boxes {
     this.repoAddressContract = wasm.Contract.pay_to_address(this.repoAddress);
     this.watcherCollateralContract = wasm.Contract.pay_to_address(
       wasm.Address.from_base58(rosenConfig.watcherCollateralAddress)
+    );
+    this.repoConfigAddress = wasm.Address.from_base58(
+      rosenConfig.repoConfigAddress
     );
     this.fee = wasm.BoxValue.from_i64(
       wasm.I64.from_str(getConfig().general.fee)
@@ -273,6 +281,19 @@ export class Boxes {
         this.repoNFTId.to_str()
       ),
       this.repoNFTId.to_str()
+    );
+  };
+
+  /**
+   * Return latest repo config box from network with tracking mempool transactions
+   */
+  getRepoConfigBox = async (): Promise<wasm.ErgoBox> => {
+    return await ErgoNetwork.trackMemPool(
+      await ErgoNetwork.getBoxWithToken(
+        this.repoConfigAddress,
+        this.repoConfigNFT.to_str()
+      ),
+      this.repoConfigNFT.to_str()
     );
   };
 

@@ -119,15 +119,15 @@ export class Transaction {
    * Get required permit count
    */
   getRequiredPermitsCountPerEvent = async () => {
-    const repoBox = await Transaction.boxes.getRepoBox();
-    const R6 = repoBox.register_value(6);
-    if (R6) {
-      const r6Values: string[] = R6.to_js();
-      if (r6Values.length > 0) {
-        return BigInt(r6Values[0]);
+    const configBox = await Transaction.boxes.getRepoConfigBox();
+    const R4 = configBox.register_value(4);
+    if (R4) {
+      const r4Values: string[] = R4.to_js();
+      if (r4Values.length > 0) {
+        return BigInt(r4Values[0]);
       }
     }
-    throw Error('Invalid repo box');
+    throw Error('Invalid repo config box');
   };
 
   /**
@@ -544,21 +544,15 @@ export class Transaction {
    * CAUTION: this function removed in watcher refactor
    */
   getCollateral = async () => {
-    const repoBox = await Transaction.boxes.getRepoBox();
-    const R6 = repoBox.register_value(6);
-    if (R6) {
-      const R6Params = R6.to_js() as Array<string>;
-      const ErgCollateral = BigInt(R6Params[4]);
-      const RSNCollateral = BigInt(R6Params[5]);
-      return {
-        erg: ErgCollateral,
-        rsn: RSNCollateral,
-      };
+    const configBox = await Transaction.boxes.getRepoConfigBox();
+    const R4 = configBox.register_value(4);
+    if (R4) {
+      const r4Values: string[] = R4.to_js();
+      if (r4Values.length > 0) {
+        return { erg: BigInt(r4Values[4]), rsn: BigInt(r4Values[5]) };
+      }
     }
-    return {
-      erg: 0n,
-      rsn: 0n,
-    };
+    throw Error('Invalid repo config box');
   };
 
   /**
