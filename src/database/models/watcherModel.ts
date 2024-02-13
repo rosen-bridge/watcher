@@ -1118,6 +1118,16 @@ class WatcherDataBase {
     if (collateral) return collateral;
     throw new Error(`Could not find a collateral with wid [${wid}]`);
   };
+
+  /**
+   * Return all WIDs in valid unspent collaterals
+   */
+  getAllWids = async (): Promise<string[]> => {
+    const collaterals = await this.collateralRepository.find({
+      where: { spendBlock: IsNull() },
+    });
+    return collaterals.map((collateral) => collateral.wid);
+  };
 }
 
 export { WatcherDataBase };

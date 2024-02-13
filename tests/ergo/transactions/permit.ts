@@ -13,7 +13,9 @@ import { mockedResponseBody } from '../objects/mockedResponseBody';
 import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import TransactionTest from '../../../src/api/TransactionTest';
+import { Transaction } from '../../../src/api/Transaction';
 import { TxType } from '../../../src/database/entities/txEntity';
+import { ErgoUtils } from '../../../src/ergo/utils';
 
 chai.use(spies);
 
@@ -81,29 +83,21 @@ describe('Watcher Permit Transactions', () => {
      *    The function should return user WID
      */
     it('checks is there any wid in the usersBoxes', async () => {
-      const sampleWID =
-        '4911d8b1e96bccba5cbbfe2938578b3b58a795156518959fcbfc3bd7232b35a8';
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
-      });
-
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
-        if (tokenId === sampleWID)
-          return wasm.ErgoBox.from_json(
-            mockedResponseBody.watcherBoxWithWIDToken
-          );
-        else throw new Error('There is no box with this tokenId');
-      });
-
+      chai.spy.on(ErgoUtils, 'getWatcherBalance', () => ({
+        tokens: [
+          {
+            tokenId: 'tokenId',
+          },
+          {
+            tokenId: 'wid1',
+          },
+        ],
+      }));
+      chai.spy.on(Transaction, 'getWatcherState', () => undefined);
       await TransactionTest.setup(userAddress, secret1, boxes, DB);
       TransactionTest.getInstance();
-      const usersHex = ['414441', sampleWID];
-      const users: Array<Uint8Array> = [];
-      for (const user of usersHex) {
-        users.push(hexStrToUint8Array(user));
-      }
-      const WID = await TransactionTest.getWID(users);
-      expect(WID).to.be.equal(sampleWID);
+      const WID = await TransactionTest.getWID(['wid1', 'wid2']);
+      expect(WID).to.be.equal('wid1');
     });
   });
 
@@ -121,12 +115,7 @@ describe('Watcher Permit Transactions', () => {
      *    the token map of input and output should be the same
      */
     it('the token map of input and output should be the same', async () => {
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithPermit);
-      });
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
-      });
+      chai.spy.on(Transaction, 'getWatcherState', () => undefined);
       await TransactionTest.setup(userAddress, secret1, boxes, DB);
       const transaction = TransactionTest.getInstance();
       const ergoBoxes = wasm.ErgoBoxes.from_boxes_json([]);
@@ -243,19 +232,7 @@ describe('Watcher Permit Transactions', () => {
     it('should return error when an active permit transaction is already in queue', async () => {
       await DB.submitTx('mockedTx', 'mockedTxId', TxType.PERMIT, 100);
       const mockedTx = (await DB.getActivePermitTransactions())[0];
-
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.repoBox);
-      });
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
-        if (
-          tokenId ===
-          'a2a6c892c38d508a659caf857dbe29da4343371e597efd42e40f9bc99099a516'
-        )
-          return wasm.ErgoBox.from_json(mockedResponseBody.watcherBox);
-        else throw Error('No box with token');
-      });
-
+      chai.spy.on(Transaction, 'getWatcherState', () => undefined);
       await TransactionTest.setup(userAddress, secret1, boxes, DB);
       const transaction = TransactionTest.getInstance();
       const res = await transaction.getPermit(100n);
@@ -361,9 +338,7 @@ describe('Watcher Permit Transactions', () => {
       chai.spy.on(boxes, 'getPermits', () => {
         return [wasm.ErgoBox.from_json(boxesSample.firstWatcherPermitBox)];
       });
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(boxesSample.secondRepoBox);
-      });
+      chai.spy.on(Transaction, 'getWatcherState', () => undefined);
       await TransactionTest.setup(
         '9hz7H7bxzcEYLd333TocbEHawk7YKzdCgCg1PAaQVUWG83tghQL',
         secret2,
@@ -393,20 +368,18 @@ describe('Watcher Permit Transactions', () => {
      *    returnPermit should return true
      */
     it('should be true', async () => {
-      initMockedAxios();
-      chai.spy.on(boxes, 'getPermits', () => {
-        return [wasm.ErgoBox.from_json(mockedResponseBody.permitBox)];
-      });
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
-      });
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', (address, tokenId) => {
-        if (tokenId === '6572676f')
-          throw Error('There is no box with token id');
-        return wasm.ErgoBox.from_json(
-          mockedResponseBody.watcherBoxWithWIDToken
-        );
-      });
+      chai.spy.on(DB, 'getAllWids', () => ['wid1', 'wid2']);
+      chai.spy.on(ErgoUtils, 'getWatcherBalance', () => ({
+        tokens: [
+          {
+            tokenId: 'tokenId',
+          },
+          {
+            tokenId: 'wid1',
+          },
+        ],
+      }));
+      // chai.spy.on(Transaction, 'getWatcherState', () => undefined)
 
       await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
       const transaction = TransactionTest.getInstance();
@@ -427,16 +400,17 @@ describe('Watcher Permit Transactions', () => {
      *    returnPermit should return false
      */
     it('should be false', async () => {
-      initMockedAxios();
-      chai.spy.on(boxes, 'getPermits', () => {
-        return [wasm.ErgoBox.from_json(mockedResponseBody.permitBox)];
-      });
-      chai.spy.on(boxes, 'getRepoBox', () => {
-        return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
-      });
-      chai.spy.on(ErgoNetwork, 'getBoxWithToken', () => {
-        throw Error('There is no box with token id');
-      });
+      chai.spy.on(DB, 'getAllWids', () => ['wid1', 'wid2']);
+      chai.spy.on(ErgoUtils, 'getWatcherBalance', () => ({
+        tokens: [
+          {
+            tokenId: 'tokenId',
+          },
+          {
+            tokenId: 'tokenId2',
+          },
+        ],
+      }));
       await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
       TransactionTest.getInstance();
       await TransactionTest.getWatcherState();

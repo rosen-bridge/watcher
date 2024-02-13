@@ -90,27 +90,16 @@ export class Transaction {
   };
 
   /**
-   * it gets repoBox users list and find the corresponding wid to the watcher and
-   *  returns it's wid or in case of no permits return empty string
-   * @param users
+   * List all watcher tokens and check if they are a registered WID token
+   * @param wids all registered WIDs
+   * @return watcher WID
    */
-  static getWID = async (users: Array<Uint8Array>): Promise<string> => {
-    // TODO: This function hasn't good performance
+  static getWID = async (wids: string[]): Promise<string> => {
     if (!Transaction.isSetupCalled)
       throw new Error("The Transaction class setup doesn't called");
-    const usersWID = users.map(async (id) => {
-      const wid = uint8ArrayToHex(id);
-      try {
-        await ErgoNetwork.getBoxWithToken(Transaction.userAddress, wid);
-        return true;
-      } catch (error) {
-        return false;
-      }
-    });
-    for (const [i, userWID] of usersWID.entries()) {
-      if (await userWID) {
-        return uint8ArrayToHex(users[i]);
-      }
+    const balance = await ErgoUtils.getWatcherBalance();
+    for (const token of balance.tokens) {
+      if (wids.includes(token.tokenId)) return token.tokenId;
     }
     return '';
   };
@@ -740,15 +729,11 @@ export class Transaction {
       throw new Error("The Transaction class setup doesn't called");
     logger.info('Getting watcher status');
     if (Transaction.watcherPermitState === undefined) {
-      const repoBox = await Transaction.boxes.getRepoBox();
-      const R4 = repoBox.register_value(4);
-      logger.info(`Repo box id is: ${repoBox.box_id().to_str()}`);
-      if (R4) {
-        const users = R4.to_coll_coll_byte();
-        Transaction.watcherWID = await Transaction.getWID(users);
-        logger.info(`Watcher WID is set to: ${Transaction.watcherWID}`);
-        Transaction.watcherPermitState = Transaction.watcherWID !== '';
-      }
+      const allWids = await Transaction.watcherDatabase.getAllWids();
+      logger.debug(`All registered wids are ${allWids}`);
+      Transaction.watcherWID = await Transaction.getWID(allWids);
+      logger.info(`Watcher WID is set to: ${Transaction.watcherWID}`);
+      Transaction.watcherPermitState = Transaction.watcherWID !== '';
     }
   };
 
