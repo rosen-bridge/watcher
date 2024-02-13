@@ -93,6 +93,7 @@ class Config {
   rosenConfigPath: string;
   rosenTokensPath: string;
   apiPort: number;
+  apiKeyHash: string;
   apiAllowedOrigins: string[];
 
   constructor() {
@@ -208,6 +209,7 @@ class Config {
       path.join(this.rosenConfigPath, 'tokens.json')
     );
     this.apiPort = getOptionalNumber('api.port', 3000);
+    this.apiKeyHash = getRequiredString('api.apiKeyHash');
     this.apiAllowedOrigins = config.get<string[]>('api.allowedOrigins');
     if (
       !Array.isArray(this.apiAllowedOrigins) ||
