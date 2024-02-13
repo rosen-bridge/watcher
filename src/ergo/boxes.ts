@@ -298,6 +298,19 @@ export class Boxes {
   };
 
   /**
+   * Return unspent collateral box for the specified WID (Considering the mempool and txQueue)
+   * @param wid
+   */
+  getCollateralBox = async (wid: string): Promise<wasm.ErgoBox> => {
+    const collateralEntity = await this.dataBase.getCollateralByWid(wid);
+    const collateralBox = decodeSerializedBox(collateralEntity.serialized);
+    return await this.dataBase.trackTxQueue(
+      await ErgoNetwork.trackMemPool(collateralBox, this.AWC.to_str()),
+      this.AWC.to_str()
+    );
+  };
+
+  /**
    * creates a new permit box with required data
    * @param height
    * @param RWTCount

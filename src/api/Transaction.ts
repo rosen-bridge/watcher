@@ -135,22 +135,16 @@ export class Transaction {
    * @returns
    */
   getTotalPermit = async (): Promise<bigint> => {
-    const WID = Transaction.watcherWID!;
-    const repoBox = await Transaction.boxes.getRepoBox();
-    const R4 = repoBox.register_value(4);
-    const R5 = repoBox.register_value(5);
-    if (!R4 || !R5) {
-      throw Error('Invalid repoBox found');
-    }
+    const wid = Transaction.watcherWID;
+    if (!wid) return 0n;
     try {
-      const widIndex = R4.to_coll_coll_byte()
-        .map((user) => uint8ArrayToHex(user))
-        .indexOf(WID);
-      if (widIndex < 0) return 0n;
-      const usersCount: Array<string> | undefined = R5.to_i64_str_array();
-      return BigInt(usersCount[widIndex]);
-    } catch {
-      throw Error('Repo box register types or values are invalid');
+      const collateral = await Transaction.watcherDatabase.getCollateralByWid(
+        wid
+      );
+      return collateral.rwtCount;
+    } catch (e) {
+      logger.warn(`Could not find collateral box for WID [${wid}]`);
+      return 0n;
     }
   };
 
