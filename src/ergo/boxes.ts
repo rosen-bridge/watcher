@@ -633,6 +633,14 @@ export class Boxes {
     return boxBuilder.build();
   };
 
+  /**
+   * Return a new collateral box with required parameters
+   * @param amount
+   * @param height
+   * @param wid
+   * @param rwtCount
+   * @returns
+   */
   createCollateralBox = (
     amount: AddressBalance,
     height: number,
