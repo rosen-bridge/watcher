@@ -480,10 +480,9 @@ export class Boxes {
    * @param height
    * @param RWTCount
    * @param RSNCount
-   * @param users
-   * @param userRWT
-   * @param R6
-   * @param R7
+   * @param AWCCount
+   * @param chainId
+   * @param watcherCount
    */
   createRepo = async (
     height: number,
