@@ -119,9 +119,12 @@ export class CommitmentRedeem {
       logger.warn('Watcher WID is not set. Cannot run commitment redeem job.');
       return;
     }
-    const commitments = [...await this.watcherUtils.allTimeoutCommitments(
-      this.redeemConfirmation
-    ), ...await this.watcherUtils.allTriggeredInvalidCommitments()];
+    const commitments = [
+      ...(await this.watcherUtils.allTimeoutCommitments(
+        this.redeemConfirmation
+      )),
+      ...(await this.watcherUtils.allTriggeredInvalidCommitments()),
+    ];
     const WID = Transaction.watcherWID;
     logger.info(`Starting commitment redeem job`);
     for (const commitment of commitments) {
@@ -135,14 +138,7 @@ export class CommitmentRedeem {
         continue;
       }
       try {
-        let WIDBox = await this.boxes.getWIDBox(WID);
-        if (WIDBox.tokens().get(0).id().to_str() != WID) {
-          logger.info(
-            'WID Token is not the first token in WID Box, trying to detach WID token.'
-          );
-          await DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
-          WIDBox = await this.boxes.getWIDBox(WID);
-        }
+        const WIDBox = (await this.boxes.getWIDBox(WID))[0];
         logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
         const requiredValue =
           BigInt(getConfig().general.fee) +
@@ -213,14 +209,7 @@ export class CommitmentRedeem {
       const commitment = await this.watcherUtils.lastCommitment();
       logger.info(`Redeeming last commitment with boxId [${commitment.boxId}]`);
       const WID = Transaction.watcherWID;
-      let WIDBox = await this.boxes.getWIDBox(WID);
-      if (WIDBox.tokens().get(0).id().to_str() != WID) {
-        logger.info(
-          'WID Token is not the first token in WID Box, trying to detach WID token.'
-        );
-        await DetachWID.detachWIDtx(this.txUtils, this.boxes, WID, WIDBox);
-        WIDBox = await this.boxes.getWIDBox(WID);
-      }
+      const WIDBox = (await this.boxes.getWIDBox(WID))[0];
       logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
       const requiredValue =
         BigInt(getConfig().general.fee) +

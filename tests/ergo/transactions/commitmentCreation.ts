@@ -237,7 +237,7 @@ describe('Commitment creation transaction tests', () => {
         return;
       });
       chai.spy.on(boxes, 'getPermits', () => permits);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBox]);
       chai.spy.on(boxes, 'getUserPaymentBox');
       chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
@@ -278,7 +278,7 @@ describe('Commitment creation transaction tests', () => {
         return;
       });
       chai.spy.on(boxes, 'getPermits', () => permits);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBoxWithoutErg);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBoxWithoutErg]);
       chai.spy.on(boxes, 'getUserPaymentBox', () => plainBox);
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cc, 'createCommitmentTx', () => {
@@ -321,13 +321,12 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       chai.spy.on(watcherUtils, 'allReadyObservations', () => [observation]);
       chai.spy.on(boxes, 'getPermits', () => permits);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBoxWithoutErg);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBoxWithoutErg]);
       sinon.stub(Transaction, 'watcherWID').value('differentWID');
       chai.spy.on(cc, 'createCommitmentTx', () => {
         return { txId: 'txId', commitmentBoxId: 'boxId' };
       });
       await cc.job();
-      expect(DetachWID.detachWIDtx).to.have.called();
       expect(cc.createCommitmentTx).to.not.have.called;
     });
   });

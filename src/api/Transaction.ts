@@ -351,7 +351,8 @@ export class Transaction {
 
     const permitBoxes = await Transaction.boxes.getPermits(WID, RWTCount);
     let repoBox = await Transaction.boxes.getRepoBox();
-    let widBox = await Transaction.boxes.getWIDBox(WID);
+    // TODO: To be fixed in unlock refactor
+    let widBox = (await Transaction.boxes.getWIDBox(WID))[0];
     const height = await ErgoNetwork.getHeight();
 
     if (widBox.tokens().get(0).id().to_str() != WID) {
@@ -592,7 +593,8 @@ export class Transaction {
       };
     }
     if (WID) {
-      const widBox = await Transaction.boxes.getWIDBox(WID);
+      // TODO: To be fixed in lock refactor
+      const widBox = (await Transaction.boxes.getWIDBox(WID))[0];
       if (widBox.tokens().get(0).id().to_str() != WID) {
         await DetachWID.detachWIDtx(
           Transaction.txUtils,

@@ -215,7 +215,7 @@ describe('Testing Box Creation', () => {
       const data = await boxes.getWIDBox(
         'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b'
       );
-      expect(data.box_id().to_str()).to.eq(WIDBox.boxId);
+      expect(data[0].box_id().to_str()).to.eq(WIDBox.boxId);
     });
   });
 

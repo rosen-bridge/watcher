@@ -272,7 +272,7 @@ describe('Commitment redeem transaction tests', () => {
         { observation: observation, status: TxStatus.COMMITTED },
       ]);
       chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => []);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox2);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBox2]);
       chai.spy.on(boxes, 'getUserPaymentBox');
       chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
@@ -313,8 +313,8 @@ describe('Commitment redeem transaction tests', () => {
       chai.spy.on(watcherUtils, 'allCommitedObservations', () => [
         { observation: observation, status: TxStatus.COMMITTED },
       ]);
-      chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => [])
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
+      chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => []);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBox]);
       chai.spy.on(boxes, 'getUserPaymentBox', () => [feeBox1]);
       chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
@@ -358,7 +358,7 @@ describe('Commitment redeem transaction tests', () => {
         { observation: observation, status: TxStatus.COMMITTED },
       ]);
       chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => []);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBox]);
       chai.spy.on(boxes, 'getUserPaymentBox', () => [feeBox1]);
       chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
@@ -396,11 +396,10 @@ describe('Commitment redeem transaction tests', () => {
         { observation: observation, status: TxStatus.COMMITTED },
       ]);
       chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => []);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBoxWithoutErg);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBoxWithoutErg]);
       sinon.stub(Transaction, 'watcherWID').value('differentWID');
       chai.spy.on(cr, 'redeemCommitmentTx');
       await cr.job();
-      expect(DetachWID.detachWIDtx).to.have.called();
       expect(cr.redeemCommitmentTx).to.not.have.called;
     });
   });

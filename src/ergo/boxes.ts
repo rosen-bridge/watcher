@@ -4,6 +4,7 @@ import {
   boxHaveAsset,
   decodeSerializedBox,
   ErgoUtils,
+  extractTokens,
 } from './utils';
 import {
   bigIntToUint8Array,
@@ -140,27 +141,49 @@ export class Boxes {
   };
 
   /**
-   * Returns unspent WID boxes with the specified WID (Considering the mempool)
+   * Returns unspent WID boxes with the specified WID covering the required wid count (Considering the mempool)
    * @param wid
+   * @param widCount
    */
-  getWIDBox = async (wid?: string): Promise<wasm.ErgoBox> => {
+  getWIDBox = async (wid?: string, widCount = 1): Promise<wasm.ErgoBox[]> => {
     if (wid) {
-      const WID = (await this.dataBase.getUnspentAddressBoxes())
+      const widBoxes = (await this.dataBase.getUnspentAddressBoxes())
         .map((box: BoxEntity) => {
           return decodeSerializedBox(box.serialized);
         })
         .filter(
           (box: wasm.ErgoBox) =>
             box.tokens().len() > 0 && boxHaveAsset(box, wid)
-        )[0];
-      if (!WID)
+        );
+      let coveredWidCount = 0n;
+      const selectedWidBoxes: wasm.ErgoBox[] = [];
+      for (const widBox of widBoxes) {
+        const trackedWidBox = await this.dataBase.trackTxQueue(
+          await ErgoNetwork.trackMemPool(widBox, wid),
+          wid
+        );
+        if (
+          selectedWidBoxes
+            .map((box) => box.box_id().to_str())
+            .includes(trackedWidBox.box_id().to_str())
+        )
+          continue;
+        selectedWidBoxes.push(trackedWidBox);
+        const widBoxTokens = extractTokens(trackedWidBox.tokens());
+        const boxWidCount = widBoxTokens
+          .filter((token) => token.id().to_str() == wid)
+          .reduce(
+            (sum, token) => sum + BigInt(token.amount().as_i64().to_str()),
+            0n
+          );
+        coveredWidCount += boxWidCount;
+        if (coveredWidCount >= widCount) break;
+      }
+      if (coveredWidCount < widCount)
         throw new NoWID(
           'WID box is not found. Cannot sign the transaction. Please check that the scanner to be synced.'
         );
-      return await this.dataBase.trackTxQueue(
-        await ErgoNetwork.trackMemPool(WID, wid),
-        wid
-      );
+      return selectedWidBoxes;
     } else
       throw new NoWID('Watcher WID is not set. Cannot sign the transaction.');
   };
