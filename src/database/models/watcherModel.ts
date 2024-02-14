@@ -33,6 +33,7 @@ import { RevenueView } from '../entities/revenueView';
 import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueChartDataView } from '../entities/revenueChartDataView';
 import { PagedItemData } from '../../types/items';
+import { CollateralEntity } from '../entities/collateralEntity';
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -48,6 +49,7 @@ class WatcherDataBase {
   private readonly revenueView: Repository<RevenueView>;
   private readonly revenueRepository: Repository<RevenueEntity>;
   private readonly revenueChartView: Repository<RevenueChartDataView>;
+  private readonly collateralRepository: Repository<CollateralEntity>;
 
   constructor(dataSource: DataSource) {
     this.dataSource = dataSource;
@@ -65,6 +67,7 @@ class WatcherDataBase {
     this.revenueView = dataSource.getRepository(RevenueView);
     this.revenueRepository = dataSource.getRepository(RevenueEntity);
     this.revenueChartView = dataSource.getRepository(RevenueChartDataView);
+    this.collateralRepository = dataSource.getRepository(CollateralEntity);
   }
 
   /**
@@ -91,7 +94,12 @@ class WatcherDataBase {
    * @param maxConfirmation
    * @param onlyNotCommitted
    */
-  getConfirmedObservations = async (confirmation: number, height: number, maxConfirmation?: number, onlyNotCommitted = false) => {
+  getConfirmedObservations = async (
+    confirmation: number,
+    height: number,
+    maxConfirmation?: number,
+    onlyNotCommitted = false
+  ) => {
     const maxHeight = height - confirmation;
     const minHeight = height - (maxConfirmation ? maxConfirmation : height);
     const observations = await this.observationRepository.find({
@@ -103,21 +111,24 @@ class WatcherDataBase {
         requestId: 'ASC',
       },
     });
-    if(onlyNotCommitted){
+    if (onlyNotCommitted) {
       const invalidIds: Set<number> = new Set();
-      (await this.observationStatusRepository.find({
-        where:{
-          observation:{
-            id: In(observations.map(item => item.id))
-          }
-        },
-        relations: ['observation']
-      })).forEach(item => {
-        if(item.status !== TxStatus.NOT_COMMITTED) invalidIds.add(item.observation.id)
-      })
-      return observations.filter(item => !invalidIds.has(item.id))
+      (
+        await this.observationStatusRepository.find({
+          where: {
+            observation: {
+              id: In(observations.map((item) => item.id)),
+            },
+          },
+          relations: ['observation'],
+        })
+      ).forEach((item) => {
+        if (item.status !== TxStatus.NOT_COMMITTED)
+          invalidIds.add(item.observation.id);
+      });
+      return observations.filter((item) => !invalidIds.has(item.id));
     }
-    return observations
+    return observations;
   };
 
   /**
@@ -1094,6 +1105,18 @@ class WatcherDataBase {
       amount,
       permit,
     });
+  };
+
+  /**
+   * Return unspent collateral box for wid
+   * @param wid
+   */
+  getCollateralByWid = async (wid: string): Promise<CollateralEntity> => {
+    const collateral = await this.collateralRepository.findOne({
+      where: { spendBlock: IsNull(), wid: wid },
+    });
+    if (collateral) return collateral;
+    throw new Error(`Could not find a collateral with wid [${wid}]`);
   };
 }
 

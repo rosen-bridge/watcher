@@ -16,6 +16,9 @@ type RosenConfigType = {
   lockAddress: string;
   RepoNFT: string;
   RWTId: string;
+  repoConfigAddress: string;
+  repoConfigNFT: string;
+  AWC: string;
 };
 
 class RosenConfig {
@@ -33,6 +36,9 @@ class RosenConfig {
   readonly lockAddress: string;
   readonly RepoNFT: string;
   readonly RWTId: string;
+  readonly repoConfigAddress: string;
+  readonly repoConfigNFT: string;
+  readonly AWC: string;
 
   constructor(network: string, networkType: string, configRoot: string) {
     const rosenConfigPath = this.getAddress(network, networkType, configRoot);
@@ -57,6 +63,9 @@ class RosenConfig {
       this.lockAddress = config.addresses.lock;
       this.RepoNFT = config.tokens.RepoNFT;
       this.RWTId = config.tokens.RWTId;
+      this.repoConfigAddress = config.addresses.RepoConfig;
+      this.repoConfigNFT = config.tokens.RepoConfigNFT;
+      this.AWC = config.tokens.AwcNFT;
     }
   }
 
