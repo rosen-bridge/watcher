@@ -690,7 +690,8 @@ export class Transaction {
             ],
           },
           height,
-          repoBox.box_id().to_str()
+          repoBox.box_id().to_str(),
+          1n
         )
       );
     }
