@@ -636,7 +636,8 @@ export class Boxes {
   createCollateralBox = (
     amount: AddressBalance,
     height: number,
-    wid: string
+    wid: string,
+    rwtCount: bigint
   ) => {
     const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
       wasm.BoxValue.from_i64(wasm.I64.from_str(amount.nanoErgs.toString())),
@@ -658,6 +659,10 @@ export class Boxes {
     boxBuilder.set_register_value(
       4,
       wasm.Constant.from_byte_array(Buffer.from(wid, 'hex'))
+    );
+    boxBuilder.set_register_value(
+      5,
+      wasm.Constant.from_i64(wasm.I64.from_str(rwtCount.toString()))
     );
     return boxBuilder.build();
   };

@@ -561,12 +561,11 @@ export class Transaction {
     const repoBox = await Transaction.boxes.getRepoBox();
     const R4 = repoBox.register_value(4);
     const R5 = repoBox.register_value(5);
-    const R6 = repoBox.register_value(6);
     const WID = Transaction.watcherWID;
     // This couldn't happen
-    if (!R4 || !R5 || !R6) {
+    if (!R4 || !R5) {
       return {
-        response: 'one of registers (4, 5, 6) of repo box is not set',
+        response: 'one of registers (4, 5) of repo box is not set',
         status: 500,
       };
     }
@@ -596,26 +595,20 @@ export class Transaction {
         status: 400,
       };
     }
+    let collateralBox: wasm.ErgoBox;
+    let widCount = 0n;
     if (WID) {
-      // TODO: To be fixed in lock refactor
-      const widBox = (await Transaction.boxes.getWIDBox(WID))[0];
-      if (widBox.tokens().get(0).id().to_str() != WID) {
-        await DetachWID.detachWIDtx(
-          Transaction.txUtils,
-          Transaction.boxes,
-          WID,
-          widBox
-        );
-        return {
-          response: `WID box is not in valid format (WID token is not the first token), please wait for the correction transaction`,
-          status: 400,
-        };
-      }
-      inputBoxes.push(widBox);
+      collateralBox = await Transaction.boxes.getCollateralBox(WID);
+      inputBoxes.push(collateralBox);
+      const widBoxes = await Transaction.boxes.getWIDBox(WID, 2);
+      widBoxes.forEach((widBox) => inputBoxes.push(widBox));
+      const widBoxIds = widBoxes.map((widBox) => widBox.box_id().to_str());
       userBoxes.boxes.forEach((box) => {
-        if (box.box_id().to_str() != widBox.box_id().to_str())
-          inputBoxes.push(box);
+        if (!widBoxIds.includes(box.box_id().to_str())) inputBoxes.push(box);
       });
+      widCount = ErgoUtils.getBoxAssetsSum(widBoxes).filter(
+        (token) => token.tokenId == WID
+      )[0].amount;
     } else inputBoxes.push(...userBoxes.boxes);
 
     // generate RepoOut
@@ -631,32 +624,58 @@ export class Transaction {
       .amount()
       .as_i64()
       .checked_add(wasm.I64.from_str(RSNCount.toString()));
-    const inUsers: Array<Uint8Array> = R4.to_coll_coll_byte();
-    const R7 = WID
-      ? inUsers.map((item) => Buffer.from(item).toString('hex')).indexOf(WID)
-      : undefined;
-    const usersOut = WID
-      ? [...inUsers]
-      : [...inUsers, repoBox.box_id().as_bytes()];
-    const usersCount: Array<string> = R5.to_i64_str_array();
-    const usersCountOut = WID
-      ? usersCount.map((item, index) =>
-          index === R7 ? (BigInt(item) + RSNCount).toString() : item
-        )
-      : [...usersCount, RSNCount.toString()];
-
+    const AWCTokenCount = BigInt(
+      repoBox.tokens().get(3).amount().as_i64().to_str()
+    );
     const outBoxes: Array<wasm.ErgoBoxCandidate> = [];
-    // TODO: To be fixed in lock transaction refactor
+    const watcherCount = Number(R5.to_i64().to_str());
+    const chainId = R4.to_byte_array();
+
     outBoxes.push(
       await Transaction.boxes.createRepo(
         height,
         RepoRWTCount.to_str(),
         RSNTokenCount.to_str(),
-        '10',
-        new Uint8Array(),
-        0
+        WID ? AWCTokenCount.toString() : (AWCTokenCount - 1n).toString(),
+        chainId,
+        WID ? watcherCount : watcherCount - 1
       )
     );
+
+    // generate collateral box
+    if (!WID) {
+      outBoxes.push(
+        await Transaction.boxes.createCollateralBox(
+          {
+            nanoErgs: ErgCollateral,
+            tokens: [
+              {
+                tokenId: Transaction.RSN.to_str(),
+                amount: RSNCollateral,
+              },
+            ],
+          },
+          height,
+          repoBox.box_id().to_str(),
+          RSNCount
+        )
+      );
+    } else {
+      const collateralRwtCount = BigInt(
+        collateralBox!.register_value(4)!.to_i64().to_str()
+      );
+      outBoxes.push(
+        await Transaction.boxes.createCollateralBox(
+          {
+            nanoErgs: ErgoUtils.getBoxValuesSum([collateralBox!]),
+            tokens: ErgoUtils.getBoxAssetsSum([collateralBox!]),
+          },
+          height,
+          WID,
+          collateralRwtCount + RSNCount
+        )
+      );
+    }
     // generate watcherPermit
     outBoxes.push(
       await Transaction.boxes.createPermit(
@@ -671,29 +690,11 @@ export class Transaction {
         height,
         WID ? WID : repoBox.box_id().to_str(),
         Transaction.minBoxValue.as_i64().to_str(),
-        '1',
+        widCount ? widCount.toString() : '3',
         wasm.Contract.pay_to_address(Transaction.userAddress),
         !WID
       )
     );
-    // generate collateral if required
-    if (!WID) {
-      outBoxes.push(
-        await Transaction.boxes.createCollateralBox(
-          {
-            nanoErgs: ErgCollateral,
-            tokens: [
-              {
-                tokenId: Transaction.RSN.to_str(),
-                amount: RSNCollateral,
-              },
-            ],
-          },
-          height,
-          repoBox.box_id().to_str()
-        )
-      );
-    }
     outBoxes.push(
       this.createChangeBox(
         inputBoxes,
@@ -718,6 +719,12 @@ export class Transaction {
       Transaction.fee,
       Transaction.userAddress
     );
+    if (!WID) {
+      const txDataInputs = new wasm.DataInputs();
+      const repoConfig = await Transaction.boxes.getRepoConfigBox();
+      txDataInputs.add(new wasm.DataInput(repoConfig.box_id()));
+      builder.set_data_inputs(txDataInputs);
+    }
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,
