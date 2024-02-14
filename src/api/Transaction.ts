@@ -234,11 +234,13 @@ export class Transaction {
           Buffer.from(wid, 'hex')
         )
       );
+      // TODO: To be fixed in unlock tx refactor
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
           wid,
           Transaction.minBoxValue.as_i64().to_str(),
+          '1',
           Transaction.userAddressContract
         )
       );
@@ -248,11 +250,13 @@ export class Transaction {
       logger.debug(
         `Creating a new wid box for other permits, all permits in the existing box are returned`
       );
+      // TODO: To be fixed in unlock tx refactor
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
           wid,
           Transaction.minBoxValue.as_i64().to_str(),
+          '1',
           Transaction.userAddressContract
         )
       );
@@ -667,6 +671,7 @@ export class Transaction {
         height,
         WID ? WID : repoBox.box_id().to_str(),
         Transaction.minBoxValue.as_i64().to_str(),
+        '1',
         wasm.Contract.pay_to_address(Transaction.userAddress),
         !WID
       )

@@ -73,10 +73,12 @@ export class CommitmentRedeem {
           BigInt(getConfig().general.minBoxValue)
         )
           throw new NotEnoughFund();
+        // TODO: To be fixed in commitment tx refactor
         const outWIDBox = this.boxes.createWIDBox(
           height,
           WID,
-          (totalValue - requiredValue).toString()
+          (totalValue - requiredValue).toString(),
+          '1'
         );
         candidates.push(outWIDBox);
       }

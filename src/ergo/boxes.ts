@@ -559,6 +559,7 @@ export class Boxes {
     height: number,
     WID: string,
     ergAmount: string,
+    widCount: string,
     contract?: wasm.Contract,
     issueNewWID = false
   ): wasm.ErgoBoxCandidate => {
@@ -573,7 +574,7 @@ export class Boxes {
     );
     WIDBuilder.add_token(
       wasm.TokenId.from_str(WID),
-      wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
+      wasm.TokenAmount.from_i64(wasm.I64.from_str(widCount))
     );
     if (issueNewWID) {
       const address = getConfig().general.address;
