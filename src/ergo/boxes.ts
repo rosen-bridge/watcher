@@ -20,6 +20,7 @@ import { getConfig } from '../config/config';
 import { AddressBalance } from './interfaces';
 import { JsonBI } from './network/parser';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { blake2b } from 'blakejs';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -332,7 +333,7 @@ export class Boxes {
         wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString()))
       );
     }
-    builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([WID]));
+    builder.set_register_value(4, wasm.Constant.from_byte_array(WID));
     // The R5 register is needed for commitment redeem transaction
     builder.set_register_value(
       5,
@@ -372,11 +373,11 @@ export class Boxes {
     );
     builder.set_register_value(
       4,
-      wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(WID)])
+      wasm.Constant.from_byte_array(hexStrToUint8Array(WID))
     );
     builder.set_register_value(
       5,
-      wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(requestId)])
+      wasm.Constant.from_byte_array(hexStrToUint8Array(requestId))
     );
     builder.set_register_value(6, wasm.Constant.from_byte_array(eventDigest));
     builder.set_register_value(
@@ -466,9 +467,11 @@ export class Boxes {
         wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)
       )
     );
-    builder.set_register_value(4, wasm.Constant.from_coll_coll_byte(WIDs));
+    const widListHash = Buffer.from(blake2b(WIDs.join(''), undefined, 32));
+    builder.set_register_value(4, wasm.Constant.from_byte_array(widListHash));
     builder.set_register_value(5, wasm.Constant.from_coll_coll_byte(eventData));
     builder.set_register_value(6, wasm.Constant.from_byte_array(permitHash));
+    builder.set_register_value(7, wasm.Constant.from_i32(WIDs.length));
     return builder.build();
   };
 
@@ -486,10 +489,9 @@ export class Boxes {
     height: number,
     RWTCount: string,
     RSNCount: string,
-    users: Array<Uint8Array>,
-    userRWT: Array<string>,
-    R6: wasm.Constant,
-    R7?: number
+    AWCCount: string,
+    chainId: Uint8Array,
+    watcherCount: number
   ) => {
     const repoBuilder = new wasm.ErgoBoxCandidateBuilder(
       this.minBoxValue,
@@ -508,14 +510,16 @@ export class Boxes {
       this.RSN,
       wasm.TokenAmount.from_i64(wasm.I64.from_str(RSNCount))
     );
+    repoBuilder.add_token(
+      this.AWC,
+      wasm.TokenAmount.from_i64(wasm.I64.from_str(AWCCount))
+    );
 
-    repoBuilder.set_register_value(4, wasm.Constant.from_coll_coll_byte(users));
+    repoBuilder.set_register_value(4, wasm.Constant.from_byte_array(chainId));
     repoBuilder.set_register_value(
       5,
-      wasm.Constant.from_i64_str_array(userRWT)
+      wasm.Constant.from_i64(wasm.I64.from_str(watcherCount.toString()))
     );
-    repoBuilder.set_register_value(6, R6);
-    R7 && repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
     const boxVal = repoBuilder.calc_min_box_value();
     logger.debug(`calculated value for repo: [${boxVal.as_i64().to_str()}]`);
     if (boxVal > this.minBoxValue) repoBuilder.set_value(boxVal);
@@ -554,7 +558,11 @@ export class Boxes {
       WIDBuilder.set_register_value(
         4,
         wasm.Constant.from_byte_array(
-          strToUint8Array(`WID-${address.substring(address.length - 7)}`)
+          strToUint8Array(
+            `WID-${WID.substring(WID.length - 5)}-${address.substring(
+              address.length - 7
+            )}`
+          )
         )
       );
       WIDBuilder.set_register_value(
@@ -620,6 +628,10 @@ export class Boxes {
         );
       }
     }
+    boxBuilder.add_token(
+      this.AWC,
+      wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
+    );
     boxBuilder.set_register_value(
       4,
       wasm.Constant.from_byte_array(Buffer.from(wid, 'hex'))

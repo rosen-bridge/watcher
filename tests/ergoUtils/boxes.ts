@@ -407,23 +407,35 @@ describe('Testing Box Creation', () => {
     it('checks repoBox tokens order and count', async () => {
       const RWTCount = '100';
       const RSNCount = '1';
+      const AWCCount = '10';
       const repoBox = await boxes.createRepo(
         0,
         RWTCount,
         RSNCount,
-        [new Uint8Array([])],
-        [],
-        wasm.Constant.from_i64_str_array([]),
+        AWCCount,
+        new Uint8Array(),
         0
       );
 
-      expect(repoBox.tokens().len()).to.be.equal(3);
+      expect(repoBox.tokens().len()).to.be.equal(4);
       expect(repoBox.value().as_i64().to_str()).to.be.equal(config.minBoxValue);
       expect(repoBox.tokens().get(1).amount().as_i64().to_str()).to.be.equal(
         RWTCount
       );
       expect(repoBox.tokens().get(2).amount().as_i64().to_str()).to.be.equal(
         RSNCount
+      );
+      expect(repoBox.tokens().get(3).amount().as_i64().to_str()).to.be.equal(
+        AWCCount
+      );
+      expect(repoBox.tokens().get(1).id().to_str()).to.be.equal(
+        getConfig().rosen.RWTId
+      );
+      expect(repoBox.tokens().get(2).id().to_str()).to.be.equal(
+        getConfig().rosen.RSN
+      );
+      expect(repoBox.tokens().get(3).id().to_str()).to.be.equal(
+        getConfig().rosen.AWC
       );
     });
   });
@@ -450,12 +462,7 @@ describe('Testing Box Creation', () => {
       expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(
         getConfig().rosen.RWTId
       );
-      expect(
-        permitBox.register_value(4)?.to_coll_coll_byte().length
-      ).to.be.equal(1);
-      expect(permitBox.register_value(4)?.to_coll_coll_byte()[0]).to.be.eql(
-        WID
-      );
+      expect(permitBox.register_value(4)?.to_byte_array()).to.be.eql(WID);
     });
   });
 

@@ -197,6 +197,7 @@ export class Transaction {
       ).toString();
     }
     const outputBoxes: Array<ErgoBoxCandidate> = [];
+    // TODO: To be fixed in unlock transaction refactor
     outputBoxes.push(
       await Transaction.boxes.createRepo(
         height,
@@ -206,10 +207,9 @@ export class Transaction {
         (
           BigInt(repoBox.tokens().get(2).amount().as_i64().to_str()) - RWTCount
         ).toString(),
-        usersOut,
-        usersCountOut,
-        R6,
-        widIndex
+        '10',
+        new Uint8Array(),
+        0
       )
     );
     let burnToken: { [tokenId: string]: bigint } = {};
@@ -640,15 +640,15 @@ export class Transaction {
       : [...usersCount, RSNCount.toString()];
 
     const outBoxes: Array<wasm.ErgoBoxCandidate> = [];
+    // TODO: To be fixed in lock transaction refactor
     outBoxes.push(
       await Transaction.boxes.createRepo(
         height,
         RepoRWTCount.to_str(),
         RSNTokenCount.to_str(),
-        usersOut,
-        usersCountOut,
-        R6,
-        R7
+        '10',
+        new Uint8Array(),
+        0
       )
     );
     // generate watcherPermit
