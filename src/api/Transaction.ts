@@ -11,7 +11,7 @@ import { WatcherDataBase } from '../database/models/watcherModel';
 import { TransactionUtils } from '../utils/watcherUtils';
 import { TxType } from '../database/entities/txEntity';
 import { AddressBalance } from '../ergo/interfaces';
-import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
+import { ChangeBoxCreationError, NoWID, NotEnoughFund } from '../errors/errors';
 import { DetachWID } from '../transactions/detachWID';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
@@ -597,19 +597,28 @@ export class Transaction {
     }
     let collateralBox: wasm.ErgoBox;
     let widCount = 0n;
-    if (WID) {
-      collateralBox = await Transaction.boxes.getCollateralBox(WID);
-      inputBoxes.push(collateralBox);
-      const widBoxes = await Transaction.boxes.getWIDBox(WID, 2);
-      widBoxes.forEach((widBox) => inputBoxes.push(widBox));
-      const widBoxIds = widBoxes.map((widBox) => widBox.box_id().to_str());
-      userBoxes.boxes.forEach((box) => {
-        if (!widBoxIds.includes(box.box_id().to_str())) inputBoxes.push(box);
-      });
-      widCount = ErgoUtils.getBoxAssetsSum(widBoxes).filter(
-        (token) => token.tokenId == WID
-      )[0].amount;
-    } else inputBoxes.push(...userBoxes.boxes);
+    try {
+      if (WID) {
+        collateralBox = await Transaction.boxes.getCollateralBox(WID);
+        inputBoxes.push(collateralBox);
+        const widBoxes = await Transaction.boxes.getWIDBox(WID, 2);
+        widBoxes.forEach((widBox) => inputBoxes.push(widBox));
+        const widBoxIds = widBoxes.map((widBox) => widBox.box_id().to_str());
+        userBoxes.boxes.forEach((box) => {
+          if (!widBoxIds.includes(box.box_id().to_str())) inputBoxes.push(box);
+        });
+        widCount = ErgoUtils.getBoxAssetsSum(widBoxes).filter(
+          (token) => token.tokenId == WID
+        )[0].amount;
+      } else inputBoxes.push(...userBoxes.boxes);
+    } catch (e) {
+      if (e instanceof NoWID)
+        return {
+          response: 'Could not find 2 WID tokens in watcher wallet',
+          status: 400,
+        };
+      else throw e;
+    }
 
     // generate RepoOut
     const RepoRWTCount = repoBox
