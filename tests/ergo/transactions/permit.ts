@@ -379,8 +379,6 @@ describe('Watcher Permit Transactions', () => {
           },
         ],
       }));
-      // chai.spy.on(Transaction, 'getWatcherState', () => undefined)
-
       await TransactionTest.setup(watcherAddress, permitSecret, boxes, DB);
       const transaction = TransactionTest.getInstance();
       await TransactionTest.getWatcherState();
