@@ -26,9 +26,11 @@ class DetachWID {
     txUtils: TransactionUtils,
     boxes: Boxes,
     WID: string,
-    WIDBox: wasm.ErgoBox
+    WIDBoxes: wasm.ErgoBox[]
   ) => {
     const height = await ErgoNetwork.getHeight();
+    // TODO: To be fixed in detach tx refactor
+    const WIDBox = WIDBoxes[0];
     const inputBoxes = new wasm.ErgoBoxes(WIDBox);
     const candidates = [];
     try {
