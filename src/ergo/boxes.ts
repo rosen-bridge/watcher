@@ -157,18 +157,15 @@ export class Boxes {
         );
       let coveredWidCount = 0n;
       const selectedWidBoxes: wasm.ErgoBox[] = [];
+      const selectedWidBoxIds: Set<string> = new Set();
       for (const widBox of widBoxes) {
         const trackedWidBox = await this.dataBase.trackTxQueue(
           await ErgoNetwork.trackMemPool(widBox, wid),
           wid
         );
-        if (
-          selectedWidBoxes
-            .map((box) => box.box_id().to_str())
-            .includes(trackedWidBox.box_id().to_str())
-        )
-          continue;
+        if (selectedWidBoxIds.has(trackedWidBox.box_id().to_str())) continue;
         selectedWidBoxes.push(trackedWidBox);
+        selectedWidBoxIds.add(trackedWidBox.box_id().to_str());
         const widBoxTokens = extractTokens(trackedWidBox.tokens());
         const boxWidCount = widBoxTokens
           .filter((token) => token.id().to_str() == wid)
