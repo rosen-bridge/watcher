@@ -6,7 +6,6 @@ import { ErgoUtils } from '../../../src/ergo/utils';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import { CommitmentReveal } from '../../../src/transactions/commitmentReveal';
 import { Buffer } from 'buffer';
-import { CommitmentSet } from '../../../src/utils/interfaces';
 import { observation } from './commitmentCreation';
 import { TxType } from '../../../src/database/entities/txEntity';
 import { secret1, userAddress } from './permit';
@@ -31,6 +30,7 @@ import {
   WatcherUtils,
 } from '../../../src/utils/watcherUtils';
 import TransactionTest from '../../../src/api/TransactionTest';
+import { Transaction } from '../../../src/api/Transaction';
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))];
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
@@ -57,6 +57,7 @@ describe('Commitment reveal transaction tests', () => {
     boxes = new Boxes(dataBase);
     chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
     TransactionTest.reset();
+    chai.spy.on(Transaction, 'getWatcherState', () => undefined);
     await TransactionTest.setup(userAddress, secret1, boxes, dataBase);
     txUtils = new TransactionUtils(dataBase);
     transaction = TransactionTest.getInstance();
