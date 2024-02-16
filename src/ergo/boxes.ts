@@ -4,6 +4,7 @@ import {
   boxHaveAsset,
   decodeSerializedBox,
   ErgoUtils,
+  extractTokens,
 } from './utils';
 import {
   bigIntToUint8Array,
@@ -20,6 +21,7 @@ import { getConfig } from '../config/config';
 import { AddressBalance } from './interfaces';
 import { JsonBI } from './network/parser';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { blake2b } from 'blakejs';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -139,27 +141,46 @@ export class Boxes {
   };
 
   /**
-   * Returns unspent WID boxes with the specified WID (Considering the mempool)
+   * Returns unspent WID boxes with the specified WID covering the required wid count (Considering the mempool)
    * @param wid
+   * @param widCount
    */
-  getWIDBox = async (wid?: string): Promise<wasm.ErgoBox> => {
+  getWIDBox = async (wid?: string, widCount = 1): Promise<wasm.ErgoBox[]> => {
     if (wid) {
-      const WID = (await this.dataBase.getUnspentAddressBoxes())
+      const widBoxes = (await this.dataBase.getUnspentAddressBoxes())
         .map((box: BoxEntity) => {
           return decodeSerializedBox(box.serialized);
         })
         .filter(
           (box: wasm.ErgoBox) =>
             box.tokens().len() > 0 && boxHaveAsset(box, wid)
-        )[0];
-      if (!WID)
+        );
+      let coveredWidCount = 0n;
+      const selectedWidBoxes: wasm.ErgoBox[] = [];
+      const selectedWidBoxIds: Set<string> = new Set();
+      for (const widBox of widBoxes) {
+        const trackedWidBox = await this.dataBase.trackTxQueue(
+          await ErgoNetwork.trackMemPool(widBox, wid),
+          wid
+        );
+        if (selectedWidBoxIds.has(trackedWidBox.box_id().to_str())) continue;
+        selectedWidBoxes.push(trackedWidBox);
+        selectedWidBoxIds.add(trackedWidBox.box_id().to_str());
+        const widBoxTokens = extractTokens(trackedWidBox.tokens());
+        const boxWidCount = widBoxTokens
+          .filter((token) => token.id().to_str() == wid)
+          .reduce(
+            (sum, token) => sum + BigInt(token.amount().as_i64().to_str()),
+            0n
+          );
+        coveredWidCount += boxWidCount;
+        if (coveredWidCount >= widCount) break;
+      }
+      if (coveredWidCount < widCount)
         throw new NoWID(
           'WID box is not found. Cannot sign the transaction. Please check that the scanner to be synced.'
         );
-      return await this.dataBase.trackTxQueue(
-        await ErgoNetwork.trackMemPool(WID, wid),
-        wid
-      );
+      return selectedWidBoxes;
     } else
       throw new NoWID('Watcher WID is not set. Cannot sign the transaction.');
   };
@@ -332,7 +353,7 @@ export class Boxes {
         wasm.TokenAmount.from_i64(wasm.I64.from_str(RWTCount.toString()))
       );
     }
-    builder.set_register_value(4, wasm.Constant.from_coll_coll_byte([WID]));
+    builder.set_register_value(4, wasm.Constant.from_byte_array(WID));
     // The R5 register is needed for commitment redeem transaction
     builder.set_register_value(
       5,
@@ -372,11 +393,11 @@ export class Boxes {
     );
     builder.set_register_value(
       4,
-      wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(WID)])
+      wasm.Constant.from_byte_array(hexStrToUint8Array(WID))
     );
     builder.set_register_value(
       5,
-      wasm.Constant.from_coll_coll_byte([hexStrToUint8Array(requestId)])
+      wasm.Constant.from_byte_array(hexStrToUint8Array(requestId))
     );
     builder.set_register_value(6, wasm.Constant.from_byte_array(eventDigest));
     builder.set_register_value(
@@ -466,9 +487,11 @@ export class Boxes {
         wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)
       )
     );
-    builder.set_register_value(4, wasm.Constant.from_coll_coll_byte(WIDs));
+    const widListHash = Buffer.from(blake2b(WIDs.join(''), undefined, 32));
+    builder.set_register_value(4, wasm.Constant.from_byte_array(widListHash));
     builder.set_register_value(5, wasm.Constant.from_coll_coll_byte(eventData));
     builder.set_register_value(6, wasm.Constant.from_byte_array(permitHash));
+    builder.set_register_value(7, wasm.Constant.from_i32(WIDs.length));
     return builder.build();
   };
 
@@ -477,19 +500,17 @@ export class Boxes {
    * @param height
    * @param RWTCount
    * @param RSNCount
-   * @param users
-   * @param userRWT
-   * @param R6
-   * @param R7
+   * @param AWCCount
+   * @param chainId
+   * @param watcherCount
    */
   createRepo = async (
     height: number,
     RWTCount: string,
     RSNCount: string,
-    users: Array<Uint8Array>,
-    userRWT: Array<string>,
-    R6: wasm.Constant,
-    R7?: number
+    AWCCount: string,
+    chainId: Uint8Array,
+    watcherCount: number
   ) => {
     const repoBuilder = new wasm.ErgoBoxCandidateBuilder(
       this.minBoxValue,
@@ -508,14 +529,16 @@ export class Boxes {
       this.RSN,
       wasm.TokenAmount.from_i64(wasm.I64.from_str(RSNCount))
     );
+    repoBuilder.add_token(
+      this.AWC,
+      wasm.TokenAmount.from_i64(wasm.I64.from_str(AWCCount))
+    );
 
-    repoBuilder.set_register_value(4, wasm.Constant.from_coll_coll_byte(users));
+    repoBuilder.set_register_value(4, wasm.Constant.from_byte_array(chainId));
     repoBuilder.set_register_value(
       5,
-      wasm.Constant.from_i64_str_array(userRWT)
+      wasm.Constant.from_i64(wasm.I64.from_str(watcherCount.toString()))
     );
-    repoBuilder.set_register_value(6, R6);
-    R7 && repoBuilder.set_register_value(7, wasm.Constant.from_i32(R7));
     const boxVal = repoBuilder.calc_min_box_value();
     logger.debug(`calculated value for repo: [${boxVal.as_i64().to_str()}]`);
     if (boxVal > this.minBoxValue) repoBuilder.set_value(boxVal);
@@ -533,6 +556,7 @@ export class Boxes {
     height: number,
     WID: string,
     ergAmount: string,
+    widCount: string,
     contract?: wasm.Contract,
     issueNewWID = false
   ): wasm.ErgoBoxCandidate => {
@@ -547,14 +571,18 @@ export class Boxes {
     );
     WIDBuilder.add_token(
       wasm.TokenId.from_str(WID),
-      wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
+      wasm.TokenAmount.from_i64(wasm.I64.from_str(widCount))
     );
     if (issueNewWID) {
       const address = getConfig().general.address;
       WIDBuilder.set_register_value(
         4,
         wasm.Constant.from_byte_array(
-          strToUint8Array(`WID-${address.substring(address.length - 7)}`)
+          strToUint8Array(
+            `WID-${WID.substring(WID.length - 5)}-${address.substring(
+              address.length - 7
+            )}`
+          )
         )
       );
       WIDBuilder.set_register_value(
@@ -602,10 +630,19 @@ export class Boxes {
     return boxBuilder.build();
   };
 
+  /**
+   * Return a new collateral box with required parameters
+   * @param amount
+   * @param height
+   * @param wid
+   * @param rwtCount
+   * @returns
+   */
   createCollateralBox = (
     amount: AddressBalance,
     height: number,
-    wid: string
+    wid: string,
+    rwtCount: bigint
   ) => {
     const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
       wasm.BoxValue.from_i64(wasm.I64.from_str(amount.nanoErgs.toString())),
@@ -620,9 +657,17 @@ export class Boxes {
         );
       }
     }
+    boxBuilder.add_token(
+      this.AWC,
+      wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
+    );
     boxBuilder.set_register_value(
       4,
       wasm.Constant.from_byte_array(Buffer.from(wid, 'hex'))
+    );
+    boxBuilder.set_register_value(
+      5,
+      wasm.Constant.from_i64(wasm.I64.from_str(rwtCount.toString()))
     );
     return boxBuilder.build();
   };

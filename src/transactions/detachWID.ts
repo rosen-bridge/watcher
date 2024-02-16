@@ -40,7 +40,8 @@ class DetachWID {
         ]);
         feeBoxes.forEach((box) => inputBoxes.add(box));
       }
-      const outWIDBox = boxes.createWIDBox(height, WID, fee.toString());
+      // TODO: To be fixed in commitment refactor
+      const outWIDBox = boxes.createWIDBox(height, WID, fee.toString(), '1');
       candidates.push(outWIDBox);
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,

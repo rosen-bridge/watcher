@@ -197,6 +197,7 @@ export class Transaction {
       ).toString();
     }
     const outputBoxes: Array<ErgoBoxCandidate> = [];
+    // TODO: To be fixed in unlock transaction refactor
     outputBoxes.push(
       await Transaction.boxes.createRepo(
         height,
@@ -206,10 +207,9 @@ export class Transaction {
         (
           BigInt(repoBox.tokens().get(2).amount().as_i64().to_str()) - RWTCount
         ).toString(),
-        usersOut,
-        usersCountOut,
-        R6,
-        widIndex
+        '10',
+        new Uint8Array(),
+        0
       )
     );
     let burnToken: { [tokenId: string]: bigint } = {};
@@ -234,11 +234,13 @@ export class Transaction {
           Buffer.from(wid, 'hex')
         )
       );
+      // TODO: To be fixed in unlock tx refactor
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
           wid,
           Transaction.minBoxValue.as_i64().to_str(),
+          '1',
           Transaction.userAddressContract
         )
       );
@@ -248,11 +250,13 @@ export class Transaction {
       logger.debug(
         `Creating a new wid box for other permits, all permits in the existing box are returned`
       );
+      // TODO: To be fixed in unlock tx refactor
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
           wid,
           Transaction.minBoxValue.as_i64().to_str(),
+          '1',
           Transaction.userAddressContract
         )
       );
@@ -351,7 +355,8 @@ export class Transaction {
 
     const permitBoxes = await Transaction.boxes.getPermits(WID, RWTCount);
     let repoBox = await Transaction.boxes.getRepoBox();
-    let widBox = await Transaction.boxes.getWIDBox(WID);
+    // TODO: To be fixed in unlock refactor
+    let widBox = (await Transaction.boxes.getWIDBox(WID))[0];
     const height = await ErgoNetwork.getHeight();
 
     if (widBox.tokens().get(0).id().to_str() != WID) {
@@ -592,7 +597,8 @@ export class Transaction {
       };
     }
     if (WID) {
-      const widBox = await Transaction.boxes.getWIDBox(WID);
+      // TODO: To be fixed in lock refactor
+      const widBox = (await Transaction.boxes.getWIDBox(WID))[0];
       if (widBox.tokens().get(0).id().to_str() != WID) {
         await DetachWID.detachWIDtx(
           Transaction.txUtils,
@@ -640,15 +646,15 @@ export class Transaction {
       : [...usersCount, RSNCount.toString()];
 
     const outBoxes: Array<wasm.ErgoBoxCandidate> = [];
+    // TODO: To be fixed in lock transaction refactor
     outBoxes.push(
       await Transaction.boxes.createRepo(
         height,
         RepoRWTCount.to_str(),
         RSNTokenCount.to_str(),
-        usersOut,
-        usersCountOut,
-        R6,
-        R7
+        '10',
+        new Uint8Array(),
+        0
       )
     );
     // generate watcherPermit
@@ -665,6 +671,7 @@ export class Transaction {
         height,
         WID ? WID : repoBox.box_id().to_str(),
         Transaction.minBoxValue.as_i64().to_str(),
+        '1',
         wasm.Contract.pay_to_address(Transaction.userAddress),
         !WID
       )
@@ -683,7 +690,8 @@ export class Transaction {
             ],
           },
           height,
-          repoBox.box_id().to_str()
+          repoBox.box_id().to_str(),
+          1n
         )
       );
     }
