@@ -1,0 +1,96 @@
+---
+network: '' # which scanner network used in this watcher ergo/cardano
+observation:
+  confirmation: 60 # number of required block confirmations to create the commitment after observing an event
+  validThreshold: 12960 # observations that have not been triggered won't be processed after this period (in blocks)
+cardano:
+  type: '' # options: koios, ogmios, blockfrost
+  initial:
+    slot: -1 # initial block global slot, only used for ogmios
+    hash: '' # initial block hash, only used for ogmios
+    height: -1 # initial height of scanning, only used for koios
+  koios:
+    interval: 20 # koios scanning interval (in seconds)
+    timeout: 10 # koios request timeout (in seconds)
+    url: 'https://api.koios.rest/api/beta' # koios url
+  ogmios:
+    host: '' # ogmios node host address
+    port: 1337 # ogmios port
+    useTls: false # connect to ogmios using https or not
+  blockfrost:
+    url: '' # url to connect to blockfrost
+    projectId: '' # blockfrost project Id
+    timeout: 10 # blockfrost request timeout
+    interval: 20 # blockfrost check timeout
+ergo:
+  network: 'Mainnet' # ergo network type. testnet or mainnet
+  type: 'node' # ergo scanner type. options: node, explorer
+  fee: '2000000' # transaction fee
+  minBoxValue: '2000000' # minimum box value
+  mnemonic: '' # watcher mnemonic
+  initialHeight: 0 # scanner initial height
+  explorer:
+    url: 'https://api.ergoplatform.com' # explorer url
+    timeout: 60 # explorer request timeout (in seconds)
+  node:
+    url: '' # node url
+    timeout: 60 # node request timeout (in seconds)
+  transaction:
+    timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
+    confirmation: 4 # required block confirmations for sent transactions
+    commitmentTimeoutConfirmation: 4320 # required block confirmations for a commitment to redeem
+  interval:
+    scanner: 180 # scanner update interval (in seconds)
+    revenue: 120 # revenue update interval (in seconds)
+    transaction: 120 # processing transaction interval (in seconds)
+    tokenName: 180 # token name check interval (in seconds)
+    commitment:
+      creation: 120 # commitment creation interval (in seconds)
+      reveal: 180 # commitment reveal interval (in seconds)
+      redeem: 120 # commitment reveal interval (in seconds)
+path:
+  addresses: config/rosen # addresses path
+  # tokens: config/rosen/tokens.json # default tokens path.
+logs:
+  - type: 'file' # [file, console]
+    path: './logs/' # path to log files (only for rotateFile type)
+    maxSize: '20m' # maximum size of each log file (20 MB) (only for rotateFile type)
+    maxFiles: '14d' # maximum number of log files (14 days) (only for rotateFile type)
+    level: 'info' # [debug, info, warn, error]
+  - type: 'console'
+    level: 'info'
+database:
+  type: 'sqlite' # options: postgres, sqlite
+  path: './sqlite/watcher.sqlite' # database path (for sqlite)
+  # host: '' # database host (for postgres)
+  # port: 5432 # database port (for postgres)
+  # user: '' # database user (for postgres)
+  # password: '' # database password (for postgres)
+  # name: '' # database name (for postgres)
+api:
+  port: 3000 # port used to run express server
+  apiKeyHash: '' # blake2b hash of API_KEY
+  allowedOrigins: [] # list of allowed origins for CORS requests
+healthCheck:
+  interval: 60 # health check update interval (in seconds)
+  asset:
+    ergWarnThreshold: 1000000000 # minimum recommended erg balance
+    ergCriticalThreshold: 100000000 # minimum required erg balance
+  ergoScanner:
+    warnDifference: 2 # warning difference between existing and scanned blocks height
+    criticalDifference: 100 # critical difference between existing and scanned blocks height
+  ergoNode:
+    maxHeightDifference: 2 # maximum difference between header height and full height
+    maxBlockTime: 30 # maximum time to see  a new block in minutes
+    minPeerCount: 10 # minimum recommended peers
+    maxPeerHeightDifference: 2 # maximum difference between peers and our node
+  cardanoScanner:
+    warnDifference: 2 # warning difference between existing and scanned blocks height
+    criticalDifference: 600 # critical difference between existing and scanned blocks height
+  permit:
+    warnCommitmentCount: 4 # warning remaining permits for creating commitment
+    criticalCommitmentCount: 0 # critical remaining permits for creating commitment
+  errorLog:
+    maxAllowedCount: 2 # maximum allowed error log lines
+    duration: 100000 # error log duration time check in milliseconds
+redeemSwapEnabled: true # if set true when no permit left, system automatically redeem new commitments and commit again for old observations

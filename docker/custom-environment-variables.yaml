@@ -1,0 +1,17 @@
+---
+api:
+  port: 'SERVICE_PORT'
+database:
+  host: 'POSTGRES_HOST'
+  port: 'POSTGRES_PORT'
+  user: 'POSTGRES_USER'
+  password: 'POSTGRES_PASSWORD'
+  name: 'POSTGRES_DB'
+ergo:
+  mnemonic: 'MNEMONIC'
+cardano:
+  koios:
+    authToken: 'KOIOS_AUTH_TOKEN'
+  blockfrost:
+    projectId: 'BLOCKFROST_PROJECT_ID'
+overrideLokiBasicAuth: 'OVERRIDE_LOKI_BASIC_AUTH'
