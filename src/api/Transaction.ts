@@ -14,7 +14,7 @@ import { TxType } from '../database/entities/txEntity';
 import { AddressBalance } from '../ergo/interfaces';
 import { ChangeBoxCreationError, NoWID, NotEnoughFund } from '../errors/errors';
 import { DetachWID } from '../transactions/detachWID';
-import { WID_LOCK_COUNT, WID_MINT_COUNT } from '../../src/config/constants';
+import { WID_LOCK_COUNT, WID_MINT_COUNT } from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
