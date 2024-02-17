@@ -49,6 +49,7 @@ const userSecret = wasm.SecretKey.dlog_from_bytes(
 );
 
 import repoObj from './dataset/repoBox.json' assert { type: 'json' };
+import repoConfigObj from './dataset/repoConfigBox.json' assert { type: 'json' };
 import { getConfig } from '../../src/config/config';
 import { Transaction } from '../../src/api/Transaction';
 import sinon from 'sinon';
@@ -58,6 +59,7 @@ import { initWatcherDB } from '../../src/init';
 import { permitMockRWT, validBox1Token } from '../database/mockedData';
 
 const repoBox = JSON.stringify(repoObj);
+const repoConfigBox = JSON.stringify(repoConfigObj);
 
 describe('Testing ergoUtils', () => {
   describe('commitmentFromObservation', () => {
@@ -360,8 +362,9 @@ describe('Testing ergoUtils', () => {
      *    => result = 4
      */
     it('should return formula number as the required commitment count', async () => {
-      const box = wasm.ErgoBox.from_json(repoBox);
-      const data = ErgoUtils.requiredCommitmentCount(box);
+      const repo = wasm.ErgoBox.from_json(repoBox);
+      const config = wasm.ErgoBox.from_json(repoConfigBox);
+      const data = ErgoUtils.requiredCommitmentCount(repo, config);
       expect(data).to.eql(BigInt(4));
     });
   });

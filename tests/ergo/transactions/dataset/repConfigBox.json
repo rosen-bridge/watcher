@@ -1,0 +1,31 @@
+{
+  "boxId": "2f7f460e22601445bd1f106ec8ac68a42f73b153fd045ab7171ccbb1b84c1df6",
+  "transactionId": "ea227d4688778a822d438c1094174ff8faa8faa9b98a3ea144f24d7e03316dc1",
+  "blockId": "f453d1456501f76cb143505af56f5b39773bc6b7c0fe74d6a515280a45c13296",
+  "value": 1100000,
+  "index": 1,
+  "globalIndex": 2384622,
+  "creationHeight": 1198624,
+  "settlementHeight": 1198626,
+  "ergoTree": "100604000400040004000e20648e9cf0b39560dd33454bb8e5c5e5bf48f12e161dc7c3112d8edfdb1606c40d0402d803d601b2db6501fe730000d602b2db6308b2a5730100730200d603b2db6308a7730300ea02d196830301aedb63087201d901044d0e938c7204017304938c7202018c720301938c7202028c72030298b2e4c672010510730500ade4c67201041ad901040ecdee7204",
+  "address": "prufxZid3SJMyUVhAa6eaMgMtHpTTkiF7FcKQaMurTF2iDyZaghSsYuMMLLQKsyFJyygHqSzuvAkokiTjZs2GXiF2JRW9JfXifKAYWSTLrZAHsk9ExH7jiJ5hT7Ex2YDBbRnoyafZ2j282op1wg4T3Yp7rzuihZShM1U96Xx4UF5MqnHJokjnogqjEMjUB1NgQ4Vha9eoHfepW1ULxdm",
+  "assets": [
+    {
+      "tokenId": "99016d570b66c7188957cb72acbf131ab0be7611e011ba47c783a3c3f5773daf",
+      "index": 0,
+      "amount": 1,
+      "name": "E-RepoConfigNFT-loen",
+      "decimals": 0,
+      "type": "EIP-004"
+    }
+  ],
+  "additionalRegisters": {
+    "R4": {
+      "serializedValue": "1106d00f8c01022880dac40900",
+      "sigmaType": "Coll[SLong]",
+      "renderedValue": "[1000,70,1,20,10000000,0]"
+    }
+  },
+  "spentTransactionId": null,
+  "mainChain": true
+}
