@@ -29,21 +29,28 @@ class DetachWID {
     WIDBoxes: wasm.ErgoBox[]
   ) => {
     const height = await ErgoNetwork.getHeight();
-    // TODO: To be fixed in detach tx refactor
-    const WIDBox = WIDBoxes[0];
-    const inputBoxes = new wasm.ErgoBoxes(WIDBox);
+    const inputBoxes = new wasm.ErgoBoxes(WIDBoxes[0]);
+    WIDBoxes.slice(1).forEach((box) => inputBoxes.add(box));
     const candidates = [];
     try {
       const fee = BigInt(getConfig().general.fee);
       const minBoxValue = BigInt(getConfig().general.minBoxValue);
-      if (WIDBox.value().as_i64().as_num() < fee + minBoxValue) {
-        const feeBoxes = await boxes.getUserPaymentBox(fee + minBoxValue, [
-          WIDBox.box_id().to_str(),
-        ]);
+      if (ErgoUtils.getBoxValuesSum(WIDBoxes) < fee + minBoxValue) {
+        const feeBoxes = await boxes.getUserPaymentBox(
+          fee + minBoxValue,
+          WIDBoxes.map((box) => box.box_id().to_str())
+        );
         feeBoxes.forEach((box) => inputBoxes.add(box));
       }
-      // TODO: To be fixed in commitment refactor
-      const outWIDBox = boxes.createWIDBox(height, WID, fee.toString(), '1');
+      const widCount = ErgoUtils.getBoxAssetsSum(WIDBoxes).filter(
+        (token) => token.tokenId == WID
+      )[0].amount;
+      const outWIDBox = boxes.createWIDBox(
+        height,
+        WID,
+        fee.toString(),
+        widCount.toString()
+      );
       candidates.push(outWIDBox);
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,
