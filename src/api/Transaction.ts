@@ -14,6 +14,7 @@ import { AddressBalance } from '../ergo/interfaces';
 import { ChangeBoxCreationError, NoWID, NotEnoughFund } from '../errors/errors';
 import { DetachWID } from '../transactions/detachWID';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { WID_LOCK_COUNT, WID_MINT_COUNT } from 'src/config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -601,7 +602,7 @@ export class Transaction {
       if (WID) {
         collateralBox = await Transaction.boxes.getCollateralBox(WID);
         inputBoxes.push(collateralBox);
-        const widBoxes = await Transaction.boxes.getWIDBox(WID, 2);
+        const widBoxes = await Transaction.boxes.getWIDBox(WID, WID_LOCK_COUNT);
         widBoxes.forEach((widBox) => inputBoxes.push(widBox));
         const widBoxIds = widBoxes.map((widBox) => widBox.box_id().to_str());
         userBoxes.boxes.forEach((box) => {
@@ -647,7 +648,7 @@ export class Transaction {
         RSNTokenCount.to_str(),
         WID ? AWCTokenCount.toString() : (AWCTokenCount - 1n).toString(),
         chainId,
-        WID ? watcherCount : watcherCount - 1
+        WID ? watcherCount : watcherCount + 1
       )
     );
 
@@ -699,7 +700,7 @@ export class Transaction {
         height,
         WID ? WID : repoBox.box_id().to_str(),
         Transaction.minBoxValue.as_i64().to_str(),
-        widCount ? widCount.toString() : '3',
+        widCount ? widCount.toString() : WID_MINT_COUNT.toString(),
         wasm.Contract.pay_to_address(Transaction.userAddress),
         !WID
       )
