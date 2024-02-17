@@ -12,7 +12,7 @@ const authenticateKey = (req: Request, res: Response, next: NextFunction) => {
   ) {
     next();
   } else {
-    res.status(403).send({ message: "API_KEY doesn't exist or it is wrong" });
+    res.status(403).send({ message: "Api-Key doesn't exist or it is wrong" });
   }
 };
 
