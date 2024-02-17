@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
 import { ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
 import * as wasm from 'ergo-lib-wasm-nodejs';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { uint8ArrayToHex } from '../utils/utils';
@@ -13,8 +14,7 @@ import { TxType } from '../database/entities/txEntity';
 import { AddressBalance } from '../ergo/interfaces';
 import { ChangeBoxCreationError, NoWID, NotEnoughFund } from '../errors/errors';
 import { DetachWID } from '../transactions/detachWID';
-import WinstonLogger from '@rosen-bridge/winston-logger';
-import { WID_LOCK_COUNT, WID_MINT_COUNT } from 'src/config/constants';
+import { WID_LOCK_COUNT, WID_MINT_COUNT } from '../../src/config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
