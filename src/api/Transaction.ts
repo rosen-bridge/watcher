@@ -4,7 +4,6 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { uint8ArrayToHex } from '../utils/utils';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
 import { getConfig } from '../config/config';
@@ -140,9 +139,9 @@ export class Transaction {
 
   returnPermitTx = async (
     RWTCount: bigint,
-    widBox: wasm.ErgoBox,
-    wid: string
+    widBox: wasm.ErgoBox
   ): Promise<{ tx: wasm.Transaction; remainingRwt: bigint }> => {
+    const wid = Transaction.watcherWID!;
     const permitBoxes = await Transaction.boxes.getPermits(wid, RWTCount);
     const repoBox = await Transaction.boxes.getRepoBox();
     const height = await ErgoNetwork.getHeight();
@@ -220,7 +219,6 @@ export class Transaction {
           Buffer.from(wid, 'hex')
         )
       );
-      // TODO: To be fixed in unlock tx refactor
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
@@ -236,7 +234,6 @@ export class Transaction {
       logger.debug(
         `Creating a new wid box for other permits, all permits in the existing box are returned`
       );
-      // TODO: To be fixed in unlock tx refactor
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
@@ -380,11 +377,7 @@ export class Transaction {
       }
     }
     try {
-      const { tx, remainingRwt } = await this.returnPermitTx(
-        RWTCount,
-        widBox,
-        WID
-      );
+      const { tx, remainingRwt } = await this.returnPermitTx(RWTCount, widBox);
       const isAlreadyWatcher = remainingRwt > 0;
       Transaction.watcherUnconfirmedWID = isAlreadyWatcher
         ? Transaction.watcherWID
