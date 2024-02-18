@@ -188,7 +188,11 @@ export class Transaction {
       .filter((asset) => asset.tokenId == getConfig().rosen.RWTId)
       .reduce((sum, asset) => sum + asset.amount, 0n);
     const widCount = BigInt(widBox.tokens().get(0).amount().as_i64().to_str());
-    if (!completeReturn) {
+    if (completeReturn) {
+      // Should burn the wid and no need for any new box
+      logger.debug(`Burning the wid token: [${wid}]`);
+      burnToken = { [wid]: -widCount };
+    } else {
       // Adding output collateral to transaction
       const outCollateralBox = await Transaction.boxes.createCollateralBox(
         {
@@ -200,40 +204,23 @@ export class Transaction {
         totalRwt - RWTCount
       );
       outputBoxes.push(outCollateralBox);
-    }
-    if (completeReturn) {
-      // Should burn the wid and no need for any new box
-      logger.debug(`Burning the wid token: [${wid}]`);
-      burnToken = { [wid]: -widCount };
-    } else if (inputRwtCount > RWTCount) {
-      // Should create a change permit box and a new wid box
-      logger.debug(
-        `Creating a new wid box and permit with rwtCount= [${
-          inputRwtCount - RWTCount
-        }]`
-      );
-      outputBoxes.push(
-        await Transaction.boxes.createPermit(
-          height,
-          inputRwtCount - RWTCount,
-          Buffer.from(wid, 'hex')
-        )
-      );
-      outputBoxes.push(
-        Transaction.boxes.createWIDBox(
-          height,
-          wid,
-          Transaction.minBoxValue.as_i64().to_str(),
-          widCount.toString(),
-          Transaction.userAddressContract
-        )
-      );
-    } else {
-      // All tokens should be unlocked and no need to create a new permit box
-      // But it already has some permits so needs the wid token
-      logger.debug(
-        `Creating a new wid box for other permits, all permits in the existing box are returned`
-      );
+
+      if (inputRwtCount > RWTCount) {
+        // Should create a change permit box
+        logger.debug(
+          `Creating a new wid box and permit with rwtCount= [${
+            inputRwtCount - RWTCount
+          }]`
+        );
+        outputBoxes.push(
+          await Transaction.boxes.createPermit(
+            height,
+            inputRwtCount - RWTCount,
+            Buffer.from(wid, 'hex')
+          )
+        );
+      }
+      // Create the output wid box
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
@@ -244,6 +231,7 @@ export class Transaction {
         )
       );
     }
+
     const totalErgIn = inputBoxes
       .map((item) => BigInt(item.value().as_i64().to_str()))
       .reduce((a, b) => a + b, 0n);
