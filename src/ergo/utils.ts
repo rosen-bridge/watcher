@@ -316,8 +316,10 @@ export class ErgoUtils {
   };
 
   /**
-   * returns the required number of commitments to merge creating an event trigger
+   * returns the required number of commitments for creating a new event trigger
+   * read configs from repoConfig box and uses the repo box to find the total number of registered watchers
    * @param repo
+   * @param repoConfig
    */
   static requiredCommitmentCount = (
     repo: wasm.ErgoBox,
