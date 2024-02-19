@@ -17,4 +17,5 @@ export const DOING_STATUS = 'Doing';
 export const DONE_STATUS = 'Done';
 export const ERGO_NATIVE_ASSET_NAME = 'ERG';
 export const WID_LOCK_COUNT = 2;
+export const WID_UNLOCK_COUNT = 2;
 export const WID_MINT_COUNT = 3;

@@ -13,7 +13,11 @@ import { TxType } from '../database/entities/txEntity';
 import { AddressBalance } from '../ergo/interfaces';
 import { ChangeBoxCreationError, NoWID, NotEnoughFund } from '../errors/errors';
 import { DetachWID } from '../transactions/detachWID';
-import { WID_LOCK_COUNT, WID_MINT_COUNT } from '../config/constants';
+import {
+  WID_LOCK_COUNT,
+  WID_MINT_COUNT,
+  WID_UNLOCK_COUNT,
+} from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -137,6 +141,12 @@ export class Transaction {
     }
   };
 
+  /**
+   * Create return permit transaction for required rwt tokens
+   * @param RWTCount
+   * @param widBox box containing at least 2 wid tokens in its first token place
+   * @returns signed transaction and remaining locked rwt tokens
+   */
   returnPermitTx = async (
     RWTCount: bigint,
     widBox: wasm.ErgoBox
@@ -323,12 +333,12 @@ export class Transaction {
 
     let widBox: wasm.ErgoBox | undefined = undefined;
     try {
-      const widBoxes = await Transaction.boxes.getWIDBox(WID, 2);
+      const widBoxes = await Transaction.boxes.getWIDBox(WID, WID_UNLOCK_COUNT);
       for (const box of widBoxes) {
         const token = box.tokens().get(0);
         if (
           token.id().to_str() == WID &&
-          BigInt(token.amount().as_i64().to_str()) >= 2
+          BigInt(token.amount().as_i64().to_str()) >= WID_UNLOCK_COUNT
         ) {
           widBox = box;
           break;
@@ -336,7 +346,7 @@ export class Transaction {
       }
       if (!widBox) {
         logger.info(
-          `Wid box with at least 2 wid token is not found, creating detach transaction for wid boxes [${widBoxes.map(
+          `Wid box with at least ${WID_UNLOCK_COUNT} wid token is not found, creating detach transaction for wid boxes [${widBoxes.map(
             (box) => box.box_id().to_str()
           )}]`
         );
@@ -354,10 +364,10 @@ export class Transaction {
     } catch (e) {
       if (e instanceof NoWID) {
         logger.warn(
-          'Could not find 2 WID token in watcher wallet, skipping unlock transaction'
+          `Could not find ${WID_UNLOCK_COUNT} token in watcher wallet, skipping unlock transaction`
         );
         return {
-          response: `Could not find 2 WID token in watcher wallet`,
+          response: `Could not find ${WID_UNLOCK_COUNT} WID token in watcher wallet`,
           status: 400,
         };
       } else {
