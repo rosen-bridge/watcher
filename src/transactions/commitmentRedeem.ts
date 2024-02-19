@@ -73,12 +73,14 @@ export class CommitmentRedeem {
           BigInt(getConfig().general.minBoxValue)
         )
           throw new NotEnoughFund();
-        // TODO: To be fixed in commitment tx refactor
+        const widCount = ErgoUtils.getBoxAssetsSum(allInputs).filter(
+          (token) => token.tokenId == WID
+        )[0].amount;
         const outWIDBox = this.boxes.createWIDBox(
           height,
           WID,
           (totalValue - requiredValue).toString(),
-          '1'
+          widCount.toString()
         );
         candidates.push(outWIDBox);
       }

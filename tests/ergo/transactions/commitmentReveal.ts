@@ -17,10 +17,10 @@ import chai from 'chai';
 import spies from 'chai-spies';
 import sinon from 'sinon';
 
-import repoBox1Obj from './dataset/repoBox1.json' assert { type: 'json' };
-
 chai.use(spies);
 
+import repoBox1Obj from './dataset/repoBox1.json' assert { type: 'json' };
+import repoConfigObj from './dataset/repConfigBox.json' assert { type: 'json' };
 import commitmentObj from './dataset/commitmentBox.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
@@ -37,6 +37,7 @@ const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 const repoBox1 = wasm.ErgoBox.from_json(JSON.stringify(repoBox1Obj));
+const repoConfigBox = wasm.ErgoBox.from_json(JSON.stringify(repoConfigObj));
 
 const WIDs = [
   Buffer.from(firstCommitment.WID, 'hex'),
@@ -87,6 +88,7 @@ describe('Commitment reveal transaction tests', () => {
       await cr.triggerEventCreationTx(
         commitments,
         repoBox1,
+        repoConfigBox,
         observation,
         WIDs,
         plainBox
