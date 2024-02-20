@@ -204,14 +204,15 @@ export class Transaction {
       burnToken = { [wid]: -widCount };
     } else {
       // Adding output collateral to transaction
+      const rsnCollateral = ErgoUtils.getBoxAssetsSum([collateralBox]).filter(
+        (token) => token.tokenId == getConfig().rosen.RSN
+      );
       const outCollateralBox = await Transaction.boxes.createCollateralBox(
-        {
-          nanoErgs: ErgoUtils.getBoxValuesSum([collateralBox]),
-          tokens: ErgoUtils.getBoxAssetsSum([collateralBox]),
-        },
+        ErgoUtils.getBoxValuesSum([collateralBox]),
         height,
         wid,
-        totalRwt - RWTCount
+        totalRwt - RWTCount,
+        rsnCollateral.length ? rsnCollateral[0].amount : 0n
       );
       outputBoxes.push(outCollateralBox);
 
@@ -619,33 +620,27 @@ export class Transaction {
     if (!WID) {
       outBoxes.push(
         await Transaction.boxes.createCollateralBox(
-          {
-            nanoErgs: ErgCollateral,
-            tokens: [
-              {
-                tokenId: Transaction.RSN.to_str(),
-                amount: RSNCollateral,
-              },
-            ],
-          },
+          ErgCollateral,
           height,
           repoBox.box_id().to_str(),
-          RSNCount
+          RSNCount,
+          RSNCollateral
         )
       );
     } else {
       const collateralRwtCount = BigInt(
         collateralBox!.register_value(4)!.to_i64().to_str()
       );
+      const rsnCollateral = ErgoUtils.getBoxAssetsSum([collateralBox!]).filter(
+        (token) => token.tokenId == getConfig().rosen.RSN
+      );
       outBoxes.push(
         await Transaction.boxes.createCollateralBox(
-          {
-            nanoErgs: ErgoUtils.getBoxValuesSum([collateralBox!]),
-            tokens: ErgoUtils.getBoxAssetsSum([collateralBox!]),
-          },
+          ErgoUtils.getBoxValuesSum([collateralBox!]),
           height,
           WID,
-          collateralRwtCount + RSNCount
+          collateralRwtCount + RSNCount,
+          rsnCollateral.length ? rsnCollateral[0].amount : 0n
         )
       );
     }
