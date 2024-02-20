@@ -48,7 +48,7 @@ class DetachWID {
       const outWIDBox = boxes.createWIDBox(
         height,
         WID,
-        fee.toString(),
+        minBoxValue.toString(),
         widCount.toString()
       );
       candidates.push(outWIDBox);
