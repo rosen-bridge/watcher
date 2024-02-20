@@ -75,10 +75,10 @@ export class Transaction {
         this.userAddress
       );
       Transaction.isSetupCalled = true;
-      await Transaction.getWatcherState();
-
       this.watcherDatabase = db;
       this.txUtils = new TransactionUtils(db);
+
+      await Transaction.getWatcherState();
     }
   };
 
