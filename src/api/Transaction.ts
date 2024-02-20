@@ -687,16 +687,17 @@ export class Transaction {
       Transaction.fee,
       Transaction.userAddress
     );
+    const repoConfig = await Transaction.boxes.getRepoConfigBox();
     if (!WID) {
       const txDataInputs = new wasm.DataInputs();
-      const repoConfig = await Transaction.boxes.getRepoConfigBox();
       txDataInputs.add(new wasm.DataInput(repoConfig.box_id()));
       builder.set_data_inputs(txDataInputs);
     }
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,
-      inBoxes
+      inBoxes,
+      new wasm.ErgoBoxes(repoConfig)
     );
     await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
     Transaction.watcherUnconfirmedWID = WID ? WID : repoBox.box_id().to_str();
