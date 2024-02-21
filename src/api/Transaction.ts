@@ -389,7 +389,7 @@ export class Transaction {
       logger.warn(`Unlock operation exited incomplete by error: ${e.message}`);
       if (e instanceof NotEnoughFund) {
         return {
-          response: `Not enough ERG to complete the unlock operation`,
+          response: e.message,
           status: 400,
         };
       } else {
@@ -629,7 +629,7 @@ export class Transaction {
       );
     } else {
       const collateralRwtCount = BigInt(
-        collateralBox!.register_value(4)!.to_i64().to_str()
+        collateralBox!.register_value(5)!.to_i64().to_str()
       );
       const rsnCollateral = ErgoUtils.getBoxAssetsSum([collateralBox!]).filter(
         (token) => token.tokenId == getConfig().rosen.RSN
