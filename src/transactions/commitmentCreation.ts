@@ -55,9 +55,10 @@ export class CommitmentCreation {
         wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)
       )
     );
-    const RWTRepo = await this.boxes.getRepoBox();
-    const R6 = RWTRepo.register_value(6)?.to_js() as Array<string>;
-    const requiredRWTCount = BigInt(R6[0]);
+    const repoConfigBox = await this.boxes.getRepoConfigBox();
+    const requiredRWTCount = BigInt(
+      (repoConfigBox.register_value(4)?.to_js() as Array<string>)[0]
+    );
     const outCommitment = this.boxes.createCommitment(
       height,
       requiredRWTCount,
