@@ -192,12 +192,13 @@ eventTriggerEntity.fromChain = 'cardano';
 eventTriggerEntity.toChain = 'toChain';
 eventTriggerEntity.sourceChainTokenId = 'tokenId2';
 eventTriggerEntity.targetChainTokenId = 'targetTokenId';
-eventTriggerEntity.WIDs = '1,2,3';
 eventTriggerEntity.sourceBlockId = 'block';
 eventTriggerEntity.sourceChainHeight = 123456;
 eventTriggerEntity.eventId =
   'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b';
 eventTriggerEntity.txId = 'txId';
+eventTriggerEntity.WIDsCount = 2;
+eventTriggerEntity.WIDsHash = 'abcd';
 
 export const newEventTriggerEntity = new EventTriggerEntity();
 newEventTriggerEntity.sourceTxId = 'txId2';
@@ -215,13 +216,14 @@ newEventTriggerEntity.fromChain = 'cardano';
 newEventTriggerEntity.toChain = 'toChain';
 newEventTriggerEntity.sourceChainTokenId = 'tokenId';
 newEventTriggerEntity.targetChainTokenId = 'targetTokenId';
-newEventTriggerEntity.WIDs = '1,2,3';
 newEventTriggerEntity.sourceBlockId = 'block';
 newEventTriggerEntity.sourceChainHeight = 123457;
 newEventTriggerEntity.eventId =
   'ab59962c20f57d9d59e95f5170ccb3472df4279ad4967e51ba8be9ba75144c7b';
 newEventTriggerEntity.txId = 'createTxId2';
 newEventTriggerEntity.spendTxId = 'txId2';
+newEventTriggerEntity.WIDsCount = 2;
+newEventTriggerEntity.WIDsHash = 'abcd';
 
 export const observationEntity1 = new ObservationEntity();
 observationEntity1.height = 1;

@@ -15,6 +15,7 @@ import {
   CommitmentExtractor,
   PermitExtractor,
   EventTriggerExtractor,
+  CollateralExtractor,
 } from '@rosen-bridge/watcher-data-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 
@@ -50,6 +51,9 @@ const createLoggers = () => ({
   plainExtractorLogger:
     WinstonLogger.getInstance().getLogger('plain-extractor'),
   scannerLogger: WinstonLogger.getInstance().getLogger('scanner'),
+  collateralExtractorLogger: WinstonLogger.getInstance().getLogger(
+    'collateral-extractor'
+  ),
 });
 
 const loggers = createLoggers();
@@ -145,10 +149,19 @@ class CreateScanner {
       undefined, // Token constraint not needed
       loggers.plainExtractorLogger
     );
+    const collateralExtractor = new CollateralExtractor(
+      Constants.COLLATERAL_EXTRACTOR_NAME,
+      rosenConfig.AWC,
+      rosenConfig.watcherCollateralAddress,
+      dataSource,
+      config.explorerUrl,
+      loggers.collateralExtractorLogger
+    );
     this.ergoScanner.registerExtractor(commitmentExtractor);
     this.ergoScanner.registerExtractor(permitExtractor);
     this.ergoScanner.registerExtractor(eventTriggerExtractor);
     this.ergoScanner.registerExtractor(plainExtractor);
+    this.ergoScanner.registerExtractor(collateralExtractor);
   };
 
   private createCardanoScanner = () => {

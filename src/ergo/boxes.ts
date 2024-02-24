@@ -324,7 +324,7 @@ export class Boxes {
    */
   getCollateralBox = async (wid: string): Promise<wasm.ErgoBox> => {
     const collateralEntity = await this.dataBase.getCollateralByWid(wid);
-    const collateralBox = decodeSerializedBox(collateralEntity.serialized);
+    const collateralBox = decodeSerializedBox(collateralEntity.boxSerialized);
     return await this.dataBase.trackTxQueue(
       await ErgoNetwork.trackMemPool(collateralBox, this.AWC.to_str()),
       this.AWC.to_str()
