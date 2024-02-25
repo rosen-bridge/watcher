@@ -24,6 +24,7 @@ import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
 import cors from 'cors';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { widStatusJob } from './jobs/widStatus';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -118,6 +119,8 @@ const init = async () => {
       revenueJob();
       // Starting HealthCheck jobs
       healthCheckJob(boxesObject);
+      // Starting WID status jobs
+      widStatusJob();
 
       logger.debug('Service initialization finished successfully.');
     })
