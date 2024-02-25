@@ -15,6 +15,7 @@ import {
   EventTriggerEntity,
   migrations as watcherDataExtractorMigrations,
   PermitEntity,
+  CollateralEntity,
 } from '@rosen-bridge/watcher-data-extractor';
 import { DataSource } from 'typeorm';
 import { getConfig } from '../src/config/config';
@@ -35,6 +36,7 @@ const dbConfigs = {
     CommitmentEntity,
     EventTriggerEntity,
     PermitEntity,
+    CollateralEntity,
     ObservationEntity,
     TokenEntity,
     TxEntity,

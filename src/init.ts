@@ -13,8 +13,6 @@ import { reveal } from './jobs/commitmentReveal';
 import { transactionQueueJob } from './jobs/transactionQueue';
 import { delay } from './utils/utils';
 import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
-import Statistics from './statistics/statistics';
-import { statisticsRouter } from './statistics/apis';
 import { getConfig } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
@@ -68,7 +66,6 @@ const init = async () => {
     const router = Router();
     router.use('/address', addressRouter);
     router.use('/permit', permitRouter);
-    router.use('/statistics', statisticsRouter);
     router.use('/observation', observationRouter);
     router.use('/info', generalRouter);
     router.use('/events', eventsRouter);
@@ -98,8 +95,6 @@ const init = async () => {
       );
       const txUtils = new TransactionUtils(watcherDatabase);
       logger.debug('Initializing statistic object...');
-      Statistics.setup(watcherDatabase, Transaction.watcherWID);
-      Statistics.getInstance();
       await Transaction.setup(
         getConfig().general.address,
         getConfig().general.secretKey,
