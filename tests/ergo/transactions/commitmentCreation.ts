@@ -113,8 +113,8 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(boxes, 'createCommitment');
       chai.spy.on(boxes, 'createPermit');
       chai.spy.on(boxes, 'createWIDBox');
-      chai.spy.on(boxes, 'getRepoConfigBox').resolves(repoConfig);
       chai.spy.on(ErgoUtils, 'getExtraTokenCount');
+      sinon.stub(boxes, 'getRepoConfigBox').resolves(repoConfig);
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
       sinon.stub(ErgoNetwork, 'getMaxHeight').resolves(111);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);
