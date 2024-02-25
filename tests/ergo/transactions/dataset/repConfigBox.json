@@ -1,5 +1,4 @@
 {
-  "boxId": "2f7f460e22601445bd1f106ec8ac68a42f73b153fd045ab7171ccbb1b84c1df6",
   "transactionId": "ea227d4688778a822d438c1094174ff8faa8faa9b98a3ea144f24d7e03316dc1",
   "blockId": "f453d1456501f76cb143505af56f5b39773bc6b7c0fe74d6a515280a45c13296",
   "value": 1100000,
@@ -21,9 +20,7 @@
   ],
   "additionalRegisters": {
     "R4": {
-      "serializedValue": "1106d00f8c01022880dac40900",
-      "sigmaType": "Coll[SLong]",
-      "renderedValue": "[1000,70,1,20,10000000,0]"
+      "serializedValue": "1106028c01022880a8d6b90700"
     }
   },
   "spentTransactionId": null,
