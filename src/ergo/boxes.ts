@@ -450,7 +450,7 @@ export class Boxes {
   createTriggerEvent = (
     value: bigint,
     height: number,
-    WIDs: Array<Uint8Array>,
+    WIDs: Array<string>,
     observation: Observation,
     watcherPermitCount: bigint
   ) => {
@@ -487,7 +487,9 @@ export class Boxes {
         wasm.Address.from_base58(getConfig().rosen.watcherPermitAddress)
       )
     );
-    const widListHash = Buffer.from(blake2b(WIDs.join(''), undefined, 32));
+    const widListHash = Buffer.from(
+      blake2b(Buffer.from(WIDs.join(''), 'hex'), undefined, 32)
+    );
     builder.set_register_value(4, wasm.Constant.from_byte_array(widListHash));
     builder.set_register_value(5, wasm.Constant.from_coll_coll_byte(eventData));
     builder.set_register_value(6, wasm.Constant.from_byte_array(permitHash));

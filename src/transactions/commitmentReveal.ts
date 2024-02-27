@@ -40,7 +40,7 @@ export class CommitmentReveal {
     RWTRepoBox: wasm.ErgoBox,
     repoConfigBox: wasm.ErgoBox,
     observation: ObservationEntity,
-    WIDs: Array<Uint8Array>,
+    WIDs: Array<string>,
     feeBoxes: Array<wasm.ErgoBox>
   ) => {
     const allInputs = [
@@ -149,9 +149,9 @@ export class CommitmentReveal {
               return await ErgoNetwork.unspentErgoBoxById(commitment.boxId);
             })
           );
-          const WIDs: Array<Uint8Array> = validCommitments.map((commitment) => {
-            return Buffer.from(commitment.WID, 'hex');
-          });
+          const WIDs: Array<string> = validCommitments.map(
+            (commitment) => commitment.WID
+          );
           await this.triggerEventCreationTx(
             commitmentBoxes,
             RWTRepoBox,
