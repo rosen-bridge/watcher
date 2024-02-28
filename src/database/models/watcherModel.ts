@@ -550,7 +550,7 @@ class WatcherDataBase {
 
   /**
    * Returns all commitments related with a specific spendTxId
-   * @param eventId
+   * @param txId
    */
   commitmentsBySpendTxId = async (
     txId: string
@@ -1050,6 +1050,7 @@ class WatcherDataBase {
    */
   getCollateralByWid = async (wid: string): Promise<CollateralEntity> => {
     const collateral = await this.collateralRepository.findOne({
+      // TODO change wId to wid when new collateral extractor is ready
       where: { spendBlock: IsNull(), wId: wid },
     });
     if (collateral) return collateral;
