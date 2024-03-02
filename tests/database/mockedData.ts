@@ -79,6 +79,7 @@ spentCommitmentEntityOfWID.block = 'block';
 spentCommitmentEntityOfWID.extractor = 'extractor';
 spentCommitmentEntityOfWID.height = 105;
 spentCommitmentEntityOfWID.spendHeight = 110;
+spentCommitmentEntityOfWID.spendTxId = 'spendTx';
 spentCommitmentEntityOfWID.boxSerialized = '2223';
 spentCommitmentEntityOfWID.txId = 'txId2223';
 
@@ -92,6 +93,7 @@ spentCommitmentEntity.block = 'block2';
 spentCommitmentEntity.extractor = 'extractor';
 spentCommitmentEntity.height = 100;
 spentCommitmentEntity.spendHeight = 110;
+spentCommitmentEntity.spendTxId = 'spendTx2';
 spentCommitmentEntity.boxSerialized = '222';
 spentCommitmentEntity.txId = 'txId222';
 
