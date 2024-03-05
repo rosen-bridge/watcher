@@ -18,6 +18,8 @@ import {
   WID_MINT_COUNT,
   WID_UNLOCK_COUNT,
 } from '../config/constants';
+import { HealthStatusLevel } from '@rosen-bridge/health-check';
+import { HealthCheckSingleton } from '../utils/healthCheck';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -318,6 +320,15 @@ export class Transaction {
    * @param RWTCount
    */
   returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
+    const scannerSyncStatus =
+      await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
+    if (scannerSyncStatus !== HealthStatusLevel.HEALTHY) {
+      return {
+        response: `Ergo scanner is not synced, please check your connection and wait more`,
+        status: 400,
+      };
+    }
+
     const activePermitTxs =
       await Transaction.watcherDatabase.getActivePermitTransactions();
     if (activePermitTxs.length !== 0) {
@@ -513,6 +524,15 @@ export class Transaction {
    * @param RSNCount
    */
   getPermit = async (RSNCount: bigint): Promise<ApiResponse> => {
+    const scannerSyncStatus =
+      await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
+    if (scannerSyncStatus !== HealthStatusLevel.HEALTHY) {
+      return {
+        response: `Ergo scanner is not synced, please check your connection and wait more`,
+        status: 400,
+      };
+    }
+
     const activePermitTxs =
       await Transaction.watcherDatabase.getActivePermitTransactions();
     if (activePermitTxs.length !== 0) {

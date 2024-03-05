@@ -29,6 +29,8 @@ import {
 import { scanner } from './scanner';
 import { Transaction } from '../../src/api/Transaction';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+// TODO: Fix import after health check update: https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/226
+import { AbstractScannerSyncHealthCheckParam } from '@rosen-bridge/health-check/dist/lib/params/scannerSyncHealthCheck/AbstractScannerSyncHealthCheck';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -36,6 +38,7 @@ class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
   private healthCheck: HealthCheck;
   private permitHealthCheckParam: AbstractPermitHealthCheckParam;
+  private ergoScannerSyncCheckParam: AbstractScannerSyncHealthCheckParam;
 
   static getInstance = () => {
     if (!HealthCheckSingleton.instance) {
@@ -88,14 +91,14 @@ class HealthCheckSingleton {
     );
     this.healthCheck.register(assetHealthCheck);
 
-    const ergoScannerSyncCheck = new ErgoNodeScannerHealthCheck(
+    this.ergoScannerSyncCheckParam = new ErgoNodeScannerHealthCheck(
       dataSource,
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.nodeUrl
     );
-    this.healthCheck.register(ergoScannerSyncCheck);
+    this.healthCheck.register(this.ergoScannerSyncCheckParam);
 
     const ergoNodeSyncCheck = new ErgoNodeSyncHealthCheckParam(
       getConfig().healthCheck.ergoNodeMaxHeightDiff,
@@ -130,14 +133,14 @@ class HealthCheckSingleton {
     );
     this.healthCheck.register(assetHealthCheck);
 
-    const ergoScannerSyncCheck = new ErgoExplorerScannerHealthCheck(
+    this.ergoScannerSyncCheckParam = new ErgoExplorerScannerHealthCheck(
       dataSource,
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.explorerUrl
     );
-    this.healthCheck.register(ergoScannerSyncCheck);
+    this.healthCheck.register(this.ergoScannerSyncCheckParam);
   };
 
   /**
@@ -253,6 +256,12 @@ class HealthCheckSingleton {
    * @param paramName
    */
   updateParam = (paramName: string) => this.healthCheck.updateParam(paramName);
+
+  /**
+   * Get ergo scanner sync health status
+   */
+  getErgoScannerSyncHealth = () =>
+    this.ergoScannerSyncCheckParam.getHealthStatus();
 }
 
 export { HealthCheckSingleton };

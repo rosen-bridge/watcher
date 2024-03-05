@@ -105,6 +105,8 @@ const init = async () => {
       Transaction.getInstance();
 
       logger.debug('Initializing job threads...');
+      // Starting HealthCheck jobs
+      healthCheckJob(boxesObject);
       // Running transaction checking thread
       transactionQueueJob(watcherDatabase, watcherUtils);
       // Running commitment creation thread
@@ -117,8 +119,6 @@ const init = async () => {
       tokenNameJob([]);
       // Running revenue thread
       revenueJob();
-      // Starting HealthCheck jobs
-      healthCheckJob(boxesObject);
       // Starting WID status jobs
       widStatusJob();
 
