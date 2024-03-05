@@ -74,7 +74,7 @@
     "@rosen-bridge/address-extractor": "^3.2.1",
     "@rosen-bridge/health-check": "^3.0.1",
     "@rosen-bridge/minimum-fee": "^0.1.13",
-    "@rosen-bridge/observation-extractor": "^4.2.1",
+    "@rosen-bridge/observation-extractor": "^4.3.0",
     "@rosen-bridge/scanner": "^3.2.1",
     "@rosen-bridge/watcher-data-extractor": "^5.1.0",
     "@rosen-bridge/winston-logger": "0.2.1",
