@@ -29,6 +29,7 @@ import {
 import { scanner } from './scanner';
 import { Transaction } from '../../src/api/Transaction';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+// TODO: Fix import after health check update: https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/226
 import { AbstractScannerSyncHealthCheckParam } from '@rosen-bridge/health-check/dist/lib/params/scannerSyncHealthCheck/AbstractScannerSyncHealthCheck';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
