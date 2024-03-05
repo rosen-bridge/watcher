@@ -29,8 +29,7 @@ import {
 import { scanner } from './scanner';
 import { Transaction } from '../../src/api/Transaction';
 import WinstonLogger from '@rosen-bridge/winston-logger';
-// TODO: Fix import after health check update: https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/226
-import { AbstractScannerSyncHealthCheckParam } from '@rosen-bridge/health-check/dist/lib/params/scannerSyncHealthCheck/AbstractScannerSyncHealthCheck';
+import { AbstractScannerSyncHealthCheckParam } from '@rosen-bridge/health-check';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -73,8 +72,8 @@ class HealthCheckSingleton {
    */
   registerErgoNodeHealthCheckParams = () => {
     const widHealthCheck = new NodeWidHealthCheckParam(
-      getConfig().rosen.RWTRepoAddress,
-      getConfig().rosen.RepoNFT,
+      getConfig().rosen.watcherCollateralAddress,
+      getConfig().rosen.AWC,
       getConfig().general.address,
       getConfig().general.nodeUrl
     );
@@ -115,8 +114,8 @@ class HealthCheckSingleton {
    */
   registerErgoExplorerHealthCheckParams = () => {
     const widHealthCheck = new ExplorerWidHealthCheckParam(
-      getConfig().rosen.RWTRepoAddress,
-      getConfig().rosen.RepoNFT,
+      getConfig().rosen.watcherCollateralAddress,
+      getConfig().rosen.AWC,
       getConfig().general.address,
       getConfig().general.explorerUrl
     );
