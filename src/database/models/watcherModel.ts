@@ -1,39 +1,38 @@
+import { BoxEntity } from '@rosen-bridge/address-extractor';
+import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { BlockEntity } from '@rosen-bridge/scanner';
+import { PROCEED } from '@rosen-bridge/scanner/dist/entities/blockEntity';
+import {
+  CollateralEntity,
+  CommitmentEntity,
+  EventTriggerEntity,
+  PermitEntity,
+} from '@rosen-bridge/watcher-data-extractor';
+import * as wasm from 'ergo-lib-wasm-nodejs';
 import {
   And,
   DataSource,
   In,
   IsNull,
   LessThan,
-  Like,
   MoreThan,
   Not,
   Repository,
 } from 'typeorm';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
-import { TxEntity, TxType } from '../entities/txEntity';
+import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
+import { PagedItemData } from '../../types/items';
+import { EventStatus } from '../../utils/interfaces';
+import { base64ToArrayBuffer } from '../../utils/utils';
 import {
   ObservationStatusEntity,
   SortedTxStatus,
   TxStatus,
 } from '../entities/observationStatusEntity';
-import { BlockEntity } from '@rosen-bridge/scanner';
-import { PROCEED } from '@rosen-bridge/scanner/dist/entities/blockEntity';
-import {
-  CommitmentEntity,
-  EventTriggerEntity,
-  PermitEntity,
-} from '@rosen-bridge/watcher-data-extractor';
-import { BoxEntity } from '@rosen-bridge/address-extractor';
-import { base64ToArrayBuffer } from '../../utils/utils';
-import * as wasm from 'ergo-lib-wasm-nodejs';
-import { TokenEntity } from '../entities/tokenEntity';
-import { EventStatus } from '../../utils/interfaces';
-import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
-import { RevenueView } from '../entities/revenueView';
-import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueChartDataView } from '../entities/revenueChartDataView';
-import { PagedItemData } from '../../types/items';
-import { CollateralEntity } from '../entities/collateralEntity';
+import { RevenueEntity } from '../entities/revenueEntity';
+import { RevenueView } from '../entities/revenueView';
+import { TokenEntity } from '../entities/tokenEntity';
+import { TxEntity, TxType } from '../entities/txEntity';
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -550,22 +549,16 @@ class WatcherDataBase {
   };
 
   /**
-   * Returns all commitments with specific wid
-   * @param wid
-   * @param offset
-   * @param limit
+   * Returns all commitments related with a specific spendTxId
+   * @param txId
    */
-  commitmentByWID = async (
-    wid: string,
-    offset: number,
-    limit: number
+  commitmentsBySpendTxId = async (
+    txId: string
   ): Promise<Array<CommitmentEntity>> => {
     return await this.commitmentRepository.find({
       where: {
-        WID: wid,
+        spendTxId: txId,
       },
-      take: limit,
-      skip: offset,
     });
   };
 
@@ -609,62 +602,6 @@ class WatcherDataBase {
         WID: wid,
         height: LessThan(maxHeight),
         spendHeight: IsNull(),
-      },
-    });
-  };
-
-  /**
-   * Returns Count of all commitments with specific wid
-   * @param wid
-   */
-  commitmentsByWIDCount = async (wid: string): Promise<number> => {
-    return await this.commitmentRepository.count({
-      where: {
-        WID: wid,
-      },
-    });
-  };
-
-  /**
-   * Returns all event triggers that have wid in wids field
-   * @param wid
-   */
-  eventTriggersByWIDCount = async (wid: string): Promise<number> => {
-    return await this.eventTriggerRepository.count({
-      where: {
-        WIDs: Like(`%${wid}%`),
-      },
-    });
-  };
-
-  /**
-   * Returns event triggers count that have wid in wids field
-   * @param wid
-   * @param offset
-   * @param limit
-   */
-  eventTriggersByWID = async (
-    wid: string,
-    offset: number,
-    limit: number
-  ): Promise<Array<EventTriggerEntity>> => {
-    return await this.eventTriggerRepository.find({
-      where: {
-        WIDs: Like(`%${wid}%`),
-      },
-      take: limit,
-      skip: offset,
-    });
-  };
-
-  /**
-   * Returns all Permits by WID
-   * @param wid
-   */
-  getPermitBoxesByWID = async (wid: string) => {
-    return await this.permitRepository.find({
-      where: {
-        WID: wid,
       },
     });
   };
@@ -1113,6 +1050,7 @@ class WatcherDataBase {
    */
   getCollateralByWid = async (wid: string): Promise<CollateralEntity> => {
     const collateral = await this.collateralRepository.findOne({
+      // TODO change wId to wid when new collateral extractor is ready
       where: { spendBlock: IsNull(), wid: wid },
     });
     if (collateral) return collateral;

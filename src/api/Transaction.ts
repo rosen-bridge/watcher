@@ -75,10 +75,10 @@ export class Transaction {
         this.userAddress
       );
       Transaction.isSetupCalled = true;
-      await Transaction.getWatcherState();
-
       this.watcherDatabase = db;
       this.txUtils = new TransactionUtils(db);
+
+      await Transaction.getWatcherState();
     }
   };
 
@@ -204,14 +204,15 @@ export class Transaction {
       burnToken = { [wid]: -widCount };
     } else {
       // Adding output collateral to transaction
+      const rsnCollateral = ErgoUtils.getBoxAssetsSum([collateralBox]).filter(
+        (token) => token.tokenId == getConfig().rosen.RSN
+      );
       const outCollateralBox = await Transaction.boxes.createCollateralBox(
-        {
-          nanoErgs: ErgoUtils.getBoxValuesSum([collateralBox]),
-          tokens: ErgoUtils.getBoxAssetsSum([collateralBox]),
-        },
+        ErgoUtils.getBoxValuesSum([collateralBox]),
         height,
         wid,
-        totalRwt - RWTCount
+        totalRwt - RWTCount,
+        rsnCollateral.length ? rsnCollateral[0].amount : 0n
       );
       outputBoxes.push(outCollateralBox);
 
@@ -388,7 +389,7 @@ export class Transaction {
       logger.warn(`Unlock operation exited incomplete by error: ${e.message}`);
       if (e instanceof NotEnoughFund) {
         return {
-          response: `Not enough ERG to complete the unlock operation`,
+          response: e.message,
           status: 400,
         };
       } else {
@@ -619,33 +620,27 @@ export class Transaction {
     if (!WID) {
       outBoxes.push(
         await Transaction.boxes.createCollateralBox(
-          {
-            nanoErgs: ErgCollateral,
-            tokens: [
-              {
-                tokenId: Transaction.RSN.to_str(),
-                amount: RSNCollateral,
-              },
-            ],
-          },
+          ErgCollateral,
           height,
           repoBox.box_id().to_str(),
-          RSNCount
+          RSNCount,
+          RSNCollateral
         )
       );
     } else {
       const collateralRwtCount = BigInt(
-        collateralBox!.register_value(4)!.to_i64().to_str()
+        collateralBox!.register_value(5)!.to_i64().to_str()
+      );
+      const rsnCollateral = ErgoUtils.getBoxAssetsSum([collateralBox!]).filter(
+        (token) => token.tokenId == getConfig().rosen.RSN
       );
       outBoxes.push(
         await Transaction.boxes.createCollateralBox(
-          {
-            nanoErgs: ErgoUtils.getBoxValuesSum([collateralBox!]),
-            tokens: ErgoUtils.getBoxAssetsSum([collateralBox!]),
-          },
+          ErgoUtils.getBoxValuesSum([collateralBox!]),
           height,
           WID,
-          collateralRwtCount + RSNCount
+          collateralRwtCount + RSNCount,
+          rsnCollateral.length ? rsnCollateral[0].amount : 0n
         )
       );
     }
@@ -692,16 +687,17 @@ export class Transaction {
       Transaction.fee,
       Transaction.userAddress
     );
+    const repoConfig = await Transaction.boxes.getRepoConfigBox();
     if (!WID) {
       const txDataInputs = new wasm.DataInputs();
-      const repoConfig = await Transaction.boxes.getRepoConfigBox();
       txDataInputs.add(new wasm.DataInput(repoConfig.box_id()));
       builder.set_data_inputs(txDataInputs);
     }
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,
-      inBoxes
+      inBoxes,
+      new wasm.ErgoBoxes(repoConfig)
     );
     await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
     Transaction.watcherUnconfirmedWID = WID ? WID : repoBox.box_id().to_str();

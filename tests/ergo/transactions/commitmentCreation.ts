@@ -29,6 +29,7 @@ import WIDObj2 from './dataset/WIDBoxWithoutErg.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
 import repoBox1Obj from './dataset/repoBox1.json' assert { type: 'json' };
+import repoConfigObj from './dataset/repConfigBox.json' assert { type: 'json' };
 
 chai.use(spies);
 
@@ -40,6 +41,7 @@ const WIDBoxWithoutErg = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2));
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 const repoBox1 = wasm.ErgoBox.from_json(JSON.stringify(repoBox1Obj));
+const repoConfig = wasm.ErgoBox.from_json(JSON.stringify(repoConfigObj));
 
 const userAddress = '9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9';
 const rwtID =
@@ -112,6 +114,7 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(boxes, 'createPermit');
       chai.spy.on(boxes, 'createWIDBox');
       chai.spy.on(ErgoUtils, 'getExtraTokenCount');
+      sinon.stub(boxes, 'getRepoConfigBox').resolves(repoConfig);
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
       sinon.stub(ErgoNetwork, 'getMaxHeight').resolves(111);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);

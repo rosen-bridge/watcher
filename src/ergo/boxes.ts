@@ -324,7 +324,7 @@ export class Boxes {
    */
   getCollateralBox = async (wid: string): Promise<wasm.ErgoBox> => {
     const collateralEntity = await this.dataBase.getCollateralByWid(wid);
-    const collateralBox = decodeSerializedBox(collateralEntity.serialized);
+    const collateralBox = decodeSerializedBox(collateralEntity.boxSerialized);
     return await this.dataBase.trackTxQueue(
       await ErgoNetwork.trackMemPool(collateralBox, this.AWC.to_str()),
       this.AWC.to_str()
@@ -632,35 +632,34 @@ export class Boxes {
 
   /**
    * Return a new collateral box with required parameters
-   * @param amount
+   * @param value
    * @param height
    * @param wid
    * @param rwtCount
+   * @param rsnCount
    * @returns
    */
   createCollateralBox = (
-    amount: AddressBalance,
+    value: bigint,
     height: number,
     wid: string,
-    rwtCount: bigint
+    rwtCount: bigint,
+    rsnCount: bigint
   ) => {
     const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
-      wasm.BoxValue.from_i64(wasm.I64.from_str(amount.nanoErgs.toString())),
+      wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
       this.watcherCollateralContract,
       height
     );
-    for (const token of amount.tokens) {
-      if (token.amount > 0n) {
-        boxBuilder.add_token(
-          wasm.TokenId.from_str(token.tokenId),
-          wasm.TokenAmount.from_i64(wasm.I64.from_str(token.amount.toString()))
-        );
-      }
-    }
     boxBuilder.add_token(
       this.AWC,
       wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
     );
+    if (rsnCount)
+      boxBuilder.add_token(
+        this.RSN,
+        wasm.TokenAmount.from_i64(wasm.I64.from_str(rsnCount.toString()))
+      );
     boxBuilder.set_register_value(
       4,
       wasm.Constant.from_byte_array(Buffer.from(wid, 'hex'))
