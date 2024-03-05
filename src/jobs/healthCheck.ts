@@ -13,7 +13,9 @@ const updatePermitCheckThreshold = async (boxes: Boxes) => {
   const repoBox = await boxes.getRepoConfigBox();
   const R4 = repoBox.register_value(4);
   if (!R4) {
-    logger.warn('incorrect repo box format, repo R6 register is undefined.');
+    logger.warn(
+      'incorrect repo config box format, repo config R4 register is undefined.'
+    );
     return;
   }
   const commitmentRwt = BigInt(R4.to_i64_str_array()[0]);
