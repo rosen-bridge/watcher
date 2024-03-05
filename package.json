@@ -76,7 +76,7 @@
     "@rosen-bridge/minimum-fee": "^0.1.13",
     "@rosen-bridge/observation-extractor": "^4.3.0",
     "@rosen-bridge/scanner": "^3.2.6",
-    "@rosen-bridge/watcher-data-extractor": "^5.1.0-ca8db39e",
+    "@rosen-bridge/watcher-data-extractor": "^5.1.0",
     "@rosen-bridge/winston-logger": "0.2.1",
     "axios": "^0.26.1",
     "bip39": "^3.1.0",

@@ -356,6 +356,7 @@ describe('WatcherModel tests', () => {
         1000,
         'reqId1'
       );
+      firstStatisticCommitment;
     });
   });
 
@@ -530,6 +531,22 @@ describe('WatcherModel tests', () => {
       expect(data).to.have.length(2);
       expect(data[0]).to.eql(commitmentEntity);
       expect(data[1]).to.eql(spentCommitmentEntity);
+    });
+  });
+
+  describe('commitmentsBySpendTxId', () => {
+    /**
+     * Target: testing commitmentsBySpendTxId
+     * Expected Output:
+     *    The function should return one commitment
+     */
+    it('should return one commitment', async () => {
+      await commitmentRepo.insert(spentCommitmentEntityOfWID);
+      const data = await DB.commitmentsBySpendTxId('spendTx');
+      expect(data).to.have.length(1);
+      await commitmentRepo.delete({
+        eventId: spentCommitmentEntityOfWID.eventId,
+      });
     });
   });
 

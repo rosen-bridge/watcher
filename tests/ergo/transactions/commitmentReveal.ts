@@ -39,10 +39,7 @@ const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 const repoBox1 = wasm.ErgoBox.from_json(JSON.stringify(repoBox1Obj));
 const repoConfigBox = wasm.ErgoBox.from_json(JSON.stringify(repoConfigObj));
 
-const WIDs = [
-  Buffer.from(firstCommitment.WID, 'hex'),
-  Buffer.from(thirdCommitment.WID, 'hex'),
-];
+const WIDs = [firstCommitment.WID, thirdCommitment.WID];
 
 describe('Commitment reveal transaction tests', () => {
   let dataBase: WatcherDataBase,

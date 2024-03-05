@@ -545,7 +545,7 @@ describe('Testing Box Creation', () => {
       const data = boxes.createTriggerEvent(
         value,
         10,
-        [Buffer.from(WID), Buffer.from(WID)],
+        [WID, WID],
         firstObservation,
         2n
       );
