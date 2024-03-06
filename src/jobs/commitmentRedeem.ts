@@ -19,6 +19,10 @@ const redeemJob = async () => {
       if (getConfig().general.redeemSwapEnabled) {
         await commitmentRedeemObj.deadlockJob();
       }
+    } else {
+      logger.info(
+        'Scanner is not synced with network, skipping commitment redeem job'
+      );
     }
   } catch (e) {
     logger.warn(`Redeem Job failed with error: ${e.message} - ${e.stack}`);

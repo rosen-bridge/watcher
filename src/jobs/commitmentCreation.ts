@@ -22,6 +22,10 @@ const creationJob = async () => {
         redeemExecuted = true;
         redeemJob();
       }
+    } else {
+      logger.info(
+        'Scanner is not synced with network, skipping commitment creation job'
+      );
     }
   } catch (e) {
     logger.warn(`Creation Job failed with error: ${e.message} - ${e.stack}`);

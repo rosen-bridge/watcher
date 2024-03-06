@@ -730,14 +730,12 @@ export class Transaction {
   static getWatcherState = async () => {
     if (!Transaction.isSetupCalled)
       throw new Error("The Transaction class setup doesn't called");
-    logger.info('Getting watcher status');
-    if (Transaction.watcherPermitState === undefined) {
-      const allWids = await Transaction.watcherDatabase.getAllWids();
-      logger.debug(`All registered wids are ${allWids}`);
-      Transaction.watcherWID = await Transaction.getWID(allWids);
-      logger.info(`Watcher WID is set to: ${Transaction.watcherWID}`);
-      Transaction.watcherPermitState = Transaction.watcherWID !== '';
-    }
+    logger.info('Updating watcher status');
+    const allWids = await Transaction.watcherDatabase.getAllWids();
+    logger.debug(`All registered wids are ${allWids}`);
+    Transaction.watcherWID = await Transaction.getWID(allWids);
+    logger.info(`Watcher WID is set to: ${Transaction.watcherWID}`);
+    Transaction.watcherPermitState = Transaction.watcherWID !== '';
   };
 
   /**

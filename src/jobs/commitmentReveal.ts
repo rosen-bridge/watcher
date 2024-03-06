@@ -16,6 +16,10 @@ const revealJob = async () => {
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
     if (scannerSyncStatus === HealthStatusLevel.HEALTHY) {
       await commitmentRevealingObj.job();
+    } else {
+      logger.info(
+        'Scanner is not synced with network, skipping trigger creation job'
+      );
     }
   } catch (e) {
     logger.warn(`Reveal Job failed with error: ${e.message} - ${e.stack}`);
