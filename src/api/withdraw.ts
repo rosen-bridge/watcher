@@ -4,6 +4,7 @@ import { Transaction } from './Transaction';
 import { ERGO_NATIVE_ASSET } from '../config/constants';
 import { BoxValue } from 'ergo-lib-wasm-nodejs';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { authenticateKey } from './authentication';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -45,7 +46,7 @@ const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
 /**
  * Api for withdrawing from the watcher wallet
  */
-withdrawRouter.post('/', async (req, res) => {
+withdrawRouter.post('/', authenticateKey, async (req, res) => {
   try {
     const withdrawBody = castReqBodyToWithdrawBody(req.body);
     const txInstance = Transaction.getInstance();
