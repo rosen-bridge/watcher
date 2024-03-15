@@ -6,7 +6,6 @@ import { ErgoUtils } from '../../../src/ergo/utils';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import { CommitmentReveal } from '../../../src/transactions/commitmentReveal';
 import { Buffer } from 'buffer';
-import { CommitmentSet } from '../../../src/utils/interfaces';
 import { observation } from './commitmentCreation';
 import { TxType } from '../../../src/database/entities/txEntity';
 import { secret1, userAddress } from './permit';
@@ -18,10 +17,10 @@ import chai from 'chai';
 import spies from 'chai-spies';
 import sinon from 'sinon';
 
-import repoBox1Obj from './dataset/repoBox1.json' assert { type: 'json' };
-
 chai.use(spies);
 
+import repoBox1Obj from './dataset/repoBox1.json' assert { type: 'json' };
+import repoConfigObj from './dataset/repConfigBox.json' assert { type: 'json' };
 import commitmentObj from './dataset/commitmentBox.json' assert { type: 'json' };
 import WIDObj from './dataset/WIDBox.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
@@ -31,17 +30,16 @@ import {
   WatcherUtils,
 } from '../../../src/utils/watcherUtils';
 import TransactionTest from '../../../src/api/TransactionTest';
+import { Transaction } from '../../../src/api/Transaction';
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))];
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 const repoBox1 = wasm.ErgoBox.from_json(JSON.stringify(repoBox1Obj));
+const repoConfigBox = wasm.ErgoBox.from_json(JSON.stringify(repoConfigObj));
 
-const WIDs = [
-  Buffer.from(firstCommitment.WID, 'hex'),
-  Buffer.from(thirdCommitment.WID, 'hex'),
-];
+const WIDs = [firstCommitment.WID, thirdCommitment.WID];
 
 describe('Commitment reveal transaction tests', () => {
   let dataBase: WatcherDataBase,
@@ -57,6 +55,7 @@ describe('Commitment reveal transaction tests', () => {
     boxes = new Boxes(dataBase);
     chai.spy.on(boxes, 'getRepoBox', () => WIDBox);
     TransactionTest.reset();
+    chai.spy.on(Transaction, 'getWatcherState', () => undefined);
     await TransactionTest.setup(userAddress, secret1, boxes, dataBase);
     txUtils = new TransactionUtils(dataBase);
     transaction = TransactionTest.getInstance();
@@ -86,6 +85,7 @@ describe('Commitment reveal transaction tests', () => {
       await cr.triggerEventCreationTx(
         commitments,
         repoBox1,
+        repoConfigBox,
         observation,
         WIDs,
         plainBox

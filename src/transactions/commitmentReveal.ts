@@ -38,11 +38,17 @@ export class CommitmentReveal {
   triggerEventCreationTx = async (
     commitmentBoxes: Array<wasm.ErgoBox>,
     RWTRepoBox: wasm.ErgoBox,
+    repoConfigBox: wasm.ErgoBox,
     observation: ObservationEntity,
-    WIDs: Array<Uint8Array>,
+    WIDs: Array<string>,
     feeBoxes: Array<wasm.ErgoBox>
   ) => {
-    const allInputs = [...commitmentBoxes, RWTRepoBox, ...feeBoxes];
+    const allInputs = [
+      ...commitmentBoxes,
+      repoConfigBox,
+      RWTRepoBox,
+      ...feeBoxes,
+    ];
     const height = await ErgoNetwork.getMaxHeight(allInputs);
     const boxValues = commitmentBoxes
       .map((box) => BigInt(box.value().as_i64().to_str()))
@@ -63,12 +69,14 @@ export class CommitmentReveal {
       .forEach((box) => inputBoxes.add(box));
     feeBoxes.forEach((box) => inputBoxes.add(box));
     try {
+      const dataInputs = new wasm.ErgoBoxes(repoConfigBox);
+      dataInputs.add(RWTRepoBox);
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,
         inputBoxes,
         [triggerEvent],
         height,
-        new wasm.ErgoBoxes(RWTRepoBox)
+        dataInputs
       );
       await this.txUtils.submitTransaction(signed, TxType.TRIGGER, observation);
       logger.info(`Trigger event created with txId [${signed.id().to_str()}]`);
@@ -117,41 +125,43 @@ export class CommitmentReveal {
     for (const commitmentSet of commitmentSets) {
       try {
         const RWTRepoBox = await this.boxes.getRepoBox();
+        const repoConfigBox = await this.boxes.getRepoConfigBox();
         const requiredRWTCount = BigInt(
-          (RWTRepoBox.register_value(6)?.to_js() as Array<string>)[0]
+          (repoConfigBox.register_value(4)?.to_js() as Array<string>)[0]
         );
         const validCommitments = this.commitmentCheck(
           commitmentSet.commitments,
           commitmentSet.observation,
           requiredRWTCount
         );
-        const requiredCommitments =
-          ErgoUtils.requiredCommitmentCount(RWTRepoBox);
+        const requiredCommitments = ErgoUtils.requiredCommitmentCount(
+          RWTRepoBox,
+          repoConfigBox
+        );
         logger.info(
           `Valid commitments: [${validCommitments.length}/${
             requiredCommitments + 1n
           }]`
         );
         if (BigInt(validCommitments.length) > requiredCommitments) {
-          const commitmentBoxes = validCommitments.map(async (commitment) => {
-            return await ErgoNetwork.unspentErgoBoxById(commitment.boxId);
-          });
-          await Promise.all(commitmentBoxes).then(async (cBoxes) => {
-            const WIDs: Array<Uint8Array> = validCommitments.map(
-              (commitment) => {
-                return Buffer.from(commitment.WID, 'hex');
-              }
-            );
-            await this.triggerEventCreationTx(
-              cBoxes,
-              RWTRepoBox,
-              commitmentSet.observation,
-              WIDs,
-              await this.boxes.getUserPaymentBox(
-                BigInt(getConfig().general.fee) * 2n
-              )
-            );
-          });
+          const commitmentBoxes = await Promise.all(
+            validCommitments.map(async (commitment) => {
+              return await ErgoNetwork.unspentErgoBoxById(commitment.boxId);
+            })
+          );
+          const WIDs: Array<string> = validCommitments.map(
+            (commitment) => commitment.WID
+          );
+          await this.triggerEventCreationTx(
+            commitmentBoxes,
+            RWTRepoBox,
+            repoConfigBox,
+            commitmentSet.observation,
+            WIDs,
+            await this.boxes.getUserPaymentBox(
+              BigInt(getConfig().general.fee) * 2n
+            )
+          );
         }
       } catch (e) {
         logger.warn(

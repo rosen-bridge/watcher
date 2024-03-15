@@ -23,8 +23,6 @@ import WIDObj2 from './dataset/WIDBox4.json' assert { type: 'json' };
 import WIDObjWithoutErg from './dataset/WIDBoxWithoutErg.json' assert { type: 'json' };
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
-import { fail } from 'assert';
-import { DetachWID } from '../../../src/transactions/detachWID';
 import { TxStatus } from '../../../src/database/entities/observationStatusEntity';
 
 chai.use(spies);
@@ -254,7 +252,6 @@ describe('Commitment redeem transaction tests', () => {
      * - mock allCommitedObservations to return the mocked observation with status
      * - mock getWIDBox to return the mocked WIDBox
      * - mock getUserPaymentBox
-     * - mock detachWID
      * - mock WatcherWID to return the correct test WID
      * - mock redeemCommitmentTx
      * - run test
@@ -272,15 +269,13 @@ describe('Commitment redeem transaction tests', () => {
         { observation: observation, status: TxStatus.COMMITTED },
       ]);
       chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => []);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox2);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBox2]);
       chai.spy.on(boxes, 'getUserPaymentBox');
-      chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cr, 'redeemCommitmentTx', () => WIDBox);
       await cr.job();
       // Total value is enough should not call paymentBox
       expect(cr.redeemCommitmentTx).to.have.been.called();
-      expect(DetachWID.detachWIDtx).to.not.have.been.called();
       expect(boxes.getUserPaymentBox).to.not.have.called();
     });
 
@@ -296,7 +291,6 @@ describe('Commitment redeem transaction tests', () => {
      * - mock allCommitedObservations to return the mocked observation with status
      * - mock getWIDBox to return the mocked WIDBox
      * - mock getUserPaymentBox
-     * - mock detachWID
      * - mock WatcherWID to return the correct test WID
      * - mock redeemCommitmentTx
      * - run test
@@ -313,16 +307,14 @@ describe('Commitment redeem transaction tests', () => {
       chai.spy.on(watcherUtils, 'allCommitedObservations', () => [
         { observation: observation, status: TxStatus.COMMITTED },
       ]);
-      chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => [])
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
+      chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => []);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBox]);
       chai.spy.on(boxes, 'getUserPaymentBox', () => [feeBox1]);
-      chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cr, 'redeemCommitmentTx', () => WIDBox2);
       await cr.job();
       // Total value is NOT enough. Should call paymentBox
       expect(cr.redeemCommitmentTx).to.have.been.called();
-      expect(DetachWID.detachWIDtx).to.not.have.been.called();
       expect(boxes.getUserPaymentBox).to.have.called.once;
     });
 
@@ -337,7 +329,6 @@ describe('Commitment redeem transaction tests', () => {
      * - mock allCommitedObservations to return the mocked observation with status
      * - mock getWIDBox to return the mocked WIDBox
      * - mock getUserPaymentBox
-     * - mock detachWID
      * - mock WatcherWID to return the correct test WID
      * - mock redeemCommitmentTx
      * - run test
@@ -358,50 +349,13 @@ describe('Commitment redeem transaction tests', () => {
         { observation: observation, status: TxStatus.COMMITTED },
       ]);
       chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => []);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBox]);
       chai.spy.on(boxes, 'getUserPaymentBox', () => [feeBox1]);
-      chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cr, 'redeemCommitmentTx');
       await cr.job();
       expect(cr.redeemCommitmentTx).to.have.been.called.twice;
-      expect(DetachWID.detachWIDtx).to.not.have.been.called();
       expect(boxes.getUserPaymentBox).to.have.called.twice;
-    });
-
-    /**
-     * @target redeemCommitmentTx.job should call wid detach and skip the commitment redeem
-     * @dependencies
-     * - WatcherUtils
-     * - Boxes
-     * - Transaction
-     * @scenario
-     * - mock detachWID
-     * - mock allTimeoutCommitments to return two the mocked commitment
-     * - mock allCommitedObservations to return the mocked observation with status
-     * - mock getWIDBox to return the mocked WIDBox
-     * - mock WatcherWID to return a different token id
-     * - mock createCommitmentTx
-     * - run test
-     * - check calling detach tx
-     * - check not calling redeemCommitmentTx
-     * @expected
-     * - it should call DetachWID.detachWIDtx
-     * - should skip the rest of the process
-     */
-    it('Should call wid detach and skip the commitment redeem', async () => {
-      chai.spy.on(DetachWID, 'detachWIDtx', () => '');
-      chai.spy.on(watcherUtils, 'allTimeoutCommitments', () => [commitment]);
-      chai.spy.on(watcherUtils, 'allCommitedObservations', () => [
-        { observation: observation, status: TxStatus.COMMITTED },
-      ]);
-      chai.spy.on(watcherUtils, 'allTriggeredInvalidCommitments', () => []);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBoxWithoutErg);
-      sinon.stub(Transaction, 'watcherWID').value('differentWID');
-      chai.spy.on(cr, 'redeemCommitmentTx');
-      await cr.job();
-      expect(DetachWID.detachWIDtx).to.have.called();
-      expect(cr.redeemCommitmentTx).to.not.have.called;
     });
   });
 });

@@ -87,6 +87,7 @@ class Config {
   transactionConfirmation: number;
   commitmentTimeoutConfirmation: number;
   transactionCheckingInterval: number;
+  widStatusCheckInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
   redeemSwapEnabled: boolean;
@@ -176,6 +177,7 @@ class Config {
     this.transactionCheckingInterval = getRequiredNumber(
       'ergo.interval.transaction'
     );
+    this.widStatusCheckInterval = getRequiredNumber('ergo.interval.wid.status');
     this.transactionConfirmation = getRequiredNumber(
       'ergo.transaction.confirmation'
     );
@@ -235,7 +237,9 @@ class LoggerConfig {
       const logTypeValidation = ['console', 'file', 'loki'].includes(log.type);
       let loggerChecks = true;
       if (log.type === 'loki') {
-        const overrideLokiBasicAuth = getOptionalString('overrideLokiBasicAuth');
+        const overrideLokiBasicAuth = getOptionalString(
+          'overrideLokiBasicAuth'
+        );
         if (overrideLokiBasicAuth !== '') log.basicAuth = overrideLokiBasicAuth;
         loggerChecks =
           log.host != undefined &&

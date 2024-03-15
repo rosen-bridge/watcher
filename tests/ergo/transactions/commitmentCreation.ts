@@ -21,8 +21,6 @@ import { expect } from 'chai';
 import chai from 'chai';
 import spies from 'chai-spies';
 import sinon from 'sinon';
-
-import { DetachWID } from '../../../src/transactions/detachWID';
 import permitObj from './dataset/permitBox.json' assert { type: 'json' };
 import permitObj2 from './dataset/permitBox2.json' assert { type: 'json' };
 import permitObj3 from './dataset/permitBox3.json' assert { type: 'json' };
@@ -31,6 +29,7 @@ import WIDObj2 from './dataset/WIDBoxWithoutErg.json' assert { type: 'json' };
 import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
 import repoBox1Obj from './dataset/repoBox1.json' assert { type: 'json' };
+import repoConfigObj from './dataset/repConfigBox.json' assert { type: 'json' };
 
 chai.use(spies);
 
@@ -42,6 +41,7 @@ const WIDBoxWithoutErg = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2));
 const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
 const repoBox1 = wasm.ErgoBox.from_json(JSON.stringify(repoBox1Obj));
+const repoConfig = wasm.ErgoBox.from_json(JSON.stringify(repoConfigObj));
 
 const userAddress = '9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9';
 const rwtID =
@@ -114,6 +114,7 @@ describe('Commitment creation transaction tests', () => {
       chai.spy.on(boxes, 'createPermit');
       chai.spy.on(boxes, 'createWIDBox');
       chai.spy.on(ErgoUtils, 'getExtraTokenCount');
+      sinon.stub(boxes, 'getRepoConfigBox').resolves(repoConfig);
       sinon.stub(boxes, 'RWTTokenId').value(wasm.TokenId.from_str(rwtID));
       sinon.stub(ErgoNetwork, 'getMaxHeight').resolves(111);
       sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);
@@ -237,9 +238,8 @@ describe('Commitment creation transaction tests', () => {
         return;
       });
       chai.spy.on(boxes, 'getPermits', () => permits);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBox);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBox]);
       chai.spy.on(boxes, 'getUserPaymentBox');
-      chai.spy.on(DetachWID, 'detachWIDtx', () => '');
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cc, 'createCommitmentTx', () => {
         return { txId: 'txId', commitmentBoxId: 'boxId' };
@@ -255,7 +255,6 @@ describe('Commitment creation transaction tests', () => {
         WIDBox,
         []
       );
-      expect(DetachWID.detachWIDtx).to.not.have.been.called();
     });
 
     /**
@@ -278,7 +277,7 @@ describe('Commitment creation transaction tests', () => {
         return;
       });
       chai.spy.on(boxes, 'getPermits', () => permits);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBoxWithoutErg);
+      chai.spy.on(boxes, 'getWIDBox', () => [WIDBoxWithoutErg]);
       chai.spy.on(boxes, 'getUserPaymentBox', () => plainBox);
       sinon.stub(Transaction, 'watcherWID').value(WID);
       chai.spy.on(cc, 'createCommitmentTx', () => {
@@ -295,40 +294,6 @@ describe('Commitment creation transaction tests', () => {
         WIDBoxWithoutErg,
         plainBox
       );
-    });
-
-    /**
-     * @target CommitmentCreation.job should call wid detach and skip the commitment creation
-     * @dependencies
-     * - WatcherUtils
-     * - Boxes
-     * - Transaction
-     * @scenario
-     * - mock detachWID
-     * - mock allReadyObservations to return the mocked observation
-     * - mock getPermits to return the mocked permit
-     * - mock getWIDBox to return the mocked WIDBox
-     * - mock WatcherWID to return a different token id
-     * - mock createCommitmentTx
-     * - run test
-     * - check calling detach tx
-     * - check not calling createCommitmentTx
-     * @expected
-     * - it should call DetachWID.detachWIDtx
-     * - should skip the rest of the process
-     */
-    it('Should call wid detach and skip the commitment creation', async () => {
-      chai.spy.on(DetachWID, 'detachWIDtx', () => '');
-      chai.spy.on(watcherUtils, 'allReadyObservations', () => [observation]);
-      chai.spy.on(boxes, 'getPermits', () => permits);
-      chai.spy.on(boxes, 'getWIDBox', () => WIDBoxWithoutErg);
-      sinon.stub(Transaction, 'watcherWID').value('differentWID');
-      chai.spy.on(cc, 'createCommitmentTx', () => {
-        return { txId: 'txId', commitmentBoxId: 'boxId' };
-      });
-      await cc.job();
-      expect(DetachWID.detachWIDtx).to.have.called();
-      expect(cc.createCommitmentTx).to.not.have.called;
     });
   });
 });

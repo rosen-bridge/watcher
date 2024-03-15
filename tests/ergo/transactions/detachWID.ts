@@ -66,7 +66,7 @@ describe('DetachWID', () => {
     sinon.stub(ErgoUtils, 'createAndSignTx').resolves(signedTx);
     chai.spy.on(boxes, 'getUserPaymentBox');
 
-    await DetachWID.detachWIDtx(txUtils, boxes, WID, widBox);
+    await DetachWID.detachWIDtx(txUtils, boxes, WID, [widBox]);
 
     expect(txUtils.submitTransaction).to.have.been.called.with.exactly(
       signedTx,
@@ -111,7 +111,7 @@ describe('DetachWID', () => {
       ];
     });
 
-    await DetachWID.detachWIDtx(txUtils, boxes, WID, widBox);
+    await DetachWID.detachWIDtx(txUtils, boxes, WID, [widBox]);
 
     expect(txUtils.submitTransaction).to.have.been.called.with.exactly(
       signedTx,
