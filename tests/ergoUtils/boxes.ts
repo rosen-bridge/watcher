@@ -215,7 +215,7 @@ describe('Testing Box Creation', () => {
       const data = await boxes.getWIDBox(
         'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b'
       );
-      expect(data.box_id().to_str()).to.eq(WIDBox.boxId);
+      expect(data[0].box_id().to_str()).to.eq(WIDBox.boxId);
     });
   });
 
@@ -233,7 +233,7 @@ describe('Testing Box Creation', () => {
       // chai.spy.on(boxes, 'getWIDBox', () => undefined);
       const WID =
         'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
-      const data = boxes.createWIDBox(111, WID, '1000000');
+      const data = boxes.createWIDBox(111, WID, '1000000', '1');
       expect(data.creation_height()).to.eq(111);
       expect(data.tokens().get(0).id().to_str()).to.eq(WID);
       expect(data.tokens().get(0).amount().as_i64().to_str()).to.eq('1');
@@ -407,23 +407,35 @@ describe('Testing Box Creation', () => {
     it('checks repoBox tokens order and count', async () => {
       const RWTCount = '100';
       const RSNCount = '1';
+      const AWCCount = '10';
       const repoBox = await boxes.createRepo(
         0,
         RWTCount,
         RSNCount,
-        [new Uint8Array([])],
-        [],
-        wasm.Constant.from_i64_str_array([]),
+        AWCCount,
+        new Uint8Array(),
         0
       );
 
-      expect(repoBox.tokens().len()).to.be.equal(3);
+      expect(repoBox.tokens().len()).to.be.equal(4);
       expect(repoBox.value().as_i64().to_str()).to.be.equal(config.minBoxValue);
       expect(repoBox.tokens().get(1).amount().as_i64().to_str()).to.be.equal(
         RWTCount
       );
       expect(repoBox.tokens().get(2).amount().as_i64().to_str()).to.be.equal(
         RSNCount
+      );
+      expect(repoBox.tokens().get(3).amount().as_i64().to_str()).to.be.equal(
+        AWCCount
+      );
+      expect(repoBox.tokens().get(1).id().to_str()).to.be.equal(
+        getConfig().rosen.RWTId
+      );
+      expect(repoBox.tokens().get(2).id().to_str()).to.be.equal(
+        getConfig().rosen.RSN
+      );
+      expect(repoBox.tokens().get(3).id().to_str()).to.be.equal(
+        getConfig().rosen.AWC
       );
     });
   });
@@ -450,12 +462,7 @@ describe('Testing Box Creation', () => {
       expect(permitBox.tokens().get(0).id().to_str()).to.be.equal(
         getConfig().rosen.RWTId
       );
-      expect(
-        permitBox.register_value(4)?.to_coll_coll_byte().length
-      ).to.be.equal(1);
-      expect(permitBox.register_value(4)?.to_coll_coll_byte()[0]).to.be.eql(
-        WID
-      );
+      expect(permitBox.register_value(4)?.to_byte_array()).to.be.eql(WID);
     });
   });
 
@@ -538,7 +545,7 @@ describe('Testing Box Creation', () => {
       const data = boxes.createTriggerEvent(
         value,
         10,
-        [Buffer.from(WID), Buffer.from(WID)],
+        [WID, WID],
         firstObservation,
         2n
       );

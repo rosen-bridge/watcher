@@ -29,6 +29,7 @@ import {
 import { scanner } from './scanner';
 import { Transaction } from '../../src/api/Transaction';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { AbstractScannerSyncHealthCheckParam } from '@rosen-bridge/health-check';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -36,6 +37,7 @@ class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
   private healthCheck: HealthCheck;
   private permitHealthCheckParam: AbstractPermitHealthCheckParam;
+  private ergoScannerSyncCheckParam: AbstractScannerSyncHealthCheckParam;
 
   static getInstance = () => {
     if (!HealthCheckSingleton.instance) {
@@ -70,8 +72,8 @@ class HealthCheckSingleton {
    */
   registerErgoNodeHealthCheckParams = () => {
     const widHealthCheck = new NodeWidHealthCheckParam(
-      getConfig().rosen.RWTRepoAddress,
-      getConfig().rosen.RepoNFT,
+      getConfig().rosen.watcherCollateralAddress,
+      getConfig().rosen.AWC,
       getConfig().general.address,
       getConfig().general.nodeUrl
     );
@@ -88,14 +90,14 @@ class HealthCheckSingleton {
     );
     this.healthCheck.register(assetHealthCheck);
 
-    const ergoScannerSyncCheck = new ErgoNodeScannerHealthCheck(
+    this.ergoScannerSyncCheckParam = new ErgoNodeScannerHealthCheck(
       dataSource,
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.nodeUrl
     );
-    this.healthCheck.register(ergoScannerSyncCheck);
+    this.healthCheck.register(this.ergoScannerSyncCheckParam);
 
     const ergoNodeSyncCheck = new ErgoNodeSyncHealthCheckParam(
       getConfig().healthCheck.ergoNodeMaxHeightDiff,
@@ -112,8 +114,8 @@ class HealthCheckSingleton {
    */
   registerErgoExplorerHealthCheckParams = () => {
     const widHealthCheck = new ExplorerWidHealthCheckParam(
-      getConfig().rosen.RWTRepoAddress,
-      getConfig().rosen.RepoNFT,
+      getConfig().rosen.watcherCollateralAddress,
+      getConfig().rosen.AWC,
       getConfig().general.address,
       getConfig().general.explorerUrl
     );
@@ -130,14 +132,14 @@ class HealthCheckSingleton {
     );
     this.healthCheck.register(assetHealthCheck);
 
-    const ergoScannerSyncCheck = new ErgoExplorerScannerHealthCheck(
+    this.ergoScannerSyncCheckParam = new ErgoExplorerScannerHealthCheck(
       dataSource,
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.explorerUrl
     );
-    this.healthCheck.register(ergoScannerSyncCheck);
+    this.healthCheck.register(this.ergoScannerSyncCheckParam);
   };
 
   /**
@@ -253,6 +255,12 @@ class HealthCheckSingleton {
    * @param paramName
    */
   updateParam = (paramName: string) => this.healthCheck.updateParam(paramName);
+
+  /**
+   * Get ergo scanner sync health status
+   */
+  getErgoScannerSyncHealth = () =>
+    this.ergoScannerSyncCheckParam.getHealthStatus();
 }
 
 export { HealthCheckSingleton };

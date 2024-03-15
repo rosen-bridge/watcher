@@ -350,10 +350,18 @@ class WatcherUtils {
     const eventTrigger = await this.dataBase.eventTriggerByEventId(
       commitment.eventId
     );
+
+    if (eventTrigger == null) {
+      return false;
+    }
+
+    const commitmentWIDs = (
+      await this.dataBase.commitmentsBySpendTxId(eventTrigger?.txId)
+    ).map((comm) => comm.WID);
+
     return (
-      eventTrigger !== null &&
       commitment.height < eventTrigger.height &&
-      !eventTrigger.WIDs.split(',').includes(commitment.WID)
+      !commitmentWIDs.includes(commitment.WID)
     );
   };
 }

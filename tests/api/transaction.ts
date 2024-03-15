@@ -19,6 +19,7 @@ import { Boxes } from '../../src/ergo/boxes';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { ErgoUtils } from '../../src/ergo/utils';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
+import { Transaction } from '../../src/api/Transaction';
 
 chai.use(spies);
 const signedErgTx = wasm.Transaction.from_json(JsonBI.stringify(withdrawErg));
@@ -38,6 +39,7 @@ describe('Transaction', () => {
     chai.spy.on(boxes, 'getRepoBox', () => {
       return wasm.ErgoBox.from_json(mockedResponseBody.repoBoxWithWIDToken);
     });
+    chai.spy.on(Transaction, 'getWatcherState', () => undefined);
     await TransactionTest.setup(userAddress, secret1, boxes, watcherDb);
   });
 

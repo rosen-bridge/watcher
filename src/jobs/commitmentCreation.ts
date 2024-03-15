@@ -1,9 +1,11 @@
-import { CommitmentCreation } from '../transactions/commitmentCreation';
-import { Boxes } from '../ergo/boxes';
-import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
-import { getConfig } from '../config/config';
+import { HealthStatusLevel } from '@rosen-bridge/health-check';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { getConfig } from '../config/config';
+import { Boxes } from '../ergo/boxes';
+import { CommitmentCreation } from '../transactions/commitmentCreation';
+import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { redeemJob } from './commitmentRedeem';
+import { HealthCheckSingleton } from '../utils/healthCheck';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -12,10 +14,18 @@ let redeemExecuted = false;
 
 const creationJob = async () => {
   try {
-    await commitmentCreatorObj.job();
-    if (!redeemExecuted) {
-      redeemExecuted = true;
-      redeemJob();
+    const scannerSyncStatus =
+      await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
+    if (scannerSyncStatus === HealthStatusLevel.HEALTHY) {
+      await commitmentCreatorObj.job();
+      if (!redeemExecuted) {
+        redeemExecuted = true;
+        redeemJob();
+      }
+    } else {
+      logger.info(
+        'Scanner is not synced with network, skipping commitment creation job'
+      );
     }
   } catch (e) {
     logger.warn(`Creation Job failed with error: ${e.message} - ${e.stack}`);

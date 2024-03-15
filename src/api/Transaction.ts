@@ -1,9 +1,9 @@
 import { Buffer } from 'buffer';
 import { ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
 import * as wasm from 'ergo-lib-wasm-nodejs';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
-import { uint8ArrayToHex } from '../utils/utils';
 import { Boxes } from '../ergo/boxes';
 import { ErgoUtils } from '../ergo/utils';
 import { getConfig } from '../config/config';
@@ -11,9 +11,15 @@ import { WatcherDataBase } from '../database/models/watcherModel';
 import { TransactionUtils } from '../utils/watcherUtils';
 import { TxType } from '../database/entities/txEntity';
 import { AddressBalance } from '../ergo/interfaces';
-import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
+import { ChangeBoxCreationError, NoWID, NotEnoughFund } from '../errors/errors';
 import { DetachWID } from '../transactions/detachWID';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import {
+  WID_LOCK_COUNT,
+  WID_MINT_COUNT,
+  WID_UNLOCK_COUNT,
+} from '../config/constants';
+import { HealthStatusLevel } from '@rosen-bridge/health-check';
+import { HealthCheckSingleton } from '../utils/healthCheck';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -71,10 +77,10 @@ export class Transaction {
         this.userAddress
       );
       Transaction.isSetupCalled = true;
-      await Transaction.getWatcherState();
-
       this.watcherDatabase = db;
       this.txUtils = new TransactionUtils(db);
+
+      await Transaction.getWatcherState();
     }
   };
 
@@ -90,27 +96,16 @@ export class Transaction {
   };
 
   /**
-   * it gets repoBox users list and find the corresponding wid to the watcher and
-   *  returns it's wid or in case of no permits return empty string
-   * @param users
+   * List all watcher tokens and check if they are a registered WID token
+   * @param wids all registered WIDs
+   * @return watcher WID
    */
-  static getWID = async (users: Array<Uint8Array>): Promise<string> => {
-    // TODO: This function hasn't good performance
+  static getWID = async (wids: string[]): Promise<string> => {
     if (!Transaction.isSetupCalled)
       throw new Error("The Transaction class setup doesn't called");
-    const usersWID = users.map(async (id) => {
-      const wid = uint8ArrayToHex(id);
-      try {
-        await ErgoNetwork.getBoxWithToken(Transaction.userAddress, wid);
-        return true;
-      } catch (error) {
-        return false;
-      }
-    });
-    for (const [i, userWID] of usersWID.entries()) {
-      if (await userWID) {
-        return uint8ArrayToHex(users[i]);
-      }
+    const balance = await ErgoUtils.getWatcherBalance();
+    for (const token of balance.tokens) {
+      if (wids.includes(token.tokenId)) return token.tokenId;
     }
     return '';
   };
@@ -119,15 +114,15 @@ export class Transaction {
    * Get required permit count
    */
   getRequiredPermitsCountPerEvent = async () => {
-    const repoBox = await Transaction.boxes.getRepoBox();
-    const R6 = repoBox.register_value(6);
-    if (R6) {
-      const r6Values: string[] = R6.to_js();
-      if (r6Values.length > 0) {
-        return BigInt(r6Values[0]);
+    const configBox = await Transaction.boxes.getRepoConfigBox();
+    const R4 = configBox.register_value(4);
+    if (R4) {
+      const r4Values: string[] = R4.to_js();
+      if (r4Values.length > 0) {
+        return BigInt(r4Values[0]);
       }
     }
-    throw Error('Invalid repo box');
+    throw Error('Invalid repo config box');
   };
 
   /**
@@ -135,85 +130,54 @@ export class Transaction {
    * @returns
    */
   getTotalPermit = async (): Promise<bigint> => {
-    const WID = Transaction.watcherWID!;
-    const repoBox = await Transaction.boxes.getRepoBox();
-    const R4 = repoBox.register_value(4);
-    const R5 = repoBox.register_value(5);
-    if (!R4 || !R5) {
-      throw Error('Invalid repoBox found');
-    }
+    const wid = Transaction.watcherWID;
+    if (!wid) return 0n;
     try {
-      const widIndex = R4.to_coll_coll_byte()
-        .map((user) => uint8ArrayToHex(user))
-        .indexOf(WID);
-      if (widIndex < 0) return 0n;
-      const usersCount: Array<string> | undefined = R5.to_i64_str_array();
-      return BigInt(usersCount[widIndex]);
-    } catch {
-      throw Error('Repo box register types or values are invalid');
+      const collateral = await Transaction.watcherDatabase.getCollateralByWid(
+        wid
+      );
+      return collateral.rwtCount;
+    } catch (e) {
+      logger.warn(`Could not find collateral box for WID [${wid}]`);
+      return 0n;
     }
   };
 
+  /**
+   * Create return permit transaction for required rwt tokens
+   * @param RWTCount
+   * @param widBox box containing at least 2 wid tokens in its first token place
+   * @returns signed transaction and remaining locked rwt tokens
+   */
   returnPermitTx = async (
-    height: number,
     RWTCount: bigint,
-    permitBox: wasm.ErgoBox,
-    repoBox: wasm.ErgoBox,
-    widBox: wasm.ErgoBox,
-    wid: string,
-    feeBox: wasm.ErgoBox | undefined
+    widBox: wasm.ErgoBox
   ): Promise<{ tx: wasm.Transaction; remainingRwt: bigint }> => {
+    const wid = Transaction.watcherWID!;
+    const permitBoxes = await Transaction.boxes.getPermits(wid, RWTCount);
+    const repoBox = await Transaction.boxes.getRepoBox();
+    const height = await ErgoNetwork.getHeight();
+
     const R4 = repoBox.register_value(4);
     const R5 = repoBox.register_value(5);
-    const R6 = repoBox.register_value(6);
-
-    // This couldn't happen
-    if (!R4 || !R5 || !R6) {
-      throw Error('one of registers (4, 5, 6) of repo box is not set');
+    if (!R4 || !R5) {
+      // Impossible case
+      throw Error('one of registers (4, 5) of repo box is not set');
     }
 
-    const users = R4.to_coll_coll_byte();
-    const usersCount: Array<string> | undefined = R5.to_i64_str_array();
+    const collateralBox = await Transaction.boxes.getCollateralBox(wid);
+    const totalRwt = BigInt(collateralBox.register_value(5)!.to_i64().to_str());
+    const completeReturn = totalRwt == RWTCount;
 
-    const widIndex = users.map((user) => uint8ArrayToHex(user)).indexOf(wid);
-    const inputBoxes = [repoBox, permitBox, widBox];
-    const totalRwt = BigInt(usersCount[widIndex]);
-    const usersOut = [...users];
-    const usersCountOut = [...usersCount];
-    if (totalRwt === RWTCount) {
-      // need to add collateral
-      const collateral = await Transaction.getInstance().getCollateral();
-      const collateralBoxes =
-        await ErgoNetwork.getCoveringErgAndTokenForAddress(
-          Transaction.boxes.watcherCollateralContract
-            .ergo_tree()
-            .to_base16_bytes(),
-          collateral.erg,
-          { [getConfig().rosen.RSN]: collateral.rsn },
-          (box) => {
-            if (!box.register_value(4)) {
-              logger.debug('Skipping collateral box without wid information');
-              return false;
-            }
-            const collateralWid = Buffer.from(
-              box.register_value(4)?.to_js()
-            ).toString('hex');
-            logger.debug(`Collateral is found for wid: [${collateralWid}]`);
-            return collateralWid == wid;
-          }
-        );
-      if (collateralBoxes.boxes.length == 0)
-        throw Error('Collateral box for this wid is not found');
-      if (!collateralBoxes.covered) throw Error('Collateral is not covered');
-      collateralBoxes.boxes.forEach((box) => inputBoxes.push(box));
-      usersOut.splice(widIndex, 1);
-      usersCountOut.splice(widIndex, 1);
-    } else {
-      usersCountOut[widIndex] = (
-        BigInt(usersCountOut[widIndex]) - RWTCount
-      ).toString();
-    }
+    const inputBoxes = [repoBox, collateralBox, permitBoxes[0], widBox];
+    permitBoxes.slice(1).forEach((box) => inputBoxes.push(box));
     const outputBoxes: Array<ErgoBoxCandidate> = [];
+
+    const AWCTokenCount = BigInt(
+      repoBox.tokens().get(3).amount().as_i64().to_str()
+    );
+    const watcherCount = Number(R5.to_i64().to_str());
+    const chainId = R4.to_byte_array();
     outputBoxes.push(
       await Transaction.boxes.createRepo(
         height,
@@ -223,58 +187,64 @@ export class Transaction {
         (
           BigInt(repoBox.tokens().get(2).amount().as_i64().to_str()) - RWTCount
         ).toString(),
-        usersOut,
-        usersCountOut,
-        R6,
-        widIndex
+        completeReturn
+          ? (AWCTokenCount + 1n).toString()
+          : AWCTokenCount.toString(),
+        chainId,
+        completeReturn ? watcherCount - 1 : watcherCount
       )
     );
+
     let burnToken: { [tokenId: string]: bigint } = {};
-    const inputRwtCount = BigInt(
-      permitBox.tokens().get(0).amount().as_i64().to_str()
-    );
-    if (RWTCount == totalRwt) {
+    const inputRwtCount = ErgoUtils.getBoxAssetsSum(permitBoxes)
+      .filter((asset) => asset.tokenId == getConfig().rosen.RWTId)
+      .reduce((sum, asset) => sum + asset.amount, 0n);
+    const widCount = BigInt(widBox.tokens().get(0).amount().as_i64().to_str());
+    if (completeReturn) {
       // Should burn the wid and no need for any new box
       logger.debug(`Burning the wid token: [${wid}]`);
-      burnToken = { [wid]: -1n };
-    } else if (inputRwtCount > RWTCount) {
-      // Should create a change permit box and a new wid box
-      logger.debug(
-        `Creating a new wid box and permit with rwtCount= [${
-          inputRwtCount - RWTCount
-        }]`
-      );
-      outputBoxes.push(
-        await Transaction.boxes.createPermit(
-          height,
-          inputRwtCount - RWTCount,
-          Buffer.from(wid, 'hex')
-        )
-      );
-      outputBoxes.push(
-        Transaction.boxes.createWIDBox(
-          height,
-          wid,
-          Transaction.minBoxValue.as_i64().to_str(),
-          Transaction.userAddressContract
-        )
-      );
+      burnToken = { [wid]: -widCount };
     } else {
-      // All tokens should be unlocked and no need to create a new permit box
-      // But it already has some permits so needs the wid token
-      logger.debug(
-        `Creating a new wid box for other permits, all permits in the existing box are returned`
+      // Adding output collateral to transaction
+      const rsnCollateral = ErgoUtils.getBoxAssetsSum([collateralBox]).filter(
+        (token) => token.tokenId == getConfig().rosen.RSN
       );
+      const outCollateralBox = await Transaction.boxes.createCollateralBox(
+        ErgoUtils.getBoxValuesSum([collateralBox]),
+        height,
+        wid,
+        totalRwt - RWTCount,
+        rsnCollateral.length ? rsnCollateral[0].amount : 0n
+      );
+      outputBoxes.push(outCollateralBox);
+
+      if (inputRwtCount > RWTCount) {
+        // Should create a change permit box
+        logger.debug(
+          `Creating a new wid box and permit with rwtCount= [${
+            inputRwtCount - RWTCount
+          }]`
+        );
+        outputBoxes.push(
+          await Transaction.boxes.createPermit(
+            height,
+            inputRwtCount - RWTCount,
+            Buffer.from(wid, 'hex')
+          )
+        );
+      }
+      // Create the output wid box
       outputBoxes.push(
         Transaction.boxes.createWIDBox(
           height,
           wid,
           Transaction.minBoxValue.as_i64().to_str(),
+          widCount.toString(),
           Transaction.userAddressContract
         )
       );
     }
-    if (feeBox) inputBoxes.push(feeBox);
+
     const totalErgIn = inputBoxes
       .map((item) => BigInt(item.value().as_i64().to_str()))
       .reduce((a, b) => a + b, 0n);
@@ -285,11 +255,9 @@ export class Transaction {
       BigInt(Transaction.fee.as_i64().to_str()) +
       BigInt(Transaction.minBoxValue.as_i64().to_str());
     if (totalErgOut > totalErgIn) {
-      const existingBoxIds = [widBox.box_id().to_str()];
-      if (feeBox) existingBoxIds.push(feeBox.box_id().to_str());
       const userBoxes = await Transaction.boxes.getUserPaymentBox(
         totalErgOut - totalErgIn,
-        existingBoxIds
+        [widBox.box_id().to_str()]
       );
       userBoxes.forEach((box) => inputBoxes.push(box));
     }
@@ -352,6 +320,15 @@ export class Transaction {
    * @param RWTCount
    */
   returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
+    const scannerSyncStatus =
+      await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
+    if (scannerSyncStatus !== HealthStatusLevel.HEALTHY) {
+      return {
+        response: `Ergo scanner is not synced, please check your connection and wait more`,
+        status: 400,
+      };
+    }
+
     const activePermitTxs =
       await Transaction.watcherDatabase.getActivePermitTransactions();
     if (activePermitTxs.length !== 0) {
@@ -366,77 +343,64 @@ export class Transaction {
     }
     const WID = Transaction.watcherWID!;
 
-    const permitBoxes = await Transaction.boxes.getPermits(WID, RWTCount);
-    let repoBox = await Transaction.boxes.getRepoBox();
-    let widBox = await Transaction.boxes.getWIDBox(WID);
-    const height = await ErgoNetwork.getHeight();
-
-    if (widBox.tokens().get(0).id().to_str() != WID) {
-      try {
+    let widBox: wasm.ErgoBox | undefined = undefined;
+    try {
+      const widBoxes = await Transaction.boxes.getWIDBox(WID, WID_UNLOCK_COUNT);
+      for (const box of widBoxes) {
+        const token = box.tokens().get(0);
+        if (
+          token.id().to_str() == WID &&
+          BigInt(token.amount().as_i64().to_str()) >= WID_UNLOCK_COUNT
+        ) {
+          widBox = box;
+          break;
+        }
+      }
+      if (!widBox) {
+        logger.info(
+          `Wid box with at least ${WID_UNLOCK_COUNT} wid token is not found, creating detach transaction for wid boxes [${widBoxes.map(
+            (box) => box.box_id().to_str()
+          )}]`
+        );
         await DetachWID.detachWIDtx(
           Transaction.txUtils,
           Transaction.boxes,
           WID,
-          widBox
+          widBoxes
         );
         return {
           response: `WID box is not in valid format (WID token is not the first token), please wait for the correction transaction`,
           status: 400,
         };
-      } catch (e) {
+      }
+    } catch (e) {
+      if (e instanceof NoWID) {
+        logger.warn(
+          `Could not find ${WID_UNLOCK_COUNT} token in watcher wallet, skipping unlock transaction`
+        );
         return {
-          response: `WID box is not in valid format, but an error in creating correction transaction: ${e}`,
-          status: 500,
+          response: `Could not find ${WID_UNLOCK_COUNT} WID token in watcher wallet`,
+          status: 400,
         };
+      } else {
+        throw e;
       }
     }
     try {
-      let tx: wasm.Transaction,
-        remainingRwt = RWTCount,
-        remainingUnlock = RWTCount,
-        feeBox: wasm.ErgoBox | undefined = undefined;
-      const unlockTxIds: Array<string> = [];
-      for (const permitBox of permitBoxes) {
-        const permitRwt = BigInt(
-          permitBox.tokens().get(0).amount().as_i64().to_str()
-        );
-        const unlockingRwt =
-          remainingUnlock > permitRwt ? permitRwt : remainingUnlock;
-        logger.debug(
-          `Unlocking ${unlockingRwt} locked in permitBox: [${permitBox
-            .box_id()
-            .to_str()}], using widBox: [${widBox
-            .box_id()
-            .to_str()}] and repoBox: [${repoBox.box_id().to_str()}]`
-        );
-        ({ tx, remainingRwt } = await this.returnPermitTx(
-          height,
-          unlockingRwt,
-          permitBox,
-          repoBox,
-          widBox,
-          WID,
-          feeBox
-        ));
-        repoBox = tx.outputs().get(0);
-        widBox = tx.outputs().get(1);
-        feeBox = tx.outputs().len() > 3 ? tx.outputs().get(2) : undefined;
-        remainingUnlock -= unlockingRwt;
-        unlockTxIds.push(tx.id().to_str());
-      }
+      const { tx, remainingRwt } = await this.returnPermitTx(RWTCount, widBox);
       const isAlreadyWatcher = remainingRwt > 0;
       Transaction.watcherUnconfirmedWID = isAlreadyWatcher
         ? Transaction.watcherWID
         : '';
       return {
-        response: unlockTxIds,
+        response: tx.id().to_str(),
         status: 200,
       };
     } catch (e) {
       logger.warn(`Unlock operation exited incomplete by error: ${e.message}`);
       if (e instanceof NotEnoughFund) {
         return {
-          response: `Not enough ERG to complete the unlock operation`,
+          response: e.message,
           status: 400,
         };
       } else {
@@ -544,21 +508,15 @@ export class Transaction {
    * CAUTION: this function removed in watcher refactor
    */
   getCollateral = async () => {
-    const repoBox = await Transaction.boxes.getRepoBox();
-    const R6 = repoBox.register_value(6);
-    if (R6) {
-      const R6Params = R6.to_js() as Array<string>;
-      const ErgCollateral = BigInt(R6Params[4]);
-      const RSNCollateral = BigInt(R6Params[5]);
-      return {
-        erg: ErgCollateral,
-        rsn: RSNCollateral,
-      };
+    const configBox = await Transaction.boxes.getRepoConfigBox();
+    const R4 = configBox.register_value(4);
+    if (R4) {
+      const r4Values: string[] = R4.to_js();
+      if (r4Values.length > 0) {
+        return { erg: BigInt(r4Values[4]), rsn: BigInt(r4Values[5]) };
+      }
     }
-    return {
-      erg: 0n,
-      rsn: 0n,
-    };
+    throw Error('Invalid repo config box');
   };
 
   /**
@@ -566,6 +524,15 @@ export class Transaction {
    * @param RSNCount
    */
   getPermit = async (RSNCount: bigint): Promise<ApiResponse> => {
+    const scannerSyncStatus =
+      await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
+    if (scannerSyncStatus !== HealthStatusLevel.HEALTHY) {
+      return {
+        response: `Ergo scanner is not synced, please check your connection and wait more`,
+        status: 400,
+      };
+    }
+
     const activePermitTxs =
       await Transaction.watcherDatabase.getActivePermitTransactions();
     if (activePermitTxs.length !== 0) {
@@ -579,12 +546,11 @@ export class Transaction {
     const repoBox = await Transaction.boxes.getRepoBox();
     const R4 = repoBox.register_value(4);
     const R5 = repoBox.register_value(5);
-    const R6 = repoBox.register_value(6);
     const WID = Transaction.watcherWID;
     // This couldn't happen
-    if (!R4 || !R5 || !R6) {
+    if (!R4 || !R5) {
       return {
-        response: 'one of registers (4, 5, 6) of repo box is not set',
+        response: 'one of registers (4, 5) of repo box is not set',
         status: 500,
       };
     }
@@ -614,26 +580,30 @@ export class Transaction {
         status: 400,
       };
     }
-    if (WID) {
-      const widBox = await Transaction.boxes.getWIDBox(WID);
-      if (widBox.tokens().get(0).id().to_str() != WID) {
-        await DetachWID.detachWIDtx(
-          Transaction.txUtils,
-          Transaction.boxes,
-          WID,
-          widBox
-        );
+    let collateralBox: wasm.ErgoBox;
+    let widCount = 0n;
+    try {
+      if (WID) {
+        collateralBox = await Transaction.boxes.getCollateralBox(WID);
+        inputBoxes.push(collateralBox);
+        const widBoxes = await Transaction.boxes.getWIDBox(WID, WID_LOCK_COUNT);
+        widBoxes.forEach((widBox) => inputBoxes.push(widBox));
+        const widBoxIds = widBoxes.map((widBox) => widBox.box_id().to_str());
+        userBoxes.boxes.forEach((box) => {
+          if (!widBoxIds.includes(box.box_id().to_str())) inputBoxes.push(box);
+        });
+        widCount = ErgoUtils.getBoxAssetsSum(widBoxes).filter(
+          (token) => token.tokenId == WID
+        )[0].amount;
+      } else inputBoxes.push(...userBoxes.boxes);
+    } catch (e) {
+      if (e instanceof NoWID)
         return {
-          response: `WID box is not in valid format (WID token is not the first token), please wait for the correction transaction`,
+          response: 'Could not find 2 WID tokens in watcher wallet',
           status: 400,
         };
-      }
-      inputBoxes.push(widBox);
-      userBoxes.boxes.forEach((box) => {
-        if (box.box_id().to_str() != widBox.box_id().to_str())
-          inputBoxes.push(box);
-      });
-    } else inputBoxes.push(...userBoxes.boxes);
+      else throw e;
+    }
 
     // generate RepoOut
     const RepoRWTCount = repoBox
@@ -648,32 +618,52 @@ export class Transaction {
       .amount()
       .as_i64()
       .checked_add(wasm.I64.from_str(RSNCount.toString()));
-    const inUsers: Array<Uint8Array> = R4.to_coll_coll_byte();
-    const R7 = WID
-      ? inUsers.map((item) => Buffer.from(item).toString('hex')).indexOf(WID)
-      : undefined;
-    const usersOut = WID
-      ? [...inUsers]
-      : [...inUsers, repoBox.box_id().as_bytes()];
-    const usersCount: Array<string> = R5.to_i64_str_array();
-    const usersCountOut = WID
-      ? usersCount.map((item, index) =>
-          index === R7 ? (BigInt(item) + RSNCount).toString() : item
-        )
-      : [...usersCount, RSNCount.toString()];
-
+    const AWCTokenCount = BigInt(
+      repoBox.tokens().get(3).amount().as_i64().to_str()
+    );
     const outBoxes: Array<wasm.ErgoBoxCandidate> = [];
+    const watcherCount = Number(R5.to_i64().to_str());
+    const chainId = R4.to_byte_array();
+
     outBoxes.push(
       await Transaction.boxes.createRepo(
         height,
         RepoRWTCount.to_str(),
         RSNTokenCount.to_str(),
-        usersOut,
-        usersCountOut,
-        R6,
-        R7
+        WID ? AWCTokenCount.toString() : (AWCTokenCount - 1n).toString(),
+        chainId,
+        WID ? watcherCount : watcherCount + 1
       )
     );
+
+    // generate collateral box
+    if (!WID) {
+      outBoxes.push(
+        await Transaction.boxes.createCollateralBox(
+          ErgCollateral,
+          height,
+          repoBox.box_id().to_str(),
+          RSNCount,
+          RSNCollateral
+        )
+      );
+    } else {
+      const collateralRwtCount = BigInt(
+        collateralBox!.register_value(5)!.to_i64().to_str()
+      );
+      const rsnCollateral = ErgoUtils.getBoxAssetsSum([collateralBox!]).filter(
+        (token) => token.tokenId == getConfig().rosen.RSN
+      );
+      outBoxes.push(
+        await Transaction.boxes.createCollateralBox(
+          ErgoUtils.getBoxValuesSum([collateralBox!]),
+          height,
+          WID,
+          collateralRwtCount + RSNCount,
+          rsnCollateral.length ? rsnCollateral[0].amount : 0n
+        )
+      );
+    }
     // generate watcherPermit
     outBoxes.push(
       await Transaction.boxes.createPermit(
@@ -688,28 +678,11 @@ export class Transaction {
         height,
         WID ? WID : repoBox.box_id().to_str(),
         Transaction.minBoxValue.as_i64().to_str(),
+        widCount ? widCount.toString() : WID_MINT_COUNT.toString(),
         wasm.Contract.pay_to_address(Transaction.userAddress),
         !WID
       )
     );
-    // generate collateral if required
-    if (!WID) {
-      outBoxes.push(
-        await Transaction.boxes.createCollateralBox(
-          {
-            nanoErgs: ErgCollateral,
-            tokens: [
-              {
-                tokenId: Transaction.RSN.to_str(),
-                amount: RSNCollateral,
-              },
-            ],
-          },
-          height,
-          repoBox.box_id().to_str()
-        )
-      );
-    }
     outBoxes.push(
       this.createChangeBox(
         inputBoxes,
@@ -734,10 +707,17 @@ export class Transaction {
       Transaction.fee,
       Transaction.userAddress
     );
+    const repoConfig = await Transaction.boxes.getRepoConfigBox();
+    if (!WID) {
+      const txDataInputs = new wasm.DataInputs();
+      txDataInputs.add(new wasm.DataInput(repoConfig.box_id()));
+      builder.set_data_inputs(txDataInputs);
+    }
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,
-      inBoxes
+      inBoxes,
+      new wasm.ErgoBoxes(repoConfig)
     );
     await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
     Transaction.watcherUnconfirmedWID = WID ? WID : repoBox.box_id().to_str();
@@ -750,18 +730,12 @@ export class Transaction {
   static getWatcherState = async () => {
     if (!Transaction.isSetupCalled)
       throw new Error("The Transaction class setup doesn't called");
-    logger.info('Getting watcher status');
-    if (Transaction.watcherPermitState === undefined) {
-      const repoBox = await Transaction.boxes.getRepoBox();
-      const R4 = repoBox.register_value(4);
-      logger.info(`Repo box id is: ${repoBox.box_id().to_str()}`);
-      if (R4) {
-        const users = R4.to_coll_coll_byte();
-        Transaction.watcherWID = await Transaction.getWID(users);
-        logger.info(`Watcher WID is set to: ${Transaction.watcherWID}`);
-        Transaction.watcherPermitState = Transaction.watcherWID !== '';
-      }
-    }
+    logger.info('Updating watcher status');
+    const allWids = await Transaction.watcherDatabase.getAllWids();
+    logger.debug(`All registered wids are ${allWids}`);
+    Transaction.watcherWID = await Transaction.getWID(allWids);
+    logger.info(`Watcher WID is set to: ${Transaction.watcherWID}`);
+    Transaction.watcherPermitState = Transaction.watcherWID !== '';
   };
 
   /**
