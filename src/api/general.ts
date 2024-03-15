@@ -5,10 +5,12 @@ import { ErgoUtils } from '../ergo/utils';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 import { Transaction } from './Transaction';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import packageJson from '../../package.json' assert { type: 'json' };
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 interface GeneralInfo {
+  version: string;
   currentBalance: bigint;
   network: string;
   permitsPerEvent: bigint;
@@ -34,6 +36,7 @@ generalRouter.get('/', async (req: Request, res: Response) => {
   try {
     const collateral = await Transaction.getInstance().getCollateral();
     const info: GeneralInfo = {
+      version: packageJson.version,
       currentBalance: (await ErgoUtils.getWatcherBalance()).nanoErgs,
       network: getConfig().general.networkWatcher,
       permitsPerEvent:
