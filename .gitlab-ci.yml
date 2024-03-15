@@ -5,6 +5,7 @@ stages:
   - test
   - installation_18
   - coverage
+  - changeset
 
 installation_16:
   image: node:16.19.1
@@ -63,6 +64,19 @@ installation_18:
       - node_modules
   script:
     - npm ci
+
+changeset:
+  image: node:18.14.0
+  stage: changeset
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    policy: pull
+    paths:
+      - node_modules
+  before_script:
+    - git fetch origin dev
+  script:
+    - npx changeset status --since=origin/dev
 
 coverage:
   image: node:18.14.0
