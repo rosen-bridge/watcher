@@ -16,7 +16,7 @@ const creationJob = async () => {
   try {
     const scannerSyncStatus =
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
-    if (scannerSyncStatus === HealthStatusLevel.HEALTHY) {
+    if (scannerSyncStatus !== HealthStatusLevel.BROKEN) {
       await commitmentCreatorObj.job();
       if (!redeemExecuted) {
         redeemExecuted = true;

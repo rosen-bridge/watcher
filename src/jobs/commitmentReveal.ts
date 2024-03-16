@@ -14,7 +14,7 @@ const revealJob = async () => {
   try {
     const scannerSyncStatus =
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
-    if (scannerSyncStatus === HealthStatusLevel.HEALTHY) {
+    if (scannerSyncStatus !== HealthStatusLevel.BROKEN) {
       await commitmentRevealingObj.job();
     } else {
       logger.info(

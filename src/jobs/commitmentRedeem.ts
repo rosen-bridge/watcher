@@ -14,7 +14,7 @@ const redeemJob = async () => {
   try {
     const scannerSyncStatus =
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
-    if (scannerSyncStatus === HealthStatusLevel.HEALTHY) {
+    if (scannerSyncStatus !== HealthStatusLevel.BROKEN) {
       await commitmentRedeemObj.job();
       if (getConfig().general.redeemSwapEnabled) {
         await commitmentRedeemObj.deadlockJob();
