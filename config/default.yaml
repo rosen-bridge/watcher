@@ -80,7 +80,7 @@ healthCheck:
     ergCriticalThreshold: 100000000 # minimum required erg balance
   ergoScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
-    criticalDifference: 100 # critical difference between existing and scanned blocks height
+    criticalDifference: 10 # critical difference between existing and scanned blocks height
   ergoNode:
     maxHeightDifference: 2 # maximum difference between header height and full height
     maxBlockTime: 30 # maximum time to see  a new block in minutes
