@@ -410,6 +410,7 @@ describe('Testing Box Creation', () => {
       const AWCCount = '10';
       const repoBox = await boxes.createRepo(
         0,
+        '1100000',
         RWTCount,
         RSNCount,
         AWCCount,

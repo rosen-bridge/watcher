@@ -508,6 +508,7 @@ export class Boxes {
    */
   createRepo = async (
     height: number,
+    value: string,
     RWTCount: string,
     RSNCount: string,
     AWCCount: string,
@@ -515,7 +516,7 @@ export class Boxes {
     watcherCount: number
   ) => {
     const repoBuilder = new wasm.ErgoBoxCandidateBuilder(
-      this.minBoxValue,
+      wasm.BoxValue.from_i64(wasm.I64.from_str(value)),
       this.repoAddressContract,
       height
     );

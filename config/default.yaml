@@ -38,7 +38,7 @@ ergo:
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
     confirmation: 4 # required block confirmations for sent transactions
-    commitmentTimeoutConfirmation: 4320 # required block confirmations for a commitment to redeem
+    commitmentTimeoutConfirmation: 720 # required block confirmations for a commitment to redeem
   interval:
     scanner: 180 # scanner update interval (in seconds)
     revenue: 120 # revenue update interval (in seconds)
@@ -80,7 +80,7 @@ healthCheck:
     ergCriticalThreshold: 100000000 # minimum required erg balance
   ergoScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
-    criticalDifference: 100 # critical difference between existing and scanned blocks height
+    criticalDifference: 10 # critical difference between existing and scanned blocks height
   ergoNode:
     maxHeightDifference: 2 # maximum difference between header height and full height
     maxBlockTime: 30 # maximum time to see  a new block in minutes

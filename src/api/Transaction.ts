@@ -181,6 +181,7 @@ export class Transaction {
     outputBoxes.push(
       await Transaction.boxes.createRepo(
         height,
+        repoBox.value().as_i64().to_str(),
         (
           BigInt(repoBox.tokens().get(1).amount().as_i64().to_str()) + RWTCount
         ).toString(),
@@ -322,7 +323,7 @@ export class Transaction {
   returnPermit = async (RWTCount: bigint): Promise<ApiResponse> => {
     const scannerSyncStatus =
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
-    if (scannerSyncStatus !== HealthStatusLevel.HEALTHY) {
+    if (scannerSyncStatus === HealthStatusLevel.BROKEN) {
       return {
         response: `Ergo scanner is not synced, please check your connection and wait more`,
         status: 400,
@@ -526,7 +527,7 @@ export class Transaction {
   getPermit = async (RSNCount: bigint): Promise<ApiResponse> => {
     const scannerSyncStatus =
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
-    if (scannerSyncStatus !== HealthStatusLevel.HEALTHY) {
+    if (scannerSyncStatus === HealthStatusLevel.BROKEN) {
       return {
         response: `Ergo scanner is not synced, please check your connection and wait more`,
         status: 400,
@@ -628,6 +629,7 @@ export class Transaction {
     outBoxes.push(
       await Transaction.boxes.createRepo(
         height,
+        repoBox.value().as_i64().to_str(),
         RepoRWTCount.to_str(),
         RSNTokenCount.to_str(),
         WID ? AWCTokenCount.toString() : (AWCTokenCount - 1n).toString(),
