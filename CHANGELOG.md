@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 2.0.2
+
+### Patch Changes
+
+- fix unlock api response schema
+
 ## 2.0.1
 
 ### Patch Changes
