@@ -24,7 +24,7 @@ import { HealthCheckSingleton } from '../utils/healthCheck';
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export type ApiResponse = {
-  response: string | string[];
+  response: string;
   status: number;
 };
 

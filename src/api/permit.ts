@@ -59,7 +59,7 @@ permitRouter.post(
         BigInt(RWTCount)
       );
       if (response.status === 200) {
-        res.status(200).send({ txIds: response.response });
+        res.status(200).send({ txId: response.response });
       } else {
         res.status(response.status).send({ message: response.response });
       }
