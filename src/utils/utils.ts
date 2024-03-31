@@ -30,6 +30,14 @@ const uint8ArrayToHex = (buffer: Uint8Array): string => {
 };
 
 /**
+ * Encodes the uint array to the base64 string
+ * @param buffer
+ */
+const uint8ArrayToBase64 = (buffer: Uint8Array): string => {
+  return Buffer.from(buffer).toString('base64');
+};
+
+/**
  * returns the decoded bigint input
  * @param num
  */
@@ -131,6 +139,7 @@ export {
   strToUint8Array,
   hexStrToUint8Array,
   uint8ArrayToHex,
+  uint8ArrayToBase64,
   delay,
   bigIntToUint8Array,
   generateSK,
