@@ -5,6 +5,8 @@
 ### Patch Changes
 
 - fix unlock api response schema
+- add salt to the apiKey to prevent precomputed hash attacks
+- solve mocha test coverage hanging problem
 
 ## 2.0.1
 
