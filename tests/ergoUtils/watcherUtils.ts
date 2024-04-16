@@ -27,8 +27,8 @@ import { NoObservationStatus } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
 import TransactionTest from '../../src/api/TransactionTest';
-import MinimumFee from '../../src/utils/MinimumFee';
-import { Fee } from '@rosen-bridge/minimum-fee';
+import MinimumFeeHandler from '../../src/utils/MinimumFeeHandler';
+import { ChainMinimumFee } from '@rosen-bridge/minimum-fee';
 
 chai.use(spies);
 
@@ -474,13 +474,15 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
      *   The function should return false since the bridgeFee + networkFee is greater than amount of observation
      */
     it('should return false since the bridgeFee + networkFee is greater than amount of observation', async () => {
-      const fee: Fee = {
+      const fee: ChainMinimumFee = {
         bridgeFee: 100000n,
         networkFee: 100000n,
         rsnRatio: 0n,
         feeRatio: 0n,
+        rsnRatioDivisor: 1000000000000n,
+        feeRatioDivisor: 10000n,
       };
-      chai.spy.on(MinimumFee, 'getEventFeeConfig', () => fee);
+      chai.spy.on(MinimumFeeHandler, 'getEventFeeConfig', () => fee);
 
       const data = await watcherUtils.hasValidAmount(observationEntity1);
       expect(data).to.be.false;
@@ -493,13 +495,15 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
      *   The function should return true since the bridgeFee + networkFee is less than amount of observation
      */
     it('should return true since the bridgeFee + networkFee is less than amount of observation', async () => {
-      const fee: Fee = {
+      const fee: ChainMinimumFee = {
         bridgeFee: 2n,
         networkFee: 2n,
         rsnRatio: 0n,
         feeRatio: 0n,
+        rsnRatioDivisor: 1000000000000n,
+        feeRatioDivisor: 10000n,
       };
-      chai.spy.on(MinimumFee, 'getEventFeeConfig', () => fee);
+      chai.spy.on(MinimumFeeHandler, 'getEventFeeConfig', () => fee);
 
       const data = await watcherUtils.hasValidAmount(observationEntity1);
       expect(data).to.be.true;

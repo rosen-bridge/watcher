@@ -39,6 +39,7 @@ class RosenConfig {
   readonly repoConfigAddress: string;
   readonly repoConfigNFT: string;
   readonly AWC: string;
+  readonly minimumFeeAddress: string;
 
   constructor(network: string, networkType: string, configRoot: string) {
     const rosenConfigPath = this.getAddress(network, networkType, configRoot);
@@ -66,6 +67,7 @@ class RosenConfig {
       this.repoConfigAddress = config.addresses.RepoConfig;
       this.repoConfigNFT = config.tokens.RepoConfigNFT;
       this.AWC = config.tokens.AwcNFT;
+      this.minimumFeeAddress = config.addresses.MinimumFeeAddress;
     }
   }
 

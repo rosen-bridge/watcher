@@ -15,7 +15,7 @@ import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
-import MinimumFee from './MinimumFee';
+import MinimumFeeHandler from './MinimumFeeHandler';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -81,7 +81,7 @@ class WatcherUtils {
    * @param observation
    */
   hasValidAmount = async (observation: ObservationEntity): Promise<boolean> => {
-    const feeConfig = await MinimumFee.getEventFeeConfig(observation);
+    const feeConfig = MinimumFeeHandler.getEventFeeConfig(observation);
     return (
       BigInt(observation.amount) >=
       BigInt(feeConfig.bridgeFee) + BigInt(feeConfig.networkFee)

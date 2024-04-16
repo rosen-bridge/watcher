@@ -88,6 +88,7 @@ class Config {
   commitmentTimeoutConfirmation: number;
   transactionCheckingInterval: number;
   widStatusCheckInterval: number;
+  minimumFeeUpdateInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
   redeemSwapEnabled: boolean;
@@ -178,6 +179,9 @@ class Config {
       'ergo.interval.transaction'
     );
     this.widStatusCheckInterval = getRequiredNumber('ergo.interval.wid.status');
+    this.minimumFeeUpdateInterval = getRequiredNumber(
+      'ergo.interval.minimumFee'
+    );
     this.transactionConfirmation = getRequiredNumber(
       'ergo.transaction.confirmation'
     );
