@@ -73,9 +73,7 @@ class MinimumFeeHandler {
    * gets minimum fee config for an observation on it's target chain
    * @param observation the observation
    */
-  static getEventFeeConfig = (
-    observation: ObservationEntity
-  ): ChainMinimumFee => {
+  getEventFeeConfig = (observation: ObservationEntity): ChainMinimumFee => {
     const instance = MinimumFeeHandler.getInstance();
 
     const tokenMap = getConfig().token.tokenMap;

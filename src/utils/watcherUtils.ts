@@ -81,7 +81,8 @@ class WatcherUtils {
    * @param observation
    */
   hasValidAmount = async (observation: ObservationEntity): Promise<boolean> => {
-    const feeConfig = MinimumFeeHandler.getEventFeeConfig(observation);
+    const feeConfig =
+      MinimumFeeHandler.getInstance().getEventFeeConfig(observation);
     return (
       BigInt(observation.amount) >=
       BigInt(feeConfig.bridgeFee) + BigInt(feeConfig.networkFee)

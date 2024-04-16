@@ -482,7 +482,9 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
         rsnRatioDivisor: 1000000000000n,
         feeRatioDivisor: 10000n,
       };
-      chai.spy.on(MinimumFeeHandler, 'getEventFeeConfig', () => fee);
+      const minimumFeeInstance = {};
+      chai.spy.on(MinimumFeeHandler, 'getInstance', () => minimumFeeInstance);
+      chai.spy.on(minimumFeeInstance, 'getEventFeeConfig', () => fee);
 
       const data = await watcherUtils.hasValidAmount(observationEntity1);
       expect(data).to.be.false;
@@ -503,7 +505,9 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
         rsnRatioDivisor: 1000000000000n,
         feeRatioDivisor: 10000n,
       };
-      chai.spy.on(MinimumFeeHandler, 'getEventFeeConfig', () => fee);
+      const minimumFeeInstance = {};
+      chai.spy.on(MinimumFeeHandler, 'getInstance', () => minimumFeeInstance);
+      chai.spy.on(minimumFeeInstance, 'getEventFeeConfig', () => fee);
 
       const data = await watcherUtils.hasValidAmount(observationEntity1);
       expect(data).to.be.true;
