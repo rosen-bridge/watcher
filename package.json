@@ -75,7 +75,7 @@
     "@emurgo/cip14-js": "^3.0.1",
     "@rosen-bridge/address-extractor": "^3.2.6",
     "@rosen-bridge/health-check": "^4.0.0",
-    "@rosen-bridge/minimum-fee": "^0.1.13",
+    "@rosen-bridge/minimum-fee": "^1.0.2",
     "@rosen-bridge/observation-extractor": "^4.3.0",
     "@rosen-bridge/scanner": "^3.2.6",
     "@rosen-bridge/watcher-data-extractor": "^5.1.0",

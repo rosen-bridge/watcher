@@ -50,6 +50,7 @@ ergo:
       redeem: 120 # commitment reveal interval (in seconds)
     wid:
       status: 120 # wid status check interval (in seconds)
+    minimumFee: 300
 path:
   addresses: config/rosen # addresses path
   # tokens: config/rosen/tokens.json # default tokens path.
