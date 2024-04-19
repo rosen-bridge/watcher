@@ -15,11 +15,13 @@ import { TransportOptions } from '@rosen-bridge/winston-logger';
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
   Constants.CARDANO_CHAIN_NAME,
+  Constants.BITCOIN_CHAIN_NAME,
 ];
 
 interface ConfigType {
   logger: LoggerConfig;
   cardano: CardanoConfig;
+  bitcoin: BitcoinConfig;
   general: Config;
   rosen: RosenConfig;
   token: TokensConfig;
@@ -337,6 +339,33 @@ class CardanoConfig {
   }
 }
 
+class BitcoinConfig {
+  type: string;
+  esplora?: {
+    url: string;
+    timeout: number;
+    initialHeight: number;
+    interval: number;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('bitcoin.type');
+    if (network === Constants.BITCOIN_CHAIN_NAME) {
+      if (this.type === Constants.ESPLORA_TYPE) {
+        const url = getRequiredString('bitcoin.esplora.url');
+        const interval = getRequiredNumber('bitcoin.esplora.interval');
+        const timeout = getRequiredNumber('bitcoin.esplora.timeout');
+        const initialHeight = getRequiredNumber('bitcoin.initial.height');
+        this.esplora = { url, initialHeight, interval, timeout };
+      } else {
+        throw new Error(
+          `Improperly configured. bitcoin configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class DatabaseConfig {
   type: string;
   path = '';
@@ -434,6 +463,7 @@ const getConfig = (): ConfigType => {
     const general = new Config();
     const logger = new LoggerConfig();
     const cardano = new CardanoConfig(general.networkWatcher);
+    const bitcoin = new BitcoinConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
       general.networkType,
@@ -444,6 +474,7 @@ const getConfig = (): ConfigType => {
     const healthCheck = new HealthCheckConfig();
     internalConfig = {
       cardano,
+      bitcoin,
       logger,
       general,
       rosen,
