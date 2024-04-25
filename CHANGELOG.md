@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 2.1.0
+
+### Minor Changes
+
+- Support Raspberry Pi from version 3 and above
+
 ## 2.0.2
 
 ### Patch Changes
