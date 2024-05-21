@@ -8,6 +8,7 @@ import {
 } from '@rosen-bridge/observation-extractor';
 import {
   BlockEntity,
+  ExtractorStatusEntity,
   migrations as scannerMigrations,
 } from '@rosen-bridge/scanner';
 import {
@@ -38,6 +39,7 @@ const dbConfigs = {
     PermitEntity,
     CollateralEntity,
     ObservationEntity,
+    ExtractorStatusEntity,
     TokenEntity,
     TxEntity,
     ObservationStatusEntity,
