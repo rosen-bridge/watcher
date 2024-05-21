@@ -341,22 +341,32 @@ class CardanoConfig {
 
 class BitcoinConfig {
   type: string;
+  initialHeight: number;
   esplora?: {
     url: string;
     timeout: number;
-    initialHeight: number;
+    interval: number;
+  };
+  rpc?: {
+    url: string;
+    timeout: number;
     interval: number;
   };
 
   constructor(network: string) {
     this.type = config.get<string>('bitcoin.type');
     if (network === Constants.BITCOIN_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('bitcoin.initial.height');
       if (this.type === Constants.ESPLORA_TYPE) {
         const url = getRequiredString('bitcoin.esplora.url');
         const interval = getRequiredNumber('bitcoin.esplora.interval');
         const timeout = getRequiredNumber('bitcoin.esplora.timeout');
-        const initialHeight = getRequiredNumber('bitcoin.initial.height');
-        this.esplora = { url, initialHeight, interval, timeout };
+        this.esplora = { url, interval, timeout };
+      } else if (this.type == Constants.RPC_TYPE) {
+        const url = getRequiredString('bitcoin.rpc.url');
+        const timeout = getRequiredNumber('bitcoin.rpc.timeout');
+        const interval = getRequiredNumber('bitcoin.rpc.interval');
+        this.rpc = { url, timeout, interval };
       } else {
         throw new Error(
           `Improperly configured. bitcoin configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`

@@ -4,13 +4,17 @@ observation:
   confirmation: 60 # number of required block confirmations to create the commitment after observing an event
   validThreshold: 12960 # observations that have not been triggered won't be processed after this period (in blocks)
 bitcoin:
-  type: '' # options: esplora
+  type: '' # options: esplora, rpc
   initial:
     height: -1 # initial height of scanning
   esplora:
     interval: 180 # esplora scanning interval (in seconds)
     timeout: 10 # esplora request timeout (in seconds)
     url: 'https://blockstream.info' # esplora url
+  rpc:
+    interval: 180 # rpc scanning interval (in seconds)
+    timeout: 10 # rpc request timeout (in seconds)
+    url: '' # rpc url
 cardano:
   type: '' # options: koios, ogmios, blockfrost
   initial:

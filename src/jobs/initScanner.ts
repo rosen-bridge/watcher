@@ -5,6 +5,7 @@ import {
   GeneralScanner,
 } from '@rosen-bridge/scanner';
 import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
+import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
 import * as Constants from '../config/constants';
 import { getConfig } from '../config/config';
 import { scanner } from '../utils/scanner';
@@ -52,6 +53,11 @@ export const scannerInit = () => {
       scanningJob(
         bitcoinConfig.esplora.interval,
         scanner.observationScanner as BitcoinEsploraScanner
+      ).then(() => null);
+    } else if (bitcoinConfig.rpc) {
+      scanningJob(
+        bitcoinConfig.rpc.interval,
+        scanner.observationScanner as BitcoinRpcScanner
       ).then(() => null);
     } else {
       throw new Error(

@@ -6,13 +6,17 @@ import {
   CardanoBlockFrostScanner,
 } from '@rosen-bridge/scanner';
 import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
+import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
 import {
   ErgoObservationExtractor,
   CardanoKoiosObservationExtractor,
   CardanoOgmiosObservationExtractor,
   CardanoBlockFrostObservationExtractor,
 } from '@rosen-bridge/observation-extractor';
-import { BitcoinEsploraObservationExtractor } from '@rosen-bridge/bitcoin-observation-extractor';
+import {
+  BitcoinEsploraObservationExtractor,
+  BitcoinRpcObservationExtractor,
+} from '@rosen-bridge/bitcoin-observation-extractor';
 import {
   CommitmentExtractor,
   PermitExtractor,
@@ -20,11 +24,11 @@ import {
   CollateralExtractor,
 } from '@rosen-bridge/watcher-data-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
 import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
 import * as Constants from '../config/constants';
-import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const allConfig = getConfig();
 const {
@@ -69,7 +73,8 @@ class CreateScanner {
     | CardanoKoiosScanner
     | CardanoOgmiosScanner
     | CardanoBlockFrostScanner
-    | BitcoinEsploraScanner;
+    | BitcoinEsploraScanner
+    | BitcoinRpcScanner;
 
   constructor() {
     this.createErgoScanner();
@@ -236,11 +241,29 @@ class CreateScanner {
             dataSource: dataSource,
             esploraUrl: bitcoinConfig.esplora.url,
             timeout: bitcoinConfig.esplora.timeout * 1000,
-            initialHeight: bitcoinConfig.esplora.initialHeight,
+            initialHeight: bitcoinConfig.initialHeight,
           },
           loggers.scannerLogger
         );
         const observationExtractor = new BitcoinEsploraObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          tokensConfig.tokens,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (bitcoinConfig.rpc) {
+        this.observationScanner = new BitcoinRpcScanner(
+          {
+            rpcUrl: bitcoinConfig.rpc.url,
+            timeout: bitcoinConfig.rpc.timeout * 1000,
+            initialHeight: bitcoinConfig.initialHeight,
+            dataSource: dataSource,
+          },
+          loggers.scannerLogger
+        );
+
+        const observationExtractor = new BitcoinRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
           tokensConfig.tokens,
