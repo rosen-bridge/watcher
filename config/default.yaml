@@ -102,6 +102,9 @@ healthCheck:
   cardanoScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 600 # critical difference between existing and scanned blocks height
+  bitcoinScanner:
+    warnDifference: 2 # warning difference between existing and scanned blocks height
+    criticalDifference: 10 # critical difference between existing and scanned blocks height
   permit:
     warnCommitmentCount: 4 # warning remaining permits for creating commitment
     criticalCommitmentCount: 0 # critical remaining permits for creating commitment

@@ -16,6 +16,8 @@ import {
   CardanoOgmiosScannerHealthCheck,
   ErgoExplorerScannerHealthCheck,
   ErgoNodeScannerHealthCheck,
+  BitcoinEsploraScannerHealthCheck,
+  BitcoinRPCScannerHealthCheck,
 } from '@rosen-bridge/scanner-sync-check';
 import {
   ExplorerWidHealthCheckParam,
@@ -28,13 +30,16 @@ import { dataSource } from '../../config/dataSource';
 import { Transaction } from '../../src/api/Transaction';
 import { getConfig } from '../config/config';
 import {
+  BITCOIN_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
+  ESPLORA_TYPE,
   EXPLORER_TYPE,
   KOIOS_TYPE,
   NODE_TYPE,
   OGMIOS_TYPE,
+  RPC_TYPE,
 } from '../config/constants';
 import { scanner } from './scanner';
 
@@ -71,6 +76,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === CARDANO_CHAIN_NAME) {
       this.registerCardanoHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
+      this.registerBitcoinHealthCheckParams();
     }
   }
 
@@ -176,6 +184,32 @@ class HealthCheckSingleton {
     }
     if (cardanoScannerSyncCheck)
       this.healthCheck.register(cardanoScannerSyncCheck);
+  };
+
+  /**
+   * Registers all bitcoin check params
+   */
+  registerBitcoinHealthCheckParams = () => {
+    let bitcoinScannerSyncCheck;
+    if (getConfig().bitcoin.type === RPC_TYPE) {
+      bitcoinScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
+        dataSource,
+        scanner.observationScanner.name(),
+        getConfig().healthCheck.bitcoinScannerWarnDiff,
+        getConfig().healthCheck.bitcoinScannerCriticalDiff,
+        getConfig().bitcoin.rpc!.url
+      );
+    } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
+      bitcoinScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
+        dataSource,
+        scanner.observationScanner.name(),
+        getConfig().healthCheck.bitcoinScannerWarnDiff,
+        getConfig().healthCheck.bitcoinScannerCriticalDiff,
+        getConfig().bitcoin.esplora!.url
+      );
+    }
+    if (bitcoinScannerSyncCheck)
+      this.healthCheck.register(bitcoinScannerSyncCheck);
   };
 
   /**

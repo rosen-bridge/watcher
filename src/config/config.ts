@@ -410,6 +410,8 @@ class HealthCheckConfig {
   ergoScannerCriticalDiff: number;
   cardanoScannerWarnDiff: number;
   cardanoScannerCriticalDiff: number;
+  bitcoinScannerWarnDiff: number;
+  bitcoinScannerCriticalDiff: number;
   ergoNodeMaxHeightDiff: number;
   ergoNodeMaxBlockTime: number;
   ergoNodeMinPeerCount: number;
@@ -451,6 +453,12 @@ class HealthCheckConfig {
     );
     this.cardanoScannerCriticalDiff = getRequiredNumber(
       'healthCheck.cardanoScanner.criticalDifference'
+    );
+    this.bitcoinScannerWarnDiff = getRequiredNumber(
+      'healthCheck.bitcoinScanner.warnDifference'
+    );
+    this.bitcoinScannerCriticalDiff = getRequiredNumber(
+      'healthCheck.bitcoinScanner.criticalDifference'
     );
     this.permitWarnCommitmentCount = getRequiredNumber(
       'healthCheck.permit.warnCommitmentCount'
