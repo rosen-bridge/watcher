@@ -25,6 +25,8 @@ import { healthRouter } from './api/healthCheck';
 import cors from 'cors';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 import { widStatusJob } from './jobs/widStatus';
+import MinimumFeeHandler from './utils/MinimumFeeHandler';
+import { minimumFeeUpdateJob } from './jobs/minimumFee';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -95,6 +97,9 @@ const init = async () => {
         getConfig().general.observationValidThreshold
       );
       const txUtils = new TransactionUtils(watcherDatabase);
+
+      await MinimumFeeHandler.init(getConfig().token.tokens);
+      minimumFeeUpdateJob();
       logger.debug('Initializing statistic object...');
       await Transaction.setup(
         getConfig().general.address,

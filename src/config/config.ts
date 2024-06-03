@@ -15,11 +15,13 @@ import { TransportOptions } from '@rosen-bridge/winston-logger';
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
   Constants.CARDANO_CHAIN_NAME,
+  Constants.BITCOIN_CHAIN_NAME,
 ];
 
 interface ConfigType {
   logger: LoggerConfig;
   cardano: CardanoConfig;
+  bitcoin: BitcoinConfig;
   general: Config;
   rosen: RosenConfig;
   token: TokensConfig;
@@ -88,6 +90,7 @@ class Config {
   commitmentTimeoutConfirmation: number;
   transactionCheckingInterval: number;
   widStatusCheckInterval: number;
+  minimumFeeUpdateInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
   redeemSwapEnabled: boolean;
@@ -178,6 +181,9 @@ class Config {
       'ergo.interval.transaction'
     );
     this.widStatusCheckInterval = getRequiredNumber('ergo.interval.wid.status');
+    this.minimumFeeUpdateInterval = getRequiredNumber(
+      'ergo.interval.minimumFee'
+    );
     this.transactionConfirmation = getRequiredNumber(
       'ergo.transaction.confirmation'
     );
@@ -333,6 +339,43 @@ class CardanoConfig {
   }
 }
 
+class BitcoinConfig {
+  type: string;
+  initialHeight: number;
+  esplora?: {
+    url: string;
+    timeout: number;
+    interval: number;
+  };
+  rpc?: {
+    url: string;
+    timeout: number;
+    interval: number;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('bitcoin.type');
+    if (network === Constants.BITCOIN_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('bitcoin.initial.height');
+      if (this.type === Constants.ESPLORA_TYPE) {
+        const url = getRequiredString('bitcoin.esplora.url');
+        const interval = getRequiredNumber('bitcoin.esplora.interval');
+        const timeout = getRequiredNumber('bitcoin.esplora.timeout');
+        this.esplora = { url, interval, timeout };
+      } else if (this.type == Constants.RPC_TYPE) {
+        const url = getRequiredString('bitcoin.rpc.url');
+        const timeout = getRequiredNumber('bitcoin.rpc.timeout');
+        const interval = getRequiredNumber('bitcoin.rpc.interval');
+        this.rpc = { url, timeout, interval };
+      } else {
+        throw new Error(
+          `Improperly configured. bitcoin configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class DatabaseConfig {
   type: string;
   path = '';
@@ -367,6 +410,8 @@ class HealthCheckConfig {
   ergoScannerCriticalDiff: number;
   cardanoScannerWarnDiff: number;
   cardanoScannerCriticalDiff: number;
+  bitcoinScannerWarnDiff: number;
+  bitcoinScannerCriticalDiff: number;
   ergoNodeMaxHeightDiff: number;
   ergoNodeMaxBlockTime: number;
   ergoNodeMinPeerCount: number;
@@ -409,6 +454,12 @@ class HealthCheckConfig {
     this.cardanoScannerCriticalDiff = getRequiredNumber(
       'healthCheck.cardanoScanner.criticalDifference'
     );
+    this.bitcoinScannerWarnDiff = getRequiredNumber(
+      'healthCheck.bitcoinScanner.warnDifference'
+    );
+    this.bitcoinScannerCriticalDiff = getRequiredNumber(
+      'healthCheck.bitcoinScanner.criticalDifference'
+    );
     this.permitWarnCommitmentCount = getRequiredNumber(
       'healthCheck.permit.warnCommitmentCount'
     );
@@ -430,6 +481,7 @@ const getConfig = (): ConfigType => {
     const general = new Config();
     const logger = new LoggerConfig();
     const cardano = new CardanoConfig(general.networkWatcher);
+    const bitcoin = new BitcoinConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
       general.networkType,
@@ -440,6 +492,7 @@ const getConfig = (): ConfigType => {
     const healthCheck = new HealthCheckConfig();
     internalConfig = {
       cardano,
+      bitcoin,
       logger,
       general,
       rosen,

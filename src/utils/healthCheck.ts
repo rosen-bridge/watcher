@@ -1,35 +1,47 @@
 import {
+  ErgoExplorerAssetHealthCheckParam,
+  ErgoNodeAssetHealthCheckParam,
+} from '@rosen-bridge/asset-check';
+import { HealthCheck, HealthStatusLevel } from '@rosen-bridge/health-check';
+import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
+import { ErgoNodeSyncHealthCheckParam } from '@rosen-bridge/node-sync-check';
+import {
   AbstractPermitHealthCheckParam,
+  ExplorerPermitHealthCheckParam,
+  NodePermitHealthCheckParam,
+} from '@rosen-bridge/permit-check';
+import {
+  AbstractScannerSyncHealthCheckParam,
   CardanoKoiosScannerHealthCheck,
   CardanoOgmiosScannerHealthCheck,
-  ErgoExplorerAssetHealthCheckParam,
   ErgoExplorerScannerHealthCheck,
-  ErgoNodeAssetHealthCheckParam,
   ErgoNodeScannerHealthCheck,
-  ErgoNodeSyncHealthCheckParam,
-  ExplorerPermitHealthCheckParam,
-  ExplorerWidHealthCheckParam,
-  HealthCheck,
-  HealthStatusLevel,
-  LogLevelHealthCheck,
-  NodePermitHealthCheckParam,
-  NodeWidHealthCheckParam,
-} from '@rosen-bridge/health-check';
-import { getConfig } from '../config/config';
-import { dataSource } from '../../config/dataSource';
+  BitcoinEsploraScannerHealthCheck,
+  BitcoinRPCScannerHealthCheck,
+} from '@rosen-bridge/scanner-sync-check';
 import {
+  ExplorerWidHealthCheckParam,
+  NodeWidHealthCheckParam,
+} from '@rosen-bridge/wid-check';
+
+import WinstonLogger from '@rosen-bridge/winston-logger';
+
+import { dataSource } from '../../config/dataSource';
+import { Transaction } from '../../src/api/Transaction';
+import { getConfig } from '../config/config';
+import {
+  BITCOIN_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
-  OGMIOS_TYPE,
+  ERGO_DECIMALS,
+  ERGO_NATIVE_ASSET,
+  ESPLORA_TYPE,
+  EXPLORER_TYPE,
   KOIOS_TYPE,
   NODE_TYPE,
-  EXPLORER_TYPE,
-  ERGO_NATIVE_ASSET,
-  ERGO_DECIMALS,
+  OGMIOS_TYPE,
+  RPC_TYPE,
 } from '../config/constants';
 import { scanner } from './scanner';
-import { Transaction } from '../../src/api/Transaction';
-import WinstonLogger from '@rosen-bridge/winston-logger';
-import { AbstractScannerSyncHealthCheckParam } from '@rosen-bridge/health-check';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -64,6 +76,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === CARDANO_CHAIN_NAME) {
       this.registerCardanoHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
+      this.registerBitcoinHealthCheckParams();
     }
   }
 
@@ -169,6 +184,32 @@ class HealthCheckSingleton {
     }
     if (cardanoScannerSyncCheck)
       this.healthCheck.register(cardanoScannerSyncCheck);
+  };
+
+  /**
+   * Registers all bitcoin check params
+   */
+  registerBitcoinHealthCheckParams = () => {
+    let bitcoinScannerSyncCheck;
+    if (getConfig().bitcoin.type === RPC_TYPE) {
+      bitcoinScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
+        dataSource,
+        scanner.observationScanner.name(),
+        getConfig().healthCheck.bitcoinScannerWarnDiff,
+        getConfig().healthCheck.bitcoinScannerCriticalDiff,
+        getConfig().bitcoin.rpc!.url
+      );
+    } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
+      bitcoinScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
+        dataSource,
+        scanner.observationScanner.name(),
+        getConfig().healthCheck.bitcoinScannerWarnDiff,
+        getConfig().healthCheck.bitcoinScannerCriticalDiff,
+        getConfig().bitcoin.esplora!.url
+      );
+    }
+    if (bitcoinScannerSyncCheck)
+      this.healthCheck.register(bitcoinScannerSyncCheck);
   };
 
   /**

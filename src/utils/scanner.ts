@@ -5,6 +5,8 @@ import {
   ErgoNetworkType,
   CardanoBlockFrostScanner,
 } from '@rosen-bridge/scanner';
+import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
+import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
 import {
   ErgoObservationExtractor,
   CardanoKoiosObservationExtractor,
@@ -12,17 +14,21 @@ import {
   CardanoBlockFrostObservationExtractor,
 } from '@rosen-bridge/observation-extractor';
 import {
+  BitcoinEsploraObservationExtractor,
+  BitcoinRpcObservationExtractor,
+} from '@rosen-bridge/bitcoin-observation-extractor';
+import {
   CommitmentExtractor,
   PermitExtractor,
   EventTriggerExtractor,
   CollateralExtractor,
 } from '@rosen-bridge/watcher-data-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
 import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
 import * as Constants from '../config/constants';
-import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const allConfig = getConfig();
 const {
@@ -30,6 +36,7 @@ const {
   token: tokensConfig,
   rosen: rosenConfig,
   cardano: cardanoConfig,
+  bitcoin: bitcoinConfig,
 } = allConfig;
 
 /**
@@ -65,12 +72,16 @@ class CreateScanner {
     | ErgoScanner
     | CardanoKoiosScanner
     | CardanoOgmiosScanner
-    | CardanoBlockFrostScanner;
+    | CardanoBlockFrostScanner
+    | BitcoinEsploraScanner
+    | BitcoinRpcScanner;
 
   constructor() {
     this.createErgoScanner();
     if (config.networkWatcher === Constants.CARDANO_CHAIN_NAME)
       this.createCardanoScanner();
+    else if (config.networkWatcher === Constants.BITCOIN_CHAIN_NAME)
+      this.createBitcoinScanner();
     if (!this.observationScanner)
       throw Error(
         'Observation scanner initialization failed, check the watcher network to be correct'
@@ -215,6 +226,47 @@ class CreateScanner {
           dataSource,
           tokensConfig.tokens,
           rosenConfig.lockAddress,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      }
+    }
+  };
+
+  private createBitcoinScanner = () => {
+    if (!this.observationScanner) {
+      if (bitcoinConfig.esplora) {
+        this.observationScanner = new BitcoinEsploraScanner(
+          {
+            dataSource: dataSource,
+            esploraUrl: bitcoinConfig.esplora.url,
+            timeout: bitcoinConfig.esplora.timeout * 1000,
+            initialHeight: bitcoinConfig.initialHeight,
+          },
+          loggers.scannerLogger
+        );
+        const observationExtractor = new BitcoinEsploraObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          tokensConfig.tokens,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (bitcoinConfig.rpc) {
+        this.observationScanner = new BitcoinRpcScanner(
+          {
+            rpcUrl: bitcoinConfig.rpc.url,
+            timeout: bitcoinConfig.rpc.timeout * 1000,
+            initialHeight: bitcoinConfig.initialHeight,
+            dataSource: dataSource,
+          },
+          loggers.scannerLogger
+        );
+
+        const observationExtractor = new BitcoinRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          tokensConfig.tokens,
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);

@@ -73,13 +73,23 @@
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
-    "@rosen-bridge/address-extractor": "^3.2.6",
-    "@rosen-bridge/health-check": "^4.0.0",
-    "@rosen-bridge/minimum-fee": "^0.1.13",
-    "@rosen-bridge/observation-extractor": "^4.3.0",
-    "@rosen-bridge/scanner": "^3.2.6",
-    "@rosen-bridge/watcher-data-extractor": "^5.1.0",
+    "@rosen-bridge/address-extractor": "^4.0.0",
+    "@rosen-bridge/asset-check": "^0.2.0",
+    "@rosen-bridge/bitcoin-esplora-scanner": "^0.1.5",
+    "@rosen-bridge/bitcoin-observation-extractor": "^3.0.0",
+    "@rosen-bridge/bitcoin-rpc-scanner": "^0.1.1",
+    "@rosen-bridge/health-check": "^5.0.0",
+    "@rosen-bridge/log-level-check": "^0.1.1",
+    "@rosen-bridge/minimum-fee": "^2.0.1",
+    "@rosen-bridge/node-sync-check": "^0.1.1",
+    "@rosen-bridge/observation-extractor": "^4.4.4",
+    "@rosen-bridge/permit-check": "^0.1.1",
+    "@rosen-bridge/scanner": "^4.0.0",
+    "@rosen-bridge/scanner-sync-check": "^0.2.0",
+    "@rosen-bridge/watcher-data-extractor": "^6.0.0",
+    "@rosen-bridge/wid-check": "^0.1.1",
     "@rosen-bridge/winston-logger": "0.2.1",
+    "@rosen-clients/cardano-koios": "^2.0.3",
     "axios": "^0.26.1",
     "bip39": "^3.1.0",
     "blakejs": "^1.2.1",
@@ -98,6 +108,6 @@
     "sqlite3": "^5.0.2",
     "supertest": "^6.3.0",
     "tsconfig-paths": "^4.0.0",
-    "typeorm": "^0.3.6"
+    "typeorm": "^0.3.20"
   }
 }

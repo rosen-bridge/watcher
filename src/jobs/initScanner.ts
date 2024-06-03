@@ -4,7 +4,8 @@ import {
   CardanoOgmiosScanner,
   GeneralScanner,
 } from '@rosen-bridge/scanner';
-
+import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
+import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
 import * as Constants from '../config/constants';
 import { getConfig } from '../config/config';
 import { scanner } from '../utils/scanner';
@@ -26,9 +27,9 @@ const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
 export const scannerInit = () => {
   const allConfig = getConfig();
   const config = allConfig.general;
-  const cardanoConfig = allConfig.cardano;
   scanningJob(config.ergoInterval, scanner.ergoScanner).then(() => null);
   if (config.networkWatcher === Constants.CARDANO_CHAIN_NAME) {
+    const cardanoConfig = allConfig.cardano;
     if (cardanoConfig.ogmios)
       (scanner.observationScanner as CardanoOgmiosScanner).start();
     else if (cardanoConfig.koios) {
@@ -40,6 +41,23 @@ export const scannerInit = () => {
       scanningJob(
         cardanoConfig.blockfrost.interval,
         scanner.observationScanner as CardanoBlockFrostScanner
+      ).then(() => null);
+    } else {
+      throw new Error(
+        `The observing network [${config.networkWatcher}] is not supported`
+      );
+    }
+  } else if (config.networkWatcher === Constants.BITCOIN_CHAIN_NAME) {
+    const bitcoinConfig = allConfig.bitcoin;
+    if (bitcoinConfig.esplora) {
+      scanningJob(
+        bitcoinConfig.esplora.interval,
+        scanner.observationScanner as BitcoinEsploraScanner
+      ).then(() => null);
+    } else if (bitcoinConfig.rpc) {
+      scanningJob(
+        bitcoinConfig.rpc.interval,
+        scanner.observationScanner as BitcoinRpcScanner
       ).then(() => null);
     } else {
       throw new Error(

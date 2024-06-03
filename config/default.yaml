@@ -1,8 +1,20 @@
 ---
-network: '' # which scanner network used in this watcher ergo/cardano
+network: '' # which scanner network used in this watcher ergo/cardano/bitcoin
 observation:
   confirmation: 60 # number of required block confirmations to create the commitment after observing an event
   validThreshold: 12960 # observations that have not been triggered won't be processed after this period (in blocks)
+bitcoin:
+  type: '' # options: esplora, rpc
+  initial:
+    height: -1 # initial height of scanning
+  esplora:
+    interval: 180 # esplora scanning interval (in seconds)
+    timeout: 10 # esplora request timeout (in seconds)
+    url: 'https://blockstream.info' # esplora url
+  rpc:
+    interval: 180 # rpc scanning interval (in seconds)
+    timeout: 10 # rpc request timeout (in seconds)
+    url: '' # rpc url
 cardano:
   type: '' # options: koios, ogmios, blockfrost
   initial:
@@ -50,6 +62,7 @@ ergo:
       redeem: 120 # commitment reveal interval (in seconds)
     wid:
       status: 120 # wid status check interval (in seconds)
+    minimumFee: 300
 path:
   addresses: config/rosen # addresses path
   # tokens: config/rosen/tokens.json # default tokens path.
@@ -89,6 +102,9 @@ healthCheck:
   cardanoScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 600 # critical difference between existing and scanned blocks height
+  bitcoinScanner:
+    warnDifference: 2 # warning difference between existing and scanned blocks height
+    criticalDifference: 10 # critical difference between existing and scanned blocks height
   permit:
     warnCommitmentCount: 4 # warning remaining permits for creating commitment
     criticalCommitmentCount: 0 # critical remaining permits for creating commitment
