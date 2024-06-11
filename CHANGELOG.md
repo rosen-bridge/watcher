@@ -1,5 +1,22 @@
 # @rosen-bridge/watcher
 
+## 3.0.0
+
+### Major Changes
+
+- Update minimum-fee to v1
+
+### Minor Changes
+
+- Upgrade health check package to latest
+- Add bitcoin network
+- Integrate rpc scanner for bitcoin network
+
+### Patch Changes
+
+- Update typeorm version to 0.3.20
+- Update minimum-fee and health-check packages
+
 ## 2.1.0
 
 ### Minor Changes
