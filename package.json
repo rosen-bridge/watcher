@@ -1,6 +1,6 @@
 {
   "name": "@rosen-bridge/watcher",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Rosen bridge Watcher service",
   "main": "index.js",
   "type": "module",
@@ -10,14 +10,15 @@
     "madge": "npx madge --circular --extensions ts ./",
     "prettify": "prettier --write . --ignore-path ./.gitignore",
     "start": "ts-node --experimental-specifier-resolution=node ./src/index.ts",
-    "test": "NODE_ENV=\"test\" mocha --slow 3000",
+    "test": "NODE_ENV=\"test\" mocha --exit --slow 3000",
     "type-check": "tsc --noEmit",
     "typeorm:generate:sqlite": "npm run typeorm migration:generate ./src/database/migrations/sqlite/watcherMigration -- -p -d ./config/dataSource.ts",
     "typeorm:generate:postgres": "npm run typeorm migration:generate ./src/database/migrations/postgres/watcherMigration -- -p -d ./config/dataSource.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
     "typeorm": "NODE_OPTIONS=--experimental-specifier-resolution=node typeorm-ts-node-esm",
     "build": "rollup --config ./rollup.config.ts --configPlugin @rollup/plugin-typescript",
-    "release": "npm run build && pkg ./out/index.cjs --targets host --out-path bin"
+    "release": "npm run build && pkg ./out/index.cjs --targets host --out-path bin",
+    "version": "npx changeset version && npm i"
   },
   "repository": {
     "type": "git",
@@ -27,11 +28,13 @@
   "author": "Rosen Team",
   "license": "ISC",
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-typescript": "^11.1.1",
     "@rollup/plugin-virtual": "^3.0.1",
+    "@rosen-bridge/changeset-formatter": "^0.1.0",
     "@rosen-bridge/rollup-plugin-node-wasm": "^0.1.0",
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.5",
@@ -71,13 +74,23 @@
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
-    "@rosen-bridge/address-extractor": "^3.2.1",
-    "@rosen-bridge/health-check": "^3.0.1",
-    "@rosen-bridge/minimum-fee": "^0.1.13",
-    "@rosen-bridge/observation-extractor": "^4.2.1",
-    "@rosen-bridge/scanner": "^3.2.1",
-    "@rosen-bridge/watcher-data-extractor": "^4.2.3",
+    "@rosen-bridge/address-extractor": "^4.0.0",
+    "@rosen-bridge/asset-check": "^0.2.0",
+    "@rosen-bridge/bitcoin-esplora-scanner": "^0.1.5",
+    "@rosen-bridge/bitcoin-observation-extractor": "^3.0.0",
+    "@rosen-bridge/bitcoin-rpc-scanner": "^0.1.1",
+    "@rosen-bridge/health-check": "^5.0.0",
+    "@rosen-bridge/log-level-check": "^0.1.1",
+    "@rosen-bridge/minimum-fee": "^2.0.1",
+    "@rosen-bridge/node-sync-check": "^0.1.1",
+    "@rosen-bridge/observation-extractor": "^4.4.4",
+    "@rosen-bridge/permit-check": "^0.1.1",
+    "@rosen-bridge/scanner": "^4.0.0",
+    "@rosen-bridge/scanner-sync-check": "^0.2.0",
+    "@rosen-bridge/watcher-data-extractor": "^6.0.0",
+    "@rosen-bridge/wid-check": "^0.1.1",
     "@rosen-bridge/winston-logger": "0.2.1",
+    "@rosen-clients/cardano-koios": "^2.0.3",
     "axios": "^0.26.1",
     "bip39": "^3.1.0",
     "blakejs": "^1.2.1",
@@ -96,6 +109,6 @@
     "sqlite3": "^5.0.2",
     "supertest": "^6.3.0",
     "tsconfig-paths": "^4.0.0",
-    "typeorm": "^0.3.6"
+    "typeorm": "^0.3.20"
   }
 }

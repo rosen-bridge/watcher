@@ -13,8 +13,6 @@ import { reveal } from './jobs/commitmentReveal';
 import { transactionQueueJob } from './jobs/transactionQueue';
 import { delay } from './utils/utils';
 import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
-import Statistics from './statistics/statistics';
-import { statisticsRouter } from './statistics/apis';
 import { getConfig } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
@@ -26,6 +24,9 @@ import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
 import cors from 'cors';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { widStatusJob } from './jobs/widStatus';
+import MinimumFeeHandler from './utils/MinimumFeeHandler';
+import { minimumFeeUpdateJob } from './jobs/minimumFee';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -68,7 +69,6 @@ const init = async () => {
     const router = Router();
     router.use('/address', addressRouter);
     router.use('/permit', permitRouter);
-    router.use('/statistics', statisticsRouter);
     router.use('/observation', observationRouter);
     router.use('/info', generalRouter);
     router.use('/events', eventsRouter);
@@ -97,9 +97,10 @@ const init = async () => {
         getConfig().general.observationValidThreshold
       );
       const txUtils = new TransactionUtils(watcherDatabase);
+
+      await MinimumFeeHandler.init(getConfig().token.tokens);
+      minimumFeeUpdateJob();
       logger.debug('Initializing statistic object...');
-      Statistics.setup(watcherDatabase, Transaction.watcherWID);
-      Statistics.getInstance();
       await Transaction.setup(
         getConfig().general.address,
         getConfig().general.secretKey,
@@ -109,6 +110,8 @@ const init = async () => {
       Transaction.getInstance();
 
       logger.debug('Initializing job threads...');
+      // Starting HealthCheck jobs
+      healthCheckJob(boxesObject);
       // Running transaction checking thread
       transactionQueueJob(watcherDatabase, watcherUtils);
       // Running commitment creation thread
@@ -121,8 +124,8 @@ const init = async () => {
       tokenNameJob([]);
       // Running revenue thread
       revenueJob();
-      // Starting HealthCheck jobs
-      healthCheckJob(boxesObject);
+      // Starting WID status jobs
+      widStatusJob();
 
       logger.debug('Service initialization finished successfully.');
     })

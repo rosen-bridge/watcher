@@ -316,19 +316,26 @@ export class ErgoUtils {
   };
 
   /**
-   * returns the required number of commitments to merge creating an event trigger
+   * returns the required number of commitments for creating a new event trigger
+   * read configs from repoConfig box and uses the repo box to find the total number of registered watchers
    * @param repo
+   * @param repoConfig
    */
-  static requiredCommitmentCount = (repo: wasm.ErgoBox): bigint => {
-    const R6 = repo.register_value(6);
-    const R4 = repo.register_value(4);
-    if (!R6 || !R4) throw new Error('Bad Repo Box response');
-    const r6: Array<string> = R6.to_i64_str_array();
-    const r4 = R4.to_coll_coll_byte();
-    const max = BigInt(r6[3]);
-    const min = BigInt(r6[2]);
-    const percentage = parseInt(r6[1]);
-    const watcherCount = r4.length;
+  static requiredCommitmentCount = (
+    repo: wasm.ErgoBox,
+    repoConfig: wasm.ErgoBox
+  ): bigint => {
+    const R5 = repo.register_value(5);
+    const configRegister = repoConfig.register_value(4);
+    if (!R5 || !configRegister)
+      throw new Error(
+        'rwtRepo or repoConfig registers is not in a valid format'
+      );
+    const configs = configRegister.to_i64_str_array();
+    const max = BigInt(configs[3]);
+    const min = BigInt(configs[2]);
+    const percentage = parseInt(configs[1]);
+    const watcherCount = Number(R5.to_i64().to_str());
     const formula =
       min + BigInt(Math.ceil((percentage * (watcherCount - 1)) / 100));
     return max < formula ? max : formula;

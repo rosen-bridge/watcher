@@ -15,7 +15,7 @@ import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import { scanner } from './scanner';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
-import MinimumFee from './MinimumFee';
+import MinimumFeeHandler from './MinimumFeeHandler';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -81,7 +81,8 @@ class WatcherUtils {
    * @param observation
    */
   hasValidAmount = async (observation: ObservationEntity): Promise<boolean> => {
-    const feeConfig = await MinimumFee.getEventFeeConfig(observation);
+    const feeConfig =
+      MinimumFeeHandler.getInstance().getEventFeeConfig(observation);
     return (
       BigInt(observation.amount) >=
       BigInt(feeConfig.bridgeFee) + BigInt(feeConfig.networkFee)
@@ -350,10 +351,18 @@ class WatcherUtils {
     const eventTrigger = await this.dataBase.eventTriggerByEventId(
       commitment.eventId
     );
+
+    if (eventTrigger == null) {
+      return false;
+    }
+
+    const commitmentWIDs = (
+      await this.dataBase.commitmentsBySpendTxId(eventTrigger?.txId)
+    ).map((comm) => comm.WID);
+
     return (
-      eventTrigger !== null &&
       commitment.height < eventTrigger.height &&
-      !eventTrigger.WIDs.split(',').includes(commitment.WID)
+      !commitmentWIDs.includes(commitment.WID)
     );
   };
 }

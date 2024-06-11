@@ -1,34 +1,47 @@
 import {
+  ErgoExplorerAssetHealthCheckParam,
+  ErgoNodeAssetHealthCheckParam,
+} from '@rosen-bridge/asset-check';
+import { HealthCheck, HealthStatusLevel } from '@rosen-bridge/health-check';
+import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
+import { ErgoNodeSyncHealthCheckParam } from '@rosen-bridge/node-sync-check';
+import {
   AbstractPermitHealthCheckParam,
+  ExplorerPermitHealthCheckParam,
+  NodePermitHealthCheckParam,
+} from '@rosen-bridge/permit-check';
+import {
+  AbstractScannerSyncHealthCheckParam,
   CardanoKoiosScannerHealthCheck,
   CardanoOgmiosScannerHealthCheck,
-  ErgoExplorerAssetHealthCheckParam,
   ErgoExplorerScannerHealthCheck,
-  ErgoNodeAssetHealthCheckParam,
   ErgoNodeScannerHealthCheck,
-  ErgoNodeSyncHealthCheckParam,
-  ExplorerPermitHealthCheckParam,
-  ExplorerWidHealthCheckParam,
-  HealthCheck,
-  HealthStatusLevel,
-  LogLevelHealthCheck,
-  NodePermitHealthCheckParam,
-  NodeWidHealthCheckParam,
-} from '@rosen-bridge/health-check';
-import { getConfig } from '../config/config';
-import { dataSource } from '../../config/dataSource';
+  BitcoinEsploraScannerHealthCheck,
+  BitcoinRPCScannerHealthCheck,
+} from '@rosen-bridge/scanner-sync-check';
 import {
+  ExplorerWidHealthCheckParam,
+  NodeWidHealthCheckParam,
+} from '@rosen-bridge/wid-check';
+
+import WinstonLogger from '@rosen-bridge/winston-logger';
+
+import { dataSource } from '../../config/dataSource';
+import { Transaction } from '../../src/api/Transaction';
+import { getConfig } from '../config/config';
+import {
+  BITCOIN_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
-  OGMIOS_TYPE,
+  ERGO_DECIMALS,
+  ERGO_NATIVE_ASSET,
+  ESPLORA_TYPE,
+  EXPLORER_TYPE,
   KOIOS_TYPE,
   NODE_TYPE,
-  EXPLORER_TYPE,
-  ERGO_NATIVE_ASSET,
-  ERGO_DECIMALS,
+  OGMIOS_TYPE,
+  RPC_TYPE,
 } from '../config/constants';
 import { scanner } from './scanner';
-import { Transaction } from '../../src/api/Transaction';
-import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -36,6 +49,7 @@ class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
   private healthCheck: HealthCheck;
   private permitHealthCheckParam: AbstractPermitHealthCheckParam;
+  private ergoScannerSyncCheckParam: AbstractScannerSyncHealthCheckParam;
 
   static getInstance = () => {
     if (!HealthCheckSingleton.instance) {
@@ -63,6 +77,9 @@ class HealthCheckSingleton {
     if (getConfig().general.networkWatcher === CARDANO_CHAIN_NAME) {
       this.registerCardanoHealthCheckParams();
     }
+    if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
+      this.registerBitcoinHealthCheckParams();
+    }
   }
 
   /**
@@ -70,8 +87,8 @@ class HealthCheckSingleton {
    */
   registerErgoNodeHealthCheckParams = () => {
     const widHealthCheck = new NodeWidHealthCheckParam(
-      getConfig().rosen.RWTRepoAddress,
-      getConfig().rosen.RepoNFT,
+      getConfig().rosen.watcherCollateralAddress,
+      getConfig().rosen.AWC,
       getConfig().general.address,
       getConfig().general.nodeUrl
     );
@@ -88,14 +105,14 @@ class HealthCheckSingleton {
     );
     this.healthCheck.register(assetHealthCheck);
 
-    const ergoScannerSyncCheck = new ErgoNodeScannerHealthCheck(
+    this.ergoScannerSyncCheckParam = new ErgoNodeScannerHealthCheck(
       dataSource,
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.nodeUrl
     );
-    this.healthCheck.register(ergoScannerSyncCheck);
+    this.healthCheck.register(this.ergoScannerSyncCheckParam);
 
     const ergoNodeSyncCheck = new ErgoNodeSyncHealthCheckParam(
       getConfig().healthCheck.ergoNodeMaxHeightDiff,
@@ -112,8 +129,8 @@ class HealthCheckSingleton {
    */
   registerErgoExplorerHealthCheckParams = () => {
     const widHealthCheck = new ExplorerWidHealthCheckParam(
-      getConfig().rosen.RWTRepoAddress,
-      getConfig().rosen.RepoNFT,
+      getConfig().rosen.watcherCollateralAddress,
+      getConfig().rosen.AWC,
       getConfig().general.address,
       getConfig().general.explorerUrl
     );
@@ -130,14 +147,14 @@ class HealthCheckSingleton {
     );
     this.healthCheck.register(assetHealthCheck);
 
-    const ergoScannerSyncCheck = new ErgoExplorerScannerHealthCheck(
+    this.ergoScannerSyncCheckParam = new ErgoExplorerScannerHealthCheck(
       dataSource,
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.explorerUrl
     );
-    this.healthCheck.register(ergoScannerSyncCheck);
+    this.healthCheck.register(this.ergoScannerSyncCheckParam);
   };
 
   /**
@@ -167,6 +184,32 @@ class HealthCheckSingleton {
     }
     if (cardanoScannerSyncCheck)
       this.healthCheck.register(cardanoScannerSyncCheck);
+  };
+
+  /**
+   * Registers all bitcoin check params
+   */
+  registerBitcoinHealthCheckParams = () => {
+    let bitcoinScannerSyncCheck;
+    if (getConfig().bitcoin.type === RPC_TYPE) {
+      bitcoinScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
+        dataSource,
+        scanner.observationScanner.name(),
+        getConfig().healthCheck.bitcoinScannerWarnDiff,
+        getConfig().healthCheck.bitcoinScannerCriticalDiff,
+        getConfig().bitcoin.rpc!.url
+      );
+    } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
+      bitcoinScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
+        dataSource,
+        scanner.observationScanner.name(),
+        getConfig().healthCheck.bitcoinScannerWarnDiff,
+        getConfig().healthCheck.bitcoinScannerCriticalDiff,
+        getConfig().bitcoin.esplora!.url
+      );
+    }
+    if (bitcoinScannerSyncCheck)
+      this.healthCheck.register(bitcoinScannerSyncCheck);
   };
 
   /**
@@ -253,6 +296,12 @@ class HealthCheckSingleton {
    * @param paramName
    */
   updateParam = (paramName: string) => this.healthCheck.updateParam(paramName);
+
+  /**
+   * Get ergo scanner sync health status
+   */
+  getErgoScannerSyncHealth = () =>
+    this.ergoScannerSyncCheckParam.getHealthStatus();
 }
 
 export { HealthCheckSingleton };

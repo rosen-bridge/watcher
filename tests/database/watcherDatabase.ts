@@ -356,6 +356,7 @@ describe('WatcherModel tests', () => {
         1000,
         'reqId1'
       );
+      firstStatisticCommitment;
     });
   });
 
@@ -533,28 +534,19 @@ describe('WatcherModel tests', () => {
     });
   });
 
-  describe('commitmentByWID', () => {
+  describe('commitmentsBySpendTxId', () => {
     /**
-     * Target: testing commitmentByWID
+     * Target: testing commitmentsBySpendTxId
      * Expected Output:
-     *    The function should return one specific commitment
+     *    The function should return one commitment
      */
-    it('should return first commitment with specific WID', async () => {
-      const data = await DB.commitmentByWID('WIDStatistics', 0, 1);
-      expect(data).to.be.eql([firstStatisticCommitment]);
-    });
-
-    /**
-     * Target: testing commitmentByWID
-     * Expected Output:
-     *    The function should return two specific commitment
-     */
-    it('should return two commitment with specific WID with offset 1', async () => {
-      const data = await DB.commitmentByWID('WIDStatistics', 1, 2);
-      expect(data).to.be.eql([
-        secondStatisticCommitment,
-        thirdStatisticCommitment,
-      ]);
+    it('should return one commitment', async () => {
+      await commitmentRepo.insert(spentCommitmentEntityOfWID);
+      const data = await DB.commitmentsBySpendTxId('spendTx');
+      expect(data).to.have.length(1);
+      await commitmentRepo.delete({
+        eventId: spentCommitmentEntityOfWID.eventId,
+      });
     });
   });
 
@@ -571,55 +563,6 @@ describe('WatcherModel tests', () => {
       await commitmentRepo.delete({
         eventId: spentCommitmentEntityOfWID.eventId,
       });
-    });
-  });
-
-  describe('commitmentsByWIDCount', () => {
-    /**
-     * Target: testing commitmentsByWIDCount
-     * Expected Output:
-     *    The function should return 3
-     */
-    it('should return counts of commitments with specific WID', async () => {
-      const data = await DB.commitmentsByWIDCount('WIDStatistics');
-      expect(data).to.be.equal(3);
-    });
-  });
-
-  describe('eventTriggersByWIDCount', () => {
-    /**
-     * Target: testing eventTriggersByWIDCount
-     * Expected Output:
-     *    The function should return 3
-     */
-    it('should return counts of eventTriggers that have specific WID in them', async () => {
-      const data = await DB.eventTriggersByWIDCount('WIDStatistics');
-      expect(data).to.be.equal(3);
-    });
-  });
-
-  describe('eventTriggersByWID', () => {
-    /**
-     * Target: testing commitmentByWID
-     * Expected Output:
-     *    The function should return one specific eventTrigger
-     */
-    it('should return first eventTrigger with specific WID', async () => {
-      const data = await DB.eventTriggersByWID('WIDStatistics', 0, 1);
-      expect(data).to.be.eql([firstStatisticsEventTrigger]);
-    });
-
-    /**
-     * Target: testing commitmentByWID
-     * Expected Output:
-     *    The function should return two specific eventTriggers
-     */
-    it('should return two commitment with specific WID with offset 1', async () => {
-      const data = await DB.eventTriggersByWID('WIDStatistics', 1, 2);
-      expect(data).to.be.eql([
-        secondStatisticsEventTrigger,
-        thirdStatisticsEventTrigger,
-      ]);
     });
   });
 

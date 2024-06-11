@@ -8,6 +8,7 @@ import {
 } from '@rosen-bridge/observation-extractor';
 import {
   BlockEntity,
+  ExtractorStatusEntity,
   migrations as scannerMigrations,
 } from '@rosen-bridge/scanner';
 import {
@@ -15,6 +16,7 @@ import {
   EventTriggerEntity,
   migrations as watcherDataExtractorMigrations,
   PermitEntity,
+  CollateralEntity,
 } from '@rosen-bridge/watcher-data-extractor';
 import { DataSource } from 'typeorm';
 import { getConfig } from '../src/config/config';
@@ -35,7 +37,9 @@ const dbConfigs = {
     CommitmentEntity,
     EventTriggerEntity,
     PermitEntity,
+    CollateralEntity,
     ObservationEntity,
+    ExtractorStatusEntity,
     TokenEntity,
     TxEntity,
     ObservationStatusEntity,

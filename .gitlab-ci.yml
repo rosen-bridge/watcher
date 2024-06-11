@@ -5,6 +5,7 @@ stages:
   - test
   - installation_18
   - coverage
+  - changeset
 
 installation_16:
   image: node:16.19.1
@@ -81,3 +82,17 @@ coverage:
       coverage_report:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
+
+changeset:
+  image: node:18.14.0
+  stage: changeset
+  needs: ['coverage']
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    policy: pull
+    paths:
+      - node_modules
+  before_script:
+    - git fetch origin dev
+  script:
+    - npx changeset status --since=origin/dev
