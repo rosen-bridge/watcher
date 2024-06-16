@@ -24,7 +24,7 @@ cardano:
   koios:
     interval: 20 # koios scanning interval (in seconds)
     timeout: 10 # koios request timeout (in seconds)
-    url: 'https://api.koios.rest/api/beta' # koios url
+    url: 'https://api.koios.rest/api/v1' # koios url
   ogmios:
     host: '' # ogmios node host address
     port: 1337 # ogmios port
