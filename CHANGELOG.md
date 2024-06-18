@@ -11,6 +11,7 @@
 
 - Update koios default url to v1
 - Add fee constraints at observation validation
+- Use authentication for bitcoin rpc health-check
 - Updated dependencies:
   - @rosen-bridge/scanner
   - @rosen-bridge/address-extractor

@@ -197,7 +197,9 @@ class HealthCheckSingleton {
         scanner.observationScanner.name(),
         getConfig().healthCheck.bitcoinScannerWarnDiff,
         getConfig().healthCheck.bitcoinScannerCriticalDiff,
-        getConfig().bitcoin.rpc!.url
+        getConfig().bitcoin.rpc!.url,
+        getConfig().bitcoin.rpc!.username,
+        getConfig().bitcoin.rpc!.password
       );
     } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
       bitcoinScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
