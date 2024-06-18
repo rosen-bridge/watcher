@@ -4,6 +4,7 @@ import {
   commitmentEntity,
   eventTriggerEntity,
   observationEntity1,
+  observationEntity3,
   observationStatusCommitted,
   observationStatusNotCommitted,
   observationStatusRevealed,
@@ -494,6 +495,29 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
      * Target: testing hasValidAmount
      * Dependencies:
      * Expected Output:
+     *   The function should return false since the bridgeFee + networkFee is more than amount of observation
+     */
+    it('should return false since the bridgeFee + networkFee is less than amount of observation', async () => {
+      const fee: ChainMinimumFee = {
+        bridgeFee: 2n,
+        networkFee: 2n,
+        rsnRatio: 0n,
+        feeRatio: 0n,
+        rsnRatioDivisor: 1000000000000n,
+        feeRatioDivisor: 10000n,
+      };
+      const minimumFeeInstance = {};
+      chai.spy.on(MinimumFeeHandler, 'getInstance', () => minimumFeeInstance);
+      chai.spy.on(minimumFeeInstance, 'getEventFeeConfig', () => fee);
+
+      const data = await watcherUtils.hasValidAmount(observationEntity1);
+      expect(data).to.be.false;
+    });
+
+    /**
+     * Target: testing hasValidAmount
+     * Dependencies:
+     * Expected Output:
      *   The function should return true since the bridgeFee + networkFee is less than amount of observation
      */
     it('should return true since the bridgeFee + networkFee is less than amount of observation', async () => {
@@ -509,7 +533,7 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
       chai.spy.on(MinimumFeeHandler, 'getInstance', () => minimumFeeInstance);
       chai.spy.on(minimumFeeInstance, 'getEventFeeConfig', () => fee);
 
-      const data = await watcherUtils.hasValidAmount(observationEntity1);
+      const data = await watcherUtils.hasValidAmount(observationEntity3);
       expect(data).to.be.true;
     });
   });

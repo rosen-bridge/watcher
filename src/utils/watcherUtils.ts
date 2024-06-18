@@ -78,14 +78,19 @@ class WatcherUtils {
 
   /**
    * returns false if the observation amount be less than (bridgeFee + networkFee)
+   * or amount is less than specified fees
    * @param observation
    */
   hasValidAmount = async (observation: ObservationEntity): Promise<boolean> => {
     const feeConfig =
       MinimumFeeHandler.getInstance().getEventFeeConfig(observation);
+    const bridgeFeePercent = BigInt(observation.amount) * feeConfig.feeRatio / feeConfig.feeRatioDivisor;
+    const bridgeFee = bridgeFeePercent > feeConfig.bridgeFee ? bridgeFeePercent : feeConfig.bridgeFee
     return (
       BigInt(observation.amount) >=
-      BigInt(feeConfig.bridgeFee) + BigInt(feeConfig.networkFee)
+        BigInt(bridgeFee) + BigInt(feeConfig.networkFee) &&
+      BigInt(observation.amount) >=
+        BigInt(observation.bridgeFee) + BigInt(observation.networkFee)
     );
   };
 

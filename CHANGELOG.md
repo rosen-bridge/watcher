@@ -1,5 +1,24 @@
 # @rosen-bridge/watcher
 
+## 3.1.0
+
+### Minor Changes
+
+- Add authentication for bitcoin rpc
+- Add random id to bitcoin rpc requests
+
+### Patch Changes
+
+- Update koios default url to v1
+- Add fee constraints at observation validation
+- Updated dependencies:
+  - @rosen-bridge/scanner
+  - @rosen-bridge/address-extractor
+  - @rosen-bridge/bitcoin-esplora-scanner
+  - @rosen-bridge/bitcoin-observation-extractor
+  - @rosen-bridge/bitcoin-observation-extractor
+  - @rosen-bridge/watcher-data-extractor
+
 ## 3.0.0
 
 ### Major Changes
