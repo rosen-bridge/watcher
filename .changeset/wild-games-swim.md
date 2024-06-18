@@ -1,0 +1,3 @@
+---
+'@rosen-bridge/watcher': patch
+---

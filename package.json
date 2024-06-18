@@ -86,7 +86,7 @@
     "@rosen-bridge/observation-extractor": "^4.4.5",
     "@rosen-bridge/permit-check": "^0.1.1",
     "@rosen-bridge/scanner": "^4.0.1",
-    "@rosen-bridge/scanner-sync-check": "^0.2.0",
+    "@rosen-bridge/scanner-sync-check": "^0.3.0",
     "@rosen-bridge/watcher-data-extractor": "^6.0.1",
     "@rosen-bridge/wid-check": "^0.1.1",
     "@rosen-bridge/winston-logger": "0.2.1",
