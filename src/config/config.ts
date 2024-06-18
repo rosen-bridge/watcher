@@ -68,7 +68,7 @@ const getOptionalString = (path: string, defaultValue = '') => {
 class Config {
   networkPrefix: wasm.NetworkPrefix;
   networkType: string;
-  scannerType: string;
+  scannerType: ErgoNetworkType;
   secretKey: wasm.SecretKey;
   address: string;
   explorerUrl: string;
@@ -111,9 +111,11 @@ class Config {
         ? wasm.NetworkPrefix.Mainnet
         : wasm.NetworkPrefix.Testnet;
 
-    this.scannerType = getRequiredString('ergo.type').toLowerCase();
+    this.scannerType = getRequiredString(
+      'ergo.type'
+    ).toLowerCase() as ErgoNetworkType;
     if (
-      ([ErgoNetworkType.Node, ErgoNetworkType.Explorer] as string[]).indexOf(
+      [ErgoNetworkType.Node, ErgoNetworkType.Explorer].indexOf(
         this.scannerType
       ) === -1
     )
@@ -351,6 +353,8 @@ class BitcoinConfig {
     url: string;
     timeout: number;
     interval: number;
+    username?: string;
+    password?: string;
   };
 
   constructor(network: string) {
@@ -366,7 +370,9 @@ class BitcoinConfig {
         const url = getRequiredString('bitcoin.rpc.url');
         const timeout = getRequiredNumber('bitcoin.rpc.timeout');
         const interval = getRequiredNumber('bitcoin.rpc.interval');
-        this.rpc = { url, timeout, interval };
+        const username = getOptionalString('bitcoin.rpc.username', undefined);
+        const password = getOptionalString('bitcoin.rpc.password', undefined);
+        this.rpc = { url, timeout, interval, username, password };
       } else {
         throw new Error(
           `Improperly configured. bitcoin configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`

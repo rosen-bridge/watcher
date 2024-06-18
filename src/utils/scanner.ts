@@ -89,30 +89,27 @@ class CreateScanner {
   }
 
   private createErgoScanner = () => {
-    let ergoScannerConfig;
+    let networkUrl;
+    let networkTimeout;
     if (config.scannerType === ErgoNetworkType.Node) {
-      ergoScannerConfig = {
-        type: ErgoNetworkType.Node,
-        url: config.nodeUrl,
-        timeout: config.nodeTimeout * 1000,
-        initialHeight: config.ergoInitialHeight,
-        dataSource: dataSource,
-      };
+      networkTimeout = config.nodeTimeout * 1000;
+      networkUrl = config.nodeUrl;
     } else if (config.scannerType === ErgoNetworkType.Explorer) {
-      ergoScannerConfig = {
-        type: ErgoNetworkType.Explorer,
-        url: config.explorerUrl,
-        timeout: config.explorerTimeout * 1000,
-        initialHeight: config.ergoInitialHeight,
-        dataSource: dataSource,
-      };
-    }
-    if (!ergoScannerConfig) {
+      networkUrl = config.explorerUrl;
+      networkTimeout = config.explorerTimeout * 1000;
+    } else {
       logger.error(
         `Scanner type is not correct, available options are [${ErgoNetworkType.Node}], [${ErgoNetworkType.Explorer}].`
       );
       throw new Error('Scanner type is not correct');
     }
+    const ergoScannerConfig = {
+      type: config.scannerType,
+      url: networkUrl,
+      timeout: networkTimeout,
+      initialHeight: config.ergoInitialHeight,
+      dataSource: dataSource,
+    };
     this.ergoScanner = new ErgoScanner(
       ergoScannerConfig,
       loggers.scannerLogger
@@ -155,7 +152,8 @@ class CreateScanner {
       dataSource,
       Constants.ADDRESS_EXTRACTOR_NAME,
       config.networkPrefix,
-      config.explorerUrl,
+      networkUrl,
+      config.scannerType,
       config.address,
       undefined, // Token constraint not needed
       loggers.plainExtractorLogger
@@ -259,6 +257,8 @@ class CreateScanner {
             timeout: bitcoinConfig.rpc.timeout * 1000,
             initialHeight: bitcoinConfig.initialHeight,
             dataSource: dataSource,
+            username: bitcoinConfig.rpc.username,
+            password: bitcoinConfig.rpc.password,
           },
           loggers.scannerLogger
         );
