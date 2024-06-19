@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 3.1.1
+
+### Patch Changes
+
+- Fix initialization spend info
+
 ## 3.1.0
 
 ### Minor Changes
