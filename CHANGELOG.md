@@ -5,6 +5,13 @@
 ### Patch Changes
 
 - Fix initialization spend info
+- Updated dependencies:
+  - @rosen-bridge/scanner
+  - @rosen-bridge/address-extractor
+  - @rosen-bridge/bitcoin-esplora-scanner
+  - @rosen-bridge/bitcoin-rpc-scanner
+  - @rosen-bridge/bitcoin-observation-extractor
+  - @rosen-bridge/watcher-data-extractor
 
 ## 3.1.0
 
@@ -22,7 +29,7 @@
   - @rosen-bridge/scanner
   - @rosen-bridge/address-extractor
   - @rosen-bridge/bitcoin-esplora-scanner
-  - @rosen-bridge/bitcoin-observation-extractor
+  - @rosen-bridge/bitcoin-rpc-scanner
   - @rosen-bridge/bitcoin-observation-extractor
   - @rosen-bridge/watcher-data-extractor
 
