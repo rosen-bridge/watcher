@@ -13,6 +13,7 @@ export enum TxType {
   DETACH = 'detach',
   REDEEM = 'redeem',
   PERMIT = 'permit',
+  REWARD = 'reward',
 }
 
 @Entity()

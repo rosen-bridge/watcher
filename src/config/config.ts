@@ -99,6 +99,10 @@ class Config {
   apiPort: number;
   apiKeyHash: string;
   apiAllowedOrigins: string[];
+  rewardCollectionInterval: number;
+  rewardCollectionThreshold: number;
+  rewardCollectionAddress: string;
+  eRsnTokenId: string;
 
   constructor() {
     this.networkType = getRequiredString('ergo.network').toLowerCase();
@@ -232,6 +236,17 @@ class Config {
         'An allowed origin header with value "*" will cause all origins to be able to request this service, which may cause security issues'
       );
     }
+    this.eRsnTokenId = getRequiredString('rewardCollection.eRsnTokenId');
+    this.rewardCollectionInterval = getRequiredNumber(
+      'rewardCollection.interval'
+    );
+    this.rewardCollectionThreshold = getRequiredNumber(
+      'rewardCollection.threshold'
+    );
+    this.rewardCollectionAddress = getOptionalString(
+      'rewardCollection.address',
+      this.address // set default watcher address as reward address if its not specified
+    );
   }
 }
 

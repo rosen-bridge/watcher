@@ -27,6 +27,7 @@ import WinstonLogger from '@rosen-bridge/winston-logger';
 import { widStatusJob } from './jobs/widStatus';
 import MinimumFeeHandler from './utils/MinimumFeeHandler';
 import { minimumFeeUpdateJob } from './jobs/minimumFee';
+import { rewardCollection } from './jobs/rewardCollection';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -126,6 +127,8 @@ const init = async () => {
       revenueJob();
       // Starting WID status jobs
       widStatusJob();
+      // Running reward collection thread
+      rewardCollection(txUtils, boxesObject);
 
       logger.debug('Service initialization finished successfully.');
     })
