@@ -728,16 +728,14 @@ export class Boxes {
    * Return a new rsn emission box with required parameters
    * @param value
    * @param height
-   * @param wid
-   * @param rwtCount
    * @param rsnCount
-   * @returns
+   * @param eRsnCount
    */
   createEmissionBox = (
     value: bigint,
     height: number,
-    eRsnCount: bigint,
-    rsnCount: bigint
+    rsnCount: bigint,
+    eRsnCount: bigint
   ) => {
     const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
       wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),

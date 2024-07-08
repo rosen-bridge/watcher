@@ -128,7 +128,7 @@ const init = async () => {
       // Starting WID status jobs
       widStatusJob();
       // Running reward collection thread
-      rewardCollection(txUtils, boxesObject);
+      rewardCollection(watcherUtils, txUtils, boxesObject);
 
       logger.debug('Service initialization finished successfully.');
     })

@@ -8,7 +8,6 @@ import { hexStrToUint8Array } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
-import { DetachWID } from './detachWID';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -114,7 +113,10 @@ export class CommitmentRedeem {
    */
   job = async () => {
     const activeTx =
-      await this.watcherUtils.dataBase.getActiveCommitTransactions();
+      await this.watcherUtils.dataBase.getActiveTransactionsByType([
+        TxType.COMMITMENT,
+        TxType.REDEEM,
+      ]);
     if (activeTx.length > 0) {
       logger.debug('Has unconfirmed commitment or redeem transactions');
       return;
@@ -187,7 +189,10 @@ export class CommitmentRedeem {
    */
   deadlockJob = async () => {
     const activeTx =
-      await this.watcherUtils.dataBase.getActiveCommitTransactions();
+      await this.watcherUtils.dataBase.getActiveTransactionsByType([
+        TxType.REDEEM,
+        TxType.COMMITMENT,
+      ]);
     if (activeTx.length > 0) {
       logger.debug('Has unconfirmed commitment or redeem transactions');
       return;

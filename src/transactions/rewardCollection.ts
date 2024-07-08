@@ -4,17 +4,23 @@ import { ErgoUtils } from '../ergo/utils';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 import { TxType } from '../database/entities/txEntity';
-import { TransactionUtils } from '../utils/watcherUtils';
+import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 class RewardCollection {
+  watcherUtils: WatcherUtils;
   txUtils: TransactionUtils;
   boxes: Boxes;
 
-  constructor(txUtils: TransactionUtils, boxes: Boxes) {
+  constructor(
+    watcherUtils: WatcherUtils,
+    txUtils: TransactionUtils,
+    boxes: Boxes
+  ) {
+    this.watcherUtils = watcherUtils;
     this.txUtils = txUtils;
     this.boxes = boxes;
   }
@@ -29,7 +35,7 @@ class RewardCollection {
     feeBoxes: Array<wasm.ErgoBox>
   ) => {
     const height = await ErgoNetwork.getHeight();
-    const inputBoxes = wasm.ErgoBoxes.empty();
+    const inputBoxes = new wasm.ErgoBoxes(emissionBox);
     eRsnBoxes.forEach((box) => inputBoxes.add(box));
     feeBoxes.forEach((box) => inputBoxes.add(box));
     const candidates = [];
@@ -37,8 +43,10 @@ class RewardCollection {
       const emissionOut = this.boxes.createEmissionBox(
         BigInt(emissionBox.value().as_i64().to_str()),
         height,
-        BigInt(emissionBox.tokens().get(1).amount.toString()) - eRsnCount,
-        BigInt(emissionBox.tokens().get(2).amount.toString()) + eRsnCount
+        BigInt(emissionBox.tokens().get(1).amount().as_i64().to_str()) -
+          eRsnCount,
+        BigInt(emissionBox.tokens().get(2).amount().as_i64().to_str()) +
+          eRsnCount
       );
       candidates.push(emissionOut);
       const rewardBox = this.boxes.createCustomBox(
@@ -86,6 +94,14 @@ class RewardCollection {
    */
   job = async () => {
     try {
+      const activeTx =
+        await this.watcherUtils.dataBase.getActiveTransactionsByType([
+          TxType.REWARD,
+        ]);
+      if (activeTx.length > 0) {
+        logger.debug('Has unconfirmed reward collection transactions');
+        return;
+      }
       const eRsnBoxes = await this.boxes.getERsnBoxes();
       const eRsnCount = ErgoUtils.getBoxAssetsSum(eRsnBoxes).filter(
         (token) => token.tokenId == getConfig().general.eRsnTokenId

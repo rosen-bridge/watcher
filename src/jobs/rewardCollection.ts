@@ -1,7 +1,7 @@
 import WinstonLogger from '@rosen-bridge/winston-logger';
 import { getConfig } from '../config/config';
 import { Boxes } from '../ergo/boxes';
-import { TransactionUtils } from '../utils/watcherUtils';
+import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { RewardCollection } from '../transactions/rewardCollection';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -30,7 +30,11 @@ const rewardCollectionJob = async () => {
  * @param txUtils
  * @param boxes
  */
-export const rewardCollection = (txUtils: TransactionUtils, boxes: Boxes) => {
-  rewardCollectorObj = new RewardCollection(txUtils, boxes);
+export const rewardCollection = (
+  watcherUtils: WatcherUtils,
+  txUtils: TransactionUtils,
+  boxes: Boxes
+) => {
+  rewardCollectorObj = new RewardCollection(watcherUtils, txUtils, boxes);
   rewardCollectionJob();
 };
