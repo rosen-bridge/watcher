@@ -198,8 +198,7 @@ export class Boxes {
    * @param wid
    * @param widCount
    */
-  getERsnBoxes = async (): Promise<wasm.ErgoBox[]> => {
-    const eRsnTokenId = getConfig().general.eRsnTokenId;
+  getERsnBoxes = async (eRsnTokenId: string): Promise<wasm.ErgoBox[]> => {
     const boxes = (await this.dataBase.getUnspentAddressBoxes())
       .map((box: BoxEntity) => {
         return decodeSerializedBox(box.serialized);
@@ -735,7 +734,8 @@ export class Boxes {
     value: bigint,
     height: number,
     rsnCount: bigint,
-    eRsnCount: bigint
+    eRsnCount: bigint,
+    eRsnTokenId: string
   ) => {
     const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
       wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
@@ -751,7 +751,7 @@ export class Boxes {
       wasm.TokenAmount.from_i64(wasm.I64.from_str(rsnCount.toString()))
     );
     boxBuilder.add_token(
-      wasm.TokenId.from_str(getConfig().general.eRsnTokenId),
+      wasm.TokenId.from_str(eRsnTokenId),
       wasm.TokenAmount.from_i64(wasm.I64.from_str(eRsnCount.toString()))
     );
     return boxBuilder.build();

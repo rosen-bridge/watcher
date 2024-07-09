@@ -79,6 +79,7 @@ export class Queue {
       case TxType.DETACH:
       case TxType.REDEEM:
       case TxType.PERMIT:
+      case TxType.REWARD:
         return true;
       default:
         return false;
