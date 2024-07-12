@@ -15,7 +15,6 @@ export const CARDANO_CHAIN_NAME = 'cardano';
 export const BITCOIN_CHAIN_NAME = 'bitcoin';
 export const ERGO_NATIVE_ASSET = 'erg';
 export const ERGO_DECIMALS = 9;
-export const RSN_DECIMALS = 3;
 export const DEFAULT_API_LIMIT = 20;
 export const MAX_API_LIMIT = 100;
 export const DOING_STATUS = 'Doing';

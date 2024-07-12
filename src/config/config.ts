@@ -238,9 +238,9 @@ class Config {
     this.rewardCollectionInterval = getRequiredNumber(
       'rewardCollection.interval'
     );
-    this.rewardCollectionThreshold =
-      getRequiredNumber('rewardCollection.threshold') *
-      10 ** Constants.RSN_DECIMALS; // Considering Rsn decimal points
+    this.rewardCollectionThreshold = getRequiredNumber(
+      'rewardCollection.threshold'
+    );
     this.rewardCollectionAddress = getOptionalString(
       'rewardCollection.address',
       this.address // set default watcher address as reward address if its not specified

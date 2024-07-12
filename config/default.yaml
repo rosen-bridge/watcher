@@ -113,7 +113,6 @@ healthCheck:
     duration: 100000 # error log duration time check in milliseconds
 redeemSwapEnabled: true # if set true when no permit left, system automatically redeem new commitments and commit again for old observations
 rewardCollection:
-  eRsnTokenId: '0cd8c9f416e5b1ca9f986a7f10a84191dfb85941619e49e53c0dc30ebf83324b' # eRSN token id # TODO: fix id
-  threshold: 100 # RSN threshold for reward collection
+  threshold: 100000 # RSN threshold for reward collection
   interval: 600 # reward collection interval in seconds
   # address: "" # reward collection address (uses default address if not set)

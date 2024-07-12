@@ -95,13 +95,16 @@ class RewardCollection {
    * find all eRsn boxes then change and send to reward address
    */
   job = async () => {
+    logger.info('Starting reward collection job');
     try {
       const activeTx =
         await this.watcherUtils.dataBase.getActiveTransactionsByType([
           TxType.REWARD,
         ]);
       if (activeTx.length > 0) {
-        logger.debug('Has unconfirmed reward collection transactions');
+        logger.info(
+          'Aborting reward collection, has unconfirmed reward collection transactions'
+        );
         return;
       }
       const emissionBox = await this.boxes.getEmissionBox();
