@@ -9,7 +9,8 @@
     "WatcherTriggerEvent": "BRNzuPCshtnBeoxCJ8iQiVd7pKqEfQrue3x8L4rj11AfsbvSURUHFMKvTvfERxKgbhbKb1xqAKp1MssAaRj2s5QbmVMexgH1DeX3pbSUhkNNEDbdDrPoDVywnKg7QaSPfg7qBdUmtthYJv3AemeFHLvJdSV7fEBEzfB7G8MWw1BDLSMkCxcY46XwZs6ULTYHk3iCAi2SAEHMYsJoLfHMT4CkXAwfDyge5aoJLP9KbjKeW6Zk6QNKvSaSnLzJUA1WF35BnsiDpJ6fKBgB94YWnm2nNpCAHW9iF8QC46Jp1iSv4Q8nQ9wTQbQYYQimdWVueLjioa6HWugyxDLuK5CSoLHEiJBx8ybp14urcx2XHQPs8J4cE9qAyznX2j5aybpb3YXyK8NsmnxiPFkeKJvA82AS6VBekoPsan5JJTnrYW6fvmS84VRFVE1XPx8hxsLgvh",
     "WatcherCollateral": "2DxRv75maq3FewTq4mCgRzJSJ5usEgvv6NPUGFUVvVpWnogX8ucuhogGUWGKxYFrb6F86N8UocRpo4T3kprWjRQxczhvfJhpbNUKfHd1pA8TdnMdxP7GFRaZGP8XHvTNb34GRkVvjha8XUCUXvBWqS84aS3JqZY27S5qX58VzMUFhRKUKcVgCCRhAZPt5yfUDcjmQh43psFxPTpPhupkZe8Zx",
     "RepoConfig": "prufxZid3SJMyUVhAa6eaMgMtHpTTkiF7FcKQaMurTF2iDyZaghSsYuMMLLQKsyFJyygHqSzuvAkokiTjZs2GXiF2JRW9JfXifKAYWSTLrZAHsk9ExH7jiJ5hT7Ex2YDBbRnoyafZ2j282op1wg4T3Yp7rzuihZShM1U96Xx4UF5MqnHJokjnogqjEMjUB1NgQ4Vha9eoHfepW1ULxdm",
-    "MinimumFeeAddress": "9gH92yjsJCBHwx4fDbXe6j8jLdDBMX3dm6nqwiHhUqyxgNKXmoK"
+    "MinimumFeeAddress": "9gH92yjsJCBHwx4fDbXe6j8jLdDBMX3dm6nqwiHhUqyxgNKXmoK",
+    "Emission": "9gH92yjsJCBHwx4fDbXe6j8jLdDBMX3dm6nqwiHhUqyxgNKXmoK"
   },
   "tokens": {
     "RepoNFT": "a29d9bb0d622eb8b4f83a34c4ab1b7d3f18aaaabc3aa6876912a3ebaf0da1018",
@@ -19,7 +20,8 @@
     "CleanupNFT": "5b81c74b04b7eed17bd1e3d37c990003183601951f22a3360a8bc5c848a32006",
     "RWTId": "497287b9a1eff643791277744a74b7d598b834dc613f2ebc972e33767c61ac2b",
     "AwcNFT": "852ccfce6b0b060f81153cd1994d5f42e5e59d7f092adbadab2b5e1ca2c34b63",
-    "RepoConfigNFT": "99016d570b66c7188957cb72acbf131ab0be7611e011ba47c783a3c3f5773daf"
+    "RepoConfigNFT": "99016d570b66c7188957cb72acbf131ab0be7611e011ba47c783a3c3f5773daf",
+    "EmissionNFT": "99016d570b66c7188957cb72acbf131ab0be7611e011ba47c783a3c3f5773daf"
   },
   "cleanupConfirm": 7200
 }

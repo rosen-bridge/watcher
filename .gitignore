@@ -1,7 +1,7 @@
 src/config/*.json
 config/local*.yaml
 config/rosen
-sqlite/
+*.sqlite*
 
 .idea
 node_modules

@@ -40,6 +40,9 @@ export class Boxes {
   watcherCollateralContract: wasm.Contract;
   repoAddress: wasm.Address;
   repoConfigAddress: wasm.Address;
+  emissionAddress: wasm.Address;
+  emissionContract: wasm.Contract;
+  emissionNft: wasm.TokenId;
 
   constructor(db: WatcherDataBase) {
     const rosenConfig = getConfig().rosen;
@@ -70,6 +73,11 @@ export class Boxes {
     this.fee = wasm.BoxValue.from_i64(
       wasm.I64.from_str(getConfig().general.fee)
     );
+    this.emissionAddress = wasm.Address.from_base58(
+      rosenConfig.emissionAddress
+    );
+    this.emissionContract = wasm.Contract.pay_to_address(this.emissionAddress);
+    this.emissionNft = wasm.TokenId.from_str(rosenConfig.emissionNFT);
   }
 
   /**
@@ -183,6 +191,34 @@ export class Boxes {
       return selectedWidBoxes;
     } else
       throw new NoWID('Watcher WID is not set. Cannot sign the transaction.');
+  };
+
+  /**
+   * Returns unspent WID boxes with the specified WID covering the required wid count (Considering the mempool)
+   * @param wid
+   * @param widCount
+   */
+  getERsnBoxes = async (eRsnTokenId: string): Promise<wasm.ErgoBox[]> => {
+    const boxes = (await this.dataBase.getUnspentAddressBoxes())
+      .map((box: BoxEntity) => {
+        return decodeSerializedBox(box.serialized);
+      })
+      .filter(
+        (box: wasm.ErgoBox) =>
+          box.tokens().len() > 0 && boxHaveAsset(box, eRsnTokenId)
+      );
+    const selectedBoxes: wasm.ErgoBox[] = [];
+    const selectedBoxIds: Set<string> = new Set();
+    for (const Box of boxes) {
+      const trackedBox = await this.dataBase.trackTxQueue(
+        await ErgoNetwork.trackMemPool(Box, eRsnTokenId),
+        eRsnTokenId
+      );
+      if (selectedBoxIds.has(trackedBox.box_id().to_str())) continue;
+      selectedBoxes.push(trackedBox);
+      selectedBoxIds.add(trackedBox.box_id().to_str());
+    }
+    return selectedBoxes;
   };
 
   /**
@@ -315,6 +351,19 @@ export class Boxes {
         this.repoConfigNFT.to_str()
       ),
       this.repoConfigNFT.to_str()
+    );
+  };
+
+  /**
+   * Return latest rsn emission box from network with tracking mempool transactions
+   */
+  getEmissionBox = async (): Promise<wasm.ErgoBox> => {
+    return await ErgoNetwork.trackMemPool(
+      await ErgoNetwork.getBoxWithToken(
+        this.emissionAddress,
+        this.emissionNft.to_str()
+      ),
+      this.emissionNft.to_str()
     );
   };
 
@@ -670,6 +719,40 @@ export class Boxes {
     boxBuilder.set_register_value(
       5,
       wasm.Constant.from_i64(wasm.I64.from_str(rwtCount.toString()))
+    );
+    return boxBuilder.build();
+  };
+
+  /**
+   * Return a new rsn emission box with required parameters
+   * @param value
+   * @param height
+   * @param rsnCount
+   * @param eRsnCount
+   */
+  createEmissionBox = (
+    value: bigint,
+    height: number,
+    rsnCount: bigint,
+    eRsnCount: bigint,
+    eRsnTokenId: string
+  ) => {
+    const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
+      wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
+      this.emissionContract,
+      height
+    );
+    boxBuilder.add_token(
+      this.emissionNft,
+      wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
+    );
+    boxBuilder.add_token(
+      this.RSN,
+      wasm.TokenAmount.from_i64(wasm.I64.from_str(rsnCount.toString()))
+    );
+    boxBuilder.add_token(
+      wasm.TokenId.from_str(eRsnTokenId),
+      wasm.TokenAmount.from_i64(wasm.I64.from_str(eRsnCount.toString()))
     );
     return boxBuilder.build();
   };

@@ -771,12 +771,14 @@ class WatcherDataBase {
   };
 
   /**
-   * returns active transaction with 'commitment' or 'redeem' type
+   * returns active transaction with specified types
    */
-  getActiveCommitTransactions = async (): Promise<Array<TxEntity>> => {
+  getActiveTransactionsByType = async (
+    types: Array<TxType>
+  ): Promise<Array<TxEntity>> => {
     return await this.txRepository.find({
       where: {
-        type: In([TxType.COMMITMENT, TxType.REDEEM]),
+        type: In(types),
         deleted: false,
       },
     });
