@@ -561,7 +561,7 @@ export class ErgoUtils {
     );
   };
 
-  static transformChartData = (chartData: RevenueChartRecord[]) => {
+  static transformChartData = async (chartData: RevenueChartRecord[]) => {
     const chartMap = new Map<string, Array<ChartRecord>>();
     const labels: Array<string> = [];
     chartData.forEach((record) => {
@@ -588,17 +588,19 @@ export class ErgoUtils {
       title: Omit<TokenData, 'amount'>;
       data: Array<ChartRecord>;
     }[] = [];
-    chartMap.forEach(async (records, tokenId) => {
-      const filledRecords = labels.map((timestamp) => {
-        const filtered = records.filter((rec) => rec.label === timestamp);
-        if (filtered.length) return filtered[0];
-        return { label: timestamp, amount: '0' };
-      });
-      jsonObject.push({
-        title: await this.tokenDetailByDatabase(tokenId),
-        data: filledRecords,
-      });
-    });
+    await Promise.all(
+      [...chartMap.entries()].map(async ([tokenId, records]) => {
+        const filledRecords = labels.map((timestamp) => {
+          const filtered = records.filter((rec) => rec.label === timestamp);
+          if (filtered.length) return filtered[0];
+          return { label: timestamp, amount: '0' };
+        });
+        jsonObject.push({
+          title: await this.tokenDetailByDatabase(tokenId),
+          data: filledRecords,
+        });
+      })
+    );
     return jsonObject;
   };
 }
