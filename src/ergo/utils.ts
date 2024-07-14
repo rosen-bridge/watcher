@@ -451,26 +451,20 @@ export class ErgoUtils {
   };
 
   /**
-   * Returns full token data by checking token details table
+   * Returns full token data by checking token details in database and tokenMap
    * @param tokenId
    */
-  static tokenDetailByDatabase = async (tokenId: string) => {
-    let name = 'Unsupported token';
-    let decimals = 0;
-    let isNativeToken = false;
+  static tokenDetail = async (tokenId: string) => {
     const tokenInfo = (await watcherDatabase.getTokenEntity([tokenId]))[0];
     if (tokenInfo) {
-      name = tokenInfo.tokenName;
-      decimals = tokenInfo.decimals;
-      isNativeToken = tokenId == ERGO_NATIVE_ASSET;
+      return {
+        tokenId: tokenId,
+        name: tokenInfo.tokenName,
+        decimals: tokenInfo.decimals,
+        isNativeToken: tokenId == ERGO_NATIVE_ASSET,
+      };
     }
-
-    return {
-      tokenId: tokenId,
-      name: name,
-      decimals: decimals,
-      isNativeToken,
-    };
+    return this.tokenDetailByTokenMap(tokenId, ERGO_CHAIN_NAME);
   };
 
   /**
@@ -596,7 +590,7 @@ export class ErgoUtils {
           return { label: timestamp, amount: '0' };
         });
         jsonObject.push({
-          title: await this.tokenDetailByDatabase(tokenId),
+          title: await this.tokenDetail(tokenId),
           data: filledRecords,
         });
       })

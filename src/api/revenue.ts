@@ -94,7 +94,7 @@ revenueRouter.get('/chart', async (req, res) => {
     } else {
       throw new Error('Invalid period');
     }
-    const result = ErgoUtils.transformChartData(queryResult);
+    const result = await ErgoUtils.transformChartData(queryResult);
     res.set('Content-Type', 'application/json');
     res.status(200).send(result);
   } catch (e) {
