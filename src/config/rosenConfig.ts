@@ -21,6 +21,7 @@ class RosenConfig {
   readonly AWC: string;
   readonly emissionNFT: string;
   readonly emissionAddress: string;
+  readonly eRSN: string;
 
   constructor(network: string, networkType: string, configRoot: string) {
     const rosenConfigPath = this.getAddress(network, networkType, configRoot);
@@ -49,6 +50,7 @@ class RosenConfig {
       this.repoConfigNFT = config.tokens.RepoConfigNFT;
       this.AWC = config.tokens.AwcNFT;
       this.emissionNFT = config.tokens.EmissionNFT;
+      this.eRSN = config.tokens.ERSN;
       this.emissionAddress = config.addresses.Emission;
     }
   }

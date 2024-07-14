@@ -31,7 +31,6 @@ class RewardCollection {
   rewardCollectionTx = async (
     eRsnBoxes: wasm.ErgoBox[],
     eRsnCount: bigint,
-    eRsnTokenId: string,
     emissionBox: wasm.ErgoBox,
     feeBoxes: Array<wasm.ErgoBox>
   ) => {
@@ -47,8 +46,7 @@ class RewardCollection {
         BigInt(emissionBox.tokens().get(1).amount().as_i64().to_str()) -
           eRsnCount,
         BigInt(emissionBox.tokens().get(2).amount().as_i64().to_str()) +
-          eRsnCount,
-        eRsnTokenId
+          eRsnCount
       );
       candidates.push(emissionOut);
       const rewardBox = this.boxes.createCustomBox(
@@ -107,15 +105,9 @@ class RewardCollection {
         );
         return;
       }
-      const emissionBox = await this.boxes.getEmissionBox();
-      logger.debug(
-        `Found emission box with boxId [${emissionBox.box_id().to_str()}]`
-      );
-      const eRsnTokenId = emissionBox.tokens().get(2).id().to_str();
-      logger.debug(`eRsn token id is :[${eRsnTokenId}]`);
-      const eRsnBoxes = await this.boxes.getERsnBoxes(eRsnTokenId);
+      const eRsnBoxes = await this.boxes.getERsnBoxes(getConfig().rosen.eRSN);
       const eRsnCount = ErgoUtils.getBoxAssetsSum(eRsnBoxes).filter(
-        (token) => token.tokenId == eRsnTokenId
+        (token) => token.tokenId == getConfig().rosen.eRSN
       )[0].amount;
       if (eRsnCount < getConfig().general.rewardCollectionThreshold) {
         logger.debug(
@@ -126,6 +118,10 @@ class RewardCollection {
       logger.info(
         `Found ${eRsnCount} eRsn tokens, trying to collect and change eRsn rewards`
       );
+      const emissionBox = await this.boxes.getEmissionBox();
+      logger.debug(
+        `Found emission box with boxId [${emissionBox.box_id().to_str()}]`
+      );
       const fee = BigInt(getConfig().general.fee);
       const minBoxValue = BigInt(getConfig().general.minBoxValue);
       let feeBoxes: Array<wasm.ErgoBox> = [];
@@ -135,13 +131,7 @@ class RewardCollection {
           eRsnBoxes.map((box) => box.box_id().to_str())
         );
       }
-      this.rewardCollectionTx(
-        eRsnBoxes,
-        eRsnCount,
-        eRsnTokenId,
-        emissionBox,
-        feeBoxes
-      );
+      this.rewardCollectionTx(eRsnBoxes, eRsnCount, emissionBox, feeBoxes);
     } catch (e) {
       logger.warn(
         `Skipping reward collection due to occurred error: ${e.message} - ${e.stack}`
