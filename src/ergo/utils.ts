@@ -451,6 +451,23 @@ export class ErgoUtils {
   };
 
   /**
+   * Returns full token data by checking token details in database and tokenMap
+   * @param tokenId
+   */
+  static tokenDetail = async (tokenId: string) => {
+    const tokenInfo = (await watcherDatabase.getTokenEntity([tokenId]))[0];
+    if (tokenInfo) {
+      return {
+        tokenId: tokenId,
+        name: tokenInfo.tokenName,
+        decimals: tokenInfo.decimals,
+        isNativeToken: tokenId == ERGO_NATIVE_ASSET,
+      };
+    }
+    return this.tokenDetailByTokenMap(tokenId, ERGO_CHAIN_NAME);
+  };
+
+  /**
    * Fill token info in events and observations
    * @param pagedItems
    * @returns pagedItems with token info
@@ -538,7 +555,7 @@ export class ErgoUtils {
     );
   };
 
-  static transformChartData = (chartData: RevenueChartRecord[]) => {
+  static transformChartData = async (chartData: RevenueChartRecord[]) => {
     const chartMap = new Map<string, Array<ChartRecord>>();
     const labels: Array<string> = [];
     chartData.forEach((record) => {
@@ -565,17 +582,19 @@ export class ErgoUtils {
       title: Omit<TokenData, 'amount'>;
       data: Array<ChartRecord>;
     }[] = [];
-    chartMap.forEach((records, tokenId) => {
-      const filledRecords = labels.map((timestamp) => {
-        const filtered = records.filter((rec) => rec.label === timestamp);
-        if (filtered.length) return filtered[0];
-        return { label: timestamp, amount: '0' };
-      });
-      jsonObject.push({
-        title: this.tokenDetailByTokenMap(tokenId, ERGO_CHAIN_NAME),
-        data: filledRecords,
-      });
-    });
+    await Promise.all(
+      [...chartMap.entries()].map(async ([tokenId, records]) => {
+        const filledRecords = labels.map((timestamp) => {
+          const filtered = records.filter((rec) => rec.label === timestamp);
+          if (filtered.length) return filtered[0];
+          return { label: timestamp, amount: '0' };
+        });
+        jsonObject.push({
+          title: await this.tokenDetail(tokenId),
+          data: filledRecords,
+        });
+      })
+    );
     return jsonObject;
   };
 }

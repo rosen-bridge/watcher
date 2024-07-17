@@ -734,8 +734,7 @@ export class Boxes {
     value: bigint,
     height: number,
     rsnCount: bigint,
-    eRsnCount: bigint,
-    eRsnTokenId: string
+    eRsnCount: bigint
   ) => {
     const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
       wasm.BoxValue.from_i64(wasm.I64.from_str(value.toString())),
@@ -751,7 +750,7 @@ export class Boxes {
       wasm.TokenAmount.from_i64(wasm.I64.from_str(rsnCount.toString()))
     );
     boxBuilder.add_token(
-      wasm.TokenId.from_str(eRsnTokenId),
+      wasm.TokenId.from_str(getConfig().rosen.eRSN),
       wasm.TokenAmount.from_i64(wasm.I64.from_str(eRsnCount.toString()))
     );
     return boxBuilder.build();

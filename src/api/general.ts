@@ -21,6 +21,7 @@ interface GeneralInfo {
   health: string;
   address: string;
   rsnTokenId: string;
+  eRsnTokenId: string;
   collateral: {
     erg: bigint;
     rsn: bigint;
@@ -48,6 +49,7 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       health: await HealthCheckSingleton.getInstance().getOverallStatus(),
       address: getConfig().general.address,
       rsnTokenId: getConfig().rosen.RSN,
+      eRsnTokenId: getConfig().rosen.eRSN,
       collateral: {
         erg: collateral.erg,
         rsn: collateral.rsn,
