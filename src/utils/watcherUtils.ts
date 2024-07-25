@@ -47,14 +47,20 @@ class WatcherUtils {
     );
     if (observationStatus === null)
       throw new NoObservationStatus(
-        `observation with requestId ${observation.requestId} has no status`
+        `observation with requestId [${observation.requestId}] has no status`
       );
     // Check observation time out
-    if (observationStatus.status == TxStatus.TIMED_OUT) return false;
+    if (observationStatus.status == TxStatus.TIMED_OUT) {
+      logger.debug(`Observation [${observation.requestId}] is timed out`);
+      return false;
+    }
     const currentHeight = await this.dataBase.getLastBlockHeight(
       scanner.observationScanner.name()
     );
     if (currentHeight - observation.height > this.observationValidThreshold) {
+      logger.debug(
+        `Observation [${observation.requestId}] is timed out, updating the database status`
+      );
       await this.dataBase.updateObservationTxStatus(
         observation,
         TxStatus.TIMED_OUT
@@ -62,18 +68,34 @@ class WatcherUtils {
       return false;
     }
     // check observation trigger created
-    if (await this.isMergeHappened(observation)) return false;
+    if (await this.isMergeHappened(observation)) {
+      logger.debug(
+        `Observation [${observation.requestId}] is already triggered`
+      );
+      return false;
+    }
     // validate observation amount
-    if (!(await this.hasValidAmount(observation))) return false;
+    if (!(await this.hasValidAmount(observation))) {
+      logger.debug(
+        `Observation [${observation.requestId}] Does not have valid amount`
+      );
+      return false;
+    }
     // check this watcher have created the commitment lately
     const relatedCommitments = await this.dataBase.commitmentsByEventId(
       observation.requestId
     );
-    return (
+    if (
       relatedCommitments.filter(
         (commitment) => commitment.WID === Transaction.watcherWID
-      ).length <= 0
-    );
+      ).length > 0
+    ) {
+      logger.debug(
+        `Observation [${observation.requestId}] is already committed by the same wid`
+      );
+      return false;
+    }
+    return true;
   };
 
   /**
@@ -84,8 +106,16 @@ class WatcherUtils {
   hasValidAmount = async (observation: ObservationEntity): Promise<boolean> => {
     const feeConfig =
       MinimumFeeHandler.getInstance().getEventFeeConfig(observation);
-    const bridgeFeePercent = BigInt(observation.amount) * feeConfig.feeRatio / feeConfig.feeRatioDivisor;
-    const bridgeFee = bridgeFeePercent > feeConfig.bridgeFee ? bridgeFeePercent : feeConfig.bridgeFee
+    const bridgeFeePercent =
+      (BigInt(observation.amount) * feeConfig.feeRatio) /
+      feeConfig.feeRatioDivisor;
+    const bridgeFee =
+      bridgeFeePercent > feeConfig.bridgeFee
+        ? bridgeFeePercent
+        : feeConfig.bridgeFee;
+    logger.debug(
+      `Fee for observation [${observation.requestId}] with amount ${observation.amount} is calculated: networkFee = ${feeConfig.networkFee}, bridgeFee = ${bridgeFee}`
+    );
     return (
       BigInt(observation.amount) >=
         BigInt(bridgeFee) + BigInt(feeConfig.networkFee) &&
@@ -111,7 +141,7 @@ class WatcherUtils {
       );
     if (observationStatus === null) {
       throw new NoObservationStatus(
-        `observation with requestId ${observation.requestId} has no status`
+        `observation with requestId [${observation.requestId}] has no status`
       );
     }
     if (observationStatus.status == TxStatus.REVEALED) return true;
@@ -119,6 +149,9 @@ class WatcherUtils {
       observation.sourceTxId
     );
     if (eventTrigger) {
+      logger.debug(
+        `event [${observation.requestId}] is triggered in tx [${eventTrigger.txId}]`
+      );
       const height = await ErgoNetwork.getHeight();
       if (
         height - eventTrigger.height >
@@ -146,6 +179,9 @@ class WatcherUtils {
       this.observationValidThreshold,
       true
     );
+    logger.debug(
+      `All confirmed observations are ${observations.map((ob) => ob.requestId)}`
+    );
     const validObservations: Array<ObservationEntity> = [];
     for (const observation of observations) {
       const observationStatus = await this.dataBase.checkNewObservation(
@@ -154,6 +190,9 @@ class WatcherUtils {
       );
       if (observationStatus.status === TxStatus.NOT_COMMITTED) {
         if (await this.isObservationValid(observation)) {
+          logger.debug(
+            `Observation [${observation.requestId}] is valid and not committed`
+          );
           validObservations.push(observation);
         }
       }
@@ -216,6 +255,9 @@ class WatcherUtils {
       this.observationConfirmation,
       height
     );
+    logger.debug(
+      `All confirmed observations are ${observations.map((ob) => ob.requestId)}`
+    );
     for (const observation of observations) {
       try {
         const observationStatus = await this.dataBase.getStatusForObservations(
@@ -226,11 +268,17 @@ class WatcherUtils {
           observationStatus.status === TxStatus.COMMITTED &&
           (await this.hasValidAmount(observation))
         ) {
-          const relatedCommitments = await this.dataBase.commitmentsByEventId(
-            observation.requestId
+          logger.debug(
+            `Observation [${observation.requestId}] is valid and committed`
           );
           if (!(await this.isMergeHappened(observation))) {
+            const relatedCommitments = await this.dataBase.commitmentsByEventId(
+              observation.requestId
+            );
             const uniqueRelatedCommitments = uniqBy(relatedCommitments, 'WID');
+            logger.debug(
+              `Found ${uniqueRelatedCommitments.length} unique commitments for observation [${observation.requestId}]`
+            );
             if (uniqueRelatedCommitments.length !== relatedCommitments.length) {
               this.checkDuplicateCommitments(observation, relatedCommitments);
             }
@@ -246,7 +294,7 @@ class WatcherUtils {
         }
       } catch (e) {
         logger.error(
-          `An Error occurred while processing event [${observation.requestId}] for trigger transaction: [${e}]`
+          `An Error occurred while processing event [[${observation.requestId}]] for trigger transaction: [${e}]`
         );
       }
     }

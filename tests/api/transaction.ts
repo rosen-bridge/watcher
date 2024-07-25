@@ -14,7 +14,6 @@ import { JsonBI } from '../../src/ergo/network/parser';
 import TransactionTest from '../../src/api/TransactionTest';
 import { AddressBalance } from '../../src/ergo/interfaces';
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
-import { TransactionUtils } from '../../src/utils/watcherUtils';
 import { Boxes } from '../../src/ergo/boxes';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { ErgoUtils } from '../../src/ergo/utils';

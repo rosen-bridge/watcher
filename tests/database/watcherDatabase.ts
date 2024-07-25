@@ -493,18 +493,6 @@ describe('WatcherModel tests', () => {
     });
   });
 
-  describe('getOldSpentCommitments', () => {
-    /**
-     * Target: testing getOldSpentCommitments
-     * Expected Output:
-     *    The function should return one old commitment
-     */
-    it('should return an old commitment', async () => {
-      const data = await DB.getOldSpentCommitments(3433335);
-      expect(data).to.have.length(1);
-    });
-  });
-
   describe('commitmentsByEventId', () => {
     /**
      * Target: testing commitmentsByEventId
@@ -580,22 +568,6 @@ describe('WatcherModel tests', () => {
       expect(data).to.have.length(2);
       expect(data[0]).to.eql(commitmentEntity);
       expect(data[1]).to.eql(spentCommitmentEntity);
-    });
-  });
-
-  describe('deleteCommitments', () => {
-    /**
-     * Target: testing getOldSpentCommitments
-     * Expected Output:
-     *    The function should delete two commitments with the box ids
-     */
-    it('should delete two commitments with specified ids', async () => {
-      await DB.deleteCommitments([
-        commitmentEntity.boxId,
-        spentCommitmentEntity.boxId,
-      ]);
-      const data = await DB.getOldSpentCommitments(3433335);
-      expect(data).to.have.length(0);
     });
   });
 
@@ -707,28 +679,6 @@ describe('WatcherModel tests', () => {
       // check the result
       expect(data).to.have.length(1);
       expect(data[0]).to.eql(tokenRecord2);
-    });
-  });
-
-  describe('getPermitUnspentBoxes', () => {
-    /**
-     * @target WatcherDataBase.getPermitUnspentBoxes should get all
-     * unspent permit boxes
-     * @dependencies
-     * @scenario
-     * - run the function
-     * - check the result
-     * @expected
-     * - should return data with length 1
-     * - data[0] should be equal to the permitEntity
-     */
-    it('should get all unspent permit boxes', async () => {
-      // run the function
-      const data = await DB.getPermitUnspentBoxes('WID');
-
-      // check the result
-      expect(data).to.have.length(1);
-      expect(data[0]).to.eql(permitEntity);
     });
   });
 

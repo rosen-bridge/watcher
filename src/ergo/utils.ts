@@ -505,7 +505,7 @@ export class ErgoUtils {
    */
   static getPermitCount = async (RWTId: string): Promise<bigint> => {
     if (!Transaction.watcherWID) return 0n;
-    const permitBoxes = await watcherDatabase.getPermitUnspentBoxes(
+    const permitBoxes = await watcherDatabase.getUnspentPermitBoxes(
       Transaction.watcherWID
     );
     const serializedUTXOs = permitBoxes.map((box) => box.boxSerialized);
