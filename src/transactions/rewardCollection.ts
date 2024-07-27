@@ -106,6 +106,10 @@ class RewardCollection {
         return;
       }
       const eRsnBoxes = await this.boxes.getERsnBoxes(getConfig().rosen.eRSN);
+      if (eRsnBoxes.length == 0) {
+        logger.debug(`Not found any eRSN in wallet`);
+        return;
+      }
       const eRsnCount = ErgoUtils.getBoxAssetsSum(eRsnBoxes).filter(
         (token) => token.tokenId == getConfig().rosen.eRSN
       )[0].amount;
