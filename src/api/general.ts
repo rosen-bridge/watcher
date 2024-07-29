@@ -38,6 +38,7 @@ generalRouter.get('/', async (req: Request, res: Response) => {
     const collateral = await Transaction.getInstance().getCollateral();
     const info: GeneralInfo = {
       version: packageJson.version,
+      // TODO: wrap
       currentBalance: (await ErgoUtils.getWatcherBalance()).nanoErgs,
       network: getConfig().general.networkWatcher,
       permitsPerEvent:
@@ -50,6 +51,7 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       address: getConfig().general.address,
       rsnTokenId: getConfig().rosen.RSN,
       eRsnTokenId: getConfig().rosen.eRSN,
+      // TODO: wrap
       collateral: {
         erg: collateral.erg,
         rsn: collateral.rsn,

@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { getConfig } from '../config/config';
-import { validationResult, check } from 'express-validator';
+import { validationResult } from 'express-validator';
 import { generateSK } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
@@ -46,6 +46,7 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
       tokens.push({ amount: 0n, tokenId: getConfig().rosen.RSN });
     }
     tokens = await ErgoUtils.fillTokensDetails(tokens);
+    // TODO: wrap
     tokens.push({
       amount: balance.nanoErgs,
       tokenId: ERGO_NATIVE_ASSET,

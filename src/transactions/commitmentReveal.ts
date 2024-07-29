@@ -104,15 +104,18 @@ export class CommitmentReveal {
     observation: Observation,
     requiredRWTCount: bigint
   ): Array<Commitment> => {
-    return commitments
-      .filter((commitment) => {
-        return (
-          Buffer.from(
-            ErgoUtils.commitmentFromObservation(observation, commitment.WID)
-          ).toString('hex') === commitment.commitment
-        );
-      })
-      .filter((commitment) => BigInt(commitment.rwtCount) == requiredRWTCount);
+    return (
+      commitments
+        .filter((commitment) => {
+          return (
+            Buffer.from(
+              ErgoUtils.commitmentFromObservation(observation, commitment.WID)
+            ).toString('hex') === commitment.commitment
+          );
+        })
+        // TODO: unwrap rwtCount
+        .filter((commitment) => BigInt(commitment.rwtCount) == requiredRWTCount)
+    );
   };
 
   /**

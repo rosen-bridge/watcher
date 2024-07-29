@@ -22,6 +22,7 @@ permitRouter.post(
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
+      // TODO: unwrap
       const RSNCount = req.body.count;
       const watcherTransaction = Transaction.getInstance();
       const response: ApiResponse = await watcherTransaction.getPermit(
@@ -53,6 +54,7 @@ permitRouter.post(
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
+      // TODO: unwrap
       const RWTCount = req.body.count;
       const watcherTransaction = Transaction.getInstance();
       const response: ApiResponse = await watcherTransaction.returnPermit(

@@ -136,6 +136,7 @@ export class Transaction {
       const collateral = await Transaction.watcherDatabase.getCollateralByWid(
         wid
       );
+      // TODO: unwrap
       return collateral.rwtCount;
     } catch (e) {
       logger.warn(`Could not find collateral box for WID [${wid}]`);
