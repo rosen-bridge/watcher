@@ -389,6 +389,7 @@ export class ErgoUtils {
 
   /**
    * fill token name and decimals for list of extracted tokens
+   * assume token amount is wrapped and should set significant decimals
    * @param tokens
    * @returns
    */
@@ -402,19 +403,20 @@ export class ErgoUtils {
     tokensInfo.forEach((token) => {
       tokensInfoMap.set(token.tokenId, token);
     });
+    const tokenMap = getConfig().token.tokenMap;
     return tokens.map((token) => {
       const tokenInfo = tokensInfoMap.get(token.tokenId);
-      const name =
-        token.tokenId === ERGO_NATIVE_ASSET
-          ? ERGO_NATIVE_ASSET_NAME
-          : tokenInfo?.tokenName || '';
-      const decimals =
-        token.tokenId === ERGO_NATIVE_ASSET
-          ? ERGO_DECIMALS
-          : tokenInfo?.decimals || 0;
+      const wrappedToken = tokenMap.wrapAmount(
+        token.tokenId,
+        token.amount,
+        ERGO_CHAIN_NAME
+      );
+      const decimals = wrappedToken.decimals
+        ? wrappedToken.decimals
+        : tokenInfo?.decimals || 0;
       return {
         ...token,
-        name: name === '' ? undefined : name,
+        name: tokenInfo?.tokenName,
         decimals: decimals,
         isNativeToken: token.tokenId === ERGO_NATIVE_ASSET_NAME,
       };
@@ -423,8 +425,8 @@ export class ErgoUtils {
 
   /**
    * Returns full token data by searching on token map
+   * use significant decimals
    * @param tokenId
-   * @param amount
    * @param chain
    * @returns TokenData
    */
@@ -437,8 +439,9 @@ export class ErgoUtils {
     let decimals = 0;
     let isNativeToken = false;
     if (tokenDetail.length) {
+      const wrappedToken = tokenMap.wrapAmount(tokenId, 0n, chain);
       name = tokenDetail[0][chain].name;
-      decimals = tokenDetail[0][chain].decimals;
+      decimals = wrappedToken.decimals;
       isNativeToken = tokenDetail[0][chain].metaData.type === 'native';
     }
 
@@ -452,15 +455,20 @@ export class ErgoUtils {
 
   /**
    * Returns full token data by checking token details in database and tokenMap
+   * use significant decimals
    * @param tokenId
    */
   static tokenDetail = async (tokenId: string) => {
+    const tokenMap = getConfig().token.tokenMap;
     const tokenInfo = (await watcherDatabase.getTokenEntity([tokenId]))[0];
     if (tokenInfo) {
+      const wrappedToken = tokenMap.wrapAmount(tokenId, 0n, ERGO_CHAIN_NAME);
       return {
         tokenId: tokenId,
         name: tokenInfo.tokenName,
-        decimals: tokenInfo.decimals,
+        decimals: wrappedToken.decimals
+          ? wrappedToken.decimals
+          : tokenInfo.decimals,
         isNativeToken: tokenId == ERGO_NATIVE_ASSET,
       };
     }

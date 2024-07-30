@@ -4,11 +4,7 @@ import { validationResult } from 'express-validator';
 import { generateSK } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
-import {
-  ERGO_DECIMALS,
-  ERGO_NATIVE_ASSET,
-  ERGO_NATIVE_ASSET_NAME,
-} from '../config/constants';
+import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -45,14 +41,23 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     if (!tokens.some((item) => item.tokenId === getConfig().rosen.RSN)) {
       tokens.push({ amount: 0n, tokenId: getConfig().rosen.RSN });
     }
-    tokens = await ErgoUtils.fillTokensDetails(tokens);
-    // TODO: wrap
     tokens.push({
       amount: balance.nanoErgs,
       tokenId: ERGO_NATIVE_ASSET,
-      decimals: ERGO_DECIMALS,
-      name: ERGO_NATIVE_ASSET_NAME,
-      isNativeToken: true,
+    });
+    tokens = await ErgoUtils.fillTokensDetails(tokens);
+    const tokenMap = getConfig().token.tokenMap;
+    tokens = tokens.map((token) => {
+      const wrappedToken = tokenMap.wrapAmount(
+        token.tokenId,
+        token.amount,
+        ERGO_CHAIN_NAME
+      );
+      return {
+        ...token,
+        amount: wrappedToken.amount,
+        decimals: wrappedToken.decimals,
+      };
     });
     const { tokenId, tokenName, sortByAmount } = req.query;
     if (tokenId) {
