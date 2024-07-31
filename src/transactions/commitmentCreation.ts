@@ -9,8 +9,8 @@ import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
-import { DetachWID } from './detachWID';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { ERGO_CHAIN_NAME } from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -56,9 +56,12 @@ export class CommitmentCreation {
       )
     );
     const repoConfigBox = await this.boxes.getRepoConfigBox();
-    const requiredRWTCount = BigInt(
-      (repoConfigBox.register_value(4)?.to_js() as Array<string>)[0]
-    );
+    const tokenMap = getConfig().token.tokenMap;
+    const requiredRWTCount = tokenMap.unwrapAmount(
+      getConfig().rosen.RWTId,
+      BigInt((repoConfigBox.register_value(4)?.to_js() as Array<string>)[0]),
+      ERGO_CHAIN_NAME
+    ).amount;
     const outCommitment = this.boxes.createCommitment(
       height,
       requiredRWTCount,

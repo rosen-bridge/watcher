@@ -118,6 +118,29 @@
           "residency": "native"
         }
       }
+    },
+    {
+      "ergo": {
+        "tokenId": "erg",
+        "name": "test token 12",
+        "decimals": 9,
+        "metaData": {
+          "type": "native",
+          "residency": "native"
+        }
+      },
+      "cardano": {
+        "tokenId": "policy_id4.123",
+        "policyId": "policy_id4",
+        "assetName": "123",
+        "unit": "",
+        "name": "cardano wrapped erg",
+        "decimals": 9,
+        "metaData": {
+          "type": "CIP26",
+          "residency": "native"
+        }
+      }
     }
   ]
 }

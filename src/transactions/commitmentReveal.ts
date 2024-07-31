@@ -10,6 +10,7 @@ import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { ERGO_CHAIN_NAME } from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -104,18 +105,15 @@ export class CommitmentReveal {
     observation: Observation,
     requiredRWTCount: bigint
   ): Array<Commitment> => {
-    return (
-      commitments
-        .filter((commitment) => {
-          return (
-            Buffer.from(
-              ErgoUtils.commitmentFromObservation(observation, commitment.WID)
-            ).toString('hex') === commitment.commitment
-          );
-        })
-        // TODO: unwrap rwtCount
-        .filter((commitment) => BigInt(commitment.rwtCount) == requiredRWTCount)
-    );
+    return commitments
+      .filter((commitment) => {
+        return (
+          Buffer.from(
+            ErgoUtils.commitmentFromObservation(observation, commitment.WID)
+          ).toString('hex') === commitment.commitment
+        );
+      })
+      .filter((commitment) => BigInt(commitment.rwtCount) == requiredRWTCount);
   };
 
   /**
