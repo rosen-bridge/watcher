@@ -662,7 +662,7 @@ describe('WatcherModel tests', () => {
     it('should insert token record successfully', async () => {
       // mock a new tokenRecord
       const tokenRecord2 = new TokenEntity();
-      tokenRecord2.tokenId = 'tokenId2';
+      tokenRecord2.tokenId = 'tokenId22';
       tokenRecord2.tokenName = 'tokenName2';
       tokenRecord2.decimals = 0;
 

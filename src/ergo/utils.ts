@@ -17,12 +17,7 @@ import { AddressBalance, TokenData } from './interfaces';
 import { RevenueView } from '../database/entities/revenueView';
 import { TokenEntity } from '../database/entities/tokenEntity';
 import { RevenueEntity } from '../database/entities/revenueEntity';
-import {
-  ERGO_DECIMALS,
-  ERGO_NATIVE_ASSET,
-  ERGO_NATIVE_ASSET_NAME,
-  ERGO_CHAIN_NAME,
-} from '../config/constants';
+import { ERGO_NATIVE_ASSET, ERGO_CHAIN_NAME } from '../config/constants';
 import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
@@ -418,7 +413,7 @@ export class ErgoUtils {
         ...token,
         name: tokenInfo?.tokenName,
         decimals: decimals,
-        isNativeToken: token.tokenId === ERGO_NATIVE_ASSET_NAME,
+        isNativeToken: token.tokenId === ERGO_NATIVE_ASSET,
       };
     });
   };

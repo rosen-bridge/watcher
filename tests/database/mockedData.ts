@@ -174,9 +174,9 @@ export const validBox1Token = {
 export const validTwoBoxErgAmount = {
   amount: 1861100000,
   tokenId: Constants.ERGO_NATIVE_ASSET,
-  decimals: Constants.ERGO_DECIMALS,
-  name: Constants.ERGO_NATIVE_ASSET_NAME,
+  name: Constants.ERGO_NATIVE_ASSET,
   isNativeToken: true,
+  decimals: Constants.ERGO_DECIMALS,
 };
 
 export const eventTriggerEntity = new EventTriggerEntity();

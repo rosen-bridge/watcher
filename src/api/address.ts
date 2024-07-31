@@ -41,11 +41,13 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     if (!tokens.some((item) => item.tokenId === getConfig().rosen.RSN)) {
       tokens.push({ amount: 0n, tokenId: getConfig().rosen.RSN });
     }
+    tokens = await ErgoUtils.fillTokensDetails(tokens);
     tokens.push({
       amount: balance.nanoErgs,
       tokenId: ERGO_NATIVE_ASSET,
+      name: ERGO_NATIVE_ASSET,
+      isNativeToken: true,
     });
-    tokens = await ErgoUtils.fillTokensDetails(tokens);
     const tokenMap = getConfig().token.tokenMap;
     tokens = tokens.map((token) => {
       const wrappedToken = tokenMap.wrapAmount(
@@ -56,7 +58,9 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
       return {
         ...token,
         amount: wrappedToken.amount,
-        decimals: wrappedToken.decimals,
+        decimals: wrappedToken.decimals
+          ? wrappedToken.decimals
+          : token.decimals,
       };
     });
     const { tokenId, tokenName, sortByAmount } = req.query;
