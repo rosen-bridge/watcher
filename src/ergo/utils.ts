@@ -17,7 +17,11 @@ import { AddressBalance, TokenData } from './interfaces';
 import { RevenueView } from '../database/entities/revenueView';
 import { TokenEntity } from '../database/entities/tokenEntity';
 import { RevenueEntity } from '../database/entities/revenueEntity';
-import { ERGO_NATIVE_ASSET, ERGO_CHAIN_NAME } from '../config/constants';
+import {
+  ERGO_NATIVE_ASSET,
+  ERGO_CHAIN_NAME,
+  ERGO_DECIMALS,
+} from '../config/constants';
 import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
@@ -398,20 +402,19 @@ export class ErgoUtils {
     tokensInfo.forEach((token) => {
       tokensInfoMap.set(token.tokenId, token);
     });
-    const tokenMap = getConfig().token.tokenMap;
     return tokens.map((token) => {
       const tokenInfo = tokensInfoMap.get(token.tokenId);
-      const wrappedToken = tokenMap.wrapAmount(
-        token.tokenId,
-        token.amount,
-        ERGO_CHAIN_NAME
-      );
-      const decimals = wrappedToken.decimals
-        ? wrappedToken.decimals
-        : tokenInfo?.decimals || 0;
+      const name =
+        token.tokenId === ERGO_NATIVE_ASSET
+          ? ERGO_NATIVE_ASSET
+          : tokenInfo?.tokenName;
+      const decimals =
+        token.tokenId === ERGO_NATIVE_ASSET
+          ? ERGO_DECIMALS
+          : tokenInfo?.decimals || 0;
       return {
         ...token,
-        name: tokenInfo?.tokenName,
+        name: name,
         decimals: decimals,
         isNativeToken: token.tokenId === ERGO_NATIVE_ASSET,
       };
@@ -454,16 +457,12 @@ export class ErgoUtils {
    * @param tokenId
    */
   static tokenDetail = async (tokenId: string) => {
-    const tokenMap = getConfig().token.tokenMap;
     const tokenInfo = (await watcherDatabase.getTokenEntity([tokenId]))[0];
     if (tokenInfo) {
-      const wrappedToken = tokenMap.wrapAmount(tokenId, 0n, ERGO_CHAIN_NAME);
       return {
         tokenId: tokenId,
         name: tokenInfo.tokenName,
-        decimals: wrappedToken.decimals
-          ? wrappedToken.decimals
-          : tokenInfo.decimals,
+        decimals: tokenInfo.decimals,
         isNativeToken: tokenId == ERGO_NATIVE_ASSET,
       };
     }

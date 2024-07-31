@@ -237,7 +237,7 @@ const firstRevenue = {
       tokenId:
         '0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95',
       amount: 10,
-      decimals: 6,
+      decimals: 0,
       isNativeToken: false,
     },
   ],
