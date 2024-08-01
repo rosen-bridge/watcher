@@ -793,11 +793,7 @@ class WatcherDataBase {
     decimals: number
   ) => {
     const tokenMap = getConfig().token.tokenMap;
-    const significantDecimal = tokenMap.wrapAmount(
-      tokenId,
-      0n,
-      ERGO_CHAIN_NAME
-    ).decimals;
+    const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
     await this.tokenRepository.insert({
       tokenId,
       tokenName,

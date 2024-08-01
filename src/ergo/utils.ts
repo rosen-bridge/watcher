@@ -437,9 +437,9 @@ export class ErgoUtils {
     let decimals = 0;
     let isNativeToken = false;
     if (tokenDetail.length) {
-      const wrappedToken = tokenMap.wrapAmount(tokenId, 0n, chain);
+      const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
       name = tokenDetail[0][chain].name;
-      decimals = wrappedToken.decimals;
+      decimals = significantDecimal || 0;
       isNativeToken = tokenDetail[0][chain].metaData.type === 'native';
     }
 

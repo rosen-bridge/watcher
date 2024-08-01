@@ -55,12 +55,11 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
         token.amount,
         ERGO_CHAIN_NAME
       );
+      const significantDecimal = tokenMap.getSignificantDecimals(token.tokenId);
       return {
         ...token,
         amount: wrappedToken.amount,
-        decimals: wrappedToken.decimals
-          ? wrappedToken.decimals
-          : token.decimals,
+        decimals: significantDecimal ? significantDecimal : token.decimals,
       };
     });
     const { tokenId, tokenName, sortByAmount } = req.query;

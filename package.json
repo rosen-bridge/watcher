@@ -83,7 +83,7 @@
     "@rosen-bridge/log-level-check": "^0.1.1",
     "@rosen-bridge/minimum-fee": "^2.1.0",
     "@rosen-bridge/node-sync-check": "^0.1.1",
-    "@rosen-bridge/observation-extractor": "^5.0.1",
+    "@rosen-bridge/observation-extractor": "^5.0.2",
     "@rosen-bridge/permit-check": "^0.1.1",
     "@rosen-bridge/scanner": "^4.0.5",
     "@rosen-bridge/scanner-sync-check": "^0.3.0",
