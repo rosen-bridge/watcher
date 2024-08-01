@@ -18,10 +18,9 @@ import { RevenueView } from '../database/entities/revenueView';
 import { TokenEntity } from '../database/entities/tokenEntity';
 import { RevenueEntity } from '../database/entities/revenueEntity';
 import {
-  ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
-  ERGO_NATIVE_ASSET_NAME,
   ERGO_CHAIN_NAME,
+  ERGO_DECIMALS,
 } from '../config/constants';
 import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
@@ -389,6 +388,7 @@ export class ErgoUtils {
 
   /**
    * fill token name and decimals for list of extracted tokens
+   * assume token amount is wrapped and should set significant decimals
    * @param tokens
    * @returns
    */
@@ -406,25 +406,25 @@ export class ErgoUtils {
       const tokenInfo = tokensInfoMap.get(token.tokenId);
       const name =
         token.tokenId === ERGO_NATIVE_ASSET
-          ? ERGO_NATIVE_ASSET_NAME
-          : tokenInfo?.tokenName || '';
+          ? ERGO_NATIVE_ASSET
+          : tokenInfo?.tokenName;
       const decimals =
         token.tokenId === ERGO_NATIVE_ASSET
           ? ERGO_DECIMALS
           : tokenInfo?.decimals || 0;
       return {
         ...token,
-        name: name === '' ? undefined : name,
+        name: name,
         decimals: decimals,
-        isNativeToken: token.tokenId === ERGO_NATIVE_ASSET_NAME,
+        isNativeToken: token.tokenId === ERGO_NATIVE_ASSET,
       };
     });
   };
 
   /**
    * Returns full token data by searching on token map
+   * use significant decimals
    * @param tokenId
-   * @param amount
    * @param chain
    * @returns TokenData
    */
@@ -437,8 +437,9 @@ export class ErgoUtils {
     let decimals = 0;
     let isNativeToken = false;
     if (tokenDetail.length) {
+      const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
       name = tokenDetail[0][chain].name;
-      decimals = tokenDetail[0][chain].decimals;
+      decimals = significantDecimal || 0;
       isNativeToken = tokenDetail[0][chain].metaData.type === 'native';
     }
 
@@ -452,6 +453,7 @@ export class ErgoUtils {
 
   /**
    * Returns full token data by checking token details in database and tokenMap
+   * use significant decimals
    * @param tokenId
    */
   static tokenDetail = async (tokenId: string) => {

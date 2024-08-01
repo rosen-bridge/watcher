@@ -14,6 +14,8 @@ import { AddressBalance } from '../ergo/interfaces';
 import { ChangeBoxCreationError, NoWID, NotEnoughFund } from '../errors/errors';
 import { DetachWID } from '../transactions/detachWID';
 import {
+  ERGO_CHAIN_NAME,
+  ERGO_NATIVE_ASSET,
   WID_LOCK_COUNT,
   WID_MINT_COUNT,
   WID_UNLOCK_COUNT,
@@ -112,6 +114,7 @@ export class Transaction {
 
   /**
    * Get required permit count
+   * returns the wrapped amount
    */
   getRequiredPermitsCountPerEvent = async () => {
     const configBox = await Transaction.boxes.getRepoConfigBox();
@@ -127,6 +130,7 @@ export class Transaction {
 
   /**
    * calculate total permit for current user
+   * returns the wrap amount
    * @returns
    */
   getTotalPermit = async (): Promise<bigint> => {
@@ -165,8 +169,13 @@ export class Transaction {
       throw Error('one of registers (4, 5) of repo box is not set');
     }
 
+    const tokenMap = getConfig().token.tokenMap;
     const collateralBox = await Transaction.boxes.getCollateralBox(wid);
-    const totalRwt = BigInt(collateralBox.register_value(5)!.to_i64().to_str());
+    const totalRwt = tokenMap.unwrapAmount(
+      getConfig().rosen.RWTId,
+      BigInt(collateralBox.register_value(5)!.to_i64().to_str()),
+      ERGO_CHAIN_NAME
+    ).amount;
     const completeReturn = totalRwt == RWTCount;
 
     const inputBoxes = [repoBox, collateralBox, permitBoxes[0], widBox];
@@ -506,6 +515,7 @@ export class Transaction {
 
   /**
    * get Erg and RSN collateral
+   * returns the wrapped amount
    * CAUTION: this function removed in watcher refactor
    */
   getCollateral = async () => {
@@ -555,9 +565,18 @@ export class Transaction {
         status: 500,
       };
     }
+    const tokenMap = getConfig().token.tokenMap;
     const collateral = await this.getCollateral();
-    const ErgCollateral = collateral.erg;
-    const RSNCollateral = collateral.rsn;
+    const ErgCollateral = tokenMap.unwrapAmount(
+      ERGO_NATIVE_ASSET,
+      collateral.erg,
+      ERGO_CHAIN_NAME
+    ).amount;
+    const RSNCollateral = tokenMap.unwrapAmount(
+      getConfig().rosen.RSN,
+      collateral.rsn,
+      ERGO_CHAIN_NAME
+    ).amount;
 
     const inputBoxes = [repoBox];
     const RSNTokenId = Transaction.RSN.to_str();
@@ -650,9 +669,11 @@ export class Transaction {
         )
       );
     } else {
-      const collateralRwtCount = BigInt(
-        collateralBox!.register_value(5)!.to_i64().to_str()
-      );
+      const collateralRwtCount = tokenMap.unwrapAmount(
+        getConfig().rosen.RWTId,
+        BigInt(collateralBox!.register_value(5)!.to_i64().to_str()),
+        ERGO_CHAIN_NAME
+      ).amount;
       const rsnCollateral = ErgoUtils.getBoxAssetsSum([collateralBox!]).filter(
         (token) => token.tokenId == getConfig().rosen.RSN
       );

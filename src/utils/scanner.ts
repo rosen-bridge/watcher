@@ -129,6 +129,7 @@ class CreateScanner {
       [rosenConfig.commitmentAddress],
       rosenConfig.RWTId,
       dataSource,
+      getConfig().token.tokens,
       loggers.commitmentExtractorLogger
     );
     const permitExtractor = new PermitExtractor(

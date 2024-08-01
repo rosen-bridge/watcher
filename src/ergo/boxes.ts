@@ -22,6 +22,7 @@ import { AddressBalance } from './interfaces';
 import { JsonBI } from './network/parser';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 import { blake2b } from 'blakejs';
+import { ERGO_CHAIN_NAME } from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -716,9 +717,15 @@ export class Boxes {
       4,
       wasm.Constant.from_byte_array(Buffer.from(wid, 'hex'))
     );
+    const tokenMap = getConfig().token.tokenMap;
+    const wrappedRwtCount = tokenMap.wrapAmount(
+      getConfig().rosen.RWTId,
+      rwtCount,
+      ERGO_CHAIN_NAME
+    ).amount;
     boxBuilder.set_register_value(
       5,
-      wasm.Constant.from_i64(wasm.I64.from_str(rwtCount.toString()))
+      wasm.Constant.from_i64(wasm.I64.from_str(wrappedRwtCount.toString()))
     );
     return boxBuilder.build();
   };
