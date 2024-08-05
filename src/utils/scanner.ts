@@ -185,6 +185,8 @@ class CreateScanner {
             dataSource: dataSource,
             initialHash: cardanoConfig.ogmios.initialHash,
             initialSlot: cardanoConfig.ogmios.initialSlot,
+            connectionRetrialInterval:
+              cardanoConfig.ogmios.connectionRetrialInterval * 1000,
           },
           loggers.scannerLogger
         );
