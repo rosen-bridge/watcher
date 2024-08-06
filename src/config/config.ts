@@ -326,7 +326,7 @@ class CardanoConfig {
         const port = getRequiredNumber('cardano.ogmios.port');
         const initialSlot = getRequiredNumber('cardano.initial.slot');
         const connectionRetrialInterval = getRequiredNumber(
-          'cardano.initial.connectionRetrialInterval'
+          'cardano.ogmios.connectionRetrialInterval'
         );
         const initialHash = getRequiredString('cardano.initial.hash');
         const useTls = config.get<boolean>('cardano.ogmios.useTls');
