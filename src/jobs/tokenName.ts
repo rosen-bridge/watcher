@@ -61,17 +61,12 @@ export const tokenNameJob = async (boxIds: string[]) => {
       const idKeyErgo = tokenMap.getIdKey(ERGO_CHAIN_NAME);
       for (const chain of chains) {
         const tokensData = tokenMap.getTokens(ERGO_CHAIN_NAME, chain);
-        const allTokenIds = tokensData.map((token) => token[idKeyErgo]);
-        const existingTokenIds = (
-          await watcherDatabase.getTokenEntity(allTokenIds)
-        ).map((token) => token.tokenId);
         for (const tokenData of tokensData) {
-          if (!existingTokenIds.find((id) => id === tokenData[idKeyErgo]))
-            await watcherDatabase.insertTokenEntity(
-              tokenData[idKeyErgo],
-              tokenData.name,
-              tokenData.decimals
-            );
+          await watcherDatabase.insertTokenEntity(
+            tokenData[idKeyErgo],
+            tokenData.name,
+            tokenData.decimals
+          );
         }
       }
       initialized = true;

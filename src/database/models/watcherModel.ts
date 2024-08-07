@@ -794,7 +794,7 @@ class WatcherDataBase {
   ) => {
     const tokenMap = getConfig().token.tokenMap;
     const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
-    await this.tokenRepository.insert({
+    await this.tokenRepository.save({
       tokenId,
       tokenName,
       decimals: significantDecimal != undefined ? significantDecimal : decimals,
