@@ -59,7 +59,8 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
       return {
         ...token,
         amount: wrappedToken.amount,
-        decimals: significantDecimal ? significantDecimal : token.decimals,
+        decimals:
+          significantDecimal != undefined ? significantDecimal : token.decimals,
       };
     });
     const { tokenId, tokenName, sortByAmount } = req.query;

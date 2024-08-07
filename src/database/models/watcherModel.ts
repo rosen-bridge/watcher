@@ -797,7 +797,7 @@ class WatcherDataBase {
     await this.tokenRepository.insert({
       tokenId,
       tokenName,
-      decimals: significantDecimal ? significantDecimal : decimals,
+      decimals: significantDecimal != undefined ? significantDecimal : decimals,
     });
   };
 
