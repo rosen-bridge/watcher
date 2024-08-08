@@ -1,5 +1,5 @@
 ---
-network: '' # which scanner network used in this watcher ergo/cardano/bitcoin
+network: '' # which scanner network used in this watcher ergo/cardano/bitcoin/ethereum
 observation:
   confirmation: 60 # number of required block confirmations to create the commitment after observing an event
   validThreshold: 12960 # observations that have not been triggered won't be processed after this period (in blocks)
@@ -35,6 +35,14 @@ cardano:
     projectId: '' # blockfrost project Id
     timeout: 10 # blockfrost request timeout
     interval: 20 # blockfrost check timeout
+ethereum:
+  type: '' # options: rpc
+  initial:
+    height: -1 # initial height of scanning
+  rpc:
+    url: '' # rpc url
+    interval: 180 # rpc scanning interval (in seconds)
+    timeout: 10 # rpc request timeout (in seconds)
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer

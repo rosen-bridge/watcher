@@ -422,16 +422,20 @@ class EthereumConfig {
     this.type = config.get<string>('ethereum.type');
     if (network === Constants.ETHEREUM_CHAIN_NAME) {
       this.initialHeight = getRequiredNumber('ethereum.initial.height');
-    } else if (this.type == Constants.EVM_RPC_TYPE) {
-      const url = getRequiredString('ethereum.rpc.url');
-      const timeout = getRequiredNumber('ethereum.rpc.timeout');
-      const interval = getRequiredNumber('ethereum.rpc.interval');
-      const authToken = getOptionalString('ethereum.rpc.authToken', undefined);
-      this.rpc = { url, timeout, interval, authToken };
-    } else {
-      throw new Error(
-        `Improperly configured. ethereum configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`
-      );
+      if (this.type == Constants.EVM_RPC_TYPE) {
+        const url = getRequiredString('ethereum.rpc.url');
+        const timeout = getRequiredNumber('ethereum.rpc.timeout');
+        const interval = getRequiredNumber('ethereum.rpc.interval');
+        const authToken = getOptionalString(
+          'ethereum.rpc.authToken',
+          undefined
+        );
+        this.rpc = { url, timeout, interval, authToken };
+      } else {
+        throw new Error(
+          `Improperly configured. ethereum configuration type is invalid available choices are '${Constants.EVM_RPC_TYPE}'`
+        );
+      }
     }
   }
 }
