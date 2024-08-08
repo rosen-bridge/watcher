@@ -35,6 +35,7 @@ import {
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
   ESPLORA_TYPE,
+  ETHEREUM_CHAIN_NAME,
   EXPLORER_TYPE,
   KOIOS_TYPE,
   NODE_TYPE,
@@ -79,6 +80,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
       this.registerBitcoinHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === ETHEREUM_CHAIN_NAME) {
+      this.registerEthereumHealthCheckParams();
     }
   }
 
@@ -212,6 +216,13 @@ class HealthCheckSingleton {
     }
     if (bitcoinScannerSyncCheck)
       this.healthCheck.register(bitcoinScannerSyncCheck);
+  };
+
+  /**
+   * Registers all ethereum check params
+   */
+  registerEthereumHealthCheckParams = () => {
+    // Not available
   };
 
   /**

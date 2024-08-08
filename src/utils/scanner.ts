@@ -29,6 +29,8 @@ import WinstonLogger from '@rosen-bridge/winston-logger';
 import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
 import * as Constants from '../config/constants';
+import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+import { EthereumRpcObservationExtractor } from '@rosen-bridge/evm-observation-extractor';
 
 const allConfig = getConfig();
 const {
@@ -37,6 +39,7 @@ const {
   rosen: rosenConfig,
   cardano: cardanoConfig,
   bitcoin: bitcoinConfig,
+  ethereum: ethereumConfig,
 } = allConfig;
 
 /**
@@ -74,7 +77,8 @@ class CreateScanner {
     | CardanoOgmiosScanner
     | CardanoBlockFrostScanner
     | BitcoinEsploraScanner
-    | BitcoinRpcScanner;
+    | BitcoinRpcScanner
+    | EvmRpcScanner;
 
   constructor() {
     this.createErgoScanner();
@@ -82,6 +86,8 @@ class CreateScanner {
       this.createCardanoScanner();
     else if (config.networkWatcher === Constants.BITCOIN_CHAIN_NAME)
       this.createBitcoinScanner();
+    else if (config.networkWatcher === Constants.ETHEREUM_CHAIN_NAME)
+      this.createEthereumScanner();
     if (!this.observationScanner)
       throw Error(
         'Observation scanner initialization failed, check the watcher network to be correct'
@@ -267,6 +273,32 @@ class CreateScanner {
         );
 
         const observationExtractor = new BitcoinRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          tokensConfig.tokens,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      }
+    }
+  };
+
+  private createEthereumScanner = () => {
+    if (!this.observationScanner) {
+      if (ethereumConfig.rpc) {
+        this.observationScanner = new EvmRpcScanner(
+          Constants.ETHEREUM_CHAIN_NAME,
+          {
+            RpcUrl: ethereumConfig.rpc.url,
+            timeout: ethereumConfig.rpc.timeout * 1000,
+            initialHeight: ethereumConfig.initialHeight,
+            dataSource: dataSource,
+          },
+          loggers.scannerLogger,
+          ethereumConfig.rpc.authToken
+        );
+
+        const observationExtractor = new EthereumRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
           tokensConfig.tokens,

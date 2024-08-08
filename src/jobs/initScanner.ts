@@ -10,6 +10,7 @@ import * as Constants from '../config/constants';
 import { getConfig } from '../config/config';
 import { scanner } from '../utils/scanner';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -42,11 +43,7 @@ export const scannerInit = () => {
         cardanoConfig.blockfrost.interval,
         scanner.observationScanner as CardanoBlockFrostScanner
       ).then(() => null);
-    } else {
-      throw new Error(
-        `The observing network [${config.networkWatcher}] is not supported`
-      );
-    }
+    } else throw new Error(`Cardano scanner is not configured properly`);
   } else if (config.networkWatcher === Constants.BITCOIN_CHAIN_NAME) {
     const bitcoinConfig = allConfig.bitcoin;
     if (bitcoinConfig.esplora) {
@@ -59,11 +56,19 @@ export const scannerInit = () => {
         bitcoinConfig.rpc.interval,
         scanner.observationScanner as BitcoinRpcScanner
       ).then(() => null);
-    } else {
-      throw new Error(
-        `The observing network [${config.networkWatcher}] is not supported`
-      );
-    }
+    } else throw new Error(`Bitcoin scanner is not configured properly`);
+  } else if (config.networkWatcher === Constants.ETHEREUM_CHAIN_NAME) {
+    const ethereumConfig = allConfig.ethereum;
+    if (ethereumConfig.rpc) {
+      scanningJob(
+        ethereumConfig.rpc.interval,
+        scanner.observationScanner as EvmRpcScanner
+      ).then(() => null);
+    } else throw new Error(`Ethereum scanner is not configured properly`);
+  } else {
+    throw new Error(
+      `The observing network [${config.networkWatcher}] is not supported`
+    );
   }
 
   // TODO: Add commitment cleanup job
