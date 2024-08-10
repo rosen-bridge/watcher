@@ -41,7 +41,7 @@ ethereum:
     height: -1 # initial height of scanning
   rpc:
     url: '' # rpc url
-    interval: 180 # rpc scanning interval (in seconds)
+    interval: 20 # rpc scanning interval (in seconds)
     timeout: 10 # rpc request timeout (in seconds)
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet

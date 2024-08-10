@@ -82,12 +82,17 @@ class CreateScanner {
 
   constructor() {
     this.createErgoScanner();
-    if (config.networkWatcher === Constants.CARDANO_CHAIN_NAME)
-      this.createCardanoScanner();
-    else if (config.networkWatcher === Constants.BITCOIN_CHAIN_NAME)
-      this.createBitcoinScanner();
-    else if (config.networkWatcher === Constants.ETHEREUM_CHAIN_NAME)
-      this.createEthereumScanner();
+    switch (config.networkWatcher) {
+      case Constants.BITCOIN_CHAIN_NAME:
+        this.createBitcoinScanner();
+        break;
+      case Constants.CARDANO_CHAIN_NAME:
+        this.createCardanoScanner();
+        break;
+      case Constants.ETHEREUM_CHAIN_NAME:
+        this.createEthereumScanner();
+        break;
+    }
     if (!this.observationScanner)
       throw Error(
         'Observation scanner initialization failed, check the watcher network to be correct'
