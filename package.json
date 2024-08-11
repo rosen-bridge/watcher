@@ -79,6 +79,8 @@
     "@rosen-bridge/bitcoin-esplora-scanner": "^0.1.12",
     "@rosen-bridge/bitcoin-observation-extractor": "^4.0.4",
     "@rosen-bridge/bitcoin-rpc-scanner": "^0.2.6",
+    "@rosen-bridge/evm-observation-extractor": "^3.0.2",
+    "@rosen-bridge/evm-rpc-scanner": "^1.0.2",
     "@rosen-bridge/health-check": "^5.0.0",
     "@rosen-bridge/log-level-check": "^0.1.1",
     "@rosen-bridge/minimum-fee": "^2.1.0",
