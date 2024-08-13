@@ -1,11 +1,4 @@
-import {
-  CardanoBlockFrostScanner,
-  CardanoKoiosScanner,
-  CardanoOgmiosScanner,
-  GeneralScanner,
-} from '@rosen-bridge/scanner';
-import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
-import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
+import { CardanoOgmiosScanner, GeneralScanner } from '@rosen-bridge/scanner';
 import * as Constants from '../config/constants';
 import { getConfig } from '../config/config';
 import { scanner } from '../utils/scanner';
@@ -37,10 +30,10 @@ export const scannerInit = () => {
   scanningJob(config.ergoInterval, scanner.ergoScanner).then(() => null);
   switch (config.networkWatcher) {
     case Constants.CARDANO_CHAIN_NAME:
-      if (cardanoConfig.ogmios)
+      if (cardanoConfig.ogmios) {
         (scanner.observationScanner as CardanoOgmiosScanner).start();
-      else if (!cardanoConfig.blockfrost && !cardanoConfig.koios)
-        throw new Error(`Cardano scanner is not configured properly`);
+        break;
+      }
       scanningJob(
         cardanoConfig.koios
           ? cardanoConfig.koios.interval
@@ -49,8 +42,6 @@ export const scannerInit = () => {
       ).then(() => null);
       break;
     case Constants.BITCOIN_CHAIN_NAME:
-      if (!bitcoinConfig.esplora && bitcoinConfig.rpc)
-        throw new Error(`Bitcoin scanner is not configured properly`);
       scanningJob(
         bitcoinConfig.rpc
           ? bitcoinConfig.rpc.interval
@@ -59,10 +50,8 @@ export const scannerInit = () => {
       ).then(() => null);
       break;
     case Constants.ETHEREUM_CHAIN_NAME:
-      if (!ethereumConfig.rpc)
-        throw new Error(`Ethereum scanner is not configured properly`);
       scanningJob(
-        ethereumConfig.rpc.interval,
+        ethereumConfig.rpc!.interval,
         scanner.observationScanner as EvmRpcScanner
       ).then(() => null);
       break;
