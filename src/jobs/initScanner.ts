@@ -39,38 +39,32 @@ export const scannerInit = () => {
     case Constants.CARDANO_CHAIN_NAME:
       if (cardanoConfig.ogmios)
         (scanner.observationScanner as CardanoOgmiosScanner).start();
-      else if (cardanoConfig.koios) {
-        scanningJob(
-          cardanoConfig.koios.interval,
-          scanner.observationScanner as CardanoKoiosScanner
-        ).then(() => null);
-      } else if (cardanoConfig.blockfrost) {
-        scanningJob(
-          cardanoConfig.blockfrost.interval,
-          scanner.observationScanner as CardanoBlockFrostScanner
-        ).then(() => null);
-      } else throw new Error(`Cardano scanner is not configured properly`);
+      else if (!cardanoConfig.blockfrost && !cardanoConfig.koios)
+        throw new Error(`Cardano scanner is not configured properly`);
+      scanningJob(
+        cardanoConfig.koios
+          ? cardanoConfig.koios.interval
+          : cardanoConfig.blockfrost!.interval,
+        scanner.observationScanner as GeneralScanner<unknown>
+      ).then(() => null);
       break;
     case Constants.BITCOIN_CHAIN_NAME:
-      if (bitcoinConfig.esplora) {
-        scanningJob(
-          bitcoinConfig.esplora.interval,
-          scanner.observationScanner as BitcoinEsploraScanner
-        ).then(() => null);
-      } else if (bitcoinConfig.rpc) {
-        scanningJob(
-          bitcoinConfig.rpc.interval,
-          scanner.observationScanner as BitcoinRpcScanner
-        ).then(() => null);
-      } else throw new Error(`Bitcoin scanner is not configured properly`);
+      if (!bitcoinConfig.esplora && bitcoinConfig.rpc)
+        throw new Error(`Bitcoin scanner is not configured properly`);
+      scanningJob(
+        bitcoinConfig.rpc
+          ? bitcoinConfig.rpc.interval
+          : bitcoinConfig.esplora!.interval,
+        scanner.observationScanner as GeneralScanner<unknown>
+      ).then(() => null);
       break;
     case Constants.ETHEREUM_CHAIN_NAME:
-      if (ethereumConfig.rpc) {
-        scanningJob(
-          ethereumConfig.rpc.interval,
-          scanner.observationScanner as EvmRpcScanner
-        ).then(() => null);
-      } else throw new Error(`Ethereum scanner is not configured properly`);
+      if (!ethereumConfig.rpc)
+        throw new Error(`Ethereum scanner is not configured properly`);
+      scanningJob(
+        ethereumConfig.rpc.interval,
+        scanner.observationScanner as EvmRpcScanner
+      ).then(() => null);
       break;
     case Constants.ERGO_CHAIN_NAME:
       break;
