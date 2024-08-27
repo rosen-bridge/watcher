@@ -23,10 +23,10 @@ import {
   ExplorerWidHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
-
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { CardanoOgmiosScanner } from '@rosen-bridge/scanner';
+import { DiscordNotification } from '@rosen-bridge/discord-notification';
 
-import { dataSource } from '../../config/dataSource';
 import { Transaction } from '../../src/api/Transaction';
 import { getConfig } from '../config/config';
 import {
@@ -42,6 +42,7 @@ import {
   RPC_TYPE,
 } from '../config/constants';
 import { scanner } from './scanner';
+import { watcherDatabase } from '../init';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -59,7 +60,14 @@ class HealthCheckSingleton {
   };
 
   private constructor() {
-    this.healthCheck = new HealthCheck();
+    let notify;
+    if (getConfig().notification.discordWebHookUrl) {
+      const discordNotification = new DiscordNotification(
+        getConfig().notification.discordWebHookUrl
+      );
+      notify = discordNotification.notify;
+    }
+    this.healthCheck = new HealthCheck(notify);
     const errorLogHealthCheck = new LogLevelHealthCheck(
       logger,
       HealthStatusLevel.UNSTABLE,
@@ -81,6 +89,10 @@ class HealthCheckSingleton {
       this.registerBitcoinHealthCheckParams();
     }
   }
+
+  private observingNetworkLastBlock = (scanner: string) => {
+    return () => watcherDatabase.getLastBlockHeight(scanner);
+  };
 
   /**
    * Registers all ergo node check params
@@ -106,7 +118,7 @@ class HealthCheckSingleton {
     this.healthCheck.register(assetHealthCheck);
 
     this.ergoScannerSyncCheckParam = new ErgoNodeScannerHealthCheck(
-      dataSource,
+      this.observingNetworkLastBlock(scanner.observationScanner.name()),
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
@@ -148,7 +160,7 @@ class HealthCheckSingleton {
     this.healthCheck.register(assetHealthCheck);
 
     this.ergoScannerSyncCheckParam = new ErgoExplorerScannerHealthCheck(
-      dataSource,
+      this.observingNetworkLastBlock(scanner.observationScanner.name()),
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
@@ -164,17 +176,20 @@ class HealthCheckSingleton {
     let cardanoScannerSyncCheck;
     if (getConfig().cardano.type === OGMIOS_TYPE) {
       cardanoScannerSyncCheck = new CardanoOgmiosScannerHealthCheck(
-        dataSource,
-        scanner.observationScanner.name(),
+        this.observingNetworkLastBlock(scanner.observationScanner.name()),
+        (
+          scanner.observationScanner as CardanoOgmiosScanner
+        ).getConnectionStatus,
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
         getConfig().cardano.ogmios!.host,
         getConfig().cardano.ogmios!.port,
+        getConfig().cardano.ogmios!.connectionRetrialInterval * 15,
         getConfig().cardano.ogmios!.useTls
       );
     } else if (getConfig().cardano.type === KOIOS_TYPE) {
       cardanoScannerSyncCheck = new CardanoKoiosScannerHealthCheck(
-        dataSource,
+        this.observingNetworkLastBlock(scanner.observationScanner.name()),
         scanner.observationScanner.name(),
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
@@ -193,7 +208,7 @@ class HealthCheckSingleton {
     let bitcoinScannerSyncCheck;
     if (getConfig().bitcoin.type === RPC_TYPE) {
       bitcoinScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
-        dataSource,
+        this.observingNetworkLastBlock(scanner.observationScanner.name()),
         scanner.observationScanner.name(),
         getConfig().healthCheck.bitcoinScannerWarnDiff,
         getConfig().healthCheck.bitcoinScannerCriticalDiff,
@@ -203,7 +218,7 @@ class HealthCheckSingleton {
       );
     } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
       bitcoinScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
-        dataSource,
+        this.observingNetworkLastBlock(scanner.observationScanner.name()),
         scanner.observationScanner.name(),
         getConfig().healthCheck.bitcoinScannerWarnDiff,
         getConfig().healthCheck.bitcoinScannerCriticalDiff,
@@ -278,7 +293,7 @@ class HealthCheckSingleton {
    * @returns
    */
   getOverallStatus = async () =>
-    (await this.healthCheck.getOverallHealthStatus()).status;
+    await this.healthCheck.getOverallHealthStatus();
 
   /**
    * Returns overall health status
@@ -291,7 +306,7 @@ class HealthCheckSingleton {
    * @param paramName
    */
   getParamStatus = (paramName: string) =>
-    this.healthCheck.getHealthStatusFor(paramName);
+    this.healthCheck.getHealthStatusWithParamId(paramName);
 
   /**
    * Updates the parameter health status
