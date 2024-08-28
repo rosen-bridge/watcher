@@ -61,13 +61,33 @@ class HealthCheckSingleton {
 
   private constructor() {
     let notify;
+    let notificationConfig;
     if (getConfig().notification.discordWebHookUrl) {
       const discordNotification = new DiscordNotification(
         getConfig().notification.discordWebHookUrl
       );
       notify = discordNotification.notify;
+      notificationConfig = {
+        historyConfig: {
+          cleanupThreshold: getConfig().notification.historyCleanupTimeout,
+        },
+        notificationCheckConfig: {
+          hasBeenUnstableForAWhile: {
+            windowDuration:
+              getConfig().notification.hasBeenUnknownForAWhileWindowDuration,
+          },
+          hasBeenUnknownForAWhile: {
+            windowDuration:
+              getConfig().notification.hasBeenUnknownForAWhileWindowDuration,
+          },
+          isStillUnhealthy: {
+            windowDuration:
+              getConfig().notification.isStillUnhealthyWindowDuration,
+          },
+        },
+      };
     }
-    this.healthCheck = new HealthCheck(notify);
+    this.healthCheck = new HealthCheck(notify, notificationConfig);
     const errorLogHealthCheck = new LogLevelHealthCheck(
       logger,
       HealthStatusLevel.UNSTABLE,
