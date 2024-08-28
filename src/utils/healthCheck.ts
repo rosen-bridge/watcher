@@ -316,6 +316,12 @@ class HealthCheckSingleton {
     await this.healthCheck.getOverallHealthStatus();
 
   /**
+   * Returns all trial errors
+   * @returns
+   */
+  getTrialErrors = async () => await this.healthCheck.getTrialErrors();
+
+  /**
    * Returns overall health status
    * @returns
    */
