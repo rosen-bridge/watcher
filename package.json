@@ -75,7 +75,7 @@
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
     "@rosen-bridge/address-extractor": "^5.0.7",
-    "@rosen-bridge/asset-check": "^1.0.1",
+    "@rosen-bridge/asset-check": "^1.0.2",
     "@rosen-bridge/bitcoin-esplora-scanner": "^0.1.13",
     "@rosen-bridge/bitcoin-observation-extractor": "^4.0.6",
     "@rosen-bridge/bitcoin-rpc-scanner": "^0.2.7",
