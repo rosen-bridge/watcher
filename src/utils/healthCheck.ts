@@ -204,6 +204,7 @@ class HealthCheckSingleton {
         getConfig().healthCheck.cardanoScannerCriticalDiff,
         getConfig().cardano.ogmios!.host,
         getConfig().cardano.ogmios!.port,
+        // TODO: Fix configuration: local/health-check/-/issues/29
         getConfig().cardano.ogmios!.connectionRetrialInterval * 15,
         getConfig().cardano.ogmios!.useTls
       );
