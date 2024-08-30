@@ -27,6 +27,7 @@ interface ConfigType {
   token: TokensConfig;
   database: DatabaseConfig;
   healthCheck: HealthCheckConfig;
+  notification: NotificationConfig;
 }
 
 const getRequiredNumber = (path: string) => {
@@ -49,6 +50,17 @@ const getOptionalNumber = (path: string, defaultValue: number) => {
     return value;
   }
   return defaultValue;
+};
+
+const getOptionalNumberWithoutDefault = (path: string) => {
+  if (config.has(path)) {
+    const value = config.get<number>(path);
+    if (isNaN(value)) {
+      throw new Error(`ImproperlyConfigured. ${path} is not a number`);
+    }
+    return value;
+  }
+  return undefined;
 };
 
 const getRequiredString = (path: string) => {
@@ -433,6 +445,34 @@ class DatabaseConfig {
   }
 }
 
+class NotificationConfig {
+  discordWebHookUrl: string;
+  historyCleanupTimeout?: number;
+  hasBeenUnstableForAWhileWindowDuration?: number;
+  hasBeenUnknownForAWhileWindowDuration?: number;
+  isStillUnhealthyWindowDuration?: number;
+
+  constructor() {
+    this.discordWebHookUrl = getOptionalString(
+      'notification.discordWebhookUrl'
+    );
+    this.historyCleanupTimeout = getOptionalNumberWithoutDefault(
+      'notification.historyCleanupTimeout'
+    );
+    this.hasBeenUnstableForAWhileWindowDuration =
+      getOptionalNumberWithoutDefault(
+        'notification.windowDurations.hasBeenUnstableForAWhile'
+      );
+    this.hasBeenUnknownForAWhileWindowDuration =
+      getOptionalNumberWithoutDefault(
+        'notification.windowDurations.hasBeenUnknownForAWhile'
+      );
+    this.isStillUnhealthyWindowDuration = getOptionalNumberWithoutDefault(
+      'notification.windowDurations.isStillUnhealthy'
+    );
+  }
+}
+
 class HealthCheckConfig {
   ergWarnThreshold: bigint;
   ergCriticalThreshold: bigint;
@@ -520,6 +560,7 @@ const getConfig = (): ConfigType => {
     const token = new TokensConfig(general.rosenTokensPath);
     const database = new DatabaseConfig();
     const healthCheck = new HealthCheckConfig();
+    const notification = new NotificationConfig();
     internalConfig = {
       cardano,
       bitcoin,
@@ -529,6 +570,7 @@ const getConfig = (): ConfigType => {
       token,
       database,
       healthCheck,
+      notification,
     };
   }
   return internalConfig;

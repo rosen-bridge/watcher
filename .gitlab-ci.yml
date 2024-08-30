@@ -1,15 +1,14 @@
+image: node:18.17.1
+
 stages:
-  - installation_16
+  - installation
   - type_check
   - lint
-  - test
-  - installation_18
   - coverage
   - changeset
 
-installation_16:
-  image: node:16.19.1
-  stage: installation_16
+installation:
+  stage: installation
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: push
@@ -19,9 +18,8 @@ installation_16:
     - npm ci
 
 type_check:
-  image: node:16.19.1
   stage: type_check
-  needs: ['installation_16']
+  needs: ['installation']
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: pull
@@ -31,7 +29,6 @@ type_check:
     - npm run type-check
 
 lint:
-  image: node:16.19.1
   stage: lint
   needs: ['type_check']
   cache:
@@ -42,33 +39,9 @@ lint:
   script:
     - npm run lint
 
-test:
-  image: node:16.19.1
-  stage: test
-  needs: ['lint']
-  cache:
-    key: $CI_COMMIT_REF_NAME
-    policy: pull
-    paths:
-      - node_modules
-  script:
-    - npm run test
-
-installation_18:
-  image: node:18.14.0
-  stage: installation_18
-  cache:
-    key: $CI_COMMIT_REF_NAME
-    policy: push
-    paths:
-      - node_modules
-  script:
-    - npm ci
-
 coverage:
-  image: node:18.14.0
   stage: coverage
-  needs: ['installation_18']
+  needs: ['installation']
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: pull
@@ -84,7 +57,6 @@ coverage:
         path: coverage/cobertura-coverage.xml
 
 changeset:
-  image: node:18.14.0
   stage: changeset
   needs: ['coverage']
   cache:
