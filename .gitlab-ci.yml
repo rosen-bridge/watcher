@@ -4,7 +4,6 @@ stages:
   - installation
   - type_check
   - lint
-  - test
   - coverage
   - changeset
 
@@ -39,17 +38,6 @@ lint:
       - node_modules
   script:
     - npm run lint
-
-test:
-  stage: test
-  needs: ['lint']
-  cache:
-    key: $CI_COMMIT_REF_NAME
-    policy: pull
-    paths:
-      - node_modules
-  script:
-    - npm run test
 
 coverage:
   stage: coverage
