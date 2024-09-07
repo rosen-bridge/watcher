@@ -28,6 +28,7 @@ cardano:
   ogmios:
     host: '' # ogmios node host address
     port: 1337 # ogmios port
+    connectionRetrialInterval: 30 # ogmios connection retrial interval (in seconds)
     useTls: false # connect to ogmios using https or not
   blockfrost:
     url: '' # url to connect to blockfrost
