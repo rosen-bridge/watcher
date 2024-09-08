@@ -36,13 +36,19 @@ const healthCheckJob = async (boxes: Boxes) => {
     await updatePermitCheckThreshold(boxes);
   } catch (e) {
     logger.warn(`Health check permit check threshold failed: ${e.message}`);
-    logger.warn(e.stack);
+    logger.debug(e.stack);
   }
   try {
     await HealthCheckSingleton.getInstance().updateParams();
   } catch (e) {
-    logger.warn(`Health check update job failed: ${e.message}`);
-    logger.warn(e.stack);
+    if (e instanceof AggregateError) {
+      logger.warn(
+        `Health check update job failed: ${e.errors.map(
+          (error) => error.message
+        )}`
+      );
+    } else logger.warn(`Health check update job failed: ${e.message}`);
+    logger.debug(e.stack);
   }
   setTimeout(
     () => healthCheckJob(boxes),
