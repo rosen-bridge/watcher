@@ -27,6 +27,7 @@ interface ConfigType {
   token: TokensConfig;
   database: DatabaseConfig;
   healthCheck: HealthCheckConfig;
+  notification: NotificationConfig;
 }
 
 const getRequiredNumber = (path: string) => {
@@ -49,6 +50,17 @@ const getOptionalNumber = (path: string, defaultValue: number) => {
     return value;
   }
   return defaultValue;
+};
+
+const getOptionalNumberWithoutDefault = (path: string) => {
+  if (config.has(path)) {
+    const value = config.get<number>(path);
+    if (isNaN(value)) {
+      throw new Error(`ImproperlyConfigured. ${path} is not a number`);
+    }
+    return value;
+  }
+  return undefined;
 };
 
 const getRequiredString = (path: string) => {
@@ -300,6 +312,7 @@ class CardanoConfig {
     port: number;
     initialSlot: number;
     initialHash: string;
+    connectionRetrialInterval: number;
     useTls?: boolean;
   };
   koios?: {
@@ -324,9 +337,19 @@ class CardanoConfig {
         const host = getRequiredString('cardano.ogmios.host');
         const port = getRequiredNumber('cardano.ogmios.port');
         const initialSlot = getRequiredNumber('cardano.initial.slot');
+        const connectionRetrialInterval = getRequiredNumber(
+          'cardano.ogmios.connectionRetrialInterval'
+        );
         const initialHash = getRequiredString('cardano.initial.hash');
         const useTls = config.get<boolean>('cardano.ogmios.useTls');
-        this.ogmios = { host, port, initialHash, initialSlot, useTls };
+        this.ogmios = {
+          host,
+          port,
+          initialHash,
+          initialSlot,
+          connectionRetrialInterval,
+          useTls,
+        };
       } else if (this.type === Constants.KOIOS_TYPE) {
         const url = getRequiredString('cardano.koios.url');
         const interval = getRequiredNumber('cardano.koios.interval');
@@ -422,6 +445,34 @@ class DatabaseConfig {
   }
 }
 
+class NotificationConfig {
+  discordWebHookUrl: string;
+  historyCleanupTimeout?: number;
+  hasBeenUnstableForAWhileWindowDuration?: number;
+  hasBeenUnknownForAWhileWindowDuration?: number;
+  isStillUnhealthyWindowDuration?: number;
+
+  constructor() {
+    this.discordWebHookUrl = getOptionalString(
+      'notification.discordWebhookUrl'
+    );
+    this.historyCleanupTimeout = getOptionalNumberWithoutDefault(
+      'notification.historyCleanupTimeout'
+    );
+    this.hasBeenUnstableForAWhileWindowDuration =
+      getOptionalNumberWithoutDefault(
+        'notification.windowDurations.hasBeenUnstableForAWhile'
+      );
+    this.hasBeenUnknownForAWhileWindowDuration =
+      getOptionalNumberWithoutDefault(
+        'notification.windowDurations.hasBeenUnknownForAWhile'
+      );
+    this.isStillUnhealthyWindowDuration = getOptionalNumberWithoutDefault(
+      'notification.windowDurations.isStillUnhealthy'
+    );
+  }
+}
+
 class HealthCheckConfig {
   ergWarnThreshold: bigint;
   ergCriticalThreshold: bigint;
@@ -509,6 +560,7 @@ const getConfig = (): ConfigType => {
     const token = new TokensConfig(general.rosenTokensPath);
     const database = new DatabaseConfig();
     const healthCheck = new HealthCheckConfig();
+    const notification = new NotificationConfig();
     internalConfig = {
       cardano,
       bitcoin,
@@ -518,6 +570,7 @@ const getConfig = (): ConfigType => {
       token,
       database,
       healthCheck,
+      notification,
     };
   }
   return internalConfig;

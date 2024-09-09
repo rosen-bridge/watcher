@@ -129,6 +129,7 @@ class CreateScanner {
       [rosenConfig.commitmentAddress],
       rosenConfig.RWTId,
       dataSource,
+      getConfig().token.tokens,
       loggers.commitmentExtractorLogger
     );
     const permitExtractor = new PermitExtractor(
@@ -184,6 +185,8 @@ class CreateScanner {
             dataSource: dataSource,
             initialHash: cardanoConfig.ogmios.initialHash,
             initialSlot: cardanoConfig.ogmios.initialSlot,
+            connectionRetrialInterval:
+              cardanoConfig.ogmios.connectionRetrialInterval * 1000,
           },
           loggers.scannerLogger
         );

@@ -30,9 +30,13 @@ export const scannerInit = () => {
   scanningJob(config.ergoInterval, scanner.ergoScanner).then(() => null);
   if (config.networkWatcher === Constants.CARDANO_CHAIN_NAME) {
     const cardanoConfig = allConfig.cardano;
-    if (cardanoConfig.ogmios)
-      (scanner.observationScanner as CardanoOgmiosScanner).start();
-    else if (cardanoConfig.koios) {
+    if (cardanoConfig.ogmios) {
+      (scanner.observationScanner as CardanoOgmiosScanner)
+        .start()
+        .catch((e) => {
+          logger.error(`Ogmios connection failed with error: ${e}`);
+        });
+    } else if (cardanoConfig.koios) {
       scanningJob(
         cardanoConfig.koios.interval,
         scanner.observationScanner as CardanoKoiosScanner

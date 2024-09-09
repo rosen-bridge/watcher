@@ -1,0 +1,70 @@
+diff --git a/node_modules/@rosen-bridge/health-check/dist/healthCheck.js b/node_modules/@rosen-bridge/health-check/dist/healthCheck.js
+index 40903d0..389e287 100644
+--- a/node_modules/@rosen-bridge/health-check/dist/healthCheck.js
++++ b/node_modules/@rosen-bridge/health-check/dist/healthCheck.js
+@@ -68,13 +68,13 @@ export class HealthCheck {
+         const lastTrialErrorTime = await param.getLastTrialErrorTime();
+         if (this.healthHistory)
+             if (lastTrialErrorTime) {
+-                this.healthHistory.updateHistoryForParam(paramId, {
++                await this.healthHistory.updateHistoryForParam(paramId, {
+                     result: 'unknown',
+                     timestamp: lastTrialErrorTime.valueOf(),
+                 });
+             }
+             else {
+-                this.healthHistory.updateHistoryForParam(paramId, {
++                await this.healthHistory.updateHistoryForParam(paramId, {
+                     result: await param.getHealthStatus(),
+                     timestamp: param.getLastUpdatedTime().valueOf(),
+                 });
+@@ -92,9 +92,16 @@ export class HealthCheck {
+      * check all params health status and cleanup history
+      */
+     update = async () => {
+-        if (this.healthHistory)
+-            this.healthHistory.cleanupHistory();
+-        await Promise.all(this.params.map(this.updateParamAndItsHistory));
++    if (this.healthHistory)
++        this.healthHistory.cleanupHistory();
++        const results = await Promise.allSettled(this.params.map(this.updateParamAndItsHistory));
++        const rejectedResults =  results.filter(result => result.status == 'rejected')
++        if(rejectedResults.length){
++            throw AggregateError(rejectedResults.flatMap(result => { 
++                if(result.reason instanceof AggregateError) return result.reason.errors
++                return result.reason
++            }))
++        }    
+     };
+     /**
+      * check health status for one param
+diff --git a/node_modules/@rosen-bridge/health-check/dist/notification/notificationManager.js b/node_modules/@rosen-bridge/health-check/dist/notification/notificationManager.js
+index 6578b8e..404a0a6 100644
+--- a/node_modules/@rosen-bridge/health-check/dist/notification/notificationManager.js
++++ b/node_modules/@rosen-bridge/health-check/dist/notification/notificationManager.js
+@@ -49,15 +49,23 @@ class NotificationManager {
+             return;
+         const notificationCheckResults = this.notificationChecks.map((notificationCheck) => notificationCheck(param, paramHistory));
+         const eligibleNotificationChecks = notificationCheckResults.filter((notificationCheck) => notificationCheck.check());
+-        await Promise.all(eligibleNotificationChecks.map(async (notificationCheck) => {
++        const notifyResults = await Promise.allSettled(eligibleNotificationChecks.map(async (notificationCheck) => {
+             const notifyArgs = [
+                 notificationCheck.getSeverity(),
+                 await notificationCheck.getTitle(),
+                 await notificationCheck.getDescription(),
+             ];
+-            await this.notify(...notifyArgs);
++            try {
++                await this.notify(...notifyArgs)
++            } catch(e) {
++                throw new Error(`sending notification "${await notificationCheck.getTitle()}" failed with error: ${e}`)
++            }
+             await this.notifiedHandler(paramId, notifyArgs);
+         }));
++        const rejectedResults =  notifyResults.filter(result => result.status == 'rejected')
++        if(rejectedResults.length){
++            throw AggregateError(rejectedResults.map(result => result.reason))
++        }
+     };
+ }
+ export default NotificationManager;

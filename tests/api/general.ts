@@ -29,6 +29,7 @@ describe('General-Info-Api', () => {
       chai.spy.on(healthCheck, 'getOverallStatus', () =>
         Promise.resolve('Healthy')
       );
+      chai.spy.on(healthCheck, 'getTrialErrors', () => Promise.resolve(['']));
     });
 
     afterEach(() => {
