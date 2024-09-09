@@ -1,5 +1,5 @@
 diff --git a/node_modules/@rosen-bridge/discord-notification/dist/DiscordNotification.js b/node_modules/@rosen-bridge/discord-notification/dist/DiscordNotification.js
-index 85c6321..ba00a1f 100644
+index 85c6321..95b36d6 100644
 --- a/node_modules/@rosen-bridge/discord-notification/dist/DiscordNotification.js
 +++ b/node_modules/@rosen-bridge/discord-notification/dist/DiscordNotification.js
 @@ -13,7 +13,7 @@ class DiscordNotification extends AbstractNotification {
@@ -11,7 +11,7 @@ index 85c6321..ba00a1f 100644
              content: message.replace(/^ +| +$/gm, ''), // trim all lines
          });
      };
-@@ -23,7 +23,8 @@ class DiscordNotification extends AbstractNotification {
+@@ -23,7 +23,7 @@ class DiscordNotification extends AbstractNotification {
       * @param message
       */
      error = async (title, message) => {
@@ -20,7 +20,7 @@ index 85c6321..ba00a1f 100644
        ## ❌ ${title}
        ${message}
        `);
-@@ -34,7 +35,7 @@ class DiscordNotification extends AbstractNotification {
+@@ -34,7 +34,7 @@ class DiscordNotification extends AbstractNotification {
       * @param message
       */
      warning = async (title, message) => {
@@ -29,7 +29,7 @@ index 85c6321..ba00a1f 100644
        ## ⚠️ ${title}
        ${message}
        `);
-@@ -45,7 +46,7 @@ class DiscordNotification extends AbstractNotification {
+@@ -45,7 +45,7 @@ class DiscordNotification extends AbstractNotification {
       * @param message
       */
      info = async (title, message) => {
@@ -38,7 +38,7 @@ index 85c6321..ba00a1f 100644
        ## ℹ️ ${title}
        ${message}
        `);
-@@ -56,7 +57,7 @@ class DiscordNotification extends AbstractNotification {
+@@ -56,7 +56,7 @@ class DiscordNotification extends AbstractNotification {
       * @param message
       */
      success = async (title, message) => {
@@ -47,7 +47,7 @@ index 85c6321..ba00a1f 100644
        ## ✅ ${title}
        ${message}
        `);
-@@ -67,7 +68,7 @@ class DiscordNotification extends AbstractNotification {
+@@ -67,7 +67,7 @@ class DiscordNotification extends AbstractNotification {
       * @param message
       */
      raw = async (title, message) => {

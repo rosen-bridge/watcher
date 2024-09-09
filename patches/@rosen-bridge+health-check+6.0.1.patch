@@ -1,5 +1,5 @@
 diff --git a/node_modules/@rosen-bridge/health-check/dist/healthCheck.js b/node_modules/@rosen-bridge/health-check/dist/healthCheck.js
-index 40903d0..0b61baf 100644
+index 40903d0..389e287 100644
 --- a/node_modules/@rosen-bridge/health-check/dist/healthCheck.js
 +++ b/node_modules/@rosen-bridge/health-check/dist/healthCheck.js
 @@ -68,13 +68,13 @@ export class HealthCheck {
@@ -18,11 +18,15 @@ index 40903d0..0b61baf 100644
                      result: await param.getHealthStatus(),
                      timestamp: param.getLastUpdatedTime().valueOf(),
                  });
-@@ -94,7 +94,14 @@ export class HealthCheck {
+@@ -92,9 +92,16 @@ export class HealthCheck {
+      * check all params health status and cleanup history
+      */
      update = async () => {
-         if (this.healthHistory)
-             this.healthHistory.cleanupHistory();
+-        if (this.healthHistory)
+-            this.healthHistory.cleanupHistory();
 -        await Promise.all(this.params.map(this.updateParamAndItsHistory));
++    if (this.healthHistory)
++        this.healthHistory.cleanupHistory();
 +        const results = await Promise.allSettled(this.params.map(this.updateParamAndItsHistory));
 +        const rejectedResults =  results.filter(result => result.status == 'rejected')
 +        if(rejectedResults.length){
@@ -30,15 +34,15 @@ index 40903d0..0b61baf 100644
 +                if(result.reason instanceof AggregateError) return result.reason.errors
 +                return result.reason
 +            }))
-+        }
++        }    
      };
      /**
       * check health status for one param
 diff --git a/node_modules/@rosen-bridge/health-check/dist/notification/notificationManager.js b/node_modules/@rosen-bridge/health-check/dist/notification/notificationManager.js
-index 6578b8e..a02378e 100644
+index 6578b8e..404a0a6 100644
 --- a/node_modules/@rosen-bridge/health-check/dist/notification/notificationManager.js
 +++ b/node_modules/@rosen-bridge/health-check/dist/notification/notificationManager.js
-@@ -49,15 +51,23 @@ class NotificationManager {
+@@ -49,15 +49,23 @@ class NotificationManager {
              return;
          const notificationCheckResults = this.notificationChecks.map((notificationCheck) => notificationCheck(param, paramHistory));
          const eligibleNotificationChecks = notificationCheckResults.filter((notificationCheck) => notificationCheck.check());
@@ -56,8 +60,7 @@ index 6578b8e..a02378e 100644
 +                throw new Error(`sending notification "${await notificationCheck.getTitle()}" failed with error: ${e}`)
 +            }
              await this.notifiedHandler(paramId, notifyArgs);
--        }));
-+        }))
+         }));
 +        const rejectedResults =  notifyResults.filter(result => result.status == 'rejected')
 +        if(rejectedResults.length){
 +            throw AggregateError(rejectedResults.map(result => result.reason))
@@ -65,4 +68,3 @@ index 6578b8e..a02378e 100644
      };
  }
  export default NotificationManager;
-
