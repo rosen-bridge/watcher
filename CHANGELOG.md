@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 3.2.1
+
+### Patch Changes
+
+- Fix ergo scanner sync health check height query
+
 ## 3.2.0
 
 ### Minor Changes
