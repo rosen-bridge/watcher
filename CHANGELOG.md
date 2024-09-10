@@ -1,5 +1,27 @@
 # @rosen-bridge/watcher
 
+## 3.2.1
+
+### Patch Changes
+
+- Fix ergo scanner sync health check height query
+
+## 3.2.0
+
+### Minor Changes
+
+- Add notification and its configurations to health check
+- Update Node version to 18
+- Update health check APIs regarding to latest changes
+- Add eRSN support and periodic reward collection
+- Update APIs with respect to eRSN addition
+
+### Patch Changes
+
+- Fix warn log in reward collection when there is no eRSN tokens available
+- Stabilize ogmios connection by adding connection close handler
+- Update ogmios client and schema
+
 ## 3.1.1
 
 ### Patch Changes

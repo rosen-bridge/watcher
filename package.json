@@ -1,6 +1,6 @@
 {
   "name": "@rosen-bridge/watcher",
-  "version": "3.1.1",
+  "version": "3.2.1",
   "description": "Rosen bridge Watcher service",
   "main": "index.js",
   "type": "module",
@@ -18,7 +18,8 @@
     "typeorm": "NODE_OPTIONS=--experimental-specifier-resolution=node typeorm-ts-node-esm",
     "build": "rollup --config ./rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "release": "npm run build && pkg ./out/index.cjs --targets host --out-path bin",
-    "version": "npx changeset version && npm i"
+    "version": "npx changeset version && npm i",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",

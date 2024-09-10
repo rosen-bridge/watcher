@@ -138,7 +138,7 @@ class HealthCheckSingleton {
     this.healthCheck.register(assetHealthCheck);
 
     this.ergoScannerSyncCheckParam = new ErgoNodeScannerHealthCheck(
-      this.observingNetworkLastBlock(scanner.observationScanner.name()),
+      this.observingNetworkLastBlock(scanner.ergoScanner.name()),
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
@@ -180,7 +180,7 @@ class HealthCheckSingleton {
     this.healthCheck.register(assetHealthCheck);
 
     this.ergoScannerSyncCheckParam = new ErgoExplorerScannerHealthCheck(
-      this.observingNetworkLastBlock(scanner.observationScanner.name()),
+      this.observingNetworkLastBlock(scanner.ergoScanner.name()),
       scanner.ergoScanner.name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,

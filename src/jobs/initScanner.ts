@@ -31,7 +31,11 @@ export const scannerInit = () => {
   switch (config.networkWatcher) {
     case Constants.CARDANO_CHAIN_NAME:
       if (cardanoConfig.ogmios) {
-        (scanner.observationScanner as CardanoOgmiosScanner).start();
+        (scanner.observationScanner as CardanoOgmiosScanner)
+          .start()
+          .catch((e) => {
+            logger.error(`Ogmios connection failed with error: ${e}`);
+          });
         break;
       }
       scanningJob(
