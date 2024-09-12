@@ -28,6 +28,7 @@ cardano:
   ogmios:
     host: '' # ogmios node host address
     port: 1337 # ogmios port
+    connectionRetrialInterval: 30 # ogmios connection retrial interval (in seconds)
     useTls: false # connect to ogmios using https or not
   blockfrost:
     url: '' # url to connect to blockfrost
@@ -112,3 +113,14 @@ healthCheck:
     maxAllowedCount: 2 # maximum allowed error log lines
     duration: 100000 # error log duration time check in milliseconds
 redeemSwapEnabled: true # if set true when no permit left, system automatically redeem new commitments and commit again for old observations
+rewardCollection:
+  threshold: 100000 # RSN threshold for reward collection
+  interval: 600 # reward collection interval in seconds
+  # address: "" # reward collection address (uses default address if not set)
+# notification:
+#   discordWebhookUrl: '' # discord notification webhook
+#   historyCleanupThreshold: # notification history cleanup threshold (in seconds, uses default if not set)
+#   windowDurations:
+#     hasBeenUnstableForAWhile: # window duration to notify when service has been unstable for a while (in seconds, uses default if not set)
+#     hasBeenUnknownForAWhile:  # window duration to notify when service has been in unknown status for a while (in seconds, uses default if not set)
+#     isStillUnhealthy:  # window duration to notify when service is still unhealthy (in seconds, uses default if not set)

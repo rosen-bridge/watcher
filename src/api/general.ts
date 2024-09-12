@@ -18,9 +18,13 @@ interface GeneralInfo {
     active: bigint;
     total: bigint;
   };
-  health: string;
+  health: {
+    status: string;
+    trialErrors: string[];
+  };
   address: string;
   rsnTokenId: string;
+  eRsnTokenId: string;
   collateral: {
     erg: bigint;
     rsn: bigint;
@@ -45,9 +49,13 @@ generalRouter.get('/', async (req: Request, res: Response) => {
         active: await ErgoUtils.getPermitCount(getConfig().rosen.RWTId),
         total: await Transaction.getInstance().getTotalPermit(),
       },
-      health: await HealthCheckSingleton.getInstance().getOverallStatus(),
+      health: {
+        status: await HealthCheckSingleton.getInstance().getOverallStatus(),
+        trialErrors: await HealthCheckSingleton.getInstance().getTrialErrors(),
+      },
       address: getConfig().general.address,
       rsnTokenId: getConfig().rosen.RSN,
+      eRsnTokenId: getConfig().rosen.eRSN,
       collateral: {
         erg: collateral.erg,
         rsn: collateral.rsn,

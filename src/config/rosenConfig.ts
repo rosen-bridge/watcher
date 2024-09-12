@@ -1,26 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 
-type RosenConfigType = {
-  RSN: string;
-  guardNFT: string;
-  rsnRatioNFT: string;
-  cleanupNFT: string;
-  cleanupConfirm: number;
-  watcherPermitAddress: string;
-  watcherCollateralAddress: string;
-  RWTRepoAddress: string;
-  fraudAddress: string;
-  eventTriggerAddress: string;
-  commitmentAddress: string;
-  lockAddress: string;
-  RepoNFT: string;
-  RWTId: string;
-  repoConfigAddress: string;
-  repoConfigNFT: string;
-  AWC: string;
-};
-
 class RosenConfig {
   readonly RSN: string;
   readonly guardNFT: string;
@@ -39,6 +19,9 @@ class RosenConfig {
   readonly repoConfigAddress: string;
   readonly repoConfigNFT: string;
   readonly AWC: string;
+  readonly emissionNFT: string;
+  readonly emissionAddress: string;
+  readonly eRSN: string;
 
   constructor(network: string, networkType: string, configRoot: string) {
     const rosenConfigPath = this.getAddress(network, networkType, configRoot);
@@ -66,6 +49,9 @@ class RosenConfig {
       this.repoConfigAddress = config.addresses.RepoConfig;
       this.repoConfigNFT = config.tokens.RepoConfigNFT;
       this.AWC = config.tokens.AwcNFT;
+      this.emissionNFT = config.tokens.EmissionNFT;
+      this.eRSN = config.tokens.ERSN;
+      this.emissionAddress = config.addresses.Emission;
     }
   }
 
@@ -74,4 +60,4 @@ class RosenConfig {
   };
 }
 
-export { RosenConfig, RosenConfigType };
+export { RosenConfig };

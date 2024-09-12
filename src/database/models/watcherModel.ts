@@ -33,6 +33,9 @@ import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueView } from '../entities/revenueView';
 import { TokenEntity } from '../entities/tokenEntity';
 import { TxEntity, TxType } from '../entities/txEntity';
+import WinstonLogger from '@rosen-bridge/winston-logger';
+
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -221,7 +224,10 @@ class WatcherDataBase {
         }))
       ) {
         // found an unspent commitment by watcher wid for this observation
-        // insert observation is COMMITTED
+        // insert observation as COMMITTED
+        logger.debug(
+          `found an unspent commitment by watcher wid for observation [${observation.requestId}], updating status to COMMITTED`
+        );
         await this.observationStatusRepository.insert({
           observation: observation,
           status: TxStatus.COMMITTED,
@@ -229,6 +235,9 @@ class WatcherDataBase {
       } else {
         // there is no wid or no commitment is found for this observation
         // insert observation is NOT_COMMITTED
+        logger.debug(
+          `there is no wid or no commitment is found for observation [${observation.requestId}], updating status to NOT_COMMITTED`
+        );
         await this.observationStatusRepository.insert({
           observation: observation,
           status: TxStatus.NOT_COMMITTED,
@@ -237,7 +246,7 @@ class WatcherDataBase {
       const insertedStatus = await this.getStatusForObservations(observation);
       if (insertedStatus === null) {
         throw new Error(
-          `observation status with requestId ${observation.requestId} doesn't inserted in the dataBase`
+          `observation status with requestId [${observation.requestId}] doesn't inserted in the dataBase`
         );
       } else {
         return insertedStatus;
@@ -252,6 +261,9 @@ class WatcherDataBase {
    * @param eventIds
    */
   updateObservationStatusForEventIds = async (eventIds: Array<string>) => {
+    logger.debug(
+      `Updating observation status for ${eventIds} to not committed`
+    );
     const observationIds = (
       await this.observationRepository.find({
         where: {
@@ -276,11 +288,15 @@ class WatcherDataBase {
   getStatusForObservations = async (
     observation: ObservationEntity
   ): Promise<ObservationStatusEntity | null> => {
-    return await this.observationStatusRepository.findOne({
+    const status = await this.observationStatusRepository.findOne({
       where: {
         observation: observation,
       },
     });
+    logger.debug(
+      `Observation [${observation.requestId}] status is ${status?.status}`
+    );
+    return status;
   };
 
   /**
@@ -310,7 +326,7 @@ class WatcherDataBase {
       );
       if (observationStatus === null)
         throw new Error(
-          `observation with requestId ${observation.requestId} has no status`
+          `observation with requestId [${observation.requestId}] has no status`
         );
     }
     const time = Math.floor(new Date().getTime() / 1000);
@@ -361,6 +377,7 @@ class WatcherDataBase {
    * @param isValid
    */
   setTxValidStatus = async (tx: TxEntity, isValid: boolean) => {
+    logger.debug(`Updating validity status of tx [${tx.id}] to ${isValid}`);
     return this.txRepository.update(
       {
         id: tx.id,
@@ -374,6 +391,7 @@ class WatcherDataBase {
    * @param tx
    */
   removeTx = async (tx: TxEntity) => {
+    logger.debug(`Add removed flag to tx [${tx.id}]`);
     await this.txRepository.update(
       {
         id: tx.id,
@@ -389,6 +407,7 @@ class WatcherDataBase {
    * @param height
    */
   setTxUpdateHeight = async (tx: TxEntity, height: number) => {
+    logger.debug(`Updating tx [${tx.id}] update height to ${height}`);
     tx.updateBlock = height;
     return this.txRepository.save(tx);
   };
@@ -401,30 +420,31 @@ class WatcherDataBase {
     const observationStatus = await this.getStatusForObservations(observation);
     if (observationStatus === null)
       throw new Error(
-        `observation with requestId ${observation.requestId} has no status`
+        `observation with requestId [${observation.requestId}] has no status`
       );
     if (
       ![TxStatus.TIMED_OUT, TxStatus.REVEALED].includes(
         observationStatus.status
       )
-    )
-      await this.observationStatusRepository.update(
-        {
-          id: observationStatus.id,
-        },
-        {
-          status:
-            SortedTxStatus[
-              SortedTxStatus.findIndex(
-                (status) => status == observationStatus.status
-              ) + 1
-            ],
-        }
+    ) {
+      const newStatus =
+        SortedTxStatus[
+          SortedTxStatus.findIndex(
+            (status) => status == observationStatus.status
+          ) + 1
+        ];
+      logger.debug(
+        `upgrading observation [${observation.requestId}] status to ${newStatus}`
       );
+      await this.observationStatusRepository.update(
+        { id: observationStatus.id },
+        { status: newStatus }
+      );
+    }
     const updatedStatus = await this.getStatusForObservations(observation);
     if (updatedStatus === null) {
       throw new Error(
-        `observation status with requestId ${observation.requestId} doesn't inserted in the dataBase`
+        `observation status with requestId [${observation.requestId}] isn't inserted in the dataBase`
       );
     } else {
       return updatedStatus;
@@ -439,30 +459,31 @@ class WatcherDataBase {
     const observationStatus = await this.getStatusForObservations(observation);
     if (observationStatus === null)
       throw new Error(
-        `observation with requestId ${observation.requestId} has no status`
+        `observation with requestId [${observation.requestId}] has no status`
       );
     if (
       ![TxStatus.TIMED_OUT, TxStatus.REVEALED].includes(
         observationStatus.status
       )
-    )
-      await this.observationStatusRepository.update(
-        {
-          id: observationStatus.id,
-        },
-        {
-          status:
-            SortedTxStatus[
-              SortedTxStatus.findIndex(
-                (status) => status == observationStatus.status
-              ) - 1
-            ],
-        }
+    ) {
+      const newStatus =
+        SortedTxStatus[
+          SortedTxStatus.findIndex(
+            (status) => status == observationStatus.status
+          ) - 1
+        ];
+      logger.debug(
+        `downgrading observation [${observation.requestId}] status to ${newStatus}`
       );
+      await this.observationStatusRepository.update(
+        { id: observationStatus.id },
+        { status: newStatus }
+      );
+    }
     const updatedStatus = await this.getStatusForObservations(observation);
     if (updatedStatus === null) {
       throw new Error(
-        `observation status with requestId ${observation.requestId} doesn't inserted in the dataBase`
+        `observation status with requestId [${observation.requestId}] doesn't inserted in the dataBase`
       );
     } else {
       return updatedStatus;
@@ -481,8 +502,11 @@ class WatcherDataBase {
     const observationStatus = await this.getStatusForObservations(observation);
     if (observationStatus === null)
       throw new Error(
-        `observation with requestId ${observation.requestId} has no status`
+        `observation with requestId [${observation.requestId}] has no status`
       );
+    logger.debug(
+      `updating observation [${observation.requestId}] status to ${status}`
+    );
     await this.observationStatusRepository.update(
       {
         id: observationStatus.id,
@@ -494,29 +518,11 @@ class WatcherDataBase {
     const updatedStatus = await this.getStatusForObservations(observation);
     if (updatedStatus === null) {
       throw new Error(
-        `observation status with requestId ${observation.requestId} doesn't inserted in the dataBase`
+        `observation status with requestId [${observation.requestId}] isn't inserted in the dataBase`
       );
     } else {
       return updatedStatus;
     }
-  };
-
-  /**
-   * returns spent commitments before the specified height
-   * @param height
-   */
-  getOldSpentCommitments = async (height: number) => {
-    return await this.commitmentRepository.findBy({
-      spendHeight: LessThan(height),
-    });
-  };
-
-  /**
-   * delete commitments by their box ids
-   * @param ids
-   */
-  deleteCommitments = async (ids: Array<string>) => {
-    await this.commitmentRepository.delete({ boxId: In(ids) });
   };
 
   /**
@@ -526,11 +532,17 @@ class WatcherDataBase {
   findCommitmentsById = async (
     ids: Array<string>
   ): Promise<Array<CommitmentEntity>> => {
-    return await this.commitmentRepository.find({
+    const commitments = await this.commitmentRepository.find({
       where: {
         boxId: In(ids),
       },
     });
+    logger.debug(
+      `Found commitments with boxIds ${commitments.map(
+        (commitment) => commitment.boxId
+      )}`
+    );
+    return commitments;
   };
 
   /**
@@ -540,12 +552,18 @@ class WatcherDataBase {
   commitmentsByEventId = async (
     eventId: string
   ): Promise<Array<CommitmentEntity>> => {
-    return await this.commitmentRepository.find({
+    const commitments = await this.commitmentRepository.find({
       where: {
         eventId: eventId,
         spendHeight: IsNull(),
       },
     });
+    logger.debug(
+      `Found commitments with boxIds ${commitments.map(
+        (commitment) => commitment.boxId
+      )} for event ${eventId}`
+    );
+    return commitments;
   };
 
   /**
@@ -555,11 +573,17 @@ class WatcherDataBase {
   commitmentsBySpendTxId = async (
     txId: string
   ): Promise<Array<CommitmentEntity>> => {
-    return await this.commitmentRepository.find({
+    const commitments = await this.commitmentRepository.find({
       where: {
         spendTxId: txId,
       },
     });
+    logger.debug(
+      `Found commitments with boxIds ${commitments.map(
+        (commitment) => commitment.boxId
+      )} spent in transaction ${txId}`
+    );
+    return commitments;
   };
 
   /**
@@ -597,13 +621,19 @@ class WatcherDataBase {
     wid: string,
     maxHeight: number
   ): Promise<Array<CommitmentEntity>> => {
-    return await this.commitmentRepository.find({
+    const commitments = await this.commitmentRepository.find({
       where: {
         WID: wid,
         height: LessThan(maxHeight),
         spendHeight: IsNull(),
       },
     });
+    logger.debug(
+      `Found commitments with boxIds ${commitments.map(
+        (commitment) => commitment.boxId
+      )} with wid ${wid} and below the height ${maxHeight}`
+    );
+    return commitments;
   };
 
   /**
@@ -611,19 +641,31 @@ class WatcherDataBase {
    * @param wid
    */
   getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
-    return this.permitRepository.findBy({
+    const permits = await this.permitRepository.findBy({
       WID: wid,
       spendBlock: IsNull(),
     });
+    logger.debug(
+      `Found ${permits.length} unspent permit boxes with boxId ${permits.map(
+        (permit) => permit.boxId
+      )}`
+    );
+    return permits;
   };
 
   /**
    * Returns all unspent plain boxes
    */
   getUnspentAddressBoxes = async (): Promise<Array<BoxEntity>> => {
-    return this.boxRepository.findBy({
+    const boxes = await this.boxRepository.findBy({
       spendBlock: IsNull(),
     });
+    logger.debug(
+      `Found ${boxes.length} unspent boxes with boxId ${boxes.map(
+        (box) => box.boxId
+      )}`
+    );
+    return boxes;
   };
 
   /**
@@ -633,10 +675,16 @@ class WatcherDataBase {
   getUnspentBoxesByAddress = async (
     address: string
   ): Promise<Array<BoxEntity>> => {
-    return this.boxRepository.findBy({
+    const boxes = await this.boxRepository.findBy({
       spendBlock: IsNull(),
       address: address,
     });
+    logger.debug(
+      `Found ${boxes.length} unspent boxes with boxId ${boxes.map(
+        (box) => box.boxId
+      )}`
+    );
+    return boxes;
   };
 
   /**
@@ -646,11 +694,15 @@ class WatcherDataBase {
   eventTriggerBySourceTxId = async (
     sourceTxId: string
   ): Promise<EventTriggerEntity | null> => {
-    return await this.eventTriggerRepository.findOne({
+    const trigger = await this.eventTriggerRepository.findOne({
       where: {
         sourceTxId: sourceTxId,
       },
     });
+    logger.debug(
+      `Found trigger with boxId [${trigger?.boxId}] for observation of transaction [${sourceTxId}]`
+    );
+    return trigger;
   };
 
   /**
@@ -660,11 +712,15 @@ class WatcherDataBase {
   eventTriggerByEventId = async (
     eventId: string
   ): Promise<EventTriggerEntity | null> => {
-    return await this.eventTriggerRepository.findOne({
+    const trigger = await this.eventTriggerRepository.findOne({
       where: {
         eventId: eventId,
       },
     });
+    logger.debug(
+      `Found trigger with boxId [${trigger?.boxId}] for event [${eventId}]`
+    );
+    return trigger;
   };
 
   /**
@@ -734,16 +790,6 @@ class WatcherDataBase {
   };
 
   /**
-   * Returns all unspent permit boxes
-   */
-  getPermitUnspentBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
-    return this.permitRepository.findBy({
-      WID: wid,
-      spendBlock: IsNull(),
-    });
-  };
-
-  /**
    * Returns all unspent boxes considering boxIds
    * @param boxIds to include/exclude from the result
    * @param exclude if true, excludes boxIds from the result
@@ -752,34 +798,56 @@ class WatcherDataBase {
     boxIds: string[],
     exclude = false
   ): Promise<Array<BoxEntity>> => {
-    return this.boxRepository.findBy({
+    const boxes = await this.boxRepository.findBy({
       spendBlock: IsNull(),
       boxId: exclude ? Not(In(boxIds)) : In(boxIds),
     });
+    logger.debug(
+      `Found ${boxes.length} unspent boxes with boxId ${boxes.map(
+        (box) => box.boxId
+      )} with exclusion list ${boxIds}`
+    );
+    return boxes;
   };
 
   /**
    * returns active transaction with 'permit' type
    */
   getActivePermitTransactions = async (): Promise<Array<TxEntity>> => {
-    return await this.txRepository.find({
+    const txs = await this.txRepository.find({
       where: {
         type: TxType.PERMIT,
         deleted: false,
       },
     });
+    logger.debug(
+      `Found ${txs.length} active permit transaction with txId ${txs.map(
+        (tx) => tx.txId
+      )}`
+    );
+    return txs;
   };
 
   /**
-   * returns active transaction with 'commitment' or 'redeem' type
+   * returns active transaction with specified types
    */
-  getActiveCommitTransactions = async (): Promise<Array<TxEntity>> => {
-    return await this.txRepository.find({
+  getActiveTransactionsByType = async (
+    types: Array<TxType>
+  ): Promise<Array<TxEntity>> => {
+    const txs = await this.txRepository.find({
       where: {
-        type: In([TxType.COMMITMENT, TxType.REDEEM]),
+        type: In(types),
         deleted: false,
       },
     });
+    logger.debug(
+      `Found ${
+        txs.length
+      } active transactions by types ${types} with txId ${txs.map(
+        (tx) => tx.txId
+      )}`
+    );
+    return txs;
   };
 
   /**
@@ -1050,10 +1118,14 @@ class WatcherDataBase {
    */
   getCollateralByWid = async (wid: string): Promise<CollateralEntity> => {
     const collateral = await this.collateralRepository.findOne({
-      // TODO change wId to wid when new collateral extractor is ready
       where: { spendBlock: IsNull(), wid: wid },
     });
-    if (collateral) return collateral;
+    if (collateral) {
+      logger.debug(
+        `Found collateral box for wid [${wid}] with boxId [${collateral.boxId}]`
+      );
+      return collateral;
+    }
     throw new Error(`Could not find a collateral with wid [${wid}]`);
   };
 
