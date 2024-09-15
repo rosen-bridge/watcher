@@ -1,6 +1,6 @@
 {
   "name": "@rosen-bridge/watcher",
-  "version": "3.1.1",
+  "version": "3.2.1",
   "description": "Rosen bridge Watcher service",
   "main": "index.js",
   "type": "module",
@@ -18,7 +18,8 @@
     "typeorm": "NODE_OPTIONS=--experimental-specifier-resolution=node typeorm-ts-node-esm",
     "build": "rollup --config ./rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "release": "npm run build && pkg ./out/index.cjs --targets host --out-path bin",
-    "version": "npx changeset version && npm i"
+    "version": "npx changeset version && npm i",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
@@ -75,17 +76,17 @@
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
     "@rosen-bridge/address-extractor": "^5.0.7",
-    "@rosen-bridge/asset-check": "^1.0.2",
+    "@rosen-bridge/asset-check": "^1.0.3",
     "@rosen-bridge/bitcoin-esplora-scanner": "^0.1.14",
     "@rosen-bridge/bitcoin-observation-extractor": "^4.0.7",
     "@rosen-bridge/bitcoin-rpc-scanner": "^0.2.8",
-    "@rosen-bridge/discord-notification": "^0.1.2",
+    "@rosen-bridge/discord-notification": "^0.1.3",
     "@rosen-bridge/evm-observation-extractor": "^3.0.5",
     "@rosen-bridge/evm-rpc-scanner": "^1.0.4",
-    "@rosen-bridge/health-check": "6.0.1",
-    "@rosen-bridge/log-level-check": "^1.0.1",
+    "@rosen-bridge/health-check": "6.0.2",
+    "@rosen-bridge/log-level-check": "^1.0.2",
     "@rosen-bridge/minimum-fee": "^2.1.0",
-    "@rosen-bridge/node-sync-check": "^1.0.1",
+    "@rosen-bridge/node-sync-check": "^1.0.2",
     "@rosen-bridge/observation-extractor": "^5.0.7",
     "@rosen-bridge/permit-check": "^1.0.1",
     "@rosen-bridge/scanner": "^4.1.3",
