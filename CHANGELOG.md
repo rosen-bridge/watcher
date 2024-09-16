@@ -1,5 +1,12 @@
 # @rosen-bridge/watcher
 
+## 3.2.2
+
+### Patch Changes
+
+- Fix ogmios parallel connections issue
+- Fix issue in health check health history cleanup threshold value
+
 ## 3.2.1
 
 ### Patch Changes
