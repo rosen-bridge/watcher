@@ -74,7 +74,7 @@ class HealthCheckSingleton {
         notificationCheckConfig: {
           hasBeenUnstableForAWhile: {
             windowDuration:
-              getConfig().notification.hasBeenUnknownForAWhileWindowDuration,
+              getConfig().notification.hasBeenUnstableForAWhileWindowDuration,
           },
           hasBeenUnknownForAWhile: {
             windowDuration:
