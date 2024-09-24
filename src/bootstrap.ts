@@ -7,4 +7,6 @@ WinstonLogger.init(getConfig().logger.transports);
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
-logger.info(`Watcher Started with version ${packageJson.version}`);
+logger.info(`Watcher version: ${packageJson.version}`);
+logger.info(`Watcher contract version: ${getConfig().rosen.contractVersion}`);
+logger.info(`Watcher tokens version: ${getConfig().token.version}`);
