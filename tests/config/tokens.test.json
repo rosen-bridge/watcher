@@ -1,4 +1,5 @@
 {
+  "version": "testVersion",
   "idKeys": {
     "ergo": "tokenId",
     "cardano": "tokenId"
