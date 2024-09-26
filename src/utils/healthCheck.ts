@@ -18,6 +18,7 @@ import {
   ErgoNodeScannerHealthCheck,
   BitcoinEsploraScannerHealthCheck,
   BitcoinRPCScannerHealthCheck,
+  EthereumRPCScannerHealthCheck,
 } from '@rosen-bridge/scanner-sync-check';
 import {
   ExplorerWidHealthCheckParam,
@@ -35,6 +36,7 @@ import {
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
   ESPLORA_TYPE,
+  ETHEREUM_CHAIN_NAME,
   EXPLORER_TYPE,
   KOIOS_TYPE,
   NODE_TYPE,
@@ -107,6 +109,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
       this.registerBitcoinHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === ETHEREUM_CHAIN_NAME) {
+      this.registerEthereumHealthCheckParams();
     }
   }
 
@@ -248,6 +253,22 @@ class HealthCheckSingleton {
     }
     if (bitcoinScannerSyncCheck)
       this.healthCheck.register(bitcoinScannerSyncCheck);
+  };
+
+  /**
+   * Registers all ethereum check params
+   */
+  registerEthereumHealthCheckParams = () => {
+    const ethereumRpcScannerSyncCheck = new EthereumRPCScannerHealthCheck(
+      this.observingNetworkLastBlock(scanner.observationScanner.name()),
+      scanner.observationScanner.name(),
+      getConfig().healthCheck.ethereumScannerWarnDiff,
+      getConfig().healthCheck.ethereumScannerCriticalDiff,
+      getConfig().ethereum.rpc!.url,
+      getConfig().ethereum.rpc!.authToken,
+      getConfig().ethereum.rpc!.timeout
+    );
+    this.healthCheck.register(ethereumRpcScannerSyncCheck);
   };
 
   /**
