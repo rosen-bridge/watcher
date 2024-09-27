@@ -115,8 +115,8 @@ healthCheck:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 10 # critical difference between existing and scanned blocks height
   ethereumScanner:
-    warnDifference: 2 # warning difference between existing and scanned blocks height
-    criticalDifference: 600 # critical difference between existing and scanned blocks height
+    warnDifference: 40 # warning difference between existing and scanned blocks height
+    criticalDifference: 160 # critical difference between existing and scanned blocks height
   permit:
     warnCommitmentCount: 4 # warning remaining permits for creating commitment
     criticalCommitmentCount: 0 # critical remaining permits for creating commitment
