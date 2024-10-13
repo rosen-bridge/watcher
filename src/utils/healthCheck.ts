@@ -91,13 +91,22 @@ class HealthCheckSingleton {
     }
     this.healthCheck = new HealthCheck(notify, notificationConfig);
     const errorLogHealthCheck = new LogLevelHealthCheck(
-      logger,
+      WinstonLogger.getInstance().getDefaultLogger(),
       HealthStatusLevel.UNSTABLE,
       getConfig().healthCheck.errorLogAllowedCount,
-      getConfig().healthCheck.errorLogDuration,
+      getConfig().healthCheck.logDuration,
       'error'
     );
     this.healthCheck.register(errorLogHealthCheck);
+
+    const warnLogHealthCheck = new LogLevelHealthCheck(
+      WinstonLogger.getInstance().getDefaultLogger(),
+      HealthStatusLevel.UNSTABLE,
+      getConfig().healthCheck.warnLogAllowedCount,
+      getConfig().healthCheck.logDuration,
+      'warn'
+    );
+    this.healthCheck.register(warnLogHealthCheck);
 
     if (getConfig().general.scannerType === NODE_TYPE) {
       this.registerErgoNodeHealthCheckParams();
