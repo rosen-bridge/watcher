@@ -94,7 +94,7 @@ class HealthCheckSingleton {
       WinstonLogger.getInstance().getDefaultLogger(),
       HealthStatusLevel.UNSTABLE,
       getConfig().healthCheck.errorLogAllowedCount,
-      getConfig().healthCheck.errorLogDuration,
+      getConfig().healthCheck.logDuration,
       'error'
     );
     this.healthCheck.register(errorLogHealthCheck);
@@ -103,7 +103,7 @@ class HealthCheckSingleton {
       WinstonLogger.getInstance().getDefaultLogger(),
       HealthStatusLevel.UNSTABLE,
       getConfig().healthCheck.warnLogAllowedCount,
-      getConfig().healthCheck.warnLogDuration,
+      getConfig().healthCheck.logDuration,
       'warn'
     );
     this.healthCheck.register(warnLogHealthCheck);
