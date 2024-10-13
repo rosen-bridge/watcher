@@ -121,8 +121,11 @@ healthCheck:
     warnCommitmentCount: 4 # warning remaining permits for creating commitment
     criticalCommitmentCount: 0 # critical remaining permits for creating commitment
   errorLog:
-    maxAllowedCount: 2 # maximum allowed error log lines
-    duration: 100000 # error log duration time check in milliseconds
+    maxAllowedCount: 1 # maximum allowed error log lines
+    duration: 600000 # error log duration time check in milliseconds
+  warnLog:
+    maxAllowedCount: 10 # maximum allowed error log lines
+    duration: 600000 # error log duration time check in milliseconds
 redeemSwapEnabled: true # if set true when no permit left, system automatically redeem new commitments and commit again for old observations
 rewardCollection:
   threshold: 100000 # RSN threshold for reward collection

@@ -528,6 +528,8 @@ class HealthCheckConfig {
   updateInterval: number;
   errorLogAllowedCount: number;
   errorLogDuration: number;
+  warnLogAllowedCount: number;
+  warnLogDuration: number;
 
   constructor() {
     this.ergWarnThreshold = BigInt(
@@ -583,6 +585,10 @@ class HealthCheckConfig {
       'healthCheck.errorLog.maxAllowedCount'
     );
     this.errorLogDuration = getRequiredNumber('healthCheck.errorLog.duration');
+    this.warnLogAllowedCount = getRequiredNumber(
+      'healthCheck.warnLog.maxAllowedCount'
+    );
+    this.warnLogDuration = getRequiredNumber('healthCheck.warnLog.duration');
   }
 }
 
