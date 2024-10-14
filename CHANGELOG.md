@@ -1,5 +1,27 @@
 # @rosen-bridge/watcher
 
+## 4.0.0
+
+### Major Changes
+
+- Support contract and tokensMap version and update info controller for version configs
+- Update watcher regarding to decimal drop refactor
+
+### Minor Changes
+
+- Add warn level to logger health parameter and tune the thresholds
+- Add ethereum health check parameters
+- Integrate Ethereum network
+
+### Patch Changes
+
+- Fix decimal for tokens with significant decimal equal to 0
+- Update scanner packages
+- Always check ergo node sync status as a health parameter
+- Log current watcher version
+- Update significant decimal for tokens that are already stored in db
+- Fix watcher network switch in scanner init
+
 ## 3.2.2
 
 ### Patch Changes
