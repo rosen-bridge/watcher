@@ -15,4 +15,7 @@ cardano:
     authToken: 'KOIOS_AUTH_TOKEN'
   blockfrost:
     projectId: 'BLOCKFROST_PROJECT_ID'
+ethereum:
+  rpc:
+    authToken: 'ETHEREUM_RPC_AUTH_TOKEN'
 overrideLokiBasicAuth: 'OVERRIDE_LOKI_BASIC_AUTH'
