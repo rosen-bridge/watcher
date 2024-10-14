@@ -108,6 +108,15 @@ class HealthCheckSingleton {
     );
     this.healthCheck.register(warnLogHealthCheck);
 
+    const ergoNodeSyncCheck = new ErgoNodeSyncHealthCheckParam(
+      getConfig().healthCheck.ergoNodeMaxHeightDiff,
+      getConfig().healthCheck.ergoNodeMaxBlockTime,
+      getConfig().healthCheck.ergoNodeMinPeerCount,
+      getConfig().healthCheck.ergoNodeMaxPeerHeightDifference,
+      getConfig().general.nodeUrl
+    );
+    this.healthCheck.register(ergoNodeSyncCheck);
+
     if (getConfig().general.scannerType === NODE_TYPE) {
       this.registerErgoNodeHealthCheckParams();
     } else if (getConfig().general.scannerType === EXPLORER_TYPE) {
@@ -159,15 +168,6 @@ class HealthCheckSingleton {
       getConfig().general.nodeUrl
     );
     this.healthCheck.register(this.ergoScannerSyncCheckParam);
-
-    const ergoNodeSyncCheck = new ErgoNodeSyncHealthCheckParam(
-      getConfig().healthCheck.ergoNodeMaxHeightDiff,
-      getConfig().healthCheck.ergoNodeMaxBlockTime,
-      getConfig().healthCheck.ergoNodeMinPeerCount,
-      getConfig().healthCheck.ergoNodeMaxPeerHeightDifference,
-      getConfig().general.nodeUrl
-    );
-    this.healthCheck.register(ergoNodeSyncCheck);
   };
 
   /**
