@@ -15,7 +15,6 @@
 
 ### Patch Changes
 
-- Fix decimal for tokens with significant decimal equal to 0
 - Update scanner packages
 - Always check ergo node sync status as a health parameter
 - Log current watcher version
