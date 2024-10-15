@@ -1,6 +1,6 @@
 {
   "name": "@rosen-bridge/watcher",
-  "version": "3.2.2",
+  "version": "4.0.0",
   "description": "Rosen bridge Watcher service",
   "main": "index.js",
   "type": "module",
@@ -81,6 +81,8 @@
     "@rosen-bridge/bitcoin-observation-extractor": "^4.0.7",
     "@rosen-bridge/bitcoin-rpc-scanner": "^0.2.8",
     "@rosen-bridge/discord-notification": "^0.1.3",
+    "@rosen-bridge/evm-observation-extractor": "^3.0.5",
+    "@rosen-bridge/evm-rpc-scanner": "^1.0.4",
     "@rosen-bridge/health-check": "6.0.3",
     "@rosen-bridge/log-level-check": "^1.0.3",
     "@rosen-bridge/minimum-fee": "^2.1.0",

@@ -1,15 +1,17 @@
-import {
-  CardanoBlockFrostScanner,
-  CardanoKoiosScanner,
-  CardanoOgmiosScanner,
-  GeneralScanner,
-} from '@rosen-bridge/scanner';
-import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
-import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
+import { CardanoOgmiosScanner, GeneralScanner } from '@rosen-bridge/scanner';
 import * as Constants from '../config/constants';
 import { getConfig } from '../config/config';
 import { scanner } from '../utils/scanner';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+
+const allConfig = getConfig();
+const {
+  general: config,
+  cardano: cardanoConfig,
+  bitcoin: bitcoinConfig,
+  ethereum: ethereumConfig,
+} = allConfig;
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -25,49 +27,44 @@ const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
 };
 
 export const scannerInit = () => {
-  const allConfig = getConfig();
-  const config = allConfig.general;
   scanningJob(config.ergoInterval, scanner.ergoScanner).then(() => null);
-  if (config.networkWatcher === Constants.CARDANO_CHAIN_NAME) {
-    const cardanoConfig = allConfig.cardano;
-    if (cardanoConfig.ogmios) {
-      (scanner.observationScanner as CardanoOgmiosScanner)
-        .start()
-        .catch((e) => {
-          logger.error(`Ogmios connection failed with error: ${e}`);
-        });
-    } else if (cardanoConfig.koios) {
+  switch (config.networkWatcher) {
+    case Constants.CARDANO_CHAIN_NAME:
+      if (cardanoConfig.ogmios) {
+        (scanner.observationScanner as CardanoOgmiosScanner)
+          .start()
+          .catch((e) => {
+            logger.error(`Ogmios connection failed with error: ${e}`);
+          });
+        break;
+      }
       scanningJob(
-        cardanoConfig.koios.interval,
-        scanner.observationScanner as CardanoKoiosScanner
+        cardanoConfig.koios
+          ? cardanoConfig.koios.interval
+          : cardanoConfig.blockfrost!.interval,
+        scanner.observationScanner as GeneralScanner<unknown>
       ).then(() => null);
-    } else if (cardanoConfig.blockfrost) {
+      break;
+    case Constants.BITCOIN_CHAIN_NAME:
       scanningJob(
-        cardanoConfig.blockfrost.interval,
-        scanner.observationScanner as CardanoBlockFrostScanner
+        bitcoinConfig.rpc
+          ? bitcoinConfig.rpc.interval
+          : bitcoinConfig.esplora!.interval,
+        scanner.observationScanner as GeneralScanner<unknown>
       ).then(() => null);
-    } else {
+      break;
+    case Constants.ETHEREUM_CHAIN_NAME:
+      scanningJob(
+        ethereumConfig.rpc!.interval,
+        scanner.observationScanner as EvmRpcScanner
+      ).then(() => null);
+      break;
+    case Constants.ERGO_CHAIN_NAME:
+      break;
+    default:
       throw new Error(
         `The observing network [${config.networkWatcher}] is not supported`
       );
-    }
-  } else if (config.networkWatcher === Constants.BITCOIN_CHAIN_NAME) {
-    const bitcoinConfig = allConfig.bitcoin;
-    if (bitcoinConfig.esplora) {
-      scanningJob(
-        bitcoinConfig.esplora.interval,
-        scanner.observationScanner as BitcoinEsploraScanner
-      ).then(() => null);
-    } else if (bitcoinConfig.rpc) {
-      scanningJob(
-        bitcoinConfig.rpc.interval,
-        scanner.observationScanner as BitcoinRpcScanner
-      ).then(() => null);
-    } else {
-      throw new Error(
-        `The observing network [${config.networkWatcher}] is not supported`
-      );
-    }
   }
 
   // TODO: Add commitment cleanup job

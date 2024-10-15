@@ -6,11 +6,16 @@ import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 import { Transaction } from './Transaction';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 import packageJson from '../../package.json' assert { type: 'json' };
+import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 interface GeneralInfo {
-  version: string;
+  versions: {
+    app: string;
+    contract: string;
+    tokensMap: string;
+  };
   currentBalance: bigint;
   network: string;
   permitsPerEvent: bigint;
@@ -38,15 +43,28 @@ const generalRouter = express.Router();
  */
 generalRouter.get('/', async (req: Request, res: Response) => {
   try {
+    const tokenMap = getConfig().token.tokenMap;
     const collateral = await Transaction.getInstance().getCollateral();
     const info: GeneralInfo = {
-      version: packageJson.version,
-      currentBalance: (await ErgoUtils.getWatcherBalance()).nanoErgs,
+      versions: {
+        app: packageJson.version,
+        contract: getConfig().rosen.contractVersion,
+        tokensMap: getConfig().token.version,
+      },
+      currentBalance: tokenMap.wrapAmount(
+        ERGO_NATIVE_ASSET,
+        (await ErgoUtils.getWatcherBalance()).nanoErgs,
+        ERGO_CHAIN_NAME
+      ).amount,
       network: getConfig().general.networkWatcher,
       permitsPerEvent:
         await Transaction.getInstance().getRequiredPermitsCountPerEvent(),
       permitCount: {
-        active: await ErgoUtils.getPermitCount(getConfig().rosen.RWTId),
+        active: tokenMap.wrapAmount(
+          getConfig().rosen.RWTId,
+          await ErgoUtils.getPermitCount(getConfig().rosen.RWTId),
+          ERGO_CHAIN_NAME
+        ).amount,
         total: await Transaction.getInstance().getTotalPermit(),
       },
       health: {

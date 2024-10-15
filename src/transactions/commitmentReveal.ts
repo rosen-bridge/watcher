@@ -10,6 +10,7 @@ import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { ERGO_CHAIN_NAME } from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 

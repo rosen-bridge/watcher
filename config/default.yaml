@@ -1,5 +1,5 @@
 ---
-network: '' # which scanner network used in this watcher ergo/cardano/bitcoin
+network: '' # which scanner network used in this watcher ergo/cardano/bitcoin/ethereum
 observation:
   confirmation: 60 # number of required block confirmations to create the commitment after observing an event
   validThreshold: 12960 # observations that have not been triggered won't be processed after this period (in blocks)
@@ -35,6 +35,14 @@ cardano:
     projectId: '' # blockfrost project Id
     timeout: 10 # blockfrost request timeout
     interval: 20 # blockfrost check timeout
+ethereum:
+  type: '' # options: rpc
+  initial:
+    height: -1 # initial height of scanning
+  rpc:
+    url: '' # rpc url
+    interval: 20 # rpc scanning interval (in seconds)
+    timeout: 10 # rpc request timeout (in seconds)
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer
@@ -93,11 +101,11 @@ healthCheck:
     ergWarnThreshold: 1000000000 # minimum recommended erg balance
     ergCriticalThreshold: 100000000 # minimum required erg balance
   ergoScanner:
-    warnDifference: 2 # warning difference between existing and scanned blocks height
-    criticalDifference: 10 # critical difference between existing and scanned blocks height
+    warnDifference: 5 # warning difference between existing and scanned blocks height
+    criticalDifference: 20 # critical difference between existing and scanned blocks height
   ergoNode:
     maxHeightDifference: 2 # maximum difference between header height and full height
-    maxBlockTime: 30 # maximum time to see  a new block in minutes
+    maxBlockTime: 30 # maximum time to see a new block in minutes
     minPeerCount: 10 # minimum recommended peers
     maxPeerHeightDifference: 2 # maximum difference between peers and our node
   cardanoScanner:
@@ -106,12 +114,16 @@ healthCheck:
   bitcoinScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 10 # critical difference between existing and scanned blocks height
+  ethereumScanner:
+    warnDifference: 40 # warning difference between existing and scanned blocks height
+    criticalDifference: 160 # critical difference between existing and scanned blocks height
   permit:
     warnCommitmentCount: 4 # warning remaining permits for creating commitment
     criticalCommitmentCount: 0 # critical remaining permits for creating commitment
-  errorLog:
-    maxAllowedCount: 2 # maximum allowed error log lines
-    duration: 100000 # error log duration time check in milliseconds
+  logs:
+    duration: 600 # log duration time check (in seconds)
+    maxAllowedErrorCount: 1 # maximum allowed error log lines
+    maxAllowedWarnCount: 10 # maximum allowed warn log lines
 redeemSwapEnabled: true # if set true when no permit left, system automatically redeem new commitments and commit again for old observations
 rewardCollection:
   threshold: 100000 # RSN threshold for reward collection

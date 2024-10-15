@@ -3,6 +3,8 @@ import { ApiResponse, Transaction } from './Transaction';
 import { body, validationResult } from 'express-validator';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 import { authenticateKey } from './authentication';
+import { getConfig } from '../config/config';
+import { ERGO_CHAIN_NAME } from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -22,10 +24,15 @@ permitRouter.post(
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
-      const RSNCount = req.body.count;
+      const tokenMap = getConfig().token.tokenMap;
+      const RSNCount = tokenMap.unwrapAmount(
+        getConfig().rosen.RSN,
+        BigInt(req.body.count),
+        ERGO_CHAIN_NAME
+      ).amount;
       const watcherTransaction = Transaction.getInstance();
       const response: ApiResponse = await watcherTransaction.getPermit(
-        BigInt(RSNCount)
+        RSNCount
       );
       if (response.status === 200) {
         res.status(200).send({ txId: response.response });
@@ -53,10 +60,15 @@ permitRouter.post(
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
-      const RWTCount = req.body.count;
+      const tokenMap = getConfig().token.tokenMap;
+      const RWTCount = tokenMap.unwrapAmount(
+        getConfig().rosen.RWTId,
+        BigInt(req.body.count),
+        ERGO_CHAIN_NAME
+      ).amount;
       const watcherTransaction = Transaction.getInstance();
       const response: ApiResponse = await watcherTransaction.returnPermit(
-        BigInt(RWTCount)
+        RWTCount
       );
       if (response.status === 200) {
         res.status(200).send({ txId: response.response });

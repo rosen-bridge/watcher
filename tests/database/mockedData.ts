@@ -17,6 +17,7 @@ import { TokenEntity } from '../../src/database/entities/tokenEntity';
 import { RevenueEntity } from '../../src/database/entities/revenueEntity';
 import { firstPermit, secondPermit } from '../ergo/statistics/mockUtils';
 import packageJson from '../../package.json' assert { type: 'json' };
+import { getConfig } from '../../src/config/config';
 
 export const ergoBlockEntity = new BlockEntity();
 ergoBlockEntity.scanner = Constants.ERGO_CHAIN_NAME;
@@ -174,9 +175,9 @@ export const validBox1Token = {
 export const validTwoBoxErgAmount = {
   amount: 1861100000,
   tokenId: Constants.ERGO_NATIVE_ASSET,
-  decimals: Constants.ERGO_DECIMALS,
-  name: Constants.ERGO_NATIVE_ASSET_NAME,
+  name: Constants.ERGO_NATIVE_ASSET,
   isNativeToken: true,
+  decimals: Constants.ERGO_DECIMALS,
 };
 
 export const eventTriggerEntity = new EventTriggerEntity();
@@ -718,7 +719,11 @@ export const permitMockRWT =
   '8e5b02ba729ad364867619d2a8b9ff1438190c14979a12aa0a249e996194f074';
 
 export const generalInfo = {
-  version: packageJson.version,
+  versions: {
+    app: packageJson.version,
+    contract: getConfig().rosen.contractVersion,
+    tokensMap: getConfig().token.version,
+  },
   currentBalance: 1100000,
   network: 'ergo',
   permitsPerEvent: 10000,

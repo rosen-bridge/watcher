@@ -2,6 +2,7 @@ import { getConfig } from '../config/config';
 import { Boxes } from '../../src/ergo/boxes';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { ERGO_CHAIN_NAME } from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -18,7 +19,12 @@ const updatePermitCheckThreshold = async (boxes: Boxes) => {
     );
     return;
   }
-  const commitmentRwt = BigInt(R4.to_i64_str_array()[0]);
+  const tokenMap = getConfig().token.tokenMap;
+  const commitmentRwt = tokenMap.unwrapAmount(
+    getConfig().rosen.RWTId,
+    BigInt(R4.to_i64_str_array()[0]),
+    ERGO_CHAIN_NAME
+  ).amount;
   if (
     HealthCheckSingleton.getInstance().checkIfPermitCheckExists(commitmentRwt)
   ) {

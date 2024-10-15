@@ -16,12 +16,14 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
   Constants.CARDANO_CHAIN_NAME,
   Constants.BITCOIN_CHAIN_NAME,
+  Constants.ETHEREUM_CHAIN_NAME,
 ];
 
 interface ConfigType {
   logger: LoggerConfig;
   cardano: CardanoConfig;
   bitcoin: BitcoinConfig;
+  ethereum: EthereumConfig;
   general: Config;
   rosen: RosenConfig;
   token: TokensConfig;
@@ -418,6 +420,38 @@ class BitcoinConfig {
   }
 }
 
+class EthereumConfig {
+  type: string;
+  initialHeight: number;
+  rpc?: {
+    url: string;
+    timeout: number;
+    interval: number;
+    authToken?: string;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('ethereum.type');
+    if (network === Constants.ETHEREUM_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('ethereum.initial.height');
+      if (this.type == Constants.EVM_RPC_TYPE) {
+        const url = getRequiredString('ethereum.rpc.url');
+        const timeout = getRequiredNumber('ethereum.rpc.timeout');
+        const interval = getRequiredNumber('ethereum.rpc.interval');
+        const authToken = getOptionalString(
+          'ethereum.rpc.authToken',
+          undefined
+        );
+        this.rpc = { url, timeout, interval, authToken };
+      } else {
+        throw new Error(
+          `Improperly configured. ethereum configuration type is invalid available choices are '${Constants.EVM_RPC_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class DatabaseConfig {
   type: string;
   path = '';
@@ -482,6 +516,8 @@ class HealthCheckConfig {
   cardanoScannerCriticalDiff: number;
   bitcoinScannerWarnDiff: number;
   bitcoinScannerCriticalDiff: number;
+  ethereumScannerWarnDiff: number;
+  ethereumScannerCriticalDiff: number;
   ergoNodeMaxHeightDiff: number;
   ergoNodeMaxBlockTime: number;
   ergoNodeMinPeerCount: number;
@@ -490,8 +526,9 @@ class HealthCheckConfig {
   permitCriticalCommitmentCount: number;
   permitDefaultCommitmentRWT: number;
   updateInterval: number;
+  logDuration: number;
   errorLogAllowedCount: number;
-  errorLogDuration: number;
+  warnLogAllowedCount: number;
 
   constructor() {
     this.ergWarnThreshold = BigInt(
@@ -530,6 +567,12 @@ class HealthCheckConfig {
     this.bitcoinScannerCriticalDiff = getRequiredNumber(
       'healthCheck.bitcoinScanner.criticalDifference'
     );
+    this.ethereumScannerWarnDiff = getRequiredNumber(
+      'healthCheck.ethereumScanner.warnDifference'
+    );
+    this.ethereumScannerCriticalDiff = getRequiredNumber(
+      'healthCheck.ethereumScanner.criticalDifference'
+    );
     this.permitWarnCommitmentCount = getRequiredNumber(
       'healthCheck.permit.warnCommitmentCount'
     );
@@ -537,10 +580,13 @@ class HealthCheckConfig {
       'healthCheck.permit.criticalCommitmentCount'
     );
     this.updateInterval = getRequiredNumber('healthCheck.interval');
+    this.logDuration = getRequiredNumber('healthCheck.logs.duration') * 1000;
     this.errorLogAllowedCount = getRequiredNumber(
-      'healthCheck.errorLog.maxAllowedCount'
+      'healthCheck.logs.maxAllowedErrorCount'
     );
-    this.errorLogDuration = getRequiredNumber('healthCheck.errorLog.duration');
+    this.warnLogAllowedCount = getRequiredNumber(
+      'healthCheck.logs.maxAllowedWarnCount'
+    );
   }
 }
 
@@ -552,6 +598,7 @@ const getConfig = (): ConfigType => {
     const logger = new LoggerConfig();
     const cardano = new CardanoConfig(general.networkWatcher);
     const bitcoin = new BitcoinConfig(general.networkWatcher);
+    const ethereum = new EthereumConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
       general.networkType,
@@ -564,6 +611,7 @@ const getConfig = (): ConfigType => {
     internalConfig = {
       cardano,
       bitcoin,
+      ethereum,
       logger,
       general,
       rosen,

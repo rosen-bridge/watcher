@@ -18,6 +18,7 @@ import {
   ErgoNodeScannerHealthCheck,
   BitcoinEsploraScannerHealthCheck,
   BitcoinRPCScannerHealthCheck,
+  EthereumRPCScannerHealthCheck,
 } from '@rosen-bridge/scanner-sync-check';
 import {
   ExplorerWidHealthCheckParam,
@@ -35,6 +36,7 @@ import {
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
   ESPLORA_TYPE,
+  ETHEREUM_CHAIN_NAME,
   EXPLORER_TYPE,
   KOIOS_TYPE,
   NODE_TYPE,
@@ -74,7 +76,7 @@ class HealthCheckSingleton {
         notificationCheckConfig: {
           hasBeenUnstableForAWhile: {
             windowDuration:
-              getConfig().notification.hasBeenUnknownForAWhileWindowDuration,
+              getConfig().notification.hasBeenUnstableForAWhileWindowDuration,
           },
           hasBeenUnknownForAWhile: {
             windowDuration:
@@ -89,13 +91,31 @@ class HealthCheckSingleton {
     }
     this.healthCheck = new HealthCheck(notify, notificationConfig);
     const errorLogHealthCheck = new LogLevelHealthCheck(
-      logger,
+      WinstonLogger.getInstance().getDefaultLogger(),
       HealthStatusLevel.UNSTABLE,
       getConfig().healthCheck.errorLogAllowedCount,
-      getConfig().healthCheck.errorLogDuration,
+      getConfig().healthCheck.logDuration,
       'error'
     );
     this.healthCheck.register(errorLogHealthCheck);
+
+    const warnLogHealthCheck = new LogLevelHealthCheck(
+      WinstonLogger.getInstance().getDefaultLogger(),
+      HealthStatusLevel.UNSTABLE,
+      getConfig().healthCheck.warnLogAllowedCount,
+      getConfig().healthCheck.logDuration,
+      'warn'
+    );
+    this.healthCheck.register(warnLogHealthCheck);
+
+    const ergoNodeSyncCheck = new ErgoNodeSyncHealthCheckParam(
+      getConfig().healthCheck.ergoNodeMaxHeightDiff,
+      getConfig().healthCheck.ergoNodeMaxBlockTime,
+      getConfig().healthCheck.ergoNodeMinPeerCount,
+      getConfig().healthCheck.ergoNodeMaxPeerHeightDifference,
+      getConfig().general.nodeUrl
+    );
+    this.healthCheck.register(ergoNodeSyncCheck);
 
     if (getConfig().general.scannerType === NODE_TYPE) {
       this.registerErgoNodeHealthCheckParams();
@@ -107,6 +127,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
       this.registerBitcoinHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === ETHEREUM_CHAIN_NAME) {
+      this.registerEthereumHealthCheckParams();
     }
   }
 
@@ -145,15 +168,6 @@ class HealthCheckSingleton {
       getConfig().general.nodeUrl
     );
     this.healthCheck.register(this.ergoScannerSyncCheckParam);
-
-    const ergoNodeSyncCheck = new ErgoNodeSyncHealthCheckParam(
-      getConfig().healthCheck.ergoNodeMaxHeightDiff,
-      getConfig().healthCheck.ergoNodeMaxBlockTime,
-      getConfig().healthCheck.ergoNodeMinPeerCount,
-      getConfig().healthCheck.ergoNodeMaxPeerHeightDifference,
-      getConfig().general.nodeUrl
-    );
-    this.healthCheck.register(ergoNodeSyncCheck);
   };
 
   /**
@@ -248,6 +262,22 @@ class HealthCheckSingleton {
     }
     if (bitcoinScannerSyncCheck)
       this.healthCheck.register(bitcoinScannerSyncCheck);
+  };
+
+  /**
+   * Registers all ethereum check params
+   */
+  registerEthereumHealthCheckParams = () => {
+    const ethereumRpcScannerSyncCheck = new EthereumRPCScannerHealthCheck(
+      this.observingNetworkLastBlock(scanner.observationScanner.name()),
+      scanner.observationScanner.name(),
+      getConfig().healthCheck.ethereumScannerWarnDiff,
+      getConfig().healthCheck.ethereumScannerCriticalDiff,
+      getConfig().ethereum.rpc!.url,
+      getConfig().ethereum.rpc!.authToken,
+      getConfig().ethereum.rpc!.timeout
+    );
+    this.healthCheck.register(ethereumRpcScannerSyncCheck);
   };
 
   /**

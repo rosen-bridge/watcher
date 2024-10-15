@@ -19,7 +19,11 @@ import {
   Not,
   Repository,
 } from 'typeorm';
-import { DOING_STATUS, DONE_STATUS } from '../../config/constants';
+import {
+  DOING_STATUS,
+  DONE_STATUS,
+  ERGO_CHAIN_NAME,
+} from '../../config/constants';
 import { PagedItemData } from '../../types/items';
 import { EventStatus } from '../../utils/interfaces';
 import { base64ToArrayBuffer } from '../../utils/utils';
@@ -34,6 +38,7 @@ import { RevenueView } from '../entities/revenueView';
 import { TokenEntity } from '../entities/tokenEntity';
 import { TxEntity, TxType } from '../entities/txEntity';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { getConfig } from '../../config/config';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -777,6 +782,7 @@ class WatcherDataBase {
 
   /**
    * Stores the name and decimals of a token by its id
+   * stores the significant decimals if exists in the tokenMap
    * @param tokenId
    * @param tokenName
    * @param decimals
@@ -786,7 +792,13 @@ class WatcherDataBase {
     tokenName: string,
     decimals: number
   ) => {
-    await this.tokenRepository.insert({ tokenId, tokenName, decimals });
+    const tokenMap = getConfig().token.tokenMap;
+    const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
+    await this.tokenRepository.save({
+      tokenId,
+      tokenName,
+      decimals: significantDecimal != undefined ? significantDecimal : decimals,
+    });
   };
 
   /**
@@ -1096,6 +1108,7 @@ class WatcherDataBase {
 
   /**
    * Stores the info of permit in chart entity
+   * stores token's wrapped amount
    * @param tokenId
    * @param amount
    * @param permit
@@ -1105,9 +1118,12 @@ class WatcherDataBase {
     amount: string,
     permit: PermitEntity
   ) => {
+    const tokenMap = getConfig().token.tokenMap;
     await this.revenueRepository.save({
       tokenId,
-      amount,
+      amount: tokenMap
+        .wrapAmount(tokenId, BigInt(amount), ERGO_CHAIN_NAME)
+        .amount.toString(),
       permit,
     });
   };

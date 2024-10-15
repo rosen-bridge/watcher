@@ -9,6 +9,7 @@ import { TxType } from '../database/entities/txEntity';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { ERGO_CHAIN_NAME } from '../config/constants';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -197,9 +198,15 @@ export class CommitmentRedeem {
       logger.debug('Has unconfirmed commitment or redeem transactions');
       return;
     }
+    const tokenMap = getConfig().token.tokenMap;
+    const rwtPerCommitment = tokenMap.unwrapAmount(
+      getConfig().rosen.RWTId,
+      await Transaction.getInstance().getRequiredPermitsCountPerEvent(),
+      ERGO_CHAIN_NAME
+    ).amount;
     const availablePermits =
       ((await ErgoUtils.getPermitCount(getConfig().rosen.RWTId)) - 1n) /
-      (await Transaction.getInstance().getRequiredPermitsCountPerEvent());
+      rwtPerCommitment;
     if (availablePermits >= 1) {
       logger.debug(
         `Still have [${availablePermits}] available permits, aborting last commit redeem job`
