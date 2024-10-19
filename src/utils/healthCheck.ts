@@ -24,7 +24,7 @@ import {
   ExplorerWidHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { CardanoOgmiosScanner } from '@rosen-bridge/scanner';
 import { DiscordNotification } from '@rosen-bridge/discord-notification';
 
@@ -46,7 +46,7 @@ import {
 import { scanner } from './scanner';
 import { watcherDatabase } from '../init';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
@@ -90,24 +90,6 @@ class HealthCheckSingleton {
       };
     }
     this.healthCheck = new HealthCheck(notify, notificationConfig);
-    const errorLogHealthCheck = new LogLevelHealthCheck(
-      WinstonLogger.getInstance().getDefaultLogger(),
-      HealthStatusLevel.UNSTABLE,
-      getConfig().healthCheck.errorLogAllowedCount,
-      getConfig().healthCheck.logDuration,
-      'error'
-    );
-    this.healthCheck.register(errorLogHealthCheck);
-
-    const warnLogHealthCheck = new LogLevelHealthCheck(
-      WinstonLogger.getInstance().getDefaultLogger(),
-      HealthStatusLevel.UNSTABLE,
-      getConfig().healthCheck.warnLogAllowedCount,
-      getConfig().healthCheck.logDuration,
-      'warn'
-    );
-    this.healthCheck.register(warnLogHealthCheck);
-
     const ergoNodeSyncCheck = new ErgoNodeSyncHealthCheckParam(
       getConfig().healthCheck.ergoNodeMaxHeightDiff,
       getConfig().healthCheck.ergoNodeMaxBlockTime,
