@@ -32,6 +32,7 @@ export const tokenNameJobFunction = async (
   const boxesTokenIds = ErgoUtils.getBoxAssetsSum(newErgoBoxes).map(
     (token) => token.tokenId
   );
+  boxesTokenIds.push(getConfig().rosen.eRSN);
   const tokensInfo = await watcherDatabase.getTokenEntity(boxesTokenIds);
   const tokensInfoMap = new Map<string, string>();
   tokensInfo.forEach((token) => {

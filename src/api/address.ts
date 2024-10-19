@@ -41,6 +41,9 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     if (!tokens.some((item) => item.tokenId === getConfig().rosen.RSN)) {
       tokens.push({ amount: 0n, tokenId: getConfig().rosen.RSN });
     }
+    if (!tokens.some((item) => item.tokenId === getConfig().rosen.eRSN)) {
+      tokens.push({ amount: 0n, tokenId: getConfig().rosen.eRSN });
+    }
     tokens = await ErgoUtils.fillTokensDetails(tokens);
     tokens.push({
       amount: balance.nanoErgs,
