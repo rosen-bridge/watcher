@@ -1,5 +1,12 @@
 # @rosen-bridge/watcher
 
+## 4.0.1
+
+### Patch Changes
+
+- Add eRSN token info to assets and revenue apis
+- Update logger structure
+
 ## 4.0.0
 
 ### Major Changes
