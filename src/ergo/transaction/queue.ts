@@ -6,10 +6,10 @@ import { base64ToArrayBuffer } from '../../utils/utils';
 import { WatcherUtils } from '../../utils/watcherUtils';
 import { getConfig } from '../../config/config';
 import { Transaction } from '../../api/Transaction';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { TxStatus } from '../../database/entities/observationStatusEntity';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export class Queue {
   database: WatcherDataBase;

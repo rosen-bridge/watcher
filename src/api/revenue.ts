@@ -5,9 +5,9 @@ import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { Transaction } from './Transaction';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 const revenueRouter = express.Router();
 
 /**

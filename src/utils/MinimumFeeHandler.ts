@@ -4,12 +4,12 @@ import {
   MinimumFeeBox,
 } from '@rosen-bridge/minimum-fee';
 import { RosenTokens } from '@rosen-bridge/tokens';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { getConfig } from '../config/config';
 import { ERGO_CHAIN_NAME, NODE_TYPE } from '../config/constants';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class MinimumFeeHandler {
   private static instance: MinimumFeeHandler;

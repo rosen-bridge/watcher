@@ -1,5 +1,5 @@
 import { HealthStatusLevel } from '@rosen-bridge/health-check';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { getConfig } from '../config/config';
 import { Boxes } from '../ergo/boxes';
 import { CommitmentCreation } from '../transactions/commitmentCreation';
@@ -7,7 +7,7 @@ import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { redeemJob } from './commitmentRedeem';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 let commitmentCreatorObj: CommitmentCreation;
 let redeemExecuted = false;

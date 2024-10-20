@@ -4,11 +4,11 @@ import { JsonBI } from '../ergo/network/parser';
 import { ErgoUtils } from '../ergo/utils';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 import { Transaction } from './Transaction';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import packageJson from '../../package.json' assert { type: 'json' };
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 interface GeneralInfo {
   versions: {

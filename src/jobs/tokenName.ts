@@ -2,10 +2,10 @@ import { watcherDatabase } from '../init';
 import { decodeSerializedBox, ErgoUtils } from '../ergo/utils';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { getConfig } from '../config/config';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 let initialized = false;
 
 /**
@@ -32,6 +32,7 @@ export const tokenNameJobFunction = async (
   const boxesTokenIds = ErgoUtils.getBoxAssetsSum(newErgoBoxes).map(
     (token) => token.tokenId
   );
+  boxesTokenIds.push(getConfig().rosen.eRSN);
   const tokensInfo = await watcherDatabase.getTokenEntity(boxesTokenIds);
   const tokensInfoMap = new Map<string, string>();
   tokensInfo.forEach((token) => {

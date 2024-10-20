@@ -208,6 +208,7 @@ export const fillORM = async (
     firstPermit,
     secondPermit,
   ]);
+  await ORM.tokenRepo.save(validRSNTokenRecord);
   const UTXOArray = [plainBox, spentPlainBox];
   if (pushExtraUtxo) UTXOArray.push(addressValidBox);
   await ORM.boxRepo.save(UTXOArray);

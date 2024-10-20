@@ -8,10 +8,10 @@ import { hexStrToUint8Array } from '../utils/utils';
 import { TxType } from '../database/entities/txEntity';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export class CommitmentRedeem {
   watcherUtils: WatcherUtils;

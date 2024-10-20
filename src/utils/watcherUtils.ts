@@ -16,9 +16,9 @@ import { getConfig } from '../config/config';
 import { scanner } from './scanner';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 import MinimumFeeHandler from './MinimumFeeHandler';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class WatcherUtils {
   dataBase: WatcherDataBase;

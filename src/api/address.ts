@@ -5,9 +5,9 @@ import { generateSK } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 const addressRouter = express.Router();
 
@@ -40,6 +40,9 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     let tokens = balance.tokens;
     if (!tokens.some((item) => item.tokenId === getConfig().rosen.RSN)) {
       tokens.push({ amount: 0n, tokenId: getConfig().rosen.RSN });
+    }
+    if (!tokens.some((item) => item.tokenId === getConfig().rosen.eRSN)) {
+      tokens.push({ amount: 0n, tokenId: getConfig().rosen.eRSN });
     }
     tokens = await ErgoUtils.fillTokensDetails(tokens);
     tokens.push({

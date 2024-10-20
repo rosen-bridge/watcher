@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import { ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { Boxes } from '../ergo/boxes';
@@ -23,7 +23,7 @@ import {
 import { HealthStatusLevel } from '@rosen-bridge/health-check';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export type ApiResponse = {
   response: string;

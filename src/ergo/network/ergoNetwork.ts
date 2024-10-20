@@ -16,9 +16,9 @@ import { ConnectionError } from '../../errors/errors';
 import { getConfig } from '../../config/config';
 import { ExplorerBox, ErgoAssetInfo } from '../network/types';
 import { MAX_API_LIMIT } from '../../config/constants';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const explorerApi = axios.create({
   baseURL: getConfig().general.explorerUrl,
