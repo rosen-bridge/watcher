@@ -86,7 +86,7 @@
     "@rosen-bridge/evm-rpc-scanner": "^1.0.4",
     "@rosen-bridge/health-check": "6.0.3",
     "@rosen-bridge/log-level-check": "^1.0.3",
-    "@rosen-bridge/minimum-fee": "^2.1.0",
+    "@rosen-bridge/minimum-fee": "^2.2.2",
     "@rosen-bridge/node-sync-check": "^1.0.3",
     "@rosen-bridge/observation-extractor": "^5.0.7",
     "@rosen-bridge/permit-check": "^1.0.3",

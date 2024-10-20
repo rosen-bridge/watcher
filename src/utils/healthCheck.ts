@@ -2,8 +2,7 @@ import {
   ErgoExplorerAssetHealthCheckParam,
   ErgoNodeAssetHealthCheckParam,
 } from '@rosen-bridge/asset-check';
-import { HealthCheck, HealthStatusLevel } from '@rosen-bridge/health-check';
-import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
+import { HealthCheck } from '@rosen-bridge/health-check';
 import { ErgoNodeSyncHealthCheckParam } from '@rosen-bridge/node-sync-check';
 import {
   AbstractPermitHealthCheckParam,
@@ -28,7 +27,7 @@ import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { CardanoOgmiosScanner } from '@rosen-bridge/scanner';
 import { DiscordNotification } from '@rosen-bridge/discord-notification';
 
-import { Transaction } from '../../src/api/Transaction';
+import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import {
   BITCOIN_CHAIN_NAME,
