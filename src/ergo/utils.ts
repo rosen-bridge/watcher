@@ -25,10 +25,10 @@ import {
 import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { JsonBI } from './network/parser';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 const txFee = parseInt(getConfig().general.fee);
 
 export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {

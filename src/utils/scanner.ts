@@ -24,7 +24,7 @@ import {
   CollateralExtractor,
 } from '@rosen-bridge/watcher-data-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
 import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
@@ -47,27 +47,27 @@ const {
  * @returns loggers object
  */
 const createLoggers = () => ({
-  commitmentExtractorLogger: WinstonLogger.getInstance().getLogger(
+  commitmentExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
     'commitment-extractor'
   ),
-  eventTriggerExtractorLogger: WinstonLogger.getInstance().getLogger(
+  eventTriggerExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
     'event-trigger-extractor'
   ),
-  observationExtractorLogger: WinstonLogger.getInstance().getLogger(
+  observationExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
     'observation-extractor'
   ),
   permitExtractorLogger:
-    WinstonLogger.getInstance().getLogger('permit-extractor'),
+    DefaultLoggerFactory.getInstance().getLogger('permit-extractor'),
   plainExtractorLogger:
-    WinstonLogger.getInstance().getLogger('plain-extractor'),
-  scannerLogger: WinstonLogger.getInstance().getLogger('scanner'),
-  collateralExtractorLogger: WinstonLogger.getInstance().getLogger(
+    DefaultLoggerFactory.getInstance().getLogger('plain-extractor'),
+  scannerLogger: DefaultLoggerFactory.getInstance().getLogger('scanner'),
+  collateralExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
     'collateral-extractor'
   ),
 });
 
 const loggers = createLoggers();
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class CreateScanner {
   ergoScanner: ErgoScanner;

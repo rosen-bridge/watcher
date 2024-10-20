@@ -1,12 +1,12 @@
 import { Request, Response, Router } from 'express';
 import { ApiResponse, Transaction } from './Transaction';
 import { body, validationResult } from 'express-validator';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { authenticateKey } from './authentication';
 import { getConfig } from '../config/config';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 const permitRouter = Router();
 

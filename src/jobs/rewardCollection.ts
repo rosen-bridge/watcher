@@ -1,10 +1,10 @@
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { getConfig } from '../config/config';
 import { Boxes } from '../ergo/boxes';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { RewardCollection } from '../transactions/rewardCollection';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 let rewardCollectorObj: RewardCollection;
 
