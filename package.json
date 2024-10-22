@@ -1,6 +1,6 @@
 {
   "name": "@rosen-bridge/watcher",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Rosen bridge Watcher service",
   "main": "index.js",
   "type": "module",
