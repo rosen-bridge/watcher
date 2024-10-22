@@ -395,6 +395,7 @@ class WatcherUtils {
    *    1 - Not triggered after the specified period
    *    2 - Created after the related trigger
    *    3 - It's a duplicate commitment and a valid one merged to create the trigger (WID exists in trigger)
+   *    4 - It's information is not valid and trigger was spent without rewarding the commitment
    * @param commitment
    * @returns true if the commitment is still valid and false otherwise
    */
@@ -405,7 +406,7 @@ class WatcherUtils {
       commitment.eventId
     );
 
-    if (eventTrigger == null) {
+    if (eventTrigger == null || eventTrigger.spendBlock !== undefined) {
       return false;
     }
 
