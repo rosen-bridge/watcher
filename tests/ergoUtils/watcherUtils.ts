@@ -3,6 +3,7 @@ import { TxStatus } from '../../src/database/entities/observationStatusEntity';
 import {
   commitmentEntity,
   eventTriggerEntity,
+  newEventTriggerEntity,
   observationEntity1,
   observationEntity3,
   observationStatusCommitted,
@@ -570,6 +571,25 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
       );
       expect(ErgoNetwork.getHeight).to.have.been.called.once;
       chai.spy.restore(ErgoNetwork);
+    });
+  });
+
+  describe('isCommitmentValid', () => {
+    /**
+     * @target isCommitmentValid should return false if related trigger is spent
+     * @dependencies
+     * - DataBase
+     * @scenario
+     * - mock eventTriggerByEventId to return a spent trigger object
+     * @expected
+     * - to return false when spendBlock is set for the trigger
+     */
+    it('should return false if related trigger is spent', async () => {
+      chai.spy.on(dataBase, 'eventTriggerByEventId', () => ({
+        spendBlock: 'spendBlock',
+      }));
+      const result = await watcherUtils.isCommitmentValid(commitmentEntity);
+      expect(result).to.be.false;
     });
   });
 });
