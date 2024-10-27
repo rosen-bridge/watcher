@@ -9,8 +9,7 @@
   - [Run in production mode](#run-in-production-mode)
   - [Config](#config)
 - [How to Be a Watcher](#how-to-be-a-watcher)
-- [Contributing](#contributing)
-- [License](#license)
+- [License](./LICENSE)
   <a name="headers"/>
 
 ## Description
@@ -47,12 +46,4 @@ You can find the project configs here. In this config, you should set what netwo
 
 ## How to Be a Watcher
 
-TBD
-
-## Contributing
-
-TBD
-
-## License
-
-TBD
+Check our operation documentation [here](https://github.com/rosen-bridge/operation/blob/dev/docs/watcher/deploy-docker.md#watcher-deployment).
