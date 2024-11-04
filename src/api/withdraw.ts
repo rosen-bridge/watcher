@@ -3,10 +3,10 @@ import { AddressBalance, TokenData } from '../ergo/interfaces';
 import { Transaction } from './Transaction';
 import { ERGO_NATIVE_ASSET } from '../config/constants';
 import { BoxValue } from 'ergo-lib-wasm-nodejs';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { authenticateKey } from './authentication';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 const withdrawRouter = express.Router();
 

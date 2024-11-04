@@ -1,6 +1,6 @@
 {
   "name": "@rosen-bridge/watcher",
-  "version": "4.0.0",
+  "version": "4.0.2",
   "description": "Rosen bridge Watcher service",
   "main": "index.js",
   "type": "module",
@@ -75,6 +75,7 @@
   },
   "dependencies": {
     "@emurgo/cip14-js": "^3.0.1",
+    "@rosen-bridge/abstract-logger": "^2.0.1",
     "@rosen-bridge/address-extractor": "^5.0.7",
     "@rosen-bridge/asset-check": "^2.0.0",
     "@rosen-bridge/bitcoin-esplora-scanner": "^0.1.14",
@@ -85,7 +86,7 @@
     "@rosen-bridge/evm-rpc-scanner": "^1.0.4",
     "@rosen-bridge/health-check": "6.0.4",
     "@rosen-bridge/log-level-check": "^1.0.4",
-    "@rosen-bridge/minimum-fee": "^2.1.0",
+    "@rosen-bridge/minimum-fee": "^2.2.2",
     "@rosen-bridge/node-sync-check": "^1.0.4",
     "@rosen-bridge/observation-extractor": "^5.0.7",
     "@rosen-bridge/permit-check": "^1.0.4",
@@ -94,7 +95,7 @@
     "@rosen-bridge/tokens": "^1.2.1",
     "@rosen-bridge/watcher-data-extractor": "^8.0.2",
     "@rosen-bridge/wid-check": "^1.0.4",
-    "@rosen-bridge/winston-logger": "0.2.1",
+    "@rosen-bridge/winston-logger": "1.0.2",
     "@rosen-clients/cardano-koios": "^2.0.3",
     "axios": "^0.26.1",
     "bip39": "^3.1.0",

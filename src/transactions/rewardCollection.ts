@@ -6,9 +6,9 @@ import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 import { TxType } from '../database/entities/txEntity';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class RewardCollection {
   watcherUtils: WatcherUtils;

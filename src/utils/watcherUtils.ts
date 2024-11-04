@@ -16,9 +16,9 @@ import { getConfig } from '../config/config';
 import { scanner } from './scanner';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 import MinimumFeeHandler from './MinimumFeeHandler';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class WatcherUtils {
   dataBase: WatcherDataBase;
@@ -395,6 +395,7 @@ class WatcherUtils {
    *    1 - Not triggered after the specified period
    *    2 - Created after the related trigger
    *    3 - It's a duplicate commitment and a valid one merged to create the trigger (WID exists in trigger)
+   *    4 - It's information is not valid and trigger was spent without rewarding the commitment
    * @param commitment
    * @returns true if the commitment is still valid and false otherwise
    */
@@ -405,7 +406,7 @@ class WatcherUtils {
       commitment.eventId
     );
 
-    if (eventTrigger == null) {
+    if (eventTrigger == null || eventTrigger.spendBlock !== undefined) {
       return false;
     }
 

@@ -23,13 +23,13 @@ import { revenueJob } from './jobs/revenue';
 import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
 import cors from 'cors';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { widStatusJob } from './jobs/widStatus';
 import MinimumFeeHandler from './utils/MinimumFeeHandler';
 import { minimumFeeUpdateJob } from './jobs/minimumFee';
 import { rewardCollection } from './jobs/rewardCollection';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
