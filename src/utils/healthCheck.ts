@@ -17,6 +17,7 @@ import {
   ErgoNodeScannerHealthCheck,
   BitcoinEsploraScannerHealthCheck,
   BitcoinRPCScannerHealthCheck,
+  DogeEsploraScannerHealthCheck,
   EthereumRPCScannerHealthCheck,
 } from '@rosen-bridge/scanner-sync-check';
 import {
@@ -32,6 +33,7 @@ import { getConfig } from '../config/config';
 import {
   BITCOIN_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
+  DOGE_CHAIN_NAME,
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
   ESPLORA_TYPE,
@@ -108,6 +110,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
       this.registerBitcoinHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === DOGE_CHAIN_NAME) {
+      this.registerDogeHealthCheckParams();
     }
     if (getConfig().general.networkWatcher === ETHEREUM_CHAIN_NAME) {
       this.registerEthereumHealthCheckParams();
@@ -243,6 +248,17 @@ class HealthCheckSingleton {
     }
     if (bitcoinScannerSyncCheck)
       this.healthCheck.register(bitcoinScannerSyncCheck);
+  };
+
+  registerDogeHealthCheckParams = () => {
+    const dogeScannerSyncCheck = new DogeEsploraScannerHealthCheck(
+      this.observingNetworkLastBlock(scanner.observationScanner.name()),
+      scanner.observationScanner.name(),
+      getConfig().healthCheck.dogeScannerWarnDiff,
+      getConfig().healthCheck.dogeScannerCriticalDiff,
+      getConfig().doge.esplora!.url
+    );
+    this.healthCheck.register(dogeScannerSyncCheck);
   };
 
   /**

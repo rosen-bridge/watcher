@@ -15,6 +15,14 @@ bitcoin:
     interval: 180 # rpc scanning interval (in seconds)
     timeout: 10 # rpc request timeout (in seconds)
     url: '' # rpc url
+doge:
+  type: '' # options: esplora
+  initial:
+    height: -1 # initial height of scanning
+  esplora:
+    interval: 60 # esplora scanning interval (in seconds)
+    timeout: 10 # esplora request timeout (in seconds)
+    url: 'https://doge-electrs-demo.qed.me' # esplora url
 cardano:
   type: '' # options: koios, ogmios, blockfrost
   initial:
@@ -114,6 +122,9 @@ healthCheck:
   bitcoinScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 10 # critical difference between existing and scanned blocks height
+  dogeScanner:
+    warnDifference: 4 # warning difference between existing and scanned blocks height
+    criticalDifference: 15 # critical difference between existing and scanned blocks height
   ethereumScanner:
     warnDifference: 40 # warning difference between existing and scanned blocks height
     criticalDifference: 160 # critical difference between existing and scanned blocks height

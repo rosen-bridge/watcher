@@ -14,6 +14,7 @@ export const EXPLORER_TYPE = 'explorer';
 export const ERGO_CHAIN_NAME = 'ergo';
 export const CARDANO_CHAIN_NAME = 'cardano';
 export const BITCOIN_CHAIN_NAME = 'bitcoin';
+export const DOGE_CHAIN_NAME = 'doge';
 export const ETHEREUM_CHAIN_NAME = 'ethereum';
 export const ERGO_NATIVE_ASSET = 'erg';
 export const ERGO_DECIMALS = 9;

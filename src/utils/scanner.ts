@@ -6,6 +6,7 @@ import {
   CardanoBlockFrostScanner,
 } from '@rosen-bridge/scanner';
 import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
+import { DogeEsploraScanner } from '@rosen-bridge/doge-esplora-scanner';
 import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
 import {
   ErgoObservationExtractor,
@@ -16,6 +17,7 @@ import {
 import {
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
+  DogeEsploraObservationExtractor,
 } from '@rosen-bridge/bitcoin-observation-extractor';
 import {
   CommitmentExtractor,
@@ -39,6 +41,7 @@ const {
   rosen: rosenConfig,
   cardano: cardanoConfig,
   bitcoin: bitcoinConfig,
+  doge: dogeConfig,
   ethereum: ethereumConfig,
 } = allConfig;
 
@@ -78,6 +81,7 @@ class CreateScanner {
     | CardanoBlockFrostScanner
     | BitcoinEsploraScanner
     | BitcoinRpcScanner
+    | DogeEsploraScanner
     | EvmRpcScanner;
 
   constructor() {
@@ -91,6 +95,9 @@ class CreateScanner {
         break;
       case Constants.ETHEREUM_CHAIN_NAME:
         this.createEthereumScanner();
+        break;
+      case Constants.DOGE_CHAIN_NAME:
+        this.createDogeScanner();
         break;
     }
     if (!this.observationScanner)
@@ -278,6 +285,29 @@ class CreateScanner {
         );
 
         const observationExtractor = new BitcoinRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          tokensConfig.tokens,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      }
+    }
+  };
+
+  private createDogeScanner = () => {
+    if (!this.observationScanner) {
+      if (dogeConfig.esplora) {
+        this.observationScanner = new DogeEsploraScanner(
+          {
+            dataSource: dataSource,
+            esploraUrl: dogeConfig.esplora.url,
+            timeout: dogeConfig.esplora.timeout * 1000,
+            initialHeight: dogeConfig.initialHeight,
+          },
+          loggers.scannerLogger
+        );
+        const observationExtractor = new DogeEsploraObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
           tokensConfig.tokens,

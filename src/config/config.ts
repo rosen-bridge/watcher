@@ -16,6 +16,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
   Constants.CARDANO_CHAIN_NAME,
   Constants.BITCOIN_CHAIN_NAME,
+  Constants.DOGE_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
 ];
 
@@ -24,6 +25,7 @@ interface ConfigType {
   cardano: CardanoConfig;
   bitcoin: BitcoinConfig;
   ethereum: EthereumConfig;
+  doge: DogeConfig;
   general: Config;
   rosen: RosenConfig;
   token: TokensConfig;
@@ -420,6 +422,33 @@ class BitcoinConfig {
   }
 }
 
+class DogeConfig {
+  type: string;
+  initialHeight: number;
+  esplora?: {
+    url: string;
+    timeout: number;
+    interval: number;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('doge.type');
+    if (network === Constants.DOGE_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('doge.initial.height');
+      if (this.type === Constants.ESPLORA_TYPE) {
+        const url = getRequiredString('doge.esplora.url');
+        const interval = getRequiredNumber('doge.esplora.interval');
+        const timeout = getRequiredNumber('doge.esplora.timeout');
+        this.esplora = { url, interval, timeout };
+      } else {
+        throw new Error(
+          `Improperly configured. doge configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class EthereumConfig {
   type: string;
   initialHeight: number;
@@ -516,6 +545,8 @@ class HealthCheckConfig {
   cardanoScannerCriticalDiff: number;
   bitcoinScannerWarnDiff: number;
   bitcoinScannerCriticalDiff: number;
+  dogeScannerWarnDiff: number;
+  dogeScannerCriticalDiff: number;
   ethereumScannerWarnDiff: number;
   ethereumScannerCriticalDiff: number;
   ergoNodeMaxHeightDiff: number;
@@ -567,6 +598,12 @@ class HealthCheckConfig {
     this.bitcoinScannerCriticalDiff = getRequiredNumber(
       'healthCheck.bitcoinScanner.criticalDifference'
     );
+    this.dogeScannerWarnDiff = getRequiredNumber(
+      'healthCheck.dogeScanner.warnDifference'
+    );
+    this.dogeScannerCriticalDiff = getRequiredNumber(
+      'healthCheck.dogeScanner.criticalDifference'
+    );
     this.ethereumScannerWarnDiff = getRequiredNumber(
       'healthCheck.ethereumScanner.warnDifference'
     );
@@ -598,6 +635,7 @@ const getConfig = (): ConfigType => {
     const logger = new LoggerConfig();
     const cardano = new CardanoConfig(general.networkWatcher);
     const bitcoin = new BitcoinConfig(general.networkWatcher);
+    const doge = new DogeConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
@@ -611,6 +649,7 @@ const getConfig = (): ConfigType => {
     internalConfig = {
       cardano,
       bitcoin,
+      doge,
       ethereum,
       logger,
       general,
