@@ -161,6 +161,8 @@ class CreateScanner {
     const eventTriggerExtractor = new EventTriggerExtractor(
       Constants.TRIGGER_EXTRACTOR_NAME,
       dataSource,
+      config.scannerType,
+      networkUrl,
       rosenConfig.eventTriggerAddress,
       rosenConfig.RWTId,
       rosenConfig.watcherPermitAddress,
@@ -203,8 +205,6 @@ class CreateScanner {
             dataSource: dataSource,
             initialHash: cardanoConfig.ogmios.initialHash,
             initialSlot: cardanoConfig.ogmios.initialSlot,
-            connectionRetrialInterval:
-              cardanoConfig.ogmios.connectionRetrialInterval * 1000,
           },
           loggers.scannerLogger
         );
