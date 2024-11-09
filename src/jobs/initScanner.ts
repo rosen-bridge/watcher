@@ -11,6 +11,7 @@ const {
   cardano: cardanoConfig,
   bitcoin: bitcoinConfig,
   ethereum: ethereumConfig,
+  binance: binanceConfig,
 } = allConfig;
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
@@ -56,6 +57,12 @@ export const scannerInit = () => {
     case Constants.ETHEREUM_CHAIN_NAME:
       scanningJob(
         ethereumConfig.rpc!.interval,
+        scanner.observationScanner as EvmRpcScanner
+      ).then(() => null);
+      break;
+    case Constants.BINANCE_CHAIN_NAME:
+      scanningJob(
+        binanceConfig.rpc!.interval,
         scanner.observationScanner as EvmRpcScanner
       ).then(() => null);
       break;

@@ -17,7 +17,7 @@ import {
   ErgoNodeScannerHealthCheck,
   BitcoinEsploraScannerHealthCheck,
   BitcoinRPCScannerHealthCheck,
-  EthereumRPCScannerHealthCheck,
+  EvmRPCScannerHealthCheck,
 } from '@rosen-bridge/scanner-sync-check';
 import {
   ExplorerWidHealthCheckParam,
@@ -30,6 +30,7 @@ import { DiscordNotification } from '@rosen-bridge/discord-notification';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import {
+  BINANCE_CHAIN_NAME,
   BITCOIN_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
   ERGO_DECIMALS,
@@ -81,10 +82,6 @@ class HealthCheckSingleton {
             windowDuration:
               getConfig().notification.hasBeenUnknownForAWhileWindowDuration,
           },
-          isStillUnhealthy: {
-            windowDuration:
-              getConfig().notification.isStillUnhealthyWindowDuration,
-          },
         },
       };
     }
@@ -111,6 +108,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === ETHEREUM_CHAIN_NAME) {
       this.registerEthereumHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === BINANCE_CHAIN_NAME) {
+      this.registerBinanceHealthCheckParams();
     }
   }
 
@@ -249,7 +249,8 @@ class HealthCheckSingleton {
    * Registers all ethereum check params
    */
   registerEthereumHealthCheckParams = () => {
-    const ethereumRpcScannerSyncCheck = new EthereumRPCScannerHealthCheck(
+    const ethereumRpcScannerSyncCheck = new EvmRPCScannerHealthCheck(
+      ETHEREUM_CHAIN_NAME,
       this.observingNetworkLastBlock(scanner.observationScanner.name()),
       scanner.observationScanner.name(),
       getConfig().healthCheck.ethereumScannerWarnDiff,
@@ -259,6 +260,23 @@ class HealthCheckSingleton {
       getConfig().ethereum.rpc!.timeout
     );
     this.healthCheck.register(ethereumRpcScannerSyncCheck);
+  };
+
+  /**
+   * Registers all binance check params
+   */
+  registerBinanceHealthCheckParams = () => {
+    const binanceRpcScannerSyncCheck = new EvmRPCScannerHealthCheck(
+      BINANCE_CHAIN_NAME,
+      this.observingNetworkLastBlock(scanner.observationScanner.name()),
+      scanner.observationScanner.name(),
+      getConfig().healthCheck.binanceScannerWarnDiff,
+      getConfig().healthCheck.binanceScannerCriticalDiff,
+      getConfig().binance.rpc!.url,
+      getConfig().binance.rpc!.authToken,
+      getConfig().binance.rpc!.timeout
+    );
+    this.healthCheck.register(binanceRpcScannerSyncCheck);
   };
 
   /**
