@@ -13,7 +13,7 @@ index 776a528..a231bf4 100644
                  from: BITCOIN_NATIVE_TOKEN,
                  to: this.tokens.getID(wrappedBtc[0], toChain),
 -                amount: satoshiAmount.toString(),
-+                amount: parts[0] === '0' ? '' : parts[0] + part1,
++                amount: (parts[0] === '0' ? '' : parts[0]) + part1,
              };
          }
          else {
