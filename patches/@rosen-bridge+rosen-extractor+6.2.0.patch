@@ -1,0 +1,19 @@
+diff --git a/node_modules/@rosen-bridge/rosen-extractor/dist/lib/getRosenData/bitcoin/BitcoinRpcRosenExtractor.js b/node_modules/@rosen-bridge/rosen-extractor/dist/lib/getRosenData/bitcoin/BitcoinRpcRosenExtractor.js
+index 776a528..a231bf4 100644
+--- a/node_modules/@rosen-bridge/rosen-extractor/dist/lib/getRosenData/bitcoin/BitcoinRpcRosenExtractor.js
++++ b/node_modules/@rosen-bridge/rosen-extractor/dist/lib/getRosenData/bitcoin/BitcoinRpcRosenExtractor.js
+@@ -90,11 +90,12 @@ export class BitcoinRpcRosenExtractor extends AbstractRosenDataExtractor {
+             [this.tokens.getIdKey(BITCOIN_CHAIN)]: BITCOIN_NATIVE_TOKEN,
+         });
+         if (wrappedBtc.length > 0 && Object.hasOwn(wrappedBtc[0], toChain)) {
+-            const satoshiAmount = Math.floor(box.value * 100_000_000);
++            const parts = box.value.toString().split('.');
++            const part1 = ((parts[1] ?? '') + '0'.repeat(8)).substring(0, 8);
+             return {
+                 from: BITCOIN_NATIVE_TOKEN,
+                 to: this.tokens.getID(wrappedBtc[0], toChain),
+-                amount: satoshiAmount.toString(),
++                amount: parts[0] === '0' ? '' : parts[0] + part1,
+             };
+         }
+         else {
