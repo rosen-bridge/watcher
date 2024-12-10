@@ -10,6 +10,10 @@ database:
   name: 'POSTGRES_DB'
 ergo:
   mnemonic: 'MNEMONIC'
+bitcoin:
+  rpc:
+    username: 'BITCOIN_RPC_USERNAME'
+    password: 'BITCOIN_RPC_PASSWORD'
 cardano:
   koios:
     authToken: 'KOIOS_AUTH_TOKEN'
