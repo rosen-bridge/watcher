@@ -335,8 +335,7 @@ export class ErgoUtils {
     const min = BigInt(configs[2]);
     const percentage = parseInt(configs[1]);
     const watcherCount = Number(R5.to_i64().to_str());
-    const formula =
-      min + BigInt(Math.ceil((percentage * (watcherCount - 1)) / 100));
+    const formula = min + BigInt(Math.floor((percentage * watcherCount) / 100));
     return max < formula ? max : formula;
   };
 
