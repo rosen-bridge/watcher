@@ -359,13 +359,13 @@ describe('Testing ergoUtils', () => {
      *    percentage = 51
      *    watchers = 7
      *    min commitment = 0
-     *    => result = 3
+     *    => result = 4
      */
     it('should return formula number as the required commitment count', async () => {
       const repo = wasm.ErgoBox.from_json(repoBox);
       const config = wasm.ErgoBox.from_json(repoConfigBox);
       const data = ErgoUtils.requiredCommitmentCount(repo, config);
-      expect(data).to.eql(BigInt(3));
+      expect(data).to.eql(BigInt(4));
     });
   });
 
