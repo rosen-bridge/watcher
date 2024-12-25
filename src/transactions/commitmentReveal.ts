@@ -140,11 +140,9 @@ export class CommitmentReveal {
           repoConfigBox
         );
         logger.info(
-          `Valid commitments: [${validCommitments.length}/${
-            requiredCommitments + 1n
-          }]`
+          `Valid commitments: [${validCommitments.length}/${requiredCommitments}]`
         );
-        if (BigInt(validCommitments.length) > requiredCommitments) {
+        if (BigInt(validCommitments.length) >= requiredCommitments) {
           const commitmentBoxes = await Promise.all(
             validCommitments.map(async (commitment) => {
               return await ErgoNetwork.unspentErgoBoxById(commitment.boxId);
