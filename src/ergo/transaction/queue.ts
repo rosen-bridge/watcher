@@ -207,9 +207,14 @@ export class Queue {
       try {
         await this.processTx(tx, currentHeight);
       } catch (e) {
-        logger.warn(
-          `An error occurred while processing tx [${tx.txId}] with type ${tx.type}: ${e.message} - ${e.stack}`
-        );
+        if (e instanceof Error)
+          logger.warn(
+            `An error occurred while processing tx [${tx.txId}] with type ${tx.type}: ${e.message} - ${e.stack}`
+          );
+        else
+          logger.warn(
+            `An unknown problem occurred while processing tx [${tx.txId}] with type ${tx.type}: ${e}`
+          );
       }
     }
     logger.info('Transactions check job is done', { count: txs.length });
