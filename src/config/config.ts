@@ -109,7 +109,6 @@ class Config {
   minimumFeeUpdateInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
-  redeemSwapEnabled: boolean;
   rosenConfigPath: string;
   rosenTokensPath: string;
   apiPort: number;
@@ -220,7 +219,6 @@ class Config {
     this.observationValidThreshold = getRequiredNumber(
       'observation.validThreshold'
     );
-    this.redeemSwapEnabled = config.get<boolean>('redeemSwapEnabled');
     this.tokenNameInterval = getRequiredNumber('ergo.interval.tokenName');
     this.revenueInterval = getRequiredNumber('ergo.interval.revenue');
     if (this.ergoInterval <= this.revenueInterval) {
