@@ -137,7 +137,6 @@ healthCheck:
     duration: 600 # log duration time check (in seconds)
     maxAllowedErrorCount: 1 # maximum allowed error log lines
     maxAllowedWarnCount: 10 # maximum allowed warn log lines
-redeemSwapEnabled: true # if set true when no permit left, system automatically redeem new commitments and commit again for old observations
 rewardCollection:
   threshold: 100000 # RSN threshold for reward collection
   interval: 600 # reward collection interval in seconds

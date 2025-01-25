@@ -16,9 +16,6 @@ const redeemJob = async () => {
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
     if (scannerSyncStatus !== HealthStatusLevel.BROKEN) {
       await commitmentRedeemObj.job();
-      if (getConfig().general.redeemSwapEnabled) {
-        await commitmentRedeemObj.deadlockJob();
-      }
     } else {
       logger.info(
         'Scanner is not synced with network, skipping commitment redeem job'
