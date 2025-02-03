@@ -18,7 +18,7 @@ import {
   PermitEntity,
   CollateralEntity,
 } from '@rosen-bridge/watcher-data-extractor';
-import { DataSource } from 'typeorm';
+import { DataSource } from '@rosen-bridge/extended-typeorm';
 import { getConfig } from '../src/config/config';
 
 import { ObservationStatusEntity } from '../src/database/entities/observationStatusEntity';
