@@ -10,6 +10,10 @@ database:
   name: 'POSTGRES_DB'
 ergo:
   mnemonic: 'MNEMONIC'
+bitcoin:
+  rpc:
+    username: 'BITCOIN_RPC_USERNAME'
+    password: 'BITCOIN_RPC_PASSWORD'
 cardano:
   koios:
     authToken: 'KOIOS_AUTH_TOKEN'
@@ -18,4 +22,7 @@ cardano:
 ethereum:
   rpc:
     authToken: 'ETHEREUM_RPC_AUTH_TOKEN'
+binance:
+  rpc:
+    authToken: 'BINANCE_RPC_AUTH_TOKEN'
 overrideLokiBasicAuth: 'OVERRIDE_LOKI_BASIC_AUTH'

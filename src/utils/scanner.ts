@@ -30,7 +30,10 @@ import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
 import * as Constants from '../config/constants';
 import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
-import { EthereumRpcObservationExtractor } from '@rosen-bridge/evm-observation-extractor';
+import {
+  EthereumRpcObservationExtractor,
+  BinanceRpcObservationExtractor,
+} from '@rosen-bridge/evm-observation-extractor';
 
 const allConfig = getConfig();
 const {
@@ -40,6 +43,7 @@ const {
   cardano: cardanoConfig,
   bitcoin: bitcoinConfig,
   ethereum: ethereumConfig,
+  binance: binanceConfig,
 } = allConfig;
 
 /**
@@ -91,6 +95,9 @@ class CreateScanner {
         break;
       case Constants.ETHEREUM_CHAIN_NAME:
         this.createEthereumScanner();
+        break;
+      case Constants.BINANCE_CHAIN_NAME:
+        this.createBinanceScanner();
         break;
     }
     if (!this.observationScanner)
@@ -154,6 +161,8 @@ class CreateScanner {
     const eventTriggerExtractor = new EventTriggerExtractor(
       Constants.TRIGGER_EXTRACTOR_NAME,
       dataSource,
+      config.scannerType,
+      networkUrl,
       rosenConfig.eventTriggerAddress,
       rosenConfig.RWTId,
       rosenConfig.watcherPermitAddress,
@@ -196,8 +205,6 @@ class CreateScanner {
             dataSource: dataSource,
             initialHash: cardanoConfig.ogmios.initialHash,
             initialSlot: cardanoConfig.ogmios.initialSlot,
-            connectionRetrialInterval:
-              cardanoConfig.ogmios.connectionRetrialInterval * 1000,
           },
           loggers.scannerLogger
         );
@@ -304,6 +311,32 @@ class CreateScanner {
         );
 
         const observationExtractor = new EthereumRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          tokensConfig.tokens,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      }
+    }
+  };
+
+  private createBinanceScanner = () => {
+    if (!this.observationScanner) {
+      if (binanceConfig.rpc) {
+        this.observationScanner = new EvmRpcScanner(
+          Constants.BINANCE_CHAIN_NAME,
+          {
+            RpcUrl: binanceConfig.rpc.url,
+            timeout: binanceConfig.rpc.timeout * 1000,
+            initialHeight: binanceConfig.initialHeight,
+            dataSource: dataSource,
+          },
+          loggers.scannerLogger,
+          binanceConfig.rpc.authToken
+        );
+
+        const observationExtractor = new BinanceRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
           tokensConfig.tokens,

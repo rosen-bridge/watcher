@@ -17,6 +17,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.CARDANO_CHAIN_NAME,
   Constants.BITCOIN_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
+  Constants.BINANCE_CHAIN_NAME,
 ];
 
 interface ConfigType {
@@ -24,6 +25,7 @@ interface ConfigType {
   cardano: CardanoConfig;
   bitcoin: BitcoinConfig;
   ethereum: EthereumConfig;
+  binance: BinanceConfig;
   general: Config;
   rosen: RosenConfig;
   token: TokensConfig;
@@ -107,7 +109,6 @@ class Config {
   minimumFeeUpdateInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
-  redeemSwapEnabled: boolean;
   rosenConfigPath: string;
   rosenTokensPath: string;
   apiPort: number;
@@ -218,7 +219,6 @@ class Config {
     this.observationValidThreshold = getRequiredNumber(
       'observation.validThreshold'
     );
-    this.redeemSwapEnabled = config.get<boolean>('redeemSwapEnabled');
     this.tokenNameInterval = getRequiredNumber('ergo.interval.tokenName');
     this.revenueInterval = getRequiredNumber('ergo.interval.revenue');
     if (this.ergoInterval <= this.revenueInterval) {
@@ -452,6 +452,35 @@ class EthereumConfig {
   }
 }
 
+class BinanceConfig {
+  type: string;
+  initialHeight: number;
+  rpc?: {
+    url: string;
+    timeout: number;
+    interval: number;
+    authToken?: string;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('binance.type');
+    if (network === Constants.BINANCE_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('binance.initial.height');
+      if (this.type == Constants.EVM_RPC_TYPE) {
+        const url = getRequiredString('binance.rpc.url');
+        const timeout = getRequiredNumber('binance.rpc.timeout');
+        const interval = getRequiredNumber('binance.rpc.interval');
+        const authToken = getOptionalString('binance.rpc.authToken', undefined);
+        this.rpc = { url, timeout, interval, authToken };
+      } else {
+        throw new Error(
+          `Improperly configured. binance configuration type is invalid available choices are '${Constants.EVM_RPC_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class DatabaseConfig {
   type: string;
   path = '';
@@ -518,6 +547,8 @@ class HealthCheckConfig {
   bitcoinScannerCriticalDiff: number;
   ethereumScannerWarnDiff: number;
   ethereumScannerCriticalDiff: number;
+  binanceScannerWarnDiff: number;
+  binanceScannerCriticalDiff: number;
   ergoNodeMaxHeightDiff: number;
   ergoNodeMaxBlockTime: number;
   ergoNodeMinPeerCount: number;
@@ -573,6 +604,12 @@ class HealthCheckConfig {
     this.ethereumScannerCriticalDiff = getRequiredNumber(
       'healthCheck.ethereumScanner.criticalDifference'
     );
+    this.binanceScannerWarnDiff = getRequiredNumber(
+      'healthCheck.binanceScanner.warnDifference'
+    );
+    this.binanceScannerCriticalDiff = getRequiredNumber(
+      'healthCheck.binanceScanner.criticalDifference'
+    );
     this.permitWarnCommitmentCount = getRequiredNumber(
       'healthCheck.permit.warnCommitmentCount'
     );
@@ -599,6 +636,7 @@ const getConfig = (): ConfigType => {
     const cardano = new CardanoConfig(general.networkWatcher);
     const bitcoin = new BitcoinConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
+    const binance = new BinanceConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
       general.networkType,
@@ -612,6 +650,7 @@ const getConfig = (): ConfigType => {
       cardano,
       bitcoin,
       ethereum,
+      binance,
       logger,
       general,
       rosen,

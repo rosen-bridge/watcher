@@ -9,7 +9,6 @@ import { TxType } from '../database/entities/txEntity';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import { ERGO_CHAIN_NAME } from '../config/constants';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -183,82 +182,5 @@ export class CommitmentRedeem {
     logger.info(`Commitment redeem job is done`, {
       count: commitments.length,
     });
-  };
-
-  /**
-   * Redeem the last unspent commitment if there is a missed uncommitted observation
-   */
-  deadlockJob = async () => {
-    const activeTx =
-      await this.watcherUtils.dataBase.getActiveTransactionsByType([
-        TxType.REDEEM,
-        TxType.COMMITMENT,
-      ]);
-    if (activeTx.length > 0) {
-      logger.debug('Has unconfirmed commitment or redeem transactions');
-      return;
-    }
-    const tokenMap = getConfig().token.tokenMap;
-    const rwtPerCommitment = tokenMap.unwrapAmount(
-      getConfig().rosen.RWTId,
-      await Transaction.getInstance().getRequiredPermitsCountPerEvent(),
-      ERGO_CHAIN_NAME
-    ).amount;
-    const availablePermits =
-      ((await ErgoUtils.getPermitCount(getConfig().rosen.RWTId)) - 1n) /
-      rwtPerCommitment;
-    if (availablePermits >= 1) {
-      logger.debug(
-        `Still have [${availablePermits}] available permits, aborting last commit redeem job`
-      );
-      return;
-    }
-    if (!Transaction.watcherWID) {
-      logger.warn('Watcher WID is not set. Cannot run commitment redeem job.');
-      return;
-    }
-    try {
-      if (!(await this.watcherUtils.hasMissedObservation())) {
-        logger.debug('There is no missed observations');
-        return;
-      }
-      const commitment = await this.watcherUtils.lastCommitment();
-      logger.info(`Redeeming last commitment with boxId [${commitment.boxId}]`);
-      const WID = Transaction.watcherWID;
-      const WIDBox = (await this.boxes.getWIDBox(WID))[0];
-      logger.info(`Using WID Box [${WIDBox.box_id().to_str()}]`);
-      const requiredValue =
-        BigInt(getConfig().general.fee) +
-        BigInt(getConfig().general.minBoxValue) * 2n;
-      const feeBoxes: wasm.ErgoBox[] = [];
-      const widBoxValue = BigInt(WIDBox.value().as_i64().to_str());
-      if (widBoxValue < requiredValue) {
-        logger.debug(
-          `Require more than WID box Ergs. Total: [${widBoxValue}], Required: [${requiredValue}]`
-        );
-        feeBoxes.push(
-          ...(await this.boxes.getUserPaymentBox(requiredValue, [
-            WIDBox.box_id().to_str(),
-          ]))
-        );
-        logger.debug(
-          `Using extra fee boxes in commitment redeem tx: [${feeBoxes.map(
-            (box) => box.box_id().to_str()
-          )}] with extra erg [${ErgoUtils.getBoxValuesSum(feeBoxes)}]`
-        );
-      }
-      await this.redeemCommitmentTx(
-        WID,
-        WIDBox,
-        decodeSerializedBox(commitment.boxSerialized),
-        feeBoxes,
-        requiredValue
-      );
-    } catch (e) {
-      logger.warn(
-        `Skipping the last commitment redeem due to occurred error: ${e.message} - ${e.stack}`
-      );
-    }
-    logger.info(`Resolve deadlock job is done`);
   };
 }
