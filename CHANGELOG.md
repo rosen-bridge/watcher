@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 4.0.3
+
+### Patch Changes
+
+- Patch JS floating error in BitcoinRpcRosenExtractor
+
 ## 4.0.2
 
 ### Patch Changes
