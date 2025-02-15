@@ -43,7 +43,7 @@ const config: RollupOptions = {
      * This plugin is used to externalize all node native modules
      */
     externals({
-      deps: false,
+      deps: true,
       devDeps: false,
       peerDeps: false,
       optDeps: false,
