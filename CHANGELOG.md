@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- integrate binance
+- Integrate binance
 
 ### Patch Changes
 
