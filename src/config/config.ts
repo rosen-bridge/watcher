@@ -154,7 +154,7 @@ class Config {
         const randomMnemonic = generateMnemonic(160);
         console.warn(
           'ImproperlyConfigured. ergo.mnemonic does not exist in the config.' +
-            `You can use {${randomMnemonic}} or generate one by yourself`
+          `You can use {${randomMnemonic}} or generate one by yourself`
         );
         throw new SecretError(
           `ImproperlyConfigured. ergo.mnemonic doesn't set in config file.`
@@ -663,4 +663,9 @@ const getConfig = (): ConfigType => {
   return internalConfig;
 };
 
-export { getConfig };
+const initializeTokens = async () => {
+  const config = getConfig();
+  await config.token.initialize();
+};
+
+export { getConfig, initializeTokens };

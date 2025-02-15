@@ -430,7 +430,7 @@ export class ErgoUtils {
   static tokenDetailByTokenMap = (tokenId: string, chain: string) => {
     const tokenMap = getConfig().token.tokenMap;
     const tokenDetail = tokenMap.search(chain, {
-      [tokenMap.getIdKey(chain)]: tokenId,
+      tokenId,
     });
     let name = 'Unsupported token';
     let decimals = 0;

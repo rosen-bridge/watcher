@@ -6,5 +6,8 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 if (process.env.NODE_ENV === undefined || process.env.NODE_ENV !== 'test') {
-  init().then(() => null);
+  init().catch((e) => {
+    console.error('Failed to initialize:', e);
+    process.exit(1);
+  });
 }

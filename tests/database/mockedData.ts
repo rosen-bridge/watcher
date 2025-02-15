@@ -123,8 +123,8 @@ spentPermitEntity.txId = 'txId2';
 
 export const plainBox = new BoxEntity();
 plainBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
-plainBox.createBlock = 'blockID';
-plainBox.creationHeight = 100;
+plainBox.block = 'blockID';
+plainBox.height = 100;
 plainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 plainBox.boxId = 'boxId';
 plainBox.serialized =
@@ -132,8 +132,8 @@ plainBox.serialized =
 
 export const spentPlainBox = new BoxEntity();
 spentPlainBox.address = 'address';
-spentPlainBox.createBlock = 'blockID';
-spentPlainBox.creationHeight = 100;
+spentPlainBox.block = 'blockID';
+spentPlainBox.height = 100;
 spentPlainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 spentPlainBox.boxId = 'boxId2';
 spentPlainBox.serialized = 'box2';
@@ -141,8 +141,8 @@ spentPlainBox.spendBlock = 'blockHash';
 
 export const addressValidBox = new BoxEntity();
 addressValidBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
-addressValidBox.createBlock = 'blockID';
-addressValidBox.creationHeight = 100;
+addressValidBox.block = 'blockID';
+addressValidBox.height = 100;
 addressValidBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 addressValidBox.boxId = 'boxId3';
 addressValidBox.serialized =
@@ -186,7 +186,7 @@ eventTriggerEntity.block = 'blockID';
 eventTriggerEntity.height = 100;
 eventTriggerEntity.extractor = 'extractor';
 eventTriggerEntity.boxId = 'boxId';
-eventTriggerEntity.boxSerialized = 'box';
+eventTriggerEntity.serialized = 'box';
 eventTriggerEntity.amount = '100';
 eventTriggerEntity.networkFee = '1000';
 eventTriggerEntity.bridgeFee = '200';
@@ -210,7 +210,7 @@ newEventTriggerEntity.block = 'blockID2';
 newEventTriggerEntity.height = 100;
 newEventTriggerEntity.extractor = 'extractor';
 newEventTriggerEntity.boxId = 'boxId2';
-newEventTriggerEntity.boxSerialized = 'box2';
+newEventTriggerEntity.serialized = 'box2';
 newEventTriggerEntity.amount = '100';
 newEventTriggerEntity.networkFee = '1000';
 newEventTriggerEntity.bridgeFee = '200';
@@ -480,7 +480,7 @@ export const commitmentTxJson = {
       value: 1100000,
       index: 0,
       globalIndex: 539664,
-      creationHeight: 249262,
+      height: 249262,
       settlementHeight: 249264,
       ergoTree:
         '10130400040004040400040204000e20a40b86c663fbbfefa243c9c6ebbc5690fc4e385f15b44c49ba469c91c5af0f480404040004000400010104020400040004000e205977b8061ddad79d59af7c01d896bb848cdac3d7ff40478aa78eb3eec50065dc05020101d807d601b2a5730000d6028cb2db6308a773010001d603aeb5b4a57302b1a5d901036391b1db630872037303d9010363aedb63087203d901054d0e938c7205017202d604e4c6a7041ad605b2a5730400d606db63087205d607ae7206d901074d0e938c720701720295938cb2db63087201730500017306d196830301ef7203938cb2db6308b2a473070073080001b2720473090095720796830201938cb27206730a0001720293c27205c2a7730bd801d608c2a7d196830501ef720393c27201720893e4c67201041a7204938cb2db6308b2a4730c00730d0001b27204730e00957207d801d609b27206730f0096830701938c720901720293cbc272057310e6c67205051ae6c67205060e93e4c67205070ecb720893e4c67205041a7204938c72090273117312',
@@ -524,7 +524,7 @@ export const commitmentTxJson = {
       value: 1100000,
       index: 1,
       globalIndex: 539665,
-      creationHeight: 249262,
+      height: 249262,
       settlementHeight: 249264,
       ergoTree:
         '101c04000e209ccf1988673407c6b4484ff906e3d25792b2004ff1baebd79ee032dc0bfe275f04000200020004020400010004000400040004000400040604040402050205c8010500040204000400020004000400040204000400d80bd601b2a4730000d6027301d60393cbc272017202d604e4c6a7041ad6059572037201b2a5730200d606e4c67205041ad607c67205051ad608e67207d609957208b0e472078301027303d901093c0e0eb38c7209018c7209028301027304d60ab472097305b17209d60bb2a5730600957203d801d60cb2b5a5d9010c63d801d60ec6720c041a95e6720e93e4720e72047307730800d19683040193cbc2720ce4c6a7070e938cb2db6308720c730900018cb2db6308a7730a0001efae7206d9010d0e93720483010e720d93cbb3720ab27204730b00e4c6a7060ed801d60ccbc2720b9593720c7202d806d60db5a4d9010d6393c2a7c2720dd60eb1720dd60fb2db6501fe730c00d610e4c6720f0611d611b27210730d00d6129ab27210730e009d9cb27210730f00997eb1e4c6720f041a0573107311d19683080192c1720bb0ad720dd9011363c172137312d90113599a8c7213018c72130293b1b5720dd901136393e4c67213041a72047313ae7206d901130e9383010e7213720493e4c67205060ee4c6a7070e93b17206720e93cbb3720ab27204731400e4c6a7060e93e4c6a7051a83010e957208cbb2e472077315008301027316917e720e05958f7211721272117212d19683050193c5a7c57201938cb2db6308720b731700018cb2db6308a77318000193e4c6720b041a7204938cb2db6308b2a4731900731a0001b27204731b0093720ce4c6a7070e',
@@ -583,7 +583,7 @@ export const commitmentTxJson = {
       value: 3400000,
       index: 2,
       globalIndex: 539666,
-      creationHeight: 249262,
+      height: 249262,
       settlementHeight: 249264,
       ergoTree:
         '0008cd028bcc85fa22006fa13767ab00af28ae0b2389d576fb59cfd0e46865e0449eeb8a',
@@ -622,7 +622,7 @@ export const commitmentTxJson = {
       value: 1100000,
       index: 3,
       globalIndex: 539667,
-      creationHeight: 249262,
+      height: 249262,
       settlementHeight: 249264,
       ergoTree:
         '1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304',
@@ -646,7 +646,7 @@ export const permitBox = {
   transactionId:
     '52d1c79bbf8a3137c56cc18410b41be931e95e2ce71f45864a58e1566e9b700a',
   outputIndex: 0,
-  creationHeight: 249262,
+  height: 249262,
   ergoTree:
     '10130400040004040400040204000e20a40b86c663fbbfefa243c9c6ebbc5690fc4e385f15b44c49ba469c91c5af0f480404040004000400010104020400040004000e205977b8061ddad79d59af7c01d896bb848cdac3d7ff40478aa78eb3eec50065dc05020101d807d601b2a5730000d6028cb2db6308a773010001d603aeb5b4a57302b1a5d901036391b1db630872037303d9010363aedb63087203d901054d0e938c7205017202d604e4c6a7041ad605b2a5730400d606db63087205d607ae7206d901074d0e938c720701720295938cb2db63087201730500017306d196830301ef7203938cb2db6308b2a473070073080001b2720473090095720796830201938cb27206730a0001720293c27205c2a7730bd801d608c2a7d196830501ef720393c27201720893e4c67201041a7204938cb2db6308b2a4730c00730d0001b27204730e00957207d801d609b27206730f0096830701938c720901720293cbc272057310e6c67205051ae6c67205060e93e4c67205070ecb720893e4c67205041a7204938c72090273117312',
   address:
