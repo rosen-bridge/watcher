@@ -1,5 +1,18 @@
 # @rosen-bridge/watcher
 
+## 4.1.0
+
+### Minor Changes
+
+- integrate binance
+
+### Patch Changes
+
+- Add environment variables for bitcoin rpc connection
+- Use @rosen-bridge/extended-typeorm to prevent db transaction conflicts
+- Fix commitment redeem job bug
+- Fix required commitment count to match with the smart contract computations
+
 ## 4.0.3
 
 ### Patch Changes
