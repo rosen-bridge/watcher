@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 4.1.1
+
+### Patch Changes
+
+- Patch @rosen-bridge/rosen-extractor to improve EVM extractor speed
+
 ## 4.1.0
 
 ### Minor Changes
