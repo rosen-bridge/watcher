@@ -5,6 +5,7 @@
 ### Patch Changes
 
 - Patch @rosen-bridge/rosen-extractor to improve EVM extractor speed
+- Add event trigger initialization config and turn it off by default
 
 ## 4.1.0
 
