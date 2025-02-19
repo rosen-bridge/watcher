@@ -6,7 +6,8 @@
 
 - Patch @rosen-bridge/rosen-extractor to improve EVM extractor speed
 - Add event trigger initialization config and turn it off by default
-- Patch @rosen-bridge/abstract-extractor initialization to be stateful and resilient to network issues and log the progress
+- Patch @rosen-bridge/abstract-extractor initialization to be stateful and resilient to network issues
+- Patch @rosen-bridge/scanner-sync-check to return proper message when there is no block in database
 
 ## 4.1.0
 
