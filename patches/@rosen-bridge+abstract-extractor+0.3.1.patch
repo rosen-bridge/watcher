@@ -1,0 +1,51 @@
+diff --git a/node_modules/@rosen-bridge/abstract-extractor/dist/constants.js b/node_modules/@rosen-bridge/abstract-extractor/dist/constants.js
+index dfb054d..8c35677 100644
+--- a/node_modules/@rosen-bridge/abstract-extractor/dist/constants.js
++++ b/node_modules/@rosen-bridge/abstract-extractor/dist/constants.js
+@@ -1,4 +1,4 @@
+ export const API_LIMIT = 100;
+-export const RETRIAL_COUNT = 10;
++export const RETRIAL_COUNT = 20;
+ export const DB_CHUNK_SIZE = 100;
+ //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uc3RhbnRzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vbGliL2NvbnN0YW50cy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxNQUFNLENBQUMsTUFBTSxTQUFTLEdBQUcsR0FBRyxDQUFDO0FBQzdCLE1BQU0sQ0FBQyxNQUFNLGFBQWEsR0FBRyxFQUFFLENBQUM7QUFDaEMsTUFBTSxDQUFDLE1BQU0sYUFBYSxHQUFHLEdBQUcsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBjb25zdCBBUElfTElNSVQgPSAxMDA7XG5leHBvcnQgY29uc3QgUkVUUklBTF9DT1VOVCA9IDEwO1xuZXhwb3J0IGNvbnN0IERCX0NIVU5LX1NJWkUgPSAxMDA7XG4iXX0=
+\ No newline at end of file
+diff --git a/node_modules/@rosen-bridge/abstract-extractor/dist/ergo/initializable/AbstractInitializable.js b/node_modules/@rosen-bridge/abstract-extractor/dist/ergo/initializable/AbstractInitializable.js
+index 0bc6ef4..9363b60 100644
+--- a/node_modules/@rosen-bridge/abstract-extractor/dist/ergo/initializable/AbstractInitializable.js
++++ b/node_modules/@rosen-bridge/abstract-extractor/dist/ergo/initializable/AbstractInitializable.js
+@@ -61,6 +61,7 @@ export class AbstractInitializableErgoExtractor extends AbstractErgoExtractor {
+                         height: fromHeight,
+                     });
+                 }
++                this.logger.info(`Initialization is in progress for ${this.getId()}. Please wait, as the procedure may take some time. Processed transactions up to height ${toHeight}`)
+                 fromHeight = toHeight + 1;
+                 toHeight = initialBlock.height;
+             }
+@@ -80,13 +81,14 @@ export class AbstractInitializableErgoExtractor extends AbstractErgoExtractor {
+      */
+     initializeWithNode = async (initialBlock) => {
+         const txCountBeforeInit = await this.getTotalTxCount();
++        let offset = 0, total = 1, round = 1;
+         await this.initWithRetrial(async () => {
+             // Repeat the whole process twice to cover all spent boxes
+             // After round 1 all boxes have been saved and processed once
+             // After round 2 spending information of all stored boxes are updated successfully
+-            for (let round = 0; round <= 1; round++) {
++
++            while (round <= 2) {
+                 this.logger.debug(`Starting round ${round} of initialization`);
+-                let offset = 0, total = 1;
+                 while (offset < total) {
+                     const response = await this.network.getAddressTransactionsWithOffsetLimit(this.address, offset, API_LIMIT);
+                     total = response.total;
+@@ -95,7 +97,10 @@ export class AbstractInitializableErgoExtractor extends AbstractErgoExtractor {
+                     if (txs.length > 0)
+                         await this.processTransactionBatch(txs);
+                     offset += API_LIMIT;
++                    this.logger.info(`Initialization is in progress for ${this.getId()}. Please wait, as the procedure may take some time. Processed ${offset}/${total} transactions in round ${round}/2`)
+                 }
++                round++;
++                offset = 0; // next round initial offset
+             }
+         });
+         const txCountAfterInit = await this.getTotalTxCount();
