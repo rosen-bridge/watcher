@@ -1,0 +1,30 @@
+diff --git a/node_modules/@rosen-bridge/abstract-extractor/dist/ergo/initializable/AbstractInitializable.js b/node_modules/@rosen-bridge/abstract-extractor/dist/ergo/initializable/AbstractInitializable.js
+index 0bc6ef4..795ae3c 100644
+--- a/node_modules/@rosen-bridge/abstract-extractor/dist/ergo/initializable/AbstractInitializable.js
++++ b/node_modules/@rosen-bridge/abstract-extractor/dist/ergo/initializable/AbstractInitializable.js
+@@ -80,13 +80,14 @@ export class AbstractInitializableErgoExtractor extends AbstractErgoExtractor {
+      */
+     initializeWithNode = async (initialBlock) => {
+         const txCountBeforeInit = await this.getTotalTxCount();
++        let offset = 0, total = 1, round = 1;
+         await this.initWithRetrial(async () => {
+             // Repeat the whole process twice to cover all spent boxes
+             // After round 1 all boxes have been saved and processed once
+             // After round 2 spending information of all stored boxes are updated successfully
+-            for (let round = 0; round <= 1; round++) {
++
++            while (round <= 2) {
+                 this.logger.debug(`Starting round ${round} of initialization`);
+-                let offset = 0, total = 1;
+                 while (offset < total) {
+                     const response = await this.network.getAddressTransactionsWithOffsetLimit(this.address, offset, API_LIMIT);
+                     total = response.total;
+@@ -96,6 +97,8 @@ export class AbstractInitializableErgoExtractor extends AbstractErgoExtractor {
+                         await this.processTransactionBatch(txs);
+                     offset += API_LIMIT;
+                 }
++                round++;
++                offset = 0; // next round initial offset
+             }
+         });
+         const txCountAfterInit = await this.getTotalTxCount();
