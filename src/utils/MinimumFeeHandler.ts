@@ -27,11 +27,11 @@ class MinimumFeeHandler {
 
     MinimumFeeHandler.instance = new MinimumFeeHandler();
     logger.debug('MinimumFeeHandler instantiated');
-    const ergoTokenIdKey = configs.token.tokenMap.getIdKey(ERGO_CHAIN_NAME);
 
-    const promises = tokens.tokens.map((chainToken) => {
+
+    const promises = tokens.map((chainToken) => {
       const token = chainToken[ERGO_CHAIN_NAME];
-      const tokenId = token[ergoTokenIdKey];
+      const tokenId = token.tokenId;
 
       const { networkType, url } =
         configs.general.scannerType === NODE_TYPE
@@ -77,8 +77,7 @@ class MinimumFeeHandler {
 
     const tokenMap = getConfig().token.tokenMap;
     const token = tokenMap.search(observation.fromChain, {
-      [tokenMap.getIdKey(observation.fromChain)]:
-        observation.sourceChainTokenId,
+      tokenId: observation.sourceChainTokenId,
     });
     if (token.length === 0)
       throw Error(

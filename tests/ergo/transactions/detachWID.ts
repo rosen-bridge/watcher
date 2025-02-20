@@ -5,7 +5,7 @@ import { WatcherDataBase } from '../../../src/database/models/watcherModel';
 import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import { TransactionUtils } from '../../../src/utils/watcherUtils';
 import chai from 'chai';
-import { getConfig } from '../../../src/config/config';
+import { getConfig, initializeTokens } from '../../../src/config/config';
 import { DetachWID } from '../../../src/transactions/detachWID';
 import { ErgoUtils } from '../../../src/ergo/utils';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
@@ -34,11 +34,12 @@ describe('DetachWID', () => {
       boxes,
       watcherDb
     );
+    await initializeTokens()
   });
 
   afterEach(() => {
     sinon.restore();
-    chai.spy.restore(txUtils);
+    chai.spy.restore();
   });
 
   /**

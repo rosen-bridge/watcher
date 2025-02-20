@@ -5,6 +5,7 @@ import express, { Router } from 'express';
 import { default as addressRouter } from '../../src/api/address';
 import request from 'supertest';
 import { initWatcherDB } from '../../src/init';
+import { getConfig, initializeTokens } from '../../src/config/config';
 import JSONBigInt from 'json-bigint';
 import {
   validBox0Token,
@@ -29,6 +30,7 @@ describe('addressRouter', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM, true);
       initWatcherDB(ORM.DB);
+      await initializeTokens()
     });
 
     /**

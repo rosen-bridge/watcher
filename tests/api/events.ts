@@ -12,6 +12,7 @@ import {
 } from '../database/mockedData';
 import { spentEventTrigger } from '../ergo/statistics/mockUtils';
 import { events } from './testDataEvents';
+import { initializeTokens } from '../../src/config/config';
 
 chai.use(spies);
 
@@ -28,6 +29,7 @@ describe('eventsRouter', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
+      await initializeTokens()
     });
 
     /**
@@ -219,6 +221,7 @@ describe('eventsRouter', () => {
       await fillORM(ORM);
       await ORM.eventTriggerRepo.save(spentEventTrigger);
       initWatcherDB(ORM.DB);
+      await initializeTokens()
     });
 
     /**

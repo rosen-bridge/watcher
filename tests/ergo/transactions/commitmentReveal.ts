@@ -31,6 +31,7 @@ import {
 } from '../../../src/utils/watcherUtils';
 import TransactionTest from '../../../src/api/TransactionTest';
 import { Transaction } from '../../../src/api/Transaction';
+import { initializeTokens } from '../../../src/config/config';
 
 const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))];
 const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
@@ -61,6 +62,7 @@ describe('Commitment reveal transaction tests', () => {
     transaction = TransactionTest.getInstance();
     watcherUtils = new WatcherUtils(dataBase, 0, 100);
     cr = new CommitmentReveal(watcherUtils, txUtils, boxes);
+    await initializeTokens()
   });
 
   describe('triggerEventCreationTx', () => {

@@ -430,7 +430,7 @@ export class ErgoUtils {
   static tokenDetailByTokenMap = (tokenId: string, chain: string) => {
     const tokenMap = getConfig().token.tokenMap;
     const tokenDetail = tokenMap.search(chain, {
-      [tokenMap.getIdKey(chain)]: tokenId,
+      tokenId,
     });
     let name = 'Unsupported token';
     let decimals = 0;
@@ -439,7 +439,7 @@ export class ErgoUtils {
       const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
       name = tokenDetail[0][chain].name;
       decimals = significantDecimal || 0;
-      isNativeToken = tokenDetail[0][chain].metaData.type === 'native';
+      isNativeToken = tokenDetail[0][chain].metaData === 'native';
     }
 
     return {

@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import { Boxes } from '../../../src/ergo/boxes';
+
 import { Transaction } from '../../../src/api/Transaction';
 import { secret1 } from './permit';
 import { CommitmentCreation } from '../../../src/transactions/commitmentCreation';
@@ -30,6 +31,7 @@ import plainObj from './dataset/plainBox.json' assert { type: 'json' };
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
 import repoBox1Obj from './dataset/repoBox1.json' assert { type: 'json' };
 import repoConfigObj from './dataset/repConfigBox.json' assert { type: 'json' };
+import { initializeTokens } from '../../../src/config/config';
 
 chai.use(spies);
 
@@ -86,10 +88,11 @@ describe('Commitment creation transaction tests', () => {
     watcherUtils = new WatcherUtils(watcherDb, 0, 100);
     txUtils = new TransactionUtils(watcherDb);
     cc = new CommitmentCreation(watcherUtils, txUtils, boxes);
+    await initializeTokens()
   });
 
   afterEach(() => {
-    chai.spy.restore(watcherUtils);
+    chai.spy.restore();
   });
 
   describe('createCommitmentTx', () => {

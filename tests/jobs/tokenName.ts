@@ -9,6 +9,7 @@ import {
   validToken1Record,
   validToken2Record,
 } from '../database/mockedData';
+import { initializeTokens } from '../../src/config/config';
 
 chai.use(spies);
 
@@ -19,6 +20,7 @@ describe('tokenName', () => {
     await fillORM(ORM, true, false);
     initWatcherDB(ORM.DB);
     DB = ORM.DB;
+    await initializeTokens();
   });
 
   describe('tokenNameJobFunction', () => {

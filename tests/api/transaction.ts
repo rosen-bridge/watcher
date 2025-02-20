@@ -19,6 +19,7 @@ import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { ErgoUtils } from '../../src/ergo/utils';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { Transaction } from '../../src/api/Transaction';
+import { initializeTokens } from '../../src/config/config';
 
 chai.use(spies);
 const signedErgTx = wasm.Transaction.from_json(JsonBI.stringify(withdrawErg));
@@ -40,6 +41,7 @@ describe('Transaction', () => {
     });
     chai.spy.on(Transaction, 'getWatcherState', () => undefined);
     await TransactionTest.setup(userAddress, secret1, boxes, watcherDb);
+    await initializeTokens()
   });
 
   afterEach(() => {

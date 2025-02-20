@@ -13,7 +13,7 @@ import { reveal } from './jobs/commitmentReveal';
 import { transactionQueueJob } from './jobs/transactionQueue';
 import { delay } from './utils/utils';
 import { TransactionUtils, WatcherUtils } from './utils/watcherUtils';
-import { getConfig } from './config/config';
+import { getConfig, initializeTokens } from './config/config';
 import { redeem } from './jobs/commitmentRedeem';
 import { tokenNameJob } from './jobs/tokenName';
 import eventsRouter from './api/events';
@@ -39,12 +39,16 @@ let watcherUtils: WatcherUtils;
  * initiating watcher
  */
 const init = async () => {
+  // Initialize tokens before setting up transactions
+  await initializeTokens();
+
   const generateTransactionObject = async () => {
     logger.debug('Initializing data sources and APIs...');
     await dataSource.initialize();
     logger.debug('Data sources had been initialized.');
     await dataSource.runMigrations();
     logger.debug('Migrations done successfully.');
+
     watcherDatabase = new WatcherDataBase(dataSource);
     boxesObject = new Boxes(watcherDatabase);
     await Transaction.setup(

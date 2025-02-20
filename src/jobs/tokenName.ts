@@ -59,12 +59,11 @@ export const tokenNameJob = async (boxIds: string[]) => {
     try {
       const tokenMap = getConfig().token.tokenMap;
       const chains = tokenMap.getAllChains();
-      const idKeyErgo = tokenMap.getIdKey(ERGO_CHAIN_NAME);
       for (const chain of chains) {
         const tokensData = tokenMap.getTokens(ERGO_CHAIN_NAME, chain);
         for (const tokenData of tokensData) {
           await watcherDatabase.insertTokenEntity(
-            tokenData[idKeyErgo],
+            tokenData.tokenId,
             tokenData.name,
             tokenData.decimals
           );

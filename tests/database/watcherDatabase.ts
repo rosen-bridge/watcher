@@ -1,7 +1,9 @@
 import { expect } from 'chai';
 import { describe } from 'mocha';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, MigrationInterface } from 'typeorm';
 import * as wasm from 'ergo-lib-wasm-nodejs';
+import { WatcherMigration1737547742177 } from '../../src/database/migrations/sqlite/1737547742177-watcherMigration';
+import { WatcherMigration1737547744177 } from '../../src/database/migrations/sqlite/1737547744177-watcherMigration';
 
 import {
   BoxEntity,
@@ -19,6 +21,7 @@ import {
   CommitmentEntity,
   EventTriggerEntity,
   PermitEntity,
+  CollateralEntity,
   migrations as watcherDataExtractorMigrations,
 } from '@rosen-bridge/watcher-data-extractor';
 
@@ -80,6 +83,7 @@ import { TokenEntity } from '../../src/database/entities/tokenEntity';
 import { RevenueView } from '../../src/database/entities/revenueView';
 import { RevenueEntity } from '../../src/database/entities/revenueEntity';
 import { RevenueChartDataView } from '../../src/database/entities/revenueChartDataView';
+import { initializeTokens } from '../../src/config/config';
 
 const observation2Status = {
   observation: observationEntity2,
@@ -122,6 +126,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     RevenueView,
     RevenueEntity,
     RevenueChartDataView,
+    CollateralEntity,
   ];
   const ormConfig = new DataSource({
     type: 'sqlite',
@@ -241,6 +246,7 @@ describe('WatcherModel tests', () => {
     observationRepo = ORM.observationRepo;
     observationStatusRepo = ORM.observationStatusRepo;
     commitmentRepo = ORM.commitmentRepo;
+    await initializeTokens()
   });
 
   describe('getLastBlockHeight', () => {
@@ -692,6 +698,7 @@ describe('WatcherModel tests', () => {
       observationRepo = ORM.observationRepo;
       observationStatusRepo = ORM.observationStatusRepo;
       commitmentRepo = ORM.commitmentRepo;
+      await initializeTokens()
     });
 
     /**
@@ -741,6 +748,7 @@ describe('WatcherModel tests', () => {
     before(async () => {
       memoryDb = await createMemoryDatabase();
       watcherDb = new WatcherDataBase(memoryDb);
+      await initializeTokens()
     });
     /**
      * @target WatcherDataBase.getActivePermitTransactions should get txs

@@ -50,7 +50,7 @@ const userSecret = wasm.SecretKey.dlog_from_bytes(
 
 import repoObj from './dataset/repoBox.json' assert { type: 'json' };
 import repoConfigObj from './dataset/repoConfigBox.json' assert { type: 'json' };
-import { getConfig } from '../../src/config/config';
+import { getConfig, initializeTokens } from '../../src/config/config';
 import { Transaction } from '../../src/api/Transaction';
 import sinon from 'sinon';
 import { describe } from 'mocha';
@@ -401,6 +401,7 @@ describe('Testing ergoUtils', () => {
         const ORM = await loadDataBase();
         await fillORM(ORM, true);
         initWatcherDB(ORM.DB);
+        await initializeTokens();
       });
 
       /**

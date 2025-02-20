@@ -16,6 +16,7 @@ import TransactionTest from '../../../src/api/TransactionTest';
 import { Transaction } from '../../../src/api/Transaction';
 import { TxType } from '../../../src/database/entities/txEntity';
 import { ErgoUtils } from '../../../src/ergo/utils';
+import { initializeTokens } from '../../../src/config/config';
 
 chai.use(spies);
 
@@ -62,10 +63,11 @@ describe('Watcher Permit Transactions', () => {
     await fillORM(ORM);
     DB = ORM.DB;
     boxes = new Boxes(DB);
+    await initializeTokens();
   });
 
   afterEach(() => {
-    chai.spy.restore(boxes);
+    chai.spy.restore();
     TransactionTest.reset();
   });
 
