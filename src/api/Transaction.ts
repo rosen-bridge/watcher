@@ -23,6 +23,7 @@ import {
 import { HealthStatusLevel } from '@rosen-bridge/health-check';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 import { TokensConfig } from '../config/tokensConfig';
+import { CreateScanner } from '../utils/scanner';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -63,6 +64,7 @@ export class Transaction {
     boxes: Boxes,
     db: WatcherDataBase
   ) => {
+    await CreateScanner.init();
     if (!Transaction.isSetupCalled) {
       Transaction.watcherPermitState = undefined;
       Transaction.watcherWID = '';

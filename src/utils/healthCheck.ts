@@ -43,8 +43,8 @@ import {
   OGMIOS_TYPE,
   RPC_TYPE,
 } from '../config/constants';
-import { scanner } from './scanner';
 import { watcherDatabase } from '../init';
+import { CreateScanner } from './scanner';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -141,9 +141,10 @@ class HealthCheckSingleton {
     );
     this.healthCheck.register(assetHealthCheck);
 
+    const scanner = CreateScanner.getInstance();
     this.ergoScannerSyncCheckParam = new ErgoNodeScannerHealthCheck(
-      this.observingNetworkLastBlock(scanner.ergoScanner.name()),
-      scanner.ergoScanner.name(),
+      this.observingNetworkLastBlock(scanner.getErgoScanner().name()),
+      scanner.getErgoScanner().name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.nodeUrl
@@ -174,9 +175,10 @@ class HealthCheckSingleton {
     );
     this.healthCheck.register(assetHealthCheck);
 
+    const scanner = CreateScanner.getInstance();
     this.ergoScannerSyncCheckParam = new ErgoExplorerScannerHealthCheck(
-      this.observingNetworkLastBlock(scanner.ergoScanner.name()),
-      scanner.ergoScanner.name(),
+      this.observingNetworkLastBlock(scanner.getErgoScanner().name()),
+      scanner.getErgoScanner().name(),
       getConfig().healthCheck.ergoScannerWarnDiff,
       getConfig().healthCheck.ergoScannerCriticalDiff,
       getConfig().general.explorerUrl
@@ -189,11 +191,12 @@ class HealthCheckSingleton {
    */
   registerCardanoHealthCheckParams = () => {
     let cardanoScannerSyncCheck;
+    const scanner = CreateScanner.getInstance();
     if (getConfig().cardano.type === OGMIOS_TYPE) {
       cardanoScannerSyncCheck = new CardanoOgmiosScannerHealthCheck(
-        this.observingNetworkLastBlock(scanner.observationScanner.name()),
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         (
-          scanner.observationScanner as CardanoOgmiosScanner
+          scanner.getObservationScanner() as CardanoOgmiosScanner
         ).getConnectionStatus,
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
@@ -205,8 +208,8 @@ class HealthCheckSingleton {
       );
     } else if (getConfig().cardano.type === KOIOS_TYPE) {
       cardanoScannerSyncCheck = new CardanoKoiosScannerHealthCheck(
-        this.observingNetworkLastBlock(scanner.observationScanner.name()),
-        scanner.observationScanner.name(),
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        scanner.getObservationScanner().name(),
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
         getConfig().cardano.koios!.url,
@@ -222,10 +225,11 @@ class HealthCheckSingleton {
    */
   registerBitcoinHealthCheckParams = () => {
     let bitcoinScannerSyncCheck;
+    const scanner = CreateScanner.getInstance();
     if (getConfig().bitcoin.type === RPC_TYPE) {
       bitcoinScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
-        this.observingNetworkLastBlock(scanner.observationScanner.name()),
-        scanner.observationScanner.name(),
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        scanner.getObservationScanner().name(),
         getConfig().healthCheck.bitcoinScannerWarnDiff,
         getConfig().healthCheck.bitcoinScannerCriticalDiff,
         getConfig().bitcoin.rpc!.url,
@@ -234,8 +238,8 @@ class HealthCheckSingleton {
       );
     } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
       bitcoinScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
-        this.observingNetworkLastBlock(scanner.observationScanner.name()),
-        scanner.observationScanner.name(),
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        scanner.getObservationScanner().name(),
         getConfig().healthCheck.bitcoinScannerWarnDiff,
         getConfig().healthCheck.bitcoinScannerCriticalDiff,
         getConfig().bitcoin.esplora!.url
@@ -249,10 +253,11 @@ class HealthCheckSingleton {
    * Registers all ethereum check params
    */
   registerEthereumHealthCheckParams = () => {
+    const scanner = CreateScanner.getInstance();
     const ethereumRpcScannerSyncCheck = new EvmRPCScannerHealthCheck(
       ETHEREUM_CHAIN_NAME,
-      this.observingNetworkLastBlock(scanner.observationScanner.name()),
-      scanner.observationScanner.name(),
+      this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+      scanner.getObservationScanner().name(),
       getConfig().healthCheck.ethereumScannerWarnDiff,
       getConfig().healthCheck.ethereumScannerCriticalDiff,
       getConfig().ethereum.rpc!.url,
@@ -266,10 +271,11 @@ class HealthCheckSingleton {
    * Registers all binance check params
    */
   registerBinanceHealthCheckParams = () => {
+    const scanner = CreateScanner.getInstance();
     const binanceRpcScannerSyncCheck = new EvmRPCScannerHealthCheck(
       BINANCE_CHAIN_NAME,
-      this.observingNetworkLastBlock(scanner.observationScanner.name()),
-      scanner.observationScanner.name(),
+      this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+      scanner.getObservationScanner().name(),
       getConfig().healthCheck.binanceScannerWarnDiff,
       getConfig().healthCheck.binanceScannerCriticalDiff,
       getConfig().binance.rpc!.url,

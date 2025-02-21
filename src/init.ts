@@ -29,6 +29,7 @@ import MinimumFeeHandler from './utils/MinimumFeeHandler';
 import { minimumFeeUpdateJob } from './jobs/minimumFee';
 import { rewardCollection } from './jobs/rewardCollection';
 import { TokensConfig } from './config/tokensConfig';
+import { CreateScanner } from './utils/scanner';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -42,6 +43,7 @@ let watcherUtils: WatcherUtils;
 const init = async () => {
   // Initialize tokens before setting up transactions
   await initializeTokens();
+  await CreateScanner.init();
 
   const generateTransactionObject = async () => {
     logger.debug('Initializing data sources and APIs...');

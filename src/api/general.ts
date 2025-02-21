@@ -15,7 +15,6 @@ interface GeneralInfo {
   versions: {
     app: string;
     contract: string;
-    tokensMap: string;
   };
   currentBalance: bigint;
   network: string;
@@ -50,7 +49,6 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       versions: {
         app: packageJson.version,
         contract: getConfig().rosen.contractVersion,
-        tokensMap: TokensConfig.getInstance().getVersion(),
       },
       currentBalance: tokenMap.wrapAmount(
         ERGO_NATIVE_ASSET,

@@ -11,7 +11,7 @@ import { Transaction } from '../../src/api/Transaction';
 import sinon from 'sinon';
 import { TokensConfig } from 'src/config/tokensConfig';
 import { cloneDeep } from 'lodash-es';
-
+import { CreateScanner } from '../../src/utils/scanner';
 chai.use(spies);
 
 const app = express();
@@ -26,6 +26,7 @@ describe('General-Info-Api', () => {
     before('inserting into database', async () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
+      await CreateScanner.init();
       initWatcherDB(ORM.DB);
       const healthCheck = HealthCheckSingleton.getInstance();
       chai.spy.on(healthCheck, 'getOverallStatus', () =>
