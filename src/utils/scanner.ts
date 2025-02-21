@@ -35,11 +35,11 @@ import {
   EthereumRpcObservationExtractor,
   BinanceRpcObservationExtractor,
 } from '@rosen-bridge/evm-observation-extractor';
+import { TokensConfig } from '../config/tokensConfig';
 
 const allConfig = getConfig();
 const {
   general: config,
-  token: tokensConfig,
   rosen: rosenConfig,
   cardano: cardanoConfig,
   bitcoin: bitcoinConfig,
@@ -137,7 +137,7 @@ class CreateScanner {
       this.observationScanner = this.ergoScanner;
       const observationExtractor = new ErgoObservationExtractor(
         dataSource,
-        tokensConfig.tokenMap,
+        TokensConfig.getInstance().getTokenMap(),
         rosenConfig.lockAddress,
         loggers.observationExtractorLogger
       );
@@ -148,7 +148,7 @@ class CreateScanner {
       [rosenConfig.commitmentAddress],
       rosenConfig.RWTId,
       dataSource,
-      tokensConfig.tokenMap,
+      TokensConfig.getInstance().getTokenMap(),
       loggers.commitmentExtractorLogger
     );
     const permitExtractor = new PermitExtractor(
@@ -211,7 +211,7 @@ class CreateScanner {
         );
         const observationExtractor = new CardanoOgmiosObservationExtractor(
           dataSource,
-          tokensConfig.tokenMap,
+          TokensConfig.getInstance().getTokenMap(),
           rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
@@ -229,7 +229,7 @@ class CreateScanner {
         );
         const observationExtractor = new CardanoKoiosObservationExtractor(
           dataSource,
-          tokensConfig.tokenMap,
+          TokensConfig.getInstance().getTokenMap(),
           rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
@@ -244,7 +244,7 @@ class CreateScanner {
         });
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
           dataSource,
-          tokensConfig.tokenMap,
+          TokensConfig.getInstance().getTokenMap(),
           rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
@@ -268,7 +268,7 @@ class CreateScanner {
         const observationExtractor = new BitcoinEsploraObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokenMap,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -288,7 +288,7 @@ class CreateScanner {
         const observationExtractor = new BitcoinRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokenMap,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -314,7 +314,7 @@ class CreateScanner {
         const observationExtractor = new EthereumRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokenMap,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -340,7 +340,7 @@ class CreateScanner {
         const observationExtractor = new BinanceRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokenMap,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);

@@ -6,6 +6,7 @@ import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { TokensConfig } from '../config/tokensConfig';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -51,7 +52,7 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
       name: ERGO_NATIVE_ASSET,
       isNativeToken: true,
     });
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     tokens = tokens.map((token) => {
       const wrappedToken = tokenMap.wrapAmount(
         token.tokenId,

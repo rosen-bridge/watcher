@@ -5,6 +5,7 @@ import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { authenticateKey } from './authentication';
 import { getConfig } from '../config/config';
 import { ERGO_CHAIN_NAME } from '../config/constants';
+import { TokensConfig } from '../config/tokensConfig';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -24,7 +25,7 @@ permitRouter.post(
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
-      const tokenMap = getConfig().token.tokenMap;
+      const tokenMap = TokensConfig.getInstance().getTokenMap();
       const RSNCount = tokenMap.unwrapAmount(
         getConfig().rosen.RSN,
         BigInt(req.body.count),
@@ -60,7 +61,7 @@ permitRouter.post(
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
-      const tokenMap = getConfig().token.tokenMap;
+      const tokenMap = TokensConfig.getInstance().getTokenMap();
       const RWTCount = tokenMap.unwrapAmount(
         getConfig().rosen.RWTId,
         BigInt(req.body.count),

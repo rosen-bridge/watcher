@@ -7,6 +7,7 @@ import { Transaction } from './Transaction';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import packageJson from '../../package.json' assert { type: 'json' };
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
+import { TokensConfig } from '../config/tokensConfig';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -43,13 +44,13 @@ const generalRouter = express.Router();
  */
 generalRouter.get('/', async (req: Request, res: Response) => {
   try {
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     const collateral = await Transaction.getInstance().getCollateral();
     const info: GeneralInfo = {
       versions: {
         app: packageJson.version,
         contract: getConfig().rosen.contractVersion,
-        tokensMap: getConfig().token.version,
+        tokensMap: TokensConfig.getInstance().getVersion(),
       },
       currentBalance: tokenMap.wrapAmount(
         ERGO_NATIVE_ASSET,

@@ -28,6 +28,7 @@ import { widStatusJob } from './jobs/widStatus';
 import MinimumFeeHandler from './utils/MinimumFeeHandler';
 import { minimumFeeUpdateJob } from './jobs/minimumFee';
 import { rewardCollection } from './jobs/rewardCollection';
+import { TokensConfig } from './config/tokensConfig';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -103,7 +104,7 @@ const init = async () => {
       );
       const txUtils = new TransactionUtils(watcherDatabase);
 
-      await MinimumFeeHandler.init(getConfig().token.tokens);
+      await MinimumFeeHandler.init(TokensConfig.getInstance().getTokens());
       minimumFeeUpdateJob();
       logger.debug('Initializing statistic object...');
       await Transaction.setup(

@@ -28,7 +28,6 @@ interface ConfigType {
   binance: BinanceConfig;
   general: Config;
   rosen: RosenConfig;
-  token: TokensConfig;
   database: DatabaseConfig;
   healthCheck: HealthCheckConfig;
   notification: NotificationConfig;
@@ -642,7 +641,6 @@ const getConfig = (): ConfigType => {
       general.networkType,
       general.rosenConfigPath
     );
-    const token = new TokensConfig(general.rosenTokensPath);
     const database = new DatabaseConfig();
     const healthCheck = new HealthCheckConfig();
     const notification = new NotificationConfig();
@@ -654,7 +652,6 @@ const getConfig = (): ConfigType => {
       logger,
       general,
       rosen,
-      token,
       database,
       healthCheck,
       notification,
@@ -664,8 +661,8 @@ const getConfig = (): ConfigType => {
 };
 
 const initializeTokens = async () => {
-  const config = getConfig();
-  await config.token.initialize();
+  const config = new Config();
+  await TokensConfig.init(config.rosenTokensPath);
 };
 
 export { getConfig, initializeTokens };

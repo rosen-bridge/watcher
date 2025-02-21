@@ -721,8 +721,7 @@ export const permitMockRWT =
 export const generalInfo = {
   versions: {
     app: packageJson.version,
-    contract: getConfig().rosen.contractVersion,
-    tokensMap: getConfig().token.version,
+    contract: getConfig().rosen.contractVersion
   },
   currentBalance: 1100000,
   network: 'ergo',

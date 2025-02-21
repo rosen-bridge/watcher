@@ -8,6 +8,7 @@ import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { getConfig } from '../config/config';
 import { ERGO_CHAIN_NAME, NODE_TYPE } from '../config/constants';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { TokensConfig } from '../config/tokensConfig';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -75,7 +76,7 @@ class MinimumFeeHandler {
   getEventFeeConfig = (observation: ObservationEntity): ChainMinimumFee => {
     const instance = MinimumFeeHandler.getInstance();
 
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     const token = tokenMap.search(observation.fromChain, {
       tokenId: observation.sourceChainTokenId,
     });
