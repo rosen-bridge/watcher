@@ -2,8 +2,6 @@ import { expect } from 'chai';
 import { describe } from 'mocha';
 import { DataSource, Repository, MigrationInterface } from 'typeorm';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { WatcherMigration1737547742177 } from '../../src/database/migrations/sqlite/1737547742177-watcherMigration';
-import { WatcherMigration1737547744177 } from '../../src/database/migrations/sqlite/1737547744177-watcherMigration';
 
 import {
   BoxEntity,
