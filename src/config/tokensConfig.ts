@@ -78,9 +78,6 @@ class TokensConfig {
    * @returns the tokens configuration
    */
   getTokens(): RosenTokens {
-    if (!TokensConfig.initialized) {
-      throw new Error('TokensConfig is not initialized');
-    }
     return TokensConfig.instance.tokenMap.getConfig();
   }
 
@@ -88,9 +85,6 @@ class TokensConfig {
    * @returns the token map
    */
   getTokenMap(): TokenMap {
-    if (!TokensConfig.initialized) {
-      throw new Error('TokensConfig is not initialized');
-    }
     return this.tokenMap;
   }
 }
