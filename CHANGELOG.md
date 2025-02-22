@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 4.1.2
+
+### Patch Changes
+
+- Fix evm observation extractor bug
+
 ## 4.1.1
 
 ### Patch Changes
