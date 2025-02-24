@@ -3,7 +3,7 @@ import { RosenTokens, TokenMap } from '@rosen-bridge/tokens';
 
 class TokensConfig {
   private static instance: TokensConfig;
-  private tokenMap: TokenMap;
+  protected tokenMap: TokenMap;
 
   private constructor() {
     // do nothing
