@@ -4,7 +4,6 @@ import { RosenTokens, TokenMap } from '@rosen-bridge/tokens';
 class TokensConfig {
   private static instance: TokensConfig;
   private tokenMap!: TokenMap;
-  private static initialized: boolean = false;
 
   private constructor() {
     // do nothing
@@ -15,7 +14,7 @@ class TokensConfig {
    * @param tokensPath path to tokens json file
    */
   static async init(tokensPath: string): Promise<void> {
-    if (!TokensConfig.initialized) {
+    if (!TokensConfig.instance) {
       if (!fs.existsSync(tokensPath)) {
         throw new Error(`tokensMap file with path ${tokensPath} doesn't exist`);
       }
@@ -25,8 +24,6 @@ class TokensConfig {
       const transformedTokens = TokensConfig.instance.transformTokens(tokens);
       TokensConfig.instance.tokenMap = new TokenMap();
       await TokensConfig.instance.tokenMap.updateConfigByJson(transformedTokens);
-
-      TokensConfig.initialized = true;
     }
   }
 
@@ -61,7 +58,7 @@ class TokensConfig {
    * @returns TokensConfig instance
    */
   static getInstance(): TokensConfig {
-    if (!TokensConfig.initialized) {
+    if (!TokensConfig.instance) {
       throw new Error('TokensConfig is not initialized');
     }
     return TokensConfig.instance;
@@ -71,7 +68,7 @@ class TokensConfig {
    * @returns whether TokensConfig is initialized
    */
   static isInitialized(): boolean {
-    return TokensConfig.initialized;
+    return !!TokensConfig.instance;
   }
 
   /**
