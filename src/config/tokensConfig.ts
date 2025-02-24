@@ -75,13 +75,6 @@ class TokensConfig {
   }
 
   /**
-   * @returns the tokens configuration
-   */
-  getTokens(): RosenTokens {
-    return TokensConfig.instance.tokenMap.getConfig();
-  }
-
-  /**
    * @returns the token map
    */
   getTokenMap(): TokenMap {

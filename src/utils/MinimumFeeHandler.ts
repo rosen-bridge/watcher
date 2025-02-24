@@ -3,7 +3,7 @@ import {
   ErgoNetworkType,
   MinimumFeeBox,
 } from '@rosen-bridge/minimum-fee';
-import { RosenTokens } from '@rosen-bridge/tokens';
+import { TokenMap } from '@rosen-bridge/tokens';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { getConfig } from '../config/config';
 import { ERGO_CHAIN_NAME, NODE_TYPE } from '../config/constants';
@@ -23,27 +23,29 @@ class MinimumFeeHandler {
   /**
    * initializes minimum fee handler
    */
-  static init = async (tokens: RosenTokens) => {
+  static init = async (tokenMap: TokenMap) => {
     const configs = getConfig();
 
     MinimumFeeHandler.instance = new MinimumFeeHandler();
     logger.debug('MinimumFeeHandler instantiated');
 
 
-    const promises = tokens.map((chainToken) => {
+    // TODO: A function to apply token map updates is required for here 
+    // local:ergo/rosen-bridge/watcher#269
+    const promises = tokenMap.getConfig().map((chainToken) => { 
       const token = chainToken[ERGO_CHAIN_NAME];
       const tokenId = token.tokenId;
 
       const { networkType, url } =
         configs.general.scannerType === NODE_TYPE
           ? {
-              networkType: ErgoNetworkType.node,
-              url: configs.general.nodeUrl,
-            }
+            networkType: ErgoNetworkType.node,
+            url: configs.general.nodeUrl,
+          }
           : {
-              networkType: ErgoNetworkType.explorer,
-              url: configs.general.explorerUrl,
-            };
+            networkType: ErgoNetworkType.explorer,
+            url: configs.general.explorerUrl,
+          };
       const tokenMinimumFeeBox = new MinimumFeeBox(
         tokenId,
         configs.rosen.rsnRatioNFT,

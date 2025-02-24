@@ -106,7 +106,7 @@ const init = async () => {
       );
       const txUtils = new TransactionUtils(watcherDatabase);
 
-      await MinimumFeeHandler.init(TokensConfig.getInstance().getTokens());
+      await MinimumFeeHandler.init(TokensConfig.getInstance().getTokenMap());
       minimumFeeUpdateJob();
       logger.debug('Initializing statistic object...');
       await Transaction.setup(
