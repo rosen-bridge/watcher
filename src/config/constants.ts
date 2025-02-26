@@ -25,3 +25,5 @@ export const DONE_STATUS = 'Done';
 export const WID_LOCK_COUNT = 2;
 export const WID_UNLOCK_COUNT = 2;
 export const WID_MINT_COUNT = 3;
+export const ETHEREUM_BLOCK_TIME = 20;
+export const BINANCE_BLOCK_TIME = 3;
