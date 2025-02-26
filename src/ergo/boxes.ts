@@ -20,11 +20,11 @@ import { NotEnoughFund, NoWID } from '../errors/errors';
 import { getConfig } from '../config/config';
 import { AddressBalance } from './interfaces';
 import { JsonBI } from './network/parser';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { blake2b } from 'blakejs';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export class Boxes {
   dataBase: WatcherDataBase;

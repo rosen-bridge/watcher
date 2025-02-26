@@ -23,7 +23,7 @@ import {
   ExplorerWidHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { CardanoOgmiosScanner } from '@rosen-bridge/scanner';
 import { DiscordNotification } from '@rosen-bridge/discord-notification';
 
@@ -48,7 +48,7 @@ import {
 import { scanner } from './scanner';
 import { watcherDatabase } from '../init';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;

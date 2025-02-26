@@ -6,9 +6,9 @@ import { ChangeBoxCreationError, NotEnoughFund } from '../errors/errors';
 import { TxType } from '../database/entities/txEntity';
 import { TransactionUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class DetachWID {
   /**

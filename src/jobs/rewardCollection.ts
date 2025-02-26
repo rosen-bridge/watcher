@@ -1,10 +1,10 @@
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { getConfig } from '../config/config';
 import { Boxes } from '../ergo/boxes';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { RewardCollection } from '../transactions/rewardCollection';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 let rewardCollectorObj: RewardCollection;
 
