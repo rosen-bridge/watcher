@@ -24,7 +24,7 @@ import {
   CollateralExtractor,
 } from '@rosen-bridge/watcher-data-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
 import { getConfig } from '../config/config';
 import { dataSource } from '../../config/dataSource';
@@ -51,27 +51,27 @@ const {
  * @returns loggers object
  */
 const createLoggers = () => ({
-  commitmentExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
+  commitmentExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
     'commitment-extractor'
   ),
-  eventTriggerExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
+  eventTriggerExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
     'event-trigger-extractor'
   ),
-  observationExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
+  observationExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
     'observation-extractor'
   ),
   permitExtractorLogger:
-    DefaultLoggerFactory.getInstance().getLogger('permit-extractor'),
+    CallbackLoggerFactory.getInstance().getLogger('permit-extractor'),
   plainExtractorLogger:
-    DefaultLoggerFactory.getInstance().getLogger('plain-extractor'),
-  scannerLogger: DefaultLoggerFactory.getInstance().getLogger('scanner'),
-  collateralExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
+    CallbackLoggerFactory.getInstance().getLogger('plain-extractor'),
+  scannerLogger: CallbackLoggerFactory.getInstance().getLogger('scanner'),
+  collateralExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
     'collateral-extractor'
   ),
 });
 
 const loggers = createLoggers();
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class CreateScanner {
   ergoScanner: ErgoScanner;

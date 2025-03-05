@@ -2,7 +2,7 @@ import {
   ErgoExplorerAssetHealthCheckParam,
   ErgoNodeAssetHealthCheckParam,
 } from '@rosen-bridge/asset-check';
-import { HealthCheck } from '@rosen-bridge/health-check';
+import { HealthCheck, HealthStatusLevel } from '@rosen-bridge/health-check';
 import { ErgoNodeSyncHealthCheckParam } from '@rosen-bridge/node-sync-check';
 import {
   AbstractPermitHealthCheckParam,
@@ -23,7 +23,7 @@ import {
   ExplorerWidHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { CardanoOgmiosScanner } from '@rosen-bridge/scanner';
 import { DiscordNotification } from '@rosen-bridge/discord-notification';
 
@@ -47,8 +47,9 @@ import {
 } from '../config/constants';
 import { scanner } from './scanner';
 import { watcherDatabase } from '../init';
+import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
@@ -96,6 +97,24 @@ class HealthCheckSingleton {
       getConfig().general.nodeUrl
     );
     this.healthCheck.register(ergoNodeSyncCheck);
+
+    const warnLogCheck = new LogLevelHealthCheck(
+      CallbackLoggerFactory.getInstance(),
+      HealthStatusLevel.UNSTABLE,
+      getConfig().healthCheck.warnLogAllowedCount,
+      getConfig().healthCheck.logDuration,
+      'warn'
+    );
+    this.healthCheck.register(warnLogCheck);
+
+    const errorLogCheck = new LogLevelHealthCheck(
+      CallbackLoggerFactory.getInstance(),
+      HealthStatusLevel.UNSTABLE,
+      getConfig().healthCheck.errorLogAllowedCount,
+      getConfig().healthCheck.logDuration,
+      'error'
+    );
+    this.healthCheck.register(errorLogCheck);
 
     if (getConfig().general.scannerType === NODE_TYPE) {
       this.registerErgoNodeHealthCheckParams();
