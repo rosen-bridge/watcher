@@ -32,7 +32,6 @@ import { getConfig } from '../config/config';
 import {
   BINANCE_CHAIN_NAME,
   BITCOIN_CHAIN_NAME,
-  BLOCK_TIME,
   CARDANO_CHAIN_NAME,
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
@@ -43,6 +42,7 @@ import {
   NODE_TYPE,
   OGMIOS_TYPE,
   RPC_TYPE,
+  HEALTH_CHECK_BLOCK_TIME,
 } from '../config/constants';
 import { watcherDatabase } from '../init';
 import { CreateScanner } from './scanner';
@@ -256,7 +256,7 @@ class HealthCheckSingleton {
       getConfig().healthCheck.ethereumScannerWarnDiff,
       getConfig().healthCheck.ethereumScannerCriticalDiff,
       getConfig().ethereum.rpc!.url,
-      BLOCK_TIME,
+      HEALTH_CHECK_BLOCK_TIME,
       getConfig().ethereum.rpc!.authToken,
       getConfig().ethereum.rpc!.timeout
     );
@@ -274,7 +274,7 @@ class HealthCheckSingleton {
       getConfig().healthCheck.binanceScannerWarnDiff,
       getConfig().healthCheck.binanceScannerCriticalDiff,
       getConfig().binance.rpc!.url,
-      BLOCK_TIME,
+      HEALTH_CHECK_BLOCK_TIME,
       getConfig().binance.rpc!.authToken,
       getConfig().binance.rpc!.timeout
     );

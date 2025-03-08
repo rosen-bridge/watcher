@@ -25,4 +25,4 @@ export const DONE_STATUS = 'Done';
 export const WID_LOCK_COUNT = 2;
 export const WID_UNLOCK_COUNT = 2;
 export const WID_MINT_COUNT = 3;
-export const BLOCK_TIME = 120;
+export const HEALTH_CHECK_BLOCK_TIME = 120;
