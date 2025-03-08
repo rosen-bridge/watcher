@@ -21,36 +21,9 @@ class TokensConfig {
       TokensConfig.instance = new TokensConfig();
       const tokensJson: string = fs.readFileSync(tokensPath, 'utf8');
       const tokens = JSON.parse(tokensJson);
-      const transformedTokens = TokensConfig.instance.transformTokens(tokens);
       TokensConfig.instance.tokenMap = new TokenMap();
-      await TokensConfig.instance.tokenMap.updateConfigByJson(transformedTokens);
+      await TokensConfig.instance.tokenMap.updateConfigByJson(tokens);
     }
-  }
-
-  /**
-   * Transforms the tokens to a new format
-   * @param tokens the tokens to transform
-   * @returns the transformed tokens
-   */
-  private transformTokens(tokens: any): RosenTokens {
-    return tokens.tokens.map((token: any) => {
-      const transformedToken: any = {};
-
-      // Get all chain keys (ergo, cardano, ethereum, etc.)
-      const chains = Object.keys(token);
-
-      // For each chain in the token
-      for (const chain of chains) {
-        transformedToken[chain] = {
-          ...token[chain],
-          ...token[chain].metaData
-        };
-        // Delete the metaData object since it's now flattened
-        delete transformedToken[chain].metaData;
-      }
-
-      return transformedToken;
-    });
   }
 
   /**

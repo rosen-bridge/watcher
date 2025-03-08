@@ -148,8 +148,7 @@ export class ErgoUtils {
           );
         } else if (value < 0) {
           throw new ChangeBoxCreationError(
-            `Not enough token [${token}] in the input boxes, require ${
-              -1n * value
+            `Not enough token [${token}] in the input boxes, require ${-1n * value
             } more.`
           );
         }
@@ -440,7 +439,7 @@ export class ErgoUtils {
       const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
       name = tokenDetail[0][chain].name;
       decimals = significantDecimal || 0;
-      isNativeToken = tokenDetail[0][chain].metaData === 'native';
+      isNativeToken = tokenDetail[0][chain].type === 'native';
     }
 
     return {
