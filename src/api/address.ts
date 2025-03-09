@@ -6,6 +6,7 @@ import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { TokensConfig } from '../config/tokensConfig';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 

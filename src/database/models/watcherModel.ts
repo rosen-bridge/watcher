@@ -38,7 +38,7 @@ import { RevenueView } from '../entities/revenueView';
 import { TokenEntity } from '../entities/tokenEntity';
 import { TxEntity, TxType } from '../entities/txEntity';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
-import { getConfig } from '../../config/config';
+import { TokensConfig } from '../../config/tokensConfig';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 

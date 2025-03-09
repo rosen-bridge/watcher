@@ -1,9 +1,9 @@
 import { CardanoOgmiosScanner, GeneralScanner } from '@rosen-bridge/scanner';
 import * as Constants from '../config/constants';
 import { getConfig } from '../config/config';
-import { scanner } from '../utils/scanner';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+import { CreateScanner } from '../utils/scanner';
 
 const allConfig = getConfig();
 const {

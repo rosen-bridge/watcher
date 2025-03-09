@@ -294,7 +294,7 @@ class HealthCheckSingleton {
       getConfig().healthCheck.binanceScannerWarnDiff,
       getConfig().healthCheck.binanceScannerCriticalDiff,
       getConfig().binance.rpc!.url,
-      BI
+      BINANCE_BLOCK_TIME,
       getConfig().binance.rpc!.authToken,
       getConfig().binance.rpc!.timeout
     );
