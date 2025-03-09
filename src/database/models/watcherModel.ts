@@ -37,10 +37,10 @@ import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueView } from '../entities/revenueView';
 import { TokenEntity } from '../entities/tokenEntity';
 import { TxEntity, TxType } from '../entities/txEntity';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import { TokensConfig } from '../../config/tokensConfig';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { getConfig } from '../../config/config';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;

@@ -2,7 +2,7 @@ import {
   ErgoExplorerAssetHealthCheckParam,
   ErgoNodeAssetHealthCheckParam,
 } from '@rosen-bridge/asset-check';
-import { HealthCheck } from '@rosen-bridge/health-check';
+import { HealthCheck, HealthStatusLevel } from '@rosen-bridge/health-check';
 import { ErgoNodeSyncHealthCheckParam } from '@rosen-bridge/node-sync-check';
 import {
   AbstractPermitHealthCheckParam,
@@ -23,31 +23,33 @@ import {
   ExplorerWidHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { CardanoOgmiosScanner } from '@rosen-bridge/scanner';
 import { DiscordNotification } from '@rosen-bridge/discord-notification';
 
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import {
+  BINANCE_BLOCK_TIME,
   BINANCE_CHAIN_NAME,
   BITCOIN_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
   ESPLORA_TYPE,
+  ETHEREUM_BLOCK_TIME,
   ETHEREUM_CHAIN_NAME,
   EXPLORER_TYPE,
   KOIOS_TYPE,
   NODE_TYPE,
   OGMIOS_TYPE,
   RPC_TYPE,
-  HEALTH_CHECK_BLOCK_TIME,
 } from '../config/constants';
 import { watcherDatabase } from '../init';
+import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
 import { CreateScanner } from './scanner';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
@@ -95,6 +97,24 @@ class HealthCheckSingleton {
       getConfig().general.nodeUrl
     );
     this.healthCheck.register(ergoNodeSyncCheck);
+
+    const warnLogCheck = new LogLevelHealthCheck(
+      CallbackLoggerFactory.getInstance(),
+      HealthStatusLevel.UNSTABLE,
+      getConfig().healthCheck.warnLogAllowedCount,
+      getConfig().healthCheck.logDuration,
+      'warn'
+    );
+    this.healthCheck.register(warnLogCheck);
+
+    const errorLogCheck = new LogLevelHealthCheck(
+      CallbackLoggerFactory.getInstance(),
+      HealthStatusLevel.UNSTABLE,
+      getConfig().healthCheck.errorLogAllowedCount,
+      getConfig().healthCheck.logDuration,
+      'error'
+    );
+    this.healthCheck.register(errorLogCheck);
 
     if (getConfig().general.scannerType === NODE_TYPE) {
       this.registerErgoNodeHealthCheckParams();
@@ -256,7 +276,7 @@ class HealthCheckSingleton {
       getConfig().healthCheck.ethereumScannerWarnDiff,
       getConfig().healthCheck.ethereumScannerCriticalDiff,
       getConfig().ethereum.rpc!.url,
-      HEALTH_CHECK_BLOCK_TIME,
+      ETHEREUM_BLOCK_TIME,
       getConfig().ethereum.rpc!.authToken,
       getConfig().ethereum.rpc!.timeout
     );
@@ -274,7 +294,7 @@ class HealthCheckSingleton {
       getConfig().healthCheck.binanceScannerWarnDiff,
       getConfig().healthCheck.binanceScannerCriticalDiff,
       getConfig().binance.rpc!.url,
-      HEALTH_CHECK_BLOCK_TIME,
+      BI
       getConfig().binance.rpc!.authToken,
       getConfig().binance.rpc!.timeout
     );

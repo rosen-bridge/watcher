@@ -16,9 +16,9 @@ import { getConfig } from '../config/config';
 import { CreateScanner } from './scanner';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 import MinimumFeeHandler from './MinimumFeeHandler';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class WatcherUtils {
   dataBase: WatcherDataBase;
