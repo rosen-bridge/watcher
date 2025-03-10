@@ -107,7 +107,6 @@ describe('Testing Box Creation', () => {
     const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool');
     mempoolTrack.onCall(1).resolves(wasm.ErgoBox.from_json(WIDJson));
     mempoolTrack.onCall(2).resolves(wasm.ErgoBox.from_json(plainJson));
-    ;
   });
 
   afterEach(() => {

@@ -23,7 +23,6 @@ describe('observationRouter', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM, false, true, true);
       initWatcherDB(ORM.DB);
-
     });
 
     /**

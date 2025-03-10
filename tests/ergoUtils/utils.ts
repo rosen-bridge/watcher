@@ -401,7 +401,6 @@ describe('Testing ergoUtils', () => {
         const ORM = await loadDataBase();
         await fillORM(ORM, true);
         initWatcherDB(ORM.DB);
-        ;
       });
 
       /**

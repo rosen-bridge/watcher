@@ -244,7 +244,6 @@ describe('WatcherModel tests', () => {
     observationRepo = ORM.observationRepo;
     observationStatusRepo = ORM.observationStatusRepo;
     commitmentRepo = ORM.commitmentRepo;
-
   });
 
   describe('getLastBlockHeight', () => {
@@ -696,7 +695,6 @@ describe('WatcherModel tests', () => {
       observationRepo = ORM.observationRepo;
       observationStatusRepo = ORM.observationStatusRepo;
       commitmentRepo = ORM.commitmentRepo;
-
     });
 
     /**
@@ -746,7 +744,6 @@ describe('WatcherModel tests', () => {
     before(async () => {
       memoryDb = await createMemoryDatabase();
       watcherDb = new WatcherDataBase(memoryDb);
-
     });
     /**
      * @target WatcherDataBase.getActivePermitTransactions should get txs

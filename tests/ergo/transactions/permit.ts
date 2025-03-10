@@ -62,7 +62,6 @@ describe('Watcher Permit Transactions', () => {
     await fillORM(ORM);
     DB = ORM.DB;
     boxes = new Boxes(DB);
-    ;
   });
 
   afterEach(() => {

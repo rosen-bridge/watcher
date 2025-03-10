@@ -41,7 +41,6 @@ describe('Transaction', () => {
     });
     chai.spy.on(Transaction, 'getWatcherState', () => undefined);
     await TransactionTest.setup(userAddress, secret1, boxes, watcherDb);
-
   });
 
   afterEach(() => {

@@ -15,7 +15,6 @@ describe('revenue Job', () => {
     await fillORM(ORM, false, true, false, false);
     initWatcherDB(ORM.DB);
     DB = ORM.DB;
-    ;
   });
 
   describe('revenueJobFunction', () => {

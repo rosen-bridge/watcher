@@ -87,7 +87,6 @@ describe('Commitment creation transaction tests', () => {
     watcherUtils = new WatcherUtils(watcherDb, 0, 100);
     txUtils = new TransactionUtils(watcherDb);
     cc = new CommitmentCreation(watcherUtils, txUtils, boxes);
-
   });
 
   afterEach(() => {

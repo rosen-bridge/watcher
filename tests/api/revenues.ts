@@ -30,7 +30,6 @@ describe('revenueRouter', () => {
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
       Transaction.watcherWID = 'WIDStatistics';
-
     });
 
     /**
@@ -297,7 +296,6 @@ describe('revenueRouter', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
-
     });
 
     /**

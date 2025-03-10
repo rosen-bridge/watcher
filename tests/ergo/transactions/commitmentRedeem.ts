@@ -24,8 +24,6 @@ import WIDObjWithoutErg from './dataset/WIDBoxWithoutErg.json' assert { type: 'j
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { TxStatus } from '../../../src/database/entities/observationStatusEntity';
-import { TokensConfig } from '../../../src/config/tokensConfig';
-import { getConfig } from '../../../src/config/config';
 
 chai.use(spies);
 
@@ -97,7 +95,6 @@ describe('Commitment redeem transaction tests', () => {
     watcherUtils = new WatcherUtils(watcherDb, 0, 100);
     txUtils = new TransactionUtils(watcherDb);
     cr = new CommitmentRedeem(watcherUtils, txUtils, boxes, 20);
-
   });
 
   afterEach(() => {

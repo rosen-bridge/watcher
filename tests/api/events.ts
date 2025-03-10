@@ -28,7 +28,6 @@ describe('eventsRouter', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
-
     });
 
     /**
@@ -220,7 +219,6 @@ describe('eventsRouter', () => {
       await fillORM(ORM);
       await ORM.eventTriggerRepo.save(spentEventTrigger);
       initWatcherDB(ORM.DB);
-      // 
     });
 
     /**

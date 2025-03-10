@@ -49,7 +49,6 @@ describe('Transaction queue tests', () => {
     transaction = TransactionTest.getInstance();
     dbConnection = new WatcherUtils(dataBase, 0, 100);
     txQueue = new Queue(dataBase, dbConnection);
-    ;
   });
 
   afterEach(() => {
@@ -244,7 +243,6 @@ describe('Transaction queue tests', () => {
       watcherDb = new WatcherDataBase(db);
       dbConnection = new WatcherUtils(watcherDb, 0, 100);
       txQueue = new Queue(watcherDb, dbConnection);
-
     });
 
     /**
