@@ -20,7 +20,6 @@ import { Transaction } from '../../src/api/Transaction';
 import { createMemoryDatabase } from '../resources/inMemoryDb';
 import { DataSource } from 'typeorm';
 
-
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
 
 const height = 1000;

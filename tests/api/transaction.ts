@@ -20,7 +20,6 @@ import { ErgoUtils } from '../../src/ergo/utils';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { Transaction } from '../../src/api/Transaction';
 
-
 chai.use(spies);
 const signedErgTx = wasm.Transaction.from_json(JsonBI.stringify(withdrawErg));
 const signedTokenTx = wasm.Transaction.from_json(

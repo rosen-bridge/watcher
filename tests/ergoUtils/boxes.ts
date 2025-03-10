@@ -29,7 +29,6 @@ import { mockedResponseBody } from '../ergo/objects/mockedResponseBody';
 import { beforeEach } from 'mocha';
 import { getConfig } from '../../src/config/config';
 
-
 const config = getConfig().general;
 const permitJson = JsonBI.stringify(permitObj);
 const WIDJson = JsonBI.stringify(WIDObj);

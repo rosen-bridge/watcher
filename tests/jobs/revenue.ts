@@ -5,7 +5,6 @@ import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
 import { revenueJobFunction } from '../../src/jobs/revenue';
 
-
 chai.use(spies);
 
 describe('revenue Job', () => {

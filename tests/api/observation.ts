@@ -7,7 +7,6 @@ import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import request from 'supertest';
 import { observations } from './testDataEvents';
 
-
 chai.use(spies);
 
 const app = express();

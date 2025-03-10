@@ -13,7 +13,6 @@ import {
 } from '../ergo/statistics/mockUtils';
 import { Transaction } from '../../src/api/Transaction';
 
-
 chai.use(spies);
 
 const app = express();
