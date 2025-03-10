@@ -3,7 +3,6 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
-import { TokensConfig } from './tokensConfig';
 import { cloneDeep } from 'lodash-es';
 import path from 'path';
 import { NetworkType } from '../types';
@@ -660,9 +659,4 @@ const getConfig = (): ConfigType => {
   return internalConfig;
 };
 
-const initializeTokens = async () => {
-  const config = new Config();
-  await TokensConfig.init(config.rosenTokensPath);
-};
-
-export { getConfig, initializeTokens };
+export { getConfig, Config, RosenConfig, CardanoConfig, BitcoinConfig, EthereumConfig, BinanceConfig };

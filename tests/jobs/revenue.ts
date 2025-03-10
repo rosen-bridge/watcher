@@ -4,7 +4,7 @@ import { WatcherDataBase } from '../../src/database/models/watcherModel';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
 import { revenueJobFunction } from '../../src/jobs/revenue';
-import { initializeTokens } from '../../src/config/config';
+
 
 chai.use(spies);
 
@@ -15,7 +15,7 @@ describe('revenue Job', () => {
     await fillORM(ORM, false, true, false, false);
     initWatcherDB(ORM.DB);
     DB = ORM.DB;
-    await initializeTokens();
+    ;
   });
 
   describe('revenueJobFunction', () => {

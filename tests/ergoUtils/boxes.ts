@@ -27,7 +27,8 @@ import plainObj from './dataset/plainBoxes.json' assert { type: 'json' };
 import boxesObj from './dataset/boxes.json' assert { type: 'json' };
 import { mockedResponseBody } from '../ergo/objects/mockedResponseBody';
 import { beforeEach } from 'mocha';
-import { getConfig, initializeTokens } from '../../src/config/config';
+import { getConfig } from '../../src/config/config';
+
 
 const config = getConfig().general;
 const permitJson = JsonBI.stringify(permitObj);
@@ -106,7 +107,7 @@ describe('Testing Box Creation', () => {
     const mempoolTrack = sinon.stub(ErgoNetwork, 'trackMemPool');
     mempoolTrack.onCall(1).resolves(wasm.ErgoBox.from_json(WIDJson));
     mempoolTrack.onCall(2).resolves(wasm.ErgoBox.from_json(plainJson));
-    await initializeTokens();
+    ;
   });
 
   afterEach(() => {

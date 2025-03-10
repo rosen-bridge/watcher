@@ -1,40 +1,48 @@
-import {
-  ErgoScanner,
-  CardanoKoiosScanner,
-  CardanoOgmiosScanner,
-  ErgoNetworkType,
-  CardanoBlockFrostScanner,
-} from '@rosen-bridge/scanner';
+import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
-import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
-import {
-  ErgoObservationExtractor,
-  CardanoKoiosObservationExtractor,
-  CardanoOgmiosObservationExtractor,
-  CardanoBlockFrostObservationExtractor,
-} from '@rosen-bridge/observation-extractor';
 import {
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
 } from '@rosen-bridge/bitcoin-observation-extractor';
-import {
-  CommitmentExtractor,
-  PermitExtractor,
-  EventTriggerExtractor,
-  CollateralExtractor,
-} from '@rosen-bridge/watcher-data-extractor';
-import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
+import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
-
-import { getConfig } from '../config/config';
-import { dataSource } from '../../config/dataSource';
-import { DataSource } from 'typeorm';
-import * as Constants from '../config/constants';
-import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
 import {
-  EthereumRpcObservationExtractor,
+  CardanoBlockFrostObservationExtractor,
+  CardanoKoiosObservationExtractor,
+  CardanoOgmiosObservationExtractor,
+  ErgoObservationExtractor,
+} from '@rosen-bridge/observation-extractor';
+import {
+  CardanoBlockFrostScanner,
+  CardanoKoiosScanner,
+  CardanoOgmiosScanner,
+  ErgoNetworkType,
+  ErgoScanner,
+} from '@rosen-bridge/scanner';
+import {
+  CollateralExtractor,
+  CommitmentExtractor,
+  EventTriggerExtractor,
+  PermitExtractor,
+} from '@rosen-bridge/watcher-data-extractor';
+
+import {
   BinanceRpcObservationExtractor,
+  EthereumRpcObservationExtractor,
 } from '@rosen-bridge/evm-observation-extractor';
+import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+import { DataSource } from 'typeorm';
+import { dataSource } from '../../config/dataSource';
+import {
+  BinanceConfig,
+  BitcoinConfig,
+  CardanoConfig,
+  Config,
+  EthereumConfig,
+  getConfig,
+  RosenConfig,
+} from '../config/config';
+import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
 
 /**
@@ -66,7 +74,6 @@ const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class CreateScanner {
   private static instance: CreateScanner;
-  private static initialized: boolean = false;
   private ergoScanner!: ErgoScanner;
   private observationScanner!:
     | ErgoScanner
@@ -84,8 +91,8 @@ class CreateScanner {
   /**
    * initializes scanner with the configuration
    */
-  static async init(): Promise<void> {
-    if (!CreateScanner.initialized) {
+  static init = async (): Promise<void> => {
+    if (!CreateScanner.instance) {
       CreateScanner.instance = new CreateScanner();
       const allConfig = getConfig();
       const {
@@ -116,49 +123,41 @@ class CreateScanner {
         throw Error(
           'Observation scanner initialization failed, check the watcher network to be correct'
         );
-      CreateScanner.initialized = true;
     }
-  }
+  };
 
   /**
    * returns the scanner instance if initialized
    * @returns scanner instance
    */
-  static getInstance(): CreateScanner {
-    if (!CreateScanner.initialized) {
+  static getInstance = (): CreateScanner => {
+    if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
     }
     return CreateScanner.instance;
-  }
-
-  /**
-   * @returns whether scanner is initialized
-   */
-  static isInitialized(): boolean {
-    return CreateScanner.initialized;
-  }
+  };
 
   /**
    * @returns the ergo scanner
    */
-  getErgoScanner(): ErgoScanner {
-    if (!CreateScanner.initialized) {
+  getErgoScanner = (): ErgoScanner => {
+    if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
     }
     return this.ergoScanner;
-  }
+  };
 
   /**
    * @returns the observation scanner
    */
-  getObservationScanner(): ErgoScanner | CardanoKoiosScanner | CardanoOgmiosScanner | CardanoBlockFrostScanner | BitcoinEsploraScanner | BitcoinRpcScanner | EvmRpcScanner {
-    if (!CreateScanner.initialized) {
+  getObservationScanner = (): ErgoScanner | CardanoKoiosScanner | CardanoOgmiosScanner | CardanoBlockFrostScanner | BitcoinEsploraScanner | BitcoinRpcScanner | EvmRpcScanner => {
+    if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
     }
     return this.observationScanner;
-  }
+  };
 
-  private createErgoScanner = async (config: any, rosenConfig: any) => {
+  private createErgoScanner = async (config: Config, rosenConfig: RosenConfig) => {
     let networkUrl;
     let networkTimeout;
     if (config.scannerType === ErgoNetworkType.Node) {
@@ -246,7 +245,7 @@ class CreateScanner {
     this.ergoScanner.registerExtractor(collateralExtractor);
   };
 
-  private createCardanoScanner = async (cardanoConfig: any, rosenConfig: any) => {
+  private createCardanoScanner = async (cardanoConfig: CardanoConfig, rosenConfig: RosenConfig) => {
     if (!this.observationScanner) {
       if (cardanoConfig.ogmios) {
         this.observationScanner = new CardanoOgmiosScanner(
@@ -304,7 +303,7 @@ class CreateScanner {
     }
   };
 
-  private createBitcoinScanner = async (bitcoinConfig: any, rosenConfig: any) => {
+  private createBitcoinScanner = async (bitcoinConfig: BitcoinConfig, rosenConfig: RosenConfig) => {
     if (!this.observationScanner) {
       if (bitcoinConfig.esplora) {
         this.observationScanner = new BitcoinEsploraScanner(
@@ -347,7 +346,7 @@ class CreateScanner {
     }
   };
 
-  private createEthereumScanner = async (ethereumConfig: any, rosenConfig: any) => {
+  private createEthereumScanner = async (ethereumConfig: EthereumConfig, rosenConfig: RosenConfig) => {
     if (!this.observationScanner) {
       if (ethereumConfig.rpc) {
         this.observationScanner = new EvmRpcScanner(
@@ -373,7 +372,7 @@ class CreateScanner {
     }
   };
 
-  private createBinanceScanner = async (binanceConfig: any, rosenConfig: any) => {
+  private createBinanceScanner = async (binanceConfig: BinanceConfig, rosenConfig: RosenConfig) => {
     if (!this.observationScanner) {
       if (binanceConfig.rpc) {
         this.observationScanner = new EvmRpcScanner(

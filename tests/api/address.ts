@@ -5,7 +5,6 @@ import express, { Router } from 'express';
 import { default as addressRouter } from '../../src/api/address';
 import request from 'supertest';
 import { initWatcherDB } from '../../src/init';
-import { getConfig, initializeTokens } from '../../src/config/config';
 import JSONBigInt from 'json-bigint';
 import {
   validBox0Token,
@@ -17,11 +16,9 @@ import {
 chai.use(spies);
 
 const app = express();
-app.use(express.json());
-
 const router = Router();
-router.use('/address', addressRouter);
-app.use(router);
+router.use('/', addressRouter);
+app.use('/address', router);
 
 describe('addressRouter', () => {
   // TODO: Refactor format (https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/97)
@@ -30,7 +27,6 @@ describe('addressRouter', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM, true);
       initWatcherDB(ORM.DB);
-      await initializeTokens()
     });
 
     /**

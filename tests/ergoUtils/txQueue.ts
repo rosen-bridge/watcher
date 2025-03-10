@@ -19,7 +19,7 @@ import TransactionTest from '../../src/api/TransactionTest';
 import { Transaction } from '../../src/api/Transaction';
 import { createMemoryDatabase } from '../resources/inMemoryDb';
 import { DataSource } from 'typeorm';
-import { initializeTokens } from '../../src/config/config';
+
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
 
@@ -49,7 +49,7 @@ describe('Transaction queue tests', () => {
     transaction = TransactionTest.getInstance();
     dbConnection = new WatcherUtils(dataBase, 0, 100);
     txQueue = new Queue(dataBase, dbConnection);
-    await initializeTokens();
+    ;
   });
 
   afterEach(() => {
@@ -244,7 +244,7 @@ describe('Transaction queue tests', () => {
       watcherDb = new WatcherDataBase(db);
       dbConnection = new WatcherUtils(watcherDb, 0, 100);
       txQueue = new Queue(watcherDb, dbConnection);
-      await initializeTokens()
+
     });
 
     /**

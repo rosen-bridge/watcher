@@ -6,7 +6,7 @@ import { initWatcherDB } from '../../src/init';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import request from 'supertest';
 import { observations } from './testDataEvents';
-import { initializeTokens } from '../../src/config/config';
+
 
 chai.use(spies);
 
@@ -23,7 +23,7 @@ describe('observationRouter', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM, false, true, true);
       initWatcherDB(ORM.DB);
-      await initializeTokens()
+
     });
 
     /**

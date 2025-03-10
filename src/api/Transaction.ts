@@ -64,7 +64,6 @@ export class Transaction {
     boxes: Boxes,
     db: WatcherDataBase
   ) => {
-    await CreateScanner.init();
     if (!Transaction.isSetupCalled) {
       Transaction.watcherPermitState = undefined;
       Transaction.watcherWID = '';

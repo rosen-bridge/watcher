@@ -22,7 +22,7 @@ class TokensConfig {
       const tokensJson: string = fs.readFileSync(tokensPath, 'utf8');
       const tokens = JSON.parse(tokensJson);
       TokensConfig.instance.tokenMap = new TokenMap();
-      await TokensConfig.instance.tokenMap.updateConfigByJson(tokens);
+      await TokensConfig.instance.tokenMap.updateConfigByJson(tokens.tokens);
     }
   }
 
@@ -35,13 +35,6 @@ class TokensConfig {
       throw new Error('TokensConfig is not initialized');
     }
     return TokensConfig.instance;
-  }
-
-  /**
-   * @returns whether TokensConfig is initialized
-   */
-  static isInitialized(): boolean {
-    return !!TokensConfig.instance;
   }
 
   /**

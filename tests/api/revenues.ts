@@ -12,7 +12,7 @@ import {
   revenueYearlyChart,
 } from '../ergo/statistics/mockUtils';
 import { Transaction } from '../../src/api/Transaction';
-import { initializeTokens } from '../../src/config/config';
+
 
 chai.use(spies);
 
@@ -30,7 +30,7 @@ describe('revenueRouter', () => {
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
       Transaction.watcherWID = 'WIDStatistics';
-      await initializeTokens()
+
     });
 
     /**
@@ -297,7 +297,7 @@ describe('revenueRouter', () => {
       const ORM = await loadDataBase();
       await fillORM(ORM);
       initWatcherDB(ORM.DB);
-      await initializeTokens()
+
     });
 
     /**

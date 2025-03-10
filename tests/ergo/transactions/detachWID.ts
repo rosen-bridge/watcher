@@ -5,7 +5,6 @@ import { WatcherDataBase } from '../../../src/database/models/watcherModel';
 import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import { TransactionUtils } from '../../../src/utils/watcherUtils';
 import chai from 'chai';
-import { getConfig, initializeTokens } from '../../../src/config/config';
 import { DetachWID } from '../../../src/transactions/detachWID';
 import { ErgoUtils } from '../../../src/ergo/utils';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
@@ -15,6 +14,8 @@ import { JsonBI } from '../../../src/ergo/network/parser';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
 import { TxType } from '../../../src/database/entities/txEntity';
+import { TokensConfig } from '../../../src/config/tokensConfig';
+import { getConfig } from '../../../src/config/config';
 
 const WID = 'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
 const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
@@ -34,7 +35,7 @@ describe('DetachWID', () => {
       boxes,
       watcherDb
     );
-    await initializeTokens()
+
   });
 
   afterEach(() => {

@@ -81,7 +81,7 @@ import { TokenEntity } from '../../src/database/entities/tokenEntity';
 import { RevenueView } from '../../src/database/entities/revenueView';
 import { RevenueEntity } from '../../src/database/entities/revenueEntity';
 import { RevenueChartDataView } from '../../src/database/entities/revenueChartDataView';
-import { initializeTokens } from '../../src/config/config';
+
 
 const observation2Status = {
   observation: observationEntity2,
@@ -244,7 +244,7 @@ describe('WatcherModel tests', () => {
     observationRepo = ORM.observationRepo;
     observationStatusRepo = ORM.observationStatusRepo;
     commitmentRepo = ORM.commitmentRepo;
-    await initializeTokens()
+
   });
 
   describe('getLastBlockHeight', () => {
@@ -696,7 +696,7 @@ describe('WatcherModel tests', () => {
       observationRepo = ORM.observationRepo;
       observationStatusRepo = ORM.observationStatusRepo;
       commitmentRepo = ORM.commitmentRepo;
-      await initializeTokens()
+
     });
 
     /**
@@ -746,7 +746,7 @@ describe('WatcherModel tests', () => {
     before(async () => {
       memoryDb = await createMemoryDatabase();
       watcherDb = new WatcherDataBase(memoryDb);
-      await initializeTokens()
+
     });
     /**
      * @target WatcherDataBase.getActivePermitTransactions should get txs

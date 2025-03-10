@@ -9,8 +9,6 @@ import { generalInfo } from '../database/mockedData';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 import { Transaction } from '../../src/api/Transaction';
 import sinon from 'sinon';
-import { TokensConfig } from 'src/config/tokensConfig';
-import { cloneDeep } from 'lodash-es';
 import { CreateScanner } from '../../src/utils/scanner';
 chai.use(spies);
 
