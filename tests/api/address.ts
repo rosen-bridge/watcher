@@ -16,9 +16,11 @@ import {
 chai.use(spies);
 
 const app = express();
+app.use(express.json());
+
 const router = Router();
-router.use('/', addressRouter);
-app.use('/address', router);
+router.use('/address', addressRouter);
+app.use(router);
 
 describe('addressRouter', () => {
   // TODO: Refactor format (https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/97)
