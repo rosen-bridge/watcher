@@ -109,8 +109,7 @@ describe('Testing Box Creation', () => {
   });
 
   afterEach(() => {
-    chai.spy.restore(DB);
-    chai.spy.restore(ErgoNetwork);
+    chai.spy.restore();
   });
 
   describe('uniqueTrackedBoxes', () => {

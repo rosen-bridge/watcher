@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { describe } from 'mocha';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, MigrationInterface } from 'typeorm';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
 import {
@@ -19,6 +19,7 @@ import {
   CommitmentEntity,
   EventTriggerEntity,
   PermitEntity,
+  CollateralEntity,
   migrations as watcherDataExtractorMigrations,
 } from '@rosen-bridge/watcher-data-extractor';
 
@@ -81,6 +82,7 @@ import { RevenueView } from '../../src/database/entities/revenueView';
 import { RevenueEntity } from '../../src/database/entities/revenueEntity';
 import { RevenueChartDataView } from '../../src/database/entities/revenueChartDataView';
 
+
 const observation2Status = {
   observation: observationEntity2,
   status: TxStatus.NOT_COMMITTED,
@@ -122,6 +124,7 @@ export const loadDataBase = async (clean = true): Promise<ORMType> => {
     RevenueView,
     RevenueEntity,
     RevenueChartDataView,
+    CollateralEntity,
   ];
   const ormConfig = new DataSource({
     type: 'sqlite',

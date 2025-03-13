@@ -3,7 +3,6 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
-import { TokensConfig } from './tokensConfig';
 import { cloneDeep } from 'lodash-es';
 import path from 'path';
 import { NetworkType } from '../types';
@@ -28,7 +27,6 @@ interface ConfigType {
   binance: BinanceConfig;
   general: Config;
   rosen: RosenConfig;
-  token: TokensConfig;
   database: DatabaseConfig;
   healthCheck: HealthCheckConfig;
   notification: NotificationConfig;
@@ -154,7 +152,7 @@ class Config {
         const randomMnemonic = generateMnemonic(160);
         console.warn(
           'ImproperlyConfigured. ergo.mnemonic does not exist in the config.' +
-            `You can use {${randomMnemonic}} or generate one by yourself`
+          `You can use {${randomMnemonic}} or generate one by yourself`
         );
         throw new SecretError(
           `ImproperlyConfigured. ergo.mnemonic doesn't set in config file.`
@@ -642,7 +640,6 @@ const getConfig = (): ConfigType => {
       general.networkType,
       general.rosenConfigPath
     );
-    const token = new TokensConfig(general.rosenTokensPath);
     const database = new DatabaseConfig();
     const healthCheck = new HealthCheckConfig();
     const notification = new NotificationConfig();
@@ -654,7 +651,6 @@ const getConfig = (): ConfigType => {
       logger,
       general,
       rosen,
-      token,
       database,
       healthCheck,
       notification,
@@ -663,4 +659,4 @@ const getConfig = (): ConfigType => {
   return internalConfig;
 };
 
-export { getConfig };
+export { getConfig, Config, RosenConfig, CardanoConfig, BitcoinConfig, EthereumConfig, BinanceConfig };

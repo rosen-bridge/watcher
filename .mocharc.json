@@ -1,10 +1,17 @@
 {
-  "extensions": ["ts"],
-  "spec": ["tests/**/*.ts"],
+  "extensions": [
+    "ts"
+  ],
+  "spec": [
+    "tests/**/*.ts"
+  ],
   "node-option": [
     "experimental-modules",
     "experimental-specifier-resolution=node",
     "loader=ts-node/esm"
   ],
-  "require": ["src/bootstrap.ts"]
+  "require": [
+    "src/bootstrap.ts",
+    "tests/bootstrap.ts"
+  ]
 }

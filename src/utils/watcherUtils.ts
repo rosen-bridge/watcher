@@ -13,7 +13,7 @@ import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CommitmentSet } from './interfaces';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
-import { scanner } from './scanner';
+import { CreateScanner } from './scanner';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 import MinimumFeeHandler from './MinimumFeeHandler';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
@@ -55,7 +55,7 @@ class WatcherUtils {
       return false;
     }
     const currentHeight = await this.dataBase.getLastBlockHeight(
-      scanner.observationScanner.name()
+      CreateScanner.getInstance().getObservationScanner().name()
     );
     if (currentHeight - observation.height > this.observationValidThreshold) {
       logger.debug(
@@ -118,9 +118,9 @@ class WatcherUtils {
     );
     return (
       BigInt(observation.amount) >=
-        BigInt(bridgeFee) + BigInt(feeConfig.networkFee) &&
+      BigInt(bridgeFee) + BigInt(feeConfig.networkFee) &&
       BigInt(observation.amount) >=
-        BigInt(observation.bridgeFee) + BigInt(observation.networkFee)
+      BigInt(observation.bridgeFee) + BigInt(observation.networkFee)
     );
   };
 
@@ -171,7 +171,7 @@ class WatcherUtils {
    */
   allReadyObservations = async (): Promise<Array<ObservationEntity>> => {
     const height = await this.dataBase.getLastBlockHeight(
-      scanner.observationScanner.name()
+      CreateScanner.getInstance().getObservationScanner().name()
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
@@ -249,7 +249,7 @@ class WatcherUtils {
   allReadyCommitmentSets = async (): Promise<Array<CommitmentSet>> => {
     const readyCommitments: Array<CommitmentSet> = [];
     const height = await this.dataBase.getLastBlockHeight(
-      scanner.observationScanner.name()
+      CreateScanner.getInstance().getObservationScanner().name()
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
@@ -309,7 +309,7 @@ class WatcherUtils {
     timeoutConfirmation: number
   ): Promise<Array<CommitmentEntity>> => {
     const height = await this.dataBase.getLastBlockHeight(
-      scanner.ergoScanner.name()
+      CreateScanner.getInstance().getErgoScanner().name()
     );
     return await this.dataBase.commitmentsByWIDAndMaxHeight(
       Transaction.watcherWID!,
@@ -324,7 +324,7 @@ class WatcherUtils {
    */
   allTriggeredInvalidCommitments = async () => {
     const height = await this.dataBase.getLastBlockHeight(
-      scanner.ergoScanner.name()
+      CreateScanner.getInstance().getObservationScanner().name()
     );
     const result: Array<CommitmentEntity> = [];
     const commitments = await this.dataBase.commitmentsByWIDAndMaxHeight(
@@ -363,7 +363,7 @@ class WatcherUtils {
    */
   hasMissedObservation = async (): Promise<boolean> => {
     const height = await this.dataBase.getLastBlockHeight(
-      scanner.observationScanner.name()
+      CreateScanner.getInstance().getErgoScanner().name()
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,

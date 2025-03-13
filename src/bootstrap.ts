@@ -9,4 +9,3 @@ const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 logger.info(`Watcher version: ${packageJson.version}`);
 logger.info(`Watcher contract version: ${getConfig().rosen.contractVersion}`);
-logger.info(`Watcher tokens version: ${getConfig().token.version}`);

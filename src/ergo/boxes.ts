@@ -23,6 +23,7 @@ import { JsonBI } from './network/parser';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { blake2b } from 'blakejs';
 import { ERGO_CHAIN_NAME } from '../config/constants';
+import { TokensConfig } from '../config/tokensConfig';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -717,7 +718,7 @@ export class Boxes {
       4,
       wasm.Constant.from_byte_array(Buffer.from(wid, 'hex'))
     );
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     const wrappedRwtCount = tokenMap.wrapAmount(
       getConfig().rosen.RWTId,
       rwtCount,

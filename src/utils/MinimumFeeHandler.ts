@@ -3,11 +3,12 @@ import {
   ErgoNetworkType,
   MinimumFeeBox,
 } from '@rosen-bridge/minimum-fee';
-import { RosenTokens } from '@rosen-bridge/tokens';
+import { TokenMap } from '@rosen-bridge/tokens';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { getConfig } from '../config/config';
 import { ERGO_CHAIN_NAME, NODE_TYPE } from '../config/constants';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { TokensConfig } from '../config/tokensConfig';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -22,27 +23,29 @@ class MinimumFeeHandler {
   /**
    * initializes minimum fee handler
    */
-  static init = async (tokens: RosenTokens) => {
+  static init = async (tokenMap: TokenMap) => {
     const configs = getConfig();
 
     MinimumFeeHandler.instance = new MinimumFeeHandler();
     logger.debug('MinimumFeeHandler instantiated');
-    const ergoTokenIdKey = configs.token.tokenMap.getIdKey(ERGO_CHAIN_NAME);
 
-    const promises = tokens.tokens.map((chainToken) => {
+
+    // TODO: A function to apply token map updates is required for here 
+    // local:ergo/rosen-bridge/watcher#269
+    const promises = tokenMap.getConfig().map((chainToken) => { 
       const token = chainToken[ERGO_CHAIN_NAME];
-      const tokenId = token[ergoTokenIdKey];
+      const tokenId = token.tokenId;
 
       const { networkType, url } =
         configs.general.scannerType === NODE_TYPE
           ? {
-              networkType: ErgoNetworkType.node,
-              url: configs.general.nodeUrl,
-            }
+            networkType: ErgoNetworkType.node,
+            url: configs.general.nodeUrl,
+          }
           : {
-              networkType: ErgoNetworkType.explorer,
-              url: configs.general.explorerUrl,
-            };
+            networkType: ErgoNetworkType.explorer,
+            url: configs.general.explorerUrl,
+          };
       const tokenMinimumFeeBox = new MinimumFeeBox(
         tokenId,
         configs.rosen.rsnRatioNFT,
@@ -75,10 +78,9 @@ class MinimumFeeHandler {
   getEventFeeConfig = (observation: ObservationEntity): ChainMinimumFee => {
     const instance = MinimumFeeHandler.getInstance();
 
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     const token = tokenMap.search(observation.fromChain, {
-      [tokenMap.getIdKey(observation.fromChain)]:
-        observation.sourceChainTokenId,
+      tokenId: observation.sourceChainTokenId,
     });
     if (token.length === 0)
       throw Error(

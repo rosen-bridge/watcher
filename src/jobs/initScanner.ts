@@ -1,9 +1,9 @@
 import { CardanoOgmiosScanner, GeneralScanner } from '@rosen-bridge/scanner';
 import * as Constants from '../config/constants';
 import { getConfig } from '../config/config';
-import { scanner } from '../utils/scanner';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+import { CreateScanner } from '../utils/scanner';
 
 const allConfig = getConfig();
 const {
@@ -28,11 +28,12 @@ const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
 };
 
 export const scannerInit = () => {
-  scanningJob(config.ergoInterval, scanner.ergoScanner).then(() => null);
+  const scanner = CreateScanner.getInstance();
+  scanningJob(config.ergoInterval, scanner.getErgoScanner()).then(() => null);
   switch (config.networkWatcher) {
     case Constants.CARDANO_CHAIN_NAME:
       if (cardanoConfig.ogmios) {
-        (scanner.observationScanner as CardanoOgmiosScanner)
+        (scanner.getObservationScanner() as CardanoOgmiosScanner)
           .start()
           .catch((e) => {
             logger.error(`Ogmios connection failed with error: ${e}`);
@@ -43,7 +44,7 @@ export const scannerInit = () => {
         cardanoConfig.koios
           ? cardanoConfig.koios.interval
           : cardanoConfig.blockfrost!.interval,
-        scanner.observationScanner as GeneralScanner<unknown>
+        scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
     case Constants.BITCOIN_CHAIN_NAME:
@@ -51,19 +52,19 @@ export const scannerInit = () => {
         bitcoinConfig.rpc
           ? bitcoinConfig.rpc.interval
           : bitcoinConfig.esplora!.interval,
-        scanner.observationScanner as GeneralScanner<unknown>
+        scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
     case Constants.ETHEREUM_CHAIN_NAME:
       scanningJob(
         ethereumConfig.rpc!.interval,
-        scanner.observationScanner as EvmRpcScanner
+        scanner.getObservationScanner() as EvmRpcScanner
       ).then(() => null);
       break;
     case Constants.BINANCE_CHAIN_NAME:
       scanningJob(
         binanceConfig.rpc!.interval,
-        scanner.observationScanner as EvmRpcScanner
+        scanner.getObservationScanner() as EvmRpcScanner
       ).then(() => null);
       break;
     case Constants.ERGO_CHAIN_NAME:
