@@ -269,12 +269,15 @@ class HealthCheckSingleton {
       this.healthCheck.register(bitcoinScannerSyncCheck);
   };
 
+  /**
+   * Registers all doge check params
+   */
   registerDogeHealthCheckParams = () => {
     let dogeScannerSyncCheck;
+    const scanner = CreateScanner.getInstance();
     if (getConfig().doge.type === RPC_TYPE) {
       dogeScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
-        this.observingNetworkLastBlock(scanner.observationScanner.name()),
-        scanner.observationScanner.name(),
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.dogeScannerWarnDiff,
         getConfig().healthCheck.dogeScannerCriticalDiff,
         getConfig().doge.rpc!.url,
@@ -283,8 +286,7 @@ class HealthCheckSingleton {
       );
     } else if (getConfig().doge.type === ESPLORA_TYPE) {
       dogeScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
-        this.observingNetworkLastBlock(scanner.observationScanner.name()),
-        scanner.observationScanner.name(),
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.dogeScannerWarnDiff,
         getConfig().healthCheck.dogeScannerCriticalDiff,
         getConfig().doge.esplora!.url

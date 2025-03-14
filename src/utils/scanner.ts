@@ -3,6 +3,8 @@ import { BitcoinEsploraScanner, DogeEsploraScanner } from '@rosen-bridge/bitcoin
 import {
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
+  DogeEsploraObservationExtractor,
+  DogeRpcObservationExtractor,
 } from '@rosen-bridge/bitcoin-observation-extractor';
 import { BitcoinRpcScanner, DogeRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
@@ -41,6 +43,7 @@ import {
   EthereumConfig,
   getConfig,
   RosenConfig,
+  DogeConfig,
 } from '../config/config';
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
@@ -83,6 +86,7 @@ class CreateScanner {
     | BitcoinEsploraScanner
     | BitcoinRpcScanner
     | DogeEsploraScanner
+    | DogeRpcScanner
     | EvmRpcScanner;
 
   private constructor() {
@@ -101,6 +105,7 @@ class CreateScanner {
         rosen: rosenConfig,
         cardano: cardanoConfig,
         bitcoin: bitcoinConfig,
+        doge: dogeConfig,
         ethereum: ethereumConfig,
         binance: binanceConfig,
       } = allConfig;
@@ -118,6 +123,9 @@ class CreateScanner {
           break;
         case Constants.BINANCE_CHAIN_NAME:
           await CreateScanner.instance.createBinanceScanner(binanceConfig, rosenConfig);
+          break;
+        case Constants.DOGE_CHAIN_NAME:
+          await CreateScanner.instance.createDogeScanner(dogeConfig, rosenConfig);
           break;
       }
       if (!CreateScanner.instance.observationScanner)
@@ -151,7 +159,7 @@ class CreateScanner {
   /**
    * @returns the observation scanner
    */
-  getObservationScanner = (): ErgoScanner | CardanoKoiosScanner | CardanoOgmiosScanner | CardanoBlockFrostScanner | BitcoinEsploraScanner | BitcoinRpcScanner | EvmRpcScanner => {
+  getObservationScanner = (): ErgoScanner | CardanoKoiosScanner | CardanoOgmiosScanner | CardanoBlockFrostScanner | BitcoinEsploraScanner | BitcoinRpcScanner | DogeEsploraScanner | DogeRpcScanner | EvmRpcScanner => {
     if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
     }
@@ -347,12 +355,12 @@ class CreateScanner {
     }
   };
 
-  private createDogeScanner = () => {
+  private createDogeScanner = async (dogeConfig: DogeConfig, rosenConfig: RosenConfig) => {
     if (!this.observationScanner) {
       if (dogeConfig.esplora) {
         this.observationScanner = new DogeEsploraScanner(
           {
-            dataSource: dataSource,
+            dataSource: dataSource as DataSource,
             esploraUrl: dogeConfig.esplora.url,
             timeout: dogeConfig.esplora.timeout * 1000,
             initialHeight: dogeConfig.initialHeight,
@@ -362,7 +370,7 @@ class CreateScanner {
         const observationExtractor = new DogeEsploraObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokens,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -372,9 +380,13 @@ class CreateScanner {
             rpcUrl: dogeConfig.rpc.url,
             timeout: dogeConfig.rpc.timeout * 1000,
             initialHeight: dogeConfig.initialHeight,
+            dataSource: dataSource,
+            username: dogeConfig.rpc.username,
+            password: dogeConfig.rpc.password,
           },
           loggers.scannerLogger
         );
+
         const observationExtractor = new DogeRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,

@@ -61,7 +61,7 @@ export const scannerInit = () => {
         dogeConfig.rpc
           ? dogeConfig.rpc.interval
           : dogeConfig.esplora!.interval,
-        scanner.observationScanner as GeneralScanner<unknown>
+        scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
     case Constants.ETHEREUM_CHAIN_NAME:

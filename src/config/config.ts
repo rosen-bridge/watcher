@@ -712,4 +712,4 @@ const getConfig = (): ConfigType => {
   return internalConfig;
 };
 
-export { getConfig, Config, RosenConfig, CardanoConfig, BitcoinConfig, EthereumConfig, BinanceConfig };
+export { getConfig, Config, RosenConfig, CardanoConfig, BitcoinConfig, EthereumConfig, BinanceConfig, DogeConfig };
