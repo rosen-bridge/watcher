@@ -2,4 +2,4 @@
 '@rosen-bridge/watcher': minor
 ---
 
-integrate binance
+Add log level health parameters

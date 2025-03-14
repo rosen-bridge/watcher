@@ -4,17 +4,17 @@ import { JsonBI } from '../ergo/network/parser';
 import { ErgoUtils } from '../ergo/utils';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 import { Transaction } from './Transaction';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import packageJson from '../../package.json' assert { type: 'json' };
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
+import { TokensConfig } from '../config/tokensConfig';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 interface GeneralInfo {
   versions: {
     app: string;
     contract: string;
-    tokensMap: string;
   };
   currentBalance: bigint;
   network: string;
@@ -43,13 +43,12 @@ const generalRouter = express.Router();
  */
 generalRouter.get('/', async (req: Request, res: Response) => {
   try {
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     const collateral = await Transaction.getInstance().getCollateral();
     const info: GeneralInfo = {
       versions: {
         app: packageJson.version,
         contract: getConfig().rosen.contractVersion,
-        tokensMap: getConfig().token.version,
       },
       currentBalance: tokenMap.wrapAmount(
         ERGO_NATIVE_ASSET,

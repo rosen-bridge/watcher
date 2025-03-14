@@ -3,7 +3,6 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { SecretError } from '../errors/errors';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
-import { TokensConfig } from './tokensConfig';
 import { cloneDeep } from 'lodash-es';
 import path from 'path';
 import { NetworkType } from '../types';
@@ -30,7 +29,6 @@ interface ConfigType {
   doge: DogeConfig;
   general: Config;
   rosen: RosenConfig;
-  token: TokensConfig;
   database: DatabaseConfig;
   healthCheck: HealthCheckConfig;
   notification: NotificationConfig;
@@ -694,7 +692,6 @@ const getConfig = (): ConfigType => {
       general.networkType,
       general.rosenConfigPath
     );
-    const token = new TokensConfig(general.rosenTokensPath);
     const database = new DatabaseConfig();
     const healthCheck = new HealthCheckConfig();
     const notification = new NotificationConfig();
@@ -707,7 +704,6 @@ const getConfig = (): ConfigType => {
       logger,
       general,
       rosen,
-      token,
       database,
       healthCheck,
       notification,
@@ -716,4 +712,4 @@ const getConfig = (): ConfigType => {
   return internalConfig;
 };
 
-export { getConfig };
+export { getConfig, Config, RosenConfig, CardanoConfig, BitcoinConfig, EthereumConfig, BinanceConfig };

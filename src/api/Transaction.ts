@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import { ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { Boxes } from '../ergo/boxes';
@@ -22,8 +22,10 @@ import {
 } from '../config/constants';
 import { HealthStatusLevel } from '@rosen-bridge/health-check';
 import { HealthCheckSingleton } from '../utils/healthCheck';
+import { TokensConfig } from '../config/tokensConfig';
+import { CreateScanner } from '../utils/scanner';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export type ApiResponse = {
   response: string;
@@ -169,7 +171,7 @@ export class Transaction {
       throw Error('one of registers (4, 5) of repo box is not set');
     }
 
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     const collateralBox = await Transaction.boxes.getCollateralBox(wid);
     const totalRwt = tokenMap.unwrapAmount(
       getConfig().rosen.RWTId,
@@ -565,7 +567,7 @@ export class Transaction {
         status: 500,
       };
     }
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     const collateral = await this.getCollateral();
     const ErgCollateral = tokenMap.unwrapAmount(
       ERGO_NATIVE_ASSET,

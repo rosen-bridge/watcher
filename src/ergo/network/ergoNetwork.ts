@@ -16,9 +16,9 @@ import { ConnectionError } from '../../errors/errors';
 import { getConfig } from '../../config/config';
 import { ExplorerBox, ErgoAssetInfo } from '../network/types';
 import { MAX_API_LIMIT } from '../../config/constants';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const explorerApi = axios.create({
   baseURL: getConfig().general.explorerUrl,

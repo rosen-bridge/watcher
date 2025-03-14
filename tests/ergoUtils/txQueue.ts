@@ -51,7 +51,7 @@ describe('Transaction queue tests', () => {
   });
 
   afterEach(() => {
-    chai.spy.restore(ErgoNetwork);
+    chai.spy.restore();
   });
 
   /**

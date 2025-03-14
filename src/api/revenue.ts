@@ -5,9 +5,9 @@ import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { Transaction } from './Transaction';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const revenueRouter = express.Router();
 
 /**

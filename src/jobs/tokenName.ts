@@ -2,10 +2,11 @@ import { watcherDatabase } from '../init';
 import { decodeSerializedBox, ErgoUtils } from '../ergo/utils';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { getConfig } from '../config/config';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { ERGO_CHAIN_NAME } from '../config/constants';
+import { TokensConfig } from '../config/tokensConfig';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 let initialized = false;
 
 /**
@@ -57,14 +58,13 @@ export const tokenNameJobFunction = async (
 export const tokenNameJob = async (boxIds: string[]) => {
   if (!initialized) {
     try {
-      const tokenMap = getConfig().token.tokenMap;
+      const tokenMap = TokensConfig.getInstance().getTokenMap();
       const chains = tokenMap.getAllChains();
-      const idKeyErgo = tokenMap.getIdKey(ERGO_CHAIN_NAME);
       for (const chain of chains) {
         const tokensData = tokenMap.getTokens(ERGO_CHAIN_NAME, chain);
         for (const tokenData of tokensData) {
           await watcherDatabase.insertTokenEntity(
-            tokenData[idKeyErgo],
+            tokenData.tokenId,
             tokenData.name,
             tokenData.decimals
           );

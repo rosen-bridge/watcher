@@ -123,8 +123,8 @@ spentPermitEntity.txId = 'txId2';
 
 export const plainBox = new BoxEntity();
 plainBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
-plainBox.createBlock = 'blockID';
-plainBox.creationHeight = 100;
+plainBox.block = 'blockID';
+plainBox.height = 100;
 plainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 plainBox.boxId = 'boxId';
 plainBox.serialized =
@@ -132,8 +132,8 @@ plainBox.serialized =
 
 export const spentPlainBox = new BoxEntity();
 spentPlainBox.address = 'address';
-spentPlainBox.createBlock = 'blockID';
-spentPlainBox.creationHeight = 100;
+spentPlainBox.block = 'blockID';
+spentPlainBox.height = 100;
 spentPlainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 spentPlainBox.boxId = 'boxId2';
 spentPlainBox.serialized = 'box2';
@@ -141,8 +141,8 @@ spentPlainBox.spendBlock = 'blockHash';
 
 export const addressValidBox = new BoxEntity();
 addressValidBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
-addressValidBox.createBlock = 'blockID';
-addressValidBox.creationHeight = 100;
+addressValidBox.block = 'blockID';
+addressValidBox.height = 100;
 addressValidBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
 addressValidBox.boxId = 'boxId3';
 addressValidBox.serialized =
@@ -186,7 +186,7 @@ eventTriggerEntity.block = 'blockID';
 eventTriggerEntity.height = 100;
 eventTriggerEntity.extractor = 'extractor';
 eventTriggerEntity.boxId = 'boxId';
-eventTriggerEntity.boxSerialized = 'box';
+eventTriggerEntity.serialized = 'box';
 eventTriggerEntity.amount = '100';
 eventTriggerEntity.networkFee = '1000';
 eventTriggerEntity.bridgeFee = '200';
@@ -210,7 +210,7 @@ newEventTriggerEntity.block = 'blockID2';
 newEventTriggerEntity.height = 100;
 newEventTriggerEntity.extractor = 'extractor';
 newEventTriggerEntity.boxId = 'boxId2';
-newEventTriggerEntity.boxSerialized = 'box2';
+newEventTriggerEntity.serialized = 'box2';
 newEventTriggerEntity.amount = '100';
 newEventTriggerEntity.networkFee = '1000';
 newEventTriggerEntity.bridgeFee = '200';
@@ -721,8 +721,7 @@ export const permitMockRWT =
 export const generalInfo = {
   versions: {
     app: packageJson.version,
-    contract: getConfig().rosen.contractVersion,
-    tokensMap: getConfig().token.version,
+    contract: getConfig().rosen.contractVersion
   },
   currentBalance: 1100000,
   network: 'ergo',

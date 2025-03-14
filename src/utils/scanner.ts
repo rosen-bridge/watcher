@@ -1,84 +1,81 @@
-import {
-  ErgoScanner,
-  CardanoKoiosScanner,
-  CardanoOgmiosScanner,
-  ErgoNetworkType,
-  CardanoBlockFrostScanner,
-} from '@rosen-bridge/scanner';
+import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 import { BitcoinEsploraScanner, DogeEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
-import { BitcoinRpcScanner, DogeRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
-import {
-  ErgoObservationExtractor,
-  CardanoKoiosObservationExtractor,
-  CardanoOgmiosObservationExtractor,
-  CardanoBlockFrostObservationExtractor,
-} from '@rosen-bridge/observation-extractor';
 import {
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
-  DogeEsploraObservationExtractor,
-  DogeRpcObservationExtractor,
 } from '@rosen-bridge/bitcoin-observation-extractor';
+import { BitcoinRpcScanner, DogeRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import {
-  CommitmentExtractor,
-  PermitExtractor,
-  EventTriggerExtractor,
+  CardanoBlockFrostObservationExtractor,
+  CardanoKoiosObservationExtractor,
+  CardanoOgmiosObservationExtractor,
+  ErgoObservationExtractor,
+} from '@rosen-bridge/observation-extractor';
+import {
+  CardanoBlockFrostScanner,
+  CardanoKoiosScanner,
+  CardanoOgmiosScanner,
+  ErgoNetworkType,
+  ErgoScanner,
+} from '@rosen-bridge/scanner';
+import {
   CollateralExtractor,
+  CommitmentExtractor,
+  EventTriggerExtractor,
+  PermitExtractor,
 } from '@rosen-bridge/watcher-data-extractor';
-import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-import { getConfig } from '../config/config';
-import { dataSource } from '../../config/dataSource';
-import * as Constants from '../config/constants';
-import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
 import {
-  EthereumRpcObservationExtractor,
   BinanceRpcObservationExtractor,
+  EthereumRpcObservationExtractor,
 } from '@rosen-bridge/evm-observation-extractor';
-
-const allConfig = getConfig();
-const {
-  general: config,
-  token: tokensConfig,
-  rosen: rosenConfig,
-  cardano: cardanoConfig,
-  bitcoin: bitcoinConfig,
-  doge: dogeConfig,
-  ethereum: ethereumConfig,
-  binance: binanceConfig,
-} = allConfig;
+import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+import { DataSource } from 'typeorm';
+import { dataSource } from '../../config/dataSource';
+import {
+  BinanceConfig,
+  BitcoinConfig,
+  CardanoConfig,
+  Config,
+  EthereumConfig,
+  getConfig,
+  RosenConfig,
+} from '../config/config';
+import * as Constants from '../config/constants';
+import { TokensConfig } from '../config/tokensConfig';
 
 /**
  * Creates loggers for scanners and extractors
  * @returns loggers object
  */
 const createLoggers = () => ({
-  commitmentExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
+  commitmentExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
     'commitment-extractor'
   ),
-  eventTriggerExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
+  eventTriggerExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
     'event-trigger-extractor'
   ),
-  observationExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
+  observationExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
     'observation-extractor'
   ),
   permitExtractorLogger:
-    DefaultLoggerFactory.getInstance().getLogger('permit-extractor'),
+    CallbackLoggerFactory.getInstance().getLogger('permit-extractor'),
   plainExtractorLogger:
-    DefaultLoggerFactory.getInstance().getLogger('plain-extractor'),
-  scannerLogger: DefaultLoggerFactory.getInstance().getLogger('scanner'),
-  collateralExtractorLogger: DefaultLoggerFactory.getInstance().getLogger(
+    CallbackLoggerFactory.getInstance().getLogger('plain-extractor'),
+  scannerLogger: CallbackLoggerFactory.getInstance().getLogger('scanner'),
+  collateralExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
     'collateral-extractor'
   ),
 });
 
 const loggers = createLoggers();
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class CreateScanner {
-  ergoScanner: ErgoScanner;
-  observationScanner:
+  private static instance: CreateScanner;
+  private ergoScanner!: ErgoScanner;
+  private observationScanner!:
     | ErgoScanner
     | CardanoKoiosScanner
     | CardanoOgmiosScanner
@@ -88,32 +85,80 @@ class CreateScanner {
     | DogeEsploraScanner
     | EvmRpcScanner;
 
-  constructor() {
-    this.createErgoScanner();
-    switch (config.networkWatcher) {
-      case Constants.BITCOIN_CHAIN_NAME:
-        this.createBitcoinScanner();
-        break;
-      case Constants.CARDANO_CHAIN_NAME:
-        this.createCardanoScanner();
-        break;
-      case Constants.ETHEREUM_CHAIN_NAME:
-        this.createEthereumScanner();
-        break;
-      case Constants.BINANCE_CHAIN_NAME:
-        this.createBinanceScanner();
-        break;
-      case Constants.DOGE_CHAIN_NAME:
-        this.createDogeScanner();
-        break;
-    }
-    if (!this.observationScanner)
-      throw Error(
-        'Observation scanner initialization failed, check the watcher network to be correct'
-      );
+  private constructor() {
+    // do nothing
   }
 
-  private createErgoScanner = () => {
+  /**
+   * initializes scanner with the configuration
+   */
+  static init = async (): Promise<void> => {
+    if (!CreateScanner.instance) {
+      CreateScanner.instance = new CreateScanner();
+      const allConfig = getConfig();
+      const {
+        general: config,
+        rosen: rosenConfig,
+        cardano: cardanoConfig,
+        bitcoin: bitcoinConfig,
+        ethereum: ethereumConfig,
+        binance: binanceConfig,
+      } = allConfig;
+
+      await CreateScanner.instance.createErgoScanner(config, rosenConfig);
+      switch (config.networkWatcher) {
+        case Constants.BITCOIN_CHAIN_NAME:
+          await CreateScanner.instance.createBitcoinScanner(bitcoinConfig, rosenConfig);
+          break;
+        case Constants.CARDANO_CHAIN_NAME:
+          await CreateScanner.instance.createCardanoScanner(cardanoConfig, rosenConfig);
+          break;
+        case Constants.ETHEREUM_CHAIN_NAME:
+          await CreateScanner.instance.createEthereumScanner(ethereumConfig, rosenConfig);
+          break;
+        case Constants.BINANCE_CHAIN_NAME:
+          await CreateScanner.instance.createBinanceScanner(binanceConfig, rosenConfig);
+          break;
+      }
+      if (!CreateScanner.instance.observationScanner)
+        throw Error(
+          'Observation scanner initialization failed, check the watcher network to be correct'
+        );
+    }
+  };
+
+  /**
+   * returns the scanner instance if initialized
+   * @returns scanner instance
+   */
+  static getInstance = (): CreateScanner => {
+    if (!CreateScanner.instance) {
+      throw new Error('Scanner is not initialized');
+    }
+    return CreateScanner.instance;
+  };
+
+  /**
+   * @returns the ergo scanner
+   */
+  getErgoScanner = (): ErgoScanner => {
+    if (!CreateScanner.instance) {
+      throw new Error('Scanner is not initialized');
+    }
+    return this.ergoScanner;
+  };
+
+  /**
+   * @returns the observation scanner
+   */
+  getObservationScanner = (): ErgoScanner | CardanoKoiosScanner | CardanoOgmiosScanner | CardanoBlockFrostScanner | BitcoinEsploraScanner | BitcoinRpcScanner | EvmRpcScanner => {
+    if (!CreateScanner.instance) {
+      throw new Error('Scanner is not initialized');
+    }
+    return this.observationScanner;
+  };
+
+  private createErgoScanner = async (config: Config, rosenConfig: RosenConfig) => {
     let networkUrl;
     let networkTimeout;
     if (config.scannerType === ErgoNetworkType.Node) {
@@ -143,7 +188,7 @@ class CreateScanner {
       this.observationScanner = this.ergoScanner;
       const observationExtractor = new ErgoObservationExtractor(
         dataSource,
-        tokensConfig.tokens,
+        TokensConfig.getInstance().getTokenMap(),
         rosenConfig.lockAddress,
         loggers.observationExtractorLogger
       );
@@ -154,7 +199,7 @@ class CreateScanner {
       [rosenConfig.commitmentAddress],
       rosenConfig.RWTId,
       dataSource,
-      getConfig().token.tokens,
+      TokensConfig.getInstance().getTokenMap(),
       loggers.commitmentExtractorLogger
     );
     const permitExtractor = new PermitExtractor(
@@ -201,7 +246,7 @@ class CreateScanner {
     this.ergoScanner.registerExtractor(collateralExtractor);
   };
 
-  private createCardanoScanner = () => {
+  private createCardanoScanner = async (cardanoConfig: CardanoConfig, rosenConfig: RosenConfig) => {
     if (!this.observationScanner) {
       if (cardanoConfig.ogmios) {
         this.observationScanner = new CardanoOgmiosScanner(
@@ -217,7 +262,7 @@ class CreateScanner {
         );
         const observationExtractor = new CardanoOgmiosObservationExtractor(
           dataSource,
-          tokensConfig.tokens,
+          TokensConfig.getInstance().getTokenMap(),
           rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
@@ -235,7 +280,7 @@ class CreateScanner {
         );
         const observationExtractor = new CardanoKoiosObservationExtractor(
           dataSource,
-          tokensConfig.tokens,
+          TokensConfig.getInstance().getTokenMap(),
           rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
@@ -250,7 +295,7 @@ class CreateScanner {
         });
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
           dataSource,
-          tokensConfig.tokens,
+          TokensConfig.getInstance().getTokenMap(),
           rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
@@ -259,12 +304,12 @@ class CreateScanner {
     }
   };
 
-  private createBitcoinScanner = () => {
+  private createBitcoinScanner = async (bitcoinConfig: BitcoinConfig, rosenConfig: RosenConfig) => {
     if (!this.observationScanner) {
       if (bitcoinConfig.esplora) {
         this.observationScanner = new BitcoinEsploraScanner(
           {
-            dataSource: dataSource,
+            dataSource: dataSource as DataSource,
             esploraUrl: bitcoinConfig.esplora.url,
             timeout: bitcoinConfig.esplora.timeout * 1000,
             initialHeight: bitcoinConfig.initialHeight,
@@ -274,7 +319,7 @@ class CreateScanner {
         const observationExtractor = new BitcoinEsploraObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokens,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -294,7 +339,7 @@ class CreateScanner {
         const observationExtractor = new BitcoinRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokens,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -333,7 +378,7 @@ class CreateScanner {
         const observationExtractor = new DogeRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokens,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -341,7 +386,7 @@ class CreateScanner {
     }
   };
 
-  private createEthereumScanner = () => {
+  private createEthereumScanner = async (ethereumConfig: EthereumConfig, rosenConfig: RosenConfig) => {
     if (!this.observationScanner) {
       if (ethereumConfig.rpc) {
         this.observationScanner = new EvmRpcScanner(
@@ -359,7 +404,7 @@ class CreateScanner {
         const observationExtractor = new EthereumRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokens,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -367,7 +412,7 @@ class CreateScanner {
     }
   };
 
-  private createBinanceScanner = () => {
+  private createBinanceScanner = async (binanceConfig: BinanceConfig, rosenConfig: RosenConfig) => {
     if (!this.observationScanner) {
       if (binanceConfig.rpc) {
         this.observationScanner = new EvmRpcScanner(
@@ -385,7 +430,7 @@ class CreateScanner {
         const observationExtractor = new BinanceRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
-          tokensConfig.tokens,
+          TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -394,6 +439,4 @@ class CreateScanner {
   };
 }
 
-const scanner = new CreateScanner();
-
-export { scanner };
+export { CreateScanner };

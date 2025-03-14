@@ -35,6 +35,7 @@ cardano:
     interval: 20 # koios scanning interval (in seconds)
     timeout: 10 # koios request timeout (in seconds)
     url: 'https://api.koios.rest/api/v1' # koios url
+    # authToken: # rpc auth token
   ogmios:
     host: '' # ogmios node host address
     port: 1337 # ogmios port
@@ -53,6 +54,7 @@ ethereum:
     url: '' # rpc url
     interval: 20 # rpc scanning interval (in seconds)
     timeout: 10 # rpc request timeout (in seconds)
+    # authToken: # rpc auth token
 binance:
   type: '' # options: rpc
   initial:
@@ -61,6 +63,7 @@ binance:
     url: '' # rpc url
     interval: 20 # rpc scanning interval (in seconds)
     timeout: 10 # rpc request timeout (in seconds)
+    # authToken: # rpc auth token
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer

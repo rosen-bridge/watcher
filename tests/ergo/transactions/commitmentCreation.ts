@@ -1,4 +1,3 @@
-import { Buffer } from 'buffer';
 import { Boxes } from '../../../src/ergo/boxes';
 import { Transaction } from '../../../src/api/Transaction';
 import { secret1 } from './permit';
@@ -89,7 +88,7 @@ describe('Commitment creation transaction tests', () => {
   });
 
   afterEach(() => {
-    chai.spy.restore(watcherUtils);
+    chai.spy.restore();
   });
 
   describe('createCommitmentTx', () => {
