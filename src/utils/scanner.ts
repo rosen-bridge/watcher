@@ -5,9 +5,8 @@ import {
   ErgoNetworkType,
   CardanoBlockFrostScanner,
 } from '@rosen-bridge/scanner';
-import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
-import { DogeEsploraScanner } from '@rosen-bridge/doge-esplora-scanner';
-import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
+import { BitcoinEsploraScanner, DogeEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
+import { BitcoinRpcScanner, DogeRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
 import {
   ErgoObservationExtractor,
   CardanoKoiosObservationExtractor,
@@ -18,6 +17,7 @@ import {
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
   DogeEsploraObservationExtractor,
+  DogeRpcObservationExtractor,
 } from '@rosen-bridge/bitcoin-observation-extractor';
 import {
   CommitmentExtractor,
@@ -315,6 +315,22 @@ class CreateScanner {
           loggers.scannerLogger
         );
         const observationExtractor = new DogeEsploraObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          tokensConfig.tokens,
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (dogeConfig.rpc) {
+        this.observationScanner = new DogeRpcScanner(
+          {
+            rpcUrl: dogeConfig.rpc.url,
+            timeout: dogeConfig.rpc.timeout * 1000,
+            initialHeight: dogeConfig.initialHeight,
+          },
+          loggers.scannerLogger
+        );
+        const observationExtractor = new DogeRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
           tokensConfig.tokens,

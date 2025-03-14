@@ -23,5 +23,16 @@
   "include": ["./**/*.ts", "./rollup.config.ts"],
   "ts-node": {
     "esm": true
-  }
+  },
+  "references": [
+    {
+      "path": "../scanner/packages/observation-extractors/bitcoin-observation-extractor"
+    },
+    {
+      "path": "../scanner/packages/scanners/bitcoin-rpc-scanner"
+    },
+    {
+      "path": "../scanner/packages/scanners/bitcoin-esplora-scanner"
+    }
+  ]
 }

@@ -156,7 +156,7 @@ class Config {
         const randomMnemonic = generateMnemonic(160);
         console.warn(
           'ImproperlyConfigured. ergo.mnemonic does not exist in the config.' +
-            `You can use {${randomMnemonic}} or generate one by yourself`
+          `You can use {${randomMnemonic}} or generate one by yourself`
         );
         throw new SecretError(
           `ImproperlyConfigured. ergo.mnemonic doesn't set in config file.`
@@ -430,6 +430,13 @@ class DogeConfig {
     timeout: number;
     interval: number;
   };
+  rpc?: {
+    url: string;
+    timeout: number;
+    interval: number;
+    username?: string;
+    password?: string;
+  };
 
   constructor(network: string) {
     this.type = config.get<string>('doge.type');
@@ -440,9 +447,16 @@ class DogeConfig {
         const interval = getRequiredNumber('doge.esplora.interval');
         const timeout = getRequiredNumber('doge.esplora.timeout');
         this.esplora = { url, interval, timeout };
+      } else if (this.type === Constants.RPC_TYPE) {
+        const url = getRequiredString('doge.rpc.url');
+        const timeout = getRequiredNumber('doge.rpc.timeout');
+        const interval = getRequiredNumber('doge.rpc.interval');
+        const username = getOptionalString('doge.rpc.username', undefined);
+        const password = getOptionalString('doge.rpc.password', undefined);
+        this.rpc = { url, timeout, interval, username, password };
       } else {
         throw new Error(
-          `Improperly configured. doge configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`
+          `Improperly configured. doge configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}', '${Constants.RPC_TYPE}'`
         );
       }
     }

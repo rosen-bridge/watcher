@@ -17,7 +17,6 @@ import {
   ErgoNodeScannerHealthCheck,
   BitcoinEsploraScannerHealthCheck,
   BitcoinRPCScannerHealthCheck,
-  DogeEsploraScannerHealthCheck,
   EvmRPCScannerHealthCheck,
 } from '@rosen-bridge/scanner-sync-check';
 import {
@@ -251,14 +250,28 @@ class HealthCheckSingleton {
   };
 
   registerDogeHealthCheckParams = () => {
-    const dogeScannerSyncCheck = new DogeEsploraScannerHealthCheck(
-      this.observingNetworkLastBlock(scanner.observationScanner.name()),
-      scanner.observationScanner.name(),
-      getConfig().healthCheck.dogeScannerWarnDiff,
-      getConfig().healthCheck.dogeScannerCriticalDiff,
-      getConfig().doge.esplora!.url
-    );
-    this.healthCheck.register(dogeScannerSyncCheck);
+    let dogeScannerSyncCheck;
+    if (getConfig().doge.type === RPC_TYPE) {
+      dogeScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
+        this.observingNetworkLastBlock(scanner.observationScanner.name()),
+        scanner.observationScanner.name(),
+        getConfig().healthCheck.dogeScannerWarnDiff,
+        getConfig().healthCheck.dogeScannerCriticalDiff,
+        getConfig().doge.rpc!.url,
+        getConfig().doge.rpc!.username,
+        getConfig().doge.rpc!.password
+      );
+    } else if (getConfig().doge.type === ESPLORA_TYPE) {
+      dogeScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
+        this.observingNetworkLastBlock(scanner.observationScanner.name()),
+        scanner.observationScanner.name(),
+        getConfig().healthCheck.dogeScannerWarnDiff,
+        getConfig().healthCheck.dogeScannerCriticalDiff,
+        getConfig().doge.esplora!.url
+      );
+    }
+    if (dogeScannerSyncCheck)
+      this.healthCheck.register(dogeScannerSyncCheck);
   };
 
   /**
