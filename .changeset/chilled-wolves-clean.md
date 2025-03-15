@@ -1,5 +1,5 @@
 ---
-'@rosen-bridge/watcher': patch
+'@rosen-bridge/watcher': minor
 ---
 
-Integrating Doge into the watcher service
+Integrate Doge network
