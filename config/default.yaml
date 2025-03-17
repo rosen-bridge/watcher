@@ -24,7 +24,7 @@ doge:
   esplora:
     interval: 60 # esplora scanning interval (in seconds)
     timeout: 10 # esplora request timeout (in seconds)
-    url: 'https://doge-electrs-demo.qed.me' # esplora url
+    url: '' # esplora url
   rpc:
     interval: 180 # rpc scanning interval (in seconds)
     timeout: 10 # rpc request timeout (in seconds)
