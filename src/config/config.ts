@@ -15,6 +15,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
   Constants.CARDANO_CHAIN_NAME,
   Constants.BITCOIN_CHAIN_NAME,
+  Constants.DOGE_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
   Constants.BINANCE_CHAIN_NAME,
 ];
@@ -25,6 +26,7 @@ interface ConfigType {
   bitcoin: BitcoinConfig;
   ethereum: EthereumConfig;
   binance: BinanceConfig;
+  doge: DogeConfig;
   general: Config;
   rosen: RosenConfig;
   database: DatabaseConfig;
@@ -418,6 +420,47 @@ class BitcoinConfig {
   }
 }
 
+class DogeConfig {
+  type: string;
+  initialHeight: number;
+  esplora?: {
+    url: string;
+    timeout: number;
+    interval: number;
+  };
+  rpc?: {
+    url: string;
+    timeout: number;
+    interval: number;
+    username?: string;
+    password?: string;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('doge.type');
+    if (network === Constants.DOGE_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('doge.initial.height');
+      if (this.type === Constants.ESPLORA_TYPE) {
+        const url = getRequiredString('doge.esplora.url');
+        const interval = getRequiredNumber('doge.esplora.interval');
+        const timeout = getRequiredNumber('doge.esplora.timeout');
+        this.esplora = { url, interval, timeout };
+      } else if (this.type === Constants.RPC_TYPE) {
+        const url = getRequiredString('doge.rpc.url');
+        const timeout = getRequiredNumber('doge.rpc.timeout');
+        const interval = getRequiredNumber('doge.rpc.interval');
+        const username = getOptionalString('doge.rpc.username', undefined);
+        const password = getOptionalString('doge.rpc.password', undefined);
+        this.rpc = { url, timeout, interval, username, password };
+      } else {
+        throw new Error(
+          `Improperly configured. doge configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}', '${Constants.RPC_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class EthereumConfig {
   type: string;
   initialHeight: number;
@@ -543,6 +586,8 @@ class HealthCheckConfig {
   cardanoScannerCriticalDiff: number;
   bitcoinScannerWarnDiff: number;
   bitcoinScannerCriticalDiff: number;
+  dogeScannerWarnDiff: number;
+  dogeScannerCriticalDiff: number;
   ethereumScannerWarnDiff: number;
   ethereumScannerCriticalDiff: number;
   binanceScannerWarnDiff: number;
@@ -596,6 +641,12 @@ class HealthCheckConfig {
     this.bitcoinScannerCriticalDiff = getRequiredNumber(
       'healthCheck.bitcoinScanner.criticalDifference'
     );
+    this.dogeScannerWarnDiff = getRequiredNumber(
+      'healthCheck.dogeScanner.warnDifference'
+    );
+    this.dogeScannerCriticalDiff = getRequiredNumber(
+      'healthCheck.dogeScanner.criticalDifference'
+    );
     this.ethereumScannerWarnDiff = getRequiredNumber(
       'healthCheck.ethereumScanner.warnDifference'
     );
@@ -633,6 +684,7 @@ const getConfig = (): ConfigType => {
     const logger = new LoggerConfig();
     const cardano = new CardanoConfig(general.networkWatcher);
     const bitcoin = new BitcoinConfig(general.networkWatcher);
+    const doge = new DogeConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
     const binance = new BinanceConfig(general.networkWatcher);
     const rosen = new RosenConfig(
@@ -646,6 +698,7 @@ const getConfig = (): ConfigType => {
     internalConfig = {
       cardano,
       bitcoin,
+      doge,
       ethereum,
       binance,
       logger,
@@ -659,4 +712,4 @@ const getConfig = (): ConfigType => {
   return internalConfig;
 };
 
-export { getConfig, Config, RosenConfig, CardanoConfig, BitcoinConfig, EthereumConfig, BinanceConfig };
+export { getConfig, Config, RosenConfig, CardanoConfig, BitcoinConfig, EthereumConfig, BinanceConfig, DogeConfig };

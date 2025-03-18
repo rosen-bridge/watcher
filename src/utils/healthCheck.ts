@@ -34,6 +34,7 @@ import {
   BINANCE_CHAIN_NAME,
   BITCOIN_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
+  DOGE_CHAIN_NAME,
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
   ESPLORA_TYPE,
@@ -126,6 +127,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
       this.registerBitcoinHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === DOGE_CHAIN_NAME) {
+      this.registerDogeHealthCheckParams();
     }
     if (getConfig().general.networkWatcher === ETHEREUM_CHAIN_NAME) {
       this.registerEthereumHealthCheckParams();
@@ -263,6 +267,33 @@ class HealthCheckSingleton {
     }
     if (bitcoinScannerSyncCheck)
       this.healthCheck.register(bitcoinScannerSyncCheck);
+  };
+
+  /**
+   * Registers all doge check params
+   */
+  registerDogeHealthCheckParams = () => {
+    let dogeScannerSyncCheck;
+    const scanner = CreateScanner.getInstance();
+    if (getConfig().doge.type === RPC_TYPE) {
+      dogeScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        getConfig().healthCheck.dogeScannerWarnDiff,
+        getConfig().healthCheck.dogeScannerCriticalDiff,
+        getConfig().doge.rpc!.url,
+        getConfig().doge.rpc!.username,
+        getConfig().doge.rpc!.password
+      );
+    } else if (getConfig().doge.type === ESPLORA_TYPE) {
+      dogeScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        getConfig().healthCheck.dogeScannerWarnDiff,
+        getConfig().healthCheck.dogeScannerCriticalDiff,
+        getConfig().doge.esplora!.url
+      );
+    }
+    if (dogeScannerSyncCheck)
+      this.healthCheck.register(dogeScannerSyncCheck);
   };
 
   /**

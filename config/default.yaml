@@ -17,6 +17,20 @@ bitcoin:
     url: '' # rpc url
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
+doge:
+  type: '' # options: esplora, rpc
+  initial:
+    height: -1 # initial height of scanning
+  esplora:
+    interval: 60 # esplora scanning interval (in seconds)
+    timeout: 10 # esplora request timeout (in seconds)
+    url: '' # esplora url
+  rpc:
+    interval: 180 # rpc scanning interval (in seconds)
+    timeout: 10 # rpc request timeout (in seconds)
+    url: '' # rpc url
+    # username: '' # rpc username for authentication required instances
+    # password: '' # rpc password for authentication required instances
 cardano:
   type: '' # options: koios, ogmios, blockfrost
   initial:
@@ -127,6 +141,9 @@ healthCheck:
   bitcoinScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 10 # critical difference between existing and scanned blocks height
+  dogeScanner:
+    warnDifference: 8 # warning difference between existing and scanned blocks height
+    criticalDifference: 32 # critical difference between existing and scanned blocks height
   ethereumScanner:
     warnDifference: 40 # warning difference between existing and scanned blocks height
     criticalDifference: 160 # critical difference between existing and scanned blocks height

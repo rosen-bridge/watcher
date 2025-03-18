@@ -10,6 +10,7 @@ const {
   general: config,
   cardano: cardanoConfig,
   bitcoin: bitcoinConfig,
+  doge: dogeConfig,
   ethereum: ethereumConfig,
   binance: binanceConfig,
 } = allConfig;
@@ -52,6 +53,14 @@ export const scannerInit = () => {
         bitcoinConfig.rpc
           ? bitcoinConfig.rpc.interval
           : bitcoinConfig.esplora!.interval,
+        scanner.getObservationScanner() as GeneralScanner<unknown>
+      ).then(() => null);
+      break;
+    case Constants.DOGE_CHAIN_NAME:
+      scanningJob(
+        dogeConfig.rpc
+          ? dogeConfig.rpc.interval
+          : dogeConfig.esplora!.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
