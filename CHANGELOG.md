@@ -1,7 +1,5 @@
 # @rosen-bridge/watcher
 
-# guard-service
-
 ## 4.1.3
 
 ### Patch Changes
