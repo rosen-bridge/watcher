@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import './api/axiosLimiter';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 import { getConfig } from './config/config';
 import packageJson from '../package.json' assert { type: 'json' };

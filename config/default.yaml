@@ -122,6 +122,11 @@ api:
   port: 3000 # port used to run express server
   apiKeyHash: '' # blake2b hash of API_KEY
   allowedOrigins: [] # list of allowed origins for CORS requests
+  limitRules: # regex pattern and rate limit for each URL pattern
+    - pattern: '^/api/v1/.*$' # regex pattern for matching URLs
+      rateLimit: 10 # maximum requests per second
+    - pattern: '^/api/v2/.*$'
+      rateLimit: 5
 healthCheck:
   interval: 60 # health check update interval (in seconds)
   asset:
