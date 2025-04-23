@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import axios from 'axios';
 import sinon from 'sinon';
-import Bottleneck from 'bottleneck';
 
 import { getLimiterForUrl, rules } from '../../src/api/axiosLimiter';
 import { Rule } from '../../src/types';
@@ -110,16 +109,16 @@ describe('axiosLimiter', () => {
     });
 
     /**
-     * @target should reject requests exceeding rate limit
+     * @target should wait for release of capacity before proceeding when rate limit is exceeded
      * @dependencies
      * @scenario
      * - configure mock limiter with no available capacity
      * - send a request to a rate-limited endpoint
      * - check the result
      * @expected
-     * - request should be rejected with rate limit error
+     * - request should be allowed to proceed
      */
-    it('should reject requests exceeding rate limit', async () => {
+    it('should wait for release of capacity before proceeding when rate limit is exceeded', async () => {
       const url = 'https://api.example.com/blockchain-api/test';
       const config = { url };
       
@@ -128,16 +127,18 @@ describe('axiosLimiter', () => {
         currentReservoir: sinon.stub().resolves(0),
         schedule: sinon.stub()
       };
-      
+
       // Add mock limiter to rules
       rules.push({
         regex: /blockchain-api/,
         limiter: mockLimiter as any
       });
 
-      // Request should be rejected
-      await expect(getInterceptor()(config))
-        .to.be.rejectedWith('Rate limit exceeded for https://api.example.com/blockchain-api/test');
+      // Request should be allowed
+      const result = await getInterceptor()(config);
+      expect(result).to.equal(config);
+      expect(mockLimiter.currentReservoir.calledOnce).to.be.true;
+      expect(mockLimiter.schedule.calledOnce).to.be.true;
     });
 
     /**

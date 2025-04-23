@@ -114,13 +114,14 @@ class Config {
   apiPort: number;
   apiKeyHash: string;
   apiAllowedOrigins: string[];
-  rewardCollectionInterval: number;
-  rewardCollectionThreshold: number;
-  rewardCollectionAddress: string;
+  apiLimitRateRangeAsSeconds: number;
   apiLimitRules: {
     pattern: string;
     rateLimit: number;
   }[];
+  rewardCollectionInterval: number;
+  rewardCollectionThreshold: number;
+  rewardCollectionAddress: string;
 
   constructor() {
     this.networkType = getRequiredString('ergo.network').toLowerCase();
@@ -253,6 +254,10 @@ class Config {
         'An allowed origin header with value "*" will cause all origins to be able to request this service, which may cause security issues'
       );
     }
+    this.apiLimitRateRangeAsSeconds = getOptionalNumber(
+      'api.limitRateRangeAsSeconds',
+      1
+    );
     this.apiLimitRules = config.get<{pattern: string, rateLimit: number}[]>('api.limitRules');
     this.rewardCollectionInterval = getRequiredNumber(
       'rewardCollection.interval'
