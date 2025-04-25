@@ -92,6 +92,7 @@
     "@rosen-bridge/observation-extractor": "^7.1.0",
     "@rosen-bridge/permit-check": "^1.0.5",
     "@rosen-bridge/scanner": "^6.0.0",
+    "@rosen-bridge/scanner-interfaces": "^0.1.0",
     "@rosen-bridge/scanner-sync-check": "^3.0.0",
     "@rosen-bridge/tokens": "^3.1.0",
     "@rosen-bridge/watcher-data-extractor": "^12.1.0",
