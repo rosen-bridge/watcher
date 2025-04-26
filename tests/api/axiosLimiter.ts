@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 import axios from 'axios';
 import sinon from 'sinon';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
 
-import { getLimiterForUrl, rules } from '../../src/api/axiosLimiter';
+import { getLimiterAndPatternForUrl, rules } from '../../src/api/axiosLimiter';
 import { Rule } from '../../src/types';
 
 // Add type assertion for axios interceptors
@@ -27,49 +28,49 @@ describe('axiosLimiter', () => {
     rules.push(...originalRules);
   });
 
-  describe('getLimiterForUrl', () => {
+  describe('getLimiterAndPatternForUrl', () => {
     /**
      * @target should return limiter for matching URL
      * @dependencies
      * @scenario
      * - add a mock limiter with specific regex pattern
-     * - call getLimiterForUrl with matching URL
+     * - call getLimiterAndPatternForUrl with matching URL
      * - check the result
      * @expected
      * - should return the correct limiter instance
      */
-    it('should return limiter for matching URL', () => {
-      // Mock the limiter to simulate available capacity
-      const mockLimiter = {
-        currentReservoir: sinon.stub().resolves(10),
-        schedule: sinon.stub().resolves()
-      };
-      
-      // Add mock limiter to rules
+    it('should return limiter and pattern for matching URL', () => {
+      const mockLimiter = new RateLimiterMemory({
+        points: 10,
+        duration: 1
+      });
+
       rules.push({
-        regex: /blockchain-api/,
-        limiter: mockLimiter as any
+        pattern: /blockchain-api/,
+        limiter: mockLimiter
       });
 
       const url = 'https://api.example.com/blockchain-api/test';
-      const limiter = getLimiterForUrl(url);
+      const [limiter, pattern] = getLimiterAndPatternForUrl(url);
       expect(limiter).to.not.be.null;
-      expect(limiter).to.equal(rules[0].limiter);
+      expect(pattern).to.not.be.null;
+      expect(pattern).to.eql(/blockchain-api/);
     });
 
     /**
      * @target should return null for non-matching URL
      * @dependencies
      * @scenario
-     * - call getLimiterForUrl with non-matching URL
+     * - call getLimiterAndPatternForUrl with non-matching URL
      * - check the result
      * @expected
      * - should return null
      */
     it('should return null for non-matching URL', () => {
       const url = 'https://api.example.com/other-api/test';
-      const limiter = getLimiterForUrl(url);
+      const [limiter, pattern] = getLimiterAndPatternForUrl(url);
       expect(limiter).to.be.null;
+      expect(pattern).to.be.null;
     });
   });
 
@@ -89,23 +90,18 @@ describe('axiosLimiter', () => {
       const url = 'https://api.example.com/blockchain-api/test';
       const config = { url };
       
-      // Mock the limiter to simulate available capacity
-      const mockLimiter = {
-        currentReservoir: sinon.stub().resolves(10),
-        schedule: sinon.stub().resolves()
-      };
-      
-      // Add mock limiter to rules
-      rules.push({
-        regex: /blockchain-api/,
-        limiter: mockLimiter as any
+      const mockLimiter = new RateLimiterMemory({
+        points: 10,
+        duration: 1
       });
 
-      // Request should be allowed
+      rules.push({
+        pattern: /blockchain-api/,
+        limiter: mockLimiter
+      });
+
       const result = await getInterceptor()(config);
       expect(result).to.equal(config);
-      expect(mockLimiter.currentReservoir.calledOnce).to.be.true;
-      expect(mockLimiter.schedule.calledOnce).to.be.true;
     });
 
     /**
@@ -118,27 +114,32 @@ describe('axiosLimiter', () => {
      * @expected
      * - request should be allowed to proceed
      */
-    it('should wait for release of capacity before proceeding when rate limit is exceeded', async () => {
+    it('should wait when rate limit is exceeded', async function() {
+      this.timeout(5000); // Increase timeout for this test
+
       const url = 'https://api.example.com/blockchain-api/test';
       const config = { url };
       
-      // Mock the limiter to simulate rate limit exceeded
-      const mockLimiter = {
-        currentReservoir: sinon.stub().resolves(0),
-        schedule: sinon.stub()
-      };
-
-      // Add mock limiter to rules
-      rules.push({
-        regex: /blockchain-api/,
-        limiter: mockLimiter as any
+      const mockLimiter = new RateLimiterMemory({
+        points: 1,
+        duration: 1
       });
 
-      // Request should be allowed
-      const result = await getInterceptor()(config);
-      expect(result).to.equal(config);
-      expect(mockLimiter.currentReservoir.calledOnce).to.be.true;
-      expect(mockLimiter.schedule.calledOnce).to.be.true;
+      rules.push({
+        pattern: /blockchain-api/,
+        limiter: mockLimiter
+      });
+
+      // First request should succeed
+      await getInterceptor()(config);
+      
+      // Second request should be delayed
+      const startTime = Date.now();
+      await getInterceptor()(config);
+      const endTime = Date.now();
+      
+      // Allow some margin for timing
+      expect(endTime - startTime).to.be.at.least(900); // Should wait at least 900ms
     });
 
     /**
@@ -175,16 +176,14 @@ describe('axiosLimiter', () => {
       const url = 'https://api.example.com/blockchain-api/test';
       const config = { url };
       
-      // Mock the limiter to simulate available capacity
-      const mockLimiter = {
-        currentReservoir: sinon.stub().resolves(10),
-        schedule: sinon.stub().resolves()
-      };
+      const mockLimiter = new RateLimiterMemory({
+        points: 10,
+        duration: 1
+      });
       
-      // Add mock limiter to rules
       rules.push({
-        regex: /blockchain-api/,
-        limiter: mockLimiter as any
+        pattern: /blockchain-api/,
+        limiter: mockLimiter
       });
 
       // Create multiple requests
@@ -197,9 +196,6 @@ describe('axiosLimiter', () => {
       results.forEach((result: any) => {
         expect(result).to.equal(config);
       });
-      
-      expect(mockLimiter.currentReservoir.callCount).to.equal(5);
-      expect(mockLimiter.schedule.callCount).to.equal(5);
     });
   });
 }); 

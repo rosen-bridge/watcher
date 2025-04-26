@@ -1,7 +1,7 @@
-import Bottleneck from 'bottleneck';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
 
 
 export type Rule = {
-  regex: RegExp;
-  limiter: Bottleneck;
+  pattern: RegExp;
+  limiter: RateLimiterMemory;
 };
