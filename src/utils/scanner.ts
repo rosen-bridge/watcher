@@ -18,9 +18,9 @@ import {
   CardanoBlockFrostScanner,
   CardanoKoiosScanner,
   CardanoOgmiosScanner,
-  ErgoNetworkType,
   ErgoScanner,
 } from '@rosen-bridge/scanner';
+import{  ErgoNetworkType} from '@rosen-bridge/scanner-interfaces'
 import {
   CollateralExtractor,
   CommitmentExtractor,

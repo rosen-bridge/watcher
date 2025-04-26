@@ -8,7 +8,7 @@ import path from 'path';
 import { NetworkType } from '../types';
 import { generateMnemonic } from 'bip39';
 import { convertMnemonicToSecretKey } from '../utils/utils';
-import { ErgoNetworkType } from '@rosen-bridge/scanner';
+import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 
 const supportedNetworks: Array<NetworkType> = [
