@@ -7,7 +7,7 @@ import { getLimiterAndPatternForUrl, rules } from '../../src/api/axiosLimiter';
 import { Rule } from '../../src/types';
 
 // Add type assertion for axios interceptors
-const getInterceptor = () => {
+const getRateLimiterInterceptor = () => {
   const interceptor = axios.interceptors.request as any;
   return interceptor.handlers[0].fulfilled;
 };
@@ -33,7 +33,7 @@ describe('axiosLimiter', () => {
      * @target should return limiter for matching URL
      * @dependencies
      * @scenario
-     * - add a mock limiter with specific regex pattern
+     * - create a RateLimiterMemory object with specific regex pattern
      * - call getLimiterAndPatternForUrl with matching URL
      * - check the result
      * @expected
@@ -100,7 +100,7 @@ describe('axiosLimiter', () => {
         limiter: mockLimiter
       });
 
-      const result = await getInterceptor()(config);
+      const result = await getRateLimiterInterceptor()(config);
       expect(result).to.equal(config);
     });
 
@@ -119,7 +119,7 @@ describe('axiosLimiter', () => {
 
       const url = 'https://api.example.com/blockchain-api/test';
       const config = { url };
-      
+
       const mockLimiter = new RateLimiterMemory({
         points: 1,
         duration: 1
@@ -131,11 +131,11 @@ describe('axiosLimiter', () => {
       });
 
       // First request should succeed
-      await getInterceptor()(config);
+      await getRateLimiterInterceptor()(config);
       
       // Second request should be delayed
       const startTime = Date.now();
-      await getInterceptor()(config);
+      await getRateLimiterInterceptor()(config);
       const endTime = Date.now();
       
       // Allow some margin for timing
@@ -154,8 +154,8 @@ describe('axiosLimiter', () => {
     it('should allow requests for URLs without rate limit', async () => {
       const url = 'https://api.example.com/other-api/test';
       const config = { url };
-      
-      const result = await getInterceptor()(config);
+
+      const result = await getRateLimiterInterceptor()(config);
       expect(result).to.equal(config);
     });
   });
@@ -175,12 +175,12 @@ describe('axiosLimiter', () => {
     it('should handle concurrent requests within limit', async () => {
       const url = 'https://api.example.com/blockchain-api/test';
       const config = { url };
-      
+
       const mockLimiter = new RateLimiterMemory({
         points: 10,
         duration: 1
       });
-      
+
       rules.push({
         pattern: /blockchain-api/,
         limiter: mockLimiter
@@ -188,9 +188,9 @@ describe('axiosLimiter', () => {
 
       // Create multiple requests
       const requests = Array(5).fill(null).map(() => 
-        getInterceptor()(config)
+        getRateLimiterInterceptor()(config)
       );
-      
+
       // All requests should be allowed
       const results = await Promise.all(requests);
       results.forEach((result: any) => {
@@ -198,4 +198,4 @@ describe('axiosLimiter', () => {
       });
     });
   });
-}); 
+});

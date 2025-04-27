@@ -258,7 +258,7 @@ class Config {
       'api.limitRateRangeAsSeconds',
       1
     );
-    this.apiLimitRules = config.get<{pattern: string, rateLimit: number}[]>('api.limitRules');
+    this.apiLimitRules = config.get<{pattern: string, rateLimit: number}[]>('api.limitRules') ?? [];
     this.rewardCollectionInterval = getRequiredNumber(
       'rewardCollection.interval'
     );

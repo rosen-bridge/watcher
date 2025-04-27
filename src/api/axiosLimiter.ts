@@ -48,10 +48,9 @@ axios.interceptors.request.use(async (config: AxiosRequestConfig) => {
 
   const release = await semaphorePatternList[pattern.toString()].acquire()
   const consumeData = await limiter.consume(pattern.toString());
-  console.log(consumeData, url, semaphorePatternList[pattern.toString()]);
 
-  if (consumeData && consumeData.remainingPoints === 0) {
-    logger.info(`Rate limit exceeded for ${pattern} url pattern, waiting for ${consumeData.msBeforeNext}ms`);
+  if (consumeData.remainingPoints === 0) {
+    logger.info(`Rate limit exceeded for "${pattern}" url pattern, waiting for ${consumeData.msBeforeNext}ms`);
     await new Promise(f => setTimeout(f, consumeData.msBeforeNext));
   }
   release();
