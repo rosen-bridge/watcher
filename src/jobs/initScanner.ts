@@ -51,28 +51,28 @@ export const scannerInit = () => {
     case Constants.BITCOIN_CHAIN_NAME:
       scanningJob(
         bitcoinConfig.rpc
-          ? bitcoinConfig.rpc.interval
-          : bitcoinConfig.esplora!.interval,
+          ? bitcoinConfig.interval
+          : bitcoinConfig.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
     case Constants.DOGE_CHAIN_NAME:
       scanningJob(
         dogeConfig.rpc
-          ? dogeConfig.rpc.interval
-          : dogeConfig.esplora!.interval,
+          ? dogeConfig.interval
+          : dogeConfig.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
     case Constants.ETHEREUM_CHAIN_NAME:
       scanningJob(
-        ethereumConfig.rpc!.interval,
+        ethereumConfig.interval,
         scanner.getObservationScanner() as EvmRpcScanner
       ).then(() => null);
       break;
     case Constants.BINANCE_CHAIN_NAME:
       scanningJob(
-        binanceConfig.rpc!.interval,
+        binanceConfig.interval,
         scanner.getObservationScanner() as EvmRpcScanner
       ).then(() => null);
       break;
