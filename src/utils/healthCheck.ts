@@ -280,16 +280,16 @@ class HealthCheckSingleton {
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.dogeScannerWarnDiff,
         getConfig().healthCheck.dogeScannerCriticalDiff,
-        getConfig().doge.rpc!.url,
-        getConfig().doge.rpc!.username,
-        getConfig().doge.rpc!.password
+        getConfig().doge.rpc![0].url,
+        getConfig().doge.rpc![0].username,
+        getConfig().doge.rpc![0].password
       );
     } else if (getConfig().doge.type === ESPLORA_TYPE) {
       dogeScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.dogeScannerWarnDiff,
         getConfig().healthCheck.dogeScannerCriticalDiff,
-        getConfig().doge.esplora!.url
+        getConfig().doge.esplora![0].url
       );
     }
     if (dogeScannerSyncCheck)
