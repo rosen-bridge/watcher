@@ -33,7 +33,6 @@ import {
   EthereumRpcObservationExtractor,
 } from '@rosen-bridge/evm-observation-extractor';
 import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
-import { DataSource } from 'typeorm';
 import { dataSource } from '../../config/dataSource';
 import {
   BinanceConfig,
@@ -47,6 +46,17 @@ import {
 } from '../config/config';
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
+import { 
+  createCardanoKoiosNetworkConnectorManager,
+  createCardanoBlockfrostNetworkConnectorManager,
+  createBitcoinEsploraNetworkConnectorManager,
+  createBitcoinRpcNetworkConnectorManager,
+  createDogeEsploraNetworkConnectorManager,
+  createDogeRpcNetworkConnectorManager,
+  createEvmNetworkConnectorManager,
+  createErgoNodeNetworkConnectorManager,
+  createErgoExplorerNetworkConnectorManager,
+} from './networkConnectorManagers';
 
 /**
  * Creates loggers for scanners and extractors
@@ -168,23 +178,19 @@ class CreateScanner {
 
   private createErgoScanner = async (config: Config, rosenConfig: RosenConfig) => {
     let networkUrl;
-    let networkTimeout;
     if (config.scannerType === ErgoNetworkType.Node) {
-      networkTimeout = config.nodeTimeout * 1000;
       networkUrl = config.nodeUrl;
-    } else if (config.scannerType === ErgoNetworkType.Explorer) {
-      networkUrl = config.explorerUrl;
-      networkTimeout = config.explorerTimeout * 1000;
     } else {
-      logger.error(
-        `Scanner type is not correct, available options are [${ErgoNetworkType.Node}], [${ErgoNetworkType.Explorer}].`
-      );
-      throw new Error('Scanner type is not correct');
+      networkUrl = config.explorerUrl;
+    }
+    let networkConnectorManager;
+    if (config.scannerType === ErgoNetworkType.Node) {
+      networkConnectorManager = createErgoNodeNetworkConnectorManager();
+    } else {
+      networkConnectorManager = createErgoExplorerNetworkConnectorManager();
     }
     const ergoScannerConfig = {
-      type: config.scannerType,
-      url: networkUrl,
-      timeout: networkTimeout,
+      network: networkConnectorManager,
       initialHeight: config.ergoInitialHeight,
       dataSource: dataSource,
     };
@@ -248,10 +254,10 @@ class CreateScanner {
       loggers.collateralExtractorLogger
     );
     this.ergoScanner.registerExtractor(commitmentExtractor);
-    this.ergoScanner.registerExtractor(permitExtractor);
-    this.ergoScanner.registerExtractor(eventTriggerExtractor);
-    this.ergoScanner.registerExtractor(plainExtractor);
-    this.ergoScanner.registerExtractor(collateralExtractor);
+    // this.ergoScanner.registerExtractor(permitExtractor);
+    // this.ergoScanner.registerExtractor(eventTriggerExtractor);
+    // this.ergoScanner.registerExtractor(plainExtractor);
+    // this.ergoScanner.registerExtractor(collateralExtractor);
   };
 
   private createCardanoScanner = async (cardanoConfig: CardanoConfig, rosenConfig: RosenConfig) => {
@@ -278,13 +284,11 @@ class CreateScanner {
       } else if (cardanoConfig.koios) {
         this.observationScanner = new CardanoKoiosScanner(
           {
-            dataSource: dataSource,
-            koiosUrl: cardanoConfig.koios.url,
-            timeout: cardanoConfig.koios.timeout * 1000,
+            dataSource,
             initialHeight: cardanoConfig.koios.initialHeight,
+            network: createCardanoKoiosNetworkConnectorManager()
           },
-          loggers.scannerLogger,
-          cardanoConfig.koios.authToken
+          loggers.scannerLogger
         );
         const observationExtractor = new CardanoKoiosObservationExtractor(
           dataSource,
@@ -294,13 +298,14 @@ class CreateScanner {
         );
         this.observationScanner.registerExtractor(observationExtractor);
       } else if (cardanoConfig.blockfrost) {
-        this.observationScanner = new CardanoBlockFrostScanner({
-          dataSource,
-          initialHeight: cardanoConfig.blockfrost.initialHeight,
-          projectId: cardanoConfig.blockfrost.projectId,
-          timeout: cardanoConfig.blockfrost.timeout,
-          blockFrostUrl: cardanoConfig.blockfrost.url,
-        });
+        this.observationScanner = new CardanoBlockFrostScanner(
+          {
+            dataSource,
+            initialHeight: cardanoConfig.blockfrost.initialHeight,
+            network: createCardanoBlockfrostNetworkConnectorManager()
+          },
+          loggers.scannerLogger
+        );
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
@@ -317,10 +322,9 @@ class CreateScanner {
       if (bitcoinConfig.esplora) {
         this.observationScanner = new BitcoinEsploraScanner(
           {
-            dataSource: dataSource as DataSource,
-            esploraUrl: bitcoinConfig.esplora.url,
-            timeout: bitcoinConfig.esplora.timeout * 1000,
+            dataSource,
             initialHeight: bitcoinConfig.initialHeight,
+            network: createBitcoinEsploraNetworkConnectorManager()
           },
           loggers.scannerLogger
         );
@@ -334,12 +338,9 @@ class CreateScanner {
       } else if (bitcoinConfig.rpc) {
         this.observationScanner = new BitcoinRpcScanner(
           {
-            rpcUrl: bitcoinConfig.rpc.url,
-            timeout: bitcoinConfig.rpc.timeout * 1000,
+            dataSource,
             initialHeight: bitcoinConfig.initialHeight,
-            dataSource: dataSource,
-            username: bitcoinConfig.rpc.username,
-            password: bitcoinConfig.rpc.password,
+            network: createBitcoinRpcNetworkConnectorManager()
           },
           loggers.scannerLogger
         );
@@ -360,10 +361,9 @@ class CreateScanner {
       if (dogeConfig.esplora) {
         this.observationScanner = new DogeEsploraScanner(
           {
-            dataSource: dataSource as DataSource,
-            esploraUrl: dogeConfig.esplora.url,
-            timeout: dogeConfig.esplora.timeout * 1000,
+            dataSource,
             initialHeight: dogeConfig.initialHeight,
+            network: createDogeEsploraNetworkConnectorManager()
           },
           loggers.scannerLogger
         );
@@ -377,12 +377,9 @@ class CreateScanner {
       } else if (dogeConfig.rpc) {
         this.observationScanner = new DogeRpcScanner(
           {
-            rpcUrl: dogeConfig.rpc.url,
-            timeout: dogeConfig.rpc.timeout * 1000,
+            dataSource,
             initialHeight: dogeConfig.initialHeight,
-            dataSource: dataSource,
-            username: dogeConfig.rpc.username,
-            password: dogeConfig.rpc.password,
+            network: createDogeRpcNetworkConnectorManager()
           },
           loggers.scannerLogger
         );
@@ -404,13 +401,11 @@ class CreateScanner {
         this.observationScanner = new EvmRpcScanner(
           Constants.ETHEREUM_CHAIN_NAME,
           {
-            RpcUrl: ethereumConfig.rpc.url,
-            timeout: ethereumConfig.rpc.timeout * 1000,
+            dataSource,
             initialHeight: ethereumConfig.initialHeight,
-            dataSource: dataSource,
+            network: createEvmNetworkConnectorManager(Constants.ETHEREUM_CHAIN_NAME)
           },
-          loggers.scannerLogger,
-          ethereumConfig.rpc.authToken
+          loggers.scannerLogger
         );
 
         const observationExtractor = new EthereumRpcObservationExtractor(
@@ -430,13 +425,11 @@ class CreateScanner {
         this.observationScanner = new EvmRpcScanner(
           Constants.BINANCE_CHAIN_NAME,
           {
-            RpcUrl: binanceConfig.rpc.url,
-            timeout: binanceConfig.rpc.timeout * 1000,
+            dataSource,
             initialHeight: binanceConfig.initialHeight,
-            dataSource: dataSource,
+            network: createEvmNetworkConnectorManager(Constants.BINANCE_CHAIN_NAME)
           },
-          loggers.scannerLogger,
-          binanceConfig.rpc.authToken
+          loggers.scannerLogger
         );
 
         const observationExtractor = new BinanceRpcObservationExtractor(
