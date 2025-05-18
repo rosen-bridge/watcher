@@ -99,43 +99,43 @@ const init = async () => {
       scannerInit();
 
       await delay(10000);
-      // watcherUtils = new WatcherUtils(
-      //   watcherDatabase,
-      //   getConfig().general.observationConfirmation,
-      //   getConfig().general.observationValidThreshold
-      // );
-      // const txUtils = new TransactionUtils(watcherDatabase);
+      watcherUtils = new WatcherUtils(
+        watcherDatabase,
+        getConfig().general.observationConfirmation,
+        getConfig().general.observationValidThreshold
+      );
+      const txUtils = new TransactionUtils(watcherDatabase);
 
-      // await MinimumFeeHandler.init(TokensConfig.getInstance().getTokenMap());
-      // minimumFeeUpdateJob();
-      // logger.debug('Initializing statistic object...');
-      // await Transaction.setup(
-      //   getConfig().general.address,
-      //   getConfig().general.secretKey,
-      //   boxesObject,
-      //   watcherDatabase
-      // );
-      // Transaction.getInstance();
+      await MinimumFeeHandler.init(TokensConfig.getInstance().getTokenMap());
+      minimumFeeUpdateJob();
+      logger.debug('Initializing statistic object...');
+      await Transaction.setup(
+        getConfig().general.address,
+        getConfig().general.secretKey,
+        boxesObject,
+        watcherDatabase
+      );
+      Transaction.getInstance();
 
-      // logger.debug('Initializing job threads...');
-      // // Starting HealthCheck jobs
-      // healthCheckJob(boxesObject);
-      // // Running transaction checking thread
-      // transactionQueueJob(watcherDatabase, watcherUtils);
-      // // Running commitment creation thread
-      // creation(watcherUtils, txUtils, boxesObject);
-      // // Running commitment redeem thread
-      // redeem(watcherUtils, txUtils, boxesObject);
-      // // Running trigger event creation thread
-      // reveal(watcherUtils, txUtils, boxesObject);
-      // // Running token name thread
-      // tokenNameJob([]);
-      // // Running revenue thread
-      // revenueJob();
-      // // Starting WID status jobs
-      // widStatusJob();
-      // // Running reward collection thread
-      // rewardCollection(watcherUtils, txUtils, boxesObject);
+      logger.debug('Initializing job threads...');
+      // Starting HealthCheck jobs
+      healthCheckJob(boxesObject);
+      // Running transaction checking thread
+      transactionQueueJob(watcherDatabase, watcherUtils);
+      // Running commitment creation thread
+      creation(watcherUtils, txUtils, boxesObject);
+      // Running commitment redeem thread
+      redeem(watcherUtils, txUtils, boxesObject);
+      // Running trigger event creation thread
+      reveal(watcherUtils, txUtils, boxesObject);
+      // Running token name thread
+      tokenNameJob([]);
+      // Running revenue thread
+      revenueJob();
+      // Starting WID status jobs
+      widStatusJob();
+      // Running reward collection thread
+      rewardCollection(watcherUtils, txUtils, boxesObject);
 
       logger.debug('Service initialization finished successfully.');
     })
