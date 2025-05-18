@@ -379,7 +379,8 @@ class CreateScanner {
             dataSource,
             initialHeight: dogeConfig.initialHeight,
             network: createDogeRpcNetworkConnectorManager(),
-            logger: loggers.scannerLogger
+            logger: loggers.scannerLogger,
+            blockRetrieveGap: dogeConfig.blockRetrieveGap * 1000,
           },
         );
 

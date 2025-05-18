@@ -21,6 +21,7 @@ doge:
   initial:
     height: -1 # initial height of scanning
   interval: 180 # scanning interval (in seconds)
+  blockRetrieveGap: 1.2 # block retrieve gap (in seconds)
   esplora:
     - url: '' # esplora url
       timeout: 10 # esplora request timeout (in seconds)
