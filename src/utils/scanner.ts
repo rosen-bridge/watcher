@@ -146,6 +146,10 @@ class CreateScanner {
     return CreateScanner.instance;
   };
 
+  getExtractorKey= (network: string, type: string): string=> {
+  return `${network}:${type}`;
+}
+
   /**
    * @returns the ergo scanner
    */
@@ -203,7 +207,7 @@ class CreateScanner {
       this.observationScanner.registerExtractor(observationExtractor);
     }
     const commitmentExtractor = new CommitmentExtractor(
-      Constants.COMMITMENT_EXTRACTOR_NAME,
+      this.getExtractorKey(config.networkWatcher ,Constants.COMMITMENT_EXTRACTOR_NAME),
       [rosenConfig.commitmentAddress],
       rosenConfig.RWTId,
       dataSource,
@@ -211,7 +215,7 @@ class CreateScanner {
       loggers.commitmentExtractorLogger
     );
     const permitExtractor = new PermitExtractor(
-      Constants.PERMIT_EXTRACTOR_NAME,
+      this.getExtractorKey(config.networkWatcher , Constants.PERMIT_EXTRACTOR_NAME),
       dataSource,
       rosenConfig.watcherPermitAddress,
       rosenConfig.RWTId,
@@ -219,7 +223,7 @@ class CreateScanner {
       loggers.permitExtractorLogger
     );
     const eventTriggerExtractor = new EventTriggerExtractor(
-      Constants.TRIGGER_EXTRACTOR_NAME,
+      this.getExtractorKey(config.networkWatcher,Constants.TRIGGER_EXTRACTOR_NAME),
       dataSource,
       config.scannerType,
       networkUrl,
@@ -240,7 +244,7 @@ class CreateScanner {
       loggers.plainExtractorLogger
     );
     const collateralExtractor = new CollateralExtractor(
-      Constants.COLLATERAL_EXTRACTOR_NAME,
+      this.getExtractorKey(config.networkWatcher,Constants.COLLATERAL_EXTRACTOR_NAME),
       rosenConfig.AWC,
       rosenConfig.watcherCollateralAddress,
       dataSource,
