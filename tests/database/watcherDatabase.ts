@@ -82,7 +82,6 @@ import { RevenueView } from '../../src/database/entities/revenueView';
 import { RevenueEntity } from '../../src/database/entities/revenueEntity';
 import { RevenueChartDataView } from '../../src/database/entities/revenueChartDataView';
 
-
 const observation2Status = {
   observation: observationEntity2,
   status: TxStatus.NOT_COMMITTED,

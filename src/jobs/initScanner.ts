@@ -58,9 +58,7 @@ export const scannerInit = () => {
       break;
     case Constants.DOGE_CHAIN_NAME:
       scanningJob(
-        dogeConfig.rpc
-          ? dogeConfig.rpc.interval
-          : dogeConfig.esplora!.interval,
+        dogeConfig.rpc ? dogeConfig.rpc.interval : dogeConfig.esplora!.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
