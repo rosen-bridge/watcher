@@ -147,7 +147,7 @@ class CreateScanner {
   };
 
   getExtractorKey= (network: string, type: string): string=> {
-  return `${network}:${type}`;
+  return `${network}-${type}`;
 }
 
   /**
