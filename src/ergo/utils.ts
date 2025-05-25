@@ -148,7 +148,8 @@ export class ErgoUtils {
           );
         } else if (value < 0) {
           throw new ChangeBoxCreationError(
-            `Not enough token [${token}] in the input boxes, require ${-1n * value
+            `Not enough token [${token}] in the input boxes, require ${
+              -1n * value
             } more.`
           );
         }
