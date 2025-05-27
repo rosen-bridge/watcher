@@ -118,9 +118,9 @@ class WatcherUtils {
     );
     return (
       BigInt(observation.amount) >=
-      BigInt(bridgeFee) + BigInt(feeConfig.networkFee) &&
+        BigInt(bridgeFee) + BigInt(feeConfig.networkFee) &&
       BigInt(observation.amount) >=
-      BigInt(observation.bridgeFee) + BigInt(observation.networkFee)
+        BigInt(observation.bridgeFee) + BigInt(observation.networkFee)
     );
   };
 

@@ -292,8 +292,7 @@ class HealthCheckSingleton {
         getConfig().doge.esplora![0].url
       );
     }
-    if (dogeScannerSyncCheck)
-      this.healthCheck.register(dogeScannerSyncCheck);
+    if (dogeScannerSyncCheck) this.healthCheck.register(dogeScannerSyncCheck);
   };
 
   /**
