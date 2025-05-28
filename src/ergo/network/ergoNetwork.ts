@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios, {isAxiosError} from '@rosen-bridge/rate-limited-axios';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { max, min } from 'lodash-es';
 
@@ -76,7 +76,7 @@ export class ErgoNetwork {
       .post('/transactions', tx)
       .then((response) => ({ txId: response.data as string, success: true }))
       .catch((error) => {
-        if (axios.isAxiosError(error) && error.response) {
+        if (isAxiosError(error) && error.response) {
           logger.warn(
             `Error with code ${error.response?.data.error} occurred while sending transaction to Node: ${error.response?.data.detail}`
           );
