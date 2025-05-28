@@ -666,7 +666,7 @@ class HealthCheckConfig {
       'healthCheck.permit.criticalCommitmentCount'
     );
     this.updateInterval = getRequiredNumber('healthCheck.interval');
-    this.logDuration = getRequiredNumber('healthCheck.logs.duration') * 1000;
+    this.logDuration = getRequiredNumber('healthCheck.logs.duration');
     this.errorLogAllowedCount = getRequiredNumber(
       'healthCheck.logs.maxAllowedErrorCount'
     );
