@@ -443,13 +443,17 @@ class DogeConfig {
       if (this.type === Constants.ESPLORA_TYPE) {
         const esploraConfigs = config.get<ConnectionConfig[]>('doge.esplora');
         if (!Array.isArray(esploraConfigs) || esploraConfigs.length === 0) {
-          throw new Error('Improperly configured. doge.esplora must be a non-empty array');
+          throw new Error(
+            'Improperly configured. doge.esplora must be a non-empty array'
+          );
         }
         this.esplora = esploraConfigs;
       } else if (this.type === Constants.RPC_TYPE) {
         const rpcConfigs = config.get<ConnectionConfig[]>('doge.rpc');
         if (!Array.isArray(rpcConfigs) || rpcConfigs.length === 0) {
-          throw new Error('Improperly configured. doge.rpc must be a non-empty array');
+          throw new Error(
+            'Improperly configured. doge.rpc must be a non-empty array'
+          );
         }
         this.rpc = rpcConfigs;
       } else {
