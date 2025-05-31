@@ -426,7 +426,6 @@ class CreateScanner {
           initialHeight: dogeConfig.initialHeight,
           network: createDogeRpcNetworkConnectorManager(),
           logger: loggers.scannerLogger,
-          blockRetrieveGap: dogeConfig.blockRetrieveGap * 1000,
         });
 
         const observationExtractor = new DogeRpcObservationExtractor(

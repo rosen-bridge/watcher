@@ -50,17 +50,13 @@ export const scannerInit = () => {
       break;
     case Constants.BITCOIN_CHAIN_NAME:
       scanningJob(
-        bitcoinConfig.rpc
-          ? bitcoinConfig.interval
-          : bitcoinConfig.interval,
+        bitcoinConfig.rpc ? bitcoinConfig.interval : bitcoinConfig.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
     case Constants.DOGE_CHAIN_NAME:
       scanningJob(
-        dogeConfig.rpc
-          ? dogeConfig.interval
-          : dogeConfig.interval,
+        dogeConfig.rpc ? dogeConfig.interval : dogeConfig.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;

@@ -431,14 +431,12 @@ class DogeConfig {
   interval: number;
   esplora: ConnectionConfig[];
   rpc: ConnectionConfig[];
-  blockRetrieveGap: number;
 
   constructor(network: string) {
     this.type = config.get<string>('doge.type');
     if (network === Constants.DOGE_CHAIN_NAME) {
       this.initialHeight = getRequiredNumber('doge.initial.height');
       this.interval = getRequiredNumber('doge.interval');
-      this.blockRetrieveGap = getOptionalNumber('doge.blockRetrieveGap', 0);
 
       if (this.type === Constants.ESPLORA_TYPE) {
         const esploraConfigs = config.get<ConnectionConfig[]>('doge.esplora');
