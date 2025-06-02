@@ -40,6 +40,7 @@ import {
   BINANCE_CHAIN_NAME,
   BITCOIN_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
+  DOGE_BLOCK_TIME,
   DOGE_CHAIN_NAME,
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
@@ -294,7 +295,8 @@ class HealthCheckSingleton {
         ).getBlockChainLastHeight,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.dogeScannerWarnDiff,
-        getConfig().healthCheck.dogeScannerCriticalDiff
+        getConfig().healthCheck.dogeScannerCriticalDiff,
+        DOGE_BLOCK_TIME
       );
     } else if (getConfig().doge.type === ESPLORA_TYPE) {
       dogeScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
@@ -304,7 +306,10 @@ class HealthCheckSingleton {
         ).getBlockChainLastHeight,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.dogeScannerWarnDiff,
-        getConfig().healthCheck.dogeScannerCriticalDiff
+        getConfig().healthCheck.dogeScannerCriticalDiff,
+        undefined, // to use default warn block gap
+        undefined, // to use default critical block gap
+        DOGE_BLOCK_TIME
       );
     }
     if (dogeScannerSyncCheck) this.healthCheck.register(dogeScannerSyncCheck);

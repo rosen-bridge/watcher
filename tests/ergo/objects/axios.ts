@@ -14,9 +14,9 @@ export const unavailableTxId =
   '8b7ae20a4acd23e3f1bf38671ce97103ad96d8f1c780b5e5e865e4873ae16337';
 export const spentBoxId =
   '87e570115b46cee9d02149aadbb34fddb0804c91f000149c3bba91a0f3f93d58';
-  export const spentBoxId2 =
+export const spentBoxId2 =
   '677003c698d8b60b7c422a2b81479cf4c4d9c2d5beabe5e095a89b301db17152';
-  export const spentBoxId3 =
+export const spentBoxId3 =
   '64635bdea2773d1d96d53711cfc3a916514bb9dc0997e935bdbe1829c41e4b36';
   export const notSpentBoxId =
   '99d53115caf4d19b74275ac092f6a8fb68921af5d3dca15ec809e47fde10c36c';
