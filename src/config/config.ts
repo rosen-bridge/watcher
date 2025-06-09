@@ -451,6 +451,11 @@ class DogeConfig {
               'Improperly configured. doge.esplora.url must be a non-empty string'
             );
           }
+          if (!esploraConfig.timeout) {
+            throw new Error(
+              'Improperly configured. doge.esplora.timeout must be a non-empty number'
+            );
+          }
         });
         this.esplora = esploraConfigs;
       } else if (this.type === Constants.RPC_TYPE) {
@@ -464,6 +469,11 @@ class DogeConfig {
           if (!rpcConfig.url) {
             throw new Error(
               'Improperly configured. doge.rpc.url must be a non-empty string'
+            );
+          }
+          if (!rpcConfig.timeout) {
+            throw new Error(
+              'Improperly configured. doge.rpc.timeout must be a non-empty number'
             );
           }
         });
