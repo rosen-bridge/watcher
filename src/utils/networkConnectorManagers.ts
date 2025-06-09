@@ -250,6 +250,7 @@ export const createCardanoBlockfrostNetworkConnectorManager = () => {
 
 /**
  * Creates and configures a NetworkConnectorManager instance for EVM-based scanners (Ethereum/Binance)
+ * @param chainName - The name of the chain to create a connector for (ethereum/binance)
  */
 export const createEvmNetworkConnectorManager = (chainName: string) => {
   const networkConnectorManager =

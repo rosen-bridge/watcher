@@ -289,7 +289,7 @@ class HealthCheckSingleton {
     const scanner = CreateScanner.getInstance();
     if (getConfig().doge.type === RPC_TYPE) {
       dogeScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
-        BINANCE_CHAIN_NAME,
+        DOGE_CHAIN_NAME,
         (
           scanner.getObservationScanner() as BitcoinRpcScanner
         ).getBlockChainLastHeight,
@@ -300,7 +300,7 @@ class HealthCheckSingleton {
       );
     } else if (getConfig().doge.type === ESPLORA_TYPE) {
       dogeScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
-        BINANCE_CHAIN_NAME,
+        DOGE_CHAIN_NAME,
         (
           scanner.getObservationScanner() as BitcoinEsploraScanner
         ).getBlockChainLastHeight,
