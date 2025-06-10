@@ -32,11 +32,6 @@ doge:
       timeout: 10 # rpc request timeout (in seconds)
       # username: '' # rpc username for authentication required instances
       # password: '' # rpc password for authentication required instances
-    # Add more RPC connections as needed:
-    # - url: ''
-    #   timeout: 10
-    #   username: ''
-    #   password: ''
 cardano:
   type: '' # options: koios, ogmios, blockfrost
   initial:
