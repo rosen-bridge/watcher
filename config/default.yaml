@@ -24,9 +24,6 @@ doge:
   esplora:
     - url: '' # esplora url
       timeout: 10 # esplora request timeout (in seconds)
-    # Add more Esplora connections as needed:
-    # - url: ''
-    #   timeout: 10
   rpc:
     - url: '' # rpc url
       timeout: 10 # rpc request timeout (in seconds)
