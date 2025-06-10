@@ -24,8 +24,14 @@ import {
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
-import { CardanoOgmiosScanner } from '@rosen-bridge/scanner';
+import {
+  CardanoKoiosScanner,
+  CardanoOgmiosScanner,
+} from '@rosen-bridge/scanner';
 import { DiscordNotification } from '@rosen-bridge/discord-notification';
+import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
+import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
+import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
 
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
@@ -34,6 +40,7 @@ import {
   BINANCE_CHAIN_NAME,
   BITCOIN_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
+  DOGE_BLOCK_TIME,
   DOGE_CHAIN_NAME,
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
@@ -168,10 +175,10 @@ class HealthCheckSingleton {
 
     const scanner = CreateScanner.getInstance();
     this.ergoScannerSyncCheckParam = new ErgoNodeScannerHealthCheck(
+      scanner.getErgoScanner().getBlockChainLastHeight,
       this.observingNetworkLastBlock(scanner.getErgoScanner().name()),
       getConfig().healthCheck.ergoScannerWarnDiff,
-      getConfig().healthCheck.ergoScannerCriticalDiff,
-      getConfig().general.nodeUrl
+      getConfig().healthCheck.ergoScannerCriticalDiff
     );
     this.healthCheck.register(this.ergoScannerSyncCheckParam);
   };
@@ -201,10 +208,10 @@ class HealthCheckSingleton {
 
     const scanner = CreateScanner.getInstance();
     this.ergoScannerSyncCheckParam = new ErgoExplorerScannerHealthCheck(
+      scanner.getErgoScanner().getBlockChainLastHeight,
       this.observingNetworkLastBlock(scanner.getErgoScanner().name()),
       getConfig().healthCheck.ergoScannerWarnDiff,
-      getConfig().healthCheck.ergoScannerCriticalDiff,
-      getConfig().general.explorerUrl
+      getConfig().healthCheck.ergoScannerCriticalDiff
     );
     this.healthCheck.register(this.ergoScannerSyncCheckParam);
   };
@@ -231,11 +238,12 @@ class HealthCheckSingleton {
       );
     } else if (getConfig().cardano.type === KOIOS_TYPE) {
       cardanoScannerSyncCheck = new CardanoKoiosScannerHealthCheck(
+        (
+          scanner.getObservationScanner() as CardanoKoiosScanner
+        ).getBlockChainLastHeight,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.cardanoScannerWarnDiff,
-        getConfig().healthCheck.cardanoScannerCriticalDiff,
-        getConfig().cardano.koios!.url,
-        getConfig().cardano.koios!.authToken
+        getConfig().healthCheck.cardanoScannerCriticalDiff
       );
     }
     if (cardanoScannerSyncCheck)
@@ -250,19 +258,23 @@ class HealthCheckSingleton {
     const scanner = CreateScanner.getInstance();
     if (getConfig().bitcoin.type === RPC_TYPE) {
       bitcoinScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
+        BITCOIN_CHAIN_NAME,
+        (
+          scanner.getObservationScanner() as BitcoinRpcScanner
+        ).getBlockChainLastHeight,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.bitcoinScannerWarnDiff,
-        getConfig().healthCheck.bitcoinScannerCriticalDiff,
-        getConfig().bitcoin.rpc!.url,
-        getConfig().bitcoin.rpc!.username,
-        getConfig().bitcoin.rpc!.password
+        getConfig().healthCheck.bitcoinScannerCriticalDiff
       );
     } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
       bitcoinScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
+        BITCOIN_CHAIN_NAME,
+        (
+          scanner.getObservationScanner() as BitcoinEsploraScanner
+        ).getBlockChainLastHeight,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.bitcoinScannerWarnDiff,
-        getConfig().healthCheck.bitcoinScannerCriticalDiff,
-        getConfig().bitcoin.esplora!.url
+        getConfig().healthCheck.bitcoinScannerCriticalDiff
       );
     }
     if (bitcoinScannerSyncCheck)
@@ -277,19 +289,27 @@ class HealthCheckSingleton {
     const scanner = CreateScanner.getInstance();
     if (getConfig().doge.type === RPC_TYPE) {
       dogeScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
+        DOGE_CHAIN_NAME,
+        (
+          scanner.getObservationScanner() as BitcoinRpcScanner
+        ).getBlockChainLastHeight,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.dogeScannerWarnDiff,
         getConfig().healthCheck.dogeScannerCriticalDiff,
-        getConfig().doge.rpc!.url,
-        getConfig().doge.rpc!.username,
-        getConfig().doge.rpc!.password
+        DOGE_BLOCK_TIME
       );
     } else if (getConfig().doge.type === ESPLORA_TYPE) {
       dogeScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
+        DOGE_CHAIN_NAME,
+        (
+          scanner.getObservationScanner() as BitcoinEsploraScanner
+        ).getBlockChainLastHeight,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.dogeScannerWarnDiff,
         getConfig().healthCheck.dogeScannerCriticalDiff,
-        getConfig().doge.esplora!.url
+        undefined, // to use default warn block gap
+        undefined, // to use default critical block gap
+        DOGE_BLOCK_TIME
       );
     }
     if (dogeScannerSyncCheck) this.healthCheck.register(dogeScannerSyncCheck);
@@ -302,13 +322,13 @@ class HealthCheckSingleton {
     const scanner = CreateScanner.getInstance();
     const ethereumRpcScannerSyncCheck = new EvmRPCScannerHealthCheck(
       ETHEREUM_CHAIN_NAME,
+      (
+        scanner.getObservationScanner() as EvmRpcScanner
+      ).getBlockChainLastHeight,
       this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
       getConfig().healthCheck.ethereumScannerWarnDiff,
       getConfig().healthCheck.ethereumScannerCriticalDiff,
-      getConfig().ethereum.rpc!.url,
-      ETHEREUM_BLOCK_TIME,
-      getConfig().ethereum.rpc!.authToken,
-      getConfig().ethereum.rpc!.timeout
+      ETHEREUM_BLOCK_TIME
     );
     this.healthCheck.register(ethereumRpcScannerSyncCheck);
   };
@@ -320,13 +340,13 @@ class HealthCheckSingleton {
     const scanner = CreateScanner.getInstance();
     const binanceRpcScannerSyncCheck = new EvmRPCScannerHealthCheck(
       BINANCE_CHAIN_NAME,
+      (
+        scanner.getObservationScanner() as EvmRpcScanner
+      ).getBlockChainLastHeight,
       this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
       getConfig().healthCheck.binanceScannerWarnDiff,
       getConfig().healthCheck.binanceScannerCriticalDiff,
-      getConfig().binance.rpc!.url,
-      BINANCE_BLOCK_TIME,
-      getConfig().binance.rpc!.authToken,
-      getConfig().binance.rpc!.timeout
+      BINANCE_BLOCK_TIME
     );
     this.healthCheck.register(binanceRpcScannerSyncCheck);
   };

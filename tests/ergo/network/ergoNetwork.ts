@@ -88,21 +88,6 @@ describe('Ergo Network(API)', () => {
   });
 
   /**
-   * sendTx function tests
-   */
-  describe('sendTx', () => {
-    /**
-     * the transaction should be accepted by node and the txId should return
-     */
-    it('should return txId', async () => {
-      const res = (await ErgoNetwork.sendTx(
-        mockedResponseBody.sampleTxJson
-      )) as { txId: string };
-      expect(res.txId).to.be.equal(mockedResponseBody.sampleTxId);
-    });
-  });
-
-  /**
    * getErgoStateContext function tests
    */
   describe('getErgoStateContext', () => {

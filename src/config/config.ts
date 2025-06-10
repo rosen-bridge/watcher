@@ -10,6 +10,7 @@ import { generateMnemonic } from 'bip39';
 import { convertMnemonicToSecretKey } from '../utils/utils';
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
+import { RateLimitedAxiosConfig } from '@rosen-bridge/rate-limited-axios';
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
@@ -32,6 +33,13 @@ interface ConfigType {
   database: DatabaseConfig;
   healthCheck: HealthCheckConfig;
   notification: NotificationConfig;
+}
+
+interface ConnectionConfig {
+  url: string;
+  timeout: number;
+  username?: string;
+  password?: string;
 }
 
 const getRequiredNumber = (path: string) => {
@@ -382,15 +390,14 @@ class CardanoConfig {
 class BitcoinConfig {
   type: string;
   initialHeight: number;
+  interval: number;
   esplora?: {
     url: string;
     timeout: number;
-    interval: number;
   };
   rpc?: {
     url: string;
     timeout: number;
-    interval: number;
     username?: string;
     password?: string;
   };
@@ -399,18 +406,17 @@ class BitcoinConfig {
     this.type = config.get<string>('bitcoin.type');
     if (network === Constants.BITCOIN_CHAIN_NAME) {
       this.initialHeight = getRequiredNumber('bitcoin.initial.height');
+      this.interval = getRequiredNumber('bitcoin.interval');
       if (this.type === Constants.ESPLORA_TYPE) {
         const url = getRequiredString('bitcoin.esplora.url');
-        const interval = getRequiredNumber('bitcoin.esplora.interval');
         const timeout = getRequiredNumber('bitcoin.esplora.timeout');
-        this.esplora = { url, interval, timeout };
+        this.esplora = { url, timeout };
       } else if (this.type == Constants.RPC_TYPE) {
         const url = getRequiredString('bitcoin.rpc.url');
         const timeout = getRequiredNumber('bitcoin.rpc.timeout');
-        const interval = getRequiredNumber('bitcoin.rpc.interval');
         const username = getOptionalString('bitcoin.rpc.username', undefined);
         const password = getOptionalString('bitcoin.rpc.password', undefined);
-        this.rpc = { url, timeout, interval, username, password };
+        this.rpc = { url, timeout, username, password };
       } else {
         throw new Error(
           `Improperly configured. bitcoin configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`
@@ -423,35 +429,57 @@ class BitcoinConfig {
 class DogeConfig {
   type: string;
   initialHeight: number;
-  esplora?: {
-    url: string;
-    timeout: number;
-    interval: number;
-  };
-  rpc?: {
-    url: string;
-    timeout: number;
-    interval: number;
-    username?: string;
-    password?: string;
-  };
+  interval: number;
+  esplora: ConnectionConfig[];
+  rpc: ConnectionConfig[];
 
   constructor(network: string) {
     this.type = config.get<string>('doge.type');
     if (network === Constants.DOGE_CHAIN_NAME) {
       this.initialHeight = getRequiredNumber('doge.initial.height');
+      this.interval = getRequiredNumber('doge.interval');
+
       if (this.type === Constants.ESPLORA_TYPE) {
-        const url = getRequiredString('doge.esplora.url');
-        const interval = getRequiredNumber('doge.esplora.interval');
-        const timeout = getRequiredNumber('doge.esplora.timeout');
-        this.esplora = { url, interval, timeout };
+        const esploraConfigs = config.get<ConnectionConfig[]>('doge.esplora');
+        if (!Array.isArray(esploraConfigs) || esploraConfigs.length === 0) {
+          throw new Error(
+            'Improperly configured. doge.esplora must be a non-empty array'
+          );
+        }
+        esploraConfigs.forEach((esploraConfig) => {
+          if (!esploraConfig.url) {
+            throw new Error(
+              'Improperly configured. doge.esplora.url must be a non-empty string'
+            );
+          }
+          if (!esploraConfig.timeout) {
+            throw new Error(
+              'Improperly configured. doge.esplora.timeout must be a non-empty number'
+            );
+          }
+        });
+        this.esplora = esploraConfigs;
       } else if (this.type === Constants.RPC_TYPE) {
-        const url = getRequiredString('doge.rpc.url');
-        const timeout = getRequiredNumber('doge.rpc.timeout');
-        const interval = getRequiredNumber('doge.rpc.interval');
-        const username = getOptionalString('doge.rpc.username', undefined);
-        const password = getOptionalString('doge.rpc.password', undefined);
-        this.rpc = { url, timeout, interval, username, password };
+        const rpcConfigs = config.get<ConnectionConfig[]>('doge.rpc');
+        if (!Array.isArray(rpcConfigs) || rpcConfigs.length === 0) {
+          throw new Error(
+            'Improperly configured. doge.rpc must be a non-empty array'
+          );
+        }
+        rpcConfigs.forEach((rpcConfig) => {
+          if (!rpcConfig.url) {
+            throw new Error(
+              'Improperly configured. doge.rpc.url must be a non-empty string'
+            );
+          }
+          if (!rpcConfig.timeout) {
+            throw new Error(
+              'Improperly configured. doge.rpc.timeout must be a non-empty number'
+            );
+          }
+          RateLimitedAxiosConfig.addRule(`^${rpcConfig.url}$`, 3, 1);
+        });
+        this.rpc = rpcConfigs;
       } else {
         throw new Error(
           `Improperly configured. doge configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}', '${Constants.RPC_TYPE}'`
@@ -464,10 +492,10 @@ class DogeConfig {
 class EthereumConfig {
   type: string;
   initialHeight: number;
+  interval: number;
   rpc?: {
     url: string;
     timeout: number;
-    interval: number;
     authToken?: string;
   };
 
@@ -475,15 +503,15 @@ class EthereumConfig {
     this.type = config.get<string>('ethereum.type');
     if (network === Constants.ETHEREUM_CHAIN_NAME) {
       this.initialHeight = getRequiredNumber('ethereum.initial.height');
+      this.interval = getRequiredNumber('ethereum.interval');
       if (this.type == Constants.EVM_RPC_TYPE) {
         const url = getRequiredString('ethereum.rpc.url');
         const timeout = getRequiredNumber('ethereum.rpc.timeout');
-        const interval = getRequiredNumber('ethereum.rpc.interval');
         const authToken = getOptionalString(
           'ethereum.rpc.authToken',
           undefined
         );
-        this.rpc = { url, timeout, interval, authToken };
+        this.rpc = { url, timeout, authToken };
       } else {
         throw new Error(
           `Improperly configured. ethereum configuration type is invalid available choices are '${Constants.EVM_RPC_TYPE}'`
@@ -496,10 +524,10 @@ class EthereumConfig {
 class BinanceConfig {
   type: string;
   initialHeight: number;
+  interval: number;
   rpc?: {
     url: string;
     timeout: number;
-    interval: number;
     authToken?: string;
   };
 
@@ -507,12 +535,12 @@ class BinanceConfig {
     this.type = config.get<string>('binance.type');
     if (network === Constants.BINANCE_CHAIN_NAME) {
       this.initialHeight = getRequiredNumber('binance.initial.height');
+      this.interval = getRequiredNumber('binance.interval');
       if (this.type == Constants.EVM_RPC_TYPE) {
         const url = getRequiredString('binance.rpc.url');
         const timeout = getRequiredNumber('binance.rpc.timeout');
-        const interval = getRequiredNumber('binance.rpc.interval');
         const authToken = getOptionalString('binance.rpc.authToken', undefined);
-        this.rpc = { url, timeout, interval, authToken };
+        this.rpc = { url, timeout, authToken };
       } else {
         throw new Error(
           `Improperly configured. binance configuration type is invalid available choices are '${Constants.EVM_RPC_TYPE}'`
