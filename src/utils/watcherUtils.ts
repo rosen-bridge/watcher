@@ -324,7 +324,7 @@ class WatcherUtils {
    */
   allTriggeredInvalidCommitments = async () => {
     const height = await this.dataBase.getLastBlockHeight(
-      CreateScanner.getInstance().getObservationScanner().name()
+      CreateScanner.getInstance().getErgoScanner().name()
     );
     const result: Array<CommitmentEntity> = [];
     const commitments = await this.dataBase.commitmentsByWIDAndMaxHeight(
