@@ -1,0 +1,49 @@
+diff --git a/node_modules/@rosen-bridge/scanner-sync-check/dist/abstract.js b/node_modules/@rosen-bridge/scanner-sync-check/dist/abstract.js
+index e6ad3a1..d36072e 100644
+--- a/node_modules/@rosen-bridge/scanner-sync-check/dist/abstract.js
++++ b/node_modules/@rosen-bridge/scanner-sync-check/dist/abstract.js
+@@ -28,7 +28,7 @@ class AbstractScannerSyncHealthCheckParam extends AbstractHealthCheckParam {
+      * @returns scanner sync health status
+      */
+     getHealthStatus = async () => {
+-        if (this.difference >= this.criticalDifference)
++        if (this.difference == undefined || this.difference >= this.criticalDifference)
+             return HealthStatusLevel.BROKEN;
+         else if (this.difference >= this.warnDifference)
+             return HealthStatusLevel.UNSTABLE;
+diff --git a/node_modules/@rosen-bridge/scanner-sync-check/dist/ergo/explorer.js b/node_modules/@rosen-bridge/scanner-sync-check/dist/ergo/explorer.js
+index eaa7bec..4ba9d9a 100644
+--- a/node_modules/@rosen-bridge/scanner-sync-check/dist/ergo/explorer.js
++++ b/node_modules/@rosen-bridge/scanner-sync-check/dist/ergo/explorer.js
+@@ -25,7 +25,12 @@ export class ErgoExplorerScannerHealthCheck extends AbstractScannerSyncHealthChe
+      * @returns parameter description
+      */
+     getDescription = async () => {
+-        return `Checks if the scanner is in sync with the network. The last block saved by the Ergo Explorer is ${await this.getLastSavedBlockHeight()}.`;
++        const baseMessage = 'Checks if the scanner is in sync with the network. ' 
++        try{
++            return baseMessage + `The last block saved by the Ergo Explorer scanner is ${await this.getLastSavedBlockHeight()}.`;
++        } catch {
++            return baseMessage + `There is no avaiable block in database.`
++        }    
+     };
+     /**
+      * @returns last available block in network
+diff --git a/node_modules/@rosen-bridge/scanner-sync-check/dist/ergo/node.js b/node_modules/@rosen-bridge/scanner-sync-check/dist/ergo/node.js
+index 5ff5e49..fafb84f 100644
+--- a/node_modules/@rosen-bridge/scanner-sync-check/dist/ergo/node.js
++++ b/node_modules/@rosen-bridge/scanner-sync-check/dist/ergo/node.js
+@@ -25,7 +25,12 @@ export class ErgoNodeScannerHealthCheck extends AbstractScannerSyncHealthCheckPa
+      * @returns parameter description
+      */
+     getDescription = async () => {
+-        return `Checks if the scanner is in sync with the network. The last block saved by the Ergo Node scanner is ${await this.getLastSavedBlockHeight()}.`;
++        const baseMessage = 'Checks if the scanner is in sync with the network. ' 
++        try{
++            return baseMessage + `The last block saved by the Ergo Node scanner is ${await this.getLastSavedBlockHeight()}.`;
++        } catch {
++            return baseMessage + `There is no avaiable block in database.`
++        }
+     };
+     /**
+      * @returns last available block in network

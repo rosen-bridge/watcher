@@ -125,6 +125,7 @@ class Config {
   rewardCollectionInterval: number;
   rewardCollectionThreshold: number;
   rewardCollectionAddress: string;
+  eventTriggerInit: boolean;
 
   constructor() {
     this.networkType = getRequiredString('ergo.network').toLowerCase();
@@ -267,6 +268,7 @@ class Config {
       'rewardCollection.address',
       this.address // set default watcher address as reward address if its not specified
     );
+    this.eventTriggerInit = config.get<boolean>('initialization.eventTrigger');
   }
 }
 

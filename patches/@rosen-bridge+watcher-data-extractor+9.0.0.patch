@@ -1,0 +1,28 @@
+diff --git a/node_modules/@rosen-bridge/watcher-data-extractor/dist/extractor/EventTriggerExtractor.d.ts b/node_modules/@rosen-bridge/watcher-data-extractor/dist/extractor/EventTriggerExtractor.d.ts
+index d3af052..88f6756 100644
+--- a/node_modules/@rosen-bridge/watcher-data-extractor/dist/extractor/EventTriggerExtractor.d.ts
++++ b/node_modules/@rosen-bridge/watcher-data-extractor/dist/extractor/EventTriggerExtractor.d.ts
+@@ -12,7 +12,7 @@ declare class EventTriggerExtractor extends AbstractInitializableErgoExtractor<E
+     private readonly permitErgoTree;
+     private readonly fraudErgoTree;
+     private readonly RWT;
+-    constructor(id: string, dataSource: DataSource, type: ErgoNetworkType, url: string, address: string, RWT: string, permitAddress: string, fraudAddress: string, logger?: AbstractLogger);
++    constructor(id: string, dataSource: DataSource, type: ErgoNetworkType, url: string, address: string, RWT: string, permitAddress: string, fraudAddress: string, logger?: AbstractLogger, initialize: boolean);
+     /**
+      * get Id for current extractor
+      */
+diff --git a/node_modules/@rosen-bridge/watcher-data-extractor/dist/extractor/EventTriggerExtractor.js b/node_modules/@rosen-bridge/watcher-data-extractor/dist/extractor/EventTriggerExtractor.js
+index 1f5e544..c24f43a 100644
+--- a/node_modules/@rosen-bridge/watcher-data-extractor/dist/extractor/EventTriggerExtractor.js
++++ b/node_modules/@rosen-bridge/watcher-data-extractor/dist/extractor/EventTriggerExtractor.js
+@@ -11,8 +11,8 @@ class EventTriggerExtractor extends AbstractInitializableErgoExtractor {
+     permitErgoTree;
+     fraudErgoTree;
+     RWT;
+-    constructor(id, dataSource, type, url, address, RWT, permitAddress, fraudAddress, logger) {
+-        super(type, url, address, logger);
++    constructor(id, dataSource, type, url, address, RWT, permitAddress, fraudAddress, logger, initialize) {
++        super(type, url, address, logger, initialize);
+         this.id = id;
+         this.eventTriggerErgoTree = wasm.Address.from_base58(address)
+             .to_ergo_tree()

@@ -277,7 +277,8 @@ class CreateScanner {
       rosenConfig.RWTId,
       rosenConfig.watcherPermitAddress,
       rosenConfig.fraudAddress,
-      loggers.eventTriggerExtractorLogger
+      loggers.eventTriggerExtractorLogger,
+      config.eventTriggerInit
     );
     const plainExtractor = new ErgoUTXOExtractor(
       dataSource,
