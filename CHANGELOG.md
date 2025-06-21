@@ -10,7 +10,6 @@
 
 - Integrate Doge network
 - Add log level health parameters
-- Use chain-specific extractor names to ensure correct data replacement when switching networks
 - Update scanner to support multiple connectors for each network
 
 ### Patch Changes
