@@ -1,5 +1,48 @@
 # @rosen-bridge/watcher
 
+## 5.0.0
+
+### Major Changes
+
+- Update tokens package to v3
+
+### Minor Changes
+
+- Integrate Doge network
+- Add log level health parameters
+- Update scanner to support multiple connectors for each network
+
+### Patch Changes
+
+- Fix wrong multiplication of healthCheck.logs.duration config
+- Update health parameters
+- Fix ergo scanner height in commitment redeem job
+- Update winston logger and remove its patched issue
+- Dependency updates for watcher service
+
+## 4.1.3
+
+### Patch Changes
+
+- Support new tokens
+  - PALM
+  - SOCKZ
+
+## 4.1.2
+
+### Patch Changes
+
+- Fix evm observation extractor bug
+
+## 4.1.1
+
+### Patch Changes
+
+- Patch @rosen-bridge/rosen-extractor to improve EVM extractor speed
+- Add event trigger initialization config and turn it off by default
+- Patch @rosen-bridge/abstract-extractor initialization to be stateful and resilient to network issues
+- Patch @rosen-bridge/scanner-sync-check to return proper message when there is no block in database
+
 ## 4.1.0
 
 ### Minor Changes

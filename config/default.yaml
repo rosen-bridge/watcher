@@ -85,7 +85,7 @@ ergo:
   transaction:
     timeout: 10 # will remove invalid transactions from process queue after this period (in blocks)
     confirmation: 4 # required block confirmations for sent transactions
-    commitmentTimeoutConfirmation: 720 # required block confirmations for a commitment to redeem
+    commitmentTimeoutConfirmation: 1440 # required block confirmations for a commitment to redeem
   interval:
     scanner: 180 # scanner update interval (in seconds)
     revenue: 120 # revenue update interval (in seconds)
@@ -160,6 +160,8 @@ rewardCollection:
   threshold: 100000 # RSN threshold for reward collection
   interval: 600 # reward collection interval in seconds
   # address: "" # reward collection address (uses default address if not set)
+initialization:
+  eventTrigger: false
 # notification:
 #   discordWebhookUrl: '' # discord notification webhook
 #   historyCleanupThreshold: # notification history cleanup threshold (in seconds, uses default if not set)
