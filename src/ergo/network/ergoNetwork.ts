@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios, { isAxiosError } from '@rosen-bridge/rate-limited-axios';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { max, min } from 'lodash-es';
 
@@ -16,9 +16,9 @@ import { ConnectionError } from '../../errors/errors';
 import { getConfig } from '../../config/config';
 import { ExplorerBox, ErgoAssetInfo } from '../network/types';
 import { MAX_API_LIMIT } from '../../config/constants';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const explorerApi = axios.create({
   baseURL: getConfig().general.explorerUrl,
@@ -76,7 +76,7 @@ export class ErgoNetwork {
       .post('/transactions', tx)
       .then((response) => ({ txId: response.data as string, success: true }))
       .catch((error) => {
-        if (axios.isAxiosError(error) && error.response) {
+        if (isAxiosError(error) && error.response) {
           logger.warn(
             `Error with code ${error.response?.data.error} occurred while sending transaction to Node: ${error.response?.data.detail}`
           );

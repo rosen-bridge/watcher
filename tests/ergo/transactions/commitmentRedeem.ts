@@ -98,7 +98,7 @@ describe('Commitment redeem transaction tests', () => {
   });
 
   afterEach(() => {
-    chai.spy.restore(watcherUtils);
+    chai.spy.restore();
     sinon.restore();
   });
 
@@ -237,7 +237,7 @@ describe('Commitment redeem transaction tests', () => {
 
   describe('job', () => {
     afterEach(() => {
-      chai.spy.restore(watcherUtils);
+      chai.spy.restore();
       sinon.restore();
     });
 

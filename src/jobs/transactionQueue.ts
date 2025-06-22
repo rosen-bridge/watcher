@@ -2,9 +2,9 @@ import { Queue } from '../ergo/transaction/queue';
 import { WatcherDataBase } from '../database/models/watcherModel';
 import { WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 let transactionQueue: Queue;
 

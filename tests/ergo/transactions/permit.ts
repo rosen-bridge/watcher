@@ -65,7 +65,7 @@ describe('Watcher Permit Transactions', () => {
   });
 
   afterEach(() => {
-    chai.spy.restore(boxes);
+    chai.spy.restore();
     TransactionTest.reset();
   });
 

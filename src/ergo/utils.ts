@@ -25,10 +25,11 @@ import {
 import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { JsonBI } from './network/parser';
+import { TokensConfig } from '../config/tokensConfig';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const txFee = parseInt(getConfig().general.fee);
 
 export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
@@ -428,9 +429,9 @@ export class ErgoUtils {
    * @returns TokenData
    */
   static tokenDetailByTokenMap = (tokenId: string, chain: string) => {
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     const tokenDetail = tokenMap.search(chain, {
-      [tokenMap.getIdKey(chain)]: tokenId,
+      tokenId,
     });
     let name = 'Unsupported token';
     let decimals = 0;
@@ -439,7 +440,7 @@ export class ErgoUtils {
       const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
       name = tokenDetail[0][chain].name;
       decimals = significantDecimal || 0;
-      isNativeToken = tokenDetail[0][chain].metaData.type === 'native';
+      isNativeToken = tokenDetail[0][chain].type === 'native';
     }
 
     return {

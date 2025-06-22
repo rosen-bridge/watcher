@@ -7,16 +7,28 @@ bitcoin:
   type: '' # options: esplora, rpc
   initial:
     height: -1 # initial height of scanning
+  interval: 180 # scanning interval (in seconds)
   esplora:
-    interval: 180 # esplora scanning interval (in seconds)
     timeout: 10 # esplora request timeout (in seconds)
     url: 'https://blockstream.info' # esplora url
   rpc:
-    interval: 180 # rpc scanning interval (in seconds)
     timeout: 10 # rpc request timeout (in seconds)
     url: '' # rpc url
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
+doge:
+  type: '' # options: esplora, rpc
+  initial:
+    height: -1 # initial height of scanning
+  interval: 180 # scanning interval (in seconds)
+  esplora:
+    - url: '' # esplora url
+      timeout: 10 # esplora request timeout (in seconds)
+  rpc:
+    - url: '' # rpc url
+      timeout: 10 # rpc request timeout (in seconds)
+      # username: '' # rpc username for authentication required instances
+      # password: '' # rpc password for authentication required instances
 cardano:
   type: '' # options: koios, ogmios, blockfrost
   initial:
@@ -42,6 +54,7 @@ ethereum:
   type: '' # options: rpc
   initial:
     height: -1 # initial height of scanning
+  interval: 20 # scanning interval (in seconds)
   rpc:
     url: '' # rpc url
     interval: 20 # rpc scanning interval (in seconds)
@@ -51,9 +64,9 @@ binance:
   type: '' # options: rpc
   initial:
     height: -1 # initial height of scanning
+  interval: 20 # scanning interval (in seconds)
   rpc:
     url: '' # rpc url
-    interval: 20 # rpc scanning interval (in seconds)
     timeout: 10 # rpc request timeout (in seconds)
     # authToken: # rpc auth token
 ergo:
@@ -127,6 +140,9 @@ healthCheck:
   bitcoinScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 10 # critical difference between existing and scanned blocks height
+  dogeScanner:
+    warnDifference: 8 # warning difference between existing and scanned blocks height
+    criticalDifference: 32 # critical difference between existing and scanned blocks height
   ethereumScanner:
     warnDifference: 40 # warning difference between existing and scanned blocks height
     criticalDifference: 160 # critical difference between existing and scanned blocks height

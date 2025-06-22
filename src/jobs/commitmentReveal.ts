@@ -1,12 +1,12 @@
 import { HealthStatusLevel } from '@rosen-bridge/health-check';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { getConfig } from '../config/config';
 import { Boxes } from '../ergo/boxes';
 import { CommitmentReveal } from '../transactions/commitmentReveal';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 let commitmentRevealingObj: CommitmentReveal;
 

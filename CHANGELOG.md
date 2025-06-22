@@ -1,5 +1,25 @@
 # @rosen-bridge/watcher
 
+## 5.0.0
+
+### Major Changes
+
+- Update tokens package to v3
+
+### Minor Changes
+
+- Integrate Doge network
+- Add log level health parameters
+- Update scanner to support multiple connectors for each network
+
+### Patch Changes
+
+- Fix wrong multiplication of healthCheck.logs.duration config
+- Update health parameters
+- Fix ergo scanner height in commitment redeem job
+- Update winston logger and remove its patched issue
+- Dependency updates for watcher service
+
 ## 4.1.3
 
 ### Patch Changes

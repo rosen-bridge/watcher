@@ -37,10 +37,10 @@ import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueView } from '../entities/revenueView';
 import { TokenEntity } from '../entities/tokenEntity';
 import { TxEntity, TxType } from '../entities/txEntity';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import { getConfig } from '../../config/config';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { TokensConfig } from '../../config/tokensConfig';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -792,7 +792,7 @@ class WatcherDataBase {
     tokenName: string,
     decimals: number
   ) => {
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
     await this.tokenRepository.save({
       tokenId,
@@ -1118,7 +1118,7 @@ class WatcherDataBase {
     amount: string,
     permit: PermitEntity
   ) => {
-    const tokenMap = getConfig().token.tokenMap;
+    const tokenMap = TokensConfig.getInstance().getTokenMap();
     await this.revenueRepository.save({
       tokenId,
       amount: tokenMap

@@ -50,13 +50,13 @@ const userSecret = wasm.SecretKey.dlog_from_bytes(
 
 import repoObj from './dataset/repoBox.json' assert { type: 'json' };
 import repoConfigObj from './dataset/repoConfigBox.json' assert { type: 'json' };
-import { getConfig } from '../../src/config/config';
 import { Transaction } from '../../src/api/Transaction';
 import sinon from 'sinon';
 import { describe } from 'mocha';
 import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { initWatcherDB } from '../../src/init';
 import { permitMockRWT, validBox1Token } from '../database/mockedData';
+import { getConfig } from '../../src/config/config';
 
 const repoBox = JSON.stringify(repoObj);
 const repoConfigBox = JSON.stringify(repoConfigObj);

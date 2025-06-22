@@ -23,13 +23,14 @@ import { revenueJob } from './jobs/revenue';
 import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
 import cors from 'cors';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { widStatusJob } from './jobs/widStatus';
 import MinimumFeeHandler from './utils/MinimumFeeHandler';
 import { minimumFeeUpdateJob } from './jobs/minimumFee';
 import { rewardCollection } from './jobs/rewardCollection';
-
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+import { TokensConfig } from './config/tokensConfig';
+import { CreateScanner } from './utils/scanner';
+const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
@@ -39,12 +40,18 @@ let watcherUtils: WatcherUtils;
  * initiating watcher
  */
 const init = async () => {
+  const config = getConfig();
+
+  await TokensConfig.init(config.general.rosenTokensPath);
+  await CreateScanner.init();
+
   const generateTransactionObject = async () => {
     logger.debug('Initializing data sources and APIs...');
     await dataSource.initialize();
     logger.debug('Data sources had been initialized.');
     await dataSource.runMigrations();
     logger.debug('Migrations done successfully.');
+
     watcherDatabase = new WatcherDataBase(dataSource);
     boxesObject = new Boxes(watcherDatabase);
     await Transaction.setup(
@@ -99,7 +106,7 @@ const init = async () => {
       );
       const txUtils = new TransactionUtils(watcherDatabase);
 
-      await MinimumFeeHandler.init(getConfig().token.tokens);
+      await MinimumFeeHandler.init(TokensConfig.getInstance().getTokenMap());
       minimumFeeUpdateJob();
       logger.debug('Initializing statistic object...');
       await Transaction.setup(
