@@ -19,6 +19,7 @@
 - Fix ergo scanner height in commitment redeem job
 - Update winston logger and remove its patched issue
 - Dependency updates for watcher service
+- Fix ethers version to 6.13.2 to resolve binance scanner bug
 
 ## 4.1.3
 
