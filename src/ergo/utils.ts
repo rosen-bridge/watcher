@@ -28,6 +28,7 @@ import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { JsonBI } from './network/parser';
 import { TokensConfig } from '../config/tokensConfig';
+import packageJson from '../../package.json' assert { type: 'json' };
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const txFee = parseInt(getConfig().general.fee);
@@ -218,6 +219,19 @@ export class ErgoUtils {
   };
 
   /**
+   * Creates a context extension with the current contract version
+   * @returns ContextExtension object
+   */
+  static createContextExtension = (): wasm.ContextExtension => {
+    const contextExtension = new wasm.ContextExtension();
+    const contractVersion = getConfig().rosen.contractVersion;
+    const serviceVersion = packageJson.version;
+    contextExtension.set_pair(0, wasm.Constant.from_byte_array(new Uint8Array(Buffer.from(contractVersion, 'utf8'))));
+    contextExtension.set_pair(1, wasm.Constant.from_byte_array(new Uint8Array(Buffer.from(serviceVersion, 'utf8'))));
+    return contextExtension;
+  };
+
+  /**
    * Creates the transaction from input, data input and output boxesSample, then signs the created transaction with the secrets
    * @param secret
    * @param boxes inout boxesSample
@@ -266,6 +280,7 @@ export class ErgoUtils {
         );
       txBuilder.set_data_inputs(txDataInputs);
     }
+    txBuilder.set_context_extension(boxes.get(0).box_id(), this.createContextExtension());
     return ErgoUtils.buildTxAndSign(
       txBuilder,
       secret,
