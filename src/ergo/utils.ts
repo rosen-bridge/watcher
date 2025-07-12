@@ -280,7 +280,9 @@ export class ErgoUtils {
         );
       txBuilder.set_data_inputs(txDataInputs);
     }
-    txBuilder.set_context_extension(boxes.get(0).box_id(), this.createContextExtension());
+    if (getConfig().general.versionInputExtension) {
+      txBuilder.set_context_extension(boxes.get(0).box_id(), this.createContextExtension());
+    }
     return ErgoUtils.buildTxAndSign(
       txBuilder,
       secret,
