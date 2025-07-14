@@ -219,10 +219,10 @@ export class ErgoUtils {
   };
 
   /**
-   * Creates a context extension with the current contract version
+   * Creates a context extension with the current contract version and service version
    * @returns ContextExtension object
    */
-  static createContextExtension = (): wasm.ContextExtension => {
+  static createVersionContextExtension = (): wasm.ContextExtension => {
     const contextExtension = new wasm.ContextExtension();
     const contractVersion = getConfig().rosen.contractVersion;
     const serviceVersion = packageJson.version;
@@ -281,7 +281,7 @@ export class ErgoUtils {
       txBuilder.set_data_inputs(txDataInputs);
     }
     if (getConfig().general.versionInputExtension) {
-      txBuilder.set_context_extension(boxes.get(0).box_id(), this.createContextExtension());
+      txBuilder.set_context_extension(boxes.get(0).box_id(), this.createVersionContextExtension());
     }
     return ErgoUtils.buildTxAndSign(
       txBuilder,
