@@ -14,6 +14,10 @@ bitcoin:
   rpc:
     username: 'BITCOIN_RPC_USERNAME'
     password: 'BITCOIN_RPC_PASSWORD'
+runes:
+  rpc:
+    username: 'RUNES_RPC_USERNAME'
+    password: 'RUNES_RPC_PASSWORD'
 cardano:
   koios:
     authToken: 'KOIOS_AUTH_TOKEN'

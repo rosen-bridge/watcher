@@ -33,6 +33,10 @@ import {
   EventTriggerExtractor,
   PermitExtractor,
 } from '@rosen-bridge/watcher-data-extractor';
+import {
+  RunesEsploraObservationExtractor,
+  RunesRpcObservationExtractor,
+} from '@rosen-bridge/runes-observation-extractor';
 
 import {
   BinanceRpcObservationExtractor,
@@ -49,6 +53,7 @@ import {
   getConfig,
   RosenConfig,
   DogeConfig,
+  RunesConfig,
 } from '../config/config';
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
@@ -121,6 +126,7 @@ class CreateScanner {
         rosen: rosenConfig,
         cardano: cardanoConfig,
         bitcoin: bitcoinConfig,
+        runes: runesConfig,
         doge: dogeConfig,
         ethereum: ethereumConfig,
         binance: binanceConfig,
@@ -131,6 +137,12 @@ class CreateScanner {
         case Constants.BITCOIN_CHAIN_NAME:
           await CreateScanner.instance.createBitcoinScanner(
             bitcoinConfig,
+            rosenConfig
+          );
+          break;
+        case Constants.RUNES_CHAIN_NAME:
+          await CreateScanner.instance.createRunesScanner(
+            runesConfig,
             rosenConfig
           );
           break;
@@ -377,6 +389,48 @@ class CreateScanner {
 
         const observationExtractor = new BitcoinRpcObservationExtractor(
           rosenConfig.lockAddress,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      }
+    }
+  };
+
+  private createRunesScanner = async (
+    runesConfig: RunesConfig,
+    rosenConfig: RosenConfig
+  ) => {
+    if (!this.observationScanner) {
+      if (runesConfig.esplora) {
+        this.observationScanner = new BitcoinEsploraScanner({
+          dataSource,
+          initialHeight: runesConfig.initialHeight,
+          network: createBitcoinEsploraNetworkConnectorManager(),
+          logger: loggers.scannerLogger,
+        });
+        const observationExtractor = new RunesEsploraObservationExtractor(
+          rosenConfig.lockAddress,
+          runesConfig.ordiscan.url,
+          runesConfig.ordiscan.apiKey,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (runesConfig.rpc) {
+        this.observationScanner = new BitcoinRpcScanner({
+          dataSource,
+          initialHeight: runesConfig.initialHeight,
+          network: createBitcoinRpcNetworkConnectorManager(),
+          logger: loggers.scannerLogger,
+        });
+
+        const observationExtractor = new RunesRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          runesConfig.ordiscan.url,
+          runesConfig.ordiscan.apiKey,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger

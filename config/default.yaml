@@ -16,6 +16,22 @@ bitcoin:
     url: '' # rpc url
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
+runes:
+  type: '' # options: esplora, rpc
+  initial:
+    height: -1 # initial height of scanning
+  interval: 180 # scanning interval (in seconds)
+  esplora:
+    timeout: 10 # esplora request timeout (in seconds)
+    url: 'https://blockstream.info' # esplora url
+  rpc:
+    timeout: 10 # rpc request timeout (in seconds)
+    url: '' # rpc url
+    # username: '' # rpc username for authentication required instances
+    # password: '' # rpc password for authentication required instances
+  ordiscan:
+    url: '' # ordiscan api url
+    apiKey: '' # ordiscan api key
 doge:
   type: '' # options: esplora, rpc
   initial:
@@ -138,6 +154,9 @@ healthCheck:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 600 # critical difference between existing and scanned blocks height
   bitcoinScanner:
+    warnDifference: 2 # warning difference between existing and scanned blocks height
+    criticalDifference: 10 # critical difference between existing and scanned blocks height
+  runesScanner:
     warnDifference: 2 # warning difference between existing and scanned blocks height
     criticalDifference: 10 # critical difference between existing and scanned blocks height
   dogeScanner:

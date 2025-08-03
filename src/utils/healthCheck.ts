@@ -52,6 +52,7 @@ import {
   NODE_TYPE,
   OGMIOS_TYPE,
   RPC_TYPE,
+  RUNES_CHAIN_NAME,
 } from '../config/constants';
 import { watcherDatabase } from '../init';
 import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
@@ -134,6 +135,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
       this.registerBitcoinHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === RUNES_CHAIN_NAME) {
+      this.registerRunesHealthCheckParams();
     }
     if (getConfig().general.networkWatcher === DOGE_CHAIN_NAME) {
       this.registerDogeHealthCheckParams();
@@ -279,6 +283,36 @@ class HealthCheckSingleton {
     }
     if (bitcoinScannerSyncCheck)
       this.healthCheck.register(bitcoinScannerSyncCheck);
+  };
+
+  /**
+   * Registers all runes check params
+   */
+  registerRunesHealthCheckParams = () => {
+    let runesScannerSyncCheck;
+    const scanner = CreateScanner.getInstance();
+    if (getConfig().runes.type === RPC_TYPE) {
+      runesScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
+        RUNES_CHAIN_NAME,
+        (
+          scanner.getObservationScanner() as BitcoinRpcScanner
+        ).getBlockChainLastHeight,
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        getConfig().healthCheck.runesScannerWarnDiff,
+        getConfig().healthCheck.runesScannerCriticalDiff
+      );
+    } else if (getConfig().runes.type === ESPLORA_TYPE) {
+      runesScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
+        RUNES_CHAIN_NAME,
+        (
+          scanner.getObservationScanner() as BitcoinEsploraScanner
+        ).getBlockChainLastHeight,
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        getConfig().healthCheck.runesScannerWarnDiff,
+        getConfig().healthCheck.runesScannerCriticalDiff
+      );
+    }
+    if (runesScannerSyncCheck) this.healthCheck.register(runesScannerSyncCheck);
   };
 
   /**
