@@ -53,7 +53,7 @@ import {
   getConfig,
   RosenConfig,
   DogeConfig,
-  RunesConfig,
+  BitcoinRunesConfig,
 } from '../config/config';
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
@@ -126,7 +126,7 @@ class CreateScanner {
         rosen: rosenConfig,
         cardano: cardanoConfig,
         bitcoin: bitcoinConfig,
-        runes: runesConfig,
+        bitcoinRunes: bitcoinRunesConfig,
         doge: dogeConfig,
         ethereum: ethereumConfig,
         binance: binanceConfig,
@@ -140,9 +140,9 @@ class CreateScanner {
             rosenConfig
           );
           break;
-        case Constants.RUNES_CHAIN_NAME:
-          await CreateScanner.instance.createRunesScanner(
-            runesConfig,
+        case Constants.BITCOIN_RUNES_CHAIN_NAME:
+          await CreateScanner.instance.createBitcoinRunesScanner(
+            bitcoinRunesConfig,
             rosenConfig
           );
           break;
@@ -369,7 +369,7 @@ class CreateScanner {
         this.observationScanner = new BitcoinEsploraScanner({
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
-          network: createBitcoinEsploraNetworkConnectorManager(),
+          network: createBitcoinEsploraNetworkConnectorManager(bitcoinConfig),
           logger: loggers.scannerLogger,
         });
         const observationExtractor = new BitcoinEsploraObservationExtractor(
@@ -383,7 +383,7 @@ class CreateScanner {
         this.observationScanner = new BitcoinRpcScanner({
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
-          network: createBitcoinRpcNetworkConnectorManager(),
+          network: createBitcoinRpcNetworkConnectorManager(bitcoinConfig),
           logger: loggers.scannerLogger,
         });
 
@@ -398,39 +398,40 @@ class CreateScanner {
     }
   };
 
-  private createRunesScanner = async (
-    runesConfig: RunesConfig,
+  private createBitcoinRunesScanner = async (
+    bitcoinRunesConfig: BitcoinRunesConfig,
     rosenConfig: RosenConfig
   ) => {
     if (!this.observationScanner) {
-      if (runesConfig.esplora) {
+      if (bitcoinRunesConfig.esplora) {
         this.observationScanner = new BitcoinEsploraScanner({
           dataSource,
-          initialHeight: runesConfig.initialHeight,
-          network: createBitcoinEsploraNetworkConnectorManager(),
+          initialHeight: bitcoinRunesConfig.initialHeight,
+          network:
+            createBitcoinEsploraNetworkConnectorManager(bitcoinRunesConfig),
           logger: loggers.scannerLogger,
         });
         const observationExtractor = new RunesEsploraObservationExtractor(
           rosenConfig.lockAddress,
-          runesConfig.ordiscan.url,
-          runesConfig.ordiscan.apiKey,
+          bitcoinRunesConfig.ordiscan.url,
+          bitcoinRunesConfig.ordiscan.apiKey,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
-      } else if (runesConfig.rpc) {
+      } else if (bitcoinRunesConfig.rpc) {
         this.observationScanner = new BitcoinRpcScanner({
           dataSource,
-          initialHeight: runesConfig.initialHeight,
-          network: createBitcoinRpcNetworkConnectorManager(),
+          initialHeight: bitcoinRunesConfig.initialHeight,
+          network: createBitcoinRpcNetworkConnectorManager(bitcoinRunesConfig),
           logger: loggers.scannerLogger,
         });
 
         const observationExtractor = new RunesRpcObservationExtractor(
           rosenConfig.lockAddress,
-          runesConfig.ordiscan.url,
-          runesConfig.ordiscan.apiKey,
+          bitcoinRunesConfig.ordiscan.url,
+          bitcoinRunesConfig.ordiscan.apiKey,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger

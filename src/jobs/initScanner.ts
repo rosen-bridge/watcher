@@ -10,7 +10,7 @@ const {
   general: config,
   cardano: cardanoConfig,
   bitcoin: bitcoinConfig,
-  runes: runesConfig,
+  bitcoinRunes: bitcoinRunesConfig,
   doge: dogeConfig,
   ethereum: ethereumConfig,
   binance: binanceConfig,
@@ -55,9 +55,9 @@ export const scannerInit = () => {
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
-    case Constants.RUNES_CHAIN_NAME:
+    case Constants.BITCOIN_RUNES_CHAIN_NAME:
       scanningJob(
-        runesConfig.interval,
+        bitcoinRunesConfig.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;

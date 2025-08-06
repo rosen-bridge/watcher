@@ -16,7 +16,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
   Constants.CARDANO_CHAIN_NAME,
   Constants.BITCOIN_CHAIN_NAME,
-  Constants.RUNES_CHAIN_NAME,
+  Constants.BITCOIN_RUNES_CHAIN_NAME,
   Constants.DOGE_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
   Constants.BINANCE_CHAIN_NAME,
@@ -26,7 +26,7 @@ interface ConfigType {
   logger: LoggerConfig;
   cardano: CardanoConfig;
   bitcoin: BitcoinConfig;
-  runes: RunesConfig;
+  bitcoinRunes: BitcoinRunesConfig;
   ethereum: EthereumConfig;
   binance: BinanceConfig;
   doge: DogeConfig;
@@ -432,7 +432,7 @@ class BitcoinConfig {
   }
 }
 
-class RunesConfig {
+class BitcoinRunesConfig {
   type: string;
   initialHeight: number;
   interval: number;
@@ -453,27 +453,33 @@ class RunesConfig {
   };
 
   constructor(network: string) {
-    this.type = config.get<string>('runes.type');
-    if (network === Constants.RUNES_CHAIN_NAME) {
-      this.initialHeight = getRequiredNumber('runes.initial.height');
-      this.interval = getRequiredNumber('runes.interval');
+    this.type = config.get<string>('bitcoinRunes.type');
+    if (network === Constants.BITCOIN_RUNES_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('bitcoinRunes.initial.height');
+      this.interval = getRequiredNumber('bitcoinRunes.interval');
       this.ordiscan = {
-        url: getRequiredString('runes.ordiscan.url'),
-        apiKey: getRequiredString('runes.ordiscan.apiKey'),
+        url: getRequiredString('bitcoinRunes.ordiscan.url'),
+        apiKey: getRequiredString('bitcoinRunes.ordiscan.apiKey'),
       };
       if (this.type === Constants.ESPLORA_TYPE) {
-        const url = getRequiredString('runes.esplora.url');
-        const timeout = getRequiredNumber('runes.esplora.timeout');
+        const url = getRequiredString('bitcoinRunes.esplora.url');
+        const timeout = getRequiredNumber('bitcoinRunes.esplora.timeout');
         this.esplora = { url, timeout };
       } else if (this.type == Constants.RPC_TYPE) {
-        const url = getRequiredString('runes.rpc.url');
-        const timeout = getRequiredNumber('runes.rpc.timeout');
-        const username = getOptionalString('runes.rpc.username', undefined);
-        const password = getOptionalString('runes.rpc.password', undefined);
+        const url = getRequiredString('bitcoinRunes.rpc.url');
+        const timeout = getRequiredNumber('bitcoinRunes.rpc.timeout');
+        const username = getOptionalString(
+          'bitcoinRunes.rpc.username',
+          undefined
+        );
+        const password = getOptionalString(
+          'bitcoinRunes.rpc.password',
+          undefined
+        );
         this.rpc = { url, timeout, username, password };
       } else {
         throw new Error(
-          `Improperly configured. runes configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`
+          `Improperly configured. bitcoinRunes configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`
         );
       }
     }
@@ -668,8 +674,6 @@ class HealthCheckConfig {
   cardanoScannerCriticalDiff: number;
   bitcoinScannerWarnDiff: number;
   bitcoinScannerCriticalDiff: number;
-  runesScannerWarnDiff: number;
-  runesScannerCriticalDiff: number;
   dogeScannerWarnDiff: number;
   dogeScannerCriticalDiff: number;
   ethereumScannerWarnDiff: number;
@@ -725,12 +729,6 @@ class HealthCheckConfig {
     this.bitcoinScannerCriticalDiff = getRequiredNumber(
       'healthCheck.bitcoinScanner.criticalDifference'
     );
-    this.runesScannerWarnDiff = getRequiredNumber(
-      'healthCheck.runesScanner.warnDifference'
-    );
-    this.runesScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.runesScanner.criticalDifference'
-    );
     this.dogeScannerWarnDiff = getRequiredNumber(
       'healthCheck.dogeScanner.warnDifference'
     );
@@ -774,7 +772,7 @@ const getConfig = (): ConfigType => {
     const logger = new LoggerConfig();
     const cardano = new CardanoConfig(general.networkWatcher);
     const bitcoin = new BitcoinConfig(general.networkWatcher);
-    const runes = new RunesConfig(general.networkWatcher);
+    const bitcoinRunes = new BitcoinRunesConfig(general.networkWatcher);
     const doge = new DogeConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
     const binance = new BinanceConfig(general.networkWatcher);
@@ -789,7 +787,7 @@ const getConfig = (): ConfigType => {
     internalConfig = {
       cardano,
       bitcoin,
-      runes,
+      bitcoinRunes,
       doge,
       ethereum,
       binance,
@@ -810,7 +808,7 @@ export {
   RosenConfig,
   CardanoConfig,
   BitcoinConfig,
-  RunesConfig,
+  BitcoinRunesConfig,
   EthereumConfig,
   BinanceConfig,
   DogeConfig,
