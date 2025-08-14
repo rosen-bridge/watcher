@@ -27,7 +27,7 @@
   },
   "keywords": [],
   "author": "Rosen Team",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
     "@rollup/plugin-commonjs": "^25.0.0",
