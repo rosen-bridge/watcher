@@ -17,7 +17,7 @@ import {
   BlockFrostTransaction,
 } from '@rosen-bridge/scanner';
 import { EvmRpcNetwork } from '@rosen-bridge/evm-rpc-scanner';
-import { getConfig } from '../config/config';
+import { BitcoinConfig, getConfig } from '../config/config';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { Transaction } from '@rosen-bridge/scanner-interfaces';
 import {
@@ -80,23 +80,26 @@ export const createErgoExplorerNetworkConnectorManager =
 
 /**
  * Creates and configures a NetworkConnectorManager instance for Bitcoin scanner
+ * @param bitcoinConfig
  */
-export const createBitcoinRpcNetworkConnectorManager = () => {
+export const createBitcoinRpcNetworkConnectorManager = (
+  bitcoinConfig: BitcoinConfig
+) => {
   const networkConnectorManager =
     new NetworkConnectorManager<BitcoinRpcTransaction>(
       new FailoverStrategy(),
       bitcoinLogger
     );
 
-  if (config.bitcoin.rpc) {
+  if (bitcoinConfig.rpc) {
     networkConnectorManager.addConnector(
       new BitcoinRpcNetwork(
-        config.bitcoin.rpc.url,
-        config.bitcoin.rpc.timeout * 1000,
-        config.bitcoin.rpc.username && config.bitcoin.rpc.password
+        bitcoinConfig.rpc.url,
+        bitcoinConfig.rpc.timeout * 1000,
+        bitcoinConfig.rpc.username && bitcoinConfig.rpc.password
           ? {
-              username: config.bitcoin.rpc.username,
-              password: config.bitcoin.rpc.password,
+              username: bitcoinConfig.rpc.username,
+              password: bitcoinConfig.rpc.password,
             }
           : undefined
       )
@@ -137,19 +140,22 @@ export const createDogeEsploraNetworkConnectorManager = () => {
 
 /**
  * Creates and configures a NetworkConnectorManager instance for Bitcoin Esplora scanner
+ * @param bitcoinConfig
  */
-export const createBitcoinEsploraNetworkConnectorManager = () => {
+export const createBitcoinEsploraNetworkConnectorManager = (
+  bitcoinConfig: BitcoinConfig
+) => {
   const networkConnectorManager =
     new NetworkConnectorManager<BitcoinEsploraTransaction>(
       new FailoverStrategy(),
       bitcoinLogger
     );
 
-  if (config.bitcoin.esplora) {
+  if (bitcoinConfig.esplora) {
     networkConnectorManager.addConnector(
       new EsploraNetwork(
-        config.bitcoin.esplora.url,
-        config.bitcoin.esplora.timeout * 1000
+        bitcoinConfig.esplora.url,
+        bitcoinConfig.esplora.timeout * 1000
       )
     );
   } else {
