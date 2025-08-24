@@ -21,10 +21,10 @@ export class TxEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   creationTime: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   updateBlock: number;
 
   @Column({
@@ -33,18 +33,18 @@ export class TxEntity {
   })
   type: TxType;
 
-  @Column()
+  @Column({ type: 'varchar' })
   txId: string;
 
-  @Column()
+  @Column({ type: 'text' })
   txSerialized: string;
 
   @ManyToOne('ObservationEntity', 'id', { nullable: true })
   observation?: Relation<ObservationEntity>;
 
-  @Column()
+  @Column({ type: 'boolean' })
   deleted: boolean;
 
-  @Column({ default: true })
+  @Column({ type: 'boolean', default: true })
   isValid: boolean;
 }

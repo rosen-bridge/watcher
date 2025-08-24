@@ -14,7 +14,7 @@ export class RevenueEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar' })
   tokenId: string;
 
   @Column({ type: 'bigint' })

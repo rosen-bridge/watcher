@@ -2,12 +2,12 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class TokenEntity {
-  @PrimaryColumn()
+  @PrimaryColumn({ type: 'varchar' })
   tokenId: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   tokenName: string;
 
-  @Column()
+  @Column({ type: 'integer' })
   decimals: number;
 }

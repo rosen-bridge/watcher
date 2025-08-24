@@ -9,7 +9,7 @@
     "lint": "eslint --fix . && npm run prettify",
     "madge": "npx madge --circular --extensions ts ./",
     "prettify": "prettier --write . --ignore-path ./.gitignore",
-    "start": "ts-node --experimental-specifier-resolution=node ./src/index.ts",
+    "start": "tsx ./src/index.ts",
     "test": "NODE_ENV=\"test\" mocha --exit --slow 3000",
     "type-check": "tsc --noEmit",
     "typeorm:generate:sqlite": "npm run typeorm migration:generate ./src/database/migrations/sqlite/watcherMigration -- -p -d ./config/dataSource.ts",
@@ -46,7 +46,7 @@
     "@types/json-bigint": "^1.0.1",
     "@types/lodash-es": "^4.17.6",
     "@types/mocha": "^9.1.0",
-    "@types/node": "^18.17.1",
+    "@types/node": "^20.11.0",
     "@types/rollup-plugin-natives": "^0.7.1",
     "@types/sinon": "^10.0.11",
     "@types/supertest": "^2.0.12",
@@ -62,7 +62,6 @@
     "madge": "^5.0.1",
     "mocha": "^9.2.2",
     "nock": "^13.5.4",
-    "nodemon": "^2.0.15",
     "pkg": "^5.8.1",
     "prettier": "^2.7.1",
     "rollup": "^3.21.6",
@@ -70,7 +69,6 @@
     "rollup-plugin-node-externals": "^6.0.1",
     "sinon": "^14.0.0",
     "ts-mockito": "^2.6.1",
-    "ts-node": "^10.7.0",
     "typescript": "^4.7.2"
   },
   "dependencies": {
@@ -116,6 +114,7 @@
     "sqlite3": "^5.0.2",
     "supertest": "^6.3.0",
     "tsconfig-paths": "^4.0.0",
+    "tsx": "^4.20.5",
     "typeorm": "^0.3.20"
   }
 }
