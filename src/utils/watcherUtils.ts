@@ -117,9 +117,9 @@ class WatcherUtils {
       `Fee for observation [${observation.requestId}] with amount ${observation.amount} is calculated: networkFee = ${feeConfig.networkFee}, bridgeFee = ${bridgeFee}`
     );
     return (
-      BigInt(observation.amount) >=
+      BigInt(observation.amount) >
         BigInt(bridgeFee) + BigInt(feeConfig.networkFee) &&
-      BigInt(observation.amount) >=
+      BigInt(observation.amount) >
         BigInt(observation.bridgeFee) + BigInt(observation.networkFee)
     );
   };
