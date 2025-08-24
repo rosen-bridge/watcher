@@ -1,4 +1,4 @@
-FROM node:18.17.1
+FROM node:20.11.0
 
 LABEL maintainer="rosen-bridge team <team@rosen.tech>"
 LABEL description="Docker image for the watcher service owned by rosen-bridge organization."
