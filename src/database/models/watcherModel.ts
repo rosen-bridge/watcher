@@ -18,7 +18,7 @@ import {
   MoreThan,
   Not,
   Repository,
-} from 'typeorm';
+} from '@rosen-bridge/extended-typeorm';
 import {
   DOING_STATUS,
   DONE_STATUS,

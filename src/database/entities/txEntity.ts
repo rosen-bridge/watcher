@@ -4,7 +4,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Relation,
-} from 'typeorm';
+} from '@rosen-bridge/extended-typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 export enum TxType {

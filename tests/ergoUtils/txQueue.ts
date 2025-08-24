@@ -18,7 +18,7 @@ import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
 import TransactionTest from '../../src/api/TransactionTest';
 import { Transaction } from '../../src/api/Transaction';
 import { createMemoryDatabase } from '../resources/inMemoryDb';
-import { DataSource } from 'typeorm';
+import { DataSource } from '@rosen-bridge/extended-typeorm';
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
 

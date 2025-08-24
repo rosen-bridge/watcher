@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource } from '@rosen-bridge/extended-typeorm';
 import {
   BoxEntity,
   migrations as addressExtractorMigrations,

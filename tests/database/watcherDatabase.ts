@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { describe } from 'mocha';
-import { DataSource, Repository, MigrationInterface } from 'typeorm';
+import { DataSource, Repository } from '@rosen-bridge/extended-typeorm';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
 import {

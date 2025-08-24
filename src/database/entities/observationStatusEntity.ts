@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
   JoinColumn,
   OneToOne,
-} from 'typeorm';
+} from '@rosen-bridge/extended-typeorm';
 import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 enum TxStatus {
