@@ -15,7 +15,7 @@
     "typeorm:generate:sqlite": "npm run typeorm migration:generate ./src/database/migrations/sqlite/watcherMigration -- -p -d ./config/dataSource.ts",
     "typeorm:generate:postgres": "npm run typeorm migration:generate ./src/database/migrations/postgres/watcherMigration -- -p -d ./config/dataSource.ts",
     "typeorm:migrate": "npm run typeorm migration:run -- -d config/dataSource.ts",
-    "typeorm": "NODE_OPTIONS=--experimental-specifier-resolution=node typeorm-ts-node-esm",
+    "typeorm": "NODE_OPTIONS='--import tsx' typeorm",
     "build": "rollup --config ./rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "release": "npm run build && pkg ./out/index.cjs --targets host --out-path bin",
     "version": "npx changeset version && npm i",
@@ -113,7 +113,6 @@
     "sleep-promise": "^9.1.0",
     "sqlite3": "^5.0.2",
     "supertest": "^6.3.0",
-    "tsconfig-paths": "^4.0.0",
     "tsx": "^4.20.5"
   },
   "engines": {

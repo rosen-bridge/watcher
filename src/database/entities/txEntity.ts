@@ -21,10 +21,10 @@ export class TxEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'integer' })
   creationTime: number;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'integer' })
   updateBlock: number;
 
   @Column({
@@ -36,7 +36,7 @@ export class TxEntity {
   @Column({ type: 'varchar' })
   txId: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar' })
   txSerialized: string;
 
   @ManyToOne('ObservationEntity', 'id', { nullable: true })
