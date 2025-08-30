@@ -410,7 +410,10 @@ class BitcoinConfig {
 
   constructor(network: string) {
     this.type = config.get<string>('bitcoin.type');
-    if (network === Constants.BITCOIN_CHAIN_NAME) {
+    if (
+      network === Constants.BITCOIN_CHAIN_NAME ||
+      network === Constants.BITCOIN_RUNES_CHAIN_NAME
+    ) {
       this.initialHeight = getRequiredNumber('bitcoin.initial.height');
       this.interval = getRequiredNumber('bitcoin.interval');
       if (this.type === Constants.ESPLORA_TYPE) {
@@ -433,49 +436,17 @@ class BitcoinConfig {
 }
 
 class BitcoinRunesConfig {
-  type: string;
-  initialHeight: number;
-  interval: number;
-
-  esplora?: {
-    url: string;
-    timeout: number;
-  };
-  rpc?: {
-    url: string;
-    timeout: number;
-    username?: string;
-    password?: string;
-  };
   ordiscan: {
     url: string;
     apiKey: string;
   };
 
   constructor(network: string) {
-    this.type = config.get<string>('bitcoin.type');
     if (network === Constants.BITCOIN_RUNES_CHAIN_NAME) {
-      this.initialHeight = getRequiredNumber('bitcoin.initial.height');
-      this.interval = getRequiredNumber('bitcoin.interval');
       this.ordiscan = {
         url: getRequiredString('bitcoinRunes.ordiscan.url'),
         apiKey: getRequiredString('bitcoinRunes.ordiscan.apiKey'),
       };
-      if (this.type === Constants.ESPLORA_TYPE) {
-        const url = getRequiredString('bitcoin.esplora.url');
-        const timeout = getRequiredNumber('bitcoin.esplora.timeout');
-        this.esplora = { url, timeout };
-      } else if (this.type == Constants.RPC_TYPE) {
-        const url = getRequiredString('bitcoin.rpc.url');
-        const timeout = getRequiredNumber('bitcoin.rpc.timeout');
-        const username = getOptionalString('bitcoin.rpc.username', undefined);
-        const password = getOptionalString('bitcoin.rpc.password', undefined);
-        this.rpc = { url, timeout, username, password };
-      } else {
-        throw new Error(
-          `Improperly configured. bitcoin configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}', '${Constants.RPC_TYPE}'`
-        );
-      }
     }
   }
 }

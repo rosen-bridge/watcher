@@ -57,7 +57,7 @@ export const scannerInit = () => {
       break;
     case Constants.BITCOIN_RUNES_CHAIN_NAME:
       scanningJob(
-        bitcoinRunesConfig.interval,
+        bitcoinConfig.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;

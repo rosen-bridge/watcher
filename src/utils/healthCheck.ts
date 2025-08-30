@@ -291,7 +291,7 @@ class HealthCheckSingleton {
   registerBitcoinRunesHealthCheckParams = () => {
     let bitcoinRunesScannerSyncCheck;
     const scanner = CreateScanner.getInstance();
-    if (getConfig().bitcoinRunes.type === RPC_TYPE) {
+    if (getConfig().bitcoin.type === RPC_TYPE) {
       bitcoinRunesScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
         BITCOIN_RUNES_CHAIN_NAME,
         (
@@ -301,7 +301,7 @@ class HealthCheckSingleton {
         getConfig().healthCheck.bitcoinScannerWarnDiff,
         getConfig().healthCheck.bitcoinScannerCriticalDiff
       );
-    } else if (getConfig().bitcoinRunes.type === ESPLORA_TYPE) {
+    } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
       bitcoinRunesScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
         BITCOIN_RUNES_CHAIN_NAME,
         (
