@@ -370,7 +370,7 @@ class CreateScanner {
         this.observationScanner = new BitcoinEsploraScanner({
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
-          network: createBitcoinEsploraNetworkConnectorManager(bitcoinConfig),
+          network: createBitcoinEsploraNetworkConnectorManager(),
           logger: loggers.scannerLogger,
         });
         const observationExtractor = new BitcoinEsploraObservationExtractor(
@@ -384,7 +384,7 @@ class CreateScanner {
         this.observationScanner = new BitcoinRpcScanner({
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
-          network: createBitcoinRpcNetworkConnectorManager(bitcoinConfig),
+          network: createBitcoinRpcNetworkConnectorManager(),
           logger: loggers.scannerLogger,
         });
 
@@ -409,7 +409,7 @@ class CreateScanner {
         this.observationScanner = new BitcoinEsploraScanner({
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
-          network: createBitcoinEsploraNetworkConnectorManager(bitcoinConfig),
+          network: createBitcoinEsploraNetworkConnectorManager(),
           logger: loggers.scannerLogger,
         });
         const observationExtractor = new RunesEsploraObservationExtractor(
@@ -425,7 +425,7 @@ class CreateScanner {
         this.observationScanner = new BitcoinRpcScanner({
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
-          network: createBitcoinRpcNetworkConnectorManager(bitcoinConfig),
+          network: createBitcoinRpcNetworkConnectorManager(),
           logger: loggers.scannerLogger,
         });
 
