@@ -14,6 +14,9 @@ bitcoin:
   rpc:
     username: 'BITCOIN_RPC_USERNAME'
     password: 'BITCOIN_RPC_PASSWORD'
+bitcoinRunes:
+  ordiscan:
+    apiKey: 'ORDISCAN_API_KEY'
 cardano:
   koios:
     authToken: 'KOIOS_AUTH_TOKEN'

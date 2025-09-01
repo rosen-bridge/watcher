@@ -16,6 +16,10 @@ bitcoin:
     url: '' # rpc url
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
+bitcoinRunes:
+  ordiscan:
+    url: 'https://api.ordiscan.com' # ordiscan api url
+    apiKey: '' # ordiscan api key
 doge:
   type: '' # options: esplora, rpc
   initial:

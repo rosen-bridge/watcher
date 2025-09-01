@@ -39,6 +39,7 @@ import {
   BINANCE_BLOCK_TIME,
   BINANCE_CHAIN_NAME,
   BITCOIN_CHAIN_NAME,
+  BITCOIN_RUNES_CHAIN_NAME,
   CARDANO_CHAIN_NAME,
   DOGE_BLOCK_TIME,
   DOGE_CHAIN_NAME,
@@ -134,6 +135,9 @@ class HealthCheckSingleton {
     }
     if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
       this.registerBitcoinHealthCheckParams();
+    }
+    if (getConfig().general.networkWatcher === BITCOIN_RUNES_CHAIN_NAME) {
+      this.registerBitcoinRunesHealthCheckParams();
     }
     if (getConfig().general.networkWatcher === DOGE_CHAIN_NAME) {
       this.registerDogeHealthCheckParams();
@@ -279,6 +283,37 @@ class HealthCheckSingleton {
     }
     if (bitcoinScannerSyncCheck)
       this.healthCheck.register(bitcoinScannerSyncCheck);
+  };
+
+  /**
+   * Registers all bitcoinRunes check params
+   */
+  registerBitcoinRunesHealthCheckParams = () => {
+    let bitcoinRunesScannerSyncCheck;
+    const scanner = CreateScanner.getInstance();
+    if (getConfig().bitcoin.type === RPC_TYPE) {
+      bitcoinRunesScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
+        BITCOIN_RUNES_CHAIN_NAME,
+        (
+          scanner.getObservationScanner() as BitcoinRpcScanner
+        ).getBlockChainLastHeight,
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        getConfig().healthCheck.bitcoinScannerWarnDiff,
+        getConfig().healthCheck.bitcoinScannerCriticalDiff
+      );
+    } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
+      bitcoinRunesScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
+        BITCOIN_RUNES_CHAIN_NAME,
+        (
+          scanner.getObservationScanner() as BitcoinEsploraScanner
+        ).getBlockChainLastHeight,
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        getConfig().healthCheck.bitcoinScannerWarnDiff,
+        getConfig().healthCheck.bitcoinScannerCriticalDiff
+      );
+    }
+    if (bitcoinRunesScannerSyncCheck)
+      this.healthCheck.register(bitcoinRunesScannerSyncCheck);
   };
 
   /**
