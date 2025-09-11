@@ -231,20 +231,14 @@ class HealthCheckSingleton {
           chainName = BITCOIN_CHAIN_NAME;
           chainBlockTime = BITCOIN_BLOCK_TIME;
           break;
-      }
-      switch (getConfig().general.networkWatcher) {
         case DOGE_CHAIN_NAME:
           chainName = DOGE_CHAIN_NAME;
           chainBlockTime = DOGE_BLOCK_TIME;
           break;
-      }
-      switch (getConfig().general.networkWatcher) {
         case ETHEREUM_CHAIN_NAME:
           chainName = ETHEREUM_CHAIN_NAME;
           chainBlockTime = ETHEREUM_BLOCK_TIME;
           break;
-      }
-      switch (getConfig().general.networkWatcher) {
         case BINANCE_CHAIN_NAME:
           chainName = BINANCE_CHAIN_NAME;
           chainBlockTime = BINANCE_BLOCK_TIME;
