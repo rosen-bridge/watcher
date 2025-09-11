@@ -2,7 +2,7 @@ import { loadDataBase } from '../database/watcherDatabase';
 import { Queue } from '../../src/ergo/transaction/queue';
 import { TxEntity, TxType } from '../../src/database/entities/txEntity';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { Boxes } from '../../src/ergo/boxes';
 import { secret1, userAddress } from '../ergo/transactions/permit';
 import { WatcherDataBase } from '../../src/database/models/watcherModel';

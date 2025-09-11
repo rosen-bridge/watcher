@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
   Relation,
 } from 'typeorm';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 
 export enum TxType {
   COMMITMENT = 'commitment',

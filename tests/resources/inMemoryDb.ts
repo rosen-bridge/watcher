@@ -6,11 +6,11 @@ import {
 import {
   migrations as observationMigrations,
   ObservationEntity,
-} from '@rosen-bridge/observation-extractor';
+} from '@rosen-bridge/abstract-observation-extractor';
 import {
   BlockEntity,
   migrations as scannerMigrations,
-} from '@rosen-bridge/scanner';
+} from '@rosen-bridge/abstract-scanner';
 import {
   CommitmentEntity,
   EventTriggerEntity,

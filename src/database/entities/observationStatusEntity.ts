@@ -1,3 +1,4 @@
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import {
   Column,
   Entity,
@@ -6,7 +7,6 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
 
 enum TxStatus {
   TIMED_OUT = 'timeout',

@@ -24,7 +24,7 @@ import {
 } from '../config/constants';
 import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { JsonBI } from './network/parser';
 import { TokensConfig } from '../config/tokensConfig';

@@ -2,30 +2,28 @@ import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 import {
   BitcoinEsploraScanner,
   DogeEsploraScanner,
-} from '@rosen-bridge/bitcoin-esplora-scanner';
+  BitcoinRpcScanner,
+  DogeRpcScanner,
+} from '@rosen-bridge/bitcoin-scanner';
 import {
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
   DogeEsploraObservationExtractor,
   DogeRpcObservationExtractor,
 } from '@rosen-bridge/bitcoin-observation-extractor';
-import {
-  BitcoinRpcScanner,
-  DogeRpcScanner,
-} from '@rosen-bridge/bitcoin-rpc-scanner';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { ErgoObservationExtractor } from '@rosen-bridge/ergo-observation-extractor';
 import {
   CardanoBlockFrostObservationExtractor,
   CardanoKoiosObservationExtractor,
   CardanoOgmiosObservationExtractor,
-  ErgoObservationExtractor,
-} from '@rosen-bridge/observation-extractor';
+} from '@rosen-bridge/cardano-observation-extractor';
 import {
   CardanoBlockFrostScanner,
   CardanoKoiosScanner,
   CardanoOgmiosScanner,
-  ErgoScanner,
-} from '@rosen-bridge/scanner';
+} from '@rosen-bridge/cardano-scanner';
+import { ErgoScanner } from '@rosen-bridge/ergo-scanner';
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
 import {
   CollateralExtractor,
@@ -42,7 +40,7 @@ import {
   BinanceRpcObservationExtractor,
   EthereumRpcObservationExtractor,
 } from '@rosen-bridge/evm-observation-extractor';
-import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
 import { dataSource } from '../../config/dataSource';
 import {
   BinanceConfig,
