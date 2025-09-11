@@ -1,7 +1,6 @@
 import { BoxEntity } from '@rosen-bridge/address-extractor';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
-import { BlockEntity } from '@rosen-bridge/scanner';
-import { PROCEED } from '@rosen-bridge/scanner';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
+import { BlockEntity, PROCEED } from '@rosen-bridge/abstract-scanner';
 import {
   CollateralEntity,
   CommitmentEntity,

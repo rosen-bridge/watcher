@@ -22,7 +22,7 @@ import WIDObj from './dataset/WIDBox3.json' assert { type: 'json' };
 import WIDObj2 from './dataset/WIDBox4.json' assert { type: 'json' };
 import WIDObjWithoutErg from './dataset/WIDBoxWithoutErg.json' assert { type: 'json' };
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { TxStatus } from '../../../src/database/entities/observationStatusEntity';
 
 chai.use(spies);

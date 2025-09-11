@@ -5,13 +5,12 @@ import {
   PermitEntity,
 } from '@rosen-bridge/watcher-data-extractor';
 import { BoxEntity } from '@rosen-bridge/address-extractor';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import {
   ObservationStatusEntity,
   TxStatus,
 } from '../../src/database/entities/observationStatusEntity';
-import { BlockEntity } from '@rosen-bridge/scanner';
-import { PROCEED } from '@rosen-bridge/scanner/dist/entities/blockEntity';
+import { BlockEntity, PROCEED } from '@rosen-bridge/abstract-scanner';
 import * as Constants from '../../src/config/constants';
 import { TokenEntity } from '../../src/database/entities/tokenEntity';
 import { RevenueEntity } from '../../src/database/entities/revenueEntity';

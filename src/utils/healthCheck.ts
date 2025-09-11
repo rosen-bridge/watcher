@@ -27,11 +27,13 @@ import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import {
   CardanoKoiosScanner,
   CardanoOgmiosScanner,
-} from '@rosen-bridge/scanner';
+} from '@rosen-bridge/cardano-scanner';
 import { DiscordNotification } from '@rosen-bridge/discord-notification';
-import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
-import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
-import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+import {
+  BitcoinRpcScanner,
+  BitcoinEsploraScanner,
+} from '@rosen-bridge/bitcoin-scanner';
+import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
 
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';

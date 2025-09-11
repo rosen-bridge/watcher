@@ -6,7 +6,7 @@ import * as wasm from 'ergo-lib-wasm-nodejs';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { ChangeBoxCreationError } from '../errors/errors';
 import { TxType } from '../database/entities/txEntity';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';

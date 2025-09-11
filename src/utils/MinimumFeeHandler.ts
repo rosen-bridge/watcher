@@ -7,7 +7,7 @@ import { TokenMap } from '@rosen-bridge/tokens';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { getConfig } from '../config/config';
 import { ERGO_CHAIN_NAME, NODE_TYPE } from '../config/constants';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { TokensConfig } from '../config/tokensConfig';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
