@@ -95,7 +95,7 @@
     "@rosen-bridge/permit-check": "^2.0.0",
     "@rosen-bridge/rate-limited-axios": "^0.2.1",
     "@rosen-bridge/scanner-interfaces": "^0.2.0",
-    "@rosen-bridge/scanner-sync-check": "^5.0.0",
+    "@rosen-bridge/scanner-sync-check": "^7.0.0",
     "@rosen-bridge/tokens": "^3.1.1",
     "@rosen-bridge/watcher-data-extractor": "^12.2.0",
     "@rosen-bridge/wid-check": "^2.0.0",

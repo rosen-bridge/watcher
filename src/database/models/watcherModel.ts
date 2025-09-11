@@ -38,6 +38,7 @@ import { TokenEntity } from '../entities/tokenEntity';
 import { TxEntity, TxType } from '../entities/txEntity';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { TokensConfig } from '../../config/tokensConfig';
+import { LastSavedBlock } from '../../types';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -88,6 +89,22 @@ class WatcherDataBase {
     });
     if (lastBlock.length !== 0) {
       return lastBlock[0].height;
+    }
+    throw new Error('No block found or error in database connection');
+  };
+
+  /**
+   * returns the last saved block height and timestamp
+   * @param scanner: considering scanned blocks by this scanner
+   */
+  getLastBlockInfo = async (scanner: string): Promise<LastSavedBlock> => {
+    const lastBlock = await this.blockRepository.find({
+      where: { status: PROCEED, scanner: scanner },
+      order: { height: 'DESC' },
+      take: 1,
+    });
+    if (lastBlock.length !== 0) {
+      return { height: lastBlock[0].height, timestamp: lastBlock[0].timestamp };
     }
     throw new Error('No block found or error in database connection');
   };
