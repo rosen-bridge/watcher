@@ -57,7 +57,10 @@ class WatcherUtils {
     const currentHeight = await this.dataBase.getLastBlockHeight(
       CreateScanner.getInstance().getObservationScanner().name()
     );
-    if (currentHeight - observation.height > this.observationValidThreshold) {
+    if (
+      currentHeight.height - observation.height >
+      this.observationValidThreshold
+    ) {
       logger.debug(
         `Observation [${observation.requestId}] is timed out, updating the database status`
       );
@@ -175,7 +178,7 @@ class WatcherUtils {
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
-      height,
+      height.height,
       this.observationValidThreshold,
       true
     );
@@ -253,7 +256,7 @@ class WatcherUtils {
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
-      height
+      height.height
     );
     logger.debug(
       `All confirmed observations are ${observations.map((ob) => ob.requestId)}`
@@ -313,7 +316,7 @@ class WatcherUtils {
     );
     return await this.dataBase.commitmentsByWIDAndMaxHeight(
       Transaction.watcherWID!,
-      height - timeoutConfirmation
+      height.height - timeoutConfirmation
     );
   };
 
@@ -329,7 +332,7 @@ class WatcherUtils {
     const result: Array<CommitmentEntity> = [];
     const commitments = await this.dataBase.commitmentsByWIDAndMaxHeight(
       Transaction.watcherWID!,
-      height
+      height.height
     );
     for (const commitment of commitments) {
       // TODO must improve this part without issue.
@@ -367,7 +370,7 @@ class WatcherUtils {
     );
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
-      height
+      height.height
     );
     let seenNotCommitted = false;
     for (const observation of observations) {
