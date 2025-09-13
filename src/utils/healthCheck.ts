@@ -29,6 +29,7 @@ import {
   BINANCE_CHAIN_NAME,
   BITCOIN_BLOCK_TIME,
   BITCOIN_CHAIN_NAME,
+  BITCOIN_RUNES_CHAIN_NAME,
   CARDANO_BLOCK_TIME,
   CARDANO_CHAIN_NAME,
   DOGE_BLOCK_TIME,
@@ -229,6 +230,10 @@ class HealthCheckSingleton {
           break;
         case BITCOIN_CHAIN_NAME:
           chainName = BITCOIN_CHAIN_NAME;
+          chainBlockTime = BITCOIN_BLOCK_TIME;
+          break;
+        case BITCOIN_RUNES_CHAIN_NAME:
+          chainName = BITCOIN_RUNES_CHAIN_NAME;
           chainBlockTime = BITCOIN_BLOCK_TIME;
           break;
         case DOGE_CHAIN_NAME:

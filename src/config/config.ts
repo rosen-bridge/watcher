@@ -16,6 +16,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
   Constants.CARDANO_CHAIN_NAME,
   Constants.BITCOIN_CHAIN_NAME,
+  Constants.BITCOIN_RUNES_CHAIN_NAME,
   Constants.DOGE_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
   Constants.BINANCE_CHAIN_NAME,
@@ -25,6 +26,7 @@ interface ConfigType {
   logger: LoggerConfig;
   cardano: CardanoConfig;
   bitcoin: BitcoinConfig;
+  bitcoinRunes: BitcoinRunesConfig;
   ethereum: EthereumConfig;
   binance: BinanceConfig;
   doge: DogeConfig;
@@ -155,7 +157,7 @@ class Config {
       const secret = getOptionalString('ergo.secret');
       if (secret) {
         this.secretKey = wasm.SecretKey.dlog_from_bytes(
-          Buffer.from(secret, 'hex')
+          Uint8Array.from(Buffer.from(secret, 'hex'))
         );
         console.warn(
           `Using secret key is deprecated. Please use mnemonic instead.`
@@ -270,9 +272,7 @@ class Config {
       this.address // set default watcher address as reward address if its not specified
     );
     this.eventTriggerInit = config.get<boolean>('initialization.eventTrigger');
-    this.versionInputExtension = config.get<boolean>(
-      'versionInputExtension'
-    );
+    this.versionInputExtension = config.get<boolean>('versionInputExtension');
   }
 }
 
@@ -410,7 +410,10 @@ class BitcoinConfig {
 
   constructor(network: string) {
     this.type = config.get<string>('bitcoin.type');
-    if (network === Constants.BITCOIN_CHAIN_NAME) {
+    if (
+      network === Constants.BITCOIN_CHAIN_NAME ||
+      network === Constants.BITCOIN_RUNES_CHAIN_NAME
+    ) {
       this.initialHeight = getRequiredNumber('bitcoin.initial.height');
       this.interval = getRequiredNumber('bitcoin.interval');
       if (this.type === Constants.ESPLORA_TYPE) {
@@ -428,6 +431,22 @@ class BitcoinConfig {
           `Improperly configured. bitcoin configuration type is invalid available choices are '${Constants.ESPLORA_TYPE}'`
         );
       }
+    }
+  }
+}
+
+class BitcoinRunesConfig {
+  ordiscan: {
+    url: string;
+    apiKey: string;
+  };
+
+  constructor(network: string) {
+    if (network === Constants.BITCOIN_RUNES_CHAIN_NAME) {
+      this.ordiscan = {
+        url: getRequiredString('bitcoinRunes.ordiscan.url'),
+        apiKey: getRequiredString('bitcoinRunes.ordiscan.apiKey'),
+      };
     }
   }
 }
@@ -718,6 +737,7 @@ const getConfig = (): ConfigType => {
     const logger = new LoggerConfig();
     const cardano = new CardanoConfig(general.networkWatcher);
     const bitcoin = new BitcoinConfig(general.networkWatcher);
+    const bitcoinRunes = new BitcoinRunesConfig(general.networkWatcher);
     const doge = new DogeConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
     const binance = new BinanceConfig(general.networkWatcher);
@@ -732,6 +752,7 @@ const getConfig = (): ConfigType => {
     internalConfig = {
       cardano,
       bitcoin,
+      bitcoinRunes,
       doge,
       ethereum,
       binance,
@@ -752,6 +773,7 @@ export {
   RosenConfig,
   CardanoConfig,
   BitcoinConfig,
+  BitcoinRunesConfig,
   EthereumConfig,
   BinanceConfig,
   DogeConfig,
