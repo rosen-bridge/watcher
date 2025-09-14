@@ -1,13 +1,13 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from '@rosen-bridge/extended-typeorm';
 
 @Entity()
 export class TokenEntity {
-  @PrimaryColumn()
+  @PrimaryColumn({ type: 'varchar' })
   tokenId: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   tokenName: string;
 
-  @Column()
+  @Column({ type: 'integer' })
   decimals: number;
 }

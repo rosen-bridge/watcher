@@ -1,4 +1,4 @@
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 
 export interface Block {
   hash: string;

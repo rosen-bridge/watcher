@@ -2,28 +2,29 @@ import {
   NetworkConnectorManager,
   FailoverStrategy,
   RoundRobinStrategy,
-} from '@rosen-bridge/scanner';
-import { ErgoNodeNetwork, ErgoExplorerNetwork } from '@rosen-bridge/scanner';
+} from '@rosen-bridge/abstract-scanner';
+import {
+  ErgoNodeNetwork,
+  ErgoExplorerNetwork,
+} from '@rosen-bridge/ergo-scanner';
 import {
   DogeRpcTransaction,
   BitcoinRpcTransaction,
   BitcoinRpcNetwork,
   DogeRpcNetwork,
-} from '@rosen-bridge/bitcoin-rpc-scanner';
+  EsploraNetwork,
+  BitcoinEsploraTransaction,
+} from '@rosen-bridge/bitcoin-scanner';
 import {
   KoiosNetwork,
   BlockFrostNetwork,
   KoiosTransaction,
   BlockFrostTransaction,
-} from '@rosen-bridge/scanner';
-import { EvmRpcNetwork } from '@rosen-bridge/evm-rpc-scanner';
+} from '@rosen-bridge/cardano-scanner';
+import { EvmRpcNetwork } from '@rosen-bridge/evm-scanner';
 import { getConfig } from '../config/config';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { Transaction } from '@rosen-bridge/scanner-interfaces';
-import {
-  EsploraNetwork,
-  BitcoinEsploraTransaction,
-} from '@rosen-bridge/bitcoin-esplora-scanner';
 import { TransactionResponse } from 'ethers';
 
 const config = getConfig();

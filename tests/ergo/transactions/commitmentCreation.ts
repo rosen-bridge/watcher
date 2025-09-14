@@ -3,7 +3,7 @@ import { Transaction } from '../../../src/api/Transaction';
 import { secret1 } from './permit';
 import { CommitmentCreation } from '../../../src/transactions/commitmentCreation';
 import { JsonBI } from '../../../src/ergo/network/parser';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { ErgoUtils } from '../../../src/ergo/utils';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import { hexStrToUint8Array } from '../../../src/utils/utils';

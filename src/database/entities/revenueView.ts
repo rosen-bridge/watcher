@@ -1,4 +1,4 @@
-import { ViewEntity, ViewColumn } from 'typeorm';
+import { ViewEntity, ViewColumn } from '@rosen-bridge/extended-typeorm';
 
 @ViewEntity({
   name: 'revenue_view',

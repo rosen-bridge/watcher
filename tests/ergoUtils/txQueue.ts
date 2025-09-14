@@ -2,7 +2,7 @@ import { loadDataBase } from '../database/watcherDatabase';
 import { Queue } from '../../src/ergo/transaction/queue';
 import { TxEntity, TxType } from '../../src/database/entities/txEntity';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { Boxes } from '../../src/ergo/boxes';
 import { secret1, userAddress } from '../ergo/transactions/permit';
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
@@ -18,7 +18,7 @@ import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
 import TransactionTest from '../../src/api/TransactionTest';
 import { Transaction } from '../../src/api/Transaction';
 import { createMemoryDatabase } from '../resources/inMemoryDb';
-import { DataSource } from 'typeorm';
+import { DataSource } from '@rosen-bridge/extended-typeorm';
 
 const tx = wasm.Transaction.from_json(JSON.stringify(txObj));
 

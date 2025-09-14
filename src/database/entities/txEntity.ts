@@ -4,8 +4,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Relation,
-} from 'typeorm';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+} from '@rosen-bridge/extended-typeorm';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 
 export enum TxType {
   COMMITMENT = 'commitment',
@@ -21,10 +21,10 @@ export class TxEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'integer' })
   creationTime: number;
 
-  @Column()
+  @Column({ type: 'integer' })
   updateBlock: number;
 
   @Column({
@@ -33,18 +33,18 @@ export class TxEntity {
   })
   type: TxType;
 
-  @Column()
+  @Column({ type: 'varchar' })
   txId: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   txSerialized: string;
 
   @ManyToOne('ObservationEntity', 'id', { nullable: true })
   observation?: Relation<ObservationEntity>;
 
-  @Column()
+  @Column({ type: 'boolean' })
   deleted: boolean;
 
-  @Column({ default: true })
+  @Column({ type: 'boolean', default: true })
   isValid: boolean;
 }
