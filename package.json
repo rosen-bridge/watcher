@@ -101,6 +101,7 @@
     "@rosen-bridge/watcher-data-extractor": "^12.2.0",
     "@rosen-bridge/wid-check": "^2.0.1",
     "@rosen-bridge/winston-logger": "^1.1.0",
+    "@rosen-bridge/bitcoin-runes-observation-extractor": "^0.1.1",
     "bip39": "^3.1.0",
     "blakejs": "^1.2.1",
     "config": "^3.3.7",
