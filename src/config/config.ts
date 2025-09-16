@@ -436,16 +436,16 @@ class BitcoinConfig {
 }
 
 class BitcoinRunesConfig {
-  ordiscan: {
+  unisat: {
     url: string;
     apiKey: string;
   };
 
   constructor(network: string) {
     if (network === Constants.BITCOIN_RUNES_CHAIN_NAME) {
-      this.ordiscan = {
-        url: getRequiredString('bitcoinRunes.ordiscan.url'),
-        apiKey: getRequiredString('bitcoinRunes.ordiscan.apiKey'),
+      this.unisat = {
+        url: getRequiredString('bitcoinRunes.unisat.url'),
+        apiKey: getRequiredString('bitcoinRunes.unisat.apiKey'),
       };
     }
   }
