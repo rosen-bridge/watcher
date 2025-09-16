@@ -94,7 +94,6 @@
     "@rosen-bridge/node-sync-check": "^2.0.1",
     "@rosen-bridge/permit-check": "^2.0.1",
     "@rosen-bridge/rate-limited-axios": "^0.2.1",
-    "@rosen-bridge/runes-observation-extractor": "^0.2.0",
     "@rosen-bridge/scanner-interfaces": "^0.2.0",
     "@rosen-bridge/scanner-sync-check": "^7.0.1",
     "@rosen-bridge/tokens": "^3.2.0",
