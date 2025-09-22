@@ -21,12 +21,12 @@ jobs:
 
       - name: Download Contracts
         run: |
-          npx @rosen-bridge/cli@${{ vars.ROSEN_CLI_VERSION || 'latest' }} download-assets -c ${{ vars.RELEASE_NAME }} -t ${{ vars.RELEASE_TAG }} -o .
+          mkdir -p ./config/rosen
+          npx @rosen-bridge/cli@${{ vars.ROSEN_CLI_VERSION || 'latest' }} download-assets -c ${{ vars.RELEASE_NAME }} ${{ vars.RELEASE_TAG }} -o ./config/rosen -s mainnet
+          mv ./config/rosen/tokens*.json ./config/rosen/tokens.json
 
       - name: Move Contracts files
         run: |
-          mkdir -p ./config/rosen
-          mv ./{tokens,contracts}*.json ./config/rosen/
           mv ./docker/*.yaml ./config/
 
       - name: Set up QEMU
