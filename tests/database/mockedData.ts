@@ -742,4 +742,5 @@ export const generalInfo = {
     erg: 20,
     rsn: 10,
   },
+  minBoxValue: 1100000,
 };
