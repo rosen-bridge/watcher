@@ -34,6 +34,7 @@ interface GeneralInfo {
     erg: bigint;
     rsn: bigint;
   };
+  minBoxValue: bigint;
 }
 
 const generalRouter = express.Router();
@@ -77,6 +78,7 @@ generalRouter.get('/', async (req: Request, res: Response) => {
         erg: collateral.erg,
         rsn: collateral.rsn,
       },
+      minBoxValue: BigInt(getConfig().general.minBoxValue),
     };
     res.set('Content-Type', 'application/json');
     res.status(200).send(JsonBI.stringify(info));
