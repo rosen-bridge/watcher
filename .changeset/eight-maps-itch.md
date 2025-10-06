@@ -2,4 +2,4 @@
 '@rosen-bridge/watcher': minor
 ---
 
-Add minBoxValue to general info api.
+Add minBoxValue to general info api
