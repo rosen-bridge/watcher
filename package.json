@@ -79,7 +79,7 @@
     "@rosen-bridge/asset-check": "^6.0.0",
     "@rosen-bridge/bitcoin-observation-extractor": "^6.2.1",
     "@rosen-bridge/bitcoin-scanner": "^0.1.0",
-    "@rosen-bridge/callback-logger": "^0.1.0",
+    "@rosen-bridge/callback-logger": "^1.0.1",
     "@rosen-bridge/cardano-observation-extractor": "^0.1.1",
     "@rosen-bridge/cardano-scanner": "^0.1.0",
     "@rosen-bridge/discord-notification": "^0.2.0",
