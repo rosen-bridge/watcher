@@ -324,7 +324,7 @@ class CreateScanner {
           loggers.observationScannerLogger
         );
         const observationExtractor = new CardanoOgmiosObservationExtractor(
-          rosenConfig.lockAddress, 
+          rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
@@ -338,7 +338,7 @@ class CreateScanner {
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new CardanoKoiosObservationExtractor(
-           rosenConfig.lockAddress,
+          rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
@@ -352,7 +352,7 @@ class CreateScanner {
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
-           rosenConfig.lockAddress,
+          rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
