@@ -1,4 +1,4 @@
-import axios, { isAxiosError } from '@rosen-bridge/rate-limited-axios';
+import axios, { isAxiosError } from '@rosen-clients/rate-limited-axios';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import { max, min } from 'lodash-es';
 
