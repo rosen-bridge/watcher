@@ -20,3 +20,6 @@ update Dependencies:
 - @rosen-bridge/evm-scanner@0.1.2
 - @rosen-bridge/tokens@4.0.0
 - @rosen-bridge/extended-typeorm@1.0.1
+- @rosen-clients/rate-limited-axios@1.1.0
+- @rosen-bridge/discord-notification@1.0.0
+- @rosen-bridge/minimum-fee@3.1.0
