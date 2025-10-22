@@ -30,6 +30,7 @@ import { minimumFeeUpdateJob } from './jobs/minimumFee';
 import { rewardCollection } from './jobs/rewardCollection';
 import { TokensConfig } from './config/tokensConfig';
 import { CreateScanner } from './utils/scanner';
+import { exit } from 'node:process';
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 let boxesObject: Boxes;
@@ -46,12 +47,18 @@ const init = async () => {
   await CreateScanner.init();
 
   const generateTransactionObject = async () => {
+    try{
     logger.debug('Initializing data sources and APIs...');
     await dataSource.initialize();
     logger.debug('Data sources had been initialized.');
     await dataSource.runMigrations();
     logger.debug('Migrations done successfully.');
-
+    }
+    catch(err){
+    logger.error(`An error occurred while initializing datasource: ${err}`);
+    logger.error(err.stack);
+    exit(1);
+    }
     watcherDatabase = new WatcherDataBase(dataSource);
     boxesObject = new Boxes(watcherDatabase);
     await Transaction.setup(
