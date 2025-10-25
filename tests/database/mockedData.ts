@@ -244,6 +244,7 @@ observationEntity1.toAddress = 'addr1';
 observationEntity1.targetChainTokenId = 'targetToken';
 observationEntity1.toChain = 'cardano';
 observationEntity1.requestId = 'reqId2';
+observationEntity1.rawData = JSON.stringify({});
 
 export const observationEntity2 = new ObservationEntity();
 observationEntity2.height = 1;
@@ -261,6 +262,7 @@ observationEntity2.toAddress = 'addr1';
 observationEntity2.targetChainTokenId = 'targetToken';
 observationEntity2.toChain = 'cardano';
 observationEntity2.requestId = 'reqId1';
+observationEntity2.rawData = JSON.stringify({});
 
 export const observationEntity3 = new ObservationEntity();
 observationEntity3.height = 3;
@@ -278,6 +280,7 @@ observationEntity3.toAddress = 'addr3';
 observationEntity3.targetChainTokenId = 'targetToken';
 observationEntity3.toChain = 'cardano';
 observationEntity3.requestId = 'reqId3';
+observationEntity3.rawData = JSON.stringify({});
 
 export const observationEntity4 = new ObservationEntity();
 observationEntity4.height = 10;
@@ -295,6 +298,7 @@ observationEntity4.toAddress = 'addr4';
 observationEntity4.targetChainTokenId = 'targetToken';
 observationEntity4.toChain = 'cardano';
 observationEntity4.requestId = 'reqId4';
+observationEntity4.rawData = JSON.stringify({});
 
 export const revenue1 = new RevenueEntity();
 revenue1.tokenId =

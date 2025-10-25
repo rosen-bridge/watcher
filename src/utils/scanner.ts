@@ -246,9 +246,9 @@ class CreateScanner {
     if (config.networkWatcher === Constants.ERGO_CHAIN_NAME) {
       this.observationScanner = this.ergoScanner;
       const observationExtractor = new ErgoObservationExtractor(
+        rosenConfig.lockAddress,
         dataSource,
         TokensConfig.getInstance().getTokenMap(),
-        rosenConfig.lockAddress,
         loggers.observationExtractorLogger
       );
       this.observationScanner.registerExtractor(observationExtractor);
@@ -324,9 +324,9 @@ class CreateScanner {
           loggers.observationScannerLogger
         );
         const observationExtractor = new CardanoOgmiosObservationExtractor(
+          rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
-          rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -338,9 +338,9 @@ class CreateScanner {
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new CardanoKoiosObservationExtractor(
+          rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
-          rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);
@@ -352,9 +352,9 @@ class CreateScanner {
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
+          rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
-          rosenConfig.lockAddress,
           loggers.observationExtractorLogger
         );
         this.observationScanner.registerExtractor(observationExtractor);

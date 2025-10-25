@@ -10,7 +10,7 @@ import { generateMnemonic } from 'bip39';
 import { convertMnemonicToSecretKey } from '../utils/utils';
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
-import { RateLimitedAxiosConfig } from '@rosen-bridge/rate-limited-axios';
+import { RateLimitedAxiosConfig } from '@rosen-clients/rate-limited-axios';
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
@@ -502,7 +502,7 @@ class DogeConfig {
               'Improperly configured. doge.rpc.timeout must be a non-empty number'
             );
           }
-          RateLimitedAxiosConfig.addRule(`^${rpcConfig.url}$`, 3, 1);
+          RateLimitedAxiosConfig.addRule(`^${rpcConfig.url}$`, 3, 1,rpcConfig.timeout);
         });
         this.rpc = rpcConfigs;
       } else {
