@@ -9,6 +9,7 @@
     "lint": "eslint --fix . && npm run prettify",
     "madge": "npx madge --circular --extensions ts ./",
     "prettify": "prettier --write . --ignore-path ./.gitignore",
+    "prepare": "husky install",
     "start": "tsx ./src/index.ts",
     "test": "NODE_ENV=\"test\" mocha --exit --slow 3000",
     "type-check": "tsc --noEmit",
