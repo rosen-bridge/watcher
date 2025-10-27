@@ -1,6 +1,3 @@
-import JSONBigInt from 'json-bigint';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 
-export const JsonBI = JSONBigInt({
-  useNativeBigInt: true,
-  alwaysParseAsBig: true,
-});
+export const JsonBI = JsonBigInt;
