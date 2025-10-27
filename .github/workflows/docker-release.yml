@@ -7,53 +7,144 @@ on:
     branches:
       - dev
 
+env:
+  IMAGE_NAME: ghcr.io/rosen-bridge/watcher-service
+  FINAL_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'dev' }}
+
 jobs:
+  plan:
+    name: Generate matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen-matrix.outputs.matrix }}
+    steps:
+      - id: gen-matrix
+        shell: bash
+        run: |
+          PLAT_LIST="${{ vars.PLATFORM_LIST || 'linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8' }}"
+          PLAT_LIST="${PLAT_LIST//[[:space:]]/}"
+          INCLUDE="["; SEP=""
+          IFS=',' read -ra ARR <<< "$PLAT_LIST"
+          for P in "${ARR[@]}"; do
+            [ -z "$P" ] && continue
+            ARCH=$(echo "$P" | sed 's|^linux/||; s|/||g')
+            INCLUDE+="${SEP}{\"platform\":\"$P\",\"arch_tag\":\"$ARCH\"}"
+            SEP=","
+          done
+          INCLUDE+="]"
+          echo "matrix={\"include\":$INCLUDE}" >> "$GITHUB_OUTPUT"
+
   build:
-    name: Build and Push Docker Image
+    name: Build ${{ matrix.platform }}
+    needs: plan
     permissions: write-all
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
 
     steps:
       - name: Checkout the Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Download Contracts
+        shell: bash
         run: |
           mkdir -p ./config/rosen
           npx @rosen-bridge/cli@${{ vars.ROSEN_CLI_VERSION || 'latest' }} download-assets -c ${{ vars.RELEASE_NAME }} ${{ vars.RELEASE_TAG }} -o ./config/rosen -s mainnet
           mv ./config/rosen/tokens*.json ./config/rosen/tokens.json
 
       - name: Move Contracts files
+        shell: bash
         run: |
           mv ./docker/*.yaml ./config/
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        if: contains(matrix.platform, 'arm')
+        uses: docker/setup-qemu-action@v3
         with:
-          platforms: ${{ vars.PLATFORM_LIST || 'linux/amd64' }}
+          platforms: arm
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Registry
-        uses: docker/login-action@v2
+      - name: Login to GHCR Docker Registry
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: rosen-bridge
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker Metadata action
+      - name: Prepare for artifact
+        shell: bash
+        run: |
+          platform='${{ matrix.platform }}'
+          echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_ENV"
+
+      - name: Generate Docker Metadata
         uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/rosen-bridge/watcher-service
+          images: ${{ env.IMAGE_NAME }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v4
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: ${{ vars.PLATFORM_LIST || 'linux/amd64' }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: ${{ matrix.platform }}
+          tags: ${{ env.IMAGE_NAME }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export digest file
+        shell: bash
+        run: |
+          mkdir -p "${{ runner.temp }}/digests"
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+      - name: Upload digest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    name: Publish Multi-arch Manifest
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          FINAL_TAG:  ${{ env.FINAL_TAG }}
+        run: |
+          docker buildx imagetools create \
+            -t "${IMAGE_NAME}:${FINAL_TAG}" \
+            $(printf '${{ env.IMAGE_NAME }}@sha256:%s ' *)
+
