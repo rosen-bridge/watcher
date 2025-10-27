@@ -36,7 +36,7 @@
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-typescript": "^11.1.1",
     "@rollup/plugin-virtual": "^3.0.1",
-    "@rosen-bridge/changeset-formatter": "^1.1.0",
+    "@rosen-bridge/changeset-formatter": "^2.0.1",
     "@rosen-bridge/rollup-plugin-node-wasm": "^0.1.0",
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.5",
@@ -114,7 +114,6 @@
     "lodash-es": "^4.17.21",
     "patch-package": "^6.5.1",
     "pg": "^8.7.3",
-    "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.0.2",
     "tsx": "^4.20.5"
   },
