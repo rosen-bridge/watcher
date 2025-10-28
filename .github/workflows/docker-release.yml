@@ -12,36 +12,14 @@ env:
   FINAL_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'dev' }}
 
 jobs:
-  plan:
-    name: Generate matrix
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.gen-matrix.outputs.matrix }}
-    steps:
-      - id: gen-matrix
-        shell: bash
-        run: |
-          PLAT_LIST="${{ vars.PLATFORM_LIST || 'linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8' }}"
-          PLAT_LIST="${PLAT_LIST//[[:space:]]/}"
-          INCLUDE="["; SEP=""
-          IFS=',' read -ra ARR <<< "$PLAT_LIST"
-          for P in "${ARR[@]}"; do
-            [ -z "$P" ] && continue
-            ARCH=$(echo "$P" | sed 's|^linux/||; s|/||g')
-            INCLUDE+="${SEP}{\"platform\":\"$P\",\"arch_tag\":\"$ARCH\"}"
-            SEP=","
-          done
-          INCLUDE+="]"
-          echo "matrix={\"include\":$INCLUDE}" >> "$GITHUB_OUTPUT"
-
   build:
     name: Build ${{ matrix.platform }}
-    needs: plan
     permissions: write-all
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+      matrix:
+        platform: ${{ fromJSON(vars.PLATFORM_LIST || '["linux/amd64"]') }}
 
     steps:
       - name: Checkout the Code
@@ -65,7 +43,7 @@ jobs:
         if: contains(matrix.platform, 'arm')
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: arm
+          platforms: arm64,arm
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -95,11 +73,10 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
-          tags: ${{ env.IMAGE_NAME }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to:   type=gha,mode=max
-          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest file
         shell: bash
