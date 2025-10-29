@@ -1,4 +1,4 @@
-import 'reflect-metadata';
+import '@rosen-bridge/extended-typeorm/bootstrap';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { RateLimitedAxiosConfig } from '@rosen-clients/rate-limited-axios';
