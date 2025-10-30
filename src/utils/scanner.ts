@@ -5,12 +5,14 @@ import {
   BitcoinRpcScanner,
   DogeRpcScanner,
 } from '@rosen-bridge/bitcoin-scanner';
+import { HandshakeRpcScanner } from '@rosen-bridge/handshake-rpc-scanner';
 import {
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
   DogeEsploraObservationExtractor,
   DogeRpcObservationExtractor,
 } from '@rosen-bridge/bitcoin-observation-extractor';
+import { HandshakeRpcObservationExtractor } from '@rosen-bridge/handshake-rpc-observation-extractor';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { ErgoObservationExtractor } from '@rosen-bridge/ergo-observation-extractor';
 import {
@@ -52,6 +54,7 @@ import {
   RosenConfig,
   DogeConfig,
   BitcoinRunesConfig,
+  HandshakeConfig,
 } from '../config/config';
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
@@ -65,6 +68,7 @@ import {
   createEvmNetworkConnectorManager,
   createErgoNodeNetworkConnectorManager,
   createErgoExplorerNetworkConnectorManager,
+  createHandshakeRpcNetworkConnectorManager,
 } from './networkConnectorManagers';
 
 /**
@@ -109,7 +113,8 @@ class CreateScanner {
     | BitcoinRpcScanner
     | DogeEsploraScanner
     | DogeRpcScanner
-    | EvmRpcScanner;
+    | EvmRpcScanner
+    | HandshakeRpcScanner;
 
   private constructor() {
     // do nothing
@@ -131,6 +136,7 @@ class CreateScanner {
         doge: dogeConfig,
         ethereum: ethereumConfig,
         binance: binanceConfig,
+        handshake: handshakeConfig,
       } = allConfig;
 
       await CreateScanner.instance.createErgoScanner(config, rosenConfig);
@@ -169,6 +175,12 @@ class CreateScanner {
         case Constants.DOGE_CHAIN_NAME:
           await CreateScanner.instance.createDogeScanner(
             dogeConfig,
+            rosenConfig
+          );
+          break;
+        case Constants.HANDSHAKE_CHAIN_NAME:
+          await CreateScanner.instance.createHandshakeScanner(
+            handshakeConfig,
             rosenConfig
           );
           break;
@@ -213,7 +225,8 @@ class CreateScanner {
     | BitcoinRpcScanner
     | DogeEsploraScanner
     | DogeRpcScanner
-    | EvmRpcScanner => {
+    | EvmRpcScanner
+    | HandshakeRpcScanner => {
     if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
     }
@@ -530,6 +543,30 @@ class CreateScanner {
         );
 
         const observationExtractor = new BinanceRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      }
+    }
+  };
+
+  private createHandshakeScanner = async (
+    handshakeConfig: HandshakeConfig,
+    rosenConfig: RosenConfig
+  ) => {
+    if (!this.observationScanner) {
+      if (handshakeConfig.rpc) {
+        this.observationScanner = new HandshakeRpcScanner({
+          dataSource,
+          initialHeight: handshakeConfig.initialHeight,
+          network: createHandshakeRpcNetworkConnectorManager(),
+          logger: loggers.observationScannerLogger,
+        });
+
+        const observationExtractor = new HandshakeRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),

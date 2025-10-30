@@ -20,6 +20,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.DOGE_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
   Constants.BINANCE_CHAIN_NAME,
+  Constants.HANDSHAKE_CHAIN_NAME,
 ];
 
 interface ConfigType {
@@ -30,6 +31,7 @@ interface ConfigType {
   ethereum: EthereumConfig;
   binance: BinanceConfig;
   doge: DogeConfig;
+  handshake: HandshakeConfig;
   general: Config;
   rosen: RosenConfig;
   database: DatabaseConfig;
@@ -575,6 +577,37 @@ class BinanceConfig {
   }
 }
 
+class HandshakeConfig {
+  type: string;
+  initialHeight: number;
+  interval: number;
+  rpc?: {
+    url: string;
+    timeout: number;
+    username?: string;
+    password?: string;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('handshake.type');
+    if (network === Constants.HANDSHAKE_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('handshake.initial.height');
+      this.interval = getRequiredNumber('handshake.interval');
+      if (this.type == Constants.RPC_TYPE) {
+        const url = getRequiredString('handshake.rpc.url');
+        const timeout = getRequiredNumber('handshake.rpc.timeout');
+        const username = getOptionalString('handshake.rpc.username', undefined);
+        const password = getOptionalString('handshake.rpc.password', undefined);
+        this.rpc = { url, timeout, username, password };
+      } else {
+        throw new Error(
+          `Improperly configured. handshake configuration type is invalid available choices are '${Constants.RPC_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class DatabaseConfig {
   type: string;
   path = '';
@@ -645,6 +678,8 @@ class HealthCheckConfig {
   ethereumScannerCriticalDiff: number;
   binanceScannerWarnDiff: number;
   binanceScannerCriticalDiff: number;
+  handshakeScannerWarnDiff: number;
+  handshakeScannerCriticalDiff: number;
   ergoNodeMaxHeightDiff: number;
   ergoNodeMaxBlockTime: number;
   ergoNodeMinPeerCount: number;
@@ -712,6 +747,12 @@ class HealthCheckConfig {
     this.binanceScannerCriticalDiff = getRequiredNumber(
       'healthCheck.binanceScanner.criticalDifference'
     );
+    this.handshakeScannerWarnDiff = getRequiredNumber(
+      'healthCheck.handshakeScanner.warnDifference'
+    );
+    this.handshakeScannerCriticalDiff = getRequiredNumber(
+      'healthCheck.handshakeScanner.criticalDifference'
+    );
     this.permitWarnCommitmentCount = getRequiredNumber(
       'healthCheck.permit.warnCommitmentCount'
     );
@@ -741,6 +782,7 @@ const getConfig = (): ConfigType => {
     const doge = new DogeConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
     const binance = new BinanceConfig(general.networkWatcher);
+    const handshake = new HandshakeConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
       general.networkType,
@@ -756,6 +798,7 @@ const getConfig = (): ConfigType => {
       doge,
       ethereum,
       binance,
+      handshake,
       logger,
       general,
       rosen,
@@ -777,4 +820,5 @@ export {
   EthereumConfig,
   BinanceConfig,
   DogeConfig,
+  HandshakeConfig,
 };

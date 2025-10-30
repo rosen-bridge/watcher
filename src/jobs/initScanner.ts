@@ -15,6 +15,7 @@ const {
   doge: dogeConfig,
   ethereum: ethereumConfig,
   binance: binanceConfig,
+  handshake: handshakeConfig,
 } = allConfig;
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
@@ -78,6 +79,12 @@ export const scannerInit = () => {
       scanningJob(
         binanceConfig.interval,
         scanner.getObservationScanner() as EvmRpcScanner
+      ).then(() => null);
+      break;
+    case Constants.HANDSHAKE_CHAIN_NAME:
+      scanningJob(
+        handshakeConfig.interval,
+        scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
     case Constants.ERGO_CHAIN_NAME:

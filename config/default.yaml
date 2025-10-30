@@ -73,6 +73,16 @@ binance:
     url: '' # rpc url
     timeout: 10 # rpc request timeout (in seconds)
     # authToken: # rpc auth token
+handshake:
+  type: 'rpc' # options: rpc
+  initial:
+    height: -1 # initial height of scanning
+  interval: 180 # scanning interval (in seconds)
+  rpc:
+    timeout: 10 # rpc request timeout (in seconds)
+    url: '' # rpc url
+    # username: '' # rpc username for authentication required instances
+    # password: '' # rpc password for authentication required instances
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer
@@ -153,6 +163,9 @@ healthCheck:
   binanceScanner:
     warnDifference: 160 # warning difference between existing and scanned blocks height
     criticalDifference: 640 # critical difference between existing and scanned blocks height
+  handshakeScanner:
+    warnDifference: 2 # warning difference between existing and scanned blocks height
+    criticalDifference: 10 # critical difference between existing and scanned blocks height
   permit:
     warnCommitmentCount: 4 # warning remaining permits for creating commitment
     criticalCommitmentCount: 0 # critical remaining permits for creating commitment

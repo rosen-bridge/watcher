@@ -41,6 +41,8 @@ import {
   ETHEREUM_BLOCK_TIME,
   ETHEREUM_CHAIN_NAME,
   EXPLORER_TYPE,
+  HANDSHAKE_BLOCK_TIME,
+  HANDSHAKE_CHAIN_NAME,
   NODE_TYPE,
   OGMIOS_TYPE,
 } from '../config/constants';
@@ -223,38 +225,58 @@ class HealthCheckSingleton {
     } else {
       let chainName: string;
       let chainBlockTime: number;
+      let warnDiff: number;
+      let criticalDiff: number;
       switch (getConfig().general.networkWatcher) {
         case CARDANO_CHAIN_NAME:
           chainName = CARDANO_CHAIN_NAME;
           chainBlockTime = CARDANO_BLOCK_TIME;
+          warnDiff = getConfig().healthCheck.cardanoScannerWarnDiff;
+          criticalDiff = getConfig().healthCheck.cardanoScannerCriticalDiff;
           break;
         case BITCOIN_CHAIN_NAME:
           chainName = BITCOIN_CHAIN_NAME;
           chainBlockTime = BITCOIN_BLOCK_TIME;
+          warnDiff = getConfig().healthCheck.bitcoinScannerWarnDiff;
+          criticalDiff = getConfig().healthCheck.bitcoinScannerCriticalDiff;
           break;
         case BITCOIN_RUNES_CHAIN_NAME:
           chainName = BITCOIN_RUNES_CHAIN_NAME;
           chainBlockTime = BITCOIN_BLOCK_TIME;
+          warnDiff = getConfig().healthCheck.bitcoinScannerWarnDiff;
+          criticalDiff = getConfig().healthCheck.bitcoinScannerCriticalDiff;
           break;
         case DOGE_CHAIN_NAME:
           chainName = DOGE_CHAIN_NAME;
           chainBlockTime = DOGE_BLOCK_TIME;
+          warnDiff = getConfig().healthCheck.dogeScannerWarnDiff;
+          criticalDiff = getConfig().healthCheck.dogeScannerCriticalDiff;
           break;
         case ETHEREUM_CHAIN_NAME:
           chainName = ETHEREUM_CHAIN_NAME;
           chainBlockTime = ETHEREUM_BLOCK_TIME;
+          warnDiff = getConfig().healthCheck.ethereumScannerWarnDiff;
+          criticalDiff = getConfig().healthCheck.ethereumScannerCriticalDiff;
           break;
         case BINANCE_CHAIN_NAME:
           chainName = BINANCE_CHAIN_NAME;
           chainBlockTime = BINANCE_BLOCK_TIME;
+          warnDiff = getConfig().healthCheck.binanceScannerWarnDiff;
+          criticalDiff = getConfig().healthCheck.binanceScannerCriticalDiff;
+          break;
+        case HANDSHAKE_CHAIN_NAME:
+          chainName = HANDSHAKE_CHAIN_NAME;
+          chainBlockTime = HANDSHAKE_BLOCK_TIME;
+          warnDiff = getConfig().healthCheck.handshakeScannerWarnDiff;
+          criticalDiff = getConfig().healthCheck.handshakeScannerCriticalDiff;
           break;
       }
 
       scannerSyncCheck = new ScannerSyncHealthCheckParam(
         chainName!,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-        getConfig().healthCheck.cardanoScannerWarnDiff,
-        getConfig().healthCheck.cardanoScannerCriticalDiff,
+        warnDiff!,
+        criticalDiff!,
         chainBlockTime!
       );
     }

@@ -16,6 +16,10 @@ import {
   BitcoinEsploraTransaction,
 } from '@rosen-bridge/bitcoin-scanner';
 import {
+  HandshakeRpcTransaction,
+  HandshakeRpcNetwork,
+} from '@rosen-bridge/handshake-rpc-scanner';
+import {
   KoiosNetwork,
   BlockFrostNetwork,
   KoiosTransaction,
@@ -40,6 +44,8 @@ const bitcoinLogger =
   CallbackLoggerFactory.getInstance().getLogger('bitcoin-connector');
 const dogeLogger =
   CallbackLoggerFactory.getInstance().getLogger('doge-connector');
+const handshakeLogger =
+  CallbackLoggerFactory.getInstance().getLogger('handshake-connector');
 const cardanoKoiosLogger = CallbackLoggerFactory.getInstance().getLogger(
   'cardano-koios-connector'
 );
@@ -278,6 +284,38 @@ export const createEvmNetworkConnectorManager = (chainName: string) => {
     );
   } else {
     throw new Error(`No RPC configuration found for ${chainName}`);
+  }
+
+  return networkConnectorManager;
+};
+
+/**
+ * Creates and configures a NetworkConnectorManager instance for Handshake RPC scanner
+ */
+export const createHandshakeRpcNetworkConnectorManager = () => {
+  const networkConnectorManager =
+    new NetworkConnectorManager<HandshakeRpcTransaction>(
+      new FailoverStrategy(),
+      handshakeLogger
+    );
+
+  if (config.handshake.rpc) {
+    networkConnectorManager.addConnector(
+      new HandshakeRpcNetwork(
+        config.handshake.rpc.url,
+        config.handshake.rpc.timeout * 1000,
+        config.handshake.rpc.username && config.handshake.rpc.password
+          ? {
+              username: config.handshake.rpc.username,
+              password: config.handshake.rpc.password,
+            }
+          : undefined
+      )
+    );
+  } else {
+    throw new Error(
+      'Rpc configuration must be provided for Handshake Rpc network'
+    );
   }
 
   return networkConnectorManager;

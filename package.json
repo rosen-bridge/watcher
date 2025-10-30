@@ -88,6 +88,8 @@
     "@rosen-bridge/evm-observation-extractor": "^5.2.1",
     "@rosen-bridge/evm-scanner": "^0.1.0",
     "@rosen-bridge/extended-typeorm": "0.2.1",
+    "@rosen-bridge/handshake-rpc-observation-extractor": "^0.1.0",
+    "@rosen-bridge/handshake-rpc-scanner": "^0.1.0",
     "@rosen-bridge/health-check": "^7.0.1",
     "@rosen-bridge/log-level-check": "^2.0.1",
     "@rosen-bridge/minimum-fee": "^2.3.0",
