@@ -116,17 +116,14 @@ addressRouter.post('/validate', async (req: Request, res: Response) => {
         .json({ valid: false, message: 'Address is required' });
     }
 
-    const isValid = validateAddress(ERGO_CHAIN_NAME, address);
-    if (!isValid) {
-      return res.status(200).json({
-        valid: false,
-        message: 'Invalid Ergo address',
-      });
-    }
-    res.status(200).json({ valid: isValid, message: 'Valid Ergo address' });
+    validateAddress(ERGO_CHAIN_NAME, address);
+    res.status(200).json({ valid: true, message: 'Valid Ergo address' });
   } catch (e) {
     logger.warn(`An error occurred while validating address: ${e}`);
-    res.status(500).send({ message: e.message });
+    return res.status(200).json({
+      valid: false,
+      message: 'Invalid Ergo address',
+    });
   }
 });
 
