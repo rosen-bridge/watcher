@@ -7,6 +7,7 @@ import { JsonBI } from '../ergo/network/parser';
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { TokensConfig } from '../config/tokensConfig';
+import { validateAddress } from '@rosen-bridge/address-codec';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -100,6 +101,29 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
   } catch (e) {
     logger.warn(`An error occurred while fetching assets: ${e}`);
     res.status(500).send({ message: e.message });
+  }
+});
+
+/**
+ * Api for validating Ergo addresses
+ */
+addressRouter.get('/validate/:address', async (req: Request, res: Response) => {
+  try {
+    const { address } = req.params;
+    if (!address) {
+      return res
+        .status(400)
+        .json({ valid: false, message: 'Address is required' });
+    }
+
+    validateAddress(ERGO_CHAIN_NAME, address);
+    res.status(200).json({ valid: true, message: 'Valid Ergo address' });
+  } catch (e) {
+    logger.warn(`An error occurred while validating address: ${e}`);
+    return res.status(200).json({
+      valid: false,
+      message: 'Invalid Ergo address',
+    });
   }
 });
 
