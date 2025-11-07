@@ -107,10 +107,10 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
 /**
  * Api for validating Ergo addresses
  */
-addressRouter.get('/validate', async (req: Request, res: Response) => {
+addressRouter.get('/validate/:address', async (req: Request, res: Response) => {
   try {
-    const { address } = req.query;
-    if (!address || typeof address !== 'string') {
+    const { address } = req.params;
+    if (!address) {
       return res
         .status(400)
         .json({ valid: false, message: 'Address is required' });
