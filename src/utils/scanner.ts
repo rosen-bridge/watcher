@@ -34,6 +34,9 @@ import {
 import {
   BitcoinRunesEsploraObservationExtractor,
   BitcoinRunesRpcObservationExtractor,
+  AbstractRunesProtocolNetwork,
+  UnisatRunesProtocolNetwork,
+  OrdiscanRunesProtocolNetwork,
 } from '@rosen-bridge/bitcoin-runes-observation-extractor';
 
 import {
@@ -406,6 +409,20 @@ class CreateScanner {
     rosenConfig: RosenConfig
   ) => {
     if (!this.observationScanner) {
+      let client!: AbstractRunesProtocolNetwork;
+      if (bitcoinRunesConfig.unisat)
+        client = new UnisatRunesProtocolNetwork(
+          bitcoinRunesConfig.unisat.url,
+          bitcoinRunesConfig.unisat.apiKey,
+          loggers.observationExtractorLogger
+        );
+      else if (bitcoinRunesConfig.ordiscan)
+        client = new OrdiscanRunesProtocolNetwork(
+          bitcoinRunesConfig.ordiscan.apiKey,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger
+        );
+
       if (bitcoinConfig.esplora) {
         this.observationScanner = new BitcoinEsploraScanner({
           dataSource,
@@ -416,8 +433,7 @@ class CreateScanner {
         const observationExtractor =
           new BitcoinRunesEsploraObservationExtractor(
             rosenConfig.lockAddress,
-            bitcoinRunesConfig.unisat.url,
-            bitcoinRunesConfig.unisat.apiKey,
+            client,
             dataSource,
             TokensConfig.getInstance().getTokenMap(),
             loggers.observationExtractorLogger
@@ -433,8 +449,7 @@ class CreateScanner {
 
         const observationExtractor = new BitcoinRunesRpcObservationExtractor(
           rosenConfig.lockAddress,
-          bitcoinRunesConfig.unisat.url,
-          bitcoinRunesConfig.unisat.apiKey,
+          client,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
