@@ -3,4 +3,4 @@
 ---
 
 - Update dependency
-  - bitcoin-runes-observation-extractor@1.0.2
+  - bitcoin-runes-observation-extractor@1.0.3
