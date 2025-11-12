@@ -457,6 +457,10 @@ class BitcoinRunesConfig {
         this.ordiscan = {
           apiKey: getRequiredString('bitcoinRunes.ordiscan.apiKey'),
         };
+      } else {
+        throw new Error(
+          `Improperly configured. bitcoinRunes configuration type is invalid available choices are '${Constants.UNISAT_TYPE}', '${Constants.ORDISCAN_TYPE}'`
+        );
       }
     }
   }
