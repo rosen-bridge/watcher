@@ -17,9 +17,12 @@ bitcoin:
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
 bitcoinRunes:
+  type: 'unisat' # options: unisat, ordiscan
   unisat:
     url: 'https://open-api.unisat.io' # unisat api url
     apiKey: '' # unisat api key
+  ordiscan:
+    apiKey: '' # ordiscan api key
 doge:
   type: '' # options: esplora, rpc
   initial:

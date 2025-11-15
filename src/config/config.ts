@@ -436,17 +436,32 @@ class BitcoinConfig {
 }
 
 class BitcoinRunesConfig {
-  unisat: {
+  type: string;
+  unisat?: {
     url: string;
+    apiKey: string;
+  };
+  ordiscan?: {
     apiKey: string;
   };
 
   constructor(network: string) {
+    this.type = config.get<string>('bitcoinRunes.type');
     if (network === Constants.BITCOIN_RUNES_CHAIN_NAME) {
-      this.unisat = {
-        url: getRequiredString('bitcoinRunes.unisat.url'),
-        apiKey: getRequiredString('bitcoinRunes.unisat.apiKey'),
-      };
+      if (this.type === Constants.UNISAT_TYPE) {
+        this.unisat = {
+          url: getRequiredString('bitcoinRunes.unisat.url'),
+          apiKey: getRequiredString('bitcoinRunes.unisat.apiKey'),
+        };
+      } else if (this.type === Constants.ORDISCAN_TYPE) {
+        this.ordiscan = {
+          apiKey: getRequiredString('bitcoinRunes.ordiscan.apiKey'),
+        };
+      } else {
+        throw new Error(
+          `Improperly configured. bitcoinRunes configuration type is invalid available choices are '${Constants.UNISAT_TYPE}', '${Constants.ORDISCAN_TYPE}'`
+        );
+      }
     }
   }
 }
@@ -502,7 +517,12 @@ class DogeConfig {
               'Improperly configured. doge.rpc.timeout must be a non-empty number'
             );
           }
-          RateLimitedAxiosConfig.addRule(`^${rpcConfig.url}$`, 3, 1,rpcConfig.timeout);
+          RateLimitedAxiosConfig.addRule(
+            `^${rpcConfig.url}$`,
+            3,
+            1,
+            rpcConfig.timeout
+          );
         });
         this.rpc = rpcConfigs;
       } else {
