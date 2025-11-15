@@ -98,7 +98,6 @@ const createLoggers = () => ({
 });
 
 const loggers = createLoggers();
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class CreateScanner {
   private static instance: CreateScanner;
