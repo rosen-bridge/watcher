@@ -18,6 +18,7 @@ import {
   Not,
   Repository,
 } from '@rosen-bridge/extended-typeorm';
+import { LastSavedBlock } from '@rosen-bridge/scanner-sync-check';
 import {
   DOING_STATUS,
   DONE_STATUS,
@@ -38,7 +39,6 @@ import { TokenEntity } from '../entities/tokenEntity';
 import { TxEntity, TxType } from '../entities/txEntity';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { TokensConfig } from '../../config/tokensConfig';
-import { LastSavedBlock } from '../../types';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
