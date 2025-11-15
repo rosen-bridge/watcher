@@ -3,6 +3,7 @@ network: '' # which scanner network used in this watcher ergo/cardano/bitcoin/et
 observation:
   confirmation: 60 # number of required block confirmations to create the commitment after observing an event
   validThreshold: 12960 # observations that have not been triggered won't be processed after this period (in blocks)
+  storeRawData: true # store raw observation data in database
 bitcoin:
   type: '' # options: esplora, rpc
   initial:
