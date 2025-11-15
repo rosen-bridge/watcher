@@ -119,6 +119,7 @@ class Config {
   minimumFeeUpdateInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
+  observationStoreRawData: boolean;
   rosenConfigPath: string;
   rosenTokensPath: string;
   apiPort: number;
@@ -230,6 +231,9 @@ class Config {
     );
     this.observationValidThreshold = getRequiredNumber(
       'observation.validThreshold'
+    );
+    this.observationStoreRawData = config.get<boolean>(
+      'observation.storeRawData'
     );
     this.tokenNameInterval = getRequiredNumber('ergo.interval.tokenName');
     this.revenueInterval = getRequiredNumber('ergo.interval.revenue');
