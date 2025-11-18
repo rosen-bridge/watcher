@@ -1,6 +1,10 @@
 # @rosen-bridge/watcher
 
-## 5.1.0
+## 6.0.0
+
+### Major Changes
+
+- Update to node 20.11.0
 
 ### Minor Changes
 
@@ -9,7 +13,6 @@
 - Update scanner-sync health parameter
 - Add minBoxValue to general info api
 - Add contract and service version as context extension to all transactions
-- Update to node 20.11.0
 - Terminate the watcher process if the database cannot be initialized or migrated
 - Use @rosen-bridge/extended-typeorm/bootstrap to set up the project
 - Replace json-bigint with @rosen-bridge/json-bigint
@@ -17,10 +20,9 @@
 
 ### Patch Changes
 
-- Patch winston package
+- Udpate winston package patch
 - Replace rosen-bridge/operation with @rosen-bridge/cli in .github/workflows
 - Fix observation amount validation condition
-- Remove `lastSavedBlock` interface
 - Update dependencies
   - @rosen-bridge/abstract-observation-extractor@0.2.3
   - @rosen-bridge/abstract-scanner@0.2.3
