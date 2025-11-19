@@ -3,6 +3,7 @@ network: '' # which scanner network used in this watcher ergo/cardano/bitcoin/et
 observation:
   confirmation: 60 # number of required block confirmations to create the commitment after observing an event
   validThreshold: 12960 # observations that have not been triggered won't be processed after this period (in blocks)
+  storeRawData: true # if set extractor will store observations raw data
 bitcoin:
   type: '' # options: esplora, rpc
   initial:
@@ -16,6 +17,13 @@ bitcoin:
     url: '' # rpc url
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
+bitcoinRunes:
+  type: 'unisat' # options: unisat, ordiscan
+  unisat:
+    url: 'https://open-api.unisat.io' # unisat api url
+    apiKey: '' # unisat api key
+  ordiscan:
+    apiKey: '' # ordiscan api key
 doge:
   type: '' # options: esplora, rpc
   initial:
@@ -161,7 +169,8 @@ rewardCollection:
   interval: 600 # reward collection interval in seconds
   # address: "" # reward collection address (uses default address if not set)
 initialization:
-  eventTrigger: false
+  eventTrigger: false # if true, the event trigger initialization will be enabled
+versionInputExtension: true # if true, the version will be written in the input extension
 # notification:
 #   discordWebhookUrl: '' # discord notification webhook
 #   historyCleanupThreshold: # notification history cleanup threshold (in seconds, uses default if not set)

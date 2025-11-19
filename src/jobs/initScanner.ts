@@ -1,8 +1,9 @@
-import { CardanoOgmiosScanner, GeneralScanner } from '@rosen-bridge/scanner';
+import { GeneralScanner } from '@rosen-bridge/abstract-scanner';
+import { CardanoOgmiosScanner } from '@rosen-bridge/cardano-scanner';
 import * as Constants from '../config/constants';
 import { getConfig } from '../config/config';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
-import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
 import { CreateScanner } from '../utils/scanner';
 
 const allConfig = getConfig();
@@ -10,6 +11,7 @@ const {
   general: config,
   cardano: cardanoConfig,
   bitcoin: bitcoinConfig,
+  bitcoinRunes: bitcoinRunesConfig,
   doge: dogeConfig,
   ethereum: ethereumConfig,
   binance: binanceConfig,
@@ -49,6 +51,12 @@ export const scannerInit = () => {
       ).then(() => null);
       break;
     case Constants.BITCOIN_CHAIN_NAME:
+      scanningJob(
+        bitcoinConfig.interval,
+        scanner.getObservationScanner() as GeneralScanner<unknown>
+      ).then(() => null);
+      break;
+    case Constants.BITCOIN_RUNES_CHAIN_NAME:
       scanningJob(
         bitcoinConfig.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>

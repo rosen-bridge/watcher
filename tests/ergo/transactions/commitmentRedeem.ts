@@ -22,7 +22,7 @@ import WIDObj from './dataset/WIDBox3.json' assert { type: 'json' };
 import WIDObj2 from './dataset/WIDBox4.json' assert { type: 'json' };
 import WIDObjWithoutErg from './dataset/WIDBoxWithoutErg.json' assert { type: 'json' };
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { TxStatus } from '../../../src/database/entities/observationStatusEntity';
 
 chai.use(spies);
@@ -47,6 +47,7 @@ observation.toChain = 'ERGO';
 observation.bridgeFee = '10000';
 observation.networkFee = '10000';
 observation.amount = '10';
+observation.rawData = JSON.stringify({});
 observation.sourceChainTokenId = 'asset12y0ewmxggeglymjpmp9mjf5qzh4kgwj9chtkpv';
 observation.targetChainTokenId = 'cardanoTokenId';
 observation.sourceTxId =

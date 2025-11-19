@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { describe } from 'mocha';
-import { DataSource, Repository, MigrationInterface } from 'typeorm';
+import { DataSource, Repository } from '@rosen-bridge/extended-typeorm';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
 import {
@@ -10,11 +10,11 @@ import {
 import {
   migrations as observationMigrations,
   ObservationEntity,
-} from '@rosen-bridge/observation-extractor';
+} from '@rosen-bridge/abstract-observation-extractor';
 import {
   BlockEntity,
   migrations as scannerMigrations,
-} from '@rosen-bridge/scanner';
+} from '@rosen-bridge/abstract-scanner';
 import {
   CommitmentEntity,
   EventTriggerEntity,

@@ -1,0 +1,13 @@
+diff --git a/node_modules/winston/lib/winston/logger.js b/node_modules/winston/lib/winston/logger.js
+index adc2ee5..14652b6 100644
+--- a/node_modules/winston/lib/winston/logger.js
++++ b/node_modules/winston/lib/winston/logger.js
+@@ -246,7 +246,7 @@ class Logger extends Transform {
+           message: msg
+         });
+ 
+-        if (meta.message) info.message = `${info.message} ${meta.message}`;
++        if (meta.message) info.message = `${info.message} ${JSON.stringify(meta.message)}`;
+         if (meta.stack) info.stack = meta.stack;
+         if (meta.cause) info.cause = meta.cause;
+ 

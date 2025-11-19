@@ -10,51 +10,41 @@ import {
   NodePermitHealthCheckParam,
 } from '@rosen-bridge/permit-check';
 import {
-  AbstractScannerSyncHealthCheckParam,
-  CardanoKoiosScannerHealthCheck,
+  ScannerSyncHealthCheckParam,
   CardanoOgmiosScannerHealthCheck,
-  ErgoExplorerScannerHealthCheck,
-  ErgoNodeScannerHealthCheck,
-  BitcoinEsploraScannerHealthCheck,
-  BitcoinRPCScannerHealthCheck,
-  EvmRPCScannerHealthCheck,
 } from '@rosen-bridge/scanner-sync-check';
 import {
   ExplorerWidHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
-import {
-  CardanoKoiosScanner,
-  CardanoOgmiosScanner,
-} from '@rosen-bridge/scanner';
+import { CardanoOgmiosScanner } from '@rosen-bridge/cardano-scanner';
 import { DiscordNotification } from '@rosen-bridge/discord-notification';
-import { BitcoinRpcScanner } from '@rosen-bridge/bitcoin-rpc-scanner';
-import { BitcoinEsploraScanner } from '@rosen-bridge/bitcoin-esplora-scanner';
-import { EvmRpcScanner } from '@rosen-bridge/evm-rpc-scanner';
+import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
 
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import {
   BINANCE_BLOCK_TIME,
   BINANCE_CHAIN_NAME,
+  BITCOIN_BLOCK_TIME,
   BITCOIN_CHAIN_NAME,
+  BITCOIN_RUNES_CHAIN_NAME,
+  CARDANO_BLOCK_TIME,
   CARDANO_CHAIN_NAME,
   DOGE_BLOCK_TIME,
   DOGE_CHAIN_NAME,
+  ERGO_BLOCK_TIME,
+  ERGO_CHAIN_NAME,
   ERGO_DECIMALS,
   ERGO_NATIVE_ASSET,
-  ESPLORA_TYPE,
   ETHEREUM_BLOCK_TIME,
   ETHEREUM_CHAIN_NAME,
   EXPLORER_TYPE,
-  KOIOS_TYPE,
   NODE_TYPE,
   OGMIOS_TYPE,
-  RPC_TYPE,
 } from '../config/constants';
 import { watcherDatabase } from '../init';
-import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
 import { CreateScanner } from './scanner';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
@@ -63,7 +53,7 @@ class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
   private healthCheck: HealthCheck;
   private permitHealthCheckParam: AbstractPermitHealthCheckParam;
-  private ergoScannerSyncCheckParam: AbstractScannerSyncHealthCheckParam;
+  private ergoScannerSyncCheckParam: ScannerSyncHealthCheckParam;
 
   static getInstance = () => {
     if (!HealthCheckSingleton.instance) {
@@ -129,25 +119,14 @@ class HealthCheckSingleton {
     } else if (getConfig().general.scannerType === EXPLORER_TYPE) {
       this.registerErgoExplorerHealthCheckParams();
     }
-    if (getConfig().general.networkWatcher === CARDANO_CHAIN_NAME) {
-      this.registerCardanoHealthCheckParams();
-    }
-    if (getConfig().general.networkWatcher === BITCOIN_CHAIN_NAME) {
-      this.registerBitcoinHealthCheckParams();
-    }
-    if (getConfig().general.networkWatcher === DOGE_CHAIN_NAME) {
-      this.registerDogeHealthCheckParams();
-    }
-    if (getConfig().general.networkWatcher === ETHEREUM_CHAIN_NAME) {
-      this.registerEthereumHealthCheckParams();
-    }
-    if (getConfig().general.networkWatcher === BINANCE_CHAIN_NAME) {
-      this.registerBinanceHealthCheckParams();
+
+    if (getConfig().general.networkWatcher !== ERGO_CHAIN_NAME) {
+      this.registerScannerSyncHealthCheck();
     }
   }
 
   private observingNetworkLastBlock = (scanner: string) => {
-    return () => watcherDatabase.getLastBlockHeight(scanner);
+    return () => watcherDatabase.getLastBlockInfo(scanner);
   };
 
   /**
@@ -174,11 +153,12 @@ class HealthCheckSingleton {
     this.healthCheck.register(assetHealthCheck);
 
     const scanner = CreateScanner.getInstance();
-    this.ergoScannerSyncCheckParam = new ErgoNodeScannerHealthCheck(
-      scanner.getErgoScanner().getBlockChainLastHeight,
+    this.ergoScannerSyncCheckParam = new ScannerSyncHealthCheckParam(
+      ERGO_CHAIN_NAME,
       this.observingNetworkLastBlock(scanner.getErgoScanner().name()),
       getConfig().healthCheck.ergoScannerWarnDiff,
-      getConfig().healthCheck.ergoScannerCriticalDiff
+      getConfig().healthCheck.ergoScannerCriticalDiff,
+      ERGO_BLOCK_TIME
     );
     this.healthCheck.register(this.ergoScannerSyncCheckParam);
   };
@@ -207,148 +187,78 @@ class HealthCheckSingleton {
     this.healthCheck.register(assetHealthCheck);
 
     const scanner = CreateScanner.getInstance();
-    this.ergoScannerSyncCheckParam = new ErgoExplorerScannerHealthCheck(
-      scanner.getErgoScanner().getBlockChainLastHeight,
+    this.ergoScannerSyncCheckParam = new ScannerSyncHealthCheckParam(
+      ERGO_CHAIN_NAME,
       this.observingNetworkLastBlock(scanner.getErgoScanner().name()),
       getConfig().healthCheck.ergoScannerWarnDiff,
-      getConfig().healthCheck.ergoScannerCriticalDiff
+      getConfig().healthCheck.ergoScannerCriticalDiff,
+      ERGO_BLOCK_TIME
     );
     this.healthCheck.register(this.ergoScannerSyncCheckParam);
   };
 
   /**
-   * Registers all cardano check params
+   * Registers scanner sync health check if the network is not ergo
+   * Note: Cardano-ogmios has the only different health parameter
    */
-  registerCardanoHealthCheckParams = () => {
-    let cardanoScannerSyncCheck;
+  registerScannerSyncHealthCheck = () => {
     const scanner = CreateScanner.getInstance();
-    if (getConfig().cardano.type === OGMIOS_TYPE) {
-      cardanoScannerSyncCheck = new CardanoOgmiosScannerHealthCheck(
+    let scannerSyncCheck:
+      | ScannerSyncHealthCheckParam
+      | CardanoOgmiosScannerHealthCheck;
+    if (
+      getConfig().general.networkWatcher === CARDANO_CHAIN_NAME &&
+      getConfig().cardano.type === OGMIOS_TYPE
+    ) {
+      scannerSyncCheck = new CardanoOgmiosScannerHealthCheck(
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         (
           scanner.getObservationScanner() as CardanoOgmiosScanner
         ).getConnectionStatus,
         getConfig().healthCheck.cardanoScannerWarnDiff,
         getConfig().healthCheck.cardanoScannerCriticalDiff,
-        getConfig().cardano.ogmios!.host,
-        getConfig().cardano.ogmios!.port,
         // TODO: Fix configuration: local/health-check/-/issues/29
-        getConfig().cardano.ogmios!.connectionRetrialInterval * 15,
-        getConfig().cardano.ogmios!.useTls
+        getConfig().cardano.ogmios!.connectionRetrialInterval * 15
       );
-    } else if (getConfig().cardano.type === KOIOS_TYPE) {
-      cardanoScannerSyncCheck = new CardanoKoiosScannerHealthCheck(
-        (
-          scanner.getObservationScanner() as CardanoKoiosScanner
-        ).getBlockChainLastHeight,
+    } else {
+      let chainName: string;
+      let chainBlockTime: number;
+      switch (getConfig().general.networkWatcher) {
+        case CARDANO_CHAIN_NAME:
+          chainName = CARDANO_CHAIN_NAME;
+          chainBlockTime = CARDANO_BLOCK_TIME;
+          break;
+        case BITCOIN_CHAIN_NAME:
+          chainName = BITCOIN_CHAIN_NAME;
+          chainBlockTime = BITCOIN_BLOCK_TIME;
+          break;
+        case BITCOIN_RUNES_CHAIN_NAME:
+          chainName = BITCOIN_RUNES_CHAIN_NAME;
+          chainBlockTime = BITCOIN_BLOCK_TIME;
+          break;
+        case DOGE_CHAIN_NAME:
+          chainName = DOGE_CHAIN_NAME;
+          chainBlockTime = DOGE_BLOCK_TIME;
+          break;
+        case ETHEREUM_CHAIN_NAME:
+          chainName = ETHEREUM_CHAIN_NAME;
+          chainBlockTime = ETHEREUM_BLOCK_TIME;
+          break;
+        case BINANCE_CHAIN_NAME:
+          chainName = BINANCE_CHAIN_NAME;
+          chainBlockTime = BINANCE_BLOCK_TIME;
+          break;
+      }
+
+      scannerSyncCheck = new ScannerSyncHealthCheckParam(
+        chainName!,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.cardanoScannerWarnDiff,
-        getConfig().healthCheck.cardanoScannerCriticalDiff
+        getConfig().healthCheck.cardanoScannerCriticalDiff,
+        chainBlockTime!
       );
     }
-    if (cardanoScannerSyncCheck)
-      this.healthCheck.register(cardanoScannerSyncCheck);
-  };
-
-  /**
-   * Registers all bitcoin check params
-   */
-  registerBitcoinHealthCheckParams = () => {
-    let bitcoinScannerSyncCheck;
-    const scanner = CreateScanner.getInstance();
-    if (getConfig().bitcoin.type === RPC_TYPE) {
-      bitcoinScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
-        BITCOIN_CHAIN_NAME,
-        (
-          scanner.getObservationScanner() as BitcoinRpcScanner
-        ).getBlockChainLastHeight,
-        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-        getConfig().healthCheck.bitcoinScannerWarnDiff,
-        getConfig().healthCheck.bitcoinScannerCriticalDiff
-      );
-    } else if (getConfig().bitcoin.type === ESPLORA_TYPE) {
-      bitcoinScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
-        BITCOIN_CHAIN_NAME,
-        (
-          scanner.getObservationScanner() as BitcoinEsploraScanner
-        ).getBlockChainLastHeight,
-        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-        getConfig().healthCheck.bitcoinScannerWarnDiff,
-        getConfig().healthCheck.bitcoinScannerCriticalDiff
-      );
-    }
-    if (bitcoinScannerSyncCheck)
-      this.healthCheck.register(bitcoinScannerSyncCheck);
-  };
-
-  /**
-   * Registers all doge check params
-   */
-  registerDogeHealthCheckParams = () => {
-    let dogeScannerSyncCheck;
-    const scanner = CreateScanner.getInstance();
-    if (getConfig().doge.type === RPC_TYPE) {
-      dogeScannerSyncCheck = new BitcoinRPCScannerHealthCheck(
-        DOGE_CHAIN_NAME,
-        (
-          scanner.getObservationScanner() as BitcoinRpcScanner
-        ).getBlockChainLastHeight,
-        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-        getConfig().healthCheck.dogeScannerWarnDiff,
-        getConfig().healthCheck.dogeScannerCriticalDiff,
-        DOGE_BLOCK_TIME
-      );
-    } else if (getConfig().doge.type === ESPLORA_TYPE) {
-      dogeScannerSyncCheck = new BitcoinEsploraScannerHealthCheck(
-        DOGE_CHAIN_NAME,
-        (
-          scanner.getObservationScanner() as BitcoinEsploraScanner
-        ).getBlockChainLastHeight,
-        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-        getConfig().healthCheck.dogeScannerWarnDiff,
-        getConfig().healthCheck.dogeScannerCriticalDiff,
-        undefined, // to use default warn block gap
-        undefined, // to use default critical block gap
-        DOGE_BLOCK_TIME
-      );
-    }
-    if (dogeScannerSyncCheck) this.healthCheck.register(dogeScannerSyncCheck);
-  };
-
-  /**
-   * Registers all ethereum check params
-   */
-  registerEthereumHealthCheckParams = () => {
-    const scanner = CreateScanner.getInstance();
-    const ethereumRpcScannerSyncCheck = new EvmRPCScannerHealthCheck(
-      ETHEREUM_CHAIN_NAME,
-      (
-        scanner.getObservationScanner() as EvmRpcScanner
-      ).getBlockChainLastHeight,
-      this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-      getConfig().healthCheck.ethereumScannerWarnDiff,
-      getConfig().healthCheck.ethereumScannerCriticalDiff,
-      ETHEREUM_BLOCK_TIME
-    );
-    this.healthCheck.register(ethereumRpcScannerSyncCheck);
-  };
-
-  /**
-   * Registers all binance check params
-   */
-  registerBinanceHealthCheckParams = () => {
-    const scanner = CreateScanner.getInstance();
-    const binanceRpcScannerSyncCheck = new EvmRPCScannerHealthCheck(
-      BINANCE_CHAIN_NAME,
-      (
-        scanner.getObservationScanner() as EvmRpcScanner
-      ).getBlockChainLastHeight,
-      this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-      getConfig().healthCheck.binanceScannerWarnDiff,
-      getConfig().healthCheck.binanceScannerCriticalDiff,
-      BINANCE_BLOCK_TIME
-    );
-    this.healthCheck.register(binanceRpcScannerSyncCheck);
+    this.healthCheck.register(scannerSyncCheck);
   };
 
   /**

@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
-import { ObservationEntity } from '@rosen-bridge/observation-extractor';
+import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 
 import { uniqBy, countBy, reduce } from 'lodash-es';
 
@@ -117,9 +117,9 @@ class WatcherUtils {
       `Fee for observation [${observation.requestId}] with amount ${observation.amount} is calculated: networkFee = ${feeConfig.networkFee}, bridgeFee = ${bridgeFee}`
     );
     return (
-      BigInt(observation.amount) >=
+      BigInt(observation.amount) >
         BigInt(bridgeFee) + BigInt(feeConfig.networkFee) &&
-      BigInt(observation.amount) >=
+      BigInt(observation.amount) >
         BigInt(observation.bridgeFee) + BigInt(observation.networkFee)
     );
   };

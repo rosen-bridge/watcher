@@ -195,6 +195,7 @@ const observations = [
     block: 'hash',
     extractor: 'observation-extractor',
     status: 'not_committed',
+    rawData: '{}',
     lockToken: {
       tokenId: 'tokenId',
       name: 'test token 10',
@@ -218,6 +219,7 @@ const observations = [
     sourceBlockId: 'block',
     requestId: 'reqId4',
     block: 'hash',
+    rawData: '{}',
     extractor: 'observation-extractor',
     status: 'not_committed',
     lockToken: {
