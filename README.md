@@ -47,3 +47,5 @@ You can find the project configs here. In this config, you should set what netwo
 ## How to Be a Watcher
 
 Check our operation documentation [here](https://github.com/rosen-bridge/operation/blob/dev/docs/watcher/deploy-docker.md#watcher-deployment).
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/rosen-bridge/watcher)
