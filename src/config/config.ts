@@ -657,18 +657,8 @@ class NotificationConfig {
 class HealthCheckConfig {
   ergWarnThreshold: bigint;
   ergCriticalThreshold: bigint;
-  ergoScannerWarnDiff: number;
-  ergoScannerCriticalDiff: number;
-  cardanoScannerWarnDiff: number;
-  cardanoScannerCriticalDiff: number;
-  bitcoinScannerWarnDiff: number;
-  bitcoinScannerCriticalDiff: number;
-  dogeScannerWarnDiff: number;
-  dogeScannerCriticalDiff: number;
-  ethereumScannerWarnDiff: number;
-  ethereumScannerCriticalDiff: number;
-  binanceScannerWarnDiff: number;
-  binanceScannerCriticalDiff: number;
+  scannerWarnDiff: number;
+  scannerCriticalDiff: number;
   ergoNodeMaxHeightDiff: number;
   ergoNodeMaxBlockTime: number;
   ergoNodeMinPeerCount: number;
@@ -688,11 +678,11 @@ class HealthCheckConfig {
     this.ergCriticalThreshold = BigInt(
       getRequiredString('healthCheck.asset.ergCriticalThreshold')
     );
-    this.ergoScannerWarnDiff = getRequiredNumber(
-      'healthCheck.ergoScanner.warnDifference'
+    this.scannerWarnDiff = getRequiredNumber(
+      'healthCheck.scanner.warnDifference'
     );
-    this.ergoScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.ergoScanner.criticalDifference'
+    this.scannerCriticalDiff = getRequiredNumber(
+      'healthCheck.scanner.criticalDifference'
     );
     this.ergoNodeMaxHeightDiff = getRequiredNumber(
       'healthCheck.ergoNode.maxHeightDifference'
@@ -705,36 +695,6 @@ class HealthCheckConfig {
     );
     this.ergoNodeMaxPeerHeightDifference = getRequiredNumber(
       'healthCheck.ergoNode.maxPeerHeightDifference'
-    );
-    this.cardanoScannerWarnDiff = getRequiredNumber(
-      'healthCheck.cardanoScanner.warnDifference'
-    );
-    this.cardanoScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.cardanoScanner.criticalDifference'
-    );
-    this.bitcoinScannerWarnDiff = getRequiredNumber(
-      'healthCheck.bitcoinScanner.warnDifference'
-    );
-    this.bitcoinScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.bitcoinScanner.criticalDifference'
-    );
-    this.dogeScannerWarnDiff = getRequiredNumber(
-      'healthCheck.dogeScanner.warnDifference'
-    );
-    this.dogeScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.dogeScanner.criticalDifference'
-    );
-    this.ethereumScannerWarnDiff = getRequiredNumber(
-      'healthCheck.ethereumScanner.warnDifference'
-    );
-    this.ethereumScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.ethereumScanner.criticalDifference'
-    );
-    this.binanceScannerWarnDiff = getRequiredNumber(
-      'healthCheck.binanceScanner.warnDifference'
-    );
-    this.binanceScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.binanceScanner.criticalDifference'
     );
     this.permitWarnCommitmentCount = getRequiredNumber(
       'healthCheck.permit.warnCommitmentCount'
