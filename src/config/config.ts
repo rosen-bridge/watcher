@@ -659,10 +659,6 @@ class HealthCheckConfig {
   ergCriticalThreshold: bigint;
   scannerWarnDiff: number;
   scannerCriticalDiff: number;
-  ergoNodeMaxHeightDiff: number;
-  ergoNodeMaxBlockTime: number;
-  ergoNodeMinPeerCount: number;
-  ergoNodeMaxPeerHeightDifference: number;
   permitWarnCommitmentCount: number;
   permitCriticalCommitmentCount: number;
   permitDefaultCommitmentRWT: number;
@@ -683,18 +679,6 @@ class HealthCheckConfig {
     );
     this.scannerCriticalDiff = getRequiredNumber(
       'healthCheck.scanner.criticalDifference'
-    );
-    this.ergoNodeMaxHeightDiff = getRequiredNumber(
-      'healthCheck.ergoNode.maxHeightDifference'
-    );
-    this.ergoNodeMaxBlockTime = getRequiredNumber(
-      'healthCheck.ergoNode.maxBlockTime'
-    );
-    this.ergoNodeMinPeerCount = getRequiredNumber(
-      'healthCheck.ergoNode.minPeerCount'
-    );
-    this.ergoNodeMaxPeerHeightDifference = getRequiredNumber(
-      'healthCheck.ergoNode.maxPeerHeightDifference'
     );
     this.permitWarnCommitmentCount = getRequiredNumber(
       'healthCheck.permit.warnCommitmentCount'

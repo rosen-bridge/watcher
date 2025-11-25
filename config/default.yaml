@@ -137,11 +137,6 @@ healthCheck:
   scanner:
     warnDifference: 5 # warning difference between existing and scanned blocks height
     criticalDifference: 20 # critical difference between existing and scanned blocks height
-  ergoNode:
-    maxHeightDifference: 2 # maximum difference between header height and full height
-    maxBlockTime: 30 # maximum time to see a new block in minutes
-    minPeerCount: 10 # minimum recommended peers
-    maxPeerHeightDifference: 2 # maximum difference between peers and our node
   permit:
     warnCommitmentCount: 4 # warning remaining permits for creating commitment
     criticalCommitmentCount: 0 # critical remaining permits for creating commitment
