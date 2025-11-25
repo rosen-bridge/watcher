@@ -3,7 +3,6 @@ import {
   ErgoNodeAssetHealthCheckParam,
 } from '@rosen-bridge/asset-check';
 import { HealthCheck, HealthStatusLevel } from '@rosen-bridge/health-check';
-import { ErgoNodeSyncHealthCheckParam } from '@rosen-bridge/node-sync-check';
 import {
   AbstractPermitHealthCheckParam,
   ExplorerPermitHealthCheckParam,
@@ -87,14 +86,6 @@ class HealthCheckSingleton {
       };
     }
     this.healthCheck = new HealthCheck(notify, notificationConfig);
-    const ergoNodeSyncCheck = new ErgoNodeSyncHealthCheckParam(
-      getConfig().healthCheck.ergoNodeMaxHeightDiff,
-      getConfig().healthCheck.ergoNodeMaxBlockTime,
-      getConfig().healthCheck.ergoNodeMinPeerCount,
-      getConfig().healthCheck.ergoNodeMaxPeerHeightDifference,
-      getConfig().general.nodeUrl
-    );
-    this.healthCheck.register(ergoNodeSyncCheck);
 
     const warnLogCheck = new LogLevelHealthCheck(
       CallbackLoggerFactory.getInstance(),
