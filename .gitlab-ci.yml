@@ -1,16 +1,16 @@
 image: node:20.11.0
 
+default:
+  interruptible: true
+
 stages:
   - installation
-  - type_check
-  - lint
-  - coverage
-  - changeset
+  - ci
 
 installation:
   stage: installation
   cache:
-    key: $CI_COMMIT_REF_NAME
+    key: ${CI_COMMIT_REF_NAME}
     policy: push
     paths:
       - node_modules
@@ -18,10 +18,9 @@ installation:
     - npm ci
 
 type_check:
-  stage: type_check
-  needs: ['installation']
+  stage: ci
   cache:
-    key: $CI_COMMIT_REF_NAME
+    key: ${CI_COMMIT_REF_NAME}
     policy: pull
     paths:
       - node_modules
@@ -29,10 +28,9 @@ type_check:
     - npm run type-check
 
 lint:
-  stage: lint
-  needs: ['type_check']
+  stage: ci
   cache:
-    key: $CI_COMMIT_REF_NAME
+    key: ${CI_COMMIT_REF_NAME}
     policy: pull
     paths:
       - node_modules
@@ -40,10 +38,9 @@ lint:
     - npm run lint
 
 coverage:
-  stage: coverage
-  needs: ['installation']
+  stage: ci
   cache:
-    key: $CI_COMMIT_REF_NAME
+    key: ${CI_COMMIT_REF_NAME}
     policy: pull
     paths:
       - node_modules
@@ -57,10 +54,9 @@ coverage:
         path: coverage/cobertura-coverage.xml
 
 changeset:
-  stage: changeset
-  needs: ['coverage']
+  stage: ci
   cache:
-    key: $CI_COMMIT_REF_NAME
+    key: ${CI_COMMIT_REF_NAME}
     policy: pull
     paths:
       - node_modules
