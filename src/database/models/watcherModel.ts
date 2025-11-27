@@ -14,7 +14,7 @@ import {
   In,
   IsNull,
   LessThan,
-  MoreThan,
+  MoreThanOrEqual,
   Not,
   Repository,
 } from '@rosen-bridge/extended-typeorm';
@@ -127,7 +127,7 @@ class WatcherDataBase {
     const minHeight = height - (maxConfirmation ? maxConfirmation : height);
     const observations = await this.observationRepository.find({
       where: {
-        height: And(LessThan(maxHeight), MoreThan(minHeight)),
+        height: And(LessThan(maxHeight), MoreThanOrEqual(minHeight)),
       },
       order: {
         height: 'ASC',
