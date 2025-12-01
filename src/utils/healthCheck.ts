@@ -254,7 +254,8 @@ class HealthCheckSingleton {
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         getConfig().healthCheck.scannerWarnDiff,
         getConfig().healthCheck.scannerCriticalDiff,
-        chainBlockTime!
+        chainBlockTime!,
+        updateInterval!
       );
     }
     this.healthCheck.register(scannerSyncCheck);
