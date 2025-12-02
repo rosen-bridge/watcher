@@ -149,7 +149,8 @@ class HealthCheckSingleton {
       this.observingNetworkLastBlock(scanner.getErgoScanner().name()),
       getConfig().healthCheck.scannerWarnDiff,
       getConfig().healthCheck.scannerCriticalDiff,
-      ERGO_BLOCK_TIME
+      ERGO_BLOCK_TIME,
+      getConfig().general.ergoInterval
     );
     this.healthCheck.register(this.ergoScannerSyncCheckParam);
   };
