@@ -14,6 +14,7 @@ import {
   In,
   IsNull,
   LessThan,
+  LessThanOrEqual,
   MoreThan,
   Not,
   Repository,
@@ -127,7 +128,7 @@ class WatcherDataBase {
     const minHeight = height - (maxConfirmation ? maxConfirmation : height);
     const observations = await this.observationRepository.find({
       where: {
-        height: And(LessThan(maxHeight), MoreThan(minHeight)),
+        height: And(LessThanOrEqual(maxHeight), MoreThan(minHeight)),
       },
       order: {
         height: 'ASC',
