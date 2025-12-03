@@ -226,8 +226,18 @@ export class ErgoUtils {
     const contextExtension = new wasm.ContextExtension();
     const contractVersion = getConfig().rosen.contractVersion;
     const serviceVersion = packageJson.version;
-    contextExtension.set_pair(0, wasm.Constant.from_byte_array(new Uint8Array(Buffer.from(contractVersion, 'utf8'))));
-    contextExtension.set_pair(1, wasm.Constant.from_byte_array(new Uint8Array(Buffer.from(serviceVersion, 'utf8'))));
+    contextExtension.set_pair(
+      0,
+      wasm.Constant.from_byte_array(
+        new Uint8Array(Buffer.from(contractVersion, 'utf8'))
+      )
+    );
+    contextExtension.set_pair(
+      1,
+      wasm.Constant.from_byte_array(
+        new Uint8Array(Buffer.from(serviceVersion, 'utf8'))
+      )
+    );
     return contextExtension;
   };
 
@@ -281,7 +291,10 @@ export class ErgoUtils {
       txBuilder.set_data_inputs(txDataInputs);
     }
     if (getConfig().general.versionInputExtension) {
-      txBuilder.set_context_extension(boxes.get(0).box_id(), this.createVersionContextExtension());
+      txBuilder.set_context_extension(
+        boxes.get(0).box_id(),
+        this.createVersionContextExtension()
+      );
     }
     return ErgoUtils.buildTxAndSign(
       txBuilder,

@@ -1,5 +1,13 @@
 # @rosen-bridge/watcher
 
+## 6.0.1
+
+### Patch Changes
+
+- Remove ergo node sync health parameter
+- Remove observation confirmation default value and fix height query
+- Use scanner interval in scanner sync check parameter
+
 ## 6.0.0
 
 ### Major Changes
