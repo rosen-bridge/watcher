@@ -1,5 +1,13 @@
 # @rosen-bridge/watcher
 
+## 6.0.2
+
+### Patch Changes
+
+- Support new tokens
+  - USE
+  - NIGHT
+
 ## 6.0.1
 
 ### Patch Changes
