@@ -17,7 +17,6 @@ on:
         description: 'GitHub environment name (e.g. pandora, public-launch, ...)'
         required: true
         type: string
-        default: pandora
 
 env:
   IMAGE_NAME: ghcr.io/rosen-bridge/watcher-service
@@ -27,7 +26,9 @@ jobs:
     name: Build ${{ matrix.platform }}
     permissions: write-all
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'push' && 'pandora' || github.event_name == 'release' && 'public-launch' || github.event.inputs.environment }}
+    environment: ${{ github.event_name == 'push' && vars.DEV_PUSH_ENVIRONMENT
+      || github.event_name == 'release' && vars.RELEASE_ENVIRONMENT
+      || github.event.inputs.environment }}
     strategy:
       fail-fast: false
       matrix:
@@ -110,7 +111,9 @@ jobs:
     name: Publish Multi-arch Manifest
     runs-on: ubuntu-latest
     needs: [build]
-    environment: ${{ github.event_name == 'push' && 'pandora' || github.event_name == 'release' && 'public-launch' || github.event.inputs.environment }}
+    environment: ${{ github.event_name == 'push' && vars.DEV_PUSH_ENVIRONMENT
+      || github.event_name == 'release' && vars.RELEASE_ENVIRONMENT
+      || github.event.inputs.environment }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
