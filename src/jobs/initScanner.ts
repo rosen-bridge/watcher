@@ -13,6 +13,7 @@ const {
   bitcoin: bitcoinConfig,
   bitcoinRunes: bitcoinRunesConfig,
   doge: dogeConfig,
+  firo: firoConfig,
   ethereum: ethereumConfig,
   binance: binanceConfig,
 } = allConfig;
@@ -65,6 +66,12 @@ export const scannerInit = () => {
     case Constants.DOGE_CHAIN_NAME:
       scanningJob(
         dogeConfig.interval,
+        scanner.getObservationScanner() as GeneralScanner<unknown>
+      ).then(() => null);
+      break;
+    case Constants.FIRO_CHAIN_NAME:
+      scanningJob(
+        firoConfig.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;

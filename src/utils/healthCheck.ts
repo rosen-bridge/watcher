@@ -40,6 +40,8 @@ import {
   ETHEREUM_BLOCK_TIME,
   ETHEREUM_CHAIN_NAME,
   EXPLORER_TYPE,
+  FIRO_BLOCK_TIME,
+  FIRO_CHAIN_NAME,
   NODE_TYPE,
   OGMIOS_TYPE,
 } from '../config/constants';
@@ -235,6 +237,11 @@ class HealthCheckSingleton {
           chainName = DOGE_CHAIN_NAME;
           chainBlockTime = DOGE_BLOCK_TIME;
           updateInterval = getConfig().doge.interval;
+          break;
+        case FIRO_CHAIN_NAME:
+          chainName = FIRO_CHAIN_NAME;
+          chainBlockTime = FIRO_BLOCK_TIME;
+          updateInterval = getConfig().firo.interval;
           break;
         case ETHEREUM_CHAIN_NAME:
           chainName = ETHEREUM_CHAIN_NAME;

@@ -37,6 +37,16 @@ doge:
       timeout: 10 # rpc request timeout (in seconds)
       # username: '' # rpc username for authentication required instances
       # password: '' # rpc password for authentication required instances
+firo:
+  type: '' # options: rpc
+  initial:
+    height: -1 # initial height of scanning
+  interval: 180 # scanning interval (in seconds)
+  rpc:
+    url: '' # rpc url
+    timeout: 10 # rpc request timeout (in seconds)
+    # username: '' # rpc username for authentication required instances
+    # password: '' # rpc password for authentication required instances
 cardano:
   type: '' # options: koios, ogmios, blockfrost
   initial:
