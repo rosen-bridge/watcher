@@ -45,8 +45,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p ./config/rosen
-          npx @rosen-bridge/cli@${{ vars.ROSEN_CLI_VERSION || 'latest' }} download-assets -c ${{ vars.RELEASE_NAME }} ${{ vars.RELEASE_TAG }} -o ./config/rosen -s mainnet
-          mv ./config/rosen/tokens*.json ./config/rosen/tokens.json
+          npx @rosen-bridge/cli@${{ vars.ROSEN_CLI_VERSION || 'latest' }} download-assets -c ${{ vars.RELEASE_NAME }} ${{ vars.RELEASE_TAG }} -o ./config -s mainnet
+          mv ./config/tokens*.json ./config/tokens.json
 
       - name: Move Contracts files
         shell: bash
