@@ -29,7 +29,7 @@ const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export class Boxes {
   dataBase: WatcherDataBase;
-  repoNFTId: wasm.TokenId;
+  rwtRepoNFTId: wasm.TokenId;
   repoConfigNFT: wasm.TokenId;
   AWC: wasm.TokenId;
   RWTTokenId: wasm.TokenId;
@@ -49,7 +49,7 @@ export class Boxes {
   constructor(db: WatcherDataBase) {
     const rosenConfig = getConfig().rosen;
     this.dataBase = db;
-    this.repoNFTId = wasm.TokenId.from_str(rosenConfig.RepoNFT);
+    this.rwtRepoNFTId = wasm.TokenId.from_str(rosenConfig.rwtRepoNFT);
     this.RWTTokenId = wasm.TokenId.from_str(rosenConfig.RWTId);
     this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
     this.AWC = wasm.TokenId.from_str(rosenConfig.AWC);
@@ -337,9 +337,9 @@ export class Boxes {
     return await ErgoNetwork.trackMemPool(
       await ErgoNetwork.getBoxWithToken(
         this.repoAddress,
-        this.repoNFTId.to_str()
+        this.rwtRepoNFTId.to_str()
       ),
-      this.repoNFTId.to_str()
+      this.rwtRepoNFTId.to_str()
     );
   };
 
@@ -572,7 +572,7 @@ export class Boxes {
       height
     );
     repoBuilder.add_token(
-      this.repoNFTId,
+      this.rwtRepoNFTId,
       wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
     );
     repoBuilder.add_token(

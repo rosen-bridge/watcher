@@ -107,8 +107,8 @@ ergo:
       status: 120 # wid status check interval (in seconds)
     minimumFee: 300
 path:
-  addresses: config/rosen # addresses path
-  # tokens: config/rosen/tokens.json # default tokens path.
+  addresses: config # addresses path
+  # tokens: config/tokens.json # default tokens path.
 logs:
   - type: 'file' # [file, console]
     path: './logs/' # path to log files (only for rotateFile type)
