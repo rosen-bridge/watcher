@@ -4,7 +4,7 @@ import path from 'path';
 class RosenConfig {
   readonly RSN: string;
   readonly guardNFT: string;
-  readonly MinFeeNFT: string;
+  readonly minFeeNFT: string;
   readonly cleanupNFT: string;
   readonly cleanupConfirm: number;
   readonly watcherPermitAddress: string;
@@ -14,7 +14,7 @@ class RosenConfig {
   readonly eventTriggerAddress: string;
   readonly commitmentAddress: string;
   readonly lockAddress: string;
-  readonly RWTRepoNFT: string;
+  readonly rwtRepoNFT: string;
   readonly RWTId: string;
   readonly repoConfigAddress: string;
   readonly repoConfigNFT: string;
@@ -40,10 +40,10 @@ class RosenConfig {
 
     this.contractVersion = config.version;
 
-    this.RWTRepoNFT = config.tokens.RWTRepoNFT;
+    this.rwtRepoNFT = config.tokens.RWTRepoNFT;
     this.guardNFT = config.tokens.GuardNFT;
     this.RSN = config.tokens.RSN;
-    this.MinFeeNFT = config.tokens.MinFeeNFT;
+    this.minFeeNFT = config.tokens.MinFeeNFT;
     this.emissionNFT = config.tokens.EmissionNFT;
     this.eRSN = config.tokens.ERSN;
 
