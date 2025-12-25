@@ -9,7 +9,7 @@ ergo:
   fee: '1100000'
   minBoxValue: '1100000'
 path:
-  addresses: tests/config
+  addresses: tests/config/contracts.test.json
   tokens: tests/config/tokens.test.json
 logs:
   - type: 'console'

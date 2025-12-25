@@ -107,7 +107,7 @@ ergo:
       status: 120 # wid status check interval (in seconds)
     minimumFee: 300
 path:
-  addresses: config # addresses path
+  addresses: config/contracts.json # addresses path
   # tokens: config/tokens.json # default tokens path.
 logs:
   - type: 'file' # [file, console]

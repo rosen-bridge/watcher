@@ -711,7 +711,6 @@ const getConfig = (): ConfigType => {
     const binance = new BinanceConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
-      general.networkType,
       general.rosenConfigPath
     );
     const database = new DatabaseConfig();
