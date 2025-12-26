@@ -247,10 +247,7 @@ class Config {
     this.minBoxValue = getRequiredString('ergo.minBoxValue');
     this.fee = getRequiredString('ergo.fee');
     this.rosenConfigPath = getRequiredString('path.addresses');
-    this.rosenTokensPath = getOptionalString(
-      'path.tokens',
-      path.join(this.rosenConfigPath, 'tokens.json')
-    );
+    this.rosenTokensPath = getRequiredString('path.tokens');
     this.apiPort = getOptionalNumber('api.port', 3000);
     this.apiKeyHash = getRequiredString('api.apiKeyHash');
     this.apiAllowedOrigins = config.get<string[]>('api.allowedOrigins');

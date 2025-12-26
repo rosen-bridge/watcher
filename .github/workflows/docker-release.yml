@@ -48,7 +48,7 @@ jobs:
           npx @rosen-bridge/cli@${{ vars.ROSEN_CLI_VERSION || 'latest' }} download-assets -c ${{ vars.RELEASE_NAME }} ${{ vars.RELEASE_TAG }} -o ./config 
           mv ./config/tokens*.json ./config/tokens.json
 
-      - name: Move Contracts files
+      - name: Move Docker YAMLs
         shell: bash
         run: |
           mv ./docker/*.yaml ./config/
