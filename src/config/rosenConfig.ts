@@ -24,8 +24,7 @@ class RosenConfig {
   readonly eRSN: string;
   readonly contractVersion: string;
 
-  constructor(network: string, networkType: string, configRoot: string) {
-    const rosenConfigPath = this.getAddress(networkType, configRoot);
+  constructor(network: string, rosenConfigPath: string) {
     if (!fs.existsSync(rosenConfigPath)) {
       throw new Error(
         `rosenConfig file with path ${rosenConfigPath} doesn't exist`
@@ -64,10 +63,6 @@ class RosenConfig {
     this.repoConfigNFT = chainConfig.tokens.RepoConfigNFT;
     this.AWC = chainConfig.tokens.AwcNFT;
   }
-
-  getAddress = (networkType: string, configRoot: string) => {
-    return path.join(configRoot, `contracts-${networkType}.json`);
-  };
 }
 
 export { RosenConfig };
