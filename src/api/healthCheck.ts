@@ -2,9 +2,9 @@ import express from 'express';
 import { Request, Response } from 'express';
 import { stringifyQueryParam } from '../utils/utils';
 import { HealthCheckSingleton } from '../utils/healthCheck';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 const healthRouter = express.Router();
 
 /**

@@ -2,7 +2,7 @@ import { GeneralScanner } from '@rosen-bridge/abstract-scanner';
 import { CardanoOgmiosScanner } from '@rosen-bridge/cardano-scanner';
 import * as Constants from '../config/constants';
 import { getConfig } from '../config/config';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
 import { CreateScanner } from '../utils/scanner';
 
@@ -17,7 +17,7 @@ const {
   binance: binanceConfig,
 } = allConfig;
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   try {

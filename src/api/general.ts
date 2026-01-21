@@ -4,12 +4,12 @@ import { JsonBI } from '../ergo/network/parser';
 import { ErgoUtils } from '../ergo/utils';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 import { Transaction } from './Transaction';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import packageJson from '../../package.json' assert { type: 'json' };
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 interface GeneralInfo {
   versions: {

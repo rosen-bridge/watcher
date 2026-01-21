@@ -4,9 +4,9 @@ import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 const eventsRouter = express.Router();
 
 /**

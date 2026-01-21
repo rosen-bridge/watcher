@@ -23,31 +23,21 @@ import {
 } from '@rosen-bridge/cardano-scanner';
 import { EvmRpcNetwork } from '@rosen-bridge/evm-scanner';
 import { getConfig } from '../config/config';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { Transaction } from '@rosen-bridge/scanner-interfaces';
 import { TransactionResponse } from 'ethers';
 
 const config = getConfig();
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 // Create separate loggers for each manager
-const ergoNodeLogger = CallbackLoggerFactory.getInstance().getLogger(
-  'ergo-node-connector'
-);
-const ergoExplorerLogger = CallbackLoggerFactory.getInstance().getLogger(
-  'ergo-explorer-connector'
-);
-const bitcoinLogger =
-  CallbackLoggerFactory.getInstance().getLogger('bitcoin-connector');
-const dogeLogger =
-  CallbackLoggerFactory.getInstance().getLogger('doge-connector');
-const cardanoKoiosLogger = CallbackLoggerFactory.getInstance().getLogger(
-  'cardano-koios-connector'
-);
-const cardanoBlockfrostLogger = CallbackLoggerFactory.getInstance().getLogger(
-  'cardano-blockfrost-connector'
-);
-const evmLogger =
-  CallbackLoggerFactory.getInstance().getLogger('evm-connector');
+const ergoNodeLogger = logger.child('ergo-node-connector');
+const ergoExplorerLogger = logger.child('ergo-explorer-connector');
+const bitcoinLogger = logger.child('bitcoin-connector');
+const dogeLogger = logger.child('doge-connector');
+const cardanoKoiosLogger = logger.child('cardano-koios-connector');
+const cardanoBlockfrostLogger = logger.child('cardano-blockfrost-connector');
+const evmLogger = logger.child('evm-connector');
 
 /**
  * Creates and configures a NetworkConnectorManager instance for Ergo node

@@ -5,11 +5,11 @@ import { generateSK } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { TokensConfig } from '../config/tokensConfig';
 import { validateAddress } from '@rosen-bridge/address-codec';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const addressRouter = express.Router();
 

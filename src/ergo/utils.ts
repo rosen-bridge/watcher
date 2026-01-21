@@ -25,12 +25,12 @@ import {
 import { PagedItemData } from '../types/items';
 import { EventTriggerEntity } from '@rosen-bridge/watcher-data-extractor';
 import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { JsonBI } from './network/parser';
 import { TokensConfig } from '../config/tokensConfig';
 import packageJson from '../../package.json' assert { type: 'json' };
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 const txFee = parseInt(getConfig().general.fee);
 
 export const extractBoxes = (boxes: wasm.ErgoBoxes): Array<wasm.ErgoBox> => {
@@ -226,8 +226,18 @@ export class ErgoUtils {
     const contextExtension = new wasm.ContextExtension();
     const contractVersion = getConfig().rosen.contractVersion;
     const serviceVersion = packageJson.version;
-    contextExtension.set_pair(0, wasm.Constant.from_byte_array(new Uint8Array(Buffer.from(contractVersion, 'utf8'))));
-    contextExtension.set_pair(1, wasm.Constant.from_byte_array(new Uint8Array(Buffer.from(serviceVersion, 'utf8'))));
+    contextExtension.set_pair(
+      0,
+      wasm.Constant.from_byte_array(
+        new Uint8Array(Buffer.from(contractVersion, 'utf8'))
+      )
+    );
+    contextExtension.set_pair(
+      1,
+      wasm.Constant.from_byte_array(
+        new Uint8Array(Buffer.from(serviceVersion, 'utf8'))
+      )
+    );
     return contextExtension;
   };
 
@@ -281,7 +291,10 @@ export class ErgoUtils {
       txBuilder.set_data_inputs(txDataInputs);
     }
     if (getConfig().general.versionInputExtension) {
-      txBuilder.set_context_extension(boxes.get(0).box_id(), this.createVersionContextExtension());
+      txBuilder.set_context_extension(
+        boxes.get(0).box_id(),
+        this.createVersionContextExtension()
+      );
     }
     return ErgoUtils.buildTxAndSign(
       txBuilder,

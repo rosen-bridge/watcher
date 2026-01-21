@@ -9,11 +9,11 @@ import { TxType } from '../database/entities/txEntity';
 import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 export class CommitmentCreation {
   watcherUtils: WatcherUtils;

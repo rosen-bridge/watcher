@@ -23,7 +23,7 @@ import { revenueJob } from './jobs/revenue';
 import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
 import cors from 'cors';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { widStatusJob } from './jobs/widStatus';
 import MinimumFeeHandler from './utils/MinimumFeeHandler';
 import { minimumFeeUpdateJob } from './jobs/minimumFee';
@@ -32,7 +32,7 @@ import { TokensConfig } from './config/tokensConfig';
 import { CreateScanner } from './utils/scanner';
 import { exit } from 'node:process';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;

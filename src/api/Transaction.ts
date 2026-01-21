@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import { ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { Boxes } from '../ergo/boxes';
@@ -23,9 +23,8 @@ import {
 import { HealthStatusLevel } from '@rosen-bridge/health-check';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 import { TokensConfig } from '../config/tokensConfig';
-import { CreateScanner } from '../utils/scanner';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 export type ApiResponse = {
   response: string;

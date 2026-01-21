@@ -11,7 +11,7 @@ import {
   DogeEsploraObservationExtractor,
   DogeRpcObservationExtractor,
 } from '@rosen-bridge/bitcoin-observation-extractor';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ErgoObservationExtractor } from '@rosen-bridge/ergo-observation-extractor';
 import {
   CardanoBlockFrostObservationExtractor,
@@ -34,6 +34,7 @@ import {
 import {
   BitcoinRunesEsploraObservationExtractor,
   BitcoinRunesRpcObservationExtractor,
+  UnisatRunesProtocolNetwork,
 } from '@rosen-bridge/bitcoin-runes-observation-extractor';
 
 import {
@@ -67,35 +68,24 @@ import {
   createErgoExplorerNetworkConnectorManager,
 } from './networkConnectorManagers';
 
+const logger = DefaultLogger.getInstance().child(import.meta.url);
+
 /**
  * Creates loggers for scanners and extractors
  * @returns loggers object
  */
 const createLoggers = () => ({
-  commitmentExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
-    'commitment-extractor'
-  ),
-  eventTriggerExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
-    'event-trigger-extractor'
-  ),
-  observationExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
-    'observation-extractor'
-  ),
-  permitExtractorLogger:
-    CallbackLoggerFactory.getInstance().getLogger('permit-extractor'),
-  plainExtractorLogger:
-    CallbackLoggerFactory.getInstance().getLogger('plain-extractor'),
-  scannerLogger: CallbackLoggerFactory.getInstance().getLogger('scanner'),
-  observationScannerLogger: CallbackLoggerFactory.getInstance().getLogger(
-    'observation-scanner'
-  ),
-  collateralExtractorLogger: CallbackLoggerFactory.getInstance().getLogger(
-    'collateral-extractor'
-  ),
+  commitmentExtractorLogger: logger.child('commitment-extractor'),
+  eventTriggerExtractorLogger: logger.child('event-trigger-extractor'),
+  observationExtractorLogger: logger.child('observation-extractor'),
+  permitExtractorLogger: logger.child('permit-extractor'),
+  plainExtractorLogger: logger.child('plain-extractor'),
+  scannerLogger: logger.child('scanner'),
+  observationScannerLogger: logger.child('observation-scanner'),
+  collateralExtractorLogger: logger.child('collateral-extractor'),
 });
 
 const loggers = createLoggers();
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
 class CreateScanner {
   private static instance: CreateScanner;
@@ -289,14 +279,16 @@ class CreateScanner {
       config.scannerType,
       config.address,
       undefined, // Token constraint not needed
-      loggers.plainExtractorLogger
+      loggers.plainExtractorLogger,
+      false
     );
+
     const collateralExtractor = new CollateralExtractor(
       Constants.COLLATERAL_EXTRACTOR_NAME,
       rosenConfig.AWC,
       rosenConfig.watcherCollateralAddress,
       dataSource,
-      config.explorerUrl,
+      networkUrl,
       loggers.collateralExtractorLogger
     );
     this.ergoScanner.registerExtractor(commitmentExtractor);
@@ -416,8 +408,10 @@ class CreateScanner {
         const observationExtractor =
           new BitcoinRunesEsploraObservationExtractor(
             rosenConfig.lockAddress,
-            bitcoinRunesConfig.unisat.url,
-            bitcoinRunesConfig.unisat.apiKey,
+            new UnisatRunesProtocolNetwork(
+              bitcoinRunesConfig.unisat.url,
+              bitcoinRunesConfig.unisat.apiKey
+            ),
             dataSource,
             TokensConfig.getInstance().getTokenMap(),
             loggers.observationExtractorLogger
@@ -433,8 +427,10 @@ class CreateScanner {
 
         const observationExtractor = new BitcoinRunesRpcObservationExtractor(
           rosenConfig.lockAddress,
-          bitcoinRunesConfig.unisat.url,
-          bitcoinRunesConfig.unisat.apiKey,
+          new UnisatRunesProtocolNetwork(
+            bitcoinRunesConfig.unisat.url,
+            bitcoinRunesConfig.unisat.apiKey
+          ),
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
           loggers.observationExtractorLogger
