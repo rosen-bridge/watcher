@@ -189,16 +189,16 @@ firstStatisticsEventTrigger.WIDsHash = 'abcd';
 
 const secondStatisticsEventTrigger = {
   ...firstStatisticsEventTrigger,
-  boxId: 'boxIdStatistics2',
+  identifier: 'boxIdStatistics2',
 };
 const thirdStatisticsEventTrigger = {
   ...firstStatisticsEventTrigger,
-  boxId: 'boxIdStatistics3',
+  identifier: 'boxIdStatistics3',
 };
 
 const spentEventTrigger = {
   ...firstStatisticsEventTrigger,
-  boxId: 'boxIdStatistics4',
+  identifier: 'boxIdStatistics4',
   spendBlock: 'blockHash',
   spendHeight: 110,
 };

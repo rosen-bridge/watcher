@@ -1154,7 +1154,7 @@ class WatcherDataBase {
     });
     if (collateral) {
       logger.debug(
-        `Found collateral box for wid [${wid}] with boxId [${collateral.boxId}]`
+        `Found collateral box for wid [${wid}] with boxId [${collateral.serialized}]`
       );
       return collateral;
     }
@@ -1169,6 +1169,47 @@ class WatcherDataBase {
       where: { spendBlock: IsNull() },
     });
     return collaterals.map((collateral) => collateral.wid);
+  };
+
+  /**
+   * Get blocks from both permit_entity and commitment_entity
+   * Returns distinct blocks ordered by height
+   */
+  getBlocksFromPermitAndCommitment = async (): Promise<BlockEntity[]> => {
+    // Subquery for permit blocks
+    const permitSubQuery = this.permitRepository
+      .createQueryBuilder('pe')
+      .select('pe.block', 'block')
+      .where('pe.extractor = :extractor', {
+        extractor: 'watcher-permit-extractor',
+      });
+
+    // Subquery for commitment blocks
+    const commitmentSubQuery = this.commitmentRepository
+      .createQueryBuilder('pe')
+      .select('pe.block', 'block')
+      .where('pe.extractor = :extractor', {
+        extractor: 'watcher-commitment-extractor',
+      });
+
+    // Combine subqueries using UNION in raw SQL
+    const unionQuery = `${permitSubQuery.getQuery()} UNION ${commitmentSubQuery.getQuery()}`;
+
+    // Get blocks where hash is in the combined subquery
+    return this.blockRepository
+      .createQueryBuilder('be')
+      .select('be.id', 'id')
+      .addSelect('be.height', 'height')
+      .addSelect('be.hash', 'hash')
+      .where(`be.hash IN (${unionQuery})`)
+      .setParameters({
+        ...permitSubQuery.getParameters(),
+        ...commitmentSubQuery.getParameters(),
+      })
+      .distinct(true)
+      .orderBy('be.height', 'ASC')
+      .take(10)
+      .getRawMany();
   };
 }
 

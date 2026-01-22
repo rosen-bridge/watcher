@@ -284,11 +284,15 @@ class CreateScanner {
     );
 
     const collateralExtractor = new CollateralExtractor(
+      dataSource,
       Constants.COLLATERAL_EXTRACTOR_NAME,
       rosenConfig.AWC,
-      rosenConfig.watcherCollateralAddress,
-      dataSource,
-      networkUrl,
+      {
+        active: true,
+        type: config.scannerType,
+        url: networkUrl,
+        address: rosenConfig.watcherCollateralAddress,
+      },
       loggers.collateralExtractorLogger
     );
     this.ergoScanner.registerExtractor(commitmentExtractor);
