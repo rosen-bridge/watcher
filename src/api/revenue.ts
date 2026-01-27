@@ -6,6 +6,8 @@ import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { Transaction } from './Transaction';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { ApiError } from '../errors/apiErrors';
+import { HttpStatus } from '../constants';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const revenueRouter = express.Router();
@@ -55,12 +57,12 @@ revenueRouter.get('/', async (req, res) => {
     );
 
     res
-      .status(200)
+      .status(HttpStatus.OK)
       .contentType('application/json')
       .send(JsonBI.stringify({ items: result, total: revenueRows.total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues: ${e}`);
-    res.status(500).send({ message: e.message });
+    throw new ApiError(e.message);
   }
 });
 
@@ -96,10 +98,10 @@ revenueRouter.get('/chart', async (req, res) => {
     }
     const result = await ErgoUtils.transformChartData(queryResult);
     res.set('Content-Type', 'application/json');
-    res.status(200).send(result);
+    res.status(HttpStatus.OK).send(result);
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues chart data: ${e}`);
-    res.status(500).send({ message: e.message });
+    throw new ApiError(e.message);
   }
 });
 

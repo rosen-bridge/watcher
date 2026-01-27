@@ -5,6 +5,9 @@ import { ERGO_NATIVE_ASSET } from '../config/constants';
 import { BoxValue } from 'ergo-lib-wasm-nodejs';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { authenticateKey } from './authentication';
+import { ApiError } from '../errors/apiErrors';
+import { CastReqInterface, TokenInterface } from '../types/apis';
+import { HttpStatus } from '../constants';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -20,10 +23,10 @@ interface WithdrawBody {
  * @param reqBody
  * @returns WithdrawBody object with BigInts
  */
-const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
+const castReqBodyToWithdrawBody = (reqBody: CastReqInterface): WithdrawBody => {
   let nanoErgs = 0n;
   const tokens: Array<Omit<TokenData, 'name'>> = [];
-  reqBody.tokens.forEach((token: any) => {
+  reqBody.tokens.forEach((token: TokenInterface) => {
     if (token.tokenId === ERGO_NATIVE_ASSET) {
       nanoErgs = BigInt(token.amount);
     } else {
@@ -55,12 +58,12 @@ withdrawRouter.post('/', authenticateKey, async (req, res) => {
       withdrawBody.address
     );
     res
-      .status(200)
+      .status(HttpStatus.OK)
       .contentType('application/json')
       .send(JSON.stringify({ txId, status: 'OK' }));
   } catch (e) {
     logger.warn(`An error occurred while withdrawing from wallet: ${e}`);
-    res.status(500).send({ message: e.message });
+    throw new ApiError(e.message);
   }
 });
 

@@ -5,6 +5,8 @@ import { stringifyQueryParam } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { ApiError } from '../errors/apiErrors';
+import { HttpStatus } from '../constants';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const eventsRouter = express.Router();
@@ -41,11 +43,11 @@ eventsRouter.get('/', async (req, res) => {
     );
     res.set('Content-Type', 'application/json');
     res
-      .status(200)
+      .status(HttpStatus.OK)
       .send(JsonBI.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));
   } catch (e) {
     logger.warn(`An error occurred while fetching events: ${e}`);
-    res.status(500).send({ message: e.message });
+    throw new ApiError(e.message);
   }
 });
 
@@ -70,10 +72,10 @@ eventsRouter.post('/status', async (req, res) => {
       response[eventStatus.id] = eventStatus.status;
     });
 
-    res.status(200).send(response);
+    res.status(HttpStatus.OK).send(response);
   } catch (e) {
     logger.warn(`An error occurred while fetching events status: ${e}`);
-    res.status(500).send({ message: e.message });
+    throw new ApiError(e.message);
   }
 });
 

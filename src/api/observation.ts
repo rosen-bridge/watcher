@@ -6,6 +6,8 @@ import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { ApiError } from '../errors/apiErrors';
+import { HttpStatus } from '../constants';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const observationRouter = express.Router();
@@ -57,11 +59,11 @@ observationRouter.get('/', async (req, res) => {
     });
     res.set('Content-Type', 'application/json');
     res
-      .status(200)
+      .status(HttpStatus.OK)
       .send(JsonBI.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));
   } catch (e) {
     logger.warn(`An error occurred while fetching observations: ${e}`);
-    res.status(500).send({ message: e.message });
+    throw new ApiError(e.message);
   }
 });
 

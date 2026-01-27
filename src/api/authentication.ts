@@ -6,13 +6,18 @@ import {
   uint8ArrayToBase64,
   uint8ArrayToHex,
 } from '../utils/utils';
+import { ApiError } from '../errors/apiErrors';
+import { HttpStatus } from '../constants';
 
 const authenticateKey = (req: Request, res: Response, next: NextFunction) => {
-  const api_key: string = req.header('Api-Key')!;
+  const api_key = req.header('Api-Key');
   if (api_key && isValidApiKey(api_key)) {
     next();
   } else {
-    res.status(403).send({ message: "Api-Key doesn't exist or it is wrong" });
+    throw new ApiError(
+      "Api-Key doesn't exist or it is wrong",
+      HttpStatus.FORBIDDEN
+    );
   }
 };
 
@@ -26,12 +31,12 @@ const isValidApiKey = (api_key: string) => {
   if (isSaltedHash) {
     const splitSaltedHash = getConfig().general.apiKeyHash.split('$');
     const saltedPass = Buffer.concat([
-      base64ToArrayBuffer(splitSaltedHash.at(1)!),
+      base64ToArrayBuffer(splitSaltedHash[1]),
       Buffer.from(api_key),
     ]);
     isValidHash =
       uint8ArrayToBase64(blake2b(saltedPass, undefined, 32)) ===
-      splitSaltedHash.at(2);
+      splitSaltedHash[2];
   } else {
     isValidHash =
       uint8ArrayToHex(blake2b(api_key, undefined, 32)) ===

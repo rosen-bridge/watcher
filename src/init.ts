@@ -31,6 +31,8 @@ import { rewardCollection } from './jobs/rewardCollection';
 import { TokensConfig } from './config/tokensConfig';
 import { CreateScanner } from './utils/scanner';
 import { exit } from 'node:process';
+import { errorHandler } from './middlewares/errorHandler';
+import { withErrorHandling } from './middlewares/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -82,18 +84,22 @@ const init = async () => {
     );
 
     const router = Router();
-    router.use('/address', addressRouter);
-    router.use('/permit', permitRouter);
-    router.use('/observation', observationRouter);
-    router.use('/info', generalRouter);
-    router.use('/events', eventsRouter);
-    router.use('/withdraw', withdrawRouter);
-    router.use('/revenue', revenueRouter);
-    router.use('/health', healthRouter);
+    // TODO: remove withErrorHandling wrappers after upgrading to Express 5
+    router.use('/address', withErrorHandling(addressRouter));
+    router.use('/permit', withErrorHandling(permitRouter));
+    router.use('/observation', withErrorHandling(observationRouter));
+    router.use('/info', withErrorHandling(generalRouter));
+    router.use('/events', withErrorHandling(eventsRouter));
+    router.use('/withdraw', withErrorHandling(withdrawRouter));
+    router.use('/revenue', withErrorHandling(revenueRouter));
+    router.use('/health', withErrorHandling(healthRouter));
 
     app.use(router);
-    const port = getConfig().general.apiPort;
 
+    // Use error-handler middleware
+    app.use(errorHandler);
+
+    const port = getConfig().general.apiPort;
     app.listen(port, () => logger.info(`App listening on port ${port}`));
   };
 

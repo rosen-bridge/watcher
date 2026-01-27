@@ -8,6 +8,8 @@ import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { TokensConfig } from '../config/tokensConfig';
 import { validateAddress } from '@rosen-bridge/address-codec';
+import { ApiError, ApiValidationError } from '../errors/apiErrors';
+import { HttpStatus } from '../constants';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -20,12 +22,16 @@ addressRouter.get('/generate', async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      throw new ApiValidationError(errors);
     }
-    res.status(200).json(generateSK(getConfig().general.networkPrefix));
+    res
+      .status(HttpStatus.OK)
+      .json(generateSK(getConfig().general.networkPrefix));
   } catch (e) {
-    logger.warn(`An error occurred while generating secret key: ${e}`);
-    res.status(500).send({ message: e.message });
+    if (!(e instanceof ApiError)) {
+      logger.warn(`An error occurred while generating secret key: ${e}`);
+      throw new ApiError(e.message);
+    }
   }
 });
 
@@ -35,7 +41,7 @@ addressRouter.get('/generate', async (req: Request, res: Response) => {
 addressRouter.get('/assets', async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    throw new ApiValidationError(errors);
   }
   try {
     const balance = await ErgoUtils.getWatcherBalance();
@@ -97,10 +103,10 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     const total = tokens.length;
     tokens = tokens.slice(offset, offset + limit);
 
-    res.status(200).send(JsonBI.stringify({ items: tokens, total }));
+    res.status(HttpStatus.OK).send(JsonBI.stringify({ items: tokens, total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching assets: ${e}`);
-    res.status(500).send({ message: e.message });
+    throw new ApiError(e.message);
   }
 });
 
@@ -111,19 +117,16 @@ addressRouter.get('/validate/:address', async (req: Request, res: Response) => {
   try {
     const { address } = req.params;
     if (!address) {
-      return res
-        .status(400)
-        .json({ valid: false, message: 'Address is required' });
+      throw new ApiError('Address is required', HttpStatus.BAD_REQUEST);
     }
 
     validateAddress(ERGO_CHAIN_NAME, address);
-    res.status(200).json({ valid: true, message: 'Valid Ergo address' });
+    res.status(HttpStatus.OK).json({ valid: true });
   } catch (e) {
-    logger.warn(`An error occurred while validating address: ${e}`);
-    return res.status(200).json({
-      valid: false,
-      message: 'Invalid Ergo address',
-    });
+    if (!(e instanceof ApiError)) {
+      logger.warn(`An error occurred while validating address: ${e}`);
+      throw new ApiError('Invalid Ergo address', HttpStatus.BAD_REQUEST);
+    }
   }
 });
 
