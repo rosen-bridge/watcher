@@ -119,6 +119,7 @@ class Config {
   minimumFeeUpdateInterval: number;
   observationConfirmation: number;
   observationValidThreshold: number;
+  observationStoreRawData: boolean;
   rosenConfigPath: string;
   rosenTokensPath: string;
   apiPort: number;
@@ -231,6 +232,9 @@ class Config {
     this.observationValidThreshold = getRequiredNumber(
       'observation.validThreshold'
     );
+    this.observationStoreRawData = config.get<boolean>(
+      'observation.storeRawData'
+    );
     this.tokenNameInterval = getRequiredNumber('ergo.interval.tokenName');
     this.revenueInterval = getRequiredNumber('ergo.interval.revenue');
     if (this.ergoInterval <= this.revenueInterval) {
@@ -243,10 +247,7 @@ class Config {
     this.minBoxValue = getRequiredString('ergo.minBoxValue');
     this.fee = getRequiredString('ergo.fee');
     this.rosenConfigPath = getRequiredString('path.addresses');
-    this.rosenTokensPath = getOptionalString(
-      'path.tokens',
-      path.join(this.rosenConfigPath, 'tokens.json')
-    );
+    this.rosenTokensPath = getRequiredString('path.tokens');
     this.apiPort = getOptionalNumber('api.port', 3000);
     this.apiKeyHash = getRequiredString('api.apiKeyHash');
     this.apiAllowedOrigins = config.get<string[]>('api.allowedOrigins');
@@ -436,17 +437,32 @@ class BitcoinConfig {
 }
 
 class BitcoinRunesConfig {
-  unisat: {
+  type: string;
+  unisat?: {
     url: string;
+    apiKey: string;
+  };
+  ordiscan?: {
     apiKey: string;
   };
 
   constructor(network: string) {
+    this.type = config.get<string>('bitcoinRunes.type');
     if (network === Constants.BITCOIN_RUNES_CHAIN_NAME) {
-      this.unisat = {
-        url: getRequiredString('bitcoinRunes.unisat.url'),
-        apiKey: getRequiredString('bitcoinRunes.unisat.apiKey'),
-      };
+      if (this.type === Constants.UNISAT_TYPE) {
+        this.unisat = {
+          url: getRequiredString('bitcoinRunes.unisat.url'),
+          apiKey: getRequiredString('bitcoinRunes.unisat.apiKey'),
+        };
+      } else if (this.type === Constants.ORDISCAN_TYPE) {
+        this.ordiscan = {
+          apiKey: getRequiredString('bitcoinRunes.ordiscan.apiKey'),
+        };
+      } else {
+        throw new Error(
+          `Improperly configured. bitcoinRunes configuration type is invalid available choices are '${Constants.UNISAT_TYPE}', '${Constants.ORDISCAN_TYPE}'`
+        );
+      }
     }
   }
 }
@@ -502,7 +518,12 @@ class DogeConfig {
               'Improperly configured. doge.rpc.timeout must be a non-empty number'
             );
           }
-          RateLimitedAxiosConfig.addRule(`^${rpcConfig.url}$`, 3, 1,rpcConfig.timeout);
+          RateLimitedAxiosConfig.addRule(
+            `^${rpcConfig.url}$`,
+            3,
+            1,
+            rpcConfig.timeout
+          );
         });
         this.rpc = rpcConfigs;
       } else {
@@ -633,22 +654,8 @@ class NotificationConfig {
 class HealthCheckConfig {
   ergWarnThreshold: bigint;
   ergCriticalThreshold: bigint;
-  ergoScannerWarnDiff: number;
-  ergoScannerCriticalDiff: number;
-  cardanoScannerWarnDiff: number;
-  cardanoScannerCriticalDiff: number;
-  bitcoinScannerWarnDiff: number;
-  bitcoinScannerCriticalDiff: number;
-  dogeScannerWarnDiff: number;
-  dogeScannerCriticalDiff: number;
-  ethereumScannerWarnDiff: number;
-  ethereumScannerCriticalDiff: number;
-  binanceScannerWarnDiff: number;
-  binanceScannerCriticalDiff: number;
-  ergoNodeMaxHeightDiff: number;
-  ergoNodeMaxBlockTime: number;
-  ergoNodeMinPeerCount: number;
-  ergoNodeMaxPeerHeightDifference: number;
+  scannerWarnDiff: number;
+  scannerCriticalDiff: number;
   permitWarnCommitmentCount: number;
   permitCriticalCommitmentCount: number;
   permitDefaultCommitmentRWT: number;
@@ -664,53 +671,11 @@ class HealthCheckConfig {
     this.ergCriticalThreshold = BigInt(
       getRequiredString('healthCheck.asset.ergCriticalThreshold')
     );
-    this.ergoScannerWarnDiff = getRequiredNumber(
-      'healthCheck.ergoScanner.warnDifference'
+    this.scannerWarnDiff = getRequiredNumber(
+      'healthCheck.scanner.warnDifference'
     );
-    this.ergoScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.ergoScanner.criticalDifference'
-    );
-    this.ergoNodeMaxHeightDiff = getRequiredNumber(
-      'healthCheck.ergoNode.maxHeightDifference'
-    );
-    this.ergoNodeMaxBlockTime = getRequiredNumber(
-      'healthCheck.ergoNode.maxBlockTime'
-    );
-    this.ergoNodeMinPeerCount = getRequiredNumber(
-      'healthCheck.ergoNode.minPeerCount'
-    );
-    this.ergoNodeMaxPeerHeightDifference = getRequiredNumber(
-      'healthCheck.ergoNode.maxPeerHeightDifference'
-    );
-    this.cardanoScannerWarnDiff = getRequiredNumber(
-      'healthCheck.cardanoScanner.warnDifference'
-    );
-    this.cardanoScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.cardanoScanner.criticalDifference'
-    );
-    this.bitcoinScannerWarnDiff = getRequiredNumber(
-      'healthCheck.bitcoinScanner.warnDifference'
-    );
-    this.bitcoinScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.bitcoinScanner.criticalDifference'
-    );
-    this.dogeScannerWarnDiff = getRequiredNumber(
-      'healthCheck.dogeScanner.warnDifference'
-    );
-    this.dogeScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.dogeScanner.criticalDifference'
-    );
-    this.ethereumScannerWarnDiff = getRequiredNumber(
-      'healthCheck.ethereumScanner.warnDifference'
-    );
-    this.ethereumScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.ethereumScanner.criticalDifference'
-    );
-    this.binanceScannerWarnDiff = getRequiredNumber(
-      'healthCheck.binanceScanner.warnDifference'
-    );
-    this.binanceScannerCriticalDiff = getRequiredNumber(
-      'healthCheck.binanceScanner.criticalDifference'
+    this.scannerCriticalDiff = getRequiredNumber(
+      'healthCheck.scanner.criticalDifference'
     );
     this.permitWarnCommitmentCount = getRequiredNumber(
       'healthCheck.permit.warnCommitmentCount'
@@ -743,7 +708,6 @@ const getConfig = (): ConfigType => {
     const binance = new BinanceConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
-      general.networkType,
       general.rosenConfigPath
     );
     const database = new DatabaseConfig();

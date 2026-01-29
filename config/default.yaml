@@ -1,8 +1,9 @@
 ---
 network: '' # which scanner network used in this watcher ergo/cardano/bitcoin/ethereum
 observation:
-  confirmation: 60 # number of required block confirmations to create the commitment after observing an event
-  validThreshold: 12960 # observations that have not been triggered won't be processed after this period (in blocks)
+  # confirmation: 60 # number of required block confirmations to create the commitment after observing an event
+  validThreshold: 28800 # observations that have not been triggered won't be processed after this period (in blocks)
+  storeRawData: true # if set extractor will store observations raw data
 bitcoin:
   type: '' # options: esplora, rpc
   initial:
@@ -17,9 +18,12 @@ bitcoin:
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
 bitcoinRunes:
+  type: 'unisat' # options: unisat, ordiscan
   unisat:
     url: 'https://open-api.unisat.io' # unisat api url
     apiKey: '' # unisat api key
+  ordiscan:
+    apiKey: '' # ordiscan api key
 doge:
   type: '' # options: esplora, rpc
   initial:
@@ -103,8 +107,8 @@ ergo:
       status: 120 # wid status check interval (in seconds)
     minimumFee: 300
 path:
-  addresses: config/rosen # addresses path
-  # tokens: config/rosen/tokens.json # default tokens path.
+  addresses: config/contracts.json # addresses path
+  tokens: config/tokens.json # default tokens path.
 logs:
   - type: 'file' # [file, console]
     path: './logs/' # path to log files (only for rotateFile type)
@@ -130,29 +134,9 @@ healthCheck:
   asset:
     ergWarnThreshold: 1000000000 # minimum recommended erg balance
     ergCriticalThreshold: 100000000 # minimum required erg balance
-  ergoScanner:
+  scanner:
     warnDifference: 5 # warning difference between existing and scanned blocks height
     criticalDifference: 20 # critical difference between existing and scanned blocks height
-  ergoNode:
-    maxHeightDifference: 2 # maximum difference between header height and full height
-    maxBlockTime: 30 # maximum time to see a new block in minutes
-    minPeerCount: 10 # minimum recommended peers
-    maxPeerHeightDifference: 2 # maximum difference between peers and our node
-  cardanoScanner:
-    warnDifference: 2 # warning difference between existing and scanned blocks height
-    criticalDifference: 600 # critical difference between existing and scanned blocks height
-  bitcoinScanner:
-    warnDifference: 2 # warning difference between existing and scanned blocks height
-    criticalDifference: 10 # critical difference between existing and scanned blocks height
-  dogeScanner:
-    warnDifference: 8 # warning difference between existing and scanned blocks height
-    criticalDifference: 32 # critical difference between existing and scanned blocks height
-  ethereumScanner:
-    warnDifference: 40 # warning difference between existing and scanned blocks height
-    criticalDifference: 160 # critical difference between existing and scanned blocks height
-  binanceScanner:
-    warnDifference: 160 # warning difference between existing and scanned blocks height
-    criticalDifference: 640 # critical difference between existing and scanned blocks height
   permit:
     warnCommitmentCount: 4 # warning remaining permits for creating commitment
     criticalCommitmentCount: 0 # critical remaining permits for creating commitment

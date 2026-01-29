@@ -17,6 +17,8 @@ bitcoin:
 bitcoinRunes:
   unisat:
     apiKey: 'UNISAT_API_KEY'
+  ordiscan:
+    apiKey: 'ORDISCAN_API_KEY'
 cardano:
   koios:
     authToken: 'KOIOS_AUTH_TOKEN'

@@ -338,7 +338,7 @@ class WatcherUtils {
       );
       if (
         event !== null &&
-        (commitment.height >= event.height || event.spendBlock !== undefined)
+        (commitment.height >= event.height || event.spendBlock !== null)
       ) {
         result.push(commitment);
       }
@@ -406,7 +406,7 @@ class WatcherUtils {
       commitment.eventId
     );
 
-    if (eventTrigger == null || eventTrigger.spendBlock !== undefined) {
+    if (eventTrigger == null || eventTrigger.spendBlock !== null) {
       return false;
     }
 

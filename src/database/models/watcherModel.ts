@@ -14,10 +14,12 @@ import {
   In,
   IsNull,
   LessThan,
+  LessThanOrEqual,
   MoreThan,
   Not,
   Repository,
 } from '@rosen-bridge/extended-typeorm';
+import { LastSavedBlock } from '@rosen-bridge/scanner-sync-check';
 import {
   DOING_STATUS,
   DONE_STATUS,
@@ -38,7 +40,6 @@ import { TokenEntity } from '../entities/tokenEntity';
 import { TxEntity, TxType } from '../entities/txEntity';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { TokensConfig } from '../../config/tokensConfig';
-import { LastSavedBlock } from '../../types';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -127,7 +128,7 @@ class WatcherDataBase {
     const minHeight = height - (maxConfirmation ? maxConfirmation : height);
     const observations = await this.observationRepository.find({
       where: {
-        height: And(LessThan(maxHeight), MoreThan(minHeight)),
+        height: And(LessThanOrEqual(maxHeight), MoreThan(minHeight)),
       },
       order: {
         height: 'ASC',
