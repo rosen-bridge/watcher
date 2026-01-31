@@ -1,0 +1,22 @@
+diff --git a/node_modules/@rosen-bridge/watcher-data-extractor/dist/migrations/sqlite/1762768664031-migration.js b/node_modules/@rosen-bridge/watcher-data-extractor/dist/migrations/sqlite/1762768664031-migration.js
+index a218319..b2981cd 100644
+--- a/node_modules/@rosen-bridge/watcher-data-extractor/dist/migrations/sqlite/1762768664031-migration.js
++++ b/node_modules/@rosen-bridge/watcher-data-extractor/dist/migrations/sqlite/1762768664031-migration.js
+@@ -65,7 +65,7 @@ export class Migration1762768664031 {
+                 )
+             SELECT "id",
+                 "eventId",
+-                "identifier",
++                "boxId",
+                 "block",
+                 "height",
+                 "extractor",
+@@ -169,7 +169,7 @@ export class Migration1762768664031 {
+                 )
+             SELECT "id",
+                 "eventId",
+-                "boxId",
++                "identifier",
+                 "block",
+                 "height",
+                 "extractor",
