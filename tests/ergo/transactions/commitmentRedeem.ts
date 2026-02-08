@@ -47,6 +47,7 @@ observation.toChain = 'ERGO';
 observation.bridgeFee = '10000';
 observation.networkFee = '10000';
 observation.amount = '10';
+observation.rawData = JSON.stringify({});
 observation.sourceChainTokenId = 'asset12y0ewmxggeglymjpmp9mjf5qzh4kgwj9chtkpv';
 observation.targetChainTokenId = 'cardanoTokenId';
 observation.sourceTxId =

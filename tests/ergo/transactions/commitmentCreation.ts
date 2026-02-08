@@ -66,6 +66,7 @@ observation.toAddress = 'ergoAddress';
 observation.height = 123;
 observation.fromAddress =
   'addr_test1vzg07d2qp3xje0w77f982zkhqey50gjxrsdqh89yx8r7nasu97hr0';
+observation.rawData = JSON.stringify({});
 
 const commitment = ErgoUtils.commitmentFromObservation(observation, WID);
 

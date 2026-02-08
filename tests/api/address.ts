@@ -5,7 +5,7 @@ import express, { Router } from 'express';
 import { default as addressRouter } from '../../src/api/address';
 import request from 'supertest';
 import { initWatcherDB } from '../../src/init';
-import JSONBigInt from 'json-bigint';
+import JSONBigInt from '@rosen-bridge/json-bigint';
 import {
   validBox0Token,
   validBox1Token,

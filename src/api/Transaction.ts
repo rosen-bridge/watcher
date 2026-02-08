@@ -313,6 +313,12 @@ export class Transaction {
       );
     });
     builder.set_token_burn_permit(burnTokensWasm);
+    if (getConfig().general.versionInputExtension) {
+      builder.set_context_extension(
+        txInputBoxes.get(0).box_id(),
+        ErgoUtils.createVersionContextExtension()
+      );
+    }
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,
       Transaction.userSecret,
@@ -737,6 +743,12 @@ export class Transaction {
       const txDataInputs = new wasm.DataInputs();
       txDataInputs.add(new wasm.DataInput(repoConfig.box_id()));
       builder.set_data_inputs(txDataInputs);
+    }
+    if (getConfig().general.versionInputExtension) {
+      builder.set_context_extension(
+        inBoxes.get(0).box_id(),
+        ErgoUtils.createVersionContextExtension()
+      );
     }
     const signedTx = await ErgoUtils.buildTxAndSign(
       builder,

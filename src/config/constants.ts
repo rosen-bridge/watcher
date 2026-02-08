@@ -35,3 +35,5 @@ export const ERGO_BLOCK_TIME = 120;
 export const ETHEREUM_BLOCK_TIME = 12;
 export const DOGE_BLOCK_TIME = 60;
 export const HANDSHAKE_BLOCK_TIME = 600;
+export const UNISAT_TYPE = 'unisat';
+export const ORDISCAN_TYPE = 'ordiscan';
