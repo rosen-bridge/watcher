@@ -1,66 +1,11 @@
-image: node:20.11.0
+image: $GITLAB_CI_IMAGE
 
 default:
   interruptible: true
 
-stages:
-  - installation
-  - ci
+include:
+  - component: $CI_SERVER_FQDN/${ROOT_COMPONENT}
 
-installation:
-  stage: installation
-  cache:
-    key: ${CI_COMMIT_REF_NAME}
-    policy: push
-    paths:
-      - node_modules
-  script:
-    - npm ci
-
-type_check:
-  stage: ci
-  cache:
-    key: ${CI_COMMIT_REF_NAME}
-    policy: pull
-    paths:
-      - node_modules
-  script:
-    - npm run type-check
-
-lint:
-  stage: ci
-  cache:
-    key: ${CI_COMMIT_REF_NAME}
-    policy: pull
-    paths:
-      - node_modules
-  script:
-    - npm run lint
-
-coverage:
-  stage: ci
-  cache:
-    key: ${CI_COMMIT_REF_NAME}
-    policy: pull
-    paths:
-      - node_modules
-  script:
-    - npm run coverage
-  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
-
-changeset:
-  stage: ci
-  cache:
-    key: ${CI_COMMIT_REF_NAME}
-    policy: pull
-    paths:
-      - node_modules
-  before_script:
-    - git fetch origin dev
-  script:
-    - npx changeset status --since=origin/dev
+    inputs:
+      enable_build: false
+      enable_ci_child: true
