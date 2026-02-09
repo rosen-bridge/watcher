@@ -463,11 +463,13 @@ export class ErgoUtils {
     const tokenDetail = tokenMap.search(chain, {
       tokenId,
     });
+    let ergoTokenId: string | undefined = undefined;
     let name = 'Unsupported token';
     let decimals = 0;
     let isNativeToken = false;
     if (tokenDetail.length) {
       const significantDecimal = tokenMap.getSignificantDecimals(tokenId);
+      ergoTokenId = tokenMap.getTokenSet(tokenId)?.ergo?.tokenId;
       name = tokenDetail[0][chain].name;
       decimals = significantDecimal || 0;
       isNativeToken = tokenDetail[0][chain].type === 'native';
@@ -475,6 +477,7 @@ export class ErgoUtils {
 
     return {
       tokenId: tokenId,
+      ergoTokenId,
       name: name,
       decimals: decimals,
       isNativeToken,
@@ -489,8 +492,10 @@ export class ErgoUtils {
   static tokenDetail = async (tokenId: string) => {
     const tokenInfo = (await watcherDatabase.getTokenEntity([tokenId]))[0];
     if (tokenInfo) {
+      const tokenMap = TokensConfig.getInstance().getTokenMap();
       return {
         tokenId: tokenId,
+        ergoTokenId: tokenMap.getTokenSet(tokenId)?.ergo?.tokenId,
         name: tokenInfo.tokenName,
         decimals: tokenInfo.decimals,
         isNativeToken: tokenId == ERGO_NATIVE_ASSET,
