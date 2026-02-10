@@ -3,6 +3,12 @@ image: $GITLAB_CI_IMAGE
 default:
   interruptible: true
 
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE =~ /push/'
+      when: always
+    - when: never
+
 include:
   - component: $CI_SERVER_FQDN/${ROOT_COMPONENT}
 
