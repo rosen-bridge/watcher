@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { getConfig } from '../config/config';
-import { JsonBI } from '../ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ErgoUtils } from '../ergo/utils';
 import { HealthCheckSingleton } from '../../src/utils/healthCheck';
 import { Transaction } from './Transaction';
@@ -81,7 +81,7 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       minBoxValue: BigInt(getConfig().general.minBoxValue),
     };
     res.set('Content-Type', 'application/json');
-    res.status(200).send(JsonBI.stringify(info));
+    res.status(200).send(JsonBigInt.stringify(info));
   } catch (e) {
     logger.warn(`An error occurred while fetching general info: ${e}`);
     res.status(500).send({ message: e.message });

@@ -3,7 +3,7 @@ import { watcherDatabase } from '../init';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
-import { JsonBI } from '../ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
@@ -42,7 +42,7 @@ eventsRouter.get('/', async (req, res) => {
     res.set('Content-Type', 'application/json');
     res
       .status(200)
-      .send(JsonBI.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));
+      .send(JsonBigInt.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));
   } catch (e) {
     logger.warn(`An error occurred while fetching events: ${e}`);
     res.status(500).send({ message: e.message });

@@ -3,7 +3,7 @@ import { watcherDatabase } from '../init';
 import { stringifyQueryParam } from '../utils/utils';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { ErgoUtils } from '../ergo/utils';
-import { JsonBI } from '../ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Transaction } from './Transaction';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 
@@ -57,7 +57,7 @@ revenueRouter.get('/', async (req, res) => {
     res
       .status(200)
       .contentType('application/json')
-      .send(JsonBI.stringify({ items: result, total: revenueRows.total }));
+      .send(JsonBigInt.stringify({ items: result, total: revenueRows.total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues: ${e}`);
     res.status(500).send({ message: e.message });

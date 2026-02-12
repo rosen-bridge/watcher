@@ -3,7 +3,7 @@ import { getConfig } from '../config/config';
 import { validationResult } from 'express-validator';
 import { generateSK } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
-import { JsonBI } from '../ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { TokensConfig } from '../config/tokensConfig';
@@ -97,7 +97,7 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     const total = tokens.length;
     tokens = tokens.slice(offset, offset + limit);
 
-    res.status(200).send(JsonBI.stringify({ items: tokens, total }));
+    res.status(200).send(JsonBigInt.stringify({ items: tokens, total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching assets: ${e}`);
     res.status(500).send({ message: e.message });
