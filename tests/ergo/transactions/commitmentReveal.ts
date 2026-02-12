@@ -1,7 +1,7 @@
 import { Boxes } from '../../../src/ergo/boxes';
 import { WatcherDataBase } from '../../../src/database/models/watcherModel';
 import { fillORM, loadDataBase } from '../../database/watcherDatabase';
-import { JsonBI } from '../../../src/ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ErgoUtils } from '../../../src/ergo/utils';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import { CommitmentReveal } from '../../../src/transactions/commitmentReveal';
@@ -32,10 +32,12 @@ import {
 import TransactionTest from '../../../src/api/TransactionTest';
 import { Transaction } from '../../../src/api/Transaction';
 
-const commitments = [wasm.ErgoBox.from_json(JsonBI.stringify(commitmentObj))];
-const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
-const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
-const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
+const commitments = [
+  wasm.ErgoBox.from_json(JsonBigInt.stringify(commitmentObj)),
+];
+const WIDBox = wasm.ErgoBox.from_json(JsonBigInt.stringify(WIDObj));
+const plainBox = [wasm.ErgoBox.from_json(JsonBigInt.stringify(plainObj))];
+const signedTx = wasm.Transaction.from_json(JsonBigInt.stringify(txObj));
 const repoBox1 = wasm.ErgoBox.from_json(JSON.stringify(repoBox1Obj));
 const repoConfigBox = wasm.ErgoBox.from_json(JSON.stringify(repoConfigObj));
 

@@ -19,7 +19,7 @@ import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { NotEnoughFund, NoWID } from '../errors/errors';
 import { getConfig } from '../config/config';
 import { AddressBalance } from './interfaces';
-import { JsonBI } from './network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { blake2b } from 'blakejs';
 import { ERGO_CHAIN_NAME } from '../config/constants';
@@ -321,7 +321,7 @@ export class Boxes {
         }
       );
       throw new NotEnoughFund(
-        `Not enough fund to create the transaction. Uncovered value: ${uncoveredValue}, Uncovered assets: ${JsonBI.stringify(
+        `Not enough fund to create the transaction. Uncovered value: ${uncoveredValue}, Uncovered assets: ${JsonBigInt.stringify(
           missingAssets
         )}`
       );
