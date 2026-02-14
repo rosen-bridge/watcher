@@ -16,9 +16,12 @@ export class ApiError extends Error {
     this.name = 'ApiError';
   }
 
-  toResponse() {
+  /**
+   * create response content
+   */
+  toResponse = () => {
     return {
       message: this.message,
     };
-  }
+  };
 }

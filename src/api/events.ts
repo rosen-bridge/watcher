@@ -1,12 +1,12 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { watcherDatabase } from '../init';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
-import { ApiError } from '../errors/apiErrors';
 import { HttpStatus } from '../constants';
+import { sendApiError } from 'src/errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const eventsRouter = express.Router();
@@ -14,7 +14,7 @@ const eventsRouter = express.Router();
 /**
  * Api for fetching events
  */
-eventsRouter.get('/', async (req, res) => {
+eventsRouter.get('/', async (req: Request, res: Response) => {
   try {
     const {
       fromAddress,
@@ -47,14 +47,14 @@ eventsRouter.get('/', async (req, res) => {
       .send(JsonBI.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));
   } catch (e) {
     logger.warn(`An error occurred while fetching events: ${e}`);
-    throw new ApiError(e.message);
+    sendApiError(res, e);
   }
 });
 
 /**
  * Api for fetching events status
  */
-eventsRouter.post('/status', async (req, res) => {
+eventsRouter.post('/status', async (req: Request, res: Response) => {
   try {
     const eventIds = req.body as Array<number>;
     if (eventIds.length > MAX_API_LIMIT) {
@@ -75,7 +75,7 @@ eventsRouter.post('/status', async (req, res) => {
     res.status(HttpStatus.OK).send(response);
   } catch (e) {
     logger.warn(`An error occurred while fetching events status: ${e}`);
-    throw new ApiError(e.message);
+    sendApiError(res, e);
   }
 });
 

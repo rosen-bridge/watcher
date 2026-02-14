@@ -8,15 +8,16 @@ import {
 } from '../utils/utils';
 import { ApiError } from '../errors/apiErrors';
 import { HttpStatus } from '../constants';
+import { sendApiError } from 'src/errors/apiErrors/utils';
 
 const authenticateKey = (req: Request, res: Response, next: NextFunction) => {
   const api_key = req.header('Api-Key');
   if (api_key && isValidApiKey(api_key)) {
     next();
   } else {
-    throw new ApiError(
-      "Api-Key doesn't exist or it is wrong",
-      HttpStatus.FORBIDDEN
+    sendApiError(
+      res,
+      new ApiError("Api-Key doesn't exist or it is wrong", HttpStatus.FORBIDDEN)
     );
   }
 };

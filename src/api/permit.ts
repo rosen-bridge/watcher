@@ -8,6 +8,7 @@ import { ERGO_CHAIN_NAME } from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
 import { ApiError, ApiValidationError } from '../errors/apiErrors';
 import { HttpStatus } from '../constants';
+import { sendApiError } from 'src/errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -45,7 +46,7 @@ permitRouter.post(
     } catch (e) {
       if (!(e instanceof ApiError)) {
         logger.warn(`An error occurred while locking RSN: ${e}`);
-        throw new ApiError(e.message);
+        sendApiError(res, e);
       }
     }
   }
@@ -83,7 +84,7 @@ permitRouter.post(
     } catch (e) {
       if (!(e instanceof ApiError)) {
         logger.warn(`An error occurred while returning permits: ${e}`);
-        throw new ApiError(e.message);
+        sendApiError(res, e);
       }
     }
   }

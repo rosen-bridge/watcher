@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { watcherDatabase } from '../init';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
@@ -6,8 +6,8 @@ import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { TxStatus } from '../database/entities/observationStatusEntity';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
-import { ApiError } from '../errors/apiErrors';
 import { HttpStatus } from '../constants';
+import { sendApiError } from 'src/errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const observationRouter = express.Router();
@@ -15,7 +15,7 @@ const observationRouter = express.Router();
 /**
  * Api for fetching observations
  */
-observationRouter.get('/', async (req, res) => {
+observationRouter.get('/', async (req: Request, res: Response) => {
   try {
     const {
       fromAddress,
@@ -63,7 +63,7 @@ observationRouter.get('/', async (req, res) => {
       .send(JsonBI.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));
   } catch (e) {
     logger.warn(`An error occurred while fetching observations: ${e}`);
-    throw new ApiError(e.message);
+    sendApiError(res, e);
   }
 });
 

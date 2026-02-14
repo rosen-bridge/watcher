@@ -249,12 +249,6 @@ class Config {
     this.rosenTokensPath = getRequiredString('path.tokens');
     this.apiPort = getOptionalNumber('api.port', 3000);
     this.apiKeyHash = getRequiredString('api.apiKeyHash');
-    const apiKeyHashValidPattern = /^(([^$]*)|([^$]+\$[^$]+\$[^$]+))$/;
-    if (!apiKeyHashValidPattern.test(this.apiKeyHash))
-      throw new Error(
-        `Invalid apiKeyHash provided. Make sure it is a string and does not ` +
-          `include the "$" character or match by the "*$*$*" pattern.`
-      );
 
     this.apiAllowedOrigins = config.get<string[]>('api.allowedOrigins');
     if (

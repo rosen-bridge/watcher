@@ -1,13 +1,13 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { AddressBalance, TokenData } from '../ergo/interfaces';
 import { Transaction } from './Transaction';
 import { ERGO_NATIVE_ASSET } from '../config/constants';
 import { BoxValue } from 'ergo-lib-wasm-nodejs';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { authenticateKey } from './authentication';
-import { ApiError } from '../errors/apiErrors';
 import { CastReqInterface, TokenInterface } from '../types/apis';
 import { HttpStatus } from '../constants';
+import { sendApiError } from 'src/errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -49,22 +49,26 @@ const castReqBodyToWithdrawBody = (reqBody: CastReqInterface): WithdrawBody => {
 /**
  * Api for withdrawing from the watcher wallet
  */
-withdrawRouter.post('/', authenticateKey, async (req, res) => {
-  try {
-    const withdrawBody = castReqBodyToWithdrawBody(req.body);
-    const txInstance = Transaction.getInstance();
-    const txId = await txInstance.withdrawFromWallet(
-      withdrawBody.amount,
-      withdrawBody.address
-    );
-    res
-      .status(HttpStatus.OK)
-      .contentType('application/json')
-      .send(JSON.stringify({ txId, status: 'OK' }));
-  } catch (e) {
-    logger.warn(`An error occurred while withdrawing from wallet: ${e}`);
-    throw new ApiError(e.message);
+withdrawRouter.post(
+  '/',
+  authenticateKey,
+  async (req: Request, res: Response) => {
+    try {
+      const withdrawBody = castReqBodyToWithdrawBody(req.body);
+      const txInstance = Transaction.getInstance();
+      const txId = await txInstance.withdrawFromWallet(
+        withdrawBody.amount,
+        withdrawBody.address
+      );
+      res
+        .status(HttpStatus.OK)
+        .contentType('application/json')
+        .send(JSON.stringify({ txId, status: 'OK' }));
+    } catch (e) {
+      logger.warn(`An error occurred while withdrawing from wallet: ${e}`);
+      sendApiError(res, e);
+    }
   }
-});
+);
 
 export default withdrawRouter;

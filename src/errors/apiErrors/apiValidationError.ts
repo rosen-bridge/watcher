@@ -15,7 +15,10 @@ export class ApiValidationError extends ApiError {
     this.name = 'ApiValidationError';
   }
 
-  toResponse() {
+  /**
+   * create response content
+   */
+  toResponse = () => {
     const errors: string[] = [this.message];
     for (const error of this.errors.array()) {
       for (const err of (error.nestedErrors ?? [error]) as ValidationError[]) {
@@ -26,5 +29,5 @@ export class ApiValidationError extends ApiError {
     return {
       message: errors.join(', '),
     };
-  }
+  };
 }

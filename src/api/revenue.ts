@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { watcherDatabase } from '../init';
 import { stringifyQueryParam } from '../utils/utils';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
@@ -6,8 +6,8 @@ import { ErgoUtils } from '../ergo/utils';
 import { JsonBI } from '../ergo/network/parser';
 import { Transaction } from './Transaction';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
-import { ApiError } from '../errors/apiErrors';
 import { HttpStatus } from '../constants';
+import { sendApiError } from 'src/errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const revenueRouter = express.Router();
@@ -15,7 +15,7 @@ const revenueRouter = express.Router();
 /**
  * Api for fetching revenues
  */
-revenueRouter.get('/', async (req, res) => {
+revenueRouter.get('/', async (req: Request, res: Response) => {
   try {
     const {
       fromChain,
@@ -62,11 +62,11 @@ revenueRouter.get('/', async (req, res) => {
       .send(JsonBI.stringify({ items: result, total: revenueRows.total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues: ${e}`);
-    throw new ApiError(e.message);
+    sendApiError(res, e);
   }
 });
 
-revenueRouter.get('/chart', async (req, res) => {
+revenueRouter.get('/chart', async (req: Request, res: Response) => {
   try {
     const { period, offset, limit } = req.query;
     const periodString = stringifyQueryParam(period);
@@ -101,7 +101,7 @@ revenueRouter.get('/chart', async (req, res) => {
     res.status(HttpStatus.OK).send(result);
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues chart data: ${e}`);
-    throw new ApiError(e.message);
+    sendApiError(res, e);
   }
 });
 

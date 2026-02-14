@@ -1,10 +1,9 @@
-import express from 'express';
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { stringifyQueryParam } from '../utils/utils';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { HttpStatus } from '../constants';
-import { ApiError } from '../errors/apiErrors';
+import { sendApiError } from 'src/errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const healthRouter = express.Router();
@@ -19,7 +18,7 @@ healthRouter.get('/status', async (req: Request, res: Response) => {
       .json(await HealthCheckSingleton.getInstance().getStatus());
   } catch (e) {
     logger.warn(`An error occurred while checking health status: ${e}`);
-    throw new ApiError(e.message);
+    sendApiError(res, e);
   }
 });
 
@@ -41,7 +40,7 @@ healthRouter.get(
       logger.warn(
         `An error occurred while checking parameter [${req.query}] health status: ${e}`
       );
-      throw new ApiError(e.message);
+      sendApiError(res, e);
     }
   }
 );
@@ -66,7 +65,7 @@ healthRouter.put(
       logger.warn(
         `An error occurred while updating parameter [${req.query}] health status: ${e}`
       );
-      throw new ApiError(e.message);
+      sendApiError(res, e);
     }
   }
 );

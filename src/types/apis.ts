@@ -1,6 +1,6 @@
 export interface TokenInterface {
   tokenId: string;
-  amount: string | bigint;
+  amount: string;
 }
 
 export interface CastReqInterface {

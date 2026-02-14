@@ -10,6 +10,7 @@ import { TokensConfig } from '../config/tokensConfig';
 import { validateAddress } from '@rosen-bridge/address-codec';
 import { ApiError, ApiValidationError } from '../errors/apiErrors';
 import { HttpStatus } from '../constants';
+import { sendApiError } from 'src/errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -28,10 +29,8 @@ addressRouter.get('/generate', async (req: Request, res: Response) => {
       .status(HttpStatus.OK)
       .json(generateSK(getConfig().general.networkPrefix));
   } catch (e) {
-    if (!(e instanceof ApiError)) {
-      logger.warn(`An error occurred while generating secret key: ${e}`);
-      throw new ApiError(e.message);
-    }
+    logger.warn(`An error occurred while generating secret key: ${e}`);
+    sendApiError(res, e);
   }
 });
 
@@ -40,10 +39,10 @@ addressRouter.get('/generate', async (req: Request, res: Response) => {
  */
 addressRouter.get('/assets', async (req: Request, res: Response) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    throw new ApiValidationError(errors);
-  }
   try {
+    if (!errors.isEmpty()) {
+      throw new ApiValidationError(errors);
+    }
     const balance = await ErgoUtils.getWatcherBalance();
     let tokens = balance.tokens;
     if (!tokens.some((item) => item.tokenId === getConfig().rosen.RSN)) {
@@ -106,7 +105,7 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     res.status(HttpStatus.OK).send(JsonBI.stringify({ items: tokens, total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching assets: ${e}`);
-    throw new ApiError(e.message);
+    sendApiError(res, e);
   }
 });
 
@@ -123,10 +122,8 @@ addressRouter.get('/validate/:address', async (req: Request, res: Response) => {
     validateAddress(ERGO_CHAIN_NAME, address);
     res.status(HttpStatus.OK).json({ valid: true });
   } catch (e) {
-    if (!(e instanceof ApiError)) {
-      logger.warn(`An error occurred while validating address: ${e}`);
-      throw new ApiError('Invalid Ergo address', HttpStatus.BAD_REQUEST);
-    }
+    logger.warn(`An error occurred while validating address: ${e}`);
+    sendApiError(res, e);
   }
 });
 
