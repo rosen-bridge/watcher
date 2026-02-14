@@ -663,9 +663,12 @@ class WatcherDataBase {
    * @param wid
    */
   getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
-    const permits = await this.permitRepository.findBy({
-      WID: wid,
-      spendBlock: IsNull(),
+    const permits = await this.permitRepository.find({
+      where: {
+        WID: wid,
+        spendBlock: IsNull(),
+      },
+      order: { height: 'ASC' },
     });
     logger.debug(
       `Found ${permits.length} unspent permit boxes with boxId ${permits.map(
@@ -679,8 +682,9 @@ class WatcherDataBase {
    * Returns all unspent plain boxes
    */
   getUnspentAddressBoxes = async (): Promise<Array<BoxEntity>> => {
-    const boxes = await this.boxRepository.findBy({
-      spendBlock: IsNull(),
+    const boxes = await this.boxRepository.find({
+      where: { spendBlock: IsNull() },
+      order: { height: 'ASC' },
     });
     logger.debug(
       `Found ${boxes.length} unspent boxes with boxId ${boxes.map(
@@ -697,9 +701,12 @@ class WatcherDataBase {
   getUnspentBoxesByAddress = async (
     address: string
   ): Promise<Array<BoxEntity>> => {
-    const boxes = await this.boxRepository.findBy({
-      spendBlock: IsNull(),
-      address: address,
+    const boxes = await this.boxRepository.find({
+      where: {
+        spendBlock: IsNull(),
+        address: address,
+      },
+      order: { height: 'ASC' },
     });
     logger.debug(
       `Found ${boxes.length} unspent boxes with boxId ${boxes.map(
@@ -827,9 +834,12 @@ class WatcherDataBase {
     boxIds: string[],
     exclude = false
   ): Promise<Array<BoxEntity>> => {
-    const boxes = await this.boxRepository.findBy({
-      spendBlock: IsNull(),
-      boxId: exclude ? Not(In(boxIds)) : In(boxIds),
+    const boxes = await this.boxRepository.find({
+      where: {
+        spendBlock: IsNull(),
+        boxId: exclude ? Not(In(boxIds)) : In(boxIds),
+      },
+      order: { height: 'ASC' },
     });
     logger.debug(
       `Found ${boxes.length} unspent boxes with boxId ${boxes.map(
