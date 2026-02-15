@@ -176,7 +176,7 @@ class WatcherUtils {
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
       height,
-      this.observationValidThreshold,
+      undefined, // We don't need to use the observationValidThreshold here, we have to process all confirmed observations
       true
     );
     logger.debug(

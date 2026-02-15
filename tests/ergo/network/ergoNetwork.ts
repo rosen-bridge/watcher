@@ -8,7 +8,7 @@ import {
   unavailableTxId,
   unconfirmedTxId,
 } from '../objects/axios';
-import { JsonBI } from '../../../src/ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import chai, { expect } from 'chai';
@@ -57,7 +57,7 @@ describe('Ergo Network(API)', () => {
         1
       );
       expect(res).to.eql(
-        JsonBI.parse(mockedResponseBody.firstWatcherLastUnspentBox)
+        JsonBigInt.parse(mockedResponseBody.firstWatcherLastUnspentBox)
       );
     });
 
@@ -70,7 +70,7 @@ describe('Ergo Network(API)', () => {
         1,
         1
       );
-      expect(res).to.eql(JsonBI.parse(mockedResponseBody.emptyAddressBox));
+      expect(res).to.eql(JsonBigInt.parse(mockedResponseBody.emptyAddressBox));
     });
   });
 
@@ -356,7 +356,9 @@ describe('Ergo Network(API)', () => {
      * - it should return false
      */
     it('should return false since output box height is smaller than the input boxes', async () => {
-      const tx = wasm.Transaction.from_json(JsonBI.stringify(wrongOutHeightTx));
+      const tx = wasm.Transaction.from_json(
+        JsonBigInt.stringify(wrongOutHeightTx)
+      );
       const res = await ErgoNetwork.checkOutputHeight(
         tx.inputs(),
         tx.outputs()
@@ -376,7 +378,7 @@ describe('Ergo Network(API)', () => {
      * - it should return true
      */
     it('should return true since output boxes height is greater than the input boxes', async () => {
-      const tx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
+      const tx = wasm.Transaction.from_json(JsonBigInt.stringify(txObj));
       const res = await ErgoNetwork.checkOutputHeight(
         tx.inputs(),
         tx.outputs()

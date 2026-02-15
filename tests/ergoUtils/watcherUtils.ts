@@ -3,7 +3,6 @@ import { TxStatus } from '../../src/database/entities/observationStatusEntity';
 import {
   commitmentEntity,
   eventTriggerEntity,
-  newEventTriggerEntity,
   observationEntity1,
   observationEntity3,
   observationStatusCommitted,
@@ -17,7 +16,7 @@ import {
 } from '../database/mockedData';
 import { Boxes } from '../../src/ergo/boxes';
 import { secret1, userAddress } from '../ergo/transactions/permit';
-import { JsonBI } from '../../src/ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import txObj from '../ergo/transactions/dataset/commitmentTx.json' assert { type: 'json' };
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
 import { TxType } from '../../src/database/entities/txEntity';
@@ -34,7 +33,7 @@ import { ChainMinimumFee } from '@rosen-bridge/minimum-fee';
 
 chai.use(spies);
 
-const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
+const signedTx = wasm.Transaction.from_json(JsonBigInt.stringify(txObj));
 
 describe('Testing the WatcherUtils & TransactionUtils', () => {
   let dataBase: WatcherDataBase,
