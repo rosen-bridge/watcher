@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { watcherDatabase } from '../init';
 import { stringifyQueryParam } from '../utils/utils';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
@@ -6,6 +6,8 @@ import { ErgoUtils } from '../ergo/utils';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Transaction } from './Transaction';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { HttpStatus } from '../constants';
+import { sendApiError } from '../errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const revenueRouter = express.Router();
@@ -13,7 +15,7 @@ const revenueRouter = express.Router();
 /**
  * Api for fetching revenues
  */
-revenueRouter.get('/', async (req, res) => {
+revenueRouter.get('/', async (req: Request, res: Response) => {
   try {
     const {
       fromChain,
@@ -55,16 +57,16 @@ revenueRouter.get('/', async (req, res) => {
     );
 
     res
-      .status(200)
+      .status(HttpStatus.OK)
       .contentType('application/json')
       .send(JsonBigInt.stringify({ items: result, total: revenueRows.total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues: ${e}`);
-    res.status(500).send({ message: e.message });
+    sendApiError(res, e);
   }
 });
 
-revenueRouter.get('/chart', async (req, res) => {
+revenueRouter.get('/chart', async (req: Request, res: Response) => {
   try {
     const { period, offset, limit } = req.query;
     const periodString = stringifyQueryParam(period);
@@ -96,10 +98,10 @@ revenueRouter.get('/chart', async (req, res) => {
     }
     const result = await ErgoUtils.transformChartData(queryResult);
     res.set('Content-Type', 'application/json');
-    res.status(200).send(result);
+    res.status(HttpStatus.OK).send(result);
   } catch (e) {
     logger.warn(`An error occurred while fetching revenues chart data: ${e}`);
-    res.status(500).send({ message: e.message });
+    sendApiError(res, e);
   }
 });
 

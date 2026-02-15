@@ -23,7 +23,7 @@ import {
 import { HealthStatusLevel } from '@rosen-bridge/health-check';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 import { TokensConfig } from '../config/tokensConfig';
-import { CreateScanner } from '../utils/scanner';
+import { HttpStatus } from '../constants';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -343,7 +343,7 @@ export class Transaction {
     if (scannerSyncStatus === HealthStatusLevel.BROKEN) {
       return {
         response: `Ergo scanner is not synced, please check your connection and wait more`,
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
       };
     }
 
@@ -352,12 +352,12 @@ export class Transaction {
     if (activePermitTxs.length !== 0) {
       return {
         response: `permit transaction [${activePermitTxs[0].txId}] is in queue`,
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
       };
     }
 
     if (!Transaction.watcherPermitState) {
-      return { response: 'No permit found', status: 400 };
+      return { response: 'No permit found', status: HttpStatus.BAD_REQUEST };
     }
     const WID = Transaction.watcherWID!;
 
@@ -388,7 +388,7 @@ export class Transaction {
         );
         return {
           response: `WID box is not in valid format (WID token is not the first token), please wait for the correction transaction`,
-          status: 400,
+          status: HttpStatus.BAD_REQUEST,
         };
       }
     } catch (e) {
@@ -398,7 +398,7 @@ export class Transaction {
         );
         return {
           response: `Could not find ${WID_UNLOCK_COUNT} WID token in watcher wallet`,
-          status: 400,
+          status: HttpStatus.BAD_REQUEST,
         };
       } else {
         throw e;
@@ -412,19 +412,19 @@ export class Transaction {
         : '';
       return {
         response: tx.id().to_str(),
-        status: 200,
+        status: HttpStatus.OK,
       };
     } catch (e) {
       logger.warn(`Unlock operation exited incomplete by error: ${e.message}`);
       if (e instanceof NotEnoughFund) {
         return {
           response: e.message,
-          status: 400,
+          status: HttpStatus.BAD_REQUEST,
         };
       } else {
         return {
           response: e.message,
-          status: 500,
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
         };
       }
     }
@@ -548,7 +548,7 @@ export class Transaction {
     if (scannerSyncStatus === HealthStatusLevel.BROKEN) {
       return {
         response: `Ergo scanner is not synced, please check your connection and wait more`,
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
       };
     }
 
@@ -557,7 +557,7 @@ export class Transaction {
     if (activePermitTxs.length !== 0) {
       return {
         response: `permit transaction [${activePermitTxs[0].txId}] is in queue`,
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
       };
     }
 
@@ -570,7 +570,7 @@ export class Transaction {
     if (!R4 || !R5) {
       return {
         response: 'one of registers (4, 5) of repo box is not set',
-        status: 500,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
       };
     }
     const tokenMap = TokensConfig.getInstance().getTokenMap();
@@ -605,7 +605,7 @@ export class Transaction {
     if (!userBoxes.covered) {
       return {
         response: `Not enough ERG or RSN. Required [${RequiredErg}] ERG and [${RequiredRSN}] RSN`,
-        status: 400,
+        status: HttpStatus.BAD_REQUEST,
       };
     }
     let collateralBox: wasm.ErgoBox;
@@ -628,7 +628,7 @@ export class Transaction {
       if (e instanceof NoWID)
         return {
           response: 'Could not find 2 WID tokens in watcher wallet',
-          status: 400,
+          status: HttpStatus.BAD_REQUEST,
         };
       else throw e;
     }
@@ -758,7 +758,7 @@ export class Transaction {
     );
     await Transaction.txUtils.submitTransaction(signedTx, TxType.PERMIT);
     Transaction.watcherUnconfirmedWID = WID ? WID : repoBox.box_id().to_str();
-    return { response: signedTx.id().to_str(), status: 200 };
+    return { response: signedTx.id().to_str(), status: HttpStatus.OK };
   };
 
   /**

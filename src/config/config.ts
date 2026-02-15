@@ -4,7 +4,6 @@ import { SecretError } from '../errors/errors';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
 import { cloneDeep } from 'lodash-es';
-import path from 'path';
 import { NetworkType } from '../types';
 import { generateMnemonic } from 'bip39';
 import { convertMnemonicToSecretKey } from '../utils/utils';
@@ -250,6 +249,7 @@ class Config {
     this.rosenTokensPath = getRequiredString('path.tokens');
     this.apiPort = getOptionalNumber('api.port', 3000);
     this.apiKeyHash = getRequiredString('api.apiKeyHash');
+
     this.apiAllowedOrigins = config.get<string[]>('api.allowedOrigins');
     if (
       !Array.isArray(this.apiAllowedOrigins) ||

@@ -8,6 +8,8 @@ import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import packageJson from '../../package.json' assert { type: 'json' };
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
+import { HttpStatus } from '../constants/http';
+import { sendApiError } from '../errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -81,10 +83,10 @@ generalRouter.get('/', async (req: Request, res: Response) => {
       minBoxValue: BigInt(getConfig().general.minBoxValue),
     };
     res.set('Content-Type', 'application/json');
-    res.status(200).send(JsonBigInt.stringify(info));
+    res.status(HttpStatus.OK).send(JsonBigInt.stringify(info));
   } catch (e) {
     logger.warn(`An error occurred while fetching general info: ${e}`);
-    res.status(500).send({ message: e.message });
+    sendApiError(res, e);
   }
 });
 

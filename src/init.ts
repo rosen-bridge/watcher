@@ -92,8 +92,8 @@ const init = async () => {
     router.use('/health', healthRouter);
 
     app.use(router);
-    const port = getConfig().general.apiPort;
 
+    const port = getConfig().general.apiPort;
     app.listen(port, () => logger.info(`App listening on port ${port}`));
   };
 
