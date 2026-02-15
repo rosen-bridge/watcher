@@ -7,7 +7,7 @@ import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Transaction } from './Transaction';
 import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { HttpStatus } from '../constants';
-import { sendApiError } from 'src/errors/apiErrors/utils';
+import { sendApiError } from '../errors/apiErrors/utils';
 
 const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
 const revenueRouter = express.Router();

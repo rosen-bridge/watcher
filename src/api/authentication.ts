@@ -8,7 +8,7 @@ import {
 } from '../utils/utils';
 import { ApiError } from '../errors/apiErrors';
 import { HttpStatus } from '../constants';
-import { sendApiError } from 'src/errors/apiErrors/utils';
+import { sendApiError } from '../errors/apiErrors/utils';
 
 const authenticateKey = (req: Request, res: Response, next: NextFunction) => {
   const api_key = req.header('Api-Key');
