@@ -7,7 +7,7 @@ import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { hexStrToUint8Array } from '../../src/utils/utils';
 import { tokens } from '../ergo/transactions/permit';
 import { initMockedAxios } from '../ergo/objects/axios';
-import { JsonBI } from '../../src/ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { PermitEntity } from '@rosen-bridge/watcher-data-extractor';
 import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { Buffer } from 'buffer';
@@ -30,11 +30,11 @@ import { beforeEach } from 'mocha';
 import { getConfig } from '../../src/config/config';
 
 const config = getConfig().general;
-const permitJson = JsonBI.stringify(permitObj);
-const WIDJson = JsonBI.stringify(WIDObj);
-const plainJson = JsonBI.stringify(plainObj[0]);
-const secondJson = JsonBI.stringify(plainObj[1]);
-const thirdJson = JsonBI.stringify(boxesObj[0]);
+const permitJson = JsonBigInt.stringify(permitObj);
+const WIDJson = JsonBigInt.stringify(WIDObj);
+const plainJson = JsonBigInt.stringify(plainObj[0]);
+const secondJson = JsonBigInt.stringify(plainObj[1]);
+const thirdJson = JsonBigInt.stringify(boxesObj[0]);
 
 chai.use(spies);
 chai.use(chaiPromise);

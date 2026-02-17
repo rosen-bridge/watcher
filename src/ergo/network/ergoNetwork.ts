@@ -10,7 +10,7 @@ import {
   TxInput,
   TxOutput,
 } from './types';
-import { JsonBI } from './parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ergoTreeToBase58Address } from '../../utils/utils';
 import { ConnectionError } from '../../errors/errors';
 import { getConfig } from '../../config/config';
@@ -55,7 +55,7 @@ export class ErgoNetwork {
     return explorerApi
       .get<ExplorerBoxes>(`/api/v1/boxes/unspent/byErgoTree/${tree}`, {
         params: { offset: offset, limit: limit },
-        transformResponse: (data) => JsonBI.parse(data),
+        transformResponse: (data) => JsonBigInt.parse(data),
       })
       .then((res) => res.data);
   };
@@ -128,7 +128,7 @@ export class ErgoNetwork {
     while (offset < total && remaining()) {
       const boxes = await this.getBoxesForAddress(tree, offset, MAX_API_LIMIT);
       const ergoBoxes = wasm.ErgoBoxes.from_boxes_json(
-        boxes.items.map((box) => JsonBI.stringify(box).toString())
+        boxes.items.map((box) => JsonBigInt.stringify(box).toString())
       );
       logger.debug(
         `total boxes: ${total}, offset: ${offset}, number of current boxes: ${boxes.items.length}`
@@ -248,7 +248,7 @@ export class ErgoNetwork {
           inputs.forEach((input) => {
             const box =
               outputs.length > 0
-                ? wasm.ErgoBox.from_json(JsonBI.stringify(outputs[0]))
+                ? wasm.ErgoBox.from_json(JsonBigInt.stringify(outputs[0]))
                 : undefined;
             memPoolBoxesMap.set(input.boxId, box);
           });

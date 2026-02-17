@@ -1,4 +1,3 @@
-src/config/*.json
 config/local*.yaml
 config/contracts*.json
 config/tokens*.json

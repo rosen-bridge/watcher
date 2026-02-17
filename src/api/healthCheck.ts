@@ -1,8 +1,9 @@
-import express from 'express';
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { stringifyQueryParam } from '../utils/utils';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
+import { HttpStatus } from '../constants';
+import { sendApiError } from '../errors/apiErrors/utils';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 const healthRouter = express.Router();
@@ -12,10 +13,12 @@ const healthRouter = express.Router();
  */
 healthRouter.get('/status', async (req: Request, res: Response) => {
   try {
-    res.status(200).json(await HealthCheckSingleton.getInstance().getStatus());
+    res
+      .status(HttpStatus.OK)
+      .json(await HealthCheckSingleton.getInstance().getStatus());
   } catch (e) {
     logger.warn(`An error occurred while checking health status: ${e}`);
-    res.status(500).send({ message: e.message });
+    sendApiError(res, e);
   }
 });
 
@@ -27,7 +30,7 @@ healthRouter.get(
   async (req: Request, res: Response) => {
     try {
       res
-        .status(200)
+        .status(HttpStatus.OK)
         .json(
           await HealthCheckSingleton.getInstance().getParamStatus(
             req.params.paramName
@@ -37,7 +40,7 @@ healthRouter.get(
       logger.warn(
         `An error occurred while checking parameter [${req.query}] health status: ${e}`
       );
-      res.status(500).send({ message: e.message });
+      sendApiError(res, e);
     }
   }
 );
@@ -52,7 +55,7 @@ healthRouter.put(
       const healthCheck = HealthCheckSingleton.getInstance();
       await healthCheck.updateParam(stringifyQueryParam(req.params.paramName));
       res
-        .status(200)
+        .status(HttpStatus.OK)
         .json(
           await healthCheck.getParamStatus(
             stringifyQueryParam(req.params.paramName)
@@ -62,7 +65,7 @@ healthRouter.put(
       logger.warn(
         `An error occurred while updating parameter [${req.query}] health status: ${e}`
       );
-      res.status(500).send({ message: e.message });
+      sendApiError(res, e);
     }
   }
 );

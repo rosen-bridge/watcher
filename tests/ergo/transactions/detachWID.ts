@@ -10,14 +10,14 @@ import { ErgoUtils } from '../../../src/ergo/utils';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
 import sinon from 'sinon';
 import { expect } from 'chai';
-import { JsonBI } from '../../../src/ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import txObj from './dataset/commitmentTx.json' assert { type: 'json' };
 import { TxType } from '../../../src/database/entities/txEntity';
 import { getConfig } from '../../../src/config/config';
 
 const WID = 'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
-const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
+const signedTx = wasm.Transaction.from_json(JsonBigInt.stringify(txObj));
 
 describe('DetachWID', () => {
   let watcherDb: WatcherDataBase, txUtils: TransactionUtils, boxes: Boxes;

@@ -2,7 +2,7 @@ import { Boxes } from '../../../src/ergo/boxes';
 import { Transaction } from '../../../src/api/Transaction';
 import { secret1 } from './permit';
 import { CommitmentCreation } from '../../../src/transactions/commitmentCreation';
-import { JsonBI } from '../../../src/ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { ErgoUtils } from '../../../src/ergo/utils';
 import { ErgoNetwork } from '../../../src/ergo/network/ergoNetwork';
@@ -32,13 +32,13 @@ import repoConfigObj from './dataset/repConfigBox.json' assert { type: 'json' };
 
 chai.use(spies);
 
-const permits = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj))];
-const permits2 = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj2))];
-const permits3 = [wasm.ErgoBox.from_json(JsonBI.stringify(permitObj3))];
-const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
-const WIDBoxWithoutErg = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2));
-const plainBox = [wasm.ErgoBox.from_json(JsonBI.stringify(plainObj))];
-const signedTx = wasm.Transaction.from_json(JsonBI.stringify(txObj));
+const permits = [wasm.ErgoBox.from_json(JsonBigInt.stringify(permitObj))];
+const permits2 = [wasm.ErgoBox.from_json(JsonBigInt.stringify(permitObj2))];
+const permits3 = [wasm.ErgoBox.from_json(JsonBigInt.stringify(permitObj3))];
+const WIDBox = wasm.ErgoBox.from_json(JsonBigInt.stringify(WIDObj));
+const WIDBoxWithoutErg = wasm.ErgoBox.from_json(JsonBigInt.stringify(WIDObj2));
+const plainBox = [wasm.ErgoBox.from_json(JsonBigInt.stringify(plainObj))];
+const signedTx = wasm.Transaction.from_json(JsonBigInt.stringify(txObj));
 const repoBox1 = wasm.ErgoBox.from_json(JSON.stringify(repoBox1Obj));
 const repoConfig = wasm.ErgoBox.from_json(JSON.stringify(repoConfigObj));
 

@@ -1,10 +1,13 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { AddressBalance, TokenData } from '../ergo/interfaces';
 import { Transaction } from './Transaction';
 import { ERGO_NATIVE_ASSET } from '../config/constants';
 import { BoxValue } from 'ergo-lib-wasm-nodejs';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { authenticateKey } from './authentication';
+import { CastReqInterface, TokenInterface } from '../types/apis';
+import { HttpStatus } from '../constants';
+import { sendApiError } from '../errors/apiErrors/utils';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -20,10 +23,10 @@ interface WithdrawBody {
  * @param reqBody
  * @returns WithdrawBody object with BigInts
  */
-const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
+const castReqBodyToWithdrawBody = (reqBody: CastReqInterface): WithdrawBody => {
   let nanoErgs = 0n;
   const tokens: Array<Omit<TokenData, 'name'>> = [];
-  reqBody.tokens.forEach((token: any) => {
+  reqBody.tokens.forEach((token: TokenInterface) => {
     if (token.tokenId === ERGO_NATIVE_ASSET) {
       nanoErgs = BigInt(token.amount);
     } else {
@@ -46,22 +49,26 @@ const castReqBodyToWithdrawBody = (reqBody: any): WithdrawBody => {
 /**
  * Api for withdrawing from the watcher wallet
  */
-withdrawRouter.post('/', authenticateKey, async (req, res) => {
-  try {
-    const withdrawBody = castReqBodyToWithdrawBody(req.body);
-    const txInstance = Transaction.getInstance();
-    const txId = await txInstance.withdrawFromWallet(
-      withdrawBody.amount,
-      withdrawBody.address
-    );
-    res
-      .status(200)
-      .contentType('application/json')
-      .send(JSON.stringify({ txId, status: 'OK' }));
-  } catch (e) {
-    logger.warn(`An error occurred while withdrawing from wallet: ${e}`);
-    res.status(500).send({ message: e.message });
+withdrawRouter.post(
+  '/',
+  authenticateKey,
+  async (req: Request, res: Response) => {
+    try {
+      const withdrawBody = castReqBodyToWithdrawBody(req.body);
+      const txInstance = Transaction.getInstance();
+      const txId = await txInstance.withdrawFromWallet(
+        withdrawBody.amount,
+        withdrawBody.address
+      );
+      res
+        .status(HttpStatus.OK)
+        .contentType('application/json')
+        .send(JSON.stringify({ txId, status: 'OK' }));
+    } catch (e) {
+      logger.warn(`An error occurred while withdrawing from wallet: ${e}`);
+      sendApiError(res, e);
+    }
   }
-});
+);
 
 export default withdrawRouter;

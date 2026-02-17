@@ -4,7 +4,6 @@ import { SecretError } from '../errors/errors';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
 import { cloneDeep } from 'lodash-es';
-import path from 'path';
 import { NetworkType } from '../types';
 import { generateMnemonic } from 'bip39';
 import { convertMnemonicToSecretKey } from '../utils/utils';
@@ -229,8 +228,17 @@ class Config {
     this.observationConfirmation = getRequiredNumber(
       'observation.confirmation'
     );
-    this.observationValidThreshold = getRequiredNumber(
-      'observation.validThreshold'
+    const blockTime = {
+      [Constants.ERGO_CHAIN_NAME]: Constants.ERGO_BLOCK_TIME,
+      [Constants.BITCOIN_CHAIN_NAME]: Constants.BITCOIN_BLOCK_TIME,
+      [Constants.BITCOIN_RUNES_CHAIN_NAME]: Constants.BITCOIN_BLOCK_TIME,
+      [Constants.CARDANO_CHAIN_NAME]: Constants.CARDANO_BLOCK_TIME,
+      [Constants.BINANCE_CHAIN_NAME]: Constants.BINANCE_BLOCK_TIME,
+      [Constants.ETHEREUM_CHAIN_NAME]: Constants.ETHEREUM_BLOCK_TIME,
+      [Constants.DOGE_CHAIN_NAME]: Constants.DOGE_BLOCK_TIME,
+    }[this.networkWatcher];
+    this.observationValidThreshold = Math.floor(
+      getRequiredNumber('observation.validThreshold') / blockTime
     );
     this.observationStoreRawData = config.get<boolean>(
       'observation.storeRawData'
@@ -250,6 +258,7 @@ class Config {
     this.rosenTokensPath = getRequiredString('path.tokens');
     this.apiPort = getOptionalNumber('api.port', 3000);
     this.apiKeyHash = getRequiredString('api.apiKeyHash');
+
     this.apiAllowedOrigins = config.get<string[]>('api.allowedOrigins');
     if (
       !Array.isArray(this.apiAllowedOrigins) ||
