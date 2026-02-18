@@ -77,14 +77,14 @@ const logger = DefaultLogger.getInstance().child(import.meta.url);
  * @returns loggers object
  */
 const createLoggers = () => ({
-  commitmentExtractorLogger: logger.child('commitment-extractor'),
-  eventTriggerExtractorLogger: logger.child('event-trigger-extractor'),
-  observationExtractorLogger: logger.child('observation-extractor'),
-  permitExtractorLogger: logger.child('permit-extractor'),
-  plainExtractorLogger: logger.child('plain-extractor'),
+  commitmentExtractorLogger: logger.child('commitmentExtractor'),
+  eventTriggerExtractorLogger: logger.child('eventTriggerExtractor'),
+  observationExtractorLogger: logger.child('observationExtractor'),
+  permitExtractorLogger: logger.child('permitExtractor'),
+  plainExtractorLogger: logger.child('plainExtractor'),
   scannerLogger: logger.child('scanner'),
-  observationScannerLogger: logger.child('observation-scanner'),
-  collateralExtractorLogger: logger.child('collateral-extractor'),
+  observationScannerLogger: logger.child('observationScanner'),
+  collateralExtractorLogger: logger.child('collateralExtractor'),
 });
 
 const loggers = createLoggers();

@@ -31,13 +31,13 @@ const config = getConfig();
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 // Create separate loggers for each manager
-const ergoNodeLogger = logger.child('ergo-node-connector');
-const ergoExplorerLogger = logger.child('ergo-explorer-connector');
-const bitcoinLogger = logger.child('bitcoin-connector');
-const dogeLogger = logger.child('doge-connector');
-const cardanoKoiosLogger = logger.child('cardano-koios-connector');
-const cardanoBlockfrostLogger = logger.child('cardano-blockfrost-connector');
-const evmLogger = logger.child('evm-connector');
+const ergoNodeLogger = logger.child('ergoNodeConnector');
+const ergoExplorerLogger = logger.child('ergoExplorerConnector');
+const bitcoinLogger = logger.child('bitcoinConnector');
+const dogeLogger = logger.child('dogeConnector');
+const cardanoKoiosLogger = logger.child('cardanoKoiosConnector');
+const cardanoBlockfrostLogger = logger.child('cardanoBlockfrostConnector');
+const evmLogger = logger.child('evmConnector');
 
 /**
  * Creates and configures a NetworkConnectorManager instance for Ergo node
