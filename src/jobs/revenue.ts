@@ -2,9 +2,9 @@ import { getConfig } from '../config/config';
 import { watcherDatabase } from '../init';
 import { decodeSerializedBox } from '../ergo/utils';
 import { ERGO_NATIVE_ASSET } from '../config/constants';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 /**
  * Fetches revenue details and stores in the database

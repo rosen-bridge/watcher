@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { ApiResponse, Transaction } from './Transaction';
 import { body, validationResult } from 'express-validator';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { authenticateKey } from './authentication';
 import { getConfig } from '../config/config';
 import { ERGO_CHAIN_NAME } from '../config/constants';
@@ -10,7 +10,7 @@ import { ApiError, ApiValidationError } from '../errors/apiErrors';
 import { HttpStatus } from '../constants';
 import { sendApiError } from '../errors/apiErrors/utils';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const permitRouter = Router();
 

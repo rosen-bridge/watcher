@@ -167,7 +167,7 @@ firstStatisticsEventTrigger.sourceTxId = 'txIdStar';
 firstStatisticsEventTrigger.block = 'blockID';
 firstStatisticsEventTrigger.height = 100;
 firstStatisticsEventTrigger.extractor = 'extractor';
-firstStatisticsEventTrigger.boxId = 'boxIdStatistics';
+firstStatisticsEventTrigger.identifier = 'boxIdStatistics';
 firstStatisticsEventTrigger.serialized = 'box';
 firstStatisticsEventTrigger.amount = '100';
 firstStatisticsEventTrigger.networkFee = '1000';
@@ -189,16 +189,16 @@ firstStatisticsEventTrigger.WIDsHash = 'abcd';
 
 const secondStatisticsEventTrigger = {
   ...firstStatisticsEventTrigger,
-  boxId: 'boxIdStatistics2',
+  identifier: 'boxIdStatistics2',
 };
 const thirdStatisticsEventTrigger = {
   ...firstStatisticsEventTrigger,
-  boxId: 'boxIdStatistics3',
+  identifier: 'boxIdStatistics3',
 };
 
 const spentEventTrigger = {
   ...firstStatisticsEventTrigger,
-  boxId: 'boxIdStatistics4',
+  identifier: 'boxIdStatistics4',
   spendBlock: 'blockHash',
   spendHeight: 110,
 };

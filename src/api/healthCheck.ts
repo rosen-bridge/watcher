@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
 import { stringifyQueryParam } from '../utils/utils';
 import { HealthCheckSingleton } from '../utils/healthCheck';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { HttpStatus } from '../constants';
 import { sendApiError } from '../errors/apiErrors/utils';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 const healthRouter = express.Router();
 
 /**

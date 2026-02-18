@@ -13,7 +13,7 @@ export const sendApiError = (
 ) => {
   let error: ApiError | ApiValidationError;
   if (!(e instanceof ApiError)) {
-    error = new ApiError();
+    error = new ApiError(e.message);
   } else {
     error = e;
   }

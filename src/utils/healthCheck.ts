@@ -16,7 +16,7 @@ import {
   ExplorerWidHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { CardanoOgmiosScanner } from '@rosen-bridge/cardano-scanner';
 import { DiscordNotification } from '@rosen-bridge/discord-notification';
 import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
@@ -46,7 +46,7 @@ import {
 import { watcherDatabase } from '../init';
 import { CreateScanner } from './scanner';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
@@ -88,7 +88,6 @@ class HealthCheckSingleton {
     this.healthCheck = new HealthCheck(notify, notificationConfig);
 
     const warnLogCheck = new LogLevelHealthCheck(
-      CallbackLoggerFactory.getInstance(),
       HealthStatusLevel.UNSTABLE,
       getConfig().healthCheck.warnLogAllowedCount,
       getConfig().healthCheck.logDuration,
@@ -97,7 +96,6 @@ class HealthCheckSingleton {
     this.healthCheck.register(warnLogCheck);
 
     const errorLogCheck = new LogLevelHealthCheck(
-      CallbackLoggerFactory.getInstance(),
       HealthStatusLevel.UNSTABLE,
       getConfig().healthCheck.errorLogAllowedCount,
       getConfig().healthCheck.logDuration,

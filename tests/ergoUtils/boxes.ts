@@ -51,28 +51,28 @@ const WIDBox: BoxEntity = new BoxEntity();
 WIDBox.serialized = Buffer.from(
   wasm.ErgoBox.from_json(WIDJson).sigma_serialize_bytes()
 ).toString('base64');
-WIDBox.boxId =
+WIDBox.identifier =
   '2e24776266d16afbf23e7c96ba9c2ffb9bce25ea75d3ed9f2a9a3b2c84bf1655';
 
 const plainBox: BoxEntity = new BoxEntity();
 plainBox.serialized = Buffer.from(
   wasm.ErgoBox.from_json(plainJson).sigma_serialize_bytes()
 ).toString('base64');
-plainBox.boxId =
+plainBox.identifier =
   '57dc591ecba4c90f9116740bf49ffea2c7b73625f259e60ec0c23add86b14f47';
 
 const secondBox: BoxEntity = new BoxEntity();
 secondBox.serialized = Buffer.from(
   wasm.ErgoBox.from_json(secondJson).sigma_serialize_bytes()
 ).toString('base64');
-secondBox.boxId =
+secondBox.identifier =
   '9fac7bdf9db4c468d716b1be9f7468a26af2b7eb4a098b934185fd6aa6127c3e';
 
 const thirdBox: BoxEntity = new BoxEntity();
 thirdBox.serialized = Buffer.from(
   wasm.ErgoBox.from_json(thirdJson).sigma_serialize_bytes()
 ).toString('base64');
-thirdBox.boxId =
+thirdBox.identifier =
   '87b988e426a1226bbbe7b42c7405d763cc4dd3d6f5a9fc8dbc4e67710163f442';
 
 const WID = 'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b';
@@ -214,7 +214,7 @@ describe('Testing Box Creation', () => {
       const data = await boxes.getWIDBox(
         'f875d3b916e56056968d02018133d1c122764d5c70538e70e56199f431e95e9b'
       );
-      expect(data[0].box_id().to_str()).to.eq(WIDBox.boxId);
+      expect(data[0].box_id().to_str()).to.eq(WIDBox.identifier);
     });
   });
 
@@ -261,7 +261,7 @@ describe('Testing Box Creation', () => {
       );
       const data = await boxes.getUserPaymentBox(value);
       expect(data).to.have.length(1);
-      expect(data[0].box_id().to_str()).to.eq(plainBox.boxId);
+      expect(data[0].box_id().to_str()).to.eq(plainBox.identifier);
     });
 
     /**
@@ -328,10 +328,10 @@ describe('Testing Box Creation', () => {
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);
       chai.spy.on(DB, 'trackTxQueue', (box: wasm.ErgoBox) => box);
       const data = await boxes.getUserPaymentBox(BigInt('1000000'), [
-        plainBox.boxId,
+        plainBox.identifier,
       ]);
       expect(data).to.have.length(1);
-      expect(data[0].box_id().to_str()).to.eq(secondBox.boxId);
+      expect(data[0].box_id().to_str()).to.eq(secondBox.identifier);
     });
 
     /**
@@ -356,7 +356,7 @@ describe('Testing Box Creation', () => {
       ]);
       chai.spy.on(DB, 'trackTxQueue', (box: wasm.ErgoBox) =>
         wasm.ErgoBox.from_json(
-          box.box_id().to_str() === thirdBox.boxId ? thirdJson : plainJson
+          box.box_id().to_str() === thirdBox.identifier ? thirdJson : plainJson
         )
       );
       chai.spy.on(ErgoNetwork, 'trackMemPool', (box: wasm.ErgoBox) => box);

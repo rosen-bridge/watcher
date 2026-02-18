@@ -5,14 +5,14 @@ import { generateSK } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { TokensConfig } from '../config/tokensConfig';
 import { validateAddress } from '@rosen-bridge/address-codec';
 import { ApiError, ApiValidationError } from '../errors/apiErrors';
 import { HttpStatus } from '../constants';
 import { sendApiError } from '../errors/apiErrors/utils';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const addressRouter = express.Router();
 
