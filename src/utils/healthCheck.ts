@@ -33,6 +33,8 @@ import {
   CARDANO_CHAIN_NAME,
   DOGE_BLOCK_TIME,
   DOGE_CHAIN_NAME,
+  FIRO_BLOCK_TIME,
+  FIRO_CHAIN_NAME,
   ERGO_BLOCK_TIME,
   ERGO_CHAIN_NAME,
   ERGO_DECIMALS,
@@ -245,6 +247,11 @@ class HealthCheckSingleton {
           chainName = BINANCE_CHAIN_NAME;
           chainBlockTime = BINANCE_BLOCK_TIME;
           updateInterval = getConfig().binance.interval;
+          break;
+        case FIRO_CHAIN_NAME:
+          chainName = FIRO_CHAIN_NAME;
+          chainBlockTime = FIRO_BLOCK_TIME;
+          updateInterval = getConfig().firo.interval;
           break;
       }
 
