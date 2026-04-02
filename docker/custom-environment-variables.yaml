@@ -30,4 +30,8 @@ ethereum:
 binance:
   rpc:
     authToken: 'BINANCE_RPC_AUTH_TOKEN'
+firo:
+  rpc:
+    username: 'FIRO_RPC_USERNAME'
+    password: 'FIRO_RPC_PASSWORD'
 overrideLokiBasicAuth: 'OVERRIDE_LOKI_BASIC_AUTH'
