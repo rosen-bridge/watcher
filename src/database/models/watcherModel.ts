@@ -38,10 +38,10 @@ import { RevenueEntity } from '../entities/revenueEntity';
 import { RevenueView } from '../entities/revenueView';
 import { TokenEntity } from '../entities/tokenEntity';
 import { TxEntity, TxType } from '../entities/txEntity';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { TokensConfig } from '../../config/tokensConfig';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 class WatcherDataBase {
   private readonly dataSource: DataSource;
@@ -663,9 +663,12 @@ class WatcherDataBase {
    * @param wid
    */
   getUnspentPermitBoxes = async (wid: string): Promise<Array<PermitEntity>> => {
-    const permits = await this.permitRepository.findBy({
-      WID: wid,
-      spendBlock: IsNull(),
+    const permits = await this.permitRepository.find({
+      where: {
+        WID: wid,
+        spendBlock: IsNull(),
+      },
+      order: { height: 'ASC' },
     });
     logger.debug(
       `Found ${permits.length} unspent permit boxes with boxId ${permits.map(
@@ -679,12 +682,13 @@ class WatcherDataBase {
    * Returns all unspent plain boxes
    */
   getUnspentAddressBoxes = async (): Promise<Array<BoxEntity>> => {
-    const boxes = await this.boxRepository.findBy({
-      spendBlock: IsNull(),
+    const boxes = await this.boxRepository.find({
+      where: { spendBlock: IsNull() },
+      order: { height: 'ASC' },
     });
     logger.debug(
       `Found ${boxes.length} unspent boxes with boxId ${boxes.map(
-        (box) => box.boxId
+        (box) => box.identifier
       )}`
     );
     return boxes;
@@ -697,13 +701,16 @@ class WatcherDataBase {
   getUnspentBoxesByAddress = async (
     address: string
   ): Promise<Array<BoxEntity>> => {
-    const boxes = await this.boxRepository.findBy({
-      spendBlock: IsNull(),
-      address: address,
+    const boxes = await this.boxRepository.find({
+      where: {
+        spendBlock: IsNull(),
+        address: address,
+      },
+      order: { height: 'ASC' },
     });
     logger.debug(
       `Found ${boxes.length} unspent boxes with boxId ${boxes.map(
-        (box) => box.boxId
+        (box) => box.identifier
       )}`
     );
     return boxes;
@@ -722,7 +729,7 @@ class WatcherDataBase {
       },
     });
     logger.debug(
-      `Found trigger with boxId [${trigger?.boxId}] for observation of transaction [${sourceTxId}]`
+      `Found trigger with boxId [${trigger?.identifier}] for observation of transaction [${sourceTxId}]`
     );
     return trigger;
   };
@@ -740,7 +747,7 @@ class WatcherDataBase {
       },
     });
     logger.debug(
-      `Found trigger with boxId [${trigger?.boxId}] for event [${eventId}]`
+      `Found trigger with boxId [${trigger?.identifier}] for event [${eventId}]`
     );
     return trigger;
   };
@@ -827,13 +834,16 @@ class WatcherDataBase {
     boxIds: string[],
     exclude = false
   ): Promise<Array<BoxEntity>> => {
-    const boxes = await this.boxRepository.findBy({
-      spendBlock: IsNull(),
-      boxId: exclude ? Not(In(boxIds)) : In(boxIds),
+    const boxes = await this.boxRepository.find({
+      where: {
+        spendBlock: IsNull(),
+        identifier: exclude ? Not(In(boxIds)) : In(boxIds),
+      },
+      order: { height: 'ASC' },
     });
     logger.debug(
       `Found ${boxes.length} unspent boxes with boxId ${boxes.map(
-        (box) => box.boxId
+        (box) => box.identifier
       )} with exclusion list ${boxIds}`
     );
     return boxes;
@@ -1155,7 +1165,7 @@ class WatcherDataBase {
     });
     if (collateral) {
       logger.debug(
-        `Found collateral box for wid [${wid}] with boxId [${collateral.boxId}]`
+        `Found collateral box for wid [${wid}] with boxId [${collateral.serialized}]`
       );
       return collateral;
     }

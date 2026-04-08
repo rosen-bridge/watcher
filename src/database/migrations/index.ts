@@ -16,6 +16,8 @@ import { WatcherMigration1737547742177 } from './sqlite/1737547742177-watcherMig
 import { WatcherMigration1737547744177 } from './sqlite/1737547744177-watcherMigration';
 import { WatcherMigration1761774712345 } from './sqlite/1761774712345-watcherMigration';
 import { WatcherMigration1761774798765 } from './sqlite/1761774798765-watcherMigration';
+import { WatcherMigration1762768600000 } from './sqlite/1762768600000-watcherMigration';
+import { WatcherMigration1768993381000 } from './sqlite/1768993381000-watcherMigration';
 
 export default {
   sqlite: [
@@ -31,6 +33,8 @@ export default {
     WatcherMigration1737547744177,
     WatcherMigration1761774712345,
     WatcherMigration1761774798765,
+    WatcherMigration1762768600000,
+    WatcherMigration1768993381000,
   ],
   postgres: [
     WatcherMigration1700710099334,

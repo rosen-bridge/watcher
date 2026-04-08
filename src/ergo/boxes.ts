@@ -19,17 +19,17 @@ import { BoxEntity } from '@rosen-bridge/address-extractor';
 import { NotEnoughFund, NoWID } from '../errors/errors';
 import { getConfig } from '../config/config';
 import { AddressBalance } from './interfaces';
-import { JsonBI } from './network/parser';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { blake2b } from 'blakejs';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 export class Boxes {
   dataBase: WatcherDataBase;
-  repoNFTId: wasm.TokenId;
+  rwtRepoNFTId: wasm.TokenId;
   repoConfigNFT: wasm.TokenId;
   AWC: wasm.TokenId;
   RWTTokenId: wasm.TokenId;
@@ -49,7 +49,7 @@ export class Boxes {
   constructor(db: WatcherDataBase) {
     const rosenConfig = getConfig().rosen;
     this.dataBase = db;
-    this.repoNFTId = wasm.TokenId.from_str(rosenConfig.RepoNFT);
+    this.rwtRepoNFTId = wasm.TokenId.from_str(rosenConfig.rwtRepoNFT);
     this.RWTTokenId = wasm.TokenId.from_str(rosenConfig.RWTId);
     this.RSN = wasm.TokenId.from_str(rosenConfig.RSN);
     this.AWC = wasm.TokenId.from_str(rosenConfig.AWC);
@@ -321,7 +321,7 @@ export class Boxes {
         }
       );
       throw new NotEnoughFund(
-        `Not enough fund to create the transaction. Uncovered value: ${uncoveredValue}, Uncovered assets: ${JsonBI.stringify(
+        `Not enough fund to create the transaction. Uncovered value: ${uncoveredValue}, Uncovered assets: ${JsonBigInt.stringify(
           missingAssets
         )}`
       );
@@ -337,9 +337,9 @@ export class Boxes {
     return await ErgoNetwork.trackMemPool(
       await ErgoNetwork.getBoxWithToken(
         this.repoAddress,
-        this.repoNFTId.to_str()
+        this.rwtRepoNFTId.to_str()
       ),
-      this.repoNFTId.to_str()
+      this.rwtRepoNFTId.to_str()
     );
   };
 
@@ -375,7 +375,7 @@ export class Boxes {
    */
   getCollateralBox = async (wid: string): Promise<wasm.ErgoBox> => {
     const collateralEntity = await this.dataBase.getCollateralByWid(wid);
-    const collateralBox = decodeSerializedBox(collateralEntity.boxSerialized);
+    const collateralBox = decodeSerializedBox(collateralEntity.serialized);
     return await this.dataBase.trackTxQueue(
       await ErgoNetwork.trackMemPool(collateralBox, this.AWC.to_str()),
       this.AWC.to_str()
@@ -572,7 +572,7 @@ export class Boxes {
       height
     );
     repoBuilder.add_token(
-      this.repoNFTId,
+      this.rwtRepoNFTId,
       wasm.TokenAmount.from_i64(wasm.I64.from_str('1'))
     );
     repoBuilder.add_token(

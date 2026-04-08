@@ -6,6 +6,17 @@ on:
   push:
     branches:
       - dev
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: true
+        type: string
+        default: dev
+      environment:
+        description: 'GitHub environment name (e.g. pandora, public-launch, ...)'
+        required: true
+        type: string
 
 env:
   IMAGE_NAME: ghcr.io/rosen-bridge/watcher-service
@@ -15,6 +26,9 @@ jobs:
     name: Build ${{ matrix.platform }}
     permissions: write-all
     runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'push' && vars.DEV_PUSH_ENVIRONMENT
+      || github.event_name == 'release' && vars.RELEASE_ENVIRONMENT
+      || github.event.inputs.environment }}
     strategy:
       fail-fast: false
       matrix:
@@ -25,15 +39,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref }}
 
       - name: Download Contracts
         shell: bash
         run: |
           mkdir -p ./config/rosen
-          npx @rosen-bridge/cli@${{ vars.ROSEN_CLI_VERSION || 'latest' }} download-assets -c ${{ vars.RELEASE_NAME }} ${{ vars.RELEASE_TAG }} -o ./config/rosen -s mainnet
-          mv ./config/rosen/tokens*.json ./config/rosen/tokens.json
+          npx @rosen-bridge/cli@${{ vars.ROSEN_CLI_VERSION || 'latest' }} download-assets -c ${{ vars.RELEASE_NAME }} ${{ vars.RELEASE_TAG }} -o ./config 
+          mv ./config/tokens*.json ./config/tokens.json
 
-      - name: Move Contracts files
+      - name: Move Docker YAMLs
         shell: bash
         run: |
           mv ./docker/*.yaml ./config/
@@ -96,6 +111,9 @@ jobs:
     name: Publish Multi-arch Manifest
     runs-on: ubuntu-latest
     needs: [build]
+    environment: ${{ github.event_name == 'push' && vars.DEV_PUSH_ENVIRONMENT
+      || github.event_name == 'release' && vars.RELEASE_ENVIRONMENT
+      || github.event.inputs.environment }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
@@ -107,11 +125,24 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Set image tag for workflow_dispatch
+        id: set-tag
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          branch="${{ github.event.inputs.branch }}"
+          branch="${branch//\//-}"
+          echo "tag=${branch}-${{ github.event.inputs.environment }}" >> "$GITHUB_OUTPUT"
+
       - name: Generate Docker Metadata
         uses: docker/metadata-action@v5
         id: meta
         with:
           images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=match,pattern=\d+\.\d+\.\d+,enable=${{ github.event_name == 'release' }}
+            type=raw,value=dev,enable=${{ github.event_name == 'push' }}
+            type=raw,value=${{ steps.set-tag.outputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
 
       - name: Login to GHCR Docker Registry
         uses: docker/login-action@v3

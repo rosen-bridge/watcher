@@ -3,13 +3,16 @@ import { getConfig } from '../config/config';
 import { validationResult } from 'express-validator';
 import { generateSK } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
-import { JsonBI } from '../ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { ERGO_CHAIN_NAME, ERGO_NATIVE_ASSET } from '../config/constants';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { TokensConfig } from '../config/tokensConfig';
 import { validateAddress } from '@rosen-bridge/address-codec';
+import { ApiError, ApiValidationError } from '../errors/apiErrors';
+import { HttpStatus } from '../constants';
+import { sendApiError } from '../errors/apiErrors/utils';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const addressRouter = express.Router();
 
@@ -20,12 +23,14 @@ addressRouter.get('/generate', async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      throw new ApiValidationError(errors);
     }
-    res.status(200).json(generateSK(getConfig().general.networkPrefix));
+    res
+      .status(HttpStatus.OK)
+      .json(generateSK(getConfig().general.networkPrefix));
   } catch (e) {
     logger.warn(`An error occurred while generating secret key: ${e}`);
-    res.status(500).send({ message: e.message });
+    sendApiError(res, e);
   }
 });
 
@@ -34,10 +39,10 @@ addressRouter.get('/generate', async (req: Request, res: Response) => {
  */
 addressRouter.get('/assets', async (req: Request, res: Response) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
   try {
+    if (!errors.isEmpty()) {
+      throw new ApiValidationError(errors);
+    }
     const balance = await ErgoUtils.getWatcherBalance();
     let tokens = balance.tokens;
     if (!tokens.some((item) => item.tokenId === getConfig().rosen.RSN)) {
@@ -97,10 +102,12 @@ addressRouter.get('/assets', async (req: Request, res: Response) => {
     const total = tokens.length;
     tokens = tokens.slice(offset, offset + limit);
 
-    res.status(200).send(JsonBI.stringify({ items: tokens, total }));
+    res
+      .status(HttpStatus.OK)
+      .send(JsonBigInt.stringify({ items: tokens, total }));
   } catch (e) {
     logger.warn(`An error occurred while fetching assets: ${e}`);
-    res.status(500).send({ message: e.message });
+    sendApiError(res, e);
   }
 });
 
@@ -111,19 +118,14 @@ addressRouter.get('/validate/:address', async (req: Request, res: Response) => {
   try {
     const { address } = req.params;
     if (!address) {
-      return res
-        .status(400)
-        .json({ valid: false, message: 'Address is required' });
+      throw new ApiError('Address is required', HttpStatus.BAD_REQUEST);
     }
 
     validateAddress(ERGO_CHAIN_NAME, address);
-    res.status(200).json({ valid: true, message: 'Valid Ergo address' });
+    res.status(HttpStatus.OK).json({ valid: true });
   } catch (e) {
     logger.warn(`An error occurred while validating address: ${e}`);
-    return res.status(200).json({
-      valid: false,
-      message: 'Invalid Ergo address',
-    });
+    sendApiError(res, e);
   }
 });
 

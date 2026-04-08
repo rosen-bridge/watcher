@@ -3,7 +3,7 @@ import { Buffer } from 'buffer';
 
 import { get, set } from 'lodash-es';
 
-import { JsonBI } from '../ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 
 /**
  * return Uint8Array of a string
@@ -105,7 +105,7 @@ const ergoTreeToBase58Address = (
  */
 const parseJson = (string: string, forceBigIntPaths: string[] = []) => {
   const parsedString = JSON.parse(string);
-  const allBigIntsParsedString = JsonBI.parse(string);
+  const allBigIntsParsedString = JsonBigInt.parse(string);
 
   forceBigIntPaths.forEach((path) => {
     set(parsedString, path, get(allBigIntsParsedString, path));

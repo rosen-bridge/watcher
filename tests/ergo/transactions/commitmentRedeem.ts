@@ -2,7 +2,7 @@ import { Boxes } from '../../../src/ergo/boxes';
 import { Transaction } from '../../../src/api/Transaction';
 import { secret1 } from './permit';
 import { CommitmentRedeem } from '../../../src/transactions/commitmentRedeem';
-import { JsonBI } from '../../../src/ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { WatcherDataBase } from '../../../src/database/models/watcherModel';
 import { fillORM, loadDataBase } from '../../database/watcherDatabase';
 import {
@@ -27,12 +27,12 @@ import { TxStatus } from '../../../src/database/entities/observationStatusEntity
 
 chai.use(spies);
 
-const feeBox1 = wasm.ErgoBox.from_json(JsonBI.stringify(feeBoxObj1));
-const feeBox2 = wasm.ErgoBox.from_json(JsonBI.stringify(feeBoxObj2));
-const WIDBox = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj));
-const WIDBox2 = wasm.ErgoBox.from_json(JsonBI.stringify(WIDObj2));
+const feeBox1 = wasm.ErgoBox.from_json(JsonBigInt.stringify(feeBoxObj1));
+const feeBox2 = wasm.ErgoBox.from_json(JsonBigInt.stringify(feeBoxObj2));
+const WIDBox = wasm.ErgoBox.from_json(JsonBigInt.stringify(WIDObj));
+const WIDBox2 = wasm.ErgoBox.from_json(JsonBigInt.stringify(WIDObj2));
 const WIDBoxWithoutErg = wasm.ErgoBox.from_json(
-  JsonBI.stringify(WIDObjWithoutErg)
+  JsonBigInt.stringify(WIDObjWithoutErg)
 );
 
 const userAddress = '9h4gxtzV1f8oeujQUA5jeny1mCUCWKrCWrFUJv6mgxsmp5RxGb9';

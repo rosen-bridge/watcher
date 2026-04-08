@@ -10,7 +10,7 @@ import { secret1, userAddress } from '../ergo/transactions/permit';
 import { mockedResponseBody } from '../ergo/objects/mockedResponseBody';
 import { NotEnoughFund } from '../../src/errors/errors';
 import { TxType } from '../../src/database/entities/txEntity';
-import { JsonBI } from '../../src/ergo/network/parser';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import TransactionTest from '../../src/api/TransactionTest';
 import { AddressBalance } from '../../src/ergo/interfaces';
 import { WatcherDataBase } from '../../src/database/models/watcherModel';
@@ -21,9 +21,11 @@ import { fillORM, loadDataBase } from '../database/watcherDatabase';
 import { Transaction } from '../../src/api/Transaction';
 
 chai.use(spies);
-const signedErgTx = wasm.Transaction.from_json(JsonBI.stringify(withdrawErg));
+const signedErgTx = wasm.Transaction.from_json(
+  JsonBigInt.stringify(withdrawErg)
+);
 const signedTokenTx = wasm.Transaction.from_json(
-  JsonBI.stringify(withdrawToken)
+  JsonBigInt.stringify(withdrawToken)
 );
 
 initMockedAxios();

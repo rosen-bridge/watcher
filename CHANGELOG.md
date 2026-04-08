@@ -1,5 +1,22 @@
 # @rosen-bridge/watcher
 
+## 6.1.0
+
+### Minor Changes
+
+- Include ergo token ID in events and observations API responses
+- Refactor error handling to use thrown domain errors
+- Change `observation.validThreshold` unit from block count to time duration
+
+### Patch Changes
+
+- Fix contract config to use full file path instead of directory
+- Remove custom parser module and use JSONBigInt directly
+- Sort input boxes to spend oldest first
+- Update RosenConfig to support new contracts config format
+- Fix commitment validation to prevent redemption of commitments created before the trigger box
+- Fix observation status not timing out after exceeding the validity threshold
+
 ## 6.0.2
 
 ### Patch Changes

@@ -2,11 +2,11 @@ import { watcherDatabase } from '../init';
 import { decodeSerializedBox, ErgoUtils } from '../ergo/utils';
 import { ErgoNetwork } from '../ergo/network/ergoNetwork';
 import { getConfig } from '../config/config';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 let initialized = false;
 
 /**
@@ -20,7 +20,7 @@ export const tokenNameJobFunction = async (
   // remove spent boxes from checkedBoxIds
   const validCheckedBoxIds = (
     await watcherDatabase.getUnspentBoxesByBoxIds(checkedBoxIds)
-  ).map((box) => box.boxId);
+  ).map((box) => box.identifier);
 
   // retrieve new unspent boxes
   const newUTXOs = await watcherDatabase.getUnspentBoxesByBoxIds(
@@ -48,7 +48,7 @@ export const tokenNameJobFunction = async (
       await watcherDatabase.insertTokenEntity(tokenId, name, decimals);
     }
   }
-  return [...validCheckedBoxIds, ...newUTXOs.map((box) => box.boxId)];
+  return [...validCheckedBoxIds, ...newUTXOs.map((box) => box.identifier)];
 };
 
 /**

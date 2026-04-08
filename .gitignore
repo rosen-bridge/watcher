@@ -1,6 +1,6 @@
-src/config/*.json
 config/local*.yaml
-config/rosen
+config/contracts*.json
+config/tokens*.json
 *.sqlite*
 
 .idea
