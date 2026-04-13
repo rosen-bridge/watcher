@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 6.1.1
+
+### Patch Changes
+
+- Fix ergo address extractor initialization configuration
+
 ## 6.1.0
 
 ### Minor Changes

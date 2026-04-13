@@ -288,8 +288,7 @@ class CreateScanner {
       config.scannerType,
       config.address,
       undefined, // Token constraint not needed
-      loggers.plainExtractorLogger,
-      false
+      loggers.plainExtractorLogger
     );
 
     const collateralExtractor = new CollateralExtractor(
