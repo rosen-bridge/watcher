@@ -198,75 +198,82 @@ class HealthCheckSingleton {
    */
   registerScannerSyncHealthCheck = () => {
     const scanner = CreateScanner.getInstance();
+    const currentConfig = getConfig();
     let scannerSyncCheck:
       | ScannerSyncHealthCheckParam
       | CardanoOgmiosScannerHealthCheck;
     if (
-      getConfig().general.networkWatcher === CARDANO_CHAIN_NAME &&
-      getConfig().cardano.type === OGMIOS_TYPE
+      currentConfig.general.networkWatcher === CARDANO_CHAIN_NAME &&
+      currentConfig.cardano.type === OGMIOS_TYPE
     ) {
       scannerSyncCheck = new CardanoOgmiosScannerHealthCheck(
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         (
           scanner.getObservationScanner() as CardanoOgmiosScanner
         ).getConnectionStatus,
-        getConfig().healthCheck.scannerWarnDiff,
-        getConfig().healthCheck.scannerCriticalDiff,
+        currentConfig.healthCheck.scannerWarnDiff,
+        currentConfig.healthCheck.scannerCriticalDiff,
         // TODO: Fix configuration: local/health-check/-/issues/29
-        getConfig().cardano.ogmios!.connectionRetrialInterval * 15
+        currentConfig.cardano.ogmios!.connectionRetrialInterval * 15
       );
     } else {
       let chainName: string;
       let chainBlockTime: number;
       let updateInterval: number;
-      switch (getConfig().general.networkWatcher) {
+      let scannerWarnDiff = currentConfig.healthCheck.scannerWarnDiff;
+      let scannerCriticalDiff = currentConfig.healthCheck.scannerCriticalDiff;
+
+      switch (currentConfig.general.networkWatcher) {
         case CARDANO_CHAIN_NAME:
           chainName = CARDANO_CHAIN_NAME;
           chainBlockTime = CARDANO_BLOCK_TIME;
-          updateInterval = getConfig().cardano.koios!.interval;
+          updateInterval = currentConfig.cardano.koios!.interval;
           break;
         case BITCOIN_CHAIN_NAME:
           chainName = BITCOIN_CHAIN_NAME;
           chainBlockTime = BITCOIN_BLOCK_TIME;
-          updateInterval = getConfig().bitcoin.interval;
+          updateInterval = currentConfig.bitcoin.interval;
           break;
         case BITCOIN_RUNES_CHAIN_NAME:
           chainName = BITCOIN_RUNES_CHAIN_NAME;
           chainBlockTime = BITCOIN_BLOCK_TIME;
-          updateInterval = getConfig().bitcoin.interval;
+          updateInterval = currentConfig.bitcoin.interval;
           break;
         case DOGE_CHAIN_NAME:
           chainName = DOGE_CHAIN_NAME;
           chainBlockTime = DOGE_BLOCK_TIME;
-          updateInterval = getConfig().doge.interval;
+          updateInterval = currentConfig.doge.interval;
           break;
         case ETHEREUM_CHAIN_NAME:
           chainName = ETHEREUM_CHAIN_NAME;
           chainBlockTime = ETHEREUM_BLOCK_TIME;
-          updateInterval = getConfig().ethereum.interval;
+          updateInterval = currentConfig.ethereum.interval;
           break;
         case BINANCE_CHAIN_NAME:
           chainName = BINANCE_CHAIN_NAME;
           chainBlockTime = BINANCE_BLOCK_TIME;
-          updateInterval = getConfig().binance.interval;
+          updateInterval = currentConfig.binance.interval;
           break;
         case FIRO_CHAIN_NAME:
           chainName = FIRO_CHAIN_NAME;
           chainBlockTime = FIRO_BLOCK_TIME;
-          updateInterval = getConfig().firo.interval;
+          updateInterval = currentConfig.firo.interval;
           break;
         case HANDSHAKE_CHAIN_NAME:
           chainName = HANDSHAKE_CHAIN_NAME;
           chainBlockTime = HANDSHAKE_BLOCK_TIME;
-          updateInterval = getConfig().handshake.interval;
+          updateInterval = currentConfig.handshake.interval;
+          scannerWarnDiff = currentConfig.healthCheck.handshakeScannerWarnDiff;
+          scannerCriticalDiff =
+            currentConfig.healthCheck.handshakeScannerCriticalDiff;
           break;
       }
 
       scannerSyncCheck = new ScannerSyncHealthCheckParam(
         chainName!,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-        getConfig().healthCheck.scannerWarnDiff,
-        getConfig().healthCheck.scannerCriticalDiff,
+        scannerWarnDiff,
+        scannerCriticalDiff,
         chainBlockTime!,
         updateInterval!
       );

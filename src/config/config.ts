@@ -232,7 +232,7 @@ class Config {
     this.observationConfirmation = getRequiredNumber(
       'observation.confirmation'
     );
-    const blockTime = {
+    const blockTimeByNetwork: Record<NetworkType, number> = {
       [Constants.ERGO_CHAIN_NAME]: Constants.ERGO_BLOCK_TIME,
       [Constants.BITCOIN_CHAIN_NAME]: Constants.BITCOIN_BLOCK_TIME,
       [Constants.BITCOIN_RUNES_CHAIN_NAME]: Constants.BITCOIN_BLOCK_TIME,
@@ -241,9 +241,11 @@ class Config {
       [Constants.ETHEREUM_CHAIN_NAME]: Constants.ETHEREUM_BLOCK_TIME,
       [Constants.DOGE_CHAIN_NAME]: Constants.DOGE_BLOCK_TIME,
       [Constants.FIRO_CHAIN_NAME]: Constants.FIRO_BLOCK_TIME,
-    }[this.networkWatcher];
+      [Constants.HANDSHAKE_CHAIN_NAME]: Constants.HANDSHAKE_BLOCK_TIME,
+    };
     this.observationValidThreshold = Math.floor(
-      getRequiredNumber('observation.validThreshold') / blockTime
+      getRequiredNumber('observation.validThreshold') /
+        blockTimeByNetwork[this.networkWatcher]
     );
     this.observationStoreRawData = config.get<boolean>(
       'observation.storeRawData'
@@ -732,6 +734,8 @@ class HealthCheckConfig {
   ergCriticalThreshold: bigint;
   scannerWarnDiff: number;
   scannerCriticalDiff: number;
+  handshakeScannerWarnDiff: number;
+  handshakeScannerCriticalDiff: number;
   permitWarnCommitmentCount: number;
   permitCriticalCommitmentCount: number;
   permitDefaultCommitmentRWT: number;
@@ -752,6 +756,14 @@ class HealthCheckConfig {
     );
     this.scannerCriticalDiff = getRequiredNumber(
       'healthCheck.scanner.criticalDifference'
+    );
+    this.handshakeScannerWarnDiff = getOptionalNumber(
+      'healthCheck.handshakeScanner.warnDifference',
+      this.scannerWarnDiff
+    );
+    this.handshakeScannerCriticalDiff = getOptionalNumber(
+      'healthCheck.handshakeScanner.criticalDifference',
+      this.scannerCriticalDiff
     );
     this.permitWarnCommitmentCount = getRequiredNumber(
       'healthCheck.permit.warnCommitmentCount'
