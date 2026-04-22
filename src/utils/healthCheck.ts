@@ -24,6 +24,8 @@ import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
 import {
+  BASE_BLOCK_TIME,
+  BASE_CHAIN_NAME,
   BINANCE_BLOCK_TIME,
   BINANCE_CHAIN_NAME,
   BITCOIN_BLOCK_TIME,
@@ -237,6 +239,11 @@ class HealthCheckSingleton {
           chainName = DOGE_CHAIN_NAME;
           chainBlockTime = DOGE_BLOCK_TIME;
           updateInterval = getConfig().doge.interval;
+          break;
+        case BASE_CHAIN_NAME:
+          chainName = BASE_CHAIN_NAME;
+          chainBlockTime = BASE_BLOCK_TIME;
+          updateInterval = getConfig().base.interval;
           break;
         case ETHEREUM_CHAIN_NAME:
           chainName = ETHEREUM_CHAIN_NAME;

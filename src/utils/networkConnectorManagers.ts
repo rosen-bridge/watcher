@@ -243,7 +243,7 @@ export const createCardanoBlockfrostNetworkConnectorManager = () => {
 
 /**
  * Creates and configures a NetworkConnectorManager instance for EVM-based scanners (Ethereum/Binance)
- * @param chainName - The name of the chain to create a connector for (ethereum/binance)
+ * @param chainName - The name of the chain to create a connector for (base/ethereum/binance)
  */
 export const createEvmNetworkConnectorManager = (chainName: string) => {
   const networkConnectorManager =
@@ -252,7 +252,15 @@ export const createEvmNetworkConnectorManager = (chainName: string) => {
       evmLogger
     );
 
-  if (chainName === 'ethereum' && config.ethereum.rpc) {
+  if (chainName === 'base' && config.base.rpc) {
+    networkConnectorManager.addConnector(
+      new EvmRpcNetwork(
+        config.base.rpc.url,
+        config.base.rpc.timeout * 1000,
+        config.base.rpc.authToken || undefined
+      )
+    );
+  } else if (chainName === 'ethereum' && config.ethereum.rpc) {
     networkConnectorManager.addConnector(
       new EvmRpcNetwork(
         config.ethereum.rpc.url,

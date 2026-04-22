@@ -17,6 +17,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.BITCOIN_CHAIN_NAME,
   Constants.BITCOIN_RUNES_CHAIN_NAME,
   Constants.DOGE_CHAIN_NAME,
+  Constants.BASE_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
   Constants.BINANCE_CHAIN_NAME,
   Constants.FIRO_CHAIN_NAME,
@@ -27,6 +28,7 @@ interface ConfigType {
   cardano: CardanoConfig;
   bitcoin: BitcoinConfig;
   bitcoinRunes: BitcoinRunesConfig;
+  base: BaseConfig;
   ethereum: EthereumConfig;
   binance: BinanceConfig;
   firo: FiroConfig;
@@ -235,6 +237,7 @@ class Config {
       [Constants.BITCOIN_CHAIN_NAME]: Constants.BITCOIN_BLOCK_TIME,
       [Constants.BITCOIN_RUNES_CHAIN_NAME]: Constants.BITCOIN_BLOCK_TIME,
       [Constants.CARDANO_CHAIN_NAME]: Constants.CARDANO_BLOCK_TIME,
+      [Constants.BASE_CHAIN_NAME]: Constants.BASE_BLOCK_TIME,
       [Constants.BINANCE_CHAIN_NAME]: Constants.BINANCE_BLOCK_TIME,
       [Constants.ETHEREUM_CHAIN_NAME]: Constants.ETHEREUM_BLOCK_TIME,
       [Constants.DOGE_CHAIN_NAME]: Constants.DOGE_BLOCK_TIME,
@@ -579,6 +582,35 @@ class EthereumConfig {
   }
 }
 
+class BaseConfig {
+  type: string;
+  initialHeight: number;
+  interval: number;
+  rpc?: {
+    url: string;
+    timeout: number;
+    authToken?: string;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('base.type');
+    if (network === Constants.BASE_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('base.initial.height');
+      this.interval = getRequiredNumber('base.interval');
+      if (this.type == Constants.EVM_RPC_TYPE) {
+        const url = getRequiredString('base.rpc.url');
+        const timeout = getRequiredNumber('base.rpc.timeout');
+        const authToken = getOptionalString('base.rpc.authToken', undefined);
+        this.rpc = { url, timeout, authToken };
+      } else {
+        throw new Error(
+          `Improperly configured. base configuration type is invalid available choices are '${Constants.EVM_RPC_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class BinanceConfig {
   type: string;
   initialHeight: number;
@@ -747,6 +779,7 @@ const getConfig = (): ConfigType => {
     const bitcoin = new BitcoinConfig(general.networkWatcher);
     const bitcoinRunes = new BitcoinRunesConfig(general.networkWatcher);
     const doge = new DogeConfig(general.networkWatcher);
+    const base = new BaseConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
     const binance = new BinanceConfig(general.networkWatcher);
     const firo = new FiroConfig(general.networkWatcher);
@@ -762,6 +795,7 @@ const getConfig = (): ConfigType => {
       bitcoin,
       bitcoinRunes,
       doge,
+      base,
       ethereum,
       binance,
       firo,
@@ -783,6 +817,7 @@ export {
   CardanoConfig,
   BitcoinConfig,
   BitcoinRunesConfig,
+  BaseConfig,
   EthereumConfig,
   BinanceConfig,
   FiroConfig,

@@ -24,6 +24,9 @@ cardano:
     authToken: 'KOIOS_AUTH_TOKEN'
   blockfrost:
     projectId: 'BLOCKFROST_PROJECT_ID'
+base:
+  rpc:
+    authToken: 'BASE_RPC_AUTH_TOKEN'
 ethereum:
   rpc:
     authToken: 'ETHEREUM_RPC_AUTH_TOKEN'

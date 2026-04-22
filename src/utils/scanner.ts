@@ -50,6 +50,7 @@ import { dataSource } from '../../config/dataSource';
 import {
   BinanceConfig,
   BitcoinConfig,
+  BaseConfig,
   CardanoConfig,
   Config,
   EthereumConfig,
@@ -73,6 +74,7 @@ import {
   createErgoNodeNetworkConnectorManager,
   createErgoExplorerNetworkConnectorManager,
 } from './networkConnectorManagers';
+import { BaseRpcObservationExtractor } from '../extractors/baseRpcObservationExtractor';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -126,6 +128,7 @@ class CreateScanner {
         bitcoin: bitcoinConfig,
         bitcoinRunes: bitcoinRunesConfig,
         doge: dogeConfig,
+        base: baseConfig,
         ethereum: ethereumConfig,
         binance: binanceConfig,
         firo: firoConfig,
@@ -158,6 +161,13 @@ class CreateScanner {
         case Constants.ETHEREUM_CHAIN_NAME:
           await CreateScanner.instance.createEthereumScanner(
             ethereumConfig,
+            rosenConfig,
+            config.observationStoreRawData
+          );
+          break;
+        case Constants.BASE_CHAIN_NAME:
+          await CreateScanner.instance.createBaseScanner(
+            baseConfig,
             rosenConfig,
             config.observationStoreRawData
           );
@@ -546,6 +556,32 @@ class CreateScanner {
         );
 
         const observationExtractor = new EthereumRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger,
+          observationStoreRawData
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      }
+    }
+  };
+
+  private createBaseScanner = async (
+    baseConfig: BaseConfig,
+    rosenConfig: RosenConfig,
+    observationStoreRawData: boolean
+  ) => {
+    if (!this.observationScanner) {
+      if (baseConfig.rpc) {
+        this.observationScanner = new EvmRpcScanner(Constants.BASE_CHAIN_NAME, {
+          dataSource,
+          initialHeight: baseConfig.initialHeight,
+          network: createEvmNetworkConnectorManager(Constants.BASE_CHAIN_NAME),
+          logger: loggers.observationScannerLogger,
+        });
+
+        const observationExtractor = new BaseRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
