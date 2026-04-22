@@ -1,9 +1,9 @@
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { GeneralScanner } from '@rosen-bridge/abstract-scanner';
 import { CardanoOgmiosScanner } from '@rosen-bridge/cardano-scanner';
-import * as Constants from '../config/constants';
-import { getConfig } from '../config/config';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
 import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
+import { getConfig } from '../config/config';
+import * as Constants from '../config/constants';
 import { CreateScanner } from '../utils/scanner';
 
 const allConfig = getConfig();
@@ -16,9 +16,10 @@ const {
   ethereum: ethereumConfig,
   binance: binanceConfig,
   handshake: handshakeConfig,
+  firo: firoConfig,
 } = allConfig;
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
   try {
@@ -79,6 +80,12 @@ export const scannerInit = () => {
       scanningJob(
         binanceConfig.interval,
         scanner.getObservationScanner() as EvmRpcScanner
+      ).then(() => null);
+      break;
+    case Constants.FIRO_CHAIN_NAME:
+      scanningJob(
+        firoConfig.interval,
+        scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
     case Constants.HANDSHAKE_CHAIN_NAME:

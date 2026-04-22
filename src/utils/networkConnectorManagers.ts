@@ -1,59 +1,50 @@
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import {
-  NetworkConnectorManager,
   FailoverStrategy,
+  NetworkConnectorManager,
   RoundRobinStrategy,
 } from '@rosen-bridge/abstract-scanner';
 import {
-  ErgoNodeNetwork,
-  ErgoExplorerNetwork,
-} from '@rosen-bridge/ergo-scanner';
-import {
-  DogeRpcTransaction,
-  BitcoinRpcTransaction,
-  BitcoinRpcNetwork,
-  DogeRpcNetwork,
-  EsploraNetwork,
   BitcoinEsploraTransaction,
+  BitcoinRpcNetwork,
+  BitcoinRpcTransaction,
+  DogeRpcNetwork,
+  DogeRpcTransaction,
+  EsploraNetwork,
 } from '@rosen-bridge/bitcoin-scanner';
 import {
-  HandshakeRpcTransaction,
-  HandshakeRpcNetwork,
-} from '@rosen-bridge/handshake-rpc-scanner';
-import {
-  KoiosNetwork,
   BlockFrostNetwork,
-  KoiosTransaction,
   BlockFrostTransaction,
+  KoiosNetwork,
+  KoiosTransaction,
 } from '@rosen-bridge/cardano-scanner';
+import {
+  ErgoExplorerNetwork,
+  ErgoNodeNetwork,
+} from '@rosen-bridge/ergo-scanner';
 import { EvmRpcNetwork } from '@rosen-bridge/evm-scanner';
-import { getConfig } from '../config/config';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { FiroRpcNetwork, FiroRpcTransaction } from '@rosen-bridge/firo-scanner';
+import {
+  HandshakeRpcNetwork,
+  HandshakeRpcTransaction,
+} from '@rosen-bridge/handshake-scanner';
 import { Transaction } from '@rosen-bridge/scanner-interfaces';
 import { TransactionResponse } from 'ethers';
+import { getConfig } from '../config/config';
 
 const config = getConfig();
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 // Create separate loggers for each manager
-const ergoNodeLogger = CallbackLoggerFactory.getInstance().getLogger(
-  'ergo-node-connector'
-);
-const ergoExplorerLogger = CallbackLoggerFactory.getInstance().getLogger(
-  'ergo-explorer-connector'
-);
-const bitcoinLogger =
-  CallbackLoggerFactory.getInstance().getLogger('bitcoin-connector');
-const dogeLogger =
-  CallbackLoggerFactory.getInstance().getLogger('doge-connector');
-const handshakeLogger =
-  CallbackLoggerFactory.getInstance().getLogger('handshake-connector');
-const cardanoKoiosLogger = CallbackLoggerFactory.getInstance().getLogger(
-  'cardano-koios-connector'
-);
-const cardanoBlockfrostLogger = CallbackLoggerFactory.getInstance().getLogger(
-  'cardano-blockfrost-connector'
-);
-const evmLogger =
-  CallbackLoggerFactory.getInstance().getLogger('evm-connector');
+const ergoNodeLogger = logger.child('ergoNodeConnector');
+const ergoExplorerLogger = logger.child('ergoExplorerConnector');
+const bitcoinLogger = logger.child('bitcoinConnector');
+const dogeLogger = logger.child('dogeConnector');
+const cardanoKoiosLogger = logger.child('cardanoKoiosConnector');
+const cardanoBlockfrostLogger = logger.child('cardanoBlockfrostConnector');
+const evmLogger = logger.child('evmConnector');
+const firoLogger = logger.child('firoConnector');
+const handshakeLogger = logger.child('handshakeConnector');
 
 /**
  * Creates and configures a NetworkConnectorManager instance for Ergo node
@@ -284,6 +275,36 @@ export const createEvmNetworkConnectorManager = (chainName: string) => {
     );
   } else {
     throw new Error(`No RPC configuration found for ${chainName}`);
+  }
+
+  return networkConnectorManager;
+};
+
+/**
+ * Creates and configures a NetworkConnectorManager instance for Firo RPC scanner
+ */
+export const createFiroRpcNetworkConnectorManager = () => {
+  const networkConnectorManager =
+    new NetworkConnectorManager<FiroRpcTransaction>(
+      new FailoverStrategy(),
+      firoLogger
+    );
+
+  if (config.firo.rpc) {
+    networkConnectorManager.addConnector(
+      new FiroRpcNetwork(
+        config.firo.rpc.url,
+        config.firo.rpc.timeout * 1000,
+        config.firo.rpc.username && config.firo.rpc.password
+          ? {
+              username: config.firo.rpc.username,
+              password: config.firo.rpc.password,
+            }
+          : undefined
+      )
+    );
+  } else {
+    throw new Error('Rpc configuration must be provided for Firo Rpc network');
   }
 
   return networkConnectorManager;

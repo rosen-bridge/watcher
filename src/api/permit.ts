@@ -1,13 +1,16 @@
 import { Request, Response, Router } from 'express';
 import { ApiResponse, Transaction } from './Transaction';
 import { body, validationResult } from 'express-validator';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { authenticateKey } from './authentication';
 import { getConfig } from '../config/config';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
+import { ApiError, ApiValidationError } from '../errors/apiErrors';
+import { HttpStatus } from '../constants';
+import { sendApiError } from '../errors/apiErrors/utils';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const permitRouter = Router();
 
@@ -23,7 +26,7 @@ permitRouter.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        throw new ApiValidationError(errors);
       }
       const tokenMap = TokensConfig.getInstance().getTokenMap();
       const RSNCount = tokenMap.unwrapAmount(
@@ -35,14 +38,16 @@ permitRouter.post(
       const response: ApiResponse = await watcherTransaction.getPermit(
         RSNCount
       );
-      if (response.status === 200) {
-        res.status(200).send({ txId: response.response });
+      if (response.status === HttpStatus.OK) {
+        res.status(HttpStatus.OK).send({ txId: response.response });
       } else {
         res.status(response.status).send({ message: response.response });
       }
     } catch (e) {
-      logger.warn(`An error occurred while locking RSN: ${e}`);
-      res.status(500).send({ message: e.message });
+      if (!(e instanceof ApiError)) {
+        logger.warn(`An error occurred while locking RSN: ${e}`);
+        sendApiError(res, e);
+      }
     }
   }
 );
@@ -59,7 +64,7 @@ permitRouter.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        throw new ApiValidationError(errors);
       }
       const tokenMap = TokensConfig.getInstance().getTokenMap();
       const RWTCount = tokenMap.unwrapAmount(
@@ -71,14 +76,16 @@ permitRouter.post(
       const response: ApiResponse = await watcherTransaction.returnPermit(
         RWTCount
       );
-      if (response.status === 200) {
-        res.status(200).send({ txId: response.response });
+      if (response.status === HttpStatus.OK) {
+        res.status(HttpStatus.OK).send({ txId: response.response });
       } else {
         res.status(response.status).send({ message: response.response });
       }
     } catch (e) {
-      logger.warn(`An error occurred while returning permits: ${e}`);
-      res.status(500).send({ message: e.message });
+      if (!(e instanceof ApiError)) {
+        logger.warn(`An error occurred while returning permits: ${e}`);
+        sendApiError(res, e);
+      }
     }
   }
 );

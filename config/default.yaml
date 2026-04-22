@@ -2,7 +2,7 @@
 network: '' # which scanner network used in this watcher ergo/cardano/bitcoin/ethereum
 observation:
   # confirmation: 60 # number of required block confirmations to create the commitment after observing an event
-  validThreshold: 28800 # observations that have not been triggered won't be processed after this period (in blocks)
+  validThreshold: 259200 # Observations that have not been triggered will not be processed after this period (in seconds, converted to block count based on selected network block time)
   storeRawData: true # if set extractor will store observations raw data
 bitcoin:
   type: '' # options: esplora, rpc
@@ -77,14 +77,24 @@ binance:
     url: '' # rpc url
     timeout: 10 # rpc request timeout (in seconds)
     # authToken: # rpc auth token
+firo:
+  type: '' # options: rpc
+  initial:
+    height: -1 # initial height of scanning
+  interval: 180 # scanning interval (in seconds)
+  rpc:
+    url: '' # rpc url
+    timeout: 10 # rpc request timeout (in seconds)
+    # username: '' # rpc username for authentication required instances
+    # password: '' # rpc password for authentication required instances
 handshake:
   type: 'rpc' # options: rpc
   initial:
     height: -1 # initial height of scanning
   interval: 180 # scanning interval (in seconds)
   rpc:
-    timeout: 10 # rpc request timeout (in seconds)
     url: '' # rpc url
+    timeout: 10 # rpc request timeout (in seconds)
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
 ergo:

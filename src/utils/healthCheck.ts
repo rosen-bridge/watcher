@@ -1,25 +1,25 @@
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import {
   ErgoExplorerAssetHealthCheckParam,
   ErgoNodeAssetHealthCheckParam,
 } from '@rosen-bridge/asset-check';
+import { CardanoOgmiosScanner } from '@rosen-bridge/cardano-scanner';
+import { DiscordNotification } from '@rosen-bridge/discord-notification';
 import { HealthCheck, HealthStatusLevel } from '@rosen-bridge/health-check';
+import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
 import {
   AbstractPermitHealthCheckParam,
   ExplorerPermitHealthCheckParam,
   NodePermitHealthCheckParam,
 } from '@rosen-bridge/permit-check';
 import {
-  ScannerSyncHealthCheckParam,
   CardanoOgmiosScannerHealthCheck,
+  ScannerSyncHealthCheckParam,
 } from '@rosen-bridge/scanner-sync-check';
 import {
   ExplorerWidHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
-import { CardanoOgmiosScanner } from '@rosen-bridge/cardano-scanner';
-import { DiscordNotification } from '@rosen-bridge/discord-notification';
-import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
 
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
@@ -40,6 +40,8 @@ import {
   ETHEREUM_BLOCK_TIME,
   ETHEREUM_CHAIN_NAME,
   EXPLORER_TYPE,
+  FIRO_BLOCK_TIME,
+  FIRO_CHAIN_NAME,
   HANDSHAKE_BLOCK_TIME,
   HANDSHAKE_CHAIN_NAME,
   NODE_TYPE,
@@ -48,7 +50,7 @@ import {
 import { watcherDatabase } from '../init';
 import { CreateScanner } from './scanner';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 class HealthCheckSingleton {
   private static instance: HealthCheckSingleton | undefined;
@@ -90,7 +92,6 @@ class HealthCheckSingleton {
     this.healthCheck = new HealthCheck(notify, notificationConfig);
 
     const warnLogCheck = new LogLevelHealthCheck(
-      CallbackLoggerFactory.getInstance(),
       HealthStatusLevel.UNSTABLE,
       getConfig().healthCheck.warnLogAllowedCount,
       getConfig().healthCheck.logDuration,
@@ -99,7 +100,6 @@ class HealthCheckSingleton {
     this.healthCheck.register(warnLogCheck);
 
     const errorLogCheck = new LogLevelHealthCheck(
-      CallbackLoggerFactory.getInstance(),
       HealthStatusLevel.UNSTABLE,
       getConfig().healthCheck.errorLogAllowedCount,
       getConfig().healthCheck.logDuration,
@@ -249,6 +249,11 @@ class HealthCheckSingleton {
           chainName = BINANCE_CHAIN_NAME;
           chainBlockTime = BINANCE_BLOCK_TIME;
           updateInterval = getConfig().binance.interval;
+          break;
+        case FIRO_CHAIN_NAME:
+          chainName = FIRO_CHAIN_NAME;
+          chainBlockTime = FIRO_BLOCK_TIME;
+          updateInterval = getConfig().firo.interval;
           break;
         case HANDSHAKE_CHAIN_NAME:
           chainName = HANDSHAKE_CHAIN_NAME;

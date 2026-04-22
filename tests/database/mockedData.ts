@@ -125,7 +125,7 @@ plainBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
 plainBox.block = 'blockID';
 plainBox.height = 100;
 plainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
-plainBox.boxId = 'boxId';
+plainBox.identifier = 'boxId';
 plainBox.serialized =
   '4JFDAAjNA6/nE35QL09xxfyBlz5Ab8mVjg38uMAXUIzi9gNqo6UP6848AYROPPRLMYG0ysvMv3WW00H0EUfXPa9LVl7KrJg6uiUIrbwBAHuYkTd1b0VCBfANI9wUXfe48u5Dx0lstbC6MR+NULUcAQ==';
 
@@ -134,7 +134,7 @@ spentPlainBox.address = 'address';
 spentPlainBox.block = 'blockID';
 spentPlainBox.height = 100;
 spentPlainBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
-spentPlainBox.boxId = 'boxId2';
+spentPlainBox.identifier = 'boxId2';
 spentPlainBox.serialized = 'box2';
 spentPlainBox.spendBlock = 'blockHash';
 
@@ -143,7 +143,7 @@ addressValidBox.address = '9eYicprScbobMdmWYRHwbYiM3g19EQ3iAK24FconvXFVfaEooVH';
 addressValidBox.block = 'blockID';
 addressValidBox.height = 100;
 addressValidBox.extractor = Constants.ADDRESS_EXTRACTOR_NAME;
-addressValidBox.boxId = 'boxId3';
+addressValidBox.identifier = 'boxId3';
 addressValidBox.serialized =
   'gLL19gYACM0Dr+cTflAvT3HF/IGXPkBvyZWODfy4wBdQjOL2A2qjpQ/RjT0BBQ8FSMAPxKAwLilT3j+WfLGMfLWkxSaxY7/kZwqSai8BAJVusRG2h5VtH5w8R7TSrHzuQbd2cO/foKTfUEvEDpbqAg==';
 
@@ -184,7 +184,7 @@ eventTriggerEntity.sourceTxId = 'txId';
 eventTriggerEntity.block = 'blockID';
 eventTriggerEntity.height = 100;
 eventTriggerEntity.extractor = 'extractor';
-eventTriggerEntity.boxId = 'boxId';
+eventTriggerEntity.identifier = 'boxId';
 eventTriggerEntity.serialized = 'box';
 eventTriggerEntity.amount = '100';
 eventTriggerEntity.networkFee = '1000';
@@ -208,7 +208,7 @@ newEventTriggerEntity.sourceTxId = 'txId2';
 newEventTriggerEntity.block = 'blockID2';
 newEventTriggerEntity.height = 100;
 newEventTriggerEntity.extractor = 'extractor';
-newEventTriggerEntity.boxId = 'boxId2';
+newEventTriggerEntity.identifier = 'boxId2';
 newEventTriggerEntity.serialized = 'box2';
 newEventTriggerEntity.amount = '100';
 newEventTriggerEntity.networkFee = '1000';

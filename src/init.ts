@@ -23,7 +23,7 @@ import { revenueJob } from './jobs/revenue';
 import { healthCheckJob } from './jobs/healthCheck';
 import { healthRouter } from './api/healthCheck';
 import cors from 'cors';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { widStatusJob } from './jobs/widStatus';
 import MinimumFeeHandler from './utils/MinimumFeeHandler';
 import { minimumFeeUpdateJob } from './jobs/minimumFee';
@@ -31,8 +31,10 @@ import { rewardCollection } from './jobs/rewardCollection';
 import { TokensConfig } from './config/tokensConfig';
 import { CreateScanner } from './utils/scanner';
 import { exit } from 'node:process';
+import { AddressManager } from '@rosen-bridge/address-manager';
+import { chainDecoders, chainValidators } from '@rosen-bridge/address-codec';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 let boxesObject: Boxes;
 let watcherDatabase: WatcherDataBase;
@@ -45,6 +47,11 @@ const init = async () => {
   const config = getConfig();
 
   await TokensConfig.init(config.general.rosenTokensPath);
+  AddressManager.init(
+    chainValidators,
+    chainDecoders,
+    DefaultLogger.getInstance().child('AddressManager')
+  );
   await CreateScanner.init();
 
   const generateTransactionObject = async () => {
@@ -92,8 +99,8 @@ const init = async () => {
     router.use('/health', healthRouter);
 
     app.use(router);
-    const port = getConfig().general.apiPort;
 
+    const port = getConfig().general.apiPort;
     app.listen(port, () => logger.info(`App listening on port ${port}`));
   };
 

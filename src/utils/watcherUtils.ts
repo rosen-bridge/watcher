@@ -16,9 +16,9 @@ import { getConfig } from '../config/config';
 import { CreateScanner } from './scanner';
 import { CommitmentEntity } from '@rosen-bridge/watcher-data-extractor';
 import MinimumFeeHandler from './MinimumFeeHandler';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 class WatcherUtils {
   dataBase: WatcherDataBase;
@@ -176,7 +176,7 @@ class WatcherUtils {
     const observations = await this.dataBase.getConfirmedObservations(
       this.observationConfirmation,
       height,
-      this.observationValidThreshold,
+      undefined, // We don't need to use the observationValidThreshold here, we have to process all confirmed observations
       true
     );
     logger.debug(

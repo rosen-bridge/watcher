@@ -732,7 +732,7 @@ describe('WatcherModel tests', () => {
       // check the result
       expect(result).to.have.length(1);
       expect(result[0]).to.eql(addressValidBox);
-      expect(result[0].boxId).to.not.eql('boxId');
+      expect(result[0].identifier).to.not.eql('boxId');
     });
   });
 

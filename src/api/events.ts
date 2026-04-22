@@ -1,18 +1,20 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { watcherDatabase } from '../init';
 import { DEFAULT_API_LIMIT, MAX_API_LIMIT } from '../config/constants';
 import { stringifyQueryParam } from '../utils/utils';
 import { ErgoUtils } from '../ergo/utils';
-import { JsonBI } from '../ergo/network/parser';
-import { CallbackLoggerFactory } from '@rosen-bridge/callback-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
+import JsonBigInt from '@rosen-bridge/json-bigint';
+import { HttpStatus } from '../constants';
+import { sendApiError } from '../errors/apiErrors/utils';
 
-const logger = CallbackLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 const eventsRouter = express.Router();
 
 /**
  * Api for fetching events
  */
-eventsRouter.get('/', async (req, res) => {
+eventsRouter.get('/', async (req: Request, res: Response) => {
   try {
     const {
       fromAddress,
@@ -41,18 +43,18 @@ eventsRouter.get('/', async (req, res) => {
     );
     res.set('Content-Type', 'application/json');
     res
-      .status(200)
-      .send(JsonBI.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));
+      .status(HttpStatus.OK)
+      .send(JsonBigInt.stringify(ErgoUtils.fillTokenDetailsInEvents(result)));
   } catch (e) {
     logger.warn(`An error occurred while fetching events: ${e}`);
-    res.status(500).send({ message: e.message });
+    sendApiError(res, e);
   }
 });
 
 /**
  * Api for fetching events status
  */
-eventsRouter.post('/status', async (req, res) => {
+eventsRouter.post('/status', async (req: Request, res: Response) => {
   try {
     const eventIds = req.body as Array<number>;
     if (eventIds.length > MAX_API_LIMIT) {
@@ -70,10 +72,10 @@ eventsRouter.post('/status', async (req, res) => {
       response[eventStatus.id] = eventStatus.status;
     });
 
-    res.status(200).send(response);
+    res.status(HttpStatus.OK).send(response);
   } catch (e) {
     logger.warn(`An error occurred while fetching events status: ${e}`);
-    res.status(500).send({ message: e.message });
+    sendApiError(res, e);
   }
 });
 
