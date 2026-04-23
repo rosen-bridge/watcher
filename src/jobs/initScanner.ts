@@ -13,6 +13,7 @@ const {
   bitcoin: bitcoinConfig,
   bitcoinRunes: bitcoinRunesConfig,
   doge: dogeConfig,
+  base: baseConfig,
   ethereum: ethereumConfig,
   binance: binanceConfig,
   firo: firoConfig,
@@ -72,6 +73,12 @@ export const scannerInit = () => {
     case Constants.ETHEREUM_CHAIN_NAME:
       scanningJob(
         ethereumConfig.interval,
+        scanner.getObservationScanner() as EvmRpcScanner
+      ).then(() => null);
+      break;
+    case Constants.BASE_CHAIN_NAME:
+      scanningJob(
+        baseConfig.interval,
         scanner.getObservationScanner() as EvmRpcScanner
       ).then(() => null);
       break;
