@@ -64,7 +64,7 @@ base:
     height: -1 # initial height of scanning
   interval: 20 # scanning interval (in seconds)
   rpc:
-    url: 'https://mainnet.base.org' # rpc url
+    url: '' # rpc url (use a production provider; the public Base endpoint is rate-limited)
     timeout: 10 # rpc request timeout (in seconds)
     # authToken: # rpc auth token
 ethereum:
