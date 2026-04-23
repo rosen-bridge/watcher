@@ -40,6 +40,7 @@ import {
 } from '@rosen-bridge/bitcoin-runes-observation-extractor';
 
 import {
+  BaseRpcObservationExtractor,
   BinanceRpcObservationExtractor,
   EthereumRpcObservationExtractor,
 } from '@rosen-bridge/evm-observation-extractor';
@@ -74,7 +75,6 @@ import {
   createErgoNodeNetworkConnectorManager,
   createErgoExplorerNetworkConnectorManager,
 } from './networkConnectorManagers';
-import { BaseRpcObservationExtractor } from '../extractors/baseRpcObservationExtractor';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
