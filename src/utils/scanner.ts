@@ -192,7 +192,8 @@ class CreateScanner {
         case Constants.HANDSHAKE_CHAIN_NAME:
           await CreateScanner.instance.createHandshakeScanner(
             handshakeConfig,
-            rosenConfig
+            rosenConfig,
+            config.observationStoreRawData
           );
           break;
       }
@@ -629,7 +630,8 @@ class CreateScanner {
 
   private createHandshakeScanner = async (
     handshakeConfig: HandshakeConfig,
-    rosenConfig: RosenConfig
+    rosenConfig: RosenConfig,
+    observationStoreRawData: boolean
   ) => {
     if (!this.observationScanner) {
       if (handshakeConfig.rpc) {
@@ -644,7 +646,8 @@ class CreateScanner {
           rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),
-          loggers.observationExtractorLogger
+          loggers.observationExtractorLogger,
+          observationStoreRawData
         );
         this.observationScanner.registerExtractor(observationExtractor);
       }

@@ -220,8 +220,6 @@ class HealthCheckSingleton {
       let chainName: string;
       let chainBlockTime: number;
       let updateInterval: number;
-      let scannerWarnDiff = currentConfig.healthCheck.scannerWarnDiff;
-      let scannerCriticalDiff = currentConfig.healthCheck.scannerCriticalDiff;
 
       switch (currentConfig.general.networkWatcher) {
         case CARDANO_CHAIN_NAME:
@@ -263,17 +261,14 @@ class HealthCheckSingleton {
           chainName = HANDSHAKE_CHAIN_NAME;
           chainBlockTime = HANDSHAKE_BLOCK_TIME;
           updateInterval = currentConfig.handshake.interval;
-          scannerWarnDiff = currentConfig.healthCheck.handshakeScannerWarnDiff;
-          scannerCriticalDiff =
-            currentConfig.healthCheck.handshakeScannerCriticalDiff;
           break;
       }
 
       scannerSyncCheck = new ScannerSyncHealthCheckParam(
         chainName!,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-        scannerWarnDiff,
-        scannerCriticalDiff,
+        currentConfig.healthCheck.scannerWarnDiff,
+        currentConfig.healthCheck.scannerCriticalDiff,
         chainBlockTime!,
         updateInterval!
       );
