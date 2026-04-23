@@ -1,15 +1,15 @@
-import config from 'config';
-import * as wasm from 'ergo-lib-wasm-nodejs';
-import { SecretError } from '../errors/errors';
-import * as Constants from './constants';
-import { RosenConfig } from './rosenConfig';
-import { cloneDeep } from 'lodash-es';
-import { NetworkType } from '../types';
-import { generateMnemonic } from 'bip39';
-import { convertMnemonicToSecretKey } from '../utils/utils';
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 import { RateLimitedAxiosConfig } from '@rosen-clients/rate-limited-axios';
+import { generateMnemonic } from 'bip39';
+import config from 'config';
+import * as wasm from 'ergo-lib-wasm-nodejs';
+import { cloneDeep } from 'lodash-es';
+import { SecretError } from '../errors/errors';
+import { NetworkType } from '../types';
+import { convertMnemonicToSecretKey } from '../utils/utils';
+import * as Constants from './constants';
+import { RosenConfig } from './rosenConfig';
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
@@ -19,6 +19,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.DOGE_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
   Constants.BINANCE_CHAIN_NAME,
+  Constants.HANDSHAKE_CHAIN_NAME,
   Constants.FIRO_CHAIN_NAME,
 ];
 
@@ -31,6 +32,7 @@ interface ConfigType {
   binance: BinanceConfig;
   firo: FiroConfig;
   doge: DogeConfig;
+  handshake: HandshakeConfig;
   general: Config;
   rosen: RosenConfig;
   database: DatabaseConfig;
@@ -239,6 +241,7 @@ class Config {
       [Constants.ETHEREUM_CHAIN_NAME]: Constants.ETHEREUM_BLOCK_TIME,
       [Constants.DOGE_CHAIN_NAME]: Constants.DOGE_BLOCK_TIME,
       [Constants.FIRO_CHAIN_NAME]: Constants.FIRO_BLOCK_TIME,
+      [Constants.HANDSHAKE_CHAIN_NAME]: Constants.HANDSHAKE_BLOCK_TIME,
     }[this.networkWatcher];
     this.observationValidThreshold = Math.floor(
       getRequiredNumber('observation.validThreshold') / blockTime
@@ -639,6 +642,37 @@ class FiroConfig {
   }
 }
 
+class HandshakeConfig {
+  type: string;
+  initialHeight: number;
+  interval: number;
+  rpc?: {
+    url: string;
+    timeout: number;
+    username?: string;
+    password?: string;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('handshake.type');
+    if (network === Constants.HANDSHAKE_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('handshake.initial.height');
+      this.interval = getRequiredNumber('handshake.interval');
+      if (this.type == Constants.RPC_TYPE) {
+        const url = getRequiredString('handshake.rpc.url');
+        const timeout = getRequiredNumber('handshake.rpc.timeout');
+        const username = getOptionalString('handshake.rpc.username', undefined);
+        const password = getOptionalString('handshake.rpc.password', undefined);
+        this.rpc = { url, timeout, username, password };
+      } else {
+        throw new Error(
+          `Improperly configured. handshake configuration type is invalid available choices are '${Constants.RPC_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class DatabaseConfig {
   type: string;
   path = '';
@@ -749,6 +783,7 @@ const getConfig = (): ConfigType => {
     const doge = new DogeConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
     const binance = new BinanceConfig(general.networkWatcher);
+    const handshake = new HandshakeConfig(general.networkWatcher);
     const firo = new FiroConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
@@ -764,6 +799,7 @@ const getConfig = (): ConfigType => {
       doge,
       ethereum,
       binance,
+      handshake,
       firo,
       logger,
       general,
@@ -777,14 +813,15 @@ const getConfig = (): ConfigType => {
 };
 
 export {
-  getConfig,
-  Config,
-  RosenConfig,
-  CardanoConfig,
+  BinanceConfig,
   BitcoinConfig,
   BitcoinRunesConfig,
-  EthereumConfig,
-  BinanceConfig,
-  FiroConfig,
+  CardanoConfig,
+  Config,
   DogeConfig,
+  EthereumConfig,
+  FiroConfig,
+  getConfig,
+  HandshakeConfig,
+  RosenConfig,
 };

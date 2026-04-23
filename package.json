@@ -94,6 +94,8 @@
     "@rosen-bridge/extended-typeorm": "1.1.0",
     "@rosen-bridge/firo-observation-extractor": "^1.0.0",
     "@rosen-bridge/firo-scanner": "^0.1.2",
+    "@rosen-bridge/handshake-observation-extractor": "^0.1.1",
+    "@rosen-bridge/handshake-scanner": "^0.1.2",
     "@rosen-bridge/health-check": "^8.0.0",
     "@rosen-bridge/json-bigint": "^1.1.0",
     "@rosen-bridge/log-level-check": "^4.0.0",
