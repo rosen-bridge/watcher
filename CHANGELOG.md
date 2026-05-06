@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 6.2.0
+
+### Minor Changes
+
+- Update contract version to v7.0.0
+
 ## 6.1.1
 
 ### Patch Changes
