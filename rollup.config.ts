@@ -38,6 +38,10 @@ const config: RollupOptions = {
       copyTo: './out/libs',
       destDir: './libs',
     }),
+    /**
+     * Watcher is bundled for Node, so Rollup should leave Node's native
+     * `global` object alone instead of injecting a browser-style shim.
+     */
     commonjs({ ignoreGlobal: true }),
     /**
      * This plugin is used to externalize all node native modules
