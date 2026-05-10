@@ -53,7 +53,10 @@ const config: RollupOptions = {
      * correctly. The current `exports` field in `package.json` of the package
      * is not compatible with the defaults of `nodeResolve` plugin.
      */
-    nodeResolve({ exportConditions: ['node'], preferBuiltins: false }),
+    nodeResolve({
+      exportConditions: ['node', 'require'],
+      preferBuiltins: false,
+    }),
     /**
      * Most of the following packages are optional peer dependencies which is
      * not installed by npm, but included in the bundle, which causes errors. We
