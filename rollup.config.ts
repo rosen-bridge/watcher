@@ -38,7 +38,7 @@ const config: RollupOptions = {
       copyTo: './out/libs',
       destDir: './libs',
     }),
-    commonjs(),
+    commonjs({ ignoreGlobal: true }),
     /**
      * This plugin is used to externalize all node native modules
      */
