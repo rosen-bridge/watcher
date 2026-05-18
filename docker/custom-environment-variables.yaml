@@ -34,4 +34,8 @@ firo:
   rpc:
     username: 'FIRO_RPC_USERNAME'
     password: 'FIRO_RPC_PASSWORD'
+handshake:
+  rpc:
+    username: 'HANDSHAKE_RPC_USERNAME'
+    password: 'HANDSHAKE_RPC_PASSWORD'
 overrideLokiBasicAuth: 'OVERRIDE_LOKI_BASIC_AUTH'

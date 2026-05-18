@@ -1,25 +1,25 @@
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import {
   ErgoExplorerAssetHealthCheckParam,
   ErgoNodeAssetHealthCheckParam,
 } from '@rosen-bridge/asset-check';
+import { CardanoOgmiosScanner } from '@rosen-bridge/cardano-scanner';
+import { DiscordNotification } from '@rosen-bridge/discord-notification';
 import { HealthCheck, HealthStatusLevel } from '@rosen-bridge/health-check';
+import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
 import {
   AbstractPermitHealthCheckParam,
   ExplorerPermitHealthCheckParam,
   NodePermitHealthCheckParam,
 } from '@rosen-bridge/permit-check';
 import {
-  ScannerSyncHealthCheckParam,
   CardanoOgmiosScannerHealthCheck,
+  ScannerSyncHealthCheckParam,
 } from '@rosen-bridge/scanner-sync-check';
 import {
   ExplorerWidHealthCheckParam,
   NodeWidHealthCheckParam,
 } from '@rosen-bridge/wid-check';
-import { DefaultLogger } from '@rosen-bridge/abstract-logger';
-import { CardanoOgmiosScanner } from '@rosen-bridge/cardano-scanner';
-import { DiscordNotification } from '@rosen-bridge/discord-notification';
-import { LogLevelHealthCheck } from '@rosen-bridge/log-level-check';
 
 import { Transaction } from '../api/Transaction';
 import { getConfig } from '../config/config';
@@ -33,8 +33,6 @@ import {
   CARDANO_CHAIN_NAME,
   DOGE_BLOCK_TIME,
   DOGE_CHAIN_NAME,
-  FIRO_BLOCK_TIME,
-  FIRO_CHAIN_NAME,
   ERGO_BLOCK_TIME,
   ERGO_CHAIN_NAME,
   ERGO_DECIMALS,
@@ -42,6 +40,10 @@ import {
   ETHEREUM_BLOCK_TIME,
   ETHEREUM_CHAIN_NAME,
   EXPLORER_TYPE,
+  FIRO_BLOCK_TIME,
+  FIRO_CHAIN_NAME,
+  HANDSHAKE_BLOCK_TIME,
+  HANDSHAKE_CHAIN_NAME,
   NODE_TYPE,
   OGMIOS_TYPE,
 } from '../config/constants';
@@ -196,70 +198,77 @@ class HealthCheckSingleton {
    */
   registerScannerSyncHealthCheck = () => {
     const scanner = CreateScanner.getInstance();
+    const currentConfig = getConfig();
     let scannerSyncCheck:
       | ScannerSyncHealthCheckParam
       | CardanoOgmiosScannerHealthCheck;
     if (
-      getConfig().general.networkWatcher === CARDANO_CHAIN_NAME &&
-      getConfig().cardano.type === OGMIOS_TYPE
+      currentConfig.general.networkWatcher === CARDANO_CHAIN_NAME &&
+      currentConfig.cardano.type === OGMIOS_TYPE
     ) {
       scannerSyncCheck = new CardanoOgmiosScannerHealthCheck(
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
         (
           scanner.getObservationScanner() as CardanoOgmiosScanner
         ).getConnectionStatus,
-        getConfig().healthCheck.scannerWarnDiff,
-        getConfig().healthCheck.scannerCriticalDiff,
+        currentConfig.healthCheck.scannerWarnDiff,
+        currentConfig.healthCheck.scannerCriticalDiff,
         // TODO: Fix configuration: local/health-check/-/issues/29
-        getConfig().cardano.ogmios!.connectionRetrialInterval * 15
+        currentConfig.cardano.ogmios!.connectionRetrialInterval * 15
       );
     } else {
       let chainName: string;
       let chainBlockTime: number;
       let updateInterval: number;
-      switch (getConfig().general.networkWatcher) {
+
+      switch (currentConfig.general.networkWatcher) {
         case CARDANO_CHAIN_NAME:
           chainName = CARDANO_CHAIN_NAME;
           chainBlockTime = CARDANO_BLOCK_TIME;
-          updateInterval = getConfig().cardano.koios!.interval;
+          updateInterval = currentConfig.cardano.koios!.interval;
           break;
         case BITCOIN_CHAIN_NAME:
           chainName = BITCOIN_CHAIN_NAME;
           chainBlockTime = BITCOIN_BLOCK_TIME;
-          updateInterval = getConfig().bitcoin.interval;
+          updateInterval = currentConfig.bitcoin.interval;
           break;
         case BITCOIN_RUNES_CHAIN_NAME:
           chainName = BITCOIN_RUNES_CHAIN_NAME;
           chainBlockTime = BITCOIN_BLOCK_TIME;
-          updateInterval = getConfig().bitcoin.interval;
+          updateInterval = currentConfig.bitcoin.interval;
           break;
         case DOGE_CHAIN_NAME:
           chainName = DOGE_CHAIN_NAME;
           chainBlockTime = DOGE_BLOCK_TIME;
-          updateInterval = getConfig().doge.interval;
+          updateInterval = currentConfig.doge.interval;
           break;
         case ETHEREUM_CHAIN_NAME:
           chainName = ETHEREUM_CHAIN_NAME;
           chainBlockTime = ETHEREUM_BLOCK_TIME;
-          updateInterval = getConfig().ethereum.interval;
+          updateInterval = currentConfig.ethereum.interval;
           break;
         case BINANCE_CHAIN_NAME:
           chainName = BINANCE_CHAIN_NAME;
           chainBlockTime = BINANCE_BLOCK_TIME;
-          updateInterval = getConfig().binance.interval;
+          updateInterval = currentConfig.binance.interval;
           break;
         case FIRO_CHAIN_NAME:
           chainName = FIRO_CHAIN_NAME;
           chainBlockTime = FIRO_BLOCK_TIME;
-          updateInterval = getConfig().firo.interval;
+          updateInterval = currentConfig.firo.interval;
+          break;
+        case HANDSHAKE_CHAIN_NAME:
+          chainName = HANDSHAKE_CHAIN_NAME;
+          chainBlockTime = HANDSHAKE_BLOCK_TIME;
+          updateInterval = currentConfig.handshake.interval;
           break;
       }
 
       scannerSyncCheck = new ScannerSyncHealthCheckParam(
         chainName!,
         this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
-        getConfig().healthCheck.scannerWarnDiff,
-        getConfig().healthCheck.scannerCriticalDiff,
+        currentConfig.healthCheck.scannerWarnDiff,
+        currentConfig.healthCheck.scannerCriticalDiff,
         chainBlockTime!,
         updateInterval!
       );

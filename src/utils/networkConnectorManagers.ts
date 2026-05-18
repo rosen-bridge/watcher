@@ -1,32 +1,36 @@
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import {
-  NetworkConnectorManager,
   FailoverStrategy,
+  NetworkConnectorManager,
   RoundRobinStrategy,
 } from '@rosen-bridge/abstract-scanner';
 import {
-  ErgoNodeNetwork,
-  ErgoExplorerNetwork,
-} from '@rosen-bridge/ergo-scanner';
-import {
-  DogeRpcTransaction,
-  BitcoinRpcTransaction,
-  BitcoinRpcNetwork,
-  DogeRpcNetwork,
-  EsploraNetwork,
   BitcoinEsploraTransaction,
+  BitcoinRpcNetwork,
+  BitcoinRpcTransaction,
+  DogeRpcNetwork,
+  DogeRpcTransaction,
+  EsploraNetwork,
 } from '@rosen-bridge/bitcoin-scanner';
+import {
+  BlockFrostNetwork,
+  BlockFrostTransaction,
+  KoiosNetwork,
+  KoiosTransaction,
+} from '@rosen-bridge/cardano-scanner';
+import {
+  ErgoExplorerNetwork,
+  ErgoNodeNetwork,
+} from '@rosen-bridge/ergo-scanner';
+import { EvmRpcNetwork } from '@rosen-bridge/evm-scanner';
 import { FiroRpcNetwork, FiroRpcTransaction } from '@rosen-bridge/firo-scanner';
 import {
-  KoiosNetwork,
-  BlockFrostNetwork,
-  KoiosTransaction,
-  BlockFrostTransaction,
-} from '@rosen-bridge/cardano-scanner';
-import { EvmRpcNetwork } from '@rosen-bridge/evm-scanner';
-import { getConfig } from '../config/config';
-import { DefaultLogger } from '@rosen-bridge/abstract-logger';
+  HandshakeRpcNetwork,
+  HandshakeRpcTransaction,
+} from '@rosen-bridge/handshake-scanner';
 import { Transaction } from '@rosen-bridge/scanner-interfaces';
 import { TransactionResponse } from 'ethers';
+import { getConfig } from '../config/config';
 
 const config = getConfig();
 const logger = DefaultLogger.getInstance().child(import.meta.url);
@@ -40,6 +44,7 @@ const cardanoKoiosLogger = logger.child('cardanoKoiosConnector');
 const cardanoBlockfrostLogger = logger.child('cardanoBlockfrostConnector');
 const evmLogger = logger.child('evmConnector');
 const firoLogger = logger.child('firoConnector');
+const handshakeLogger = logger.child('handshakeConnector');
 
 /**
  * Creates and configures a NetworkConnectorManager instance for Ergo node
@@ -300,6 +305,38 @@ export const createFiroRpcNetworkConnectorManager = () => {
     );
   } else {
     throw new Error('Rpc configuration must be provided for Firo Rpc network');
+  }
+
+  return networkConnectorManager;
+};
+
+/**
+ * Creates and configures a NetworkConnectorManager instance for Handshake RPC scanner
+ */
+export const createHandshakeRpcNetworkConnectorManager = () => {
+  const networkConnectorManager =
+    new NetworkConnectorManager<HandshakeRpcTransaction>(
+      new FailoverStrategy(),
+      handshakeLogger
+    );
+
+  if (config.handshake.rpc) {
+    networkConnectorManager.addConnector(
+      new HandshakeRpcNetwork(
+        config.handshake.rpc.url,
+        config.handshake.rpc.timeout * 1000,
+        config.handshake.rpc.username && config.handshake.rpc.password
+          ? {
+              username: config.handshake.rpc.username,
+              password: config.handshake.rpc.password,
+            }
+          : undefined
+      )
+    );
+  } else {
+    throw new Error(
+      'Rpc configuration must be provided for Handshake Rpc network'
+    );
   }
 
   return networkConnectorManager;
