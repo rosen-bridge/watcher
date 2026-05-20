@@ -81,7 +81,7 @@
     "@rosen-bridge/address-manager": "^0.1.0",
     "@rosen-bridge/asset-check": "^6.2.1",
     "@rosen-bridge/bitcoin-observation-extractor": "^8.0.1",
-    "@rosen-bridge/bitcoin-runes-observation-extractor": "^3.0.1",
+    "@rosen-bridge/bitcoin-runes-observation-extractor": "^3.0.2",
     "@rosen-bridge/bitcoin-scanner": "^1.0.4",
     "@rosen-bridge/callback-logger": "^2.0.0",
     "@rosen-bridge/cardano-observation-extractor": "^3.0.1",
