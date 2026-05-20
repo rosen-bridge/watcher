@@ -9,6 +9,7 @@ import {
   NodePermitHealthCheckParam,
 } from '@rosen-bridge/permit-check';
 import {
+  FiroElectrumXScannerHealthCheck,
   ScannerSyncHealthCheckParam,
   CardanoOgmiosScannerHealthCheck,
 } from '@rosen-bridge/scanner-sync-check';
@@ -196,9 +197,11 @@ class HealthCheckSingleton {
    */
   registerScannerSyncHealthCheck = () => {
     const scanner = CreateScanner.getInstance();
+    const currentConfig = getConfig();
     let scannerSyncCheck:
       | ScannerSyncHealthCheckParam
-      | CardanoOgmiosScannerHealthCheck;
+      | CardanoOgmiosScannerHealthCheck
+      | FiroElectrumXScannerHealthCheck;
     if (
       getConfig().general.networkWatcher === CARDANO_CHAIN_NAME &&
       getConfig().cardano.type === OGMIOS_TYPE
@@ -212,6 +215,16 @@ class HealthCheckSingleton {
         getConfig().healthCheck.scannerCriticalDiff,
         // TODO: Fix configuration: local/health-check/-/issues/29
         getConfig().cardano.ogmios!.connectionRetrialInterval * 15
+      );
+    } else if (currentConfig.general.networkWatcher === FIRO_CHAIN_NAME) {
+      scannerSyncCheck = new FiroElectrumXScannerHealthCheck(
+        this.observingNetworkLastBlock(scanner.getObservationScanner().name()),
+        currentConfig.healthCheck.scannerWarnDiff,
+        currentConfig.healthCheck.scannerCriticalDiff,
+        currentConfig.firo.electrumx!.host,
+        currentConfig.firo.electrumx!.port,
+        FIRO_BLOCK_TIME,
+        currentConfig.firo.interval
       );
     } else {
       let chainName: string;
@@ -243,15 +256,15 @@ class HealthCheckSingleton {
           chainBlockTime = ETHEREUM_BLOCK_TIME;
           updateInterval = getConfig().ethereum.interval;
           break;
-        case BINANCE_CHAIN_NAME:
-          chainName = BINANCE_CHAIN_NAME;
-          chainBlockTime = BINANCE_BLOCK_TIME;
-          updateInterval = getConfig().binance.interval;
-          break;
         case FIRO_CHAIN_NAME:
           chainName = FIRO_CHAIN_NAME;
           chainBlockTime = FIRO_BLOCK_TIME;
           updateInterval = getConfig().firo.interval;
+          break;
+        case BINANCE_CHAIN_NAME:
+          chainName = BINANCE_CHAIN_NAME;
+          chainBlockTime = BINANCE_BLOCK_TIME;
+          updateInterval = getConfig().binance.interval;
           break;
       }
 

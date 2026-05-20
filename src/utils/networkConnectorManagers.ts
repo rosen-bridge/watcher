@@ -15,7 +15,10 @@ import {
   EsploraNetwork,
   BitcoinEsploraTransaction,
 } from '@rosen-bridge/bitcoin-scanner';
-import { FiroRpcNetwork, FiroRpcTransaction } from '@rosen-bridge/firo-scanner';
+import {
+  FiroElectrumXNetwork,
+  FiroRpcTransaction,
+} from '@rosen-bridge/firo-scanner';
 import {
   KoiosNetwork,
   BlockFrostNetwork,
@@ -276,30 +279,27 @@ export const createEvmNetworkConnectorManager = (chainName: string) => {
 };
 
 /**
- * Creates and configures a NetworkConnectorManager instance for Firo RPC scanner
+ * Creates and configures a NetworkConnectorManager instance for Firo ElectrumX scanner
  */
-export const createFiroRpcNetworkConnectorManager = () => {
+export const createFiroElectrumXNetworkConnectorManager = () => {
   const networkConnectorManager =
     new NetworkConnectorManager<FiroRpcTransaction>(
       new FailoverStrategy(),
       firoLogger
     );
 
-  if (config.firo.rpc) {
+  if (config.firo.electrumx) {
     networkConnectorManager.addConnector(
-      new FiroRpcNetwork(
-        config.firo.rpc.url,
-        config.firo.rpc.timeout * 1000,
-        config.firo.rpc.username && config.firo.rpc.password
-          ? {
-              username: config.firo.rpc.username,
-              password: config.firo.rpc.password,
-            }
-          : undefined
+      new FiroElectrumXNetwork(
+        config.firo.electrumx.host,
+        config.firo.electrumx.port,
+        config.firo.electrumx.timeout * 1000
       )
     );
   } else {
-    throw new Error('Rpc configuration must be provided for Firo Rpc network');
+    throw new Error(
+      'ElectrumX configuration must be provided for Firo ElectrumX network'
+    );
   }
 
   return networkConnectorManager;
