@@ -1,6 +1,7 @@
 .idea
 node_modules
 .nyc_output
+.changeset
 coverage
 dir
 build
@@ -16,8 +17,9 @@ Dockerfile
 .env
 .git*
 .eslintignore
-README.md
+*.md
 .husky
 .lintstagedrc.js
 .mocharc.json
 .prettierrc.json
+scratch
