@@ -84,7 +84,7 @@ firo:
   interval: 180 # scanning interval (in seconds)
   electrumx:
     host: '' # electrumx host
-    port: 50001 # electrumx port
+    port: 50002 # electrumx SSL port
     timeout: 10 # electrumx request timeout (in seconds)
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
