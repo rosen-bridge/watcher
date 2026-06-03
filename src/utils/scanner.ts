@@ -44,8 +44,14 @@ import {
   EthereumRpcObservationExtractor,
 } from '@rosen-bridge/evm-observation-extractor';
 import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
-import { FiroObservationExtractor } from '@rosen-bridge/firo-observation-extractor';
-import { FiroElectrumXScanner } from '@rosen-bridge/firo-scanner';
+import {
+  FiroObservationExtractor,
+  FiroRpcObservationExtractor,
+} from '@rosen-bridge/firo-observation-extractor';
+import {
+  FiroElectrumXScanner,
+  FiroRpcScanner,
+} from '@rosen-bridge/firo-scanner';
 import { dataSource } from '../../config/dataSource';
 import {
   BinanceConfig,
@@ -72,6 +78,7 @@ import {
   createErgoNodeNetworkConnectorManager,
   createErgoExplorerNetworkConnectorManager,
   createFiroElectrumXNetworkConnectorManager,
+  createFiroRpcNetworkConnectorManager,
 } from './networkConnectorManagers';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
@@ -106,6 +113,7 @@ class CreateScanner {
     | DogeEsploraScanner
     | DogeRpcScanner
     | EvmRpcScanner
+    | FiroRpcScanner
     | FiroElectrumXScanner;
 
   private constructor() {
@@ -225,6 +233,7 @@ class CreateScanner {
     | DogeEsploraScanner
     | DogeRpcScanner
     | EvmRpcScanner
+    | FiroRpcScanner
     | FiroElectrumXScanner => {
     if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
@@ -592,7 +601,23 @@ class CreateScanner {
     observationStoreRawData: boolean
   ) => {
     if (!this.observationScanner) {
-      if (firoConfig.electrumx) {
+      if (firoConfig.rpc) {
+        this.observationScanner = new FiroRpcScanner({
+          dataSource,
+          initialHeight: firoConfig.initialHeight,
+          network: createFiroRpcNetworkConnectorManager(),
+          logger: loggers.observationScannerLogger,
+        });
+
+        const observationExtractor = new FiroRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger,
+          observationStoreRawData
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (firoConfig.electrumx) {
         this.observationScanner = new FiroElectrumXScanner({
           dataSource,
           initialHeight: firoConfig.initialHeight,

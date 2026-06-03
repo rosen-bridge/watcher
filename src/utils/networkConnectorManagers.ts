@@ -17,6 +17,7 @@ import {
 } from '@rosen-bridge/bitcoin-scanner';
 import {
   FiroElectrumXNetwork,
+  FiroRpcNetwork,
   FiroRpcTransaction,
 } from '@rosen-bridge/firo-scanner';
 import {
@@ -273,6 +274,36 @@ export const createEvmNetworkConnectorManager = (chainName: string) => {
     );
   } else {
     throw new Error(`No RPC configuration found for ${chainName}`);
+  }
+
+  return networkConnectorManager;
+};
+
+/**
+ * Creates and configures a NetworkConnectorManager instance for Firo RPC scanner
+ */
+export const createFiroRpcNetworkConnectorManager = () => {
+  const networkConnectorManager =
+    new NetworkConnectorManager<FiroRpcTransaction>(
+      new FailoverStrategy(),
+      firoLogger
+    );
+
+  if (config.firo.rpc) {
+    networkConnectorManager.addConnector(
+      new FiroRpcNetwork(
+        config.firo.rpc.url,
+        config.firo.rpc.timeout * 1000,
+        config.firo.rpc.username && config.firo.rpc.password
+          ? {
+              username: config.firo.rpc.username,
+              password: config.firo.rpc.password,
+            }
+          : undefined
+      )
+    );
+  } else {
+    throw new Error('Rpc configuration must be provided for Firo Rpc network');
   }
 
   return networkConnectorManager;
