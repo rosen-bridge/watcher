@@ -14,11 +14,10 @@ RUN adduser --disabled-password --home /app --no-create-home --uid 3000 --gecos 
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR ${SERVICE_DIR}
-# TODO: Add layer optimizations when at least one package is added to the monorepo
-# https://git.ergopool.io/ergo/rosen-bridge/watcher/-/issues/131
 COPY --chmod=700 --chown=ergo:ergo . .
 ENV NODE_ENV=production
 RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/root/.cache \
     --mount=type=cache,target=/tmp/node-compile-cache \
     npm ci && chown -R ergo:ergo /app/
 
