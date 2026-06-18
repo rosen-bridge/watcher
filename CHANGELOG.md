@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 6.2.1
+
+### Patch Changes
+
+- Fix bug where pagination was ignored in Unisat network used by the `BitcoinRunesObservationExtractor`
+
 ## 6.2.0
 
 ### Minor Changes
