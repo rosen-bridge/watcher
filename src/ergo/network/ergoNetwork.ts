@@ -378,7 +378,9 @@ export class ErgoNetwork {
           })
       );
       return boxes.every(
-        (box) => !box.spentTransactionId || box.spentTransactionId === txId
+        (box) =>
+          (!box.spentTransactionId || box.spentTransactionId === txId) &&
+          box.mainChain
       );
     } catch (e) {
       if (e.response && e.response.status == 404) return false;
