@@ -90,6 +90,7 @@ firo:
   electrumx:
     host: '' # electrumx host
     port: 50002 # electrumx SSL port
+    reconnectDelay: 5 # electrumx reconnect delay on socket close (in seconds)
     timeout: 10 # electrumx request timeout (in seconds)
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet

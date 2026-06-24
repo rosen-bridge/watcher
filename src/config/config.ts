@@ -621,6 +621,7 @@ class FiroConfig {
   electrumx?: {
     host: string;
     port: number;
+    reconnectDelay: number;
     timeout: number;
   };
 
@@ -638,8 +639,11 @@ class FiroConfig {
       } else if (this.type === Constants.ELECTRUMX_TYPE) {
         const host = getRequiredString('firo.electrumx.host');
         const port = getRequiredNumber('firo.electrumx.port');
+        const reconnectDelay = getRequiredNumber(
+          'firo.electrumx.reconnectDelay'
+        );
         const timeout = getRequiredNumber('firo.electrumx.timeout');
-        this.electrumx = { host, port, timeout };
+        this.electrumx = { host, port, reconnectDelay, timeout };
       } else {
         throw new Error(
           `Improperly configured. firo configuration type is invalid available choices are '${Constants.RPC_TYPE}', '${Constants.ELECTRUMX_TYPE}'`
