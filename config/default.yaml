@@ -135,6 +135,10 @@ logs:
     maxSize: '20m' # maximum size of each log file (20 MB) (only for rotateFile type)
     maxFiles: '14d' # maximum number of log files (14 days) (only for rotateFile type)
     level: 'info' # [debug, info, warn, error]
+    # format: 'json' # format of log file lines [plain or json]
+    # createSymlink: true # create tailable file symlink to last log file
+    # symlinkName: 'current.log' # name of tailable file
+    # serviceName: 'watcher' # service name for each log line
   - type: 'console'
     level: 'info'
 database:

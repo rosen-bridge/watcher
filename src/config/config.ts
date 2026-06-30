@@ -322,7 +322,11 @@ class LoggerConfig {
           log.maxSize != undefined &&
           typeof log.maxSize === 'string' &&
           log.maxFiles != undefined &&
-          typeof log.maxFiles === 'string';
+          typeof log.maxFiles === 'string' &&
+          (log.format ? typeof log.format === 'string' : true) &&
+          (log.createSymlink ? typeof log.createSymlink === 'boolean' : true) &&
+          (log.symlinkName ? typeof log.symlinkName === 'string' : true) &&
+          (log.serviceName ? typeof log.serviceName === 'string' : true);
       }
       return !(loggerChecks && logTypeValidation);
     });
