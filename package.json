@@ -105,7 +105,7 @@
     "@rosen-bridge/tokens": "^6.0.2",
     "@rosen-bridge/watcher-data-extractor": "^13.0.10",
     "@rosen-bridge/wid-check": "^3.0.3",
-    "@rosen-bridge/winston-logger": "^3.0.1",
+    "@rosen-bridge/winston-logger": "^3.1.0",
     "@rosen-clients/rate-limited-axios": "^2.0.1",
     "bip39": "^3.1.0",
     "blakejs": "^1.2.1",
