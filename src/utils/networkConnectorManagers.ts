@@ -320,14 +320,14 @@ export const createFiroElectrumXNetworkConnectorManager = () => {
     );
 
   if (config.firo.electrumx) {
-    networkConnectorManager.addConnector(
-      new FiroElectrumXNetwork(
-        config.firo.electrumx.host,
-        config.firo.electrumx.port,
-        config.firo.electrumx.reconnectDelay,
-        config.firo.electrumx.timeout
-      )
+    const network = new FiroElectrumXNetwork(
+      config.firo.electrumx.host,
+      config.firo.electrumx.port,
+      config.firo.electrumx.reconnectDelay,
+      config.firo.electrumx.timeout
     );
+    network.setupSocket();
+    networkConnectorManager.addConnector(network);
   } else {
     throw new Error(
       'ElectrumX configuration must be provided for Firo ElectrumX network'
