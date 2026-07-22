@@ -347,6 +347,29 @@ class WatcherUtils {
   };
 
   /**
+   * Return a list of commitment which observation of them are not exists
+   */
+  noObservationCommitments = async (): Promise<Array<CommitmentEntity>> => {
+    const height = await this.dataBase.getLastBlockHeight(
+      CreateScanner.getInstance().getErgoScanner().name()
+    );
+    const result: Array<CommitmentEntity> = [];
+    const commitments = await this.dataBase.commitmentsByWIDAndMaxHeight(
+      Transaction.watcherWID!,
+      height
+    );
+    for (const commitment of commitments) {
+      const observation = await this.dataBase.getObservationById(
+        commitment.eventId
+      );
+      if (!observation) {
+        result.push(commitment);
+      }
+    }
+    return result;
+  };
+
+  /**
    * returns all timeout commitments
    */
   lastCommitment = async (): Promise<CommitmentEntity> => {
