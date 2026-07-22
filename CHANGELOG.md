@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 6.2.2
+
+### Patch Changes
+
+- Fix cardano scanner and extractor to prevent events with failed transactions
+
 ## 6.2.1
 
 ### Patch Changes
