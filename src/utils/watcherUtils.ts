@@ -415,7 +415,7 @@ class WatcherUtils {
 
   /**
    * Check timed out commitments to be valid, a commitment is not valid if:
-   *    1 - Observation already exists
+   *    1 - Observation not exists
    *    2 - Not triggered after the specified period
    *    3 - Created after the related trigger
    *    4 - It's a duplicate commitment and a valid one merged to create the trigger (WID exists in trigger)
