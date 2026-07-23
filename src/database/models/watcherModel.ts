@@ -210,6 +210,14 @@ class WatcherDataBase {
     return { items, total };
   };
 
+  getObservationById = async (
+    requestId: string
+  ): Promise<ObservationEntity | null> => {
+    return this.observationRepository.findOne({
+      where: { requestId: requestId },
+    });
+  };
+
   /**
    *
    * @param observationIds get status of a list of observations

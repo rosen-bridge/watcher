@@ -347,6 +347,29 @@ class WatcherUtils {
   };
 
   /**
+   * Return a list of commitment which observation of them are not exists
+   */
+  noObservationCommitments = async (): Promise<Array<CommitmentEntity>> => {
+    const height = await this.dataBase.getLastBlockHeight(
+      CreateScanner.getInstance().getErgoScanner().name()
+    );
+    const result: Array<CommitmentEntity> = [];
+    const commitments = await this.dataBase.commitmentsByWIDAndMaxHeight(
+      Transaction.watcherWID!,
+      height
+    );
+    for (const commitment of commitments) {
+      const observation = await this.dataBase.getObservationById(
+        commitment.eventId
+      );
+      if (!observation) {
+        result.push(commitment);
+      }
+    }
+    return result;
+  };
+
+  /**
    * returns all timeout commitments
    */
   lastCommitment = async (): Promise<CommitmentEntity> => {
@@ -392,16 +415,23 @@ class WatcherUtils {
 
   /**
    * Check timed out commitments to be valid, a commitment is not valid if:
-   *    1 - Not triggered after the specified period
-   *    2 - Created after the related trigger
-   *    3 - It's a duplicate commitment and a valid one merged to create the trigger (WID exists in trigger)
-   *    4 - It's information is not valid and trigger was spent without rewarding the commitment
+   *    1 - Observation not exists
+   *    2 - Not triggered after the specified period
+   *    3 - Created after the related trigger
+   *    4 - It's a duplicate commitment and a valid one merged to create the trigger (WID exists in trigger)
+   *    5 - It's information is not valid and trigger was spent without rewarding the commitment
    * @param commitment
    * @returns true if the commitment is still valid and false otherwise
    */
   isCommitmentValid = async (
     commitment: CommitmentEntity
   ): Promise<boolean> => {
+    const observation = await this.dataBase.getObservationById(
+      commitment.eventId
+    );
+    if (!observation) {
+      return false;
+    }
     const eventTrigger = await this.dataBase.eventTriggerByEventId(
       commitment.eventId
     );

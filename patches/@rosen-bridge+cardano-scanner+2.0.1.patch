@@ -1,0 +1,12 @@
+diff --git a/node_modules/@rosen-bridge/cardano-scanner/dist/interfaces/koios.d.ts b/node_modules/@rosen-bridge/cardano-scanner/dist/interfaces/koios.d.ts
+index b678c14..5efc087 100644
+--- a/node_modules/@rosen-bridge/cardano-scanner/dist/interfaces/koios.d.ts
++++ b/node_modules/@rosen-bridge/cardano-scanner/dist/interfaces/koios.d.ts
+@@ -19,6 +19,7 @@ interface KoiosCborTx {
+     absolute_slot: number;
+     tx_timestamp: number;
+     cbor: string;
++    valid_contract: boolean;
+ }
+ type KoiosTransaction = KoiosCborTx & TransactionJSON;
+ export { KoiosBlock, KoiosBlockInfo, KoiosTransaction, KoiosCborTx };

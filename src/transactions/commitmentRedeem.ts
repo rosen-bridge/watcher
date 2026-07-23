@@ -130,6 +130,7 @@ export class CommitmentRedeem {
         this.redeemConfirmation
       )),
       ...(await this.watcherUtils.allTriggeredInvalidCommitments()),
+      ...(await this.watcherUtils.noObservationCommitments()),
     ];
     const WID = Transaction.watcherWID;
     logger.info(`Starting commitment redeem job`);
