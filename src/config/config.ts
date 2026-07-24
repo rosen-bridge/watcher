@@ -19,6 +19,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.DOGE_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
   Constants.BINANCE_CHAIN_NAME,
+  Constants.FIRO_CHAIN_NAME,
 ];
 
 interface ConfigType {
@@ -28,6 +29,7 @@ interface ConfigType {
   bitcoinRunes: BitcoinRunesConfig;
   ethereum: EthereumConfig;
   binance: BinanceConfig;
+  firo: FiroConfig;
   doge: DogeConfig;
   general: Config;
   rosen: RosenConfig;
@@ -236,6 +238,7 @@ class Config {
       [Constants.BINANCE_CHAIN_NAME]: Constants.BINANCE_BLOCK_TIME,
       [Constants.ETHEREUM_CHAIN_NAME]: Constants.ETHEREUM_BLOCK_TIME,
       [Constants.DOGE_CHAIN_NAME]: Constants.DOGE_BLOCK_TIME,
+      [Constants.FIRO_CHAIN_NAME]: Constants.FIRO_BLOCK_TIME,
     }[this.networkWatcher];
     this.observationValidThreshold = Math.floor(
       getRequiredNumber('observation.validThreshold') / blockTime
@@ -316,7 +319,11 @@ class LoggerConfig {
           log.maxSize != undefined &&
           typeof log.maxSize === 'string' &&
           log.maxFiles != undefined &&
-          typeof log.maxFiles === 'string';
+          typeof log.maxFiles === 'string' &&
+          (log.format ? typeof log.format === 'string' : true) &&
+          (log.createSymlink ? typeof log.createSymlink === 'boolean' : true) &&
+          (log.symlinkName ? typeof log.symlinkName === 'string' : true) &&
+          (log.serviceName ? typeof log.serviceName === 'string' : true);
       }
       return !(loggerChecks && logTypeValidation);
     });
@@ -605,6 +612,51 @@ class BinanceConfig {
   }
 }
 
+class FiroConfig {
+  type: string;
+  initialHeight: number;
+  interval: number;
+  rpc?: {
+    url: string;
+    timeout: number;
+    username?: string;
+    password?: string;
+  };
+  electrumx?: {
+    host: string;
+    port: number;
+    reconnectDelay: number;
+    timeout: number;
+  };
+
+  constructor(network: string) {
+    this.type = config.get<string>('firo.type');
+    if (network === Constants.FIRO_CHAIN_NAME) {
+      this.initialHeight = getRequiredNumber('firo.initial.height');
+      this.interval = getRequiredNumber('firo.interval');
+      if (this.type === Constants.RPC_TYPE) {
+        const url = getRequiredString('firo.rpc.url');
+        const timeout = getRequiredNumber('firo.rpc.timeout');
+        const username = getOptionalString('firo.rpc.username', undefined);
+        const password = getOptionalString('firo.rpc.password', undefined);
+        this.rpc = { url, timeout, username, password };
+      } else if (this.type === Constants.ELECTRUMX_TYPE) {
+        const host = getRequiredString('firo.electrumx.host');
+        const port = getRequiredNumber('firo.electrumx.port');
+        const reconnectDelay = getRequiredNumber(
+          'firo.electrumx.reconnectDelay'
+        );
+        const timeout = getRequiredNumber('firo.electrumx.timeout');
+        this.electrumx = { host, port, reconnectDelay, timeout };
+      } else {
+        throw new Error(
+          `Improperly configured. firo configuration type is invalid available choices are '${Constants.RPC_TYPE}', '${Constants.ELECTRUMX_TYPE}'`
+        );
+      }
+    }
+  }
+}
+
 class DatabaseConfig {
   type: string;
   path = '';
@@ -715,6 +767,7 @@ const getConfig = (): ConfigType => {
     const doge = new DogeConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
     const binance = new BinanceConfig(general.networkWatcher);
+    const firo = new FiroConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
       general.rosenConfigPath
@@ -729,6 +782,7 @@ const getConfig = (): ConfigType => {
       doge,
       ethereum,
       binance,
+      firo,
       logger,
       general,
       rosen,
@@ -749,5 +803,6 @@ export {
   BitcoinRunesConfig,
   EthereumConfig,
   BinanceConfig,
+  FiroConfig,
   DogeConfig,
 };

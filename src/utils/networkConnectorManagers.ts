@@ -16,6 +16,11 @@ import {
   BitcoinEsploraTransaction,
 } from '@rosen-bridge/bitcoin-scanner';
 import {
+  FiroElectrumXNetwork,
+  FiroRpcNetwork,
+  FiroRpcTransaction,
+} from '@rosen-bridge/firo-scanner';
+import {
   KoiosNetwork,
   BlockFrostNetwork,
   KoiosTransaction,
@@ -38,6 +43,7 @@ const dogeLogger = logger.child('dogeConnector');
 const cardanoKoiosLogger = logger.child('cardanoKoiosConnector');
 const cardanoBlockfrostLogger = logger.child('cardanoBlockfrostConnector');
 const evmLogger = logger.child('evmConnector');
+const firoLogger = logger.child('firoConnector');
 
 /**
  * Creates and configures a NetworkConnectorManager instance for Ergo node
@@ -268,6 +274,65 @@ export const createEvmNetworkConnectorManager = (chainName: string) => {
     );
   } else {
     throw new Error(`No RPC configuration found for ${chainName}`);
+  }
+
+  return networkConnectorManager;
+};
+
+/**
+ * Creates and configures a NetworkConnectorManager instance for Firo RPC scanner
+ */
+export const createFiroRpcNetworkConnectorManager = () => {
+  const networkConnectorManager =
+    new NetworkConnectorManager<FiroRpcTransaction>(
+      new FailoverStrategy(),
+      firoLogger
+    );
+
+  if (config.firo.rpc) {
+    networkConnectorManager.addConnector(
+      new FiroRpcNetwork(
+        config.firo.rpc.url,
+        config.firo.rpc.timeout * 1000,
+        config.firo.rpc.username && config.firo.rpc.password
+          ? {
+              username: config.firo.rpc.username,
+              password: config.firo.rpc.password,
+            }
+          : undefined
+      )
+    );
+  } else {
+    throw new Error('Rpc configuration must be provided for Firo Rpc network');
+  }
+
+  return networkConnectorManager;
+};
+
+/**
+ * Creates and configures a NetworkConnectorManager instance for Firo ElectrumX scanner
+ */
+export const createFiroElectrumXNetworkConnectorManager = () => {
+  const networkConnectorManager =
+    new NetworkConnectorManager<FiroRpcTransaction>(
+      new FailoverStrategy(),
+      firoLogger
+    );
+
+  if (config.firo.electrumx) {
+    const network = new FiroElectrumXNetwork(
+      config.firo.electrumx.host,
+      config.firo.electrumx.port,
+      config.firo.electrumx.reconnectDelay,
+      config.firo.electrumx.timeout,
+      logger.child('firoElectrumXNetwork')
+    );
+    network.setupSocket();
+    networkConnectorManager.addConnector(network);
+  } else {
+    throw new Error(
+      'ElectrumX configuration must be provided for Firo ElectrumX network'
+    );
   }
 
   return networkConnectorManager;

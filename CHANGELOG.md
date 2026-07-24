@@ -1,5 +1,48 @@
 # @rosen-bridge/watcher
 
+## 6.3.0
+
+### Minor Changes
+
+- Integrate Firo
+- Improve the size of Docker image:
+
+  - improve GA for using cache while building the image
+  - improve Docker build to use cache as much as possible and do not store unneeded files in the image
+  - Add `|| true` for husky in prepare to work with `NODE_ENV=production` set before `npm ci`
+
+- add format, serviceName, createSymlink and symlinkName options for log in config, file type
+
+### Patch Changes
+
+- Integrate and initialize the `AddressManager` which is required in the new version of Rosen extractor packages (used in all observation extractors)
+- Fix forked tx validation
+- Update dependencies
+  - @rosen-bridge/abstract-observation-extractor@1.0.10
+  - @rosen-bridge/abstract-scanner@2.0.3
+  - @rosen-bridge/address-codec@2.1.0
+  - @rosen-bridge/address-extractor@7.0.8
+  - @rosen-bridge/asset-check@6.2.2
+  - @rosen-bridge/bitcoin-observation-extractor@8.0.5
+  - @rosen-bridge/bitcoin-runes-observation-extractor@3.0.6
+  - @rosen-bridge/bitcoin-scanner@1.1.3
+  - @rosen-bridge/cardano-observation-extractor@3.0.6
+  - @rosen-bridge/cardano-scanner@2.2.0
+  - @rosen-bridge/ergo-observation-extractor@2.0.5
+  - @rosen-bridge/ergo-scanner@1.1.3
+  - @rosen-bridge/evm-observation-extractor@7.0.5
+  - @rosen-bridge/evm-scanner@1.1.3
+  - @rosen-bridge/firo-observation-extractor@1.1.3
+  - @rosen-bridge/firo-scanner@0.2.3
+  - @rosen-bridge/node-sync-check@3.0.3
+  - @rosen-bridge/permit-check@3.0.4
+  - @rosen-bridge/scanner-interfaces@1.0.0
+  - @rosen-bridge/tokens@6.0.2
+  - @rosen-bridge/watcher-data-extractor@13.0.10
+  - @rosen-bridge/wid-check@3.0.3
+  - @rosen-bridge/winston-logger@3.1.0
+  - @rosen-clients/rate-limited-axios@2.0.1
+
 ## 6.2.2
 
 ### Patch Changes

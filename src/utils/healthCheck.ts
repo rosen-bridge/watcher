@@ -33,6 +33,8 @@ import {
   CARDANO_CHAIN_NAME,
   DOGE_BLOCK_TIME,
   DOGE_CHAIN_NAME,
+  FIRO_BLOCK_TIME,
+  FIRO_CHAIN_NAME,
   ERGO_BLOCK_TIME,
   ERGO_CHAIN_NAME,
   ERGO_DECIMALS,
@@ -194,6 +196,7 @@ class HealthCheckSingleton {
    */
   registerScannerSyncHealthCheck = () => {
     const scanner = CreateScanner.getInstance();
+    const currentConfig = getConfig();
     let scannerSyncCheck:
       | ScannerSyncHealthCheckParam
       | CardanoOgmiosScannerHealthCheck;
@@ -235,6 +238,11 @@ class HealthCheckSingleton {
           chainName = DOGE_CHAIN_NAME;
           chainBlockTime = DOGE_BLOCK_TIME;
           updateInterval = getConfig().doge.interval;
+          break;
+        case FIRO_CHAIN_NAME:
+          chainName = FIRO_CHAIN_NAME;
+          chainBlockTime = FIRO_BLOCK_TIME;
+          updateInterval = currentConfig.firo.interval;
           break;
         case ETHEREUM_CHAIN_NAME:
           chainName = ETHEREUM_CHAIN_NAME;
