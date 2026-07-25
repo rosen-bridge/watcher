@@ -10,6 +10,7 @@ import {
   observationStatusRevealed,
   observationStatusTimedOut,
   redeemedCommitment,
+  spentCommitmentEntityOfWID,
   unspentCommitment,
   unspentCommitment2,
   unspentCommitmentDuplicate,
@@ -28,6 +29,7 @@ import { NoObservationStatus } from '../../src/errors/errors';
 import { ErgoNetwork } from '../../src/ergo/network/ergoNetwork';
 import { TransactionUtils, WatcherUtils } from '../../src/utils/watcherUtils';
 import TransactionTest from '../../src/api/TransactionTest';
+import { Transaction } from '../../src/api/Transaction';
 import MinimumFeeHandler from '../../src/utils/MinimumFeeHandler';
 import { ChainMinimumFee } from '@rosen-bridge/minimum-fee';
 
@@ -38,7 +40,6 @@ const signedTx = wasm.Transaction.from_json(JsonBigInt.stringify(txObj));
 describe('Testing the WatcherUtils & TransactionUtils', () => {
   let dataBase: WatcherDataBase,
     boxes: Boxes,
-    transaction: TransactionTest,
     watcherUtils: WatcherUtils,
     txUtils: TransactionUtils;
   beforeEach(async () => {
@@ -47,7 +48,6 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
     boxes = new Boxes(dataBase);
     await TransactionTest.setup(userAddress, secret1, boxes, dataBase);
     txUtils = new TransactionUtils(dataBase);
-    transaction = TransactionTest.getInstance();
     watcherUtils = new WatcherUtils(dataBase, 0, 100);
   });
 
@@ -167,6 +167,91 @@ describe('Testing the WatcherUtils & TransactionUtils', () => {
         TransactionTest.watcherWID,
         140
       );
+    });
+  });
+
+  describe('noObservationCommitments', () => {
+    /**
+     * @target WatcherUtils.noObservationCommitments should return commitments without observation
+     * @dependencies
+     * - watcherDatabase
+     * @scenario
+     * - mock getLastBlockHeight
+     * - mock commitmentsByWIDAndMaxHeight to return two commitments
+     * - mock getObservationById to return observation for one and null for the other
+     * - run test
+     * - check returned value
+     * @expected
+     * - it should return only the commitment without observation
+     */
+    it('should return commitments without observation', async () => {
+      const commitmentWithObservation = {
+        ...commitmentEntity,
+        eventId: 'eventWithObservation',
+      };
+      const commitmentWithoutObservation = {
+        ...spentCommitmentEntityOfWID,
+        eventId: 'eventWithoutObservation',
+      };
+
+      chai.spy.on(dataBase, 'getLastBlockHeight', () => 150);
+      chai.spy.on(dataBase, 'commitmentsByWIDAndMaxHeight', () => [
+        commitmentWithObservation,
+        commitmentWithoutObservation,
+      ]);
+      chai.spy.on(dataBase, 'getObservationById', (eventId: string) =>
+        eventId === 'eventWithObservation' ? observationEntity1 : null
+      );
+
+      const data = await watcherUtils.noObservationCommitments();
+      expect(data).to.have.length(1);
+      expect(data[0]).to.equal(commitmentWithoutObservation);
+    });
+
+    /**
+     * @target WatcherUtils.noObservationCommitments should return empty array when all commitments have observations
+     * @dependencies
+     * - watcherDatabase
+     * @scenario
+     * - mock getLastBlockHeight
+     * - mock commitmentsByWIDAndMaxHeight to return one commitment
+     * - mock getObservationById to return an observation
+     * - run test
+     * - check returned value
+     * @expected
+     * - it should return an empty array
+     */
+    it('should return empty array when all commitments have observations', async () => {
+      chai.spy.on(dataBase, 'getLastBlockHeight', () => 150);
+      chai.spy.on(dataBase, 'commitmentsByWIDAndMaxHeight', () => [
+        commitmentEntity,
+      ]);
+      chai.spy.on(dataBase, 'getObservationById', () => observationEntity1);
+
+      const data = await watcherUtils.noObservationCommitments();
+      expect(data).to.have.length(0);
+    });
+
+    /**
+     * @target WatcherUtils.noObservationCommitments should return empty array when there are no commitments
+     * @dependencies
+     * - watcherDatabase
+     * @scenario
+     * - mock getLastBlockHeight
+     * - mock commitmentsByWIDAndMaxHeight to return an empty array
+     * - run test
+     * - check returned value
+     * @expected
+     * - it should return an empty array and not query observations
+     */
+    it('should return empty array when there are no commitments', async () => {
+      chai.spy.on(dataBase, 'getLastBlockHeight', () => 150);
+      chai.spy.on(dataBase, 'commitmentsByWIDAndMaxHeight', () => []);
+      chai.spy.on(dataBase, 'getObservationById', () => null);
+
+      const data = await watcherUtils.noObservationCommitments();
+      expect(data).to.have.length(0);
+      expect(dataBase.getObservationById).to.not.have.been.called;
     });
   });
 
