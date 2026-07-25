@@ -1,7 +1,9 @@
+import * as wasm from 'ergo-lib-wasm-nodejs';
 import {
   ChainMinimumFee,
-  ErgoNetworkType,
   MinimumFeeBox,
+  MinimumFeeExplorerNetwork,
+  MinimumFeeNodeNetwork,
 } from '@rosen-bridge/minimum-fee';
 import { TokenMap } from '@rosen-bridge/tokens';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
@@ -29,27 +31,31 @@ class MinimumFeeHandler {
     MinimumFeeHandler.instance = new MinimumFeeHandler();
     logger.debug('MinimumFeeHandler instantiated');
 
+    const network =
+      configs.general.scannerType === NODE_TYPE
+        ? new MinimumFeeNodeNetwork(
+            configs.general.nodeUrl,
+            logger.child(`NodeNetwork`)
+          )
+        : new MinimumFeeExplorerNetwork(
+            configs.general.explorerUrl,
+            logger.child(`ExplorerNetwork`)
+          );
+    const decodeRegister = (register: string) => {
+      return wasm.Constant.decode_from_base16(register).to_js();
+    };
+
     // TODO: A function to apply token map updates is required for here
     // local:ergo/rosen-bridge/watcher#269
     const promises = tokenMap.getConfig().map((chainToken) => {
       const token = chainToken[ERGO_CHAIN_NAME];
       const tokenId = token.tokenId;
 
-      const { networkType, url } =
-        configs.general.scannerType === NODE_TYPE
-          ? {
-              networkType: ErgoNetworkType.node,
-              url: configs.general.nodeUrl,
-            }
-          : {
-              networkType: ErgoNetworkType.explorer,
-              url: configs.general.explorerUrl,
-            };
       const tokenMinimumFeeBox = new MinimumFeeBox(
         tokenId,
         configs.rosen.minFeeNFT,
-        networkType,
-        url,
+        network,
+        decodeRegister,
         logger
       );
       MinimumFeeHandler.instance.minimumFees.set(tokenId, tokenMinimumFeeBox);

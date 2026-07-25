@@ -28,6 +28,7 @@ export interface ExplorerBox {
   assets?: Array<Asset>;
   spentTransactionId: string;
   creationHeight: number;
+  mainChain: boolean;
 }
 
 export interface ExplorerBoxes {

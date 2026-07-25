@@ -309,8 +309,10 @@ describe('Ergo Network(API)', () => {
     /**
      * The function should return true cause all inputs are unspent
      */
-    it('Returns true because tx inputs are all unspent', async () => {
-      sinon.stub(ErgoNetwork, 'explorerBoxById').resolves({} as any);
+    it('Returns true when all inputs are unspent', async () => {
+      sinon
+        .stub(ErgoNetwork, 'explorerBoxById')
+        .resolves({ mainChain: true } as any);
       const data = await ErgoNetwork.checkTxInputs(
         tx.id().to_str(),
         tx.inputs()
@@ -321,15 +323,31 @@ describe('Ergo Network(API)', () => {
     /**
      * The function should return true cause all inputs are spent but in the same tx
      */
-    it('Returns true because tx inputs are all unspent', async () => {
+    it('Returns true when all inputs spent in the same tx', async () => {
       sinon.stub(ErgoNetwork, 'explorerBoxById').resolves({
         spentTransactionId: txObj.id,
+        mainChain: true,
       } as any);
       const data = await ErgoNetwork.checkTxInputs(
         tx.id().to_str(),
         tx.inputs()
       );
       expect(data).to.true;
+      sinon.restore();
+    });
+
+    /**
+     * The function should return false cause all inputs are forked
+     */
+    it('Return false when one of inputs are forked', async () => {
+      sinon.stub(ErgoNetwork, 'explorerBoxById').resolves({
+        mainChain: false,
+      } as any);
+      const data = await ErgoNetwork.checkTxInputs(
+        commitmentTx.id().to_str(),
+        commitmentTx.inputs()
+      );
+      expect(data).to.false;
       sinon.restore();
     });
   });

@@ -44,6 +44,14 @@ import {
   EthereumRpcObservationExtractor,
 } from '@rosen-bridge/evm-observation-extractor';
 import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
+import {
+  FiroObservationExtractor,
+  FiroRpcObservationExtractor,
+} from '@rosen-bridge/firo-observation-extractor';
+import {
+  FiroElectrumXScanner,
+  FiroRpcScanner,
+} from '@rosen-bridge/firo-scanner';
 import { dataSource } from '../../config/dataSource';
 import {
   BinanceConfig,
@@ -51,6 +59,7 @@ import {
   CardanoConfig,
   Config,
   EthereumConfig,
+  FiroConfig,
   getConfig,
   RosenConfig,
   DogeConfig,
@@ -68,6 +77,8 @@ import {
   createEvmNetworkConnectorManager,
   createErgoNodeNetworkConnectorManager,
   createErgoExplorerNetworkConnectorManager,
+  createFiroElectrumXNetworkConnectorManager,
+  createFiroRpcNetworkConnectorManager,
 } from './networkConnectorManagers';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
@@ -101,7 +112,9 @@ class CreateScanner {
     | BitcoinRpcScanner
     | DogeEsploraScanner
     | DogeRpcScanner
-    | EvmRpcScanner;
+    | EvmRpcScanner
+    | FiroRpcScanner
+    | FiroElectrumXScanner;
 
   private constructor() {
     // do nothing
@@ -123,6 +136,7 @@ class CreateScanner {
         doge: dogeConfig,
         ethereum: ethereumConfig,
         binance: binanceConfig,
+        firo: firoConfig,
       } = allConfig;
 
       await CreateScanner.instance.createErgoScanner(config, rosenConfig);
@@ -170,6 +184,13 @@ class CreateScanner {
             config.observationStoreRawData
           );
           break;
+        case Constants.FIRO_CHAIN_NAME:
+          await CreateScanner.instance.createFiroScanner(
+            firoConfig,
+            rosenConfig,
+            config.observationStoreRawData
+          );
+          break;
       }
       if (!CreateScanner.instance.observationScanner)
         throw Error(
@@ -211,7 +232,9 @@ class CreateScanner {
     | BitcoinRpcScanner
     | DogeEsploraScanner
     | DogeRpcScanner
-    | EvmRpcScanner => {
+    | EvmRpcScanner
+    | FiroRpcScanner
+    | FiroElectrumXScanner => {
     if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
     }
@@ -562,6 +585,47 @@ class CreateScanner {
         );
 
         const observationExtractor = new BinanceRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger,
+          observationStoreRawData
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      }
+    }
+  };
+  private createFiroScanner = async (
+    firoConfig: FiroConfig,
+    rosenConfig: RosenConfig,
+    observationStoreRawData: boolean
+  ) => {
+    if (!this.observationScanner) {
+      if (firoConfig.rpc) {
+        this.observationScanner = new FiroRpcScanner({
+          dataSource,
+          initialHeight: firoConfig.initialHeight,
+          network: createFiroRpcNetworkConnectorManager(),
+          logger: loggers.observationScannerLogger,
+        });
+
+        const observationExtractor = new FiroRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger,
+          observationStoreRawData
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (firoConfig.electrumx) {
+        this.observationScanner = new FiroElectrumXScanner({
+          dataSource,
+          initialHeight: firoConfig.initialHeight,
+          network: createFiroElectrumXNetworkConnectorManager(),
+          logger: loggers.observationScannerLogger,
+        });
+
+        const observationExtractor = new FiroObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),

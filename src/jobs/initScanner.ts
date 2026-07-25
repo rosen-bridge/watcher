@@ -15,6 +15,7 @@ const {
   doge: dogeConfig,
   ethereum: ethereumConfig,
   binance: binanceConfig,
+  firo: firoConfig,
 } = allConfig;
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
@@ -78,6 +79,12 @@ export const scannerInit = () => {
       scanningJob(
         binanceConfig.interval,
         scanner.getObservationScanner() as EvmRpcScanner
+      ).then(() => null);
+      break;
+    case Constants.FIRO_CHAIN_NAME:
+      scanningJob(
+        firoConfig.interval,
+        scanner.getObservationScanner() as GeneralScanner<unknown>
       ).then(() => null);
       break;
     case Constants.ERGO_CHAIN_NAME:
