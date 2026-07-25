@@ -32,8 +32,8 @@
   - @rosen-bridge/ergo-scanner@1.1.3
   - @rosen-bridge/evm-observation-extractor@7.0.5
   - @rosen-bridge/evm-scanner@1.1.3
-  - @rosen-bridge/firo-observation-extractor@1.1.3
-  - @rosen-bridge/firo-scanner@0.2.3
+  - @rosen-bridge/extended-typeorm@1.1.0
+  - @rosen-bridge/minimum-fee@4.0.1
   - @rosen-bridge/node-sync-check@3.0.3
   - @rosen-bridge/permit-check@3.0.4
   - @rosen-bridge/scanner-interfaces@1.0.0
