@@ -1,5 +1,11 @@
 # @rosen-bridge/watcher
 
+## 6.3.1
+
+### Patch Changes
+
+- Fix node-config issue for parsing yaml/yml files
+
 ## 6.3.0
 
 ### Minor Changes
