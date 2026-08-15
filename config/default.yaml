@@ -92,6 +92,16 @@ firo:
     port: 50002 # electrumx SSL port
     reconnectDelay: 5 # electrumx reconnect delay on socket close (in seconds)
     timeout: 10 # electrumx request timeout (in seconds)
+handshake:
+  type: 'rpc' # options: rpc
+  initial:
+    height: -1 # initial height of scanning
+  interval: 180 # scanning interval (in seconds)
+  rpc:
+    url: '' # rpc url
+    timeout: 10 # rpc request timeout (in seconds)
+    # username: '' # rpc username for authentication required instances
+    # password: '' # rpc password for authentication required instances
 ergo:
   network: 'Mainnet' # ergo network type. testnet or mainnet
   type: 'node' # ergo scanner type. options: node, explorer
