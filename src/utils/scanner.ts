@@ -262,6 +262,10 @@ class CreateScanner {
       network: networkConnectorManager,
       initialHeight: config.ergoInitialHeight,
       dataSource: dataSource,
+      blockCleanupConfig: {
+        blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+        blockTrimCountInRound: 2000,
+      },
       logger: loggers.scannerLogger,
     });
     if (config.networkWatcher === Constants.ERGO_CHAIN_NAME) {
@@ -347,6 +351,10 @@ class CreateScanner {
             nodePort: cardanoConfig.ogmios.port,
             dataSource: dataSource,
             initialHash: cardanoConfig.ogmios.initialHash,
+            blockCleanupConfig: {
+              blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+              blockTrimCountInRound: 2000,
+            },
             initialSlot: cardanoConfig.ogmios.initialSlot,
           },
           loggers.observationScannerLogger
@@ -364,6 +372,10 @@ class CreateScanner {
           dataSource,
           initialHeight: cardanoConfig.koios.initialHeight,
           network: createCardanoKoiosNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new CardanoKoiosObservationExtractor(
@@ -379,6 +391,10 @@ class CreateScanner {
           dataSource,
           initialHeight: cardanoConfig.blockfrost.initialHeight,
           network: createCardanoBlockfrostNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
@@ -404,6 +420,10 @@ class CreateScanner {
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinEsploraNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new BitcoinEsploraObservationExtractor(
@@ -419,6 +439,10 @@ class CreateScanner {
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinRpcNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
           logger: loggers.observationScannerLogger,
         });
 
@@ -460,6 +484,10 @@ class CreateScanner {
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinEsploraNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
           logger: loggers.scannerLogger,
         });
         const observationExtractor =
@@ -477,6 +505,10 @@ class CreateScanner {
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinRpcNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
           logger: loggers.scannerLogger,
         });
 
@@ -504,6 +536,10 @@ class CreateScanner {
           dataSource,
           initialHeight: dogeConfig.initialHeight,
           network: createDogeEsploraNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new DogeEsploraObservationExtractor(
@@ -519,6 +555,10 @@ class CreateScanner {
           dataSource,
           initialHeight: dogeConfig.initialHeight,
           network: createDogeRpcNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
           logger: loggers.observationScannerLogger,
         });
 
@@ -549,6 +589,10 @@ class CreateScanner {
             network: createEvmNetworkConnectorManager(
               Constants.ETHEREUM_CHAIN_NAME
             ),
+            blockCleanupConfig: {
+              blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+              blockTrimCountInRound: 2000,
+            },
             logger: loggers.observationScannerLogger,
           }
         );
@@ -580,6 +624,10 @@ class CreateScanner {
             network: createEvmNetworkConnectorManager(
               Constants.BINANCE_CHAIN_NAME
             ),
+            blockCleanupConfig: {
+              blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+              blockTrimCountInRound: 2000,
+            },
             logger: loggers.observationScannerLogger,
           }
         );
@@ -607,6 +655,10 @@ class CreateScanner {
           initialHeight: firoConfig.initialHeight,
           network: createFiroRpcNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
         });
 
         const observationExtractor = new FiroRpcObservationExtractor(
@@ -622,6 +674,10 @@ class CreateScanner {
           dataSource,
           initialHeight: firoConfig.initialHeight,
           network: createFiroElectrumXNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 60 * 60 * 24 * 2,
+            blockTrimCountInRound: 2000,
+          },
           logger: loggers.observationScannerLogger,
         });
 
