@@ -242,6 +242,11 @@ class HealthCheckSingleton {
           chainBlockTime = DOGE_BLOCK_TIME;
           updateInterval = currentConfig.doge.interval;
           break;
+        case FIRO_CHAIN_NAME:
+          chainName = FIRO_CHAIN_NAME;
+          chainBlockTime = FIRO_BLOCK_TIME;
+          updateInterval = currentConfig.firo.interval;
+          break;
         case ETHEREUM_CHAIN_NAME:
           chainName = ETHEREUM_CHAIN_NAME;
           chainBlockTime = ETHEREUM_BLOCK_TIME;
@@ -251,11 +256,6 @@ class HealthCheckSingleton {
           chainName = BINANCE_CHAIN_NAME;
           chainBlockTime = BINANCE_BLOCK_TIME;
           updateInterval = currentConfig.binance.interval;
-          break;
-        case FIRO_CHAIN_NAME:
-          chainName = FIRO_CHAIN_NAME;
-          chainBlockTime = FIRO_BLOCK_TIME;
-          updateInterval = currentConfig.firo.interval;
           break;
         case HANDSHAKE_CHAIN_NAME:
           chainName = HANDSHAKE_CHAIN_NAME;

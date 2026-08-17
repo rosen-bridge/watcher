@@ -625,6 +625,12 @@ class FiroConfig {
     username?: string;
     password?: string;
   };
+  electrumx?: {
+    host: string;
+    port: number;
+    reconnectDelay: number;
+    timeout: number;
+  };
 
   constructor(network: string) {
     this.type = config.get<string>('firo.type');
@@ -637,9 +643,17 @@ class FiroConfig {
         const username = getOptionalString('firo.rpc.username', undefined);
         const password = getOptionalString('firo.rpc.password', undefined);
         this.rpc = { url, timeout, username, password };
+      } else if (this.type === Constants.ELECTRUMX_TYPE) {
+        const host = getRequiredString('firo.electrumx.host');
+        const port = getRequiredNumber('firo.electrumx.port');
+        const reconnectDelay = getRequiredNumber(
+          'firo.electrumx.reconnectDelay'
+        );
+        const timeout = getRequiredNumber('firo.electrumx.timeout');
+        this.electrumx = { host, port, reconnectDelay, timeout };
       } else {
         throw new Error(
-          `Improperly configured. firo configuration type is invalid available choices are '${Constants.RPC_TYPE}'`
+          `Improperly configured. firo configuration type is invalid available choices are '${Constants.RPC_TYPE}', '${Constants.ELECTRUMX_TYPE}'`
         );
       }
     }

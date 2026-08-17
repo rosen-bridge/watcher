@@ -46,8 +46,11 @@ import {
   EthereumRpcObservationExtractor,
 } from '@rosen-bridge/evm-observation-extractor';
 import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
-import { FiroRpcObservationExtractor } from '@rosen-bridge/firo-observation-extractor';
-import { FiroRpcScanner } from '@rosen-bridge/firo-scanner';
+import { FiroObservationExtractor } from '@rosen-bridge/firo-observation-extractor';
+import {
+  FiroElectrumXScanner,
+  FiroRpcScanner,
+} from '@rosen-bridge/firo-scanner';
 import { dataSource } from '../../config/dataSource';
 import {
   BinanceConfig,
@@ -74,6 +77,7 @@ import {
   createErgoExplorerNetworkConnectorManager,
   createErgoNodeNetworkConnectorManager,
   createEvmNetworkConnectorManager,
+  createFiroElectrumXNetworkConnectorManager,
   createFiroRpcNetworkConnectorManager,
   createHandshakeRpcNetworkConnectorManager,
 } from './networkConnectorManagers';
@@ -111,6 +115,7 @@ class CreateScanner {
     | DogeRpcScanner
     | EvmRpcScanner
     | FiroRpcScanner
+    | FiroElectrumXScanner
     | HandshakeRpcScanner;
 
   private constructor() {
@@ -239,6 +244,7 @@ class CreateScanner {
     | DogeRpcScanner
     | EvmRpcScanner
     | FiroRpcScanner
+    | FiroElectrumXScanner
     | HandshakeRpcScanner => {
     if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
@@ -615,7 +621,23 @@ class CreateScanner {
           logger: loggers.observationScannerLogger,
         });
 
-        const observationExtractor = new FiroRpcObservationExtractor(
+        const observationExtractor = new FiroObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger,
+          observationStoreRawData
+        );
+        this.observationScanner.registerExtractor(observationExtractor);
+      } else if (firoConfig.electrumx) {
+        this.observationScanner = new FiroElectrumXScanner({
+          dataSource,
+          initialHeight: firoConfig.initialHeight,
+          network: createFiroElectrumXNetworkConnectorManager(),
+          logger: loggers.observationScannerLogger,
+        });
+
+        const observationExtractor = new FiroObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,
           TokensConfig.getInstance().getTokenMap(),

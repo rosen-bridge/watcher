@@ -78,7 +78,7 @@ binance:
     timeout: 10 # rpc request timeout (in seconds)
     # authToken: # rpc auth token
 firo:
-  type: '' # options: rpc
+  type: '' # options: rpc, electrumx
   initial:
     height: -1 # initial height of scanning
   interval: 180 # scanning interval (in seconds)
@@ -87,6 +87,11 @@ firo:
     timeout: 10 # rpc request timeout (in seconds)
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
+  electrumx:
+    host: '' # electrumx host
+    port: 50002 # electrumx SSL port
+    reconnectDelay: 5 # electrumx reconnect delay on socket close (in seconds)
+    timeout: 10 # electrumx request timeout (in seconds)
 handshake:
   type: 'rpc' # options: rpc
   initial:

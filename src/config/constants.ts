@@ -5,6 +5,7 @@ export const TRIGGER_EXTRACTOR_NAME = 'watcher-trigger-extractor';
 export const COLLATERAL_EXTRACTOR_NAME = 'watcher-collateral-extractor';
 export const ESPLORA_TYPE = 'esplora';
 export const RPC_TYPE = 'rpc';
+export const ELECTRUMX_TYPE = 'electrumx';
 export const EVM_RPC_TYPE = 'rpc';
 export const OGMIOS_TYPE = 'ogmios';
 export const KOIOS_TYPE = 'koios';
