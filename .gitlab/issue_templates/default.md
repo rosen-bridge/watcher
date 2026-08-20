@@ -10,6 +10,6 @@
 
 <TBD / N/A>
 
-**Requierd Unit Tests:**
+**Required Unit Tests:**
 
 <TBD / N/A>
