@@ -75,7 +75,7 @@
   "dependencies": {
     "@rosen-bridge/abstract-logger": "^4.0.0",
     "@rosen-bridge/abstract-observation-extractor": "^1.0.10",
-    "@rosen-bridge/abstract-scanner": "^2.0.3",
+    "@rosen-bridge/abstract-scanner": "^3.0.0-95b33950",
     "@rosen-bridge/address-codec": "^2.1.0",
     "@rosen-bridge/address-extractor": "^7.0.8",
     "@rosen-bridge/address-manager": "^0.1.0",
