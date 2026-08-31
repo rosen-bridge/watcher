@@ -117,8 +117,8 @@ firstPermit.WID = 'WIDStatistics';
 firstPermit.block = 'blockHash';
 firstPermit.height = 100;
 firstPermit.extractor = 'extractor';
-firstPermit.boxId = 'boxIDStatistics2';
-firstPermit.boxSerialized = Buffer.from(
+firstPermit.identifier = 'boxIDStatistics2';
+firstPermit.serialized = Buffer.from(
   wasm.ErgoBox.from_json(boxesSample.fifthPermitBox).sigma_serialize_bytes()
 ).toString('base64');
 firstPermit.spendBlock = 'blockHash2';
@@ -130,8 +130,8 @@ secondPermit.WID = 'WIDStatistics';
 secondPermit.block = 'blockHash2';
 secondPermit.height = 101;
 secondPermit.extractor = 'extractor';
-secondPermit.boxId = 'boxIDStatistics1';
-secondPermit.boxSerialized = permitBoxGenerator(
+secondPermit.identifier = 'boxIDStatistics1';
+secondPermit.serialized = permitBoxGenerator(
   '100000000',
   ['0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95'],
   'WIDStatistics'

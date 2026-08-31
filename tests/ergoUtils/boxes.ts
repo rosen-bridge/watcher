@@ -41,10 +41,10 @@ chai.use(chaiPromise);
 initMockedAxios();
 
 const permitBox: PermitEntity = new PermitEntity();
-permitBox.boxSerialized = Buffer.from(
+permitBox.serialized = Buffer.from(
   wasm.ErgoBox.from_json(permitJson).sigma_serialize_bytes()
 ).toString('base64');
-permitBox.boxId =
+permitBox.identifier =
   '6ba81a7de39dce3303d100516bf80228e8c03464c130d5b0f8ff6f78f66bcbc8';
 
 const WIDBox: BoxEntity = new BoxEntity();
@@ -155,7 +155,7 @@ describe('Testing Box Creation', () => {
     it('returns one unspent permit ready to merge', async () => {
       const data = await boxes.getPermits(WID);
       expect(data).to.have.length(1);
-      expect(data[0].box_id().to_str()).to.eq(permitBox.boxId);
+      expect(data[0].box_id().to_str()).to.eq(permitBox.identifier);
     });
 
     /**
@@ -173,7 +173,7 @@ describe('Testing Box Creation', () => {
     it('returns one unspent permit ready to merge covering the required RWT count', async () => {
       const data = await boxes.getPermits(WID, 98n);
       expect(data).to.have.length(1);
-      expect(data[0].box_id().to_str()).to.eq(permitBox.boxId);
+      expect(data[0].box_id().to_str()).to.eq(permitBox.identifier);
     });
 
     /**

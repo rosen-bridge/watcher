@@ -263,6 +263,10 @@ class CreateScanner {
       initialHeight: config.ergoInitialHeight,
       dataSource: dataSource,
       logger: loggers.scannerLogger,
+      blockCleanupConfig: {
+        blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+        blockTrimCountInRound: 0,
+      },
     });
     if (config.networkWatcher === Constants.ERGO_CHAIN_NAME) {
       this.observationScanner = this.ergoScanner;
@@ -288,7 +292,12 @@ class CreateScanner {
       dataSource,
       rosenConfig.watcherPermitAddress,
       rosenConfig.RWTId,
-      config.explorerUrl,
+      {
+        active: false,
+        type: config.scannerType,
+        url: networkUrl,
+        address: rosenConfig.watcherCollateralAddress,
+      },
       loggers.permitExtractorLogger
     );
     const eventTriggerExtractor = new EventTriggerExtractor(
@@ -348,6 +357,10 @@ class CreateScanner {
             dataSource: dataSource,
             initialHash: cardanoConfig.ogmios.initialHash,
             initialSlot: cardanoConfig.ogmios.initialSlot,
+            blockCleanupConfig: {
+              blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+              blockTrimCountInRound: 0,
+            },
           },
           loggers.observationScannerLogger
         );
@@ -364,6 +377,10 @@ class CreateScanner {
           dataSource,
           initialHeight: cardanoConfig.koios.initialHeight,
           network: createCardanoKoiosNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new CardanoKoiosObservationExtractor(
@@ -379,6 +396,10 @@ class CreateScanner {
           dataSource,
           initialHeight: cardanoConfig.blockfrost.initialHeight,
           network: createCardanoBlockfrostNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
@@ -404,6 +425,10 @@ class CreateScanner {
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinEsploraNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new BitcoinEsploraObservationExtractor(
@@ -419,6 +444,10 @@ class CreateScanner {
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinRpcNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.observationScannerLogger,
         });
 
@@ -460,6 +489,10 @@ class CreateScanner {
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinEsploraNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.scannerLogger,
         });
         const observationExtractor =
@@ -477,6 +510,10 @@ class CreateScanner {
           dataSource,
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinRpcNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.scannerLogger,
         });
 
@@ -504,6 +541,10 @@ class CreateScanner {
           dataSource,
           initialHeight: dogeConfig.initialHeight,
           network: createDogeEsploraNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.observationScannerLogger,
         });
         const observationExtractor = new DogeEsploraObservationExtractor(
@@ -519,6 +560,10 @@ class CreateScanner {
           dataSource,
           initialHeight: dogeConfig.initialHeight,
           network: createDogeRpcNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.observationScannerLogger,
         });
 
@@ -549,6 +594,10 @@ class CreateScanner {
             network: createEvmNetworkConnectorManager(
               Constants.ETHEREUM_CHAIN_NAME
             ),
+            blockCleanupConfig: {
+              blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+              blockTrimCountInRound: 0,
+            },
             logger: loggers.observationScannerLogger,
           }
         );
@@ -580,6 +629,10 @@ class CreateScanner {
             network: createEvmNetworkConnectorManager(
               Constants.BINANCE_CHAIN_NAME
             ),
+            blockCleanupConfig: {
+              blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+              blockTrimCountInRound: 0,
+            },
             logger: loggers.observationScannerLogger,
           }
         );
@@ -606,6 +659,10 @@ class CreateScanner {
           dataSource,
           initialHeight: firoConfig.initialHeight,
           network: createFiroRpcNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.observationScannerLogger,
         });
 
@@ -622,6 +679,10 @@ class CreateScanner {
           dataSource,
           initialHeight: firoConfig.initialHeight,
           network: createFiroElectrumXNetworkConnectorManager(),
+          blockCleanupConfig: {
+            blockCleanupThresholdDuration: 2 * 24 * 60 * 60,
+            blockTrimCountInRound: 0,
+          },
           logger: loggers.observationScannerLogger,
         });
 

@@ -680,7 +680,7 @@ class WatcherDataBase {
     });
     logger.debug(
       `Found ${permits.length} unspent permit boxes with boxId ${permits.map(
-        (permit) => permit.boxId
+        (permit) => permit.identifier
       )}`
     );
     return permits;
