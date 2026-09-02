@@ -3,13 +3,10 @@ import {
   QueryRunner,
 } from '@rosen-bridge/extended-typeorm';
 
-export class WatcherMigration1781716748001 implements MigrationInterface {
-  name = 'WatcherMigration1781716748001';
+export class WatcherMigration1782948174000 implements MigrationInterface {
+  name = 'WatcherMigration1782948174000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Drop views that depend on permit_entity before modifying/removing
-    // entities related to permit_entity.
-
     await queryRunner.query(
       `
       DELETE FROM "typeorm_metadata"

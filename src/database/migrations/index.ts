@@ -3,8 +3,7 @@ import { WatcherMigration1703244656364 } from './postgres/1703244656364-watcherM
 import { WatcherMigration1704105342269 } from './postgres/1704105342269-watcherMigration';
 import { WatcherMigration1720424860524 } from './postgres/1720424860524-watcherMigration';
 import { WatcherMigration1722549850233 } from './postgres/1722549850233-watcherMigration';
-import { WatcherMigration1722867363628 } from './postgres/1722867363628-watcherMigration';
-import { WatcherMigration1723867363628 } from './postgres/1723867363628-watcherMigration';
+import { WatcherMigration1782948062000 } from './postgres/1782948062000-watcherMigration';
 import { WatcherMigration1784715486000 } from './postgres/1784715486000-watcherMigration';
 import { WatcherMigration1788253569410 } from './postgres/1788253569410-watcherMigration';
 import { WatcherMigration1700641198429 } from './sqlite/1700641198429-watcherMigration';
@@ -21,9 +20,9 @@ import { WatcherMigration1761774712345 } from './sqlite/1761774712345-watcherMig
 import { WatcherMigration1761774798765 } from './sqlite/1761774798765-watcherMigration';
 import { WatcherMigration1762768600000 } from './sqlite/1762768600000-watcherMigration';
 import { WatcherMigration1768993381000 } from './sqlite/1768993381000-watcherMigration';
-import { WatcherMigration1781716748001 } from './sqlite/1781716748001-watcherMigration';
+import { WatcherMigration1782948174000 } from './sqlite/1782948174000-watcherMigration';
 import { WatcherMigration1784716748000 } from './sqlite/1784716748000-watcherMigration';
-import { WatcherMigration1788253569310 } from './sqlite/1788253569310-watcherMigration';
+import { WatcherMigration1788296713590 } from './sqlite/1788296713590-watcherMigration';
 
 export default {
   sqlite: [
@@ -42,8 +41,8 @@ export default {
     WatcherMigration1762768600000,
     WatcherMigration1768993381000,
     WatcherMigration1784716748000,
-    WatcherMigration1781716748001,
-    WatcherMigration1788253569310,
+    WatcherMigration1782948174000,
+    WatcherMigration1788296713590,
   ],
   postgres: [
     WatcherMigration1700710099334,
@@ -51,8 +50,7 @@ export default {
     WatcherMigration1704105342269,
     WatcherMigration1720424860524,
     WatcherMigration1722549850233,
-    WatcherMigration1722867363628,
-    WatcherMigration1723867363628,
+    WatcherMigration1782948062000,
     WatcherMigration1784715486000,
     WatcherMigration1788253569410,
   ],
