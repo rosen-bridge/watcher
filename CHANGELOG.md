@@ -1,5 +1,12 @@
 # @rosen-bridge/watcher
 
+## 6.3.2
+
+### Patch Changes
+
+- Change RSN token on binance, ethereum and cardano
+- Fix forked tx validation
+
 ## 6.3.1
 
 ### Patch Changes

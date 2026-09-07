@@ -36,4 +36,8 @@ firo:
     password: 'FIRO_RPC_PASSWORD'
   electrumx:
     port: 'FIRO_ELECTRUMX_PORT'
+handshake:
+  rpc:
+    username: 'HANDSHAKE_RPC_USERNAME'
+    password: 'HANDSHAKE_RPC_PASSWORD'
 overrideLokiBasicAuth: 'OVERRIDE_LOKI_BASIC_AUTH'
