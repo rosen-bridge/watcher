@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:20.11-bookworm-slim
+FROM node:22.18-bookworm-slim
 ARG SERVICE_DIR=/app/services/watcher
 
 LABEL maintainer="rosen-bridge team <team@rosen.tech>"
@@ -12,6 +12,8 @@ RUN adduser --disabled-password --home /app --no-create-home --uid 3000 --gecos 
     apt-get update && \
     apt-get install -y --no-install-recommends python3 build-essential curl && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN npm install --global npm@11.6.2
 
 WORKDIR ${SERVICE_DIR}
 COPY --chmod=700 --chown=ergo:ergo . .

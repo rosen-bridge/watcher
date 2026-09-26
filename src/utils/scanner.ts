@@ -31,6 +31,10 @@ import {
 } from '@rosen-bridge/cardano-scanner';
 import { ErgoObservationExtractor } from '@rosen-bridge/ergo-observation-extractor';
 import { ErgoScanner } from '@rosen-bridge/ergo-scanner';
+import {
+  FailClosedScannerLogger,
+  ZcashRpcScanner,
+} from '@rosen-bridge/zcash-scanner';
 import { HandshakeRpcObservationExtractor } from '@rosen-bridge/handshake-observation-extractor';
 import { HandshakeRpcScanner } from '@rosen-bridge/handshake-scanner';
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
@@ -64,9 +68,11 @@ import {
   getConfig,
   HandshakeConfig,
   RosenConfig,
+  ZcashConfig,
 } from '../config/config';
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
+import { createZcashObservationScanner } from './zcashScanner';
 import {
   createBitcoinEsploraNetworkConnectorManager,
   createBitcoinRpcNetworkConnectorManager,
@@ -116,7 +122,10 @@ class CreateScanner {
     | EvmRpcScanner
     | FiroRpcScanner
     | FiroElectrumXScanner
-    | HandshakeRpcScanner;
+    | HandshakeRpcScanner
+    | ZcashRpcScanner;
+  private zcashScannerLogger?: FailClosedScannerLogger;
+  private zcashObservationScanner?: ZcashRpcScanner;
 
   private constructor() {
     // do nothing
@@ -140,6 +149,7 @@ class CreateScanner {
         binance: binanceConfig,
         handshake: handshakeConfig,
         firo: firoConfig,
+        zcash: zcashConfig,
       } = allConfig;
 
       await CreateScanner.instance.createErgoScanner(config, rosenConfig);
@@ -190,6 +200,13 @@ class CreateScanner {
         case Constants.FIRO_CHAIN_NAME:
           await CreateScanner.instance.createFiroScanner(
             firoConfig,
+            rosenConfig,
+            config.observationStoreRawData
+          );
+          break;
+        case Constants.ZCASH_CHAIN_NAME:
+          await CreateScanner.instance.createZcashScanner(
+            zcashConfig,
             rosenConfig,
             config.observationStoreRawData
           );
@@ -245,11 +262,38 @@ class CreateScanner {
     | EvmRpcScanner
     | FiroRpcScanner
     | FiroElectrumXScanner
-    | HandshakeRpcScanner => {
+    | HandshakeRpcScanner
+    | ZcashRpcScanner => {
     if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
     }
     return this.observationScanner;
+  };
+
+  assertZcashScannerHealthy = async (): Promise<void> => {
+    this.zcashScannerLogger?.assertNoErrors();
+    const scanner = this.zcashObservationScanner;
+    if (!scanner) throw new Error('Zcash scanner is not initialized');
+    const tip = scanner.getBlockChainLastHeight();
+    const saved = await scanner.action.getLastSavedBlock();
+    if (tip === undefined || !saved || saved.height < tip) {
+      throw new Error('Zcash scanner did not persist the source chain tip');
+    }
+  };
+
+  private createZcashScanner = async (
+    zcashConfig: ZcashConfig,
+    rosenConfig: RosenConfig,
+    observationStoreRawData: boolean
+  ) => {
+    const { scanner, logger } = await createZcashObservationScanner(
+      zcashConfig,
+      rosenConfig,
+      observationStoreRawData
+    );
+    this.observationScanner = scanner;
+    this.zcashObservationScanner = scanner;
+    this.zcashScannerLogger = logger;
   };
 
   private createErgoScanner = async (

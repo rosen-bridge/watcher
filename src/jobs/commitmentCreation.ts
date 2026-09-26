@@ -1,11 +1,13 @@
 import { HealthStatusLevel } from '@rosen-bridge/health-check';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { getConfig } from '../config/config';
+import * as Constants from '../config/constants';
 import { Boxes } from '../ergo/boxes';
 import { CommitmentCreation } from '../transactions/commitmentCreation';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { redeemJob } from './commitmentRedeem';
 import { HealthCheckSingleton } from '../utils/healthCheck';
+import { CreateScanner } from '../utils/scanner';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -17,11 +19,14 @@ const creationJob = async () => {
     const scannerSyncStatus =
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
     if (scannerSyncStatus !== HealthStatusLevel.BROKEN) {
-      await commitmentCreatorObj.job();
       if (!redeemExecuted) {
         redeemExecuted = true;
         redeemJob();
       }
+      if (getConfig().general.networkWatcher === Constants.ZCASH_CHAIN_NAME) {
+        await CreateScanner.getInstance().assertZcashScannerHealthy();
+      }
+      await commitmentCreatorObj.job();
     } else {
       logger.info(
         'Scanner is not synced with network, skipping commitment creation job'

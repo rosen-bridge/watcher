@@ -44,6 +44,8 @@ import {
   FIRO_CHAIN_NAME,
   HANDSHAKE_BLOCK_TIME,
   HANDSHAKE_CHAIN_NAME,
+  ZCASH_BLOCK_TIME,
+  ZCASH_CHAIN_NAME,
   NODE_TYPE,
   OGMIOS_TYPE,
 } from '../config/constants';
@@ -261,6 +263,11 @@ class HealthCheckSingleton {
           chainName = HANDSHAKE_CHAIN_NAME;
           chainBlockTime = HANDSHAKE_BLOCK_TIME;
           updateInterval = currentConfig.handshake.interval;
+          break;
+        case ZCASH_CHAIN_NAME:
+          chainName = ZCASH_CHAIN_NAME;
+          chainBlockTime = ZCASH_BLOCK_TIME;
+          updateInterval = currentConfig.zcash.interval;
           break;
       }
 

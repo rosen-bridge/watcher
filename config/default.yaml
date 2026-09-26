@@ -1,9 +1,24 @@
 ---
-network: '' # which scanner network used in this watcher ergo/cardano/bitcoin/ethereum
+network: '' # observing network, including zcash
 observation:
   # confirmation: 60 # number of required block confirmations to create the commitment after observing an event
   validThreshold: 259200 # Observations that have not been triggered will not be processed after this period (in seconds, converted to block count based on selected network block time)
   storeRawData: true # if set extractor will store observations raw data
+zcash:
+  network: '' # regtest, testnet or mainnet; select the intended chain explicitly
+  expectedGenesisHash: ''
+  initial:
+    height: 0 # last processed height; scanner begins at the following block
+  interval: 75 # seconds between scans
+  rpc:
+    url: '' # current connector accepts owned loopback HTTP endpoints only
+    timeoutMs: 10000
+    username: ''
+    password: ''
+  inspector:
+    executablePath: '' # pinned native inspector binary
+    expectedSha256: ''
+  branches: [] # ascending {height, branchId} entries, starting at height 0
 bitcoin:
   type: '' # options: esplora, rpc
   initial:

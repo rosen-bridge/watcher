@@ -33,6 +33,8 @@ import { CreateScanner } from './utils/scanner';
 import { exit } from 'node:process';
 import { AddressManager } from '@rosen-bridge/address-manager';
 import { chainDecoders, chainValidators } from '@rosen-bridge/address-codec';
+import { createZcashAddressCodec } from '@rosen-bridge/address-codec-zcash';
+import rawConfig from 'config';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -47,9 +49,29 @@ const init = async () => {
   const config = getConfig();
 
   await TokensConfig.init(config.general.rosenTokensPath);
+  const supportsZcash = TokensConfig.getInstance()
+    .getTokenMap()
+    .getAllChains()
+    .includes('zcash');
+  let validators = chainValidators;
+  let decoders = chainDecoders;
+  if (supportsZcash || config.general.networkWatcher === 'zcash') {
+    if (!rawConfig.has('zcash.network')) {
+      throw new Error('ImproperlyConfigured. zcash.network is not defined');
+    }
+    const zcashNetwork = rawConfig.get<string>('zcash.network');
+    if (!['regtest', 'testnet', 'mainnet'].includes(zcashNetwork)) {
+      throw new Error('ImproperlyConfigured. zcash.network is invalid');
+    }
+    const zcashCodec = createZcashAddressCodec(
+      zcashNetwork as 'regtest' | 'testnet' | 'mainnet'
+    );
+    validators = { ...chainValidators, zcash: zcashCodec.validateAddress };
+    decoders = { ...chainDecoders, zcash: zcashCodec.decodeAddress };
+  }
   AddressManager.init(
-    chainValidators,
-    chainDecoders,
+    validators,
+    decoders,
     DefaultLogger.getInstance().child('AddressManager')
   );
   await CreateScanner.init();

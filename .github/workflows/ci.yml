@@ -25,7 +25,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Dependencies
-        run: npm ci
+        run: |
+          npm install --global npm@11.6.2
+          npm ci
 
       - name: Type Check
         run: npm run type-check

@@ -38,7 +38,9 @@ const config: RollupOptions = {
       copyTo: './out/libs',
       destDir: './libs',
     }),
-    commonjs(),
+    // The executable runs in Node, which supplies global. Preserve class fields
+    // named global instead of rewriting them as references to a browser shim.
+    commonjs({ ignoreGlobal: true }),
     /**
      * This plugin is used to externalize all node native modules
      */

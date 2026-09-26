@@ -21,6 +21,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.BINANCE_CHAIN_NAME,
   Constants.HANDSHAKE_CHAIN_NAME,
   Constants.FIRO_CHAIN_NAME,
+  Constants.ZCASH_CHAIN_NAME,
 ];
 
 interface ConfigType {
@@ -31,6 +32,7 @@ interface ConfigType {
   ethereum: EthereumConfig;
   binance: BinanceConfig;
   firo: FiroConfig;
+  zcash: ZcashConfig;
   doge: DogeConfig;
   handshake: HandshakeConfig;
   general: Config;
@@ -241,6 +243,7 @@ class Config {
       [Constants.ETHEREUM_CHAIN_NAME]: Constants.ETHEREUM_BLOCK_TIME,
       [Constants.DOGE_CHAIN_NAME]: Constants.DOGE_BLOCK_TIME,
       [Constants.FIRO_CHAIN_NAME]: Constants.FIRO_BLOCK_TIME,
+      [Constants.ZCASH_CHAIN_NAME]: Constants.ZCASH_BLOCK_TIME,
       [Constants.HANDSHAKE_CHAIN_NAME]: Constants.HANDSHAKE_BLOCK_TIME,
     }[this.networkWatcher];
     this.observationValidThreshold = Math.floor(
@@ -691,6 +694,95 @@ class HandshakeConfig {
   }
 }
 
+class ZcashConfig {
+  initialHeight!: number;
+  interval!: number;
+  network!: 'regtest' | 'testnet' | 'mainnet';
+  expectedGenesisHash!: string;
+  rpc!: {
+    url: string;
+    timeoutMs: number;
+    username?: string;
+    password?: string;
+  };
+  inspector!: { executablePath: string; expectedSha256: string };
+  branches!: Array<{ height: number; branchId: string }>;
+
+  constructor(networkWatcher: string) {
+    if (networkWatcher !== Constants.ZCASH_CHAIN_NAME) return;
+    const fail = (field: string): never => {
+      throw new Error(`ImproperlyConfigured. ${field} is invalid`);
+    };
+    const positive = (field: string) => {
+      const value = getRequiredNumber(field);
+      if (!Number.isSafeInteger(value) || value <= 0) fail(field);
+      return value;
+    };
+    const hash = (field: string, bytes: number) => {
+      const value = getRequiredString(field);
+      if (!new RegExp(`^[0-9a-f]{${bytes * 2}}$`).test(value)) fail(field);
+      return value;
+    };
+    this.initialHeight = getRequiredNumber('zcash.initial.height');
+    if (!Number.isSafeInteger(this.initialHeight) || this.initialHeight < 0)
+      fail('zcash.initial.height');
+    this.interval = positive('zcash.interval');
+    this.network = getRequiredString('zcash.network') as ZcashConfig['network'];
+    if (!['regtest', 'testnet', 'mainnet'].includes(this.network))
+      fail('zcash.network');
+    this.expectedGenesisHash = hash('zcash.expectedGenesisHash', 32);
+    const username = getOptionalString('zcash.rpc.username');
+    const password = getOptionalString('zcash.rpc.password');
+    if (Boolean(username) !== Boolean(password)) fail('zcash.rpc.auth');
+    this.rpc = {
+      url: getRequiredString('zcash.rpc.url'),
+      timeoutMs: positive('zcash.rpc.timeoutMs'),
+      ...(username ? { username, password } : {}),
+    };
+    this.inspector = {
+      executablePath: getRequiredString('zcash.inspector.executablePath'),
+      expectedSha256: hash('zcash.inspector.expectedSha256', 32),
+    };
+    const branches = config.get<unknown[]>('zcash.branches');
+    if (!Array.isArray(branches) || branches.length === 0)
+      fail('zcash.branches');
+    this.branches = branches.map((entry, index) => {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry))
+        fail(`zcash.branches[${index}]`);
+      const item = entry as Record<string, unknown>;
+      if (
+        !Number.isSafeInteger(item.height) ||
+        (item.height as number) < 0 ||
+        typeof item.branchId !== 'string' ||
+        !/^[0-9a-f]{8}$/.test(item.branchId)
+      )
+        fail(`zcash.branches[${index}]`);
+      return {
+        height: item.height as number,
+        branchId: item.branchId as string,
+      };
+    });
+    if (
+      this.branches[0].height !== 0 ||
+      this.branches.some(
+        (entry, index) =>
+          index > 0 && entry.height <= this.branches[index - 1].height
+      )
+    )
+      fail('zcash.branches');
+  }
+
+  branchIdAtHeight = (height: number): string => {
+    if (!Number.isSafeInteger(height) || height < 0)
+      throw Error('Invalid Zcash block height');
+    for (let index = this.branches.length - 1; index >= 0; index--) {
+      if (this.branches[index].height <= height)
+        return this.branches[index].branchId;
+    }
+    throw Error('Zcash branch unavailable at block height');
+  };
+}
+
 class DatabaseConfig {
   type: string;
   path = '';
@@ -803,6 +895,7 @@ const getConfig = (): ConfigType => {
     const binance = new BinanceConfig(general.networkWatcher);
     const handshake = new HandshakeConfig(general.networkWatcher);
     const firo = new FiroConfig(general.networkWatcher);
+    const zcash = new ZcashConfig(general.networkWatcher);
     const rosen = new RosenConfig(
       general.networkWatcher,
       general.rosenConfigPath
@@ -819,6 +912,7 @@ const getConfig = (): ConfigType => {
       binance,
       handshake,
       firo,
+      zcash,
       logger,
       general,
       rosen,
@@ -839,6 +933,7 @@ export {
   DogeConfig,
   EthereumConfig,
   FiroConfig,
+  ZcashConfig,
   getConfig,
   HandshakeConfig,
   RosenConfig,
