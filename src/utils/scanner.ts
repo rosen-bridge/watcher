@@ -1,4 +1,5 @@
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
+import { InitializeOptions } from '@rosen-bridge/abstract-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 import {
   BitcoinEsploraObservationExtractor,
@@ -81,6 +82,7 @@ import {
   createFiroRpcNetworkConnectorManager,
   createHandshakeRpcNetworkConnectorManager,
 } from './networkConnectorManagers';
+import { BlockCleanupConfig } from '@rosen-bridge/abstract-scanner/dist/scanner/interfaces';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -148,7 +150,8 @@ class CreateScanner {
           await CreateScanner.instance.createBitcoinScanner(
             bitcoinConfig,
             rosenConfig,
-            config.observationStoreRawData
+            config.observationStoreRawData,
+            config.blockCleanupConfig
           );
           break;
         case Constants.BITCOIN_RUNES_CHAIN_NAME:
@@ -156,49 +159,56 @@ class CreateScanner {
             bitcoinConfig,
             bitcoinRunesConfig,
             rosenConfig,
-            config.observationStoreRawData
+            config.observationStoreRawData,
+            config.blockCleanupConfig
           );
           break;
         case Constants.CARDANO_CHAIN_NAME:
           await CreateScanner.instance.createCardanoScanner(
             cardanoConfig,
             rosenConfig,
-            config.observationStoreRawData
+            config.observationStoreRawData,
+            config.blockCleanupConfig
           );
           break;
         case Constants.ETHEREUM_CHAIN_NAME:
           await CreateScanner.instance.createEthereumScanner(
             ethereumConfig,
             rosenConfig,
-            config.observationStoreRawData
+            config.observationStoreRawData,
+            config.blockCleanupConfig
           );
           break;
         case Constants.BINANCE_CHAIN_NAME:
           await CreateScanner.instance.createBinanceScanner(
             binanceConfig,
             rosenConfig,
-            config.observationStoreRawData
+            config.observationStoreRawData,
+            config.blockCleanupConfig
           );
           break;
         case Constants.DOGE_CHAIN_NAME:
           await CreateScanner.instance.createDogeScanner(
             dogeConfig,
             rosenConfig,
-            config.observationStoreRawData
+            config.observationStoreRawData,
+            config.blockCleanupConfig
           );
           break;
         case Constants.FIRO_CHAIN_NAME:
           await CreateScanner.instance.createFiroScanner(
             firoConfig,
             rosenConfig,
-            config.observationStoreRawData
+            config.observationStoreRawData,
+            config.blockCleanupConfig
           );
           break;
         case Constants.HANDSHAKE_CHAIN_NAME:
           await CreateScanner.instance.createHandshakeScanner(
             handshakeConfig,
             rosenConfig,
-            config.observationStoreRawData
+            config.observationStoreRawData,
+            config.blockCleanupConfig
           );
           break;
       }
@@ -274,6 +284,7 @@ class CreateScanner {
       initialHeight: config.ergoInitialHeight,
       dataSource: dataSource,
       logger: loggers.scannerLogger,
+      blockCleanupConfig: config.blockCleanupConfig,
     });
     if (config.networkWatcher === Constants.ERGO_CHAIN_NAME) {
       this.observationScanner = this.ergoScanner;
@@ -286,12 +297,28 @@ class CreateScanner {
       );
       this.observationScanner.registerExtractor(observationExtractor);
     }
+    const initializationOption: Pick<
+      InitializeOptions,
+      'type' | 'url' | 'maxParallelRequests'
+    > = {
+      type: config.scannerType,
+      url:
+        config.scannerType === ErgoNetworkType.Node
+          ? config.nodeUrl
+          : config.explorerUrl,
+      maxParallelRequests: config.initialization.maxParallelRequests,
+    };
     const commitmentExtractor = new CommitmentExtractor(
       Constants.COMMITMENT_EXTRACTOR_NAME,
       [rosenConfig.commitmentAddress],
       rosenConfig.RWTId,
       dataSource,
       TokensConfig.getInstance().getTokenMap(),
+      {
+        active: config.initialization.commitment,
+        ...initializationOption,
+        address: rosenConfig.commitmentAddress,
+      },
       loggers.commitmentExtractorLogger
     );
     const permitExtractor = new PermitExtractor(
@@ -299,7 +326,11 @@ class CreateScanner {
       dataSource,
       rosenConfig.watcherPermitAddress,
       rosenConfig.RWTId,
-      config.explorerUrl,
+      {
+        active: config.initialization.permit,
+        ...initializationOption,
+        address: rosenConfig.watcherPermitAddress,
+      },
       loggers.permitExtractorLogger
     );
     const eventTriggerExtractor = new EventTriggerExtractor(
@@ -312,7 +343,7 @@ class CreateScanner {
       rosenConfig.watcherPermitAddress,
       rosenConfig.fraudAddress,
       loggers.eventTriggerExtractorLogger,
-      config.eventTriggerInit
+      config.initialization.eventTrigger
     );
     const plainExtractor = new ErgoUTXOExtractor(
       dataSource,
@@ -347,7 +378,8 @@ class CreateScanner {
   private createCardanoScanner = async (
     cardanoConfig: CardanoConfig,
     rosenConfig: RosenConfig,
-    observationStoreRawData: boolean
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
   ) => {
     if (!this.observationScanner) {
       if (cardanoConfig.ogmios) {
@@ -359,6 +391,7 @@ class CreateScanner {
             dataSource: dataSource,
             initialHash: cardanoConfig.ogmios.initialHash,
             initialSlot: cardanoConfig.ogmios.initialSlot,
+            blockCleanupConfig: blockCleanupConfig,
           },
           loggers.observationScannerLogger
         );
@@ -376,6 +409,7 @@ class CreateScanner {
           initialHeight: cardanoConfig.koios.initialHeight,
           network: createCardanoKoiosNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
         const observationExtractor = new CardanoKoiosObservationExtractor(
           rosenConfig.lockAddress,
@@ -391,6 +425,7 @@ class CreateScanner {
           initialHeight: cardanoConfig.blockfrost.initialHeight,
           network: createCardanoBlockfrostNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
         const observationExtractor = new CardanoBlockFrostObservationExtractor(
           rosenConfig.lockAddress,
@@ -407,7 +442,8 @@ class CreateScanner {
   private createBitcoinScanner = async (
     bitcoinConfig: BitcoinConfig,
     rosenConfig: RosenConfig,
-    observationStoreRawData: boolean
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
   ) => {
     if (!this.observationScanner) {
       if (bitcoinConfig.esplora) {
@@ -416,6 +452,7 @@ class CreateScanner {
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinEsploraNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
         const observationExtractor = new BitcoinEsploraObservationExtractor(
           rosenConfig.lockAddress,
@@ -431,6 +468,7 @@ class CreateScanner {
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinRpcNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
 
         const observationExtractor = new BitcoinRpcObservationExtractor(
@@ -449,7 +487,8 @@ class CreateScanner {
     bitcoinConfig: BitcoinConfig,
     bitcoinRunesConfig: BitcoinRunesConfig,
     rosenConfig: RosenConfig,
-    observationStoreRawData: boolean
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
   ) => {
     if (!this.observationScanner) {
       let client!: AbstractRunesProtocolNetwork;
@@ -472,6 +511,7 @@ class CreateScanner {
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinEsploraNetworkConnectorManager(),
           logger: loggers.scannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
         const observationExtractor =
           new BitcoinRunesEsploraObservationExtractor(
@@ -489,6 +529,7 @@ class CreateScanner {
           initialHeight: bitcoinConfig.initialHeight,
           network: createBitcoinRpcNetworkConnectorManager(),
           logger: loggers.scannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
 
         const observationExtractor = new BitcoinRunesRpcObservationExtractor(
@@ -507,7 +548,8 @@ class CreateScanner {
   private createDogeScanner = async (
     dogeConfig: DogeConfig,
     rosenConfig: RosenConfig,
-    observationStoreRawData: boolean
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
   ) => {
     if (!this.observationScanner) {
       if (dogeConfig.esplora) {
@@ -516,6 +558,7 @@ class CreateScanner {
           initialHeight: dogeConfig.initialHeight,
           network: createDogeEsploraNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
         const observationExtractor = new DogeEsploraObservationExtractor(
           rosenConfig.lockAddress,
@@ -531,6 +574,7 @@ class CreateScanner {
           initialHeight: dogeConfig.initialHeight,
           network: createDogeRpcNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
 
         const observationExtractor = new DogeRpcObservationExtractor(
@@ -548,7 +592,8 @@ class CreateScanner {
   private createEthereumScanner = async (
     ethereumConfig: EthereumConfig,
     rosenConfig: RosenConfig,
-    observationStoreRawData: boolean
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
   ) => {
     if (!this.observationScanner) {
       if (ethereumConfig.rpc) {
@@ -561,6 +606,7 @@ class CreateScanner {
               Constants.ETHEREUM_CHAIN_NAME
             ),
             logger: loggers.observationScannerLogger,
+            blockCleanupConfig: blockCleanupConfig,
           }
         );
 
@@ -579,7 +625,8 @@ class CreateScanner {
   private createBinanceScanner = async (
     binanceConfig: BinanceConfig,
     rosenConfig: RosenConfig,
-    observationStoreRawData: boolean
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
   ) => {
     if (!this.observationScanner) {
       if (binanceConfig.rpc) {
@@ -592,6 +639,7 @@ class CreateScanner {
               Constants.BINANCE_CHAIN_NAME
             ),
             logger: loggers.observationScannerLogger,
+            blockCleanupConfig: blockCleanupConfig,
           }
         );
 
@@ -610,7 +658,8 @@ class CreateScanner {
   private createFiroScanner = async (
     firoConfig: FiroConfig,
     rosenConfig: RosenConfig,
-    observationStoreRawData: boolean
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
   ) => {
     if (!this.observationScanner) {
       if (firoConfig.rpc) {
@@ -619,6 +668,7 @@ class CreateScanner {
           initialHeight: firoConfig.initialHeight,
           network: createFiroRpcNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
 
         const observationExtractor = new FiroObservationExtractor(
@@ -635,6 +685,7 @@ class CreateScanner {
           initialHeight: firoConfig.initialHeight,
           network: createFiroElectrumXNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
 
         const observationExtractor = new FiroObservationExtractor(
@@ -652,7 +703,8 @@ class CreateScanner {
   private createHandshakeScanner = async (
     handshakeConfig: HandshakeConfig,
     rosenConfig: RosenConfig,
-    observationStoreRawData: boolean
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
   ) => {
     if (!this.observationScanner) {
       if (handshakeConfig.rpc) {
@@ -661,6 +713,7 @@ class CreateScanner {
           initialHeight: handshakeConfig.initialHeight,
           network: createHandshakeRpcNetworkConnectorManager(),
           logger: loggers.observationScannerLogger,
+          blockCleanupConfig: blockCleanupConfig,
         });
 
         const observationExtractor = new HandshakeRpcObservationExtractor(

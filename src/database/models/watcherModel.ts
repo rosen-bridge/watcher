@@ -564,12 +564,12 @@ class WatcherDataBase {
   ): Promise<Array<CommitmentEntity>> => {
     const commitments = await this.commitmentRepository.find({
       where: {
-        boxId: In(ids),
+        identifier: In(ids),
       },
     });
     logger.debug(
       `Found commitments with boxIds ${commitments.map(
-        (commitment) => commitment.boxId
+        (commitment) => commitment.identifier
       )}`
     );
     return commitments;
@@ -590,7 +590,7 @@ class WatcherDataBase {
     });
     logger.debug(
       `Found commitments with boxIds ${commitments.map(
-        (commitment) => commitment.boxId
+        (commitment) => commitment.identifier
       )} for event ${eventId}`
     );
     return commitments;
@@ -610,7 +610,7 @@ class WatcherDataBase {
     });
     logger.debug(
       `Found commitments with boxIds ${commitments.map(
-        (commitment) => commitment.boxId
+        (commitment) => commitment.identifier
       )} spent in transaction ${txId}`
     );
     return commitments;
@@ -660,7 +660,7 @@ class WatcherDataBase {
     });
     logger.debug(
       `Found commitments with boxIds ${commitments.map(
-        (commitment) => commitment.boxId
+        (commitment) => commitment.identifier
       )} with wid ${wid} and below the height ${maxHeight}`
     );
     return commitments;
@@ -680,7 +680,7 @@ class WatcherDataBase {
     });
     logger.debug(
       `Found ${permits.length} unspent permit boxes with boxId ${permits.map(
-        (permit) => permit.boxId
+        (permit) => permit.identifier
       )}`
     );
     return permits;

@@ -516,8 +516,8 @@ describe('WatcherModel tests', () => {
      */
     it('should return exactly two commitments with the specified box id', async () => {
       const data = await DB.findCommitmentsById([
-        commitmentEntity.boxId,
-        spentCommitmentEntity.boxId,
+        commitmentEntity.identifier,
+        spentCommitmentEntity.identifier,
       ]);
       expect(data).to.have.length(2);
       expect(data[0]).to.eql(commitmentEntity);
@@ -565,8 +565,8 @@ describe('WatcherModel tests', () => {
      */
     it('should return exactly two commitments with the specified box id', async () => {
       const data = await DB.findCommitmentsById([
-        commitmentEntity.boxId,
-        spentCommitmentEntity.boxId,
+        commitmentEntity.identifier,
+        spentCommitmentEntity.identifier,
       ]);
       expect(data).to.have.length(2);
       expect(data[0]).to.eql(commitmentEntity);
