@@ -66,6 +66,13 @@ operator-approved repair/rescan tool and persisted incident acknowledgement are
 not supplied by this PR. Do not delete the database or edit commitment status
 to bypass the gate.
 
+The recovery regression now kills a real child process after an observation is
+committed while its block remains `PROCESSING`, then opens the same SQLite file
+in fresh processes. A persistent fault keeps the cursor closed; corrected replay
+recovers without duplicate observations, and a two-block rollback removes the
+old observations before processing replacements. This exercises local process
+and database recovery, not reconciliation of live downstream liabilities.
+
 ## Node and native inspector
 
 Require an operator-controlled Zebra endpoint bound to loopback. The connector
@@ -79,7 +86,7 @@ network-upgrade behavior. This version floor is not evidence that this watcher
 was tested against every later release.
 
 The inspector is a separately built offline executable from
-[`utils/native/zcash-inspector` at ea19c4f](https://github.com/rosen-bridge/utils/tree/ea19c4f38ebb7e32ad1f8a86ea1d3e3d071528ae/native/zcash-inspector).
+[`utils/native/zcash-inspector` in the companion update](https://github.com/rosen-bridge/utils/pull/8).
 Build using its committed Cargo lockfile and documented commands, record the
 toolchain/target and binary hash, and configure that hash on the watcher. The
 source pin and SHA-256 identify the selected binary; they are not a claim of
@@ -93,13 +100,25 @@ peak memory, initial-sync/catch-up time, event-loop delay and disk headroom with
 the selected Zebra, inspector and host. Keep these as release acceptance results,
 not guessed hardware guarantees.
 
-The current extractor hashes and invokes the native executable synchronously
-for each transaction. This is a known catch-up/event-loop cost. Skipping based
+The companion utils/scanner update performs native inspection asynchronously in
+batches of at most 32 transactions and 2,000,000 decoded bytes. Each batch checks
+the executable hash and uses bounded input, output and execution time. Every
+transaction in the block is inspected before observation storage starts; a late
+refusal cannot persist an earlier partial batch. Rollback invalidates pending
+validation, drains an already-started write, removes orphaned observations and
+prevents interrupted work from reporting success to the scanner.
+
+A Windows release-binary sample over the same 128 serialized fixture transactions
+took 3.29 seconds with individual synchronous calls and 105 ms with batches, with
+identical results. A 5 ms timer made no progress during the synchronous sample;
+it progressed during the batch sample with a measured maximum lag of 14 ms.
+This measures local process overhead, not sustained Mainnet catch-up capacity.
+Skipping based
 only on RPC `vout` would change the existing validation boundary: raw transaction
 bytes and native decoding own output selection, and RPC `vout` is not bound to
 those bytes. A missing/malformed RPC projection must not silently hide a valid
-deposit. A bounded asynchronous inspector/batch design needs its own integrity,
-fault and load tests; it is not implemented by this operator correction.
+deposit. Qualify the batch-capable executable and matching consumer versions
+together; an older inspector must fail closed rather than silently downgrade.
 
 ## NU7 preparation
 
@@ -109,14 +128,18 @@ As checked on 28 September 2026, [ZIP 259](https://zips.z.cash/zip-0259) and
 are still unassigned. ZIP 218 proposes 25-second target spacing. No relative
 calendar estimate is an activation rule.
 
-The inspector already has v4/v5/v6 parsing branches, but the pinned
-`zcash_protocol 0.10.5` does not recognize `77190ad9`. Its
-[branch mapping](https://github.com/zcash/librustzcash/blob/97aefdc39a037da9c4f19a0e8a450d2c7932f53e/components/zcash_protocol/src/consensus.rs#L745)
-contains only an optional unstable placeholder for NU7. The current inspector
-therefore does not support the proposed NU7 branch. Published native tests
-include v4 contextual parsing and noncanonical rejection as well as v5 fixtures;
-they do not include a v6 or NU7 activation fixture. Before accepting NU7
-operation, the release must close all of these:
+The companion native update pins
+[librustzcash `5345dbe`](https://github.com/zcash/librustzcash/tree/5345dbe0cd6c7f2057e631a34a74dffa84ff1d48),
+including `zcash_protocol 0.10.6`, which recognizes `77190ad9`. Inspector tests
+accept upstream v5/v6 NU7 vectors, reject v4 in that branch and reject retired
+placeholder IDs. The transparent payment primitive constructs v5 NU7 payments
+and verifies an externally produced signature through actual CHECKSIG; an old
+branch signature is rejected. Its payment profile still refuses v6, and the
+Orchard profile remains restricted to NU6.2 and Revision-0 addresses.
+
+These tests establish parser and signature behavior, not network activation or
+node admission. The reviewed Zebra source still uses a provisional NU7 ID; no
+NU7 node roundtrip is qualified. Before accepting NU7 operation, close all of these:
 
 1. Pin final network activation heights and consensus rules, update the reviewed
    branch schedule and native dependencies, and exercise height `H-1`, `H` and
@@ -130,7 +153,10 @@ operation, the release must close all of these:
    commit to the branch ID: a pre-upgrade signed transaction must not be
    relabelled or blindly submitted after the change. Reconcile chain/mempool and
    prior attempts, invalidate obsolete work, then reconstruct, reauthorize and
-   sign under the new branch while preserving duplicate-payment controls.
+   sign under the new branch while preserving duplicate-payment controls. The
+   guard now rechecks live context after asynchronous authorization and before
+   transport. Historical confirmed transactions remain observable after the
+   upgrade; branch change alone does not release their reservations.
 4. Exercise rollback across the activation and a deeper reorg with already
    created commitments/triggers. Demonstrate both operator visibility and guard
    refusal of invalidated evidence before claiming recovery qualification.
@@ -146,10 +172,12 @@ For a Zcash observation, `fromAddress` is `box:<txid>.<index>`, an output-origin
 descriptor, not a sender wallet address. The observation API preserves that
 field. Clients should label it as an output reference and link the transaction
 and output index, without generating a sender-address explorer link.
-The watcher UI and third-party monitors need a rendered check for this field;
-the API's string representation alone does not qualify those consumers.
+The companion [UI update](https://github.com/rosen-bridge/ui/pull/31) renders it as
+an input reference in shared details and watcher desktop/mobile rows, without an
+address link. The wire field remains unchanged. Third-party monitors still need
+their own consumer check.
 
-High-value next reviews are controlled scanner failure/recovery with a retained
-database, native-inspector throughput under backlog, existing-chain runtime
-regressions, activation-boundary pending transactions, and the operator views
-for output descriptors and degraded states.
+Remaining release reviews cover sustained backlog and resource sizing,
+existing-chain runtime regression on the maintainer-selected graph, actual
+activation-node admission, downstream liability reconciliation after deep
+reorganizations, and deployment/operator recovery qualification.
