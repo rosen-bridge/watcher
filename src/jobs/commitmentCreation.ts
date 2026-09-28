@@ -8,6 +8,7 @@ import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { redeemJob } from './commitmentRedeem';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 import { CreateScanner } from '../utils/scanner';
+import { ZcashScannerNotReady } from '../utils/zcashReadiness';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -19,21 +20,25 @@ const creationJob = async () => {
     const scannerSyncStatus =
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
     if (scannerSyncStatus !== HealthStatusLevel.BROKEN) {
-      if (!redeemExecuted) {
-        redeemExecuted = true;
-        redeemJob();
-      }
       if (getConfig().general.networkWatcher === Constants.ZCASH_CHAIN_NAME) {
         await CreateScanner.getInstance().assertZcashScannerHealthy();
       }
       await commitmentCreatorObj.job();
+      if (!redeemExecuted) {
+        redeemExecuted = true;
+        redeemJob();
+      }
     } else {
       logger.info(
         'Scanner is not synced with network, skipping commitment creation job'
       );
     }
   } catch (e) {
-    logger.warn(`Creation Job failed with error: ${e.message} - ${e.stack}`);
+    if (e instanceof ZcashScannerNotReady && e.readiness.state !== 'halted') {
+      logger.info(`Skipping commitment creation: ${e.message}`);
+    } else {
+      logger.warn(`Creation Job failed with error: ${e.message} - ${e.stack}`);
+    }
   }
   setTimeout(
     creationJob,

@@ -47,3 +47,7 @@ You can find the project configs here. In this config, you should set what netwo
 ## How to Be a Watcher
 
 Check our operation documentation [here](https://github.com/rosen-bridge/operation/blob/dev/docs/watcher/deploy-docker.md#watcher-deployment).
+
+For the proposed transparent Zcash integration, read the
+[operator requirements and upgrade boundaries](docs/zcash-operator.md) before
+configuring a watcher. The integration remains a source-review candidate.

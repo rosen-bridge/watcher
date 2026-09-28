@@ -5,6 +5,7 @@ import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
 import { getConfig } from '../config/config';
 import * as Constants from '../config/constants';
 import { CreateScanner } from '../utils/scanner';
+import { ZcashScannerNotReady } from '../utils/zcashReadiness';
 
 const allConfig = getConfig();
 const {
@@ -28,12 +29,22 @@ const scanningJob = async (
   zcash = false
 ) => {
   try {
+    if (zcash) {
+      const readiness =
+        await CreateScanner.getInstance().getZcashScannerReadiness();
+      if (readiness.state === 'halted')
+        throw new ZcashScannerNotReady(readiness);
+    }
     await scanner.update();
     if (zcash) await CreateScanner.getInstance().assertZcashScannerHealthy();
   } catch (e) {
-    logger.warn(
-      `Scanning Job failed for ${scanner.name()}, ${e.message}, ${e.stack}`
-    );
+    if (e instanceof ZcashScannerNotReady && e.readiness.state !== 'halted') {
+      logger.info(e.message);
+    } else {
+      logger.warn(
+        `Scanning Job failed for ${scanner.name()}, ${e.message}, ${e.stack}`
+      );
+    }
   }
   setTimeout(() => scanningJob(interval, scanner, zcash), interval * 1000);
 };

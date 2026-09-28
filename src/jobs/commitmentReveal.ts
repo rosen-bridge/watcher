@@ -7,6 +7,7 @@ import { CommitmentReveal } from '../transactions/commitmentReveal';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { HealthCheckSingleton } from '../utils/healthCheck';
 import { CreateScanner } from '../utils/scanner';
+import { ZcashScannerNotReady } from '../utils/zcashReadiness';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -27,7 +28,11 @@ const revealJob = async () => {
       );
     }
   } catch (e) {
-    logger.warn(`Reveal Job failed with error: ${e.message} - ${e.stack}`);
+    if (e instanceof ZcashScannerNotReady && e.readiness.state !== 'halted') {
+      logger.info(`Skipping commitment reveal: ${e.message}`);
+    } else {
+      logger.warn(`Reveal Job failed with error: ${e.message} - ${e.stack}`);
+    }
   }
   setTimeout(revealJob, getConfig().general.commitmentRevealInterval * 1000);
 };

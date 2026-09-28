@@ -31,10 +31,7 @@ import {
 } from '@rosen-bridge/cardano-scanner';
 import { ErgoObservationExtractor } from '@rosen-bridge/ergo-observation-extractor';
 import { ErgoScanner } from '@rosen-bridge/ergo-scanner';
-import {
-  FailClosedScannerLogger,
-  ZcashRpcScanner,
-} from '@rosen-bridge/zcash-scanner';
+import { ZcashRpcScanner } from '@rosen-bridge/zcash-scanner';
 import { HandshakeRpcObservationExtractor } from '@rosen-bridge/handshake-observation-extractor';
 import { HandshakeRpcScanner } from '@rosen-bridge/handshake-scanner';
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
@@ -73,6 +70,11 @@ import {
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
 import { createZcashObservationScanner } from './zcashScanner';
+import {
+  getZcashReadiness,
+  ZcashScannerLogger,
+  ZcashScannerNotReady,
+} from './zcashReadiness';
 import {
   createBitcoinEsploraNetworkConnectorManager,
   createBitcoinRpcNetworkConnectorManager,
@@ -124,7 +126,7 @@ class CreateScanner {
     | FiroElectrumXScanner
     | HandshakeRpcScanner
     | ZcashRpcScanner;
-  private zcashScannerLogger?: FailClosedScannerLogger;
+  private zcashScannerLogger?: ZcashScannerLogger;
   private zcashObservationScanner?: ZcashRpcScanner;
 
   private constructor() {
@@ -271,15 +273,12 @@ class CreateScanner {
   };
 
   assertZcashScannerHealthy = async (): Promise<void> => {
-    this.zcashScannerLogger?.assertNoErrors();
-    const scanner = this.zcashObservationScanner;
-    if (!scanner) throw new Error('Zcash scanner is not initialized');
-    const tip = scanner.getBlockChainLastHeight();
-    const saved = await scanner.action.getLastSavedBlock();
-    if (tip === undefined || !saved || saved.height < tip) {
-      throw new Error('Zcash scanner did not persist the source chain tip');
-    }
+    const readiness = await this.getZcashScannerReadiness();
+    if (readiness.state !== 'ready') throw new ZcashScannerNotReady(readiness);
   };
+
+  getZcashScannerReadiness = () =>
+    getZcashReadiness(this.zcashObservationScanner, this.zcashScannerLogger);
 
   private createZcashScanner = async (
     zcashConfig: ZcashConfig,
