@@ -36,6 +36,31 @@ commitment/reveal/redeem and packaging on the accepted graph before rollout.
 Producer releases and refreshed consumer locks remain necessary for an ordinary
 registry installation.
 
+The operator follow-up on 29 September favors shipping the shared runtime
+separately and qualifying existing chains first. The proposed split is:
+
+| Shared runtime contribution                                                                                                                        | Zcash contribution after that baseline                                                                     |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Node/npm versions in `.nvmrc`, Dockerfile and package engines; `pkg` replacement; exact AOE 1.0.10 pin for scanner-v2 compatibility.               | Zcash codec, scanner, extractor and required Rosen-extractor dependency additions.                         |
+| Rollup `ignoreGlobal`, extended-typeorm SQLite import patch, shared CI/release installation and packaging fixes, and a runtime-specific changeset. | Chain configuration, registration, readiness, commitment/reveal gates, recovery tests and Zcash changeset. |
+| A coherent runtime-only lockfile using accepted published dependencies.                                                                            | A second lock refresh after the Zcash producers are published.                                             |
+
+The current PR's committed lockfile still reflects the old manifest; it does not
+make the proposed extraction reproducible with `npm ci`. The earlier
+[#12 discussion](https://github.com/rosen-bridge/watcher/pull/12#issuecomment-5022983382)
+prioritized gradual dependency migration and watcher-service-2. That PR was closed
+temporarily, not accepted as this runtime baseline. Maintainers still choose a
+separate v1 runtime contribution or the Service 2 route before branch extraction.
+
+For a v1 split, first build a clean runtime-only graph and execute an existing
+chain's synthetic path through scanning, persisted observation, commitment,
+reveal and permit return, followed by restart without duplicates. Then cover
+startup/scanning for every supported chain family, including Firo ElectrumX,
+database migration/recovery, and actual startup of each distributed bundle,
+container and packaged executable. Existing Zcash fixtures and successful
+bundling alone do not close that runtime release gate. No separate runtime
+release or existing-chain qualification campaign is claimed by this proposal.
+
 ## Scanner status and recovery
 
 Commitments and reveals require complete extraction through the scanner's
