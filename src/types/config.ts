@@ -9,6 +9,7 @@ type NetworkType =
   | typeof Constants.ETHEREUM_CHAIN_NAME
   | typeof Constants.BINANCE_CHAIN_NAME
   | typeof Constants.FIRO_CHAIN_NAME
-  | typeof Constants.HANDSHAKE_CHAIN_NAME;
+  | typeof Constants.HANDSHAKE_CHAIN_NAME
+  | typeof Constants.ZCASH_CHAIN_NAME;
 
 export { NetworkType };

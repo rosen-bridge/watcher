@@ -5,6 +5,7 @@ import { EvmRpcScanner } from '@rosen-bridge/evm-scanner';
 import { getConfig } from '../config/config';
 import * as Constants from '../config/constants';
 import { CreateScanner } from '../utils/scanner';
+import { ZcashScannerNotReady } from '../utils/zcashReadiness';
 
 const allConfig = getConfig();
 const {
@@ -17,19 +18,35 @@ const {
   binance: binanceConfig,
   handshake: handshakeConfig,
   firo: firoConfig,
+  zcash: zcashConfig,
 } = allConfig;
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
-const scanningJob = async (interval: number, scanner: GeneralScanner<any>) => {
+const scanningJob = async (
+  interval: number,
+  scanner: GeneralScanner<any>,
+  zcash = false
+) => {
   try {
+    if (zcash) {
+      const readiness =
+        await CreateScanner.getInstance().getZcashScannerReadiness();
+      if (readiness.state === 'halted')
+        throw new ZcashScannerNotReady(readiness);
+    }
     await scanner.update();
+    if (zcash) await CreateScanner.getInstance().assertZcashScannerHealthy();
   } catch (e) {
-    logger.warn(
-      `Scanning Job failed for ${scanner.name()}, ${e.message}, ${e.stack}`
-    );
+    if (e instanceof ZcashScannerNotReady && e.readiness.state !== 'halted') {
+      logger.info(e.message);
+    } else {
+      logger.warn(
+        `Scanning Job failed for ${scanner.name()}, ${e.message}, ${e.stack}`
+      );
+    }
   }
-  setTimeout(() => scanningJob(interval, scanner), interval * 1000);
+  setTimeout(() => scanningJob(interval, scanner, zcash), interval * 1000);
 };
 
 export const scannerInit = () => {
@@ -92,6 +109,13 @@ export const scannerInit = () => {
       scanningJob(
         handshakeConfig.interval,
         scanner.getObservationScanner() as GeneralScanner<unknown>
+      ).then(() => null);
+      break;
+    case Constants.ZCASH_CHAIN_NAME:
+      scanningJob(
+        zcashConfig.interval,
+        scanner.getObservationScanner() as GeneralScanner<unknown>,
+        true
       ).then(() => null);
       break;
     case Constants.ERGO_CHAIN_NAME:

@@ -63,7 +63,7 @@
     "madge": "^5.0.1",
     "mocha": "^9.2.2",
     "nock": "^13.5.4",
-    "pkg": "^5.8.1",
+    "@yao-pkg/pkg": "^6.22.0",
     "prettier": "^2.7.1",
     "rollup": "^3.21.6",
     "rollup-plugin-natives": "^0.7.6",
@@ -74,9 +74,10 @@
   },
   "dependencies": {
     "@rosen-bridge/abstract-logger": "^4.0.0",
-    "@rosen-bridge/abstract-observation-extractor": "^1.0.10",
+    "@rosen-bridge/abstract-observation-extractor": "1.0.10",
     "@rosen-bridge/abstract-scanner": "^2.0.3",
     "@rosen-bridge/address-codec": "^2.1.0",
+    "@rosen-bridge/address-codec-zcash": "^0.1.0",
     "@rosen-bridge/address-extractor": "^7.0.8",
     "@rosen-bridge/address-manager": "^0.1.0",
     "@rosen-bridge/asset-check": "^6.2.2",
@@ -102,12 +103,15 @@
     "@rosen-bridge/minimum-fee": "^4.0.1",
     "@rosen-bridge/node-sync-check": "^3.0.3",
     "@rosen-bridge/permit-check": "^3.0.4",
+    "@rosen-bridge/rosen-extractor": "^12.2.0",
     "@rosen-bridge/scanner-interfaces": "^1.0.0",
     "@rosen-bridge/scanner-sync-check": "^8.2.0",
     "@rosen-bridge/tokens": "^6.0.2",
     "@rosen-bridge/watcher-data-extractor": "^13.0.10",
     "@rosen-bridge/wid-check": "^3.0.3",
     "@rosen-bridge/winston-logger": "^3.1.0",
+    "@rosen-bridge/zcash-observation-extractor": "^0.1.0",
+    "@rosen-bridge/zcash-scanner": "^0.1.0",
     "@rosen-clients/rate-limited-axios": "^2.0.1",
     "bip39": "^3.1.0",
     "blakejs": "^1.2.1",
@@ -125,6 +129,7 @@
     "tsx": "^4.20.5"
   },
   "engines": {
-    "node": ">=20.11.0"
+    "node": ">=22.18.0",
+    "npm": "11.6.2"
   }
 }

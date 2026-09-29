@@ -31,6 +31,7 @@ import {
 } from '@rosen-bridge/cardano-scanner';
 import { ErgoObservationExtractor } from '@rosen-bridge/ergo-observation-extractor';
 import { ErgoScanner } from '@rosen-bridge/ergo-scanner';
+import { ZcashRpcScanner } from '@rosen-bridge/zcash-scanner';
 import { HandshakeRpcObservationExtractor } from '@rosen-bridge/handshake-observation-extractor';
 import { HandshakeRpcScanner } from '@rosen-bridge/handshake-scanner';
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
@@ -64,9 +65,16 @@ import {
   getConfig,
   HandshakeConfig,
   RosenConfig,
+  ZcashConfig,
 } from '../config/config';
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
+import { createZcashObservationScanner } from './zcashScanner';
+import {
+  getZcashReadiness,
+  ZcashScannerLogger,
+  ZcashScannerNotReady,
+} from './zcashReadiness';
 import {
   createBitcoinEsploraNetworkConnectorManager,
   createBitcoinRpcNetworkConnectorManager,
@@ -116,7 +124,10 @@ class CreateScanner {
     | EvmRpcScanner
     | FiroRpcScanner
     | FiroElectrumXScanner
-    | HandshakeRpcScanner;
+    | HandshakeRpcScanner
+    | ZcashRpcScanner;
+  private zcashScannerLogger?: ZcashScannerLogger;
+  private zcashObservationScanner?: ZcashRpcScanner;
 
   private constructor() {
     // do nothing
@@ -140,6 +151,7 @@ class CreateScanner {
         binance: binanceConfig,
         handshake: handshakeConfig,
         firo: firoConfig,
+        zcash: zcashConfig,
       } = allConfig;
 
       await CreateScanner.instance.createErgoScanner(config, rosenConfig);
@@ -190,6 +202,13 @@ class CreateScanner {
         case Constants.FIRO_CHAIN_NAME:
           await CreateScanner.instance.createFiroScanner(
             firoConfig,
+            rosenConfig,
+            config.observationStoreRawData
+          );
+          break;
+        case Constants.ZCASH_CHAIN_NAME:
+          await CreateScanner.instance.createZcashScanner(
+            zcashConfig,
             rosenConfig,
             config.observationStoreRawData
           );
@@ -245,11 +264,35 @@ class CreateScanner {
     | EvmRpcScanner
     | FiroRpcScanner
     | FiroElectrumXScanner
-    | HandshakeRpcScanner => {
+    | HandshakeRpcScanner
+    | ZcashRpcScanner => {
     if (!CreateScanner.instance) {
       throw new Error('Scanner is not initialized');
     }
     return this.observationScanner;
+  };
+
+  assertZcashScannerHealthy = async (): Promise<void> => {
+    const readiness = await this.getZcashScannerReadiness();
+    if (readiness.state !== 'ready') throw new ZcashScannerNotReady(readiness);
+  };
+
+  getZcashScannerReadiness = () =>
+    getZcashReadiness(this.zcashObservationScanner, this.zcashScannerLogger);
+
+  private createZcashScanner = async (
+    zcashConfig: ZcashConfig,
+    rosenConfig: RosenConfig,
+    observationStoreRawData: boolean
+  ) => {
+    const { scanner, logger } = await createZcashObservationScanner(
+      zcashConfig,
+      rosenConfig,
+      observationStoreRawData
+    );
+    this.observationScanner = scanner;
+    this.zcashObservationScanner = scanner;
+    this.zcashScannerLogger = logger;
   };
 
   private createErgoScanner = async (

@@ -1,11 +1,14 @@
 import { HealthStatusLevel } from '@rosen-bridge/health-check';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { getConfig } from '../config/config';
+import * as Constants from '../config/constants';
 import { Boxes } from '../ergo/boxes';
 import { CommitmentCreation } from '../transactions/commitmentCreation';
 import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { redeemJob } from './commitmentRedeem';
 import { HealthCheckSingleton } from '../utils/healthCheck';
+import { CreateScanner } from '../utils/scanner';
+import { ZcashScannerNotReady } from '../utils/zcashReadiness';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -17,6 +20,9 @@ const creationJob = async () => {
     const scannerSyncStatus =
       await HealthCheckSingleton.getInstance().getErgoScannerSyncHealth();
     if (scannerSyncStatus !== HealthStatusLevel.BROKEN) {
+      if (getConfig().general.networkWatcher === Constants.ZCASH_CHAIN_NAME) {
+        await CreateScanner.getInstance().assertZcashScannerHealthy();
+      }
       await commitmentCreatorObj.job();
       if (!redeemExecuted) {
         redeemExecuted = true;
@@ -28,7 +34,11 @@ const creationJob = async () => {
       );
     }
   } catch (e) {
-    logger.warn(`Creation Job failed with error: ${e.message} - ${e.stack}`);
+    if (e instanceof ZcashScannerNotReady && e.readiness.state !== 'halted') {
+      logger.info(`Skipping commitment creation: ${e.message}`);
+    } else {
+      logger.warn(`Creation Job failed with error: ${e.message} - ${e.stack}`);
+    }
   }
   setTimeout(
     creationJob,

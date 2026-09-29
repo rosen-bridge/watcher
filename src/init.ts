@@ -32,7 +32,8 @@ import { TokensConfig } from './config/tokensConfig';
 import { CreateScanner } from './utils/scanner';
 import { exit } from 'node:process';
 import { AddressManager } from '@rosen-bridge/address-manager';
-import { chainDecoders, chainValidators } from '@rosen-bridge/address-codec';
+import { getAddressCodecs } from './utils/addressCodecs';
+import rawConfig from 'config';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -47,9 +48,21 @@ const init = async () => {
   const config = getConfig();
 
   await TokensConfig.init(config.general.rosenTokensPath);
+  const supportsZcash = TokensConfig.getInstance()
+    .getTokenMap()
+    .getAllChains()
+    .includes('zcash');
+  const { validators, decoders } = getAddressCodecs(
+    supportsZcash,
+    config.general.networkWatcher,
+    config.general.networkType,
+    rawConfig.has('zcash.network')
+      ? rawConfig.get<string>('zcash.network')
+      : undefined
+  );
   AddressManager.init(
-    chainValidators,
-    chainDecoders,
+    validators,
+    decoders,
     DefaultLogger.getInstance().child('AddressManager')
   );
   await CreateScanner.init();
