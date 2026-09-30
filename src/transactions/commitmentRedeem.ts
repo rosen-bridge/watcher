@@ -170,7 +170,7 @@ export class CommitmentRedeem {
         await this.redeemCommitmentTx(
           WID,
           WIDBox,
-          decodeSerializedBox(commitment.boxSerialized),
+          decodeSerializedBox(commitment.serialized),
           feeBoxes,
           requiredValue
         );

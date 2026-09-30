@@ -545,7 +545,7 @@ export class ErgoUtils {
     const permitBoxes = await watcherDatabase.getUnspentPermitBoxes(
       Transaction.watcherWID
     );
-    const serializedUTXOs = permitBoxes.map((box) => box.boxSerialized);
+    const serializedUTXOs = permitBoxes.map((box) => box.serialized);
     const { tokens } = await this.extractBalanceFromBoxes(serializedUTXOs);
     const RWT = tokens.find((token) => token.tokenId === RWTId);
     if (RWT) {

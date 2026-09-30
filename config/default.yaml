@@ -89,7 +89,8 @@ firo:
     # password: '' # rpc password for authentication required instances
   electrumx:
     host: '' # electrumx host
-    port: 50002 # electrumx SSL port
+    port: 50002 # electrumx port (ElectrumX uses 50001 for unencrypted TCP and 50002 for SSL connection by default)
+    useTls: true # if true, uses SSL connection, otherwise uses unencrypted TCP connection
     reconnectDelay: 5 # electrumx reconnect delay on socket close (in seconds)
     timeout: 10 # electrumx request timeout (in seconds)
 handshake:
@@ -179,6 +180,12 @@ rewardCollection:
   # address: "" # reward collection address (uses default address if not set)
 initialization:
   eventTrigger: false # if true, the event trigger initialization will be enabled
+  permit: false # if true, the permit initialization will be enabled
+  commitment: false # if true, the commitment initialization will be enabled
+  # maxParallelRequests: 10
+blockCleanup: # scanner feature that removes unused blocks older than a day
+  isActiveForErgoChain: false
+  isActiveForNonErgoChains: true
 versionInputExtension: true # if true, the version will be written in the input extension
 # notification:
 #   discordWebhookUrl: '' # discord notification webhook
