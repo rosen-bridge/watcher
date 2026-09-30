@@ -40,3 +40,5 @@ export const HANDSHAKE_BLOCK_TIME = 600;
 export const FIRO_BLOCK_TIME = 150;
 export const UNISAT_TYPE = 'unisat';
 export const ORDISCAN_TYPE = 'ordiscan';
+export const BLOCK_CLEANUP_THRESHOLD_DURATION = 86400;
+export const BLOCK_CLEANUP_TRIM = 2000;

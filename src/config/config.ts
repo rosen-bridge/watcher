@@ -139,7 +139,10 @@ class Config {
     maxParallelRequests: number | undefined;
   };
   versionInputExtension: boolean;
-  blockCleanupConfig: BlockCleanupConfig;
+  blockCleanup: {
+    ergo: boolean;
+    nonErgo: boolean;
+  };
 
   constructor() {
     this.networkType = getRequiredString('ergo.network').toLowerCase();
@@ -304,13 +307,9 @@ class Config {
     };
     this.versionInputExtension = config.get<boolean>('versionInputExtension');
 
-    this.blockCleanupConfig = {
-      blockCleanupThresholdDuration: config.get<number>(
-        'blockCleanup.thresholdDuration'
-      ),
-      blockTrimCountInRound: config.get<number>(
-        'blockCleanup.trimCountInRound'
-      ),
+    this.blockCleanup = {
+      ergo: config.get<boolean>('blockCleanup.isActiveForErgoChain'),
+      nonErgo: config.get<boolean>('blockCleanup.isActiveForNonErgoChains'),
     };
   }
 }

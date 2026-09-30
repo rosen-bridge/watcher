@@ -183,9 +183,9 @@ initialization:
   permit: false # if true, the permit initialization will be enabled
   commitment: false # if true, the commitment initialization will be enabled
   # maxParallelRequests: 10
-blockCleanup:
-  thresholdDuration: 86400
-  trimCountInRound: 100
+blockCleanup: # scanner feature that removes unused blocks older than a day
+  isActiveForErgoChain: false
+  isActiveForNonErgoChains: true
 versionInputExtension: true # if true, the version will be written in the input extension
 # notification:
 #   discordWebhookUrl: '' # discord notification webhook
