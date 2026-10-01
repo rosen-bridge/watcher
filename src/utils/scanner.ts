@@ -2,6 +2,7 @@ import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { InitializeOptions } from '@rosen-bridge/abstract-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
 import {
+  BitcoinCashRpcObservationExtractor,
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
   DogeEsploraObservationExtractor,
@@ -15,6 +16,7 @@ import {
   UnisatRunesProtocolNetwork,
 } from '@rosen-bridge/bitcoin-runes-observation-extractor';
 import {
+  BitcoinCashRpcScanner,
   BitcoinEsploraScanner,
   BitcoinRpcScanner,
   DogeEsploraScanner,
@@ -56,6 +58,7 @@ import { dataSource } from '../../config/dataSource';
 import {
   BinanceConfig,
   BitcoinConfig,
+  BitcoinCashConfig,
   BitcoinRunesConfig,
   CardanoConfig,
   Config,
@@ -69,6 +72,7 @@ import {
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
 import {
+  createBitcoinCashRpcNetworkConnectorManager,
   createBitcoinEsploraNetworkConnectorManager,
   createBitcoinRpcNetworkConnectorManager,
   createCardanoBlockfrostNetworkConnectorManager,
@@ -113,6 +117,7 @@ class CreateScanner {
     | CardanoBlockFrostScanner
     | BitcoinEsploraScanner
     | BitcoinRpcScanner
+    | BitcoinCashRpcScanner
     | DogeEsploraScanner
     | DogeRpcScanner
     | EvmRpcScanner
@@ -136,6 +141,7 @@ class CreateScanner {
         rosen: rosenConfig,
         cardano: cardanoConfig,
         bitcoin: bitcoinConfig,
+        bitcoinCash: bitcoinCashConfig,
         bitcoinRunes: bitcoinRunesConfig,
         doge: dogeConfig,
         ethereum: ethereumConfig,
@@ -154,6 +160,14 @@ class CreateScanner {
 
       await CreateScanner.instance.createErgoScanner(config, rosenConfig);
       switch (config.networkWatcher) {
+        case Constants.BITCOIN_CASH_CHAIN_NAME:
+          await CreateScanner.instance.createBitcoinCashScanner(
+            bitcoinCashConfig,
+            rosenConfig,
+            config.observationStoreRawData,
+            nonErgoChainsBlockCleanupConfig
+          );
+          break;
         case Constants.BITCOIN_CHAIN_NAME:
           await CreateScanner.instance.createBitcoinScanner(
             bitcoinConfig,
@@ -258,6 +272,7 @@ class CreateScanner {
     | CardanoBlockFrostScanner
     | BitcoinEsploraScanner
     | BitcoinRpcScanner
+    | BitcoinCashRpcScanner
     | DogeEsploraScanner
     | DogeRpcScanner
     | EvmRpcScanner
@@ -450,6 +465,32 @@ class CreateScanner {
         );
         this.observationScanner.registerExtractor(observationExtractor);
       }
+    }
+  };
+
+  private createBitcoinCashScanner = async (
+    bitcoinCashConfig: BitcoinCashConfig,
+    rosenConfig: RosenConfig,
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
+  ) => {
+    if (!this.observationScanner) {
+      this.observationScanner = new BitcoinCashRpcScanner({
+        dataSource,
+        initialHeight: bitcoinCashConfig.initialHeight,
+        network: createBitcoinCashRpcNetworkConnectorManager(),
+        logger: loggers.observationScannerLogger,
+        blockCleanupConfig,
+      });
+      this.observationScanner.registerExtractor(
+        new BitcoinCashRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger,
+          observationStoreRawData
+        )
+      );
     }
   };
 

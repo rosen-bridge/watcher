@@ -17,6 +17,17 @@ bitcoin:
     url: '' # rpc url
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
+bitcoinCash:
+  type: 'rpc' # BCHN only
+  initial:
+    height: -1 # last scanned height; -1 starts at genesis
+  interval: 180 # seconds, 1..86400
+  rpc:
+    url: '' # operator BCHN HTTP(S) endpoint
+    timeout: 10 # seconds, 1..300
+    expectedChain: '' # explicitly select main, test or regtest
+    # username: '' # supply both credentials or neither
+    # password: ''
 bitcoinRunes:
   type: 'unisat' # options: unisat, ordiscan
   unisat:
