@@ -20,6 +20,25 @@ const state = vi.hoisted(() => ({
   nodeUrls: [] as string[],
   explorerUrls: [] as string[],
   boxIds: [] as string[],
+  batches: [] as number[],
+  cancel: vi.fn(),
+}));
+
+vi.mock('../../src/utils/bitcoinCashMinimumFeeNetwork', () => ({
+  BitcoinCashMinimumFeeNetwork: class {
+    /** Records the BCH read port selection without replacing its separate tests. */
+    constructor(url: string, kind: string) {
+      (kind === 'node' ? state.nodeUrls : state.explorerUrls).push(url);
+      state.networkConstruction();
+    }
+    /** Records each fresh batch deadline; handler tests control box acquisition. */
+    run = <T>(deadline: number, work: () => Promise<T>) => {
+      state.batches.push(deadline);
+      return work();
+    };
+    /** Records cancellation of the owned initialization. */
+    cancel = () => state.cancel();
+  },
 }));
 
 vi.mock('../../src/config/config', () => ({
@@ -118,6 +137,8 @@ describe('MinimumFeeHandler', () => {
     state.nodeUrls.length = 0;
     state.explorerUrls.length = 0;
     state.boxIds.length = 0;
+    state.batches.length = 0;
+    state.cancel.mockReset();
     state.fetch.mockReset().mockResolvedValue(true);
     state.parse.mockReset().mockReturnValue([{}]);
     state.networkConstruction.mockReset();
@@ -128,6 +149,55 @@ describe('MinimumFeeHandler', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  describe('update', () => {
+    /**
+     * @target MinimumFeeHandler.update
+     * @dependencies controlled fee boxes and batch port
+     * @scenario refresh starts after the initialization deadline has passed
+     * @expected each refresh receives a fresh full configured budget
+     */
+    it('starts a new budget for every BCH refresh', async () => {
+      await handler.init(makeMap());
+      vi.setSystemTime(1700000010000);
+      await handler.getInstance().update();
+      vi.setSystemTime(1700000020000);
+      await handler.getInstance().update();
+      expect(state.batches).toEqual([
+        1700000002000, 1700000012000, 1700000022000,
+      ]);
+      expect(state.fetch).toHaveBeenCalledTimes(3);
+    });
+
+    /**
+     * @target MinimumFeeHandler.update
+     * @dependencies controlled fee-box failure
+     * @scenario the library swallows a transport error and returns false
+     * @expected refresh rejects and does not acquire the next token
+     */
+    it('does not report a failed BCH refresh as successful', async () => {
+      await handler.init(makeMap(2));
+      state.fetch.mockClear().mockResolvedValue(false);
+      await expect(handler.getInstance().update()).rejects.toThrow(
+        'could not be fetched'
+      );
+      expect(state.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    /**
+     * @target MinimumFeeHandler.update
+     * @dependencies legacy watcher configuration
+     * @scenario a legacy fee read returns false
+     * @expected existing update semantics remain unchanged without a BCH batch
+     */
+    it('preserves legacy refresh behavior', async () => {
+      state.config.general.networkWatcher = 'bitcoin';
+      await handler.init(makeMap());
+      state.fetch.mockResolvedValue(false);
+      await handler.getInstance().update();
+      expect(state.batches).toEqual([]);
+    });
   });
 
   describe('init', () => {
