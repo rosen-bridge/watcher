@@ -7,6 +7,8 @@ import {
 import {
   BitcoinCashRpcNetwork,
   BitcoinCashRpcTransaction,
+} from '@rosen-bridge/bitcoin-cash-scanner';
+import {
   BitcoinEsploraTransaction,
   BitcoinRpcNetwork,
   BitcoinRpcTransaction,

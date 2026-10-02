@@ -13,8 +13,19 @@ import externals from 'rollup-plugin-node-externals';
 import ts from 'typescript';
 import MagicString from 'magic-string';
 
+/**
+ * Preserve bootstrap evaluation order when flattening the known source entry.
+ * @param entryId - Absolute entry module ID that this adapter may transform
+ * @returns Plugin that rejects unsupported entry imports and public exports
+ */
 export const createOrderedEntryImports = (entryId: string): Plugin => ({
   name: 'ordered-entry-imports',
+  /**
+   * Rewrite the validated bootstrap/init header to ordered static imports.
+   * @param code - Emitted JavaScript for the loaded module
+   * @param id - Loaded module ID
+   * @returns Rewritten entry and source map, or null for unrelated modules
+   */
   transform(code, id) {
     if (id.replace(/\\/g, '/') !== entryId.replace(/\\/g, '/')) return null;
     const header =
@@ -30,6 +41,10 @@ export const createOrderedEntryImports = (entryId: string): Plugin => ({
     );
     let imports = 0;
     let unsupported = false;
+    /**
+     * Count dynamic imports and detect unsupported import/export syntax.
+     * @param node - Current node of the parsed entry syntax tree
+     */
     const visit = (node: ts.Node) => {
       if (node.kind === ts.SyntaxKind.ImportKeyword) imports++;
       if (
@@ -80,6 +95,11 @@ const loadTypescript = projectTypescript.load;
 if (typeof loadTypescript !== 'function') {
   throw Error('TypeScript source-map binding requires a callable load hook');
 }
+/**
+ * Bind the generated TypeScript map to its exact loaded source and content.
+ * @param id - Loaded TypeScript module ID
+ * @returns Original load result or the result with an authenticated source map
+ */
 projectTypescript.load = async function (id) {
   const result = await loadTypescript.call(this, id);
   if (!result || typeof result === 'string' || !result.map) return result;
@@ -122,10 +142,25 @@ if (
   throw Error('Lazy native bindings require callable native plugin hooks');
 }
 const nativePrefix = '\0natives:';
+/**
+ * Identify platform-specific snappy addons returned by the native plugin.
+ * @param id - Resolved module ID
+ * @returns Whether the ID selects a platform snappy addon
+ */
 const isPlatformAddon = (id: string) =>
   id.startsWith(nativePrefix) && /\/snappy\.[^/]+\.node$/.test(id);
+/**
+ * Identify synthetic CommonJS wrappers that preserve native platform branches.
+ * @param id - Resolved module ID
+ * @returns Whether the ID names one synthetic native wrapper
+ */
 const isNativeWrapper = (id: string) =>
   id.startsWith(nativePrefix) && id.endsWith('.cjs');
+/**
+ * Convert only a single generated native require into a lazy CommonJS wrapper.
+ * @param source - Generated native-module wrapper source
+ * @returns Equivalent CommonJS require wrapper
+ */
 export const wrapNativeRequire = (source: string): string => {
   const match = /^export default require\(("(?:[^"\\\r\n]|\\.)*")\);\s*$/.exec(
     source
@@ -137,6 +172,13 @@ export const wrapNativeRequire = (source: string): string => {
   }
   return `module.exports = require(${match[1]});\n`;
 };
+/**
+ * Route platform addons through lazy wrappers using the native plugin context.
+ * @param source - Requested module specifier
+ * @param importer - Importing module ID, when supplied by Rollup
+ * @param options - Rollup resolution options
+ * @returns Original resolution or a synthetic wrapper ID for a platform addon
+ */
 projectNatives.resolveId = async function (source, importer, options) {
   const result = await resolveNative.call(this, source, importer, options);
   return typeof result === 'string' &&
@@ -145,6 +187,11 @@ projectNatives.resolveId = async function (source, importer, options) {
     ? result + '.cjs'
     : result;
 };
+/**
+ * Load one native wrapper without evaluating its platform-specific addon.
+ * @param id - Native addon or synthetic wrapper ID
+ * @returns Original load result or the validated lazy CommonJS wrapper
+ */
 projectNatives.load = async function (id) {
   if (!isNativeWrapper(id)) return loadNative.call(this, id);
   const source = await loadNative.call(this, id.slice(0, -4));
@@ -156,6 +203,12 @@ projectNatives.load = async function (id) {
   // Let CommonJS preserve the original platform branch and its try/catch.
   return wrapNativeRequire(source);
 };
+/**
+ * Preserve synthetic CommonJS wrappers while delegating other native modules.
+ * @param code - Loaded module source
+ * @param id - Loaded module ID
+ * @returns Null for wrapper modules or the original native transform result
+ */
 projectNatives.transform = function (code, id) {
   return isNativeWrapper(id) ? null : transformNative.call(this, code, id);
 };
@@ -195,6 +248,11 @@ const config: RollupOptions = {
       // Adjacent linked packages also contain dynamic require callers.
       dynamicRequireRoot: '..',
       // Copied addons are loaded at runtime by their lazy CommonJS wrappers.
+      /**
+       * Keep copied addons as runtime requires inside their lazy wrappers.
+       * @param id - Require specifier encountered by the CommonJS plugin
+       * @returns Whether the require targets a copied addon
+       */
       ignore: (id) => /^\.\/libs\/.*\.(node|dll)$/.test(id),
     }),
     /**
@@ -225,12 +283,24 @@ const config: RollupOptions = {
     }),
     {
       name: 'async-commonjs-bootstrap',
+      /**
+       * Bind import.meta.url to the generated CommonJS module filename.
+       * @param property - Requested import.meta property
+       * @returns CommonJS expression for the supported URL property
+       */
       resolveImportMeta(property) {
         if (property === 'url') {
           return 'require("url").pathToFileURL(__filename).href';
         }
         this.error('Async CommonJS bootstrap supports only import.meta.url');
       },
+      /**
+       * Wrap one entry in an async CommonJS bootstrap with composed source maps.
+       * @param code - Rendered entry JavaScript
+       * @param chunk - Rollup chunk metadata
+       * @param outputOptions - Selected Rollup output configuration
+       * @returns Async CommonJS wrapper code and its adjusted source map
+       */
       renderChunk(code, chunk, outputOptions) {
         if (
           !outputOptions.inlineDynamicImports ||

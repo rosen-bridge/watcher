@@ -1,8 +1,9 @@
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { InitializeOptions } from '@rosen-bridge/abstract-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
+import { BitcoinCashRpcObservationExtractor } from '@rosen-bridge/bitcoin-cash-observation-extractor';
+import { BitcoinCashRpcScanner } from '@rosen-bridge/bitcoin-cash-scanner';
 import {
-  BitcoinCashRpcObservationExtractor,
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
   DogeEsploraObservationExtractor,
@@ -16,7 +17,6 @@ import {
   UnisatRunesProtocolNetwork,
 } from '@rosen-bridge/bitcoin-runes-observation-extractor';
 import {
-  BitcoinCashRpcScanner,
   BitcoinEsploraScanner,
   BitcoinRpcScanner,
   DogeEsploraScanner,

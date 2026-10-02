@@ -1,5 +1,5 @@
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
-import { BitcoinCashRpcChain } from '@rosen-bridge/bitcoin-scanner';
+import { BitcoinCashRpcChain } from '@rosen-bridge/bitcoin-cash-scanner';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 import { RateLimitedAxiosConfig } from '@rosen-clients/rate-limited-axios';
 import { generateMnemonic } from 'bip39';
