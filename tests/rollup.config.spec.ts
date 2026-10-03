@@ -6,8 +6,9 @@ import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
 import commonjs from '@rollup/plugin-commonjs';
-import { OutputChunk, Plugin, rollup } from 'rollup';
+import { OutputAsset, OutputChunk, Plugin, rollup } from 'rollup';
 import config, {
+  createLazyStartup,
   createOrderedEntryImports,
   wrapNativeRequire,
 } from '../rollup.config';
@@ -24,6 +25,115 @@ import {
   expectPresent,
   resolveEsmModule,
 } from './rollupTestUtils';
+
+describe('createLazyStartup', () => {
+  /**
+   * @target generateBundle - preserves deferred BCH code in the emitted graph
+   * @dependencies Real Rollup and separate virtual bootstrap, init and BCH modules
+   * @scenario Emit the supported index.mjs entry with deferred BCH loading
+   * @expected Keep BCH in a separate marked chunk and emit the existing launcher
+   */
+  it('preserves deferred BCH code in the emitted graph', async () => {
+    const sources: Record<string, string> = {
+      'virtual:entry':
+        "await import('virtual:bootstrap'); const { load } = await import('virtual:init'); if (globalThis.bch) await load();",
+      'virtual:bootstrap': 'globalThis.bootstrapped = true;',
+      'virtual:init':
+        "export const load = () => import('virtual:/@bitauth/libauth/build/lib/crypto/sha256.js');",
+      'virtual:/@bitauth/libauth/build/lib/crypto/sha256.js':
+        'globalThis.libauthEvaluated = true;',
+    };
+    const bundle = await rollup({
+      input: 'virtual:entry',
+      plugins: [
+        {
+          name: 'lazy-startup-fixture',
+          /** Resolve only the fixture's explicit module closure. */
+          resolveId: (id) => (Object.hasOwn(sources, id) ? id : null),
+          /** Load the selected fixture module without external dependencies. */
+          load: (id) => sources[id] ?? null,
+        },
+        createLazyStartup(),
+      ],
+    });
+    try {
+      const { output } = await bundle.generate({
+        dir: 'out',
+        format: 'es',
+        inlineDynamicImports: false,
+        entryFileNames: 'index.mjs',
+        chunkFileNames: '[name]-[hash].mjs',
+      });
+      const launcher = output.find(
+        (item) => item.fileName === 'index.cjs'
+      ) as OutputAsset;
+      expect(launcher.source).toContain('import("./index.mjs")');
+      const manifest = output.find(
+        (item) => item.fileName === 'startup-graph.json'
+      ) as OutputAsset;
+      const graph = JSON.parse(manifest.source as string);
+      const entry = graph.find(
+        (item: { fileName: string }) => item.fileName === 'index.mjs'
+      );
+      expect(entry.imports).toEqual([]);
+      expect(entry.dynamicImports).toHaveLength(2);
+      const bch = graph.filter(
+        (item: { libauthModules: string[] }) => item.libauthModules.length > 0
+      );
+      expect(bch).toHaveLength(1);
+      expect(bch[0].libauthModules).toEqual(['build/lib/crypto/sha256.js']);
+      expect(entry.dynamicImports).not.toContain(bch[0].fileName);
+    } finally {
+      await bundle.close();
+    }
+  });
+
+  /**
+   * @target generateBundle - rejects an incompatible lazy entry contract
+   * @dependencies One isolated name, count, export or format fault and real Rollup
+   * @scenario Change only the selected boundary of the production output contract
+   * @expected Refuse a launcher that would point at an unsupported entry
+   */
+  it.each(['name', 'count', 'export', 'format'])(
+    'rejects an incompatible %s',
+    async (fault) => {
+      const input =
+        fault === 'count'
+          ? { index: 'virtual:first', second: 'virtual:second' }
+          : { [fault === 'name' ? 'other' : 'index']: 'virtual:first' };
+      const bundle = await rollup({
+        input,
+        plugins: [
+          {
+            name: 'lazy-entry-contract-fixture',
+            /** Resolve the fixture's one or two declared entries. */
+            resolveId: (id) => id,
+            /** Inject only the selected public-export fault. */
+            load: () =>
+              fault === 'export'
+                ? 'export const value = 1;'
+                : 'globalThis.entered = true;',
+          },
+          createLazyStartup(),
+        ],
+      });
+      try {
+        await expect(
+          bundle.generate({
+            dir: 'out',
+            format: fault === 'format' ? 'cjs' : 'es',
+            inlineDynamicImports: false,
+            entryFileNames: '[name].mjs',
+          })
+        ).rejects.toThrow(
+          'Lazy startup requires one index.mjs entry without exports'
+        );
+      } finally {
+        await bundle.close();
+      }
+    }
+  );
+});
 
 describe('createOrderedEntryImports', () => {
   describe('transform', () => {

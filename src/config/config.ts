@@ -1,11 +1,13 @@
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
-import {
+import type {
   BitcoinCashRpcChain,
   BitcoinCashRpcLimits,
+} from '@rosen-bridge/bitcoin-cash-scanner';
+import {
   resolveBitcoinCashRpcLimits,
   validateBitcoinCashRpcCredentials,
   validateBitcoinCashRpcUrl,
-} from '@rosen-bridge/bitcoin-cash-scanner';
+} from '@rosen-bridge/bitcoin-cash-scanner/dist/network/bitcoinCashRpcPolicy.js';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 import { RateLimitedAxiosConfig } from '@rosen-clients/rate-limited-axios';
 import { generateMnemonic } from 'bip39';

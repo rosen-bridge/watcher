@@ -7,7 +7,10 @@ import { WatcherUtils } from '../../utils/watcherUtils';
 import { getConfig } from '../../config/config';
 import { Transaction } from '../../api/Transaction';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
-import { assertBitcoinCashObservationFinality } from '../../utils/bitcoinCashFinality';
+import {
+  assertBitcoinCashObservationFinality,
+  BitcoinCashObservationFinalityError,
+} from '../../utils/bitcoinCashFinality';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -209,7 +212,14 @@ export class Queue {
       try {
         await this.processTx(tx, currentHeight);
       } catch (e) {
-        if (e instanceof Error)
+        if (
+          e instanceof BitcoinCashObservationFinalityError &&
+          e.isRoutineWait()
+        )
+          logger.debug(
+            `Transaction [${tx.txId}] waiting for BCH finalization: ${e.message}`
+          );
+        else if (e instanceof Error)
           logger.warn(
             `An error occurred while processing tx [${tx.txId}] with type ${tx.type}: ${e.message} - ${e.stack}`
           );

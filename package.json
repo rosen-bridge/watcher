@@ -14,6 +14,7 @@
     "test": "npm run test:legacy && npm run test:bitcoin-cash",
     "test:legacy": "cross-env NODE_ENV=test NODE_BACKEND=js mocha --exit --slow 3000 --ignore \"tests/**/*.spec.ts\" --ignore \"tests/**/mocked/*.mock.ts\" --ignore \"tests/rollupTestUtils.ts\"",
     "test:bitcoin-cash": "cross-env NODE_ENV=test NODE_BACKEND=js vitest run --config vitest.config.ts",
+    "test:build-isolation": "npm run build && node scripts/check-bch-startup-isolation.mjs",
     "type-check": "tsc --noEmit",
     "typeorm:generate:sqlite": "npm run typeorm migration:generate ./src/database/migrations/sqlite/watcherMigration -- -p -d ./config/dataSource.ts",
     "typeorm:generate:postgres": "npm run typeorm migration:generate ./src/database/migrations/postgres/watcherMigration -- -p -d ./config/dataSource.ts",

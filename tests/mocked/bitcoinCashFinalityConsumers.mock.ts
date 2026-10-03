@@ -48,7 +48,10 @@ export const observationFixture = (): ObservationEntity =>
  */
 export const finalityConsumerFixture = async () => {
   finality.mockReset().mockResolvedValue(undefined);
-  vi.doMock('../../src/utils/bitcoinCashFinality', () => ({
+  vi.doMock('../../src/utils/bitcoinCashFinality', async (importOriginal) => ({
+    ...(await importOriginal<
+      typeof import('../../src/utils/bitcoinCashFinality')
+    >()),
     assertBitcoinCashObservationFinality: finality,
   }));
   vi.doMock('../../src/init', () => ({ watcherDatabase: undefined }));

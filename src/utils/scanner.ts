@@ -1,8 +1,7 @@
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { InitializeOptions } from '@rosen-bridge/abstract-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
-import { BitcoinCashRpcObservationExtractor } from '@rosen-bridge/bitcoin-cash-observation-extractor';
-import { BitcoinCashRpcScanner } from '@rosen-bridge/bitcoin-cash-scanner';
+import type { BitcoinCashRpcScanner } from '@rosen-bridge/bitcoin-cash-scanner';
 import {
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
@@ -468,6 +467,13 @@ class CreateScanner {
     }
   };
 
+  /**
+   * Constructs BCH dependencies only for this branch and awaits extractor registration.
+   * @param bitcoinCashConfig - Validated scanner height and RPC configuration
+   * @param rosenConfig - Contract and treasury configuration for BCH
+   * @param observationStoreRawData - Whether observations retain raw transaction data
+   * @param blockCleanupConfig - Scanner persistence cleanup policy
+   */
   private createBitcoinCashScanner = async (
     bitcoinCashConfig: BitcoinCashConfig,
     rosenConfig: RosenConfig,
@@ -475,14 +481,21 @@ class CreateScanner {
     blockCleanupConfig: BlockCleanupConfig
   ) => {
     if (!this.observationScanner) {
+      const [
+        { BitcoinCashRpcScanner },
+        { BitcoinCashRpcObservationExtractor },
+      ] = await Promise.all([
+        import('@rosen-bridge/bitcoin-cash-scanner'),
+        import('@rosen-bridge/bitcoin-cash-observation-extractor'),
+      ]);
       this.observationScanner = new BitcoinCashRpcScanner({
         dataSource,
         initialHeight: bitcoinCashConfig.initialHeight,
-        network: createBitcoinCashRpcNetworkConnectorManager(),
+        network: await createBitcoinCashRpcNetworkConnectorManager(),
         logger: loggers.observationScannerLogger,
         blockCleanupConfig,
       });
-      this.observationScanner.registerExtractor(
+      await this.observationScanner.registerExtractor(
         new BitcoinCashRpcObservationExtractor(
           rosenConfig.lockAddress,
           dataSource,

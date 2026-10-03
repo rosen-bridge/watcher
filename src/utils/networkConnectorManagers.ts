@@ -4,10 +4,7 @@ import {
   NetworkConnectorManager,
   RoundRobinStrategy,
 } from '@rosen-bridge/abstract-scanner';
-import {
-  BitcoinCashRpcNetwork,
-  BitcoinCashRpcTransaction,
-} from '@rosen-bridge/bitcoin-cash-scanner';
+import type { BitcoinCashRpcTransaction } from '@rosen-bridge/bitcoin-cash-scanner';
 import {
   BitcoinEsploraTransaction,
   BitcoinRpcNetwork,
@@ -88,9 +85,12 @@ export const createErgoExplorerNetworkConnectorManager =
 /**
  * Creates and configures a NetworkConnectorManager instance for native BCHN scanning
  */
-export const createBitcoinCashRpcNetworkConnectorManager = () => {
+export const createBitcoinCashRpcNetworkConnectorManager = async () => {
   const rpc = config.bitcoinCash.rpc;
   if (!rpc) throw Error('RPC configuration must be provided for Bitcoin Cash');
+  const { BitcoinCashRpcNetwork } = await import(
+    '@rosen-bridge/bitcoin-cash-scanner'
+  );
   const manager = new NetworkConnectorManager<BitcoinCashRpcTransaction>(
     new FailoverStrategy(),
     bitcoinCashLogger

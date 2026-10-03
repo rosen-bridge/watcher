@@ -1,6 +1,6 @@
-import { Plugin, RollupOptions } from 'rollup';
+import { OutputChunk, Plugin, RollupOptions } from 'rollup';
 import { readFileSync } from 'node:fs';
-import { basename, isAbsolute, resolve } from 'node:path';
+import { basename, isAbsolute } from 'node:path';
 
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
@@ -87,6 +87,7 @@ export const createOrderedEntryImports = (entryId: string): Plugin => ({
 });
 
 const projectTypescript = typescript({
+  outDir: './out',
   sourceMap: true,
   inlineSources: true,
   exclude: [/await-semaphore/],
@@ -213,14 +214,76 @@ projectNatives.transform = function (code, id) {
   return isNativeWrapper(id) ? null : transformNative.call(this, code, id);
 };
 
+/** Emits the existing launch path and a reviewable graph for one lazy ESM entry. */
+export const createLazyStartup = (): Plugin => ({
+  name: 'lazy-bch-startup',
+  /** Validate the emitted entry before writing its launcher and module inventory. */
+  generateBundle(outputOptions, bundle) {
+    if (outputOptions.inlineDynamicImports) return;
+    const chunks = Object.values(bundle).filter(
+      (item): item is OutputChunk => item.type === 'chunk'
+    );
+    const entries = chunks.filter((chunk) => chunk.isEntry);
+    if (
+      outputOptions.format !== 'es' ||
+      entries.length !== 1 ||
+      entries[0].fileName !== 'index.mjs' ||
+      entries[0].exports.length !== 0
+    )
+      this.error('Lazy startup requires one index.mjs entry without exports');
+    this.emitFile({
+      type: 'asset',
+      fileName: 'startup-graph.json',
+      source: JSON.stringify(
+        chunks.map((chunk) => ({
+          fileName: chunk.fileName,
+          imports: chunk.imports,
+          dynamicImports: chunk.dynamicImports,
+          libauthModules: Object.entries(chunk.modules)
+            .filter(
+              ([id, module]) =>
+                module.renderedLength > 0 &&
+                id.replace(/\\/g, '/').includes('/@bitauth/libauth/')
+            )
+            .map(
+              ([id]) => id.replace(/\\/g, '/').split('/@bitauth/libauth/')[1]
+            ),
+        })),
+        null,
+        2
+      ),
+    });
+    this.emitFile({
+      type: 'asset',
+      fileName: 'index.cjs',
+      source:
+        'import("./index.mjs").catch((error) => {\n' +
+        '  console.error("Failed to initialize:", error);\n' +
+        '  process.exitCode = 1;\n' +
+        '});\n',
+    });
+  },
+});
+
 const config: RollupOptions = {
   input: './src/index.ts',
   output: [
     {
-      file: './out/index.cjs',
+      dir: './out',
+      entryFileNames: 'index.mjs',
+      chunkFileNames: '[name]-[hash].mjs',
       format: 'es',
-      inlineDynamicImports: true,
+      inlineDynamicImports: false,
       sourcemap: true,
+      // Native wrappers and node-config require CommonJS globals. Keep chunks
+      // adjacent to their copied libs so these paths retain their old meaning.
+      banner:
+        'import { createRequire as __watcherCreateRequire } from "node:module";\n' +
+        'import { fileURLToPath as __watcherFilePath } from "node:url";\n' +
+        'import { dirname as __watcherDirname } from "node:path";\n' +
+        'const __filename = __watcherFilePath(import.meta.url);\n' +
+        'const __dirname = __watcherDirname(__filename);\n' +
+        'const require = __watcherCreateRequire(import.meta.url);',
     },
   ],
   plugins: [
@@ -235,7 +298,6 @@ const config: RollupOptions = {
      * imports to the ts files (instead of js ones), which is unexpected.
      */
     projectTypescript,
-    createOrderedEntryImports(resolve('src/index.ts')),
     /**
      * This plugin is needed because the `sqlite3` package includes node native
      * addons
@@ -281,6 +343,7 @@ const config: RollupOptions = {
       'mock-aws-s3': '',
       'aws-sdk': '',
     }),
+    createLazyStartup(),
     {
       name: 'async-commonjs-bootstrap',
       /**
@@ -288,7 +351,8 @@ const config: RollupOptions = {
        * @param property - Requested import.meta property
        * @returns CommonJS expression for the supported URL property
        */
-      resolveImportMeta(property) {
+      resolveImportMeta(property, { chunkId }) {
+        if (chunkId.endsWith('.mjs')) return null;
         if (property === 'url') {
           return 'require("url").pathToFileURL(__filename).href';
         }
@@ -302,6 +366,12 @@ const config: RollupOptions = {
        * @returns Async CommonJS wrapper code and its adjusted source map
        */
       renderChunk(code, chunk, outputOptions) {
+        if (
+          !outputOptions.inlineDynamicImports &&
+          outputOptions.format === 'es' &&
+          chunk.fileName.endsWith('.mjs')
+        )
+          return null;
         if (
           !outputOptions.inlineDynamicImports ||
           !chunk.isEntry ||

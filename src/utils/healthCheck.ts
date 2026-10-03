@@ -51,6 +51,7 @@ import {
 } from '../config/constants';
 import { watcherDatabase } from '../init';
 import { CreateScanner } from './scanner';
+import { bitcoinCashFinalityHealth } from './bitcoinCashFinalityHealth';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -92,6 +93,8 @@ class HealthCheckSingleton {
       };
     }
     this.healthCheck = new HealthCheck(notify, notificationConfig);
+    if (getConfig().general.networkWatcher === BITCOIN_CASH_CHAIN_NAME)
+      this.healthCheck.register(bitcoinCashFinalityHealth);
 
     const warnLogCheck = new LogLevelHealthCheck(
       HealthStatusLevel.UNSTABLE,
