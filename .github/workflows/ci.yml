@@ -24,6 +24,9 @@ jobs:
           node-version-file: .nvmrc
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Setup npm
+        run: npm install --global npm@11.6.2
+
       - name: Install Dependencies
         run: npm ci
 

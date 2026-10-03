@@ -33,6 +33,7 @@ import { CreateScanner } from './utils/scanner';
 import { exit } from 'node:process';
 import { AddressManager } from '@rosen-bridge/address-manager';
 import { chainDecoders, chainValidators } from '@rosen-bridge/address-codec';
+import { BITCOIN_CASH_CHAIN_NAME } from './config/constants';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -45,6 +46,8 @@ let watcherUtils: WatcherUtils;
  */
 const init = async () => {
   const config = getConfig();
+  const nativeBitcoinCash =
+    config.general.networkWatcher === BITCOIN_CASH_CHAIN_NAME;
 
   await TokensConfig.init(config.general.rosenTokensPath);
   AddressManager.init(
@@ -104,8 +107,11 @@ const init = async () => {
     app.listen(port, () => logger.info(`App listening on port ${port}`));
   };
 
-  generateTransactionObject()
+  const startup = generateTransactionObject()
     .then(async () => {
+      // BCH must have usable fees before exposing APIs or scheduling work.
+      if (nativeBitcoinCash)
+        await MinimumFeeHandler.init(TokensConfig.getInstance().getTokenMap());
       logger.debug('Initializing routes...');
       initExpress();
       watcherDatabase = new WatcherDataBase(dataSource);
@@ -120,7 +126,8 @@ const init = async () => {
       );
       const txUtils = new TransactionUtils(watcherDatabase);
 
-      await MinimumFeeHandler.init(TokensConfig.getInstance().getTokenMap());
+      if (!nativeBitcoinCash)
+        await MinimumFeeHandler.init(TokensConfig.getInstance().getTokenMap());
       minimumFeeUpdateJob();
       logger.debug('Initializing statistic object...');
       await Transaction.setup(
@@ -154,10 +161,13 @@ const init = async () => {
       logger.debug('Service initialization finished successfully.');
     })
     .catch((e) => {
+      // Let the entry point terminate BCH startup, including any open handles.
+      if (nativeBitcoinCash) throw e;
       logger.error(
         `An error occurred while initializing datasource: ${e.message} - ${e.stack}`
       );
     });
+  if (nativeBitcoinCash) await startup;
 };
 
 const initWatcherDB = (db: WatcherDataBase) => {

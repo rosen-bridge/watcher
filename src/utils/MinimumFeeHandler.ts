@@ -8,14 +8,23 @@ import {
 import { TokenMap } from '@rosen-bridge/tokens';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { getConfig } from '../config/config';
-import { ERGO_CHAIN_NAME, NODE_TYPE } from '../config/constants';
+import {
+  BITCOIN_CASH_CHAIN_NAME,
+  ERGO_CHAIN_NAME,
+  NODE_TYPE,
+} from '../config/constants';
 import { ObservationEntity } from '@rosen-bridge/abstract-observation-extractor';
 import { TokensConfig } from '../config/tokensConfig';
+import { BitcoinCashMinimumFeeNetwork } from './bitcoinCashMinimumFeeNetwork';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 class MinimumFeeHandler {
-  private static instance: MinimumFeeHandler;
+  private static instance: MinimumFeeHandler | undefined;
+  private static initialization: symbol;
+  private static cancelInitialization?: () => void;
+  private bitcoinCashNetwork?: BitcoinCashMinimumFeeNetwork;
+  private timeoutMilliseconds = 0;
   protected minimumFees = new Map<string, MinimumFeeBox>();
 
   private constructor() {
@@ -23,16 +32,58 @@ class MinimumFeeHandler {
   }
 
   /**
-   * initializes minimum fee handler
+   * Initializes minimum fee boxes. BCH initialization publishes the handler
+   * only after every BCH-applicable box is fetched within the Ergo read deadline.
+   * BCH reads share a bounded, cancellable NFT lookup within each batch.
+   * @param tokenMap shared tokens, restricted to BCH membership for a BCH watcher
    */
   static init = async (tokenMap: TokenMap) => {
     const configs = getConfig();
-
-    MinimumFeeHandler.instance = new MinimumFeeHandler();
+    const nativeBitcoinCash =
+      configs.general.networkWatcher === BITCOIN_CASH_CHAIN_NAME;
+    const initialization = Symbol('minimum-fee-initialization');
+    MinimumFeeHandler.cancelInitialization?.();
+    MinimumFeeHandler.cancelInitialization = undefined;
+    MinimumFeeHandler.initialization = initialization;
+    const candidate = new MinimumFeeHandler();
+    MinimumFeeHandler.instance = nativeBitcoinCash ? undefined : candidate;
+    const timeoutMilliseconds =
+      (configs.general.scannerType === NODE_TYPE
+        ? configs.general.nodeTimeout
+        : configs.general.explorerTimeout) * 1000;
+    if (
+      nativeBitcoinCash &&
+      (!Number.isSafeInteger(timeoutMilliseconds) ||
+        timeoutMilliseconds <= 0 ||
+        timeoutMilliseconds > 0x7fffffff)
+    )
+      throw Error('Invalid Bitcoin Cash minimum-fee initialization timeout');
+    const deadline = Date.now() + timeoutMilliseconds;
+    /** Rejects an expired or superseded BCH initialization before publishing. */
+    const assertCurrent = () => {
+      if (MinimumFeeHandler.initialization !== initialization)
+        throw Error('Bitcoin Cash minimum-fee initialization superseded');
+      if (Date.now() >= deadline)
+        throw Error(
+          'Bitcoin Cash minimum-fee initialization deadline exceeded'
+        );
+    };
     logger.debug('MinimumFeeHandler instantiated');
 
+    const bitcoinCashNetwork = nativeBitcoinCash
+      ? new BitcoinCashMinimumFeeNetwork(
+          configs.general.scannerType === NODE_TYPE
+            ? configs.general.nodeUrl
+            : configs.general.explorerUrl,
+          configs.general.scannerType === NODE_TYPE ? 'node' : 'explorer'
+        )
+      : undefined;
+    candidate.bitcoinCashNetwork = bitcoinCashNetwork;
+    candidate.timeoutMilliseconds = timeoutMilliseconds;
+    MinimumFeeHandler.cancelInitialization = bitcoinCashNetwork?.cancel;
     const network =
-      configs.general.scannerType === NODE_TYPE
+      bitcoinCashNetwork ??
+      (configs.general.scannerType === NODE_TYPE
         ? new MinimumFeeNodeNetwork(
             configs.general.nodeUrl,
             logger.child(`NodeNetwork`)
@@ -40,29 +91,88 @@ class MinimumFeeHandler {
         : new MinimumFeeExplorerNetwork(
             configs.general.explorerUrl,
             logger.child(`ExplorerNetwork`)
-          );
+          ));
+    /** Decodes an Ergo register using the configured minimum-fee box parser. */
     const decodeRegister = (register: string) => {
       return wasm.Constant.decode_from_base16(register).to_js();
     };
 
     // TODO: A function to apply token map updates is required for here
     // local:ergo/rosen-bridge/watcher#269
-    const promises = tokenMap.getConfig().map((chainToken) => {
-      const token = chainToken[ERGO_CHAIN_NAME];
-      const tokenId = token.tokenId;
+    /** Fetches all boxes with rejection handlers attached in the same turn. */
+    const fetchBoxes = async () => {
+      const tokens = tokenMap
+        .getConfig()
+        .filter(
+          (chainToken) =>
+            !nativeBitcoinCash ||
+            Object.hasOwn(chainToken, BITCOIN_CASH_CHAIN_NAME)
+        );
+      const promises = tokens.map(async (chainToken) => {
+        if (nativeBitcoinCash) assertCurrent();
+        const token = chainToken[ERGO_CHAIN_NAME];
+        const tokenId = token.tokenId;
 
-      const tokenMinimumFeeBox = new MinimumFeeBox(
-        tokenId,
-        configs.rosen.minFeeNFT,
-        network,
-        decodeRegister,
-        logger
-      );
-      MinimumFeeHandler.instance.minimumFees.set(tokenId, tokenMinimumFeeBox);
-      return tokenMinimumFeeBox.fetchBox();
-    });
+        const tokenMinimumFeeBox = new MinimumFeeBox(
+          tokenId,
+          configs.rosen.minFeeNFT,
+          network,
+          decodeRegister,
+          logger
+        );
+        candidate.minimumFees.set(tokenId, tokenMinimumFeeBox);
+        if (nativeBitcoinCash) assertCurrent();
+        const fetched = await tokenMinimumFeeBox.fetchBox();
+        if (nativeBitcoinCash && !fetched)
+          throw Error('Bitcoin Cash minimum-fee boxes could not be fetched');
+        return fetched;
+      });
+      return await Promise.all(promises);
+    };
 
-    await Promise.all(promises);
+    if (bitcoinCashNetwork) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        assertCurrent();
+        const expired = new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () =>
+              reject(
+                Error(
+                  'Bitcoin Cash minimum-fee initialization deadline exceeded'
+                )
+              ),
+            deadline - Date.now()
+          );
+        });
+        const fetched = await Promise.race([
+          bitcoinCashNetwork.run(deadline, fetchBoxes),
+          expired,
+        ]);
+        assertCurrent();
+        if (fetched.length === 0 || fetched.some((success) => success !== true))
+          throw Error('Bitcoin Cash minimum-fee boxes could not be fetched');
+        for (const box of candidate.minimumFees.values()) {
+          assertCurrent();
+          if (box.getConfigs().length === 0)
+            throw Error(
+              'Bitcoin Cash minimum-fee box has no fee configuration'
+            );
+        }
+        assertCurrent();
+        MinimumFeeHandler.instance = candidate;
+      } catch (error) {
+        assertCurrent();
+        throw error;
+      } finally {
+        bitcoinCashNetwork?.cancel();
+        if (MinimumFeeHandler.initialization === initialization)
+          MinimumFeeHandler.cancelInitialization = undefined;
+        if (timer !== undefined) clearTimeout(timer);
+      }
+    } else {
+      await fetchBoxes();
+    }
     logger.info('MinimumFeeHandler initialized');
   };
 
@@ -119,6 +229,26 @@ class MinimumFeeHandler {
    * updates minimum fee boxes
    */
   update = async (): Promise<void> => {
+    if (this.bitcoinCashNetwork) {
+      await this.bitcoinCashNetwork.run(
+        Date.now() + this.timeoutMilliseconds,
+        async () => {
+          // Existing per-box updates remain non-atomic, but failed reads must
+          // reject the refresh instead of silently reporting success.
+          for (const minimumFee of this.minimumFees.values()) {
+            if (!(await minimumFee.fetchBox()))
+              throw Error(
+                'Bitcoin Cash minimum-fee boxes could not be fetched'
+              );
+            if (minimumFee.getConfigs().length === 0)
+              throw Error(
+                'Bitcoin Cash minimum-fee box has no fee configuration'
+              );
+          }
+        }
+      );
+      return;
+    }
     for (const minimumFee of this.minimumFees.values()) {
       await minimumFee.fetchBox();
     }

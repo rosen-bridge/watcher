@@ -4,6 +4,7 @@ import {
   NetworkConnectorManager,
   RoundRobinStrategy,
 } from '@rosen-bridge/abstract-scanner';
+import type { BitcoinCashRpcTransaction } from '@rosen-bridge/bitcoin-cash-scanner';
 import {
   BitcoinEsploraTransaction,
   BitcoinRpcNetwork,
@@ -43,6 +44,7 @@ const logger = DefaultLogger.getInstance().child(import.meta.url);
 const ergoNodeLogger = logger.child('ergoNodeConnector');
 const ergoExplorerLogger = logger.child('ergoExplorerConnector');
 const bitcoinLogger = logger.child('bitcoinConnector');
+const bitcoinCashLogger = logger.child('bitcoinCashConnector');
 const dogeLogger = logger.child('dogeConnector');
 const cardanoKoiosLogger = logger.child('cardanoKoiosConnector');
 const cardanoBlockfrostLogger = logger.child('cardanoBlockfrostConnector');
@@ -79,6 +81,33 @@ export const createErgoExplorerNetworkConnectorManager =
     );
     return networkConnectorManager;
   };
+
+/**
+ * Creates and configures a NetworkConnectorManager instance for native BCHN scanning
+ */
+export const createBitcoinCashRpcNetworkConnectorManager = async () => {
+  const rpc = config.bitcoinCash.rpc;
+  if (!rpc) throw Error('RPC configuration must be provided for Bitcoin Cash');
+  const { BitcoinCashRpcNetwork } = await import(
+    '@rosen-bridge/bitcoin-cash-scanner'
+  );
+  const manager = new NetworkConnectorManager<BitcoinCashRpcTransaction>(
+    new FailoverStrategy(),
+    bitcoinCashLogger
+  );
+  manager.addConnector(
+    new BitcoinCashRpcNetwork(
+      rpc.url,
+      rpc.timeout * 1000,
+      rpc.expectedChain,
+      rpc.username !== undefined && rpc.password !== undefined
+        ? { username: rpc.username, password: rpc.password }
+        : undefined,
+      rpc.limits
+    )
+  );
+  return manager;
+};
 
 /**
  * Creates and configures a NetworkConnectorManager instance for Bitcoin scanner

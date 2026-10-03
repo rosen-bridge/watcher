@@ -46,4 +46,25 @@ You can find the project configs here. In this config, you should set what netwo
 
 ## How to Be a Watcher
 
+### Bitcoin Cash finality diagnostics
+
+A BCH Watcher requires a primary BCHN RPC and a separately configured finality
+witness. Both must pass for the exact persisted event before commitment/trigger
+signing and before queue broadcast. A pruned node can serve the finality-only
+witness role; the primary must retain block bodies for its scan/recovery range.
+
+`GET /health/parameter/bitcoin-cash-finality` reports the latest event attempt,
+with the block, timestamp and separate source/witness reasons in JSON `details`.
+`waiting-finalization` is routine; `rpc-failure`, `branch-disagreement`,
+`parked-fork`, `invalid-evidence` and synchronization/snapshot failures identify
+different reasons for holding work. Health updates do not fetch new evidence,
+and the snapshot neither covers the entire queue nor authorizes a transaction.
+
+BCHN 29.2.0 defaults require a header known for two hours and ten descendant
+blocks (eleven confirmations). Slow blocks, a lagging witness or node restart
+can extend this wait; the next connected block evaluates finalization. Allow
+for this delay before subsequent Ergo and destination processing in UX and
+operator timers. See the [coordinating integration document](https://github.com/rosen-bridge/guard-service/pull/29)
+for the proposed policy, validation scope and outstanding deployment decisions.
+
 Check our operation documentation [here](https://github.com/rosen-bridge/operation/blob/dev/docs/watcher/deploy-docker.md#watcher-deployment).

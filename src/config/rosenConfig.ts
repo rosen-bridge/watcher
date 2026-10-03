@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { decodeAddress, encodeAddress } from '@rosen-bridge/address-codec';
+import { BITCOIN_CASH_CHAIN_NAME } from './constants';
 
 class RosenConfig {
   readonly RSN: string;
@@ -52,6 +54,17 @@ class RosenConfig {
     this.watcherPermitAddress = chainConfig.addresses.WatcherPermit;
     this.fraudAddress = chainConfig.addresses.Fraud;
     this.lockAddress = chainConfig.addresses.lock;
+    if (network === BITCOIN_CASH_CHAIN_NAME) {
+      if (
+        typeof this.lockAddress !== 'string' ||
+        this.lockAddress.length !== 54 ||
+        decodeAddress(network, encodeAddress(network, this.lockAddress)) !==
+          this.lockAddress
+      )
+        throw Error(
+          'Bitcoin Cash lock must be a canonical lowercase prefixed native P2PKH20/P2SH20 CashAddr'
+        );
+    }
     this.commitmentAddress = chainConfig.addresses.Commitment;
     this.eventTriggerAddress = chainConfig.addresses.WatcherTriggerEvent;
     this.watcherCollateralAddress = chainConfig.addresses.WatcherCollateral;

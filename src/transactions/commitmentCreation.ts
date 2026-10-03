@@ -12,6 +12,10 @@ import { getConfig } from '../config/config';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
+import {
+  assertBitcoinCashObservationFinality,
+  BitcoinCashObservationFinalityError,
+} from '../utils/bitcoinCashFinality';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -114,6 +118,7 @@ export class CommitmentCreation {
         );
         candidates.push(outWIDBox);
       }
+      await assertBitcoinCashObservationFinality(observation);
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,
         inputBoxes,
@@ -204,9 +209,14 @@ export class CommitmentCreation {
         );
       }
     } catch (e) {
-      logger.warn(
-        `Skipping the commitment creation due to occurred error: ${e.message} - ${e.stack}`
-      );
+      if (e instanceof BitcoinCashObservationFinalityError && e.isRoutineWait())
+        logger.debug(
+          `Commitment creation waiting for BCH finalization: ${e.message}`
+        );
+      else
+        logger.warn(
+          `Skipping the commitment creation due to occurred error: ${e.message} - ${e.stack}`
+        );
     }
     logger.info(`Commitment creation job is done`, {
       count: observations.length,

@@ -11,6 +11,10 @@ import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ERGO_CHAIN_NAME } from '../config/constants';
+import {
+  assertBitcoinCashObservationFinality,
+  BitcoinCashObservationFinalityError,
+} from '../utils/bitcoinCashFinality';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -72,6 +76,7 @@ export class CommitmentReveal {
     try {
       const dataInputs = new wasm.ErgoBoxes(repoConfigBox);
       dataInputs.add(RWTRepoBox);
+      await assertBitcoinCashObservationFinality(observation);
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,
         inputBoxes,
@@ -82,6 +87,15 @@ export class CommitmentReveal {
       await this.txUtils.submitTransaction(signed, TxType.TRIGGER, observation);
       logger.info(`Trigger event created with txId [${signed.id().to_str()}]`);
     } catch (e) {
+      if (
+        e instanceof BitcoinCashObservationFinalityError &&
+        e.isRoutineWait()
+      ) {
+        logger.debug(
+          `Event trigger creation waiting for BCH finalization: ${e.message}`
+        );
+        return;
+      }
       if (e instanceof ChangeBoxCreationError) {
         logger.warn(
           "Transaction input and output doesn't match. Input boxesSample assets must be more or equal to the outputs assets."

@@ -1,6 +1,7 @@
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { InitializeOptions } from '@rosen-bridge/abstract-extractor';
 import { ErgoUTXOExtractor } from '@rosen-bridge/address-extractor';
+import type { BitcoinCashRpcScanner } from '@rosen-bridge/bitcoin-cash-scanner';
 import {
   BitcoinEsploraObservationExtractor,
   BitcoinRpcObservationExtractor,
@@ -56,6 +57,7 @@ import { dataSource } from '../../config/dataSource';
 import {
   BinanceConfig,
   BitcoinConfig,
+  BitcoinCashConfig,
   BitcoinRunesConfig,
   CardanoConfig,
   Config,
@@ -69,6 +71,7 @@ import {
 import * as Constants from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
 import {
+  createBitcoinCashRpcNetworkConnectorManager,
   createBitcoinEsploraNetworkConnectorManager,
   createBitcoinRpcNetworkConnectorManager,
   createCardanoBlockfrostNetworkConnectorManager,
@@ -113,6 +116,7 @@ class CreateScanner {
     | CardanoBlockFrostScanner
     | BitcoinEsploraScanner
     | BitcoinRpcScanner
+    | BitcoinCashRpcScanner
     | DogeEsploraScanner
     | DogeRpcScanner
     | EvmRpcScanner
@@ -136,6 +140,7 @@ class CreateScanner {
         rosen: rosenConfig,
         cardano: cardanoConfig,
         bitcoin: bitcoinConfig,
+        bitcoinCash: bitcoinCashConfig,
         bitcoinRunes: bitcoinRunesConfig,
         doge: dogeConfig,
         ethereum: ethereumConfig,
@@ -154,6 +159,14 @@ class CreateScanner {
 
       await CreateScanner.instance.createErgoScanner(config, rosenConfig);
       switch (config.networkWatcher) {
+        case Constants.BITCOIN_CASH_CHAIN_NAME:
+          await CreateScanner.instance.createBitcoinCashScanner(
+            bitcoinCashConfig,
+            rosenConfig,
+            config.observationStoreRawData,
+            nonErgoChainsBlockCleanupConfig
+          );
+          break;
         case Constants.BITCOIN_CHAIN_NAME:
           await CreateScanner.instance.createBitcoinScanner(
             bitcoinConfig,
@@ -258,6 +271,7 @@ class CreateScanner {
     | CardanoBlockFrostScanner
     | BitcoinEsploraScanner
     | BitcoinRpcScanner
+    | BitcoinCashRpcScanner
     | DogeEsploraScanner
     | DogeRpcScanner
     | EvmRpcScanner
@@ -450,6 +464,46 @@ class CreateScanner {
         );
         this.observationScanner.registerExtractor(observationExtractor);
       }
+    }
+  };
+
+  /**
+   * Constructs BCH dependencies only for this branch and awaits extractor registration.
+   * @param bitcoinCashConfig - Validated scanner height and RPC configuration
+   * @param rosenConfig - Contract and treasury configuration for BCH
+   * @param observationStoreRawData - Whether observations retain raw transaction data
+   * @param blockCleanupConfig - Scanner persistence cleanup policy
+   */
+  private createBitcoinCashScanner = async (
+    bitcoinCashConfig: BitcoinCashConfig,
+    rosenConfig: RosenConfig,
+    observationStoreRawData: boolean,
+    blockCleanupConfig: BlockCleanupConfig
+  ) => {
+    if (!this.observationScanner) {
+      const [
+        { BitcoinCashRpcScanner },
+        { BitcoinCashRpcObservationExtractor },
+      ] = await Promise.all([
+        import('@rosen-bridge/bitcoin-cash-scanner'),
+        import('@rosen-bridge/bitcoin-cash-observation-extractor'),
+      ]);
+      this.observationScanner = new BitcoinCashRpcScanner({
+        dataSource,
+        initialHeight: bitcoinCashConfig.initialHeight,
+        network: await createBitcoinCashRpcNetworkConnectorManager(),
+        logger: loggers.observationScannerLogger,
+        blockCleanupConfig,
+      });
+      await this.observationScanner.registerExtractor(
+        new BitcoinCashRpcObservationExtractor(
+          rosenConfig.lockAddress,
+          dataSource,
+          TokensConfig.getInstance().getTokenMap(),
+          loggers.observationExtractorLogger,
+          observationStoreRawData
+        )
+      );
     }
   };
 
