@@ -6,6 +6,8 @@ export const bitcoinCashDefaults: Record<string, unknown> = {
   'bitcoinCash.rpc.url': 'http://127.0.0.1:18443',
   'bitcoinCash.rpc.timeout': 10,
   'bitcoinCash.rpc.expectedChain': 'regtest',
+  'bitcoinCash.finalityRpc.url': 'http://127.0.0.1:28443',
+  'bitcoinCash.finalityRpc.timeout': 10,
 };
 
 /** Single-field faults isolate chain policy, integer bounds, URL and credential pairing. */
@@ -26,16 +28,32 @@ export const invalidBitcoinCashValues: Array<[string, unknown]> = [
   ['bitcoinCash.rpc.url', 'file:///rpc'],
   ['bitcoinCash.rpc.url', 'http://user:pass@127.0.0.1'],
   ['bitcoinCash.rpc.url', 'http://127.0.0.1/#fragment'],
+  ['bitcoinCash.rpc.url', 'http://bchn.example/rpc'],
+  ['bitcoinCash.rpc.url', 'http://localhost:18443'],
+  ['bitcoinCash.rpc.url', 'http://127.1:18443'],
+  ['bitcoinCash.rpc.url', 'http://2130706433:18443'],
+  ['bitcoinCash.rpc.url', 'http://0x7f000001:18443'],
+  ['bitcoinCash.rpc.url', 'http://[::ffff:127.0.0.1]:18443'],
+  ['bitcoinCash.rpc.url', 'http://@127.0.0.1:18443'],
   ['bitcoinCash.rpc.url', 'http://127.0.0.1/' + 'a'.repeat(2048)],
   ['bitcoinCash.rpc.username', 'operator'],
   ['bitcoinCash.rpc.password', 'password'],
+  ['bitcoinCash.finalityRpc.url', 'http://127.0.0.1:18443/other-path'],
+  ['bitcoinCash.finalityRpc.url', 'http://witness.example'],
+  ['bitcoinCash.finalityRpc.timeout', 0],
+  ['bitcoinCash.finalityRpc.timeout', 301],
+  ['bitcoinCash.finalityRpc.username', 'operator'],
+  ['bitcoinCash.finalityRpc.password', 'password'],
 ];
 
 /** Bad values are applied to one member of an otherwise paired synthetic credential fixture. */
 export const malformedBitcoinCashCredentials: Array<[string, unknown]> = [
   ...['bitcoinCash.rpc.username', 'bitcoinCash.rpc.password'].flatMap((key) =>
-    ['', 'a'.repeat(4097), 12].map((value): [string, unknown] => [key, value])
+    ['', 'a'.repeat(1025), ' leading', 'trailing ', 'line\nbreak', 12].map(
+      (value): [string, unknown] => [key, value]
+    )
   ),
+  ['bitcoinCash.rpc.username', 'user:name'],
 ];
 
 /** Canonical native locking scripts exercise both accepted treasury address kinds. */

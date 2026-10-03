@@ -102,7 +102,8 @@ export const createBitcoinCashRpcNetworkConnectorManager = () => {
       rpc.expectedChain,
       rpc.username !== undefined && rpc.password !== undefined
         ? { username: rpc.username, password: rpc.password }
-        : undefined
+        : undefined,
+      rpc.limits
     )
   );
   return manager;

@@ -107,6 +107,14 @@ const makeMap = (count = 1) => {
         residency: 'native',
         extra: {},
       },
+      'bitcoin-cash': {
+        tokenId: 'bch',
+        name: 'BCH fixture',
+        decimals: 8,
+        type: 'native',
+        residency: 'native',
+        extra: {},
+      },
     }))
   );
   return tokenMap;
@@ -201,6 +209,60 @@ describe('MinimumFeeHandler', () => {
   });
 
   describe('init', () => {
+    /**
+     * @target MinimumFeeHandler.init
+     * @dependencies real TokenMap with BCH and unrelated bridgeable token sets
+     * @scenario an unrelated token has no available fee box
+     * @expected BCH reads and publishes only its applicable token set
+     */
+    it('does not require unrelated token fees for BCH', async () => {
+      const [applicable, unrelated] = makeMap(2).getConfig();
+      delete unrelated['bitcoin-cash'];
+      const map = new TokenMap();
+      await map.updateConfigByJson([applicable, unrelated]);
+      state.fetch.mockImplementation(async (id) => id === 'erg-0');
+      await handler.init(map);
+      expect(state.boxIds).toEqual(['erg-0']);
+      expect(
+        handler.getInstance().getMinimumFeeBoxObject('erg-0')
+      ).toBeDefined();
+      expect(() =>
+        handler.getInstance().getMinimumFeeBoxObject('erg-1')
+      ).toThrow('No minimum fee config');
+    });
+
+    /**
+     * @target MinimumFeeHandler.init
+     * @dependencies real TokenMap containing only unrelated bridgeable tokens
+     * @scenario no token set supports BCH
+     * @expected initialization rejects and never publishes a handler
+     */
+    it('rejects a map without applicable BCH tokens', async () => {
+      const [unrelated] = makeMap().getConfig();
+      delete unrelated['bitcoin-cash'];
+      const map = new TokenMap();
+      await map.updateConfigByJson([unrelated]);
+      await expect(handler.init(map)).rejects.toThrow('could not be fetched');
+      expect(state.fetch).not.toHaveBeenCalled();
+      expect(() => handler.getInstance()).toThrow("instance doesn't exist");
+    });
+
+    /**
+     * @target MinimumFeeHandler.init
+     * @dependencies real TokenMap with unrelated bridgeable tokens
+     * @scenario a legacy watcher initializes the shared map
+     * @expected its existing all-token fee selection remains unchanged
+     */
+    it('retains all configured fee boxes for legacy watchers', async () => {
+      state.config.general.networkWatcher = 'bitcoin';
+      const [applicable, unrelated] = makeMap(2).getConfig();
+      delete unrelated['bitcoin-cash'];
+      const map = new TokenMap();
+      await map.updateConfigByJson([applicable, unrelated]);
+      await handler.init(map);
+      expect(state.boxIds).toEqual(['erg-0', 'erg-1']);
+    });
+
     /**
      * @target MinimumFeeHandler.init
      * @dependencies controlled minimum-fee reads

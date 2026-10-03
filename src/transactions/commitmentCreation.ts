@@ -12,6 +12,7 @@ import { getConfig } from '../config/config';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ERGO_CHAIN_NAME } from '../config/constants';
 import { TokensConfig } from '../config/tokensConfig';
+import { assertBitcoinCashObservationFinality } from '../utils/bitcoinCashFinality';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -114,6 +115,7 @@ export class CommitmentCreation {
         );
         candidates.push(outWIDBox);
       }
+      await assertBitcoinCashObservationFinality(observation);
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,
         inputBoxes,

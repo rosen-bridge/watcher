@@ -18,6 +18,9 @@ bitcoinCash:
   rpc:
     username: 'BITCOIN_CASH_RPC_USERNAME'
     password: 'BITCOIN_CASH_RPC_PASSWORD'
+  finalityRpc:
+    username: 'BITCOIN_CASH_FINALITY_RPC_USERNAME'
+    password: 'BITCOIN_CASH_FINALITY_RPC_PASSWORD'
 bitcoinRunes:
   unisat:
     apiKey: 'UNISAT_API_KEY'

@@ -7,6 +7,7 @@ import { WatcherUtils } from '../../utils/watcherUtils';
 import { getConfig } from '../../config/config';
 import { Transaction } from '../../api/Transaction';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
+import { assertBitcoinCashObservationFinality } from '../../utils/bitcoinCashFinality';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -144,6 +145,8 @@ export class Queue {
       base64ToArrayBuffer(tx.txSerialized)
     );
     if (await this.verifyTx(tx)) {
+      if (tx.type === TxType.COMMITMENT || tx.type === TxType.TRIGGER)
+        await assertBitcoinCashObservationFinality(tx.observation);
       const result = await ErgoNetwork.sendTx(signedTx.to_json());
       if (result.success) {
         logger.debug(

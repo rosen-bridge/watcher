@@ -1,6 +1,11 @@
 import config from 'config';
+import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  BITCOIN_CASH_RPC_LIMITS,
+  BITCOIN_CASH_RPC_HARD_LIMITS,
+} from '@rosen-bridge/bitcoin-cash-scanner';
 
 import { BitcoinCashConfig } from '../../src/config/config';
 import { BITCOIN_CASH_CHAIN_NAME } from '../../src/config/constants';
@@ -38,6 +43,10 @@ describe('BitcoinCashConfig', () => {
                 expectedChain:
                   bitcoinCashDefaults['bitcoinCash.rpc.expectedChain'],
               },
+              finalityRpc: {
+                url: bitcoinCashDefaults['bitcoinCash.finalityRpc.url'],
+                timeout: bitcoinCashDefaults['bitcoinCash.finalityRpc.timeout'],
+              },
             },
           }),
           BITCOIN_RPC_USERNAME: 'synthetic-other-chain-user',
@@ -48,6 +57,8 @@ describe('BitcoinCashConfig', () => {
           ...Object.keys(environment),
           'BITCOIN_CASH_RPC_USERNAME',
           'BITCOIN_CASH_RPC_PASSWORD',
+          'BITCOIN_CASH_FINALITY_RPC_USERNAME',
+          'BITCOIN_CASH_FINALITY_RPC_PASSWORD',
         ];
         const previous = new Map(keys.map((key) => [key, process.env[key]]));
         try {
@@ -106,6 +117,49 @@ describe('BitcoinCashConfig', () => {
           }
         }
       );
+
+      /**
+       * @target BitcoinCashConfig.constructor - resolves witness credentials
+       * @dependencies Real node-config loader and production Docker environment mapping
+       * @scenario Set both, one or neither of the dedicated witness credential fields
+       * @expected Preserve a complete pair, reject an incomplete pair and never borrow scanner credentials
+       */
+      it.each(['both', 'username', 'password', 'neither'] as const)(
+        'resolves %s witness credentials through the environment mapping',
+        (mode) => {
+          const credentials = JSON.parse(
+            readFileSync(
+              new URL('./bitcoinCashCredentials.example', import.meta.url),
+              'utf8'
+            )
+          ) as Record<string, string>;
+          if (mode !== 'both' && mode !== 'username')
+            delete credentials.BITCOIN_CASH_FINALITY_RPC_USERNAME;
+          if (mode !== 'both' && mode !== 'password')
+            delete credentials.BITCOIN_CASH_FINALITY_RPC_PASSWORD;
+          const readers = resolveEnvironment(credentials);
+          const get = vi.spyOn(config, 'get').mockImplementation(readers.get);
+          const has = vi.spyOn(config, 'has').mockImplementation(readers.has);
+          try {
+            if (mode === 'username' || mode === 'password') {
+              expect(
+                () => new BitcoinCashConfig(BITCOIN_CASH_CHAIN_NAME)
+              ).toThrow('paired');
+            } else {
+              expect(
+                new BitcoinCashConfig(BITCOIN_CASH_CHAIN_NAME).finalityRpc
+              ).toMatchObject({
+                username: mode === 'both' ? 'example-witness-user' : undefined,
+                password:
+                  mode === 'both' ? 'example-witness-password' : undefined,
+              });
+            }
+          } finally {
+            has.mockRestore();
+            get.mockRestore();
+          }
+        }
+      );
     });
     describe('synthetic operator fields', () => {
       let values: Record<string, unknown>;
@@ -142,9 +196,11 @@ describe('BitcoinCashConfig', () => {
           values['bitcoinCash.rpc.expectedChain'] = chain;
           const result = new BitcoinCashConfig(BITCOIN_CASH_CHAIN_NAME);
           expect(result.rpc).toEqual({
-            url: bitcoinCashDefaults['bitcoinCash.rpc.url'],
+            url: new URL(bitcoinCashDefaults['bitcoinCash.rpc.url'] as string)
+              .href,
             timeout: 10,
             expectedChain: chain,
+            limits: BITCOIN_CASH_RPC_LIMITS,
             username: undefined,
             password: undefined,
           });
@@ -168,6 +224,65 @@ describe('BitcoinCashConfig', () => {
           ).toThrow();
         }
       );
+
+      /**
+       * @target BitcoinCashConfig.constructor - resolves a bounded operator budget
+       * @dependencies Real scanner policy and isolated configuration readers
+       * @scenario Override one resource while leaving every other field valid
+       * @expected Preserve the selected override and all other scanner defaults
+       */
+      it.each(Object.keys(BITCOIN_CASH_RPC_LIMITS))(
+        'passes a bounded %s override to the scanner configuration',
+        (resource) => {
+          const key = resource as keyof typeof BITCOIN_CASH_RPC_LIMITS;
+          values['bitcoinCash.rpc.limits'] = {
+            [key]: BITCOIN_CASH_RPC_HARD_LIMITS[key],
+          };
+          expect(
+            new BitcoinCashConfig(BITCOIN_CASH_CHAIN_NAME).rpc?.limits
+          ).toEqual({
+            ...BITCOIN_CASH_RPC_LIMITS,
+            [key]: BITCOIN_CASH_RPC_HARD_LIMITS[key],
+          });
+        }
+      );
+
+      /**
+       * @target BitcoinCashConfig.constructor - rejects an invalid budget object
+       * @dependencies Real scanner policy and isolated configuration readers
+       * @scenario Supply one malformed, unknown or out-of-range budget override
+       * @expected Reject configuration before a scanner can be constructed
+       */
+      it.each([
+        null,
+        [],
+        '10000',
+        { unknown: 1 },
+        { blockTransactions: 0 },
+        { blockTransactions: 1.5 },
+        { responseBytes: 256000001 },
+        { transactionIO: '10000' },
+      ])('rejects invalid scanner resource budgets %j', (limits) => {
+        values['bitcoinCash.rpc.limits'] = limits;
+        expect(() => new BitcoinCashConfig(BITCOIN_CASH_CHAIN_NAME)).toThrow();
+      });
+
+      /**
+       * @target BitcoinCashConfig.constructor - enforces transport before startup
+       * @dependencies Real scanner endpoint policy and configuration-reader spies
+       * @scenario Select a valid HTTPS or canonical literal loopback HTTP endpoint
+       * @expected Retain the normalized endpoint for the connector
+       */
+      it.each([
+        'https://bchn.example/rpc',
+        'http://127.1.2.3:18443',
+        'http://[::1]:18443',
+      ])('accepts the protected endpoint %s', (url) => {
+        values['bitcoinCash.rpc.url'] = url;
+        expect(new BitcoinCashConfig(BITCOIN_CASH_CHAIN_NAME).rpc?.url).toEqual(
+          new URL(url).href
+        );
+      });
 
       /**
        * @target BitcoinCashConfig.constructor - requires %s when BCH is selected

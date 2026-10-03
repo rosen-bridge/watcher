@@ -33,9 +33,9 @@ class MinimumFeeHandler {
 
   /**
    * Initializes minimum fee boxes. BCH initialization publishes the handler
-   * only after every box is fetched within the configured Ergo read deadline.
+   * only after every BCH-applicable box is fetched within the Ergo read deadline.
    * BCH reads share a bounded, cancellable NFT lookup within each batch.
-   * @param tokenMap tokens whose Ergo minimum fee boxes must be fetched
+   * @param tokenMap shared tokens, restricted to BCH membership for a BCH watcher
    */
   static init = async (tokenMap: TokenMap) => {
     const configs = getConfig();
@@ -101,7 +101,14 @@ class MinimumFeeHandler {
     // local:ergo/rosen-bridge/watcher#269
     /** Fetches all boxes with rejection handlers attached in the same turn. */
     const fetchBoxes = async () => {
-      const promises = tokenMap.getConfig().map(async (chainToken) => {
+      const tokens = tokenMap
+        .getConfig()
+        .filter(
+          (chainToken) =>
+            !nativeBitcoinCash ||
+            Object.hasOwn(chainToken, BITCOIN_CASH_CHAIN_NAME)
+        );
+      const promises = tokens.map(async (chainToken) => {
         if (nativeBitcoinCash) assertCurrent();
         const token = chainToken[ERGO_CHAIN_NAME];
         const tokenId = token.tokenId;

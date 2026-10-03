@@ -11,6 +11,7 @@ import { TransactionUtils, WatcherUtils } from '../utils/watcherUtils';
 import { getConfig } from '../config/config';
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ERGO_CHAIN_NAME } from '../config/constants';
+import { assertBitcoinCashObservationFinality } from '../utils/bitcoinCashFinality';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -72,6 +73,7 @@ export class CommitmentReveal {
     try {
       const dataInputs = new wasm.ErgoBoxes(repoConfigBox);
       dataInputs.add(RWTRepoBox);
+      await assertBitcoinCashObservationFinality(observation);
       const signed = await ErgoUtils.createAndSignTx(
         getConfig().general.secretKey,
         inputBoxes,

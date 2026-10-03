@@ -1,5 +1,11 @@
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
-import { BitcoinCashRpcChain } from '@rosen-bridge/bitcoin-cash-scanner';
+import {
+  BitcoinCashRpcChain,
+  BitcoinCashRpcLimits,
+  resolveBitcoinCashRpcLimits,
+  validateBitcoinCashRpcCredentials,
+  validateBitcoinCashRpcUrl,
+} from '@rosen-bridge/bitcoin-cash-scanner';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 import { RateLimitedAxiosConfig } from '@rosen-clients/rate-limited-axios';
 import { generateMnemonic } from 'bip39';
@@ -485,7 +491,11 @@ class BitcoinCashConfig {
   type = Constants.RPC_TYPE;
   initialHeight: number;
   interval: number;
-  rpc?: ConnectionConfig & { expectedChain: BitcoinCashRpcChain };
+  rpc?: ConnectionConfig & {
+    expectedChain: BitcoinCashRpcChain;
+    limits: Readonly<BitcoinCashRpcLimits>;
+  };
+  finalityRpc?: ConnectionConfig;
 
   constructor(network: string) {
     if (network !== Constants.BITCOIN_CASH_CHAIN_NAME) return;
@@ -518,24 +528,14 @@ class BitcoinCashConfig {
     this.initialHeight = integer('bitcoinCash.initial.height', -1, 0xffffffff);
     this.interval = integer('bitcoinCash.interval', 1, 86400);
     const timeout = integer('bitcoinCash.rpc.timeout', 1, 300);
-    const url = requiredString('bitcoinCash.rpc.url', 2048);
-    let parsedUrl: URL;
-    try {
-      parsedUrl = new URL(url);
-    } catch {
-      throw Error(
-        'ImproperlyConfigured. bitcoinCash.rpc.url must be an HTTP(S) URL'
-      );
-    }
-    if (
-      !['http:', 'https:'].includes(parsedUrl.protocol) ||
-      parsedUrl.username ||
-      parsedUrl.password ||
-      parsedUrl.hash
-    )
-      throw Error(
-        'ImproperlyConfigured. bitcoinCash.rpc.url must be HTTP(S) without embedded credentials or fragment'
-      );
+    const url = validateBitcoinCashRpcUrl(
+      requiredString('bitcoinCash.rpc.url', 2048)
+    );
+    const limits = resolveBitcoinCashRpcLimits(
+      config.has('bitcoinCash.rpc.limits')
+        ? config.get('bitcoinCash.rpc.limits')
+        : undefined
+    );
     const expectedChain = requiredString('bitcoinCash.rpc.expectedChain', 7);
     if (!['main', 'test', 'regtest'].includes(expectedChain))
       throw Error(
@@ -553,12 +553,45 @@ class BitcoinCashConfig {
     const password = hasPassword
       ? requiredString('bitcoinCash.rpc.password', 4096)
       : undefined;
+    validateBitcoinCashRpcCredentials(
+      username !== undefined && password !== undefined
+        ? { username, password }
+        : undefined
+    );
     this.rpc = {
       url,
       timeout,
       expectedChain: expectedChain as BitcoinCashRpcChain,
+      limits,
       username,
       password,
+    };
+    const witnessUrl = validateBitcoinCashRpcUrl(
+      requiredString('bitcoinCash.finalityRpc.url', 2048)
+    );
+    if (new URL(witnessUrl).origin === new URL(url).origin)
+      throw Error('BCH finality witness must use a distinct RPC origin');
+    const witnessTimeout = integer('bitcoinCash.finalityRpc.timeout', 1, 300);
+    const witnessHasUsername = config.has('bitcoinCash.finalityRpc.username');
+    const witnessHasPassword = config.has('bitcoinCash.finalityRpc.password');
+    if (witnessHasUsername !== witnessHasPassword)
+      throw Error('BCH finality witness credentials must be paired');
+    const witnessUsername = witnessHasUsername
+      ? requiredString('bitcoinCash.finalityRpc.username', 1024)
+      : undefined;
+    const witnessPassword = witnessHasPassword
+      ? requiredString('bitcoinCash.finalityRpc.password', 1024)
+      : undefined;
+    validateBitcoinCashRpcCredentials(
+      witnessUsername !== undefined && witnessPassword !== undefined
+        ? { username: witnessUsername, password: witnessPassword }
+        : undefined
+    );
+    this.finalityRpc = {
+      url: witnessUrl,
+      timeout: witnessTimeout,
+      username: witnessUsername,
+      password: witnessPassword,
     };
   }
 }

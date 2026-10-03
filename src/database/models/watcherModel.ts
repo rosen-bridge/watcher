@@ -438,8 +438,11 @@ class WatcherDataBase {
    */
   setTxUpdateHeight = async (tx: TxEntity, height: number) => {
     logger.debug(`Updating tx [${tx.id}] update height to ${height}`);
+    // A queue snapshot may predate validity/removal changes. Update only the
+    // owned column so a retry cannot overwrite their newer persisted values.
+    await this.txRepository.update({ id: tx.id }, { updateBlock: height });
     tx.updateBlock = height;
-    return this.txRepository.save(tx);
+    return tx;
   };
 
   /**
