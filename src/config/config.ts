@@ -1,4 +1,13 @@
 import { ErgoNetworkType } from '@rosen-bridge/scanner-interfaces';
+import type {
+  BitcoinCashRpcChain,
+  BitcoinCashRpcLimits,
+} from '@rosen-bridge/bitcoin-cash-scanner';
+import {
+  resolveBitcoinCashRpcLimits,
+  validateBitcoinCashRpcCredentials,
+  validateBitcoinCashRpcUrl,
+} from '@rosen-bridge/bitcoin-cash-scanner/dist/network/bitcoinCashRpcPolicy.js';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 import { RateLimitedAxiosConfig } from '@rosen-clients/rate-limited-axios';
 import { generateMnemonic } from 'bip39';
@@ -16,6 +25,7 @@ const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
   Constants.CARDANO_CHAIN_NAME,
   Constants.BITCOIN_CHAIN_NAME,
+  Constants.BITCOIN_CASH_CHAIN_NAME,
   Constants.BITCOIN_RUNES_CHAIN_NAME,
   Constants.DOGE_CHAIN_NAME,
   Constants.ETHEREUM_CHAIN_NAME,
@@ -28,6 +38,7 @@ interface ConfigType {
   logger: LoggerConfig;
   cardano: CardanoConfig;
   bitcoin: BitcoinConfig;
+  bitcoinCash: BitcoinCashConfig;
   bitcoinRunes: BitcoinRunesConfig;
   ethereum: EthereumConfig;
   binance: BinanceConfig;
@@ -245,6 +256,7 @@ class Config {
     const blockTime = {
       [Constants.ERGO_CHAIN_NAME]: Constants.ERGO_BLOCK_TIME,
       [Constants.BITCOIN_CHAIN_NAME]: Constants.BITCOIN_BLOCK_TIME,
+      [Constants.BITCOIN_CASH_CHAIN_NAME]: Constants.BITCOIN_CASH_BLOCK_TIME,
       [Constants.BITCOIN_RUNES_CHAIN_NAME]: Constants.BITCOIN_BLOCK_TIME,
       [Constants.CARDANO_CHAIN_NAME]: Constants.CARDANO_BLOCK_TIME,
       [Constants.BINANCE_CHAIN_NAME]: Constants.BINANCE_BLOCK_TIME,
@@ -474,6 +486,115 @@ class BitcoinConfig {
         );
       }
     }
+  }
+}
+
+class BitcoinCashConfig {
+  type = Constants.RPC_TYPE;
+  initialHeight: number;
+  interval: number;
+  rpc?: ConnectionConfig & {
+    expectedChain: BitcoinCashRpcChain;
+    limits: Readonly<BitcoinCashRpcLimits>;
+  };
+  finalityRpc?: ConnectionConfig;
+
+  constructor(network: string) {
+    if (network !== Constants.BITCOIN_CASH_CHAIN_NAME) return;
+    const requiredString = (path: string, maximumLength: number) => {
+      const value = getRequiredString(path);
+      if (
+        typeof value !== 'string' ||
+        !value.trim() ||
+        value.length > maximumLength
+      )
+        throw Error(
+          `ImproperlyConfigured. ${path} must be a bounded non-empty string`
+        );
+      return value;
+    };
+    const integer = (path: string, minimum: number, maximum: number) => {
+      const value = getRequiredNumber(path);
+      if (!Number.isSafeInteger(value) || value < minimum || value > maximum)
+        throw Error(
+          `ImproperlyConfigured. ${path} is outside its integer bounds`
+        );
+      return value;
+    };
+    this.type = requiredString('bitcoinCash.type', 16);
+    if (this.type !== Constants.RPC_TYPE)
+      throw Error(
+        'ImproperlyConfigured. bitcoinCash.type must be rpc (BCHN only)'
+      );
+    // -1 starts at genesis, matching GeneralScanner's last-scanned-height convention.
+    this.initialHeight = integer('bitcoinCash.initial.height', -1, 0xffffffff);
+    this.interval = integer('bitcoinCash.interval', 1, 86400);
+    const timeout = integer('bitcoinCash.rpc.timeout', 1, 300);
+    const url = validateBitcoinCashRpcUrl(
+      requiredString('bitcoinCash.rpc.url', 2048)
+    );
+    const limits = resolveBitcoinCashRpcLimits(
+      config.has('bitcoinCash.rpc.limits')
+        ? config.get('bitcoinCash.rpc.limits')
+        : undefined
+    );
+    const expectedChain = requiredString('bitcoinCash.rpc.expectedChain', 7);
+    if (!['main', 'test', 'regtest'].includes(expectedChain))
+      throw Error(
+        'ImproperlyConfigured. bitcoinCash.rpc.expectedChain must be main, test or regtest'
+      );
+    const hasUsername = config.has('bitcoinCash.rpc.username');
+    const hasPassword = config.has('bitcoinCash.rpc.password');
+    if (hasUsername !== hasPassword)
+      throw Error(
+        'ImproperlyConfigured. bitcoinCash.rpc credentials must be paired'
+      );
+    const username = hasUsername
+      ? requiredString('bitcoinCash.rpc.username', 4096)
+      : undefined;
+    const password = hasPassword
+      ? requiredString('bitcoinCash.rpc.password', 4096)
+      : undefined;
+    validateBitcoinCashRpcCredentials(
+      username !== undefined && password !== undefined
+        ? { username, password }
+        : undefined
+    );
+    this.rpc = {
+      url,
+      timeout,
+      expectedChain: expectedChain as BitcoinCashRpcChain,
+      limits,
+      username,
+      password,
+    };
+    const witnessUrl = validateBitcoinCashRpcUrl(
+      requiredString('bitcoinCash.finalityRpc.url', 2048)
+    );
+    if (new URL(witnessUrl).origin === new URL(url).origin)
+      throw Error('BCH finality witness must use a distinct RPC origin');
+    const witnessTimeout = integer('bitcoinCash.finalityRpc.timeout', 1, 300);
+    const witnessHasUsername = config.has('bitcoinCash.finalityRpc.username');
+    const witnessHasPassword = config.has('bitcoinCash.finalityRpc.password');
+    if (witnessHasUsername !== witnessHasPassword)
+      throw Error('BCH finality witness credentials must be paired');
+    const witnessUsername = witnessHasUsername
+      ? requiredString('bitcoinCash.finalityRpc.username', 1024)
+      : undefined;
+    const witnessPassword = witnessHasPassword
+      ? requiredString('bitcoinCash.finalityRpc.password', 1024)
+      : undefined;
+    validateBitcoinCashRpcCredentials(
+      witnessUsername !== undefined && witnessPassword !== undefined
+        ? { username: witnessUsername, password: witnessPassword }
+        : undefined
+    );
+    this.finalityRpc = {
+      url: witnessUrl,
+      timeout: witnessTimeout,
+      username: witnessUsername,
+      password: witnessPassword,
+    };
   }
 }
 
@@ -821,6 +942,7 @@ const getConfig = (): ConfigType => {
     const logger = new LoggerConfig();
     const cardano = new CardanoConfig(general.networkWatcher);
     const bitcoin = new BitcoinConfig(general.networkWatcher);
+    const bitcoinCash = new BitcoinCashConfig(general.networkWatcher);
     const bitcoinRunes = new BitcoinRunesConfig(general.networkWatcher);
     const doge = new DogeConfig(general.networkWatcher);
     const ethereum = new EthereumConfig(general.networkWatcher);
@@ -837,6 +959,7 @@ const getConfig = (): ConfigType => {
     internalConfig = {
       cardano,
       bitcoin,
+      bitcoinCash,
       bitcoinRunes,
       doge,
       ethereum,
@@ -857,6 +980,7 @@ const getConfig = (): ConfigType => {
 export {
   BinanceConfig,
   BitcoinConfig,
+  BitcoinCashConfig,
   BitcoinRunesConfig,
   CardanoConfig,
   Config,

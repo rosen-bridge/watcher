@@ -1,0 +1,59 @@
+{
+  "schema": "rosen-bch-finality-compatibility-v1",
+  "description": "Synthetic RPC evidence for one native deposit; no mined block or consensus proof is claimed.",
+  "chainInfo": {
+    "chain": "regtest",
+    "blocks": 111,
+    "headers": 111,
+    "initialblockdownload": false,
+    "bestblockhash": "9090909090909090909090909090909090909090909090909090909090909090"
+  },
+  "finalizedHash": "3434343434343434343434343434343434343434343434343434343434343434",
+  "sourceBlock": {
+    "hash": "3434343434343434343434343434343434343434343434343434343434343434",
+    "height": 101,
+    "confirmations": 11,
+    "time": 1720000000,
+    "previousblockhash": "3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "chainTips": [
+    {
+      "hash": "9090909090909090909090909090909090909090909090909090909090909090",
+      "height": 111,
+      "branchlen": 0,
+      "status": "active"
+    }
+  ],
+  "deposit": {
+    "hex": "02000000011111111111111111111111111111111111111111111111111111111111111111070000000151ffffffff0215cd5b07000000001976a914751e76e8199196d454941c45d1b3a323f1433bd688ac0000000000000000356a33000000000000000123000000000000045621037a9b9504ff7701431700917741864cf4702c59bf86ee3015168d2269c9e18b2200000000",
+    "txid": "82c3915f63d9ce3e83f5a43f49556b6a3e472bb39d787fb7b97761a5f1423203",
+    "hash": "82c3915f63d9ce3e83f5a43f49556b6a3e472bb39d787fb7b97761a5f1423203",
+    "size": 148,
+    "version": 2,
+    "locktime": 0,
+    "vin": [
+      {
+        "txid": "1111111111111111111111111111111111111111111111111111111111111111",
+        "vout": 7,
+        "scriptSig": { "hex": "51" },
+        "sequence": 4294967295
+      }
+    ],
+    "vout": [
+      {
+        "n": 0,
+        "value": "1.23456789",
+        "scriptPubKey": {
+          "hex": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac"
+        }
+      },
+      {
+        "n": 1,
+        "value": "0.00000000",
+        "scriptPubKey": {
+          "hex": "6a33000000000000000123000000000000045621037a9b9504ff7701431700917741864cf4702c59bf86ee3015168d2269c9e18b22"
+        }
+      }
+    ]
+  }
+}

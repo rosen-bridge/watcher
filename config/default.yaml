@@ -17,6 +17,35 @@ bitcoin:
     url: '' # rpc url
     # username: '' # rpc username for authentication required instances
     # password: '' # rpc password for authentication required instances
+bitcoinCash:
+  type: 'rpc' # BCHN only
+  initial:
+    height: -1 # last scanned height; -1 starts at genesis
+  interval: 180 # seconds, 1..86400
+  rpc:
+    url: '' # HTTPS endpoint, or literal loopback HTTP (127.0.0.1 / [::1])
+    timeout: 10 # seconds, 1..300
+    expectedChain: '' # explicitly select main, test or regtest
+    # username: '' # supply both credentials or neither
+    # password: ''
+    # Local resource budgets, not consensus limits. A limit stops scanning at
+    # the unchanged block with BCH_RPC_RESOURCE_LIMIT. Qualify memory/timeout
+    # before increasing a budget, then restart; never skip the blocked block.
+    limits:
+      transactionBytes: 1000000 # maximum configurable value: 8000000
+      transactionIO: 4096 # per input/output vector; maximum: 100000
+      blockTransactions: 10000 # maximum: 250000
+      blockTransactionBytes: 32000000 # maximum: 128000000
+      responseBytes: 64000000 # maximum: 256000000
+  # Required for BCH signing and queue broadcast. Supply a separately operated
+  # BCHN endpoint on the same chain. Both nodes must report the recorded block
+  # within finalized active ancestry, without a relevant parked fork.
+  # Distinct origins alone do not establish independent administration.
+  finalityRpc:
+    url: '' # HTTPS, or a literal loopback HTTP endpoint
+    timeout: 10 # seconds, 1..300
+    # username: '' # supply both credentials or neither
+    # password: ''
 bitcoinRunes:
   type: 'unisat' # options: unisat, ordiscan
   unisat:

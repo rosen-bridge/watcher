@@ -11,7 +11,10 @@
     "prettify": "prettier --write . --ignore-path ./.gitignore",
     "prepare": "husky || true",
     "start": "tsx ./src/index.ts",
-    "test": "NODE_ENV=\"test\" mocha --exit --slow 3000",
+    "test": "npm run test:legacy && npm run test:bitcoin-cash",
+    "test:legacy": "NODE_ENV=\"test\" mocha --exit --slow 3000 --ignore \"tests/**/*.spec.ts\" --ignore \"tests/**/mocked/*.mock.ts\" --ignore \"tests/**/*TestUtils.ts\"",
+    "test:bitcoin-cash": "NODE_ENV=\"test\" NODE_BACKEND=js vitest run --config vitest.config.ts",
+    "test:build-isolation": "npm run build && node scripts/check-bch-startup-isolation.mjs",
     "type-check": "tsc --noEmit",
     "typeorm:generate:sqlite": "npm run typeorm migration:generate ./src/database/migrations/sqlite/watcherMigration -- -p -d ./config/dataSource.ts",
     "typeorm:generate:postgres": "npm run typeorm migration:generate ./src/database/migrations/postgres/watcherMigration -- -p -d ./config/dataSource.ts",
@@ -70,7 +73,8 @@
     "rollup-plugin-node-externals": "^6.0.1",
     "sinon": "^14.0.0",
     "supertest": "^7.1.4",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.2",
+    "vitest": "3.2.4"
   },
   "dependencies": {
     "@rosen-bridge/abstract-logger": "^4.0.0",
@@ -80,6 +84,8 @@
     "@rosen-bridge/address-extractor": "^7.0.9",
     "@rosen-bridge/address-manager": "^0.1.0",
     "@rosen-bridge/asset-check": "^6.2.2",
+    "@rosen-bridge/bitcoin-cash-observation-extractor": "^0.0.0",
+    "@rosen-bridge/bitcoin-cash-scanner": "^0.0.0",
     "@rosen-bridge/bitcoin-observation-extractor": "^8.0.7",
     "@rosen-bridge/bitcoin-runes-observation-extractor": "^3.0.8",
     "@rosen-bridge/bitcoin-scanner": "^2.0.1",
@@ -126,5 +132,8 @@
   },
   "engines": {
     "node": ">=20.11.0"
+  },
+  "overrides": {
+    "vite": "6.3.6"
   }
 }

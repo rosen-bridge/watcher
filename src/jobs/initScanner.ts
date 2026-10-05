@@ -11,6 +11,7 @@ const {
   general: config,
   cardano: cardanoConfig,
   bitcoin: bitcoinConfig,
+  bitcoinCash: bitcoinCashConfig,
   bitcoinRunes: bitcoinRunesConfig,
   doge: dogeConfig,
   ethereum: ethereumConfig,
@@ -36,6 +37,12 @@ export const scannerInit = () => {
   const scanner = CreateScanner.getInstance();
   scanningJob(config.ergoInterval, scanner.getErgoScanner()).then(() => null);
   switch (config.networkWatcher) {
+    case Constants.BITCOIN_CASH_CHAIN_NAME:
+      scanningJob(
+        bitcoinCashConfig.interval,
+        scanner.getObservationScanner() as GeneralScanner<unknown>
+      ).then(() => null);
+      break;
     case Constants.CARDANO_CHAIN_NAME:
       if (cardanoConfig.ogmios) {
         (scanner.getObservationScanner() as CardanoOgmiosScanner)

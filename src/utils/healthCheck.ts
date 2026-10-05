@@ -28,6 +28,8 @@ import {
   BINANCE_CHAIN_NAME,
   BITCOIN_BLOCK_TIME,
   BITCOIN_CHAIN_NAME,
+  BITCOIN_CASH_CHAIN_NAME,
+  BITCOIN_CASH_BLOCK_TIME,
   BITCOIN_RUNES_CHAIN_NAME,
   CARDANO_BLOCK_TIME,
   CARDANO_CHAIN_NAME,
@@ -49,6 +51,7 @@ import {
 } from '../config/constants';
 import { watcherDatabase } from '../init';
 import { CreateScanner } from './scanner';
+import { bitcoinCashFinalityHealth } from './bitcoinCashFinalityHealth';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -90,6 +93,8 @@ class HealthCheckSingleton {
       };
     }
     this.healthCheck = new HealthCheck(notify, notificationConfig);
+    if (getConfig().general.networkWatcher === BITCOIN_CASH_CHAIN_NAME)
+      this.healthCheck.register(bitcoinCashFinalityHealth);
 
     const warnLogCheck = new LogLevelHealthCheck(
       HealthStatusLevel.UNSTABLE,
@@ -222,6 +227,11 @@ class HealthCheckSingleton {
       let updateInterval: number;
 
       switch (currentConfig.general.networkWatcher) {
+        case BITCOIN_CASH_CHAIN_NAME:
+          chainName = BITCOIN_CASH_CHAIN_NAME;
+          chainBlockTime = BITCOIN_CASH_BLOCK_TIME;
+          updateInterval = currentConfig.bitcoinCash.interval;
+          break;
         case CARDANO_CHAIN_NAME:
           chainName = CARDANO_CHAIN_NAME;
           chainBlockTime = CARDANO_BLOCK_TIME;
