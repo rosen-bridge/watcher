@@ -438,8 +438,10 @@ class WatcherDataBase {
    */
   setTxUpdateHeight = async (tx: TxEntity, height: number) => {
     logger.debug(`Updating tx [${tx.id}] update height to ${height}`);
+    // A queued snapshot can predate persisted validity or removal changes.
+    await this.txRepository.update({ id: tx.id }, { updateBlock: height });
     tx.updateBlock = height;
-    return this.txRepository.save(tx);
+    return tx;
   };
 
   /**
