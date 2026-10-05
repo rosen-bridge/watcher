@@ -32,7 +32,8 @@ describe('CommitmentReveal', () => {
       );
     };
     /**
-     * @target CommitmentReveal.triggerEventCreationTx - stops before signing
+     * @target CommitmentReveal.triggerEventCreationTx - keeps the observation
+     * retryable when finality rejects
      * @dependencies Real WASM inputs and TransactionUtils, controlled finality/sign/DB ports
      * @scenario Reject the finality check, then retry the same persisted observation
      * @expected Handled rejection leaves sign, queue and status untouched; retry gates anew
@@ -54,7 +55,8 @@ describe('CommitmentReveal', () => {
       expect(fixture.order).toEqual(['finality', 'sign', 'status', 'queue']);
     });
     /**
-     * @target CommitmentReveal.triggerEventCreationTx - awaits finality completion
+     * @target CommitmentReveal.triggerEventCreationTx - awaits finality
+     * before signing
      * @dependencies Actual producer with a pending finality promise and controlled signing port
      * @scenario Pause finality after transaction preparation; resolve it explicitly
      * @expected Signing and queue insertion remain untouched until the gate resolves
@@ -77,7 +79,8 @@ describe('CommitmentReveal', () => {
       expect(fixture.submit).toHaveBeenCalledTimes(1);
     });
     /**
-     * @target CommitmentReveal.triggerEventCreationTx - orders gate before signing
+     * @target CommitmentReveal.triggerEventCreationTx - orders finality
+     * before signing for %s
      * @dependencies Production trigger producer and TransactionUtils, synthetic signing port
      * @scenario Allow the finality port for BCH and a legacy observation
      * @expected Gate precedes signing and persisted observation reaches queue utility

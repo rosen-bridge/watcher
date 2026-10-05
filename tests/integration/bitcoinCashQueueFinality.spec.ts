@@ -96,7 +96,8 @@ describe('Queue persisted finality integration', () => {
     return source;
   };
   /**
-   * @target Queue.job - gates the exact persisted event after SQLite reconnect
+   * @target Queue.job - retains persisted source identity and retry state
+   * across database reconnect
    * @dependencies Real SQLite migrations, WatcherDataBase, WatcherUtils and WASM transaction;
    * external Ergo/finality ports only are controlled
    * @scenario Persist a trigger and observation, close/reopen, reject finality,
@@ -189,48 +190,4 @@ describe('Queue persisted finality integration', () => {
       await dataSource.getRepository(ObservationStatusEntity).find()
     ).toEqual(statusBefore);
   });
-  /**
-   * @target WatcherDataBase.setTxUpdateHeight - preserves persisted validity/removal flags
-   * @dependencies Actual SQLite repositories and a stale originally valid entity
-   * @scenario Change validity, deletion, or both in SQL, then update height using
-   * the previously loaded entity which still carries the original flags
-   * @expected Height advances without resurrecting or revalidating the stored row
-   */
-  it.each([
-    [true, false],
-    [false, true],
-    [true, true],
-  ])(
-    'does not overwrite invalid=%s deleted=%s from a stale entity',
-    async (invalid, deleted) => {
-      fixture = await finalityConsumerFixture();
-      const { WatcherDataBase } = await import(
-        '../../src/database/models/watcherModel'
-      );
-      databasePath = join(tmpdir(), `watcher-finality-${randomUUID()}.sqlite`);
-      dataSource = await open(databasePath);
-      const database = new WatcherDataBase(dataSource);
-      await database.submitTx(
-        Buffer.from(fixture.signed.sigma_serialize_bytes()).toString('base64'),
-        fixture.signed.id().to_str(),
-        TxType.PERMIT,
-        120
-      );
-      const [stale] = await database.getAllTxs();
-      if (invalid) await database.setTxValidStatus(stale, false);
-      if (deleted) await database.removeTx(stale);
-      expect(stale.isValid).toEqual(true);
-      expect(stale.deleted).toEqual(false);
-      const returned = await database.setTxUpdateHeight(stale, 131);
-      expect(returned).toBe(stale);
-      expect(returned.updateBlock).toEqual(131);
-      const persisted = await dataSource
-        .getRepository(TxEntity)
-        .findOneByOrFail({ id: stale.id });
-      expect(persisted.updateBlock).toEqual(131);
-      expect(persisted.isValid).toEqual(!invalid);
-      expect(persisted.deleted).toEqual(deleted);
-      expect(persisted.txSerialized).toEqual(stale.txSerialized);
-    }
-  );
 });

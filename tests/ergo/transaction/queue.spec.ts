@@ -96,7 +96,7 @@ describe('Queue', () => {
     };
 
     /**
-     * @target Queue.job - preserves queued events on finality rejection
+     * @target Queue.job - retains %s for retry after finality rejection
      * @dependencies Production queue, real serialized WASM transaction, controlled finality/DB/network ports
      * @scenario Reject finality for an unconfirmed commitment or trigger, then retry
      * @expected No broadcast or status mutation on rejection; retry gates before broadcast
@@ -136,7 +136,7 @@ describe('Queue', () => {
     );
 
     /**
-     * @target Queue.job - rechecks finalized status after queue restart
+     * @target Queue.job - does not cache finality for restarted %s
      * @dependencies New production Queue instance using the same persisted transaction
      * @scenario Broadcast once with eligible finality; restart after the event becomes ineligible
      * @expected Fresh gate sees persisted observation, previous success cannot authorize rebroadcast
@@ -166,7 +166,7 @@ describe('Queue', () => {
     );
 
     /**
-     * @target Queue.job - passes non-event transaction types without a finality read
+     * @target Queue.job - passes non-event %s without a finality request
      * @dependencies Production queue and a finality port configured to reject if called
      * @scenario Process detach, redeem, permit or reward without an observation
      * @expected Broadcast succeeds without consulting the event finality gate
@@ -190,7 +190,7 @@ describe('Queue', () => {
     );
 
     /**
-     * @target Queue.job - allows legacy events through the no-op finality port
+     * @target Queue.job - preserves legacy %s behavior
      * @dependencies Production event queue with a resolved legacy finality port
      * @scenario Process non-BCH commitment or trigger observations
      * @expected Preserve observation identity and order gate before broadcast
@@ -212,7 +212,7 @@ describe('Queue', () => {
     );
 
     /**
-     * @target Queue.job - cannot broadcast an event lacking persisted observation
+     * @target Queue.job - blocks %s with missing persisted observation
      * @dependencies Actual queue and a finality port rejecting the missing observation
      * @scenario Retain an otherwise valid serialized event with missing observation relation
      * @expected Forward undefined to finality, retain the queued row and never broadcast
@@ -232,7 +232,7 @@ describe('Queue', () => {
     );
 
     /**
-     * @target Queue.job - honors existing event validity checks before finality
+     * @target Queue.job - keeps existing %s validity rejection
      * @dependencies Production queue with invalid commitment or already merged trigger
      * @scenario Reject the preexisting event validity predicate
      * @expected Skip finality and broadcast, mark invalid using existing queue behavior
@@ -251,7 +251,8 @@ describe('Queue', () => {
     );
 
     /**
-     * @target Queue.job - avoids rebroadcast of a mined event
+     * @target Queue.job - does not gate or resend mined %s with %s
+     * confirmations
      * @dependencies Production queue with a confirmation response of zero or eleven
      * @scenario Observe an event already mined, either awaiting or past confirmation threshold
      * @expected No broadcast/finality query; retain normal queue confirmation processing
@@ -273,7 +274,7 @@ describe('Queue', () => {
       }
     );
     /**
-     * @target Queue.job - waits for finality completion before broadcasting
+     * @target Queue.job - awaits %s finality before sending
      * @dependencies Actual queue and a deliberately pending finality promise
      * @scenario Start event processing while the finality response remains pending
      * @expected No broadcast until finality resolves, followed by normal status writes

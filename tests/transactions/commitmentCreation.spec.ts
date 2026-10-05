@@ -33,7 +33,8 @@ describe('CommitmentCreation', () => {
       );
     };
     /**
-     * @target CommitmentCreation.createCommitmentTx - stops before signing
+     * @target CommitmentCreation.createCommitmentTx - keeps the observation
+     * retryable when finality rejects
      * @dependencies Real WASM inputs and TransactionUtils, owned finality/sign/DB ports
      * @scenario Reject finality after ordinary transaction preparation succeeds
      * @expected Exact persisted observation reaches gate; no sign, queue or status write
@@ -57,7 +58,8 @@ describe('CommitmentCreation', () => {
       expect(fixture.order).toEqual(['finality', 'sign', 'status', 'queue']);
     });
     /**
-     * @target CommitmentCreation.createCommitmentTx - awaits finality completion
+     * @target CommitmentCreation.createCommitmentTx - awaits finality before
+     * signing
      * @dependencies Real producer with a pending finality promise and owned signing port
      * @scenario Pause finality after transaction preparation; resolve it explicitly
      * @expected Signing and queue insertion remain untouched until the gate resolves
@@ -80,7 +82,8 @@ describe('CommitmentCreation', () => {
       expect(fixture.submit).toHaveBeenCalledTimes(1);
     });
     /**
-     * @target CommitmentCreation.createCommitmentTx - gates every signing attempt
+     * @target CommitmentCreation.createCommitmentTx - orders finality before
+     * signing for %s
      * @dependencies Actual producer and queue utility with synthetic signing response
      * @scenario Allow finality for BCH and for a legacy observation
      * @expected Await finality before sign and submit the matching persisted observation

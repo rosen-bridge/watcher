@@ -1,8 +1,6 @@
 # syntax=docker/dockerfile:1
-FROM node:22.18.0-bookworm-slim
+FROM node:20.11-bookworm-slim
 ARG SERVICE_DIR=/app/services/watcher
-
-RUN npm install --global npm@11.6.2
 
 LABEL maintainer="rosen-bridge team <team@rosen.tech>"
 LABEL description="Docker image for the watcher service owned by rosen-bridge organization."

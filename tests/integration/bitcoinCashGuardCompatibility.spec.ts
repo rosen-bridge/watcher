@@ -86,7 +86,8 @@ describe('BCH Watcher finality with the Guard compatibility fixture', () => {
   });
 
   /**
-   * @target assertBitcoinCashObservationFinality - refuses a single endpoint branch conflict
+   * @target assertBitcoinCashObservationFinality - refuses a conflicting %s
+   * branch
    * @dependencies Actual Watcher gate and scanner clients, independent HTTP mocks.
    * @scenario Change only the selected endpoint's source-height block hash
    * while the other endpoint retains the shared eligible Guard fixture.

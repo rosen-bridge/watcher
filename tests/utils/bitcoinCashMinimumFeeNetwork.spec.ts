@@ -3,7 +3,6 @@ import { createServer } from 'node:http';
 import { AddressInfo, Socket } from 'node:net';
 import {
   AxiosAdapter,
-  AxiosHeaders,
   InternalAxiosRequestConfig,
   RateLimitedAxiosConfig,
 } from '@rosen-clients/rate-limited-axios';
@@ -11,63 +10,13 @@ import { MinimumFeeBox } from '@rosen-bridge/minimum-fee';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import { BitcoinCashMinimumFeeNetwork } from '../../src/utils/bitcoinCashMinimumFeeNetwork';
 
-/** Holds a response without any socket or external network access. */
-const deferred = <T>() => {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((fulfill) => {
-    resolve = fulfill;
-  });
-  return { promise, resolve };
-};
-
-/** Returns raw JSON through the actual private Axios request/response pipeline. */
-const response = (config: InternalAxiosRequestConfig, data: string) => ({
-  config,
-  data,
-  status: 200,
-  statusText: 'OK',
-  headers: new AxiosHeaders(),
-});
-
-/** Supplies the existing node/explorer wire shapes with a lossless large amount. */
-const box = (kind: 'node' | 'explorer') => ({
-  boxId: 'box',
-  transactionId: 'transaction',
-  address: 'address',
-  index: 0,
-  value: 9007199254740993n,
-  creationHeight: 1,
-  ergoTree: 'tree',
-  globalIndex: 1n,
-  assets: [
-    { tokenId: 'nft', amount: 1n },
-    { tokenId: 'token', amount: 1n },
-  ],
-  additionalRegisters: {
-    R4: kind === 'node' ? '0402' : { serializedValue: '0402' },
-  },
-});
-
-/** Builds either API's page envelope without rounding monetary values. */
-const page = (kind: 'node' | 'explorer', rows: unknown[]) =>
-  JsonBigInt.stringify(
-    kind === 'node' ? rows : { items: rows, total: rows.length }
-  );
-
-/** Bounds waiting for a loopback fixture milestone and clears its watchdog. */
-const within = async <T>(promise: Promise<T>): Promise<T> => {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(Error('fixture watchdog')), 2000);
-      }),
-    ]);
-  } finally {
-    clearTimeout(timer);
-  }
-};
+import {
+  deferred,
+  response,
+  box,
+  page,
+  within,
+} from './bitcoinCashMinimumFeeNetworkTestUtils';
 
 describe('BitcoinCashMinimumFeeNetwork', () => {
   afterEach(() => {
@@ -77,7 +26,8 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
 
   describe('getBoxesByTokenId', () => {
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - rejects $kind
+     * $field $invalid
      * @dependencies raw node/explorer pages with one malformed amount field
      * @scenario value or token amount is negative, fractional, oversized or not decimal
      * @expected each isolated field violation rejects before exposing any box
@@ -121,7 +71,8 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - preserves %s
+     * %s boxes and deduplicates per batch
      * @dependencies actual MinimumFeeBox and private Axios adapter
      * @scenario node and explorer expose a fee box followed by an empty page
      * @expected real fee selection sees exact amounts/registers and shares the NFT read
@@ -164,7 +115,7 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
             fee.fetchBox(),
             network.getBoxesByTokenId('nft'),
           ]);
-          expect(results[0]).toBe(true);
+          expect(results[0]).toEqual(true);
           expect(fee.getBox()).toMatchObject({
             value: 9007199254740993n,
             txId: 'transaction',
@@ -175,7 +126,7 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
           { offset: 0, limit: 50 },
           { offset: 50, limit: 50 },
         ]);
-        expect(calls[0].url).toBe(
+        expect(calls[0].url).toEqual(
           kind === 'node'
             ? '/blockchain/box/unspent/byTokenId/nft'
             : '/api/v1/boxes/unspent/byTokenId/nft'
@@ -187,7 +138,7 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
               call.maxRedirects === 0 &&
               (call.timeout ?? 0) > 0
           )
-        ).toBe(true);
+        ).toEqual(true);
         await network.run(Date.now() + 1000, () =>
           network.getBoxesByTokenId('nft')
         );
@@ -197,7 +148,8 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
     );
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - stops late %s
+     * pagination
      * @dependencies held adapter, controlled clock
      * @scenario page one arrives only after the batch deadline
      * @expected signal aborts, page two never starts, and the timer is cleared
@@ -222,16 +174,17 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
         await vi.advanceTimersByTimeAsync(100);
         await rejected;
         expect(calls).toHaveLength(1);
-        expect(calls[0].signal?.aborted).toBe(true);
+        expect(calls[0].signal?.aborted).toEqual(true);
         held.resolve(page(kind, [box(kind)]));
         await vi.runAllTimersAsync();
         expect(calls).toHaveLength(1);
-        expect(vi.getTimerCount()).toBe(0);
+        expect(vi.getTimerCount()).toEqual(0);
       }
     );
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - enforces the
+     * request ceiling
      * @dependencies finite nonempty pages
      * @scenario the endpoint never sends an empty terminator
      * @expected the twentieth nonempty page rejects without returning partial boxes
@@ -249,11 +202,12 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
       await expect(
         network.run(Date.now() + 1000, () => network.getBoxesByTokenId('nft'))
       ).rejects.toThrow('page limit exceeded');
-      expect(calls).toBe(20);
+      expect(calls).toEqual(20);
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - bounds
+     * concurrent requests across distinct NFTs
      * @dependencies twenty concurrent distinct NFT reads held at the adapter
      * @scenario a twenty-first read attempts to acquire a request
      * @expected the shared ceiling aborts the first twenty and dispatches no extra request
@@ -286,7 +240,7 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
           })
         ).rejects.toThrow('request limit exceeded');
         expect(calls).toHaveLength(20);
-        expect(calls.every((call) => call.signal?.aborted)).toBe(true);
+        expect(calls.every((call) => call.signal?.aborted)).toEqual(true);
       } finally {
         held.resolve('[]');
         network.cancel();
@@ -294,7 +248,7 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - rejects %s
      * @dependencies individually malformed or oversized raw pages
      * @scenario the server ignores the row limit or sends invalid or excessive data
      * @expected each isolated invalid response fails after one request
@@ -328,7 +282,8 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - counts
+     * response bytes across all NFT reads
      * @dependencies pages smaller than the per-response limit
      * @scenario distinct NFT reads together exceed the batch byte ceiling
      * @expected the shared eight MiB ceiling rejects the ninth one MiB response
@@ -349,11 +304,12 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
             await network.getBoxesByTokenId(String(nft));
         })
       ).rejects.toThrow('response size limit exceeded');
-      expect(calls).toBe(9);
+      expect(calls).toEqual(9);
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - sanitizes
+     * transport errors
      * @dependencies adapter error containing credentials and server details
      * @scenario a transport rejects with sensitive text
      * @expected downstream errors contain only a fixed local message
@@ -378,7 +334,8 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
 
   describe('run', () => {
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - checks time
+     * after parsing before exposing boxes
      * @dependencies real parser with a clock jump immediately after parsing
      * @scenario parsing the terminal empty page reaches the deadline
      * @expected expired boxes never reach the consumer even though run also checks time
@@ -404,12 +361,13 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
           exposed = true;
         })
       ).rejects.toThrow('deadline exceeded');
-      expect(exposed).toBe(false);
-      expect(vi.getTimerCount()).toBe(0);
+      expect(exposed).toEqual(false);
+      expect(vi.getTimerCount()).toEqual(0);
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.run
+     * @target BitcoinCashMinimumFeeNetwork.run - rejects invalid remaining
+     * budget %s
      * @dependencies private adapter and invalid absolute deadlines
      * @scenario a batch starts with an expired or unsupported timer budget
      * @expected no work is acquired and no timer remains
@@ -427,12 +385,13 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
           'deadline exceeded'
         );
         expect(work).not.toHaveBeenCalled();
-        expect(vi.getTimerCount()).toBe(0);
+        expect(vi.getTimerCount()).toEqual(0);
       }
     );
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.run
+     * @target BitcoinCashMinimumFeeNetwork.run - aborts siblings on work
+     * failure
      * @dependencies held active HTTP adapter and work failure
      * @scenario one part of a batch fails while another request is active
      * @expected failure aborts the active signal and a subsequent batch can proceed
@@ -461,7 +420,7 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
             ])
           )
         ).rejects.toThrow('fee parsing failed');
-        expect(signal?.aborted).toBe(true);
+        expect(signal?.aborted).toEqual(true);
       } finally {
         held.resolve('[]');
         network.cancel();
@@ -469,7 +428,8 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId
+     * @target BitcoinCashMinimumFeeNetwork.getBoxesByTokenId - does not serve
+     * cached boxes after expiry
      * @dependencies completed cached read and controlled clock
      * @scenario a second consumer requests cached data after the batch deadline
      * @expected that consumer rejects before it can use the cached boxes
@@ -491,11 +451,12 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
           consumed = true;
         })
       ).rejects.toThrow('deadline exceeded');
-      expect(consumed).toBe(false);
+      expect(consumed).toEqual(false);
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.run
+     * @target BitcoinCashMinimumFeeNetwork.run - rejects overlap and permits
+     * a fresh batch after cancellation
      * @dependencies held work and repeated invocation
      * @scenario a second batch tries to reuse the active network
      * @expected overlap rejects while the original owner remains usable
@@ -521,7 +482,8 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.run
+     * @target BitcoinCashMinimumFeeNetwork.run - rejects an expired final
+     * response
      * @dependencies clock jump without timer dispatch
      * @scenario the last response completes exactly at the deadline
      * @expected return-time validation rejects even before the watchdog executes
@@ -540,11 +502,12 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
       await expect(
         network.run(deadline, () => network.getBoxesByTokenId('nft'))
       ).rejects.toThrow('deadline exceeded');
-      expect(vi.getTimerCount()).toBe(0);
+      expect(vi.getTimerCount()).toEqual(0);
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.run
+     * @target BitcoinCashMinimumFeeNetwork.run - does not dispatch an expired
+     * queued request
      * @dependencies actual rate-limit semaphore and private adapter
      * @scenario a second NFT request waits in the queue until after expiry
      * @expected Axios checks the aborted signal after queue release and never dispatches it
@@ -586,7 +549,7 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
           )
         ).resolves.toEqual([]);
         expect(calls).toHaveLength(1);
-        expect(calls[0].signal?.aborted).toBe(true);
+        expect(calls[0].signal?.aborted).toEqual(true);
       } finally {
         held.resolve('[]');
         network.cancel();
@@ -595,7 +558,8 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
     });
 
     /**
-     * @target BitcoinCashMinimumFeeNetwork.run
+     * @target BitcoinCashMinimumFeeNetwork.run - aborts an active native HTTP
+     * response body
      * @dependencies loopback HTTP server and unmodified native Axios adapter
      * @scenario a server sends headers and an incomplete body then holds the socket
      * @expected deadline rejection physically closes that socket and starts no second page
@@ -630,8 +594,8 @@ describe('BitcoinCashMinimumFeeNetwork', () => {
         await within(entered.promise);
         await rejected;
         await within(closed.promise);
-        expect(calls).toBe(1);
-        expect(sockets.size).toBe(0);
+        expect(calls).toEqual(1);
+        expect(sockets.size).toEqual(0);
       } finally {
         network.cancel();
         for (const socket of sockets) socket.destroy();

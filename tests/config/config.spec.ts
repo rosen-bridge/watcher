@@ -119,7 +119,8 @@ describe('BitcoinCashConfig', () => {
       );
 
       /**
-       * @target BitcoinCashConfig.constructor - resolves witness credentials
+       * @target BitcoinCashConfig.constructor - resolves %s witness
+       * credentials through the environment mapping
        * @dependencies Real node-config loader and production Docker environment mapping
        * @scenario Set both, one or neither of the dedicated witness credential fields
        * @expected Preserve a complete pair, reject an incomplete pair and never borrow scanner credentials
@@ -226,7 +227,8 @@ describe('BitcoinCashConfig', () => {
       );
 
       /**
-       * @target BitcoinCashConfig.constructor - resolves a bounded operator budget
+       * @target BitcoinCashConfig.constructor - passes a bounded %s override
+       * to the scanner configuration
        * @dependencies Real scanner policy and isolated configuration readers
        * @scenario Override one resource while leaving every other field valid
        * @expected Preserve the selected override and all other scanner defaults
@@ -248,7 +250,8 @@ describe('BitcoinCashConfig', () => {
       );
 
       /**
-       * @target BitcoinCashConfig.constructor - rejects an invalid budget object
+       * @target BitcoinCashConfig.constructor - rejects invalid scanner
+       * resource budgets %j
        * @dependencies Real scanner policy and isolated configuration readers
        * @scenario Supply one malformed, unknown or out-of-range budget override
        * @expected Reject configuration before a scanner can be constructed
@@ -268,7 +271,8 @@ describe('BitcoinCashConfig', () => {
       });
 
       /**
-       * @target BitcoinCashConfig.constructor - enforces transport before startup
+       * @target BitcoinCashConfig.constructor - accepts the protected
+       * endpoint %s
        * @dependencies Real scanner endpoint policy and configuration-reader spies
        * @scenario Select a valid HTTPS or canonical literal loopback HTTP endpoint
        * @expected Retain the normalized endpoint for the connector

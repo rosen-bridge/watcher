@@ -1,135 +1,25 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TokenMap } from '@rosen-bridge/tokens';
 
-const state = vi.hoisted(() => ({
-  config: {
-    general: {
-      networkWatcher: 'bitcoin-cash',
-      scannerType: 'node',
-      nodeTimeout: 2,
-      explorerTimeout: 3,
-      nodeUrl: 'http://node.invalid',
-      explorerUrl: 'http://explorer.invalid',
-    },
-    rosen: { minFeeNFT: 'minimum-fee-nft' },
-  },
-  fetch: vi.fn<(tokenId: string) => Promise<boolean>>(),
-  parse: vi.fn<() => unknown[]>(),
-  networkConstruction: vi.fn<() => void>(),
-  boxConstruction: vi.fn<() => void>(),
-  nodeUrls: [] as string[],
-  explorerUrls: [] as string[],
-  boxIds: [] as string[],
-  batches: [] as number[],
-  cancel: vi.fn(),
-}));
+import { makeMap, deferredRead } from './MinimumFeeHandlerTestUtils';
 
-vi.mock('../../src/utils/bitcoinCashMinimumFeeNetwork', () => ({
-  BitcoinCashMinimumFeeNetwork: class {
-    /** Records the BCH read port selection without replacing its separate tests. */
-    constructor(url: string, kind: string) {
-      (kind === 'node' ? state.nodeUrls : state.explorerUrls).push(url);
-      state.networkConstruction();
-    }
-    /** Records each fresh batch deadline; handler tests control box acquisition. */
-    run = <T>(deadline: number, work: () => Promise<T>) => {
-      state.batches.push(deadline);
-      return work();
-    };
-    /** Records cancellation of the owned initialization. */
-    cancel = () => state.cancel();
-  },
-}));
+const ports = await vi.hoisted(async () => {
+  const { createMinimumFeeHandlerMocks } = await import(
+    './mocked/MinimumFeeHandler.mock'
+  );
+  return createMinimumFeeHandlerMocks();
+});
+const { state } = ports;
 
-vi.mock('../../src/config/config', () => ({
-  /** Returns the selected initialization policy fixture. */
-  getConfig: () => state.config,
-}));
+vi.mock('../../src/utils/bitcoinCashMinimumFeeNetwork', () => ports.bchNetwork);
+vi.mock('../../src/config/config', () => ports.configPort);
 vi.mock('@rosen-bridge/abstract-logger', async (importOriginal) => {
   const original = await importOriginal<
     typeof import('@rosen-bridge/abstract-logger')
   >();
-  class Logger {
-    /** Keeps the immutable logger port independent of mock restoration. */
-    child = () => this;
-    /** Accepts debug output from the initialization under test. */
-    debug = () => undefined;
-    /** Accepts successful initialization output. */
-    info = () => undefined;
-  }
-  const logger = new Logger();
-  return {
-    ...original,
-    DefaultLogger: {
-      /** Supplies an immutable logger port for the initialization under test. */
-      getInstance: () => logger,
-    },
-  };
+  return { ...original, DefaultLogger: ports.DefaultLogger };
 });
-vi.mock('@rosen-bridge/minimum-fee', () => ({
-  MinimumFeeNodeNetwork: class {
-    /** Records node selection and applies a controlled construction delay. */
-    constructor(url: string) {
-      state.nodeUrls.push(url);
-      state.networkConstruction();
-    }
-  },
-  MinimumFeeExplorerNetwork: class {
-    /** Records explorer selection and applies a controlled construction delay. */
-    constructor(url: string) {
-      state.explorerUrls.push(url);
-      state.networkConstruction();
-    }
-  },
-  MinimumFeeBox: class {
-    /** Records the configured token and applies a controlled construction delay. */
-    constructor(private tokenId: string) {
-      state.boxIds.push(tokenId);
-      state.boxConstruction();
-    }
-    /** Returns the controlled read outcome without creating a network client. */
-    fetchBox = () => state.fetch(this.tokenId);
-    /** Returns the controlled register parse outcome. */
-    getConfigs = () => state.parse();
-  },
-}));
-
-/** Builds a real token map with only the read fixture replaced. */
-const makeMap = (count = 1) => {
-  const tokenMap = new TokenMap();
-  vi.spyOn(tokenMap, 'getConfig').mockReturnValue(
-    Array.from({ length: count }, (_, index) => ({
-      ergo: {
-        tokenId: `erg-${index}`,
-        name: 'ERG fixture',
-        decimals: 9,
-        type: 'native',
-        residency: 'native',
-        extra: {},
-      },
-      'bitcoin-cash': {
-        tokenId: 'bch',
-        name: 'BCH fixture',
-        decimals: 8,
-        type: 'native',
-        residency: 'native',
-        extra: {},
-      },
-    }))
-  );
-  return tokenMap;
-};
-
-/** Creates a controlled read that may settle after its initialization expires. */
-const deferredRead = () => {
-  let resolve!: (value: boolean) => void;
-  let reject!: (reason: Error) => void;
-  const promise = new Promise<boolean>((fulfill, fail) => {
-    resolve = fulfill;
-    reject = fail;
-  });
-  return { promise, resolve, reject };
-};
+vi.mock('@rosen-bridge/minimum-fee', () => ports.feeLibrary);
 
 describe('MinimumFeeHandler', () => {
   let handler: typeof import('../../src/utils/MinimumFeeHandler').default;
@@ -161,7 +51,8 @@ describe('MinimumFeeHandler', () => {
 
   describe('update', () => {
     /**
-     * @target MinimumFeeHandler.update
+     * @target MinimumFeeHandler.update - starts a new budget for every BCH
+     * refresh
      * @dependencies controlled fee boxes and batch port
      * @scenario refresh starts after the initialization deadline has passed
      * @expected each refresh receives a fresh full configured budget
@@ -179,7 +70,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.update
+     * @target MinimumFeeHandler.update - does not report a failed BCH refresh
+     * as successful
      * @dependencies controlled fee-box failure
      * @scenario the library swallows a transport error and returns false
      * @expected refresh rejects and does not acquire the next token
@@ -194,7 +86,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.update
+     * @target MinimumFeeHandler.update - preserves legacy refresh behavior
      * @dependencies legacy watcher configuration
      * @scenario a legacy fee read returns false
      * @expected existing update semantics remain unchanged without a BCH batch
@@ -210,7 +102,8 @@ describe('MinimumFeeHandler', () => {
 
   describe('init', () => {
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - does not require unrelated token fees
+     * for BCH
      * @dependencies real TokenMap with BCH and unrelated bridgeable token sets
      * @scenario an unrelated token has no available fee box
      * @expected BCH reads and publishes only its applicable token set
@@ -232,7 +125,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - rejects a map without applicable BCH
+     * tokens
      * @dependencies real TokenMap containing only unrelated bridgeable tokens
      * @scenario no token set supports BCH
      * @expected initialization rejects and never publishes a handler
@@ -248,7 +142,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - retains all configured fee boxes for
+     * legacy watchers
      * @dependencies real TokenMap with unrelated bridgeable tokens
      * @scenario a legacy watcher initializes the shared map
      * @expected its existing all-token fee selection remains unchanged
@@ -264,7 +159,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - publishes every fetched and decoded
+     * box
      * @dependencies controlled minimum-fee reads
      * @scenario all configured boxes are fetched and decoded before the deadline
      * @expected the candidate is published and its deadline timer is removed
@@ -280,7 +176,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - bounds a held node read without
+     * publishing the candidate
      * @dependencies held read and fake clock
      * @scenario an Ergo node read remains pending through its configured deadline
      * @expected initialization rejects with no public handler or retained timer
@@ -302,7 +199,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - consumes a late read rejection
      * @dependencies held reads and fake clock
      * @scenario a read rejects after its deadline has already rejected initialization
      * @expected the late rejection is consumed and the handler remains absent
@@ -322,7 +219,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - uses the selected explorer deadline
      * @dependencies controlled explorer read and fake clock
      * @scenario explorer mode uses its own three-second deadline
      * @expected node timeout is ignored and explorer deadline closes initialization
@@ -344,7 +241,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - rejects invalid selected timeout %s
      * @dependencies selected timeout configuration
      * @scenario the selected timeout cannot be represented by a positive timer
      * @expected initialization rejects before constructing or fetching any box
@@ -362,7 +259,7 @@ describe('MinimumFeeHandler', () => {
     );
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - ignores an unselected timeout
      * @dependencies independent node and explorer timeout settings
      * @scenario the unselected explorer timeout is invalid
      * @expected valid node initialization still publishes its candidate
@@ -375,7 +272,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - rejects a fulfilled failed fetch
      * @dependencies minimum-fee read returning false
      * @scenario the library catches an unavailable fee box and returns false
      * @expected initialization rejects instead of treating fulfillment as readiness
@@ -391,7 +288,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - rejects a partially fetched box set
      * @dependencies one successful read and one failed read
      * @scenario only part of the configured fee-box set is fetched
      * @expected no partially initialized handler is published
@@ -405,7 +302,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - rejects an empty fee-box set
      * @dependencies empty token map
      * @scenario BCH startup has no configured Ergo fee box
      * @expected an empty successful Promise set does not publish readiness
@@ -418,7 +315,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - rejects an unreadable fee register
      * @dependencies fee-register decoder throwing
      * @scenario a fetched box contains an unreadable fee register
      * @expected decoding failure rejects initialization without publication
@@ -433,7 +330,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - rejects an empty decoded fee history
      * @dependencies decoded empty fee register
      * @scenario a fetched box decodes to an empty fee history
      * @expected initialization rejects instead of publishing an unusable box
@@ -448,7 +345,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - withdraws the prior handler while
+     * reinitializing
      * @dependencies successful prior handler and failed replacement
      * @scenario a new BCH initialization fails to fetch its configured boxes
      * @expected the old handler cannot masquerade as the failed replacement
@@ -463,7 +361,7 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - clears its timer after a read rejects
      * @dependencies controlled rejection
      * @scenario a read fails before the deadline
      * @expected the original failure propagates and its timer is cleared
@@ -476,7 +374,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - checks absolute time after a read
+     * settles
      * @dependencies clock jump without timer dispatch
      * @scenario the last read fulfills at the deadline before its timer executes
      * @expected the absolute deadline rejects the candidate
@@ -494,7 +393,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - checks the deadline after network
+     * construction
      * @dependencies network constructor and clock jump without timer dispatch
      * @scenario constructing the selected network reaches the absolute deadline
      * @expected no read starts and the handler stays unavailable
@@ -512,7 +412,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - checks the deadline after fee-box
+     * construction
      * @dependencies fee-box constructor and clock jump without timer dispatch
      * @scenario constructing the fee box reaches the absolute deadline
      * @expected no read starts and the constructor failure path stays handled
@@ -530,7 +431,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - checks the deadline before each read
+     * acquisition
      * @dependencies clock jump during the first of two read acquisitions
      * @scenario the first acquisition reaches the deadline before the second starts
      * @expected the second read is never acquired and rejection stays handled
@@ -549,7 +451,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - checks the deadline after register
+     * decoding
      * @dependencies register parser and clock jump without timer dispatch
      * @scenario decoding the fetched register passes the absolute deadline
      * @expected the final publication check rejects the expired candidate
@@ -566,7 +469,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - prevents a superseded candidate from
+     * replacing a retry
      * @dependencies held first initialization and successful second initialization
      * @scenario an older candidate completes after a newer candidate is published
      * @expected the older initialization rejects without replacing the newer handler
@@ -585,7 +489,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - keeps a successful retry after a
+     * timed-out read settles
      * @dependencies timed-out first read and successful retry
      * @scenario the original read fulfills after timeout and successful retry
      * @expected its late result cannot replace the retry's handler
@@ -608,7 +513,8 @@ describe('MinimumFeeHandler', () => {
     });
 
     /**
-     * @target MinimumFeeHandler.init
+     * @target MinimumFeeHandler.init - preserves the legacy initialization
+     * path
      * @dependencies legacy watcher network and held read
      * @scenario a non-BCH watcher retains its existing early-publication semantics
      * @expected its handler remains accessible and no BCH deadline is installed

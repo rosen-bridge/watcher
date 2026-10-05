@@ -1,5 +1,5 @@
-await import('./bootstrap');
-const { default: init } = await import('./init');
+import './bootstrap';
+import init from './init';
 
 process.on('unhandledRejection', (reason, promise) => {
   console.log('Unhandled Rejection at:', promise, 'reason:', reason);
@@ -11,5 +11,3 @@ if (process.env.NODE_ENV === undefined || process.env.NODE_ENV !== 'test') {
     process.exit(1);
   });
 }
-
-export {};
