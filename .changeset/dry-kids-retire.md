@@ -6,7 +6,7 @@ Update dependencies
 
 - @rosen-bridge/abstract-observation-extractor@3.0.0
 - @rosen-bridge/abstract-scanner@4.1.0
-- @rosen-bridge/address-extractor@7.1.0
+- @rosen-bridge/address-extractor@7.1.1
 - @rosen-bridge/bitcoin-observation-extractor@9.0.0
 - @rosen-bridge/bitcoin-runes-observation-extractor@4.0.0
 - @rosen-bridge/bitcoin-scanner@2.0.2

@@ -3,8 +3,8 @@ import {
   QueryRunner,
 } from '@rosen-bridge/extended-typeorm';
 
-export class WatcherMigration1783000000001 implements MigrationInterface {
-  name = 'WatcherMigration1783000000001';
+export class WatcherMigration1788300000001 implements MigrationInterface {
+  name = 'WatcherMigration1788300000001';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(

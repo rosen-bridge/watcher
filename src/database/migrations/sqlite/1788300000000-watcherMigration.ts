@@ -4,8 +4,8 @@ import {
 } from '@rosen-bridge/extended-typeorm';
 
 // manually generated
-export class WatcherMigration1783000000000 implements MigrationInterface {
-  name = 'WatcherMigration1783000000000';
+export class WatcherMigration1788300000000 implements MigrationInterface {
+  name = 'WatcherMigration1788300000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // remove revenueView
