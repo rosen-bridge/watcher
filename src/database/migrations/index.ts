@@ -4,9 +4,7 @@ import { WatcherMigration1704105342269 } from './postgres/1704105342269-watcherM
 import { WatcherMigration1720424860524 } from './postgres/1720424860524-watcherMigration';
 import { WatcherMigration1722549850233 } from './postgres/1722549850233-watcherMigration';
 import { WatcherMigration1722867363628 } from './postgres/1722867363628-watcherMigration';
-import { WatcherMigration1788300000001 } from './postgres/1788300000001-watcherMigration';
 import { WatcherMigration1784715486000 } from './postgres/1784715486000-watcherMigration';
-import { WatcherMigration1791400000001 } from './postgres/1791400000001-watcherMigration';
 import { WatcherMigration1700641198429 } from './sqlite/1700641198429-watcherMigration';
 import { WatcherMigration1703244614956 } from './sqlite/1703244614956-watcherMigration';
 import { WatcherMigration1704105040303 } from './sqlite/1704105040303-watcherMigration';
@@ -57,7 +55,5 @@ export default {
     WatcherMigration1722549850233,
     WatcherMigration1722867363628,
     WatcherMigration1784715486000,
-    WatcherMigration1788300000001,
-    WatcherMigration1791400000001,
   ],
 };
