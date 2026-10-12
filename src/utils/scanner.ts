@@ -144,14 +144,6 @@ class CreateScanner {
         firo: firoConfig,
       } = allConfig;
 
-      const nonErgoChainsBlockCleanupConfig = {
-        blockCleanupThresholdDuration:
-          Constants.BLOCK_CLEANUP_THRESHOLD_DURATION,
-        blockTrimCountInRound: config.blockCleanup.nonErgo
-          ? Constants.BLOCK_CLEANUP_TRIM
-          : 0,
-      };
-
       await CreateScanner.instance.createErgoScanner(config, rosenConfig);
       switch (config.networkWatcher) {
         case Constants.BITCOIN_CHAIN_NAME:
@@ -159,7 +151,7 @@ class CreateScanner {
             bitcoinConfig,
             rosenConfig,
             config.observationStoreRawData,
-            nonErgoChainsBlockCleanupConfig
+            { active: config.blockCleanup.nonErgo }
           );
           break;
         case Constants.BITCOIN_RUNES_CHAIN_NAME:
@@ -168,7 +160,7 @@ class CreateScanner {
             bitcoinRunesConfig,
             rosenConfig,
             config.observationStoreRawData,
-            nonErgoChainsBlockCleanupConfig
+            { active: config.blockCleanup.nonErgo }
           );
           break;
         case Constants.CARDANO_CHAIN_NAME:
@@ -176,7 +168,7 @@ class CreateScanner {
             cardanoConfig,
             rosenConfig,
             config.observationStoreRawData,
-            nonErgoChainsBlockCleanupConfig
+            { active: config.blockCleanup.nonErgo }
           );
           break;
         case Constants.ETHEREUM_CHAIN_NAME:
@@ -184,7 +176,7 @@ class CreateScanner {
             ethereumConfig,
             rosenConfig,
             config.observationStoreRawData,
-            nonErgoChainsBlockCleanupConfig
+            { active: config.blockCleanup.nonErgo }
           );
           break;
         case Constants.BINANCE_CHAIN_NAME:
@@ -192,7 +184,7 @@ class CreateScanner {
             binanceConfig,
             rosenConfig,
             config.observationStoreRawData,
-            nonErgoChainsBlockCleanupConfig
+            { active: config.blockCleanup.nonErgo }
           );
           break;
         case Constants.DOGE_CHAIN_NAME:
@@ -200,7 +192,7 @@ class CreateScanner {
             dogeConfig,
             rosenConfig,
             config.observationStoreRawData,
-            nonErgoChainsBlockCleanupConfig
+            { active: config.blockCleanup.nonErgo }
           );
           break;
         case Constants.FIRO_CHAIN_NAME:
@@ -208,7 +200,7 @@ class CreateScanner {
             firoConfig,
             rosenConfig,
             config.observationStoreRawData,
-            nonErgoChainsBlockCleanupConfig
+            { active: config.blockCleanup.nonErgo }
           );
           break;
         case Constants.HANDSHAKE_CHAIN_NAME:
@@ -216,7 +208,7 @@ class CreateScanner {
             handshakeConfig,
             rosenConfig,
             config.observationStoreRawData,
-            nonErgoChainsBlockCleanupConfig
+            { active: config.blockCleanup.nonErgo }
           );
           break;
       }
@@ -292,13 +284,7 @@ class CreateScanner {
       initialHeight: config.ergoInitialHeight,
       dataSource: dataSource,
       logger: loggers.scannerLogger,
-      blockCleanupConfig: {
-        blockCleanupThresholdDuration:
-          Constants.BLOCK_CLEANUP_THRESHOLD_DURATION,
-        blockTrimCountInRound: config.blockCleanup.ergo
-          ? Constants.BLOCK_CLEANUP_TRIM
-          : 0,
-      },
+      blockCleanupConfig: { active: config.blockCleanup.ergo },
     });
     if (config.networkWatcher === Constants.ERGO_CHAIN_NAME) {
       this.observationScanner = this.ergoScanner;
@@ -331,7 +317,6 @@ class CreateScanner {
       {
         active: config.initialization.commitment,
         ...initializationOption,
-        address: rosenConfig.commitmentAddress,
       },
       loggers.commitmentExtractorLogger
     );
