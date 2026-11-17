@@ -1,5 +1,36 @@
 # @rosen-bridge/watcher
 
+## 6.4.0
+
+### Minor Changes
+
+- Add `firo.electrumx.useTls` config to toggle between SSL and plain TCP ElectrumX connections (defaults to `true`, preserving current behavior)
+- Add `initialization.permit` and `initialization.commitment` config to enable initial sync for the permit and commitment extractors, alongside the existing `initialization.eventTrigger` (all disabled by default)
+- Add `initialization.maxParallelRequests` to cap concurrent requests in initial sync of permit and commitment extractors
+- Integrate Handshake watcher
+- Add `blockCleanup.isActiveForErgoChain` and `blockCleanup.isActiveForNonErgoChains` config to enable periodic pruning of old scanned blocks
+
+### Patch Changes
+
+- Update dependencies
+  - @rosen-bridge/abstract-observation-extractor@3.0.0
+  - @rosen-bridge/abstract-scanner@4.1.0
+  - @rosen-bridge/address-extractor@7.1.1
+  - @rosen-bridge/bitcoin-observation-extractor@9.0.0
+  - @rosen-bridge/bitcoin-runes-observation-extractor@4.0.0
+  - @rosen-bridge/bitcoin-scanner@2.0.2
+  - @rosen-bridge/cardano-observation-extractor@4.0.0
+  - @rosen-bridge/cardano-scanner@3.0.2
+  - @rosen-bridge/ergo-observation-extractor@2.0.8
+  - @rosen-bridge/ergo-scanner@2.0.2
+  - @rosen-bridge/evm-observation-extractor@8.0.0
+  - @rosen-bridge/evm-scanner@2.0.2
+  - @rosen-bridge/firo-observation-extractor@1.1.6
+  - @rosen-bridge/firo-scanner@1.0.2
+  - @rosen-bridge/handshake-observation-extractor@2.0.0
+  - @rosen-bridge/handshake-scanner@1.0.3
+  - @rosen-bridge/watcher-data-extractor@16.1.0
+
 ## 6.3.2
 
 ### Patch Changes
