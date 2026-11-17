@@ -18,7 +18,7 @@ export const revenueJobFunction = async () => {
   logger.debug(`Revenue Job: ${newPermits.length} new permits found`);
   // store permits info
   for (let i = 0; i < newPermits.length; i++) {
-    const permitBox = decodeSerializedBox(newPermits[i].boxSerialized);
+    const permitBox = decodeSerializedBox(newPermits[i].serialized);
 
     // save tokens as revenues
     const boxTokens = permitBox.tokens();

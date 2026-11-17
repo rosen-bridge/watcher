@@ -286,6 +286,7 @@ class WatcherUtils {
             readyCommitments.push({
               commitments: uniqueRelatedCommitments.map((item) => ({
                 ...item,
+                boxId: item.identifier,
                 rwtCount: item.rwtCount ?? '1',
               })),
               observation: observation,

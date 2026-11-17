@@ -117,8 +117,8 @@ firstPermit.WID = 'WIDStatistics';
 firstPermit.block = 'blockHash';
 firstPermit.height = 100;
 firstPermit.extractor = 'extractor';
-firstPermit.boxId = 'boxIDStatistics2';
-firstPermit.boxSerialized = Buffer.from(
+firstPermit.identifier = 'boxIDStatistics2';
+firstPermit.serialized = Buffer.from(
   wasm.ErgoBox.from_json(boxesSample.fifthPermitBox).sigma_serialize_bytes()
 ).toString('base64');
 firstPermit.spendBlock = 'blockHash2';
@@ -130,8 +130,8 @@ secondPermit.WID = 'WIDStatistics';
 secondPermit.block = 'blockHash2';
 secondPermit.height = 101;
 secondPermit.extractor = 'extractor';
-secondPermit.boxId = 'boxIDStatistics1';
-secondPermit.boxSerialized = permitBoxGenerator(
+secondPermit.identifier = 'boxIDStatistics1';
+secondPermit.serialized = permitBoxGenerator(
   '100000000',
   ['0034c44f0c7a38f833190d44125ff9b3a0dd9dbb89138160182a930bc521db95'],
   'WIDStatistics'
@@ -142,23 +142,24 @@ secondPermit.txId = 'txId2';
 
 const firstStatisticCommitment = new CommitmentEntity();
 firstStatisticCommitment.commitment = 'commitment';
-firstStatisticCommitment.boxId = 'boxIdStatistics1';
+firstStatisticCommitment.identifier = 'boxIdStatistics1';
 firstStatisticCommitment.WID = 'WIDStatistics';
 firstStatisticCommitment.eventId = 'eventId1';
 firstStatisticCommitment.block = 'block';
 firstStatisticCommitment.extractor = 'extractor';
 firstStatisticCommitment.height = 1005;
-firstStatisticCommitment.boxSerialized = '222';
+firstStatisticCommitment.rwtCount = '1';
+firstStatisticCommitment.serialized = '222';
 firstStatisticCommitment.txId = 'txId';
 
 const secondStatisticCommitment = {
   ...firstStatisticCommitment,
-  boxId: 'boxIdStatistics2',
+  identifier: 'boxIdStatistics2',
   eventId: 'eventId2',
 };
 const thirdStatisticCommitment = {
   ...firstStatisticCommitment,
-  boxId: 'boxIdStatistics3',
+  identifier: 'boxIdStatistics3',
   eventId: 'eventId3',
 };
 

@@ -114,7 +114,7 @@ export class Boxes {
   ): Promise<Array<wasm.ErgoBox>> => {
     const permits = (await this.dataBase.getUnspentPermitBoxes(wid)).map(
       (box) => {
-        return decodeSerializedBox(box.boxSerialized);
+        return decodeSerializedBox(box.serialized);
       }
     );
     if (RWTCount) {

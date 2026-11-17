@@ -25,6 +25,7 @@ const events = [
     spendBlock: null,
     spendHeight: null,
     spendTxId: 'txId',
+    spendIndex: null,
     lockToken: {
       decimals: 6,
       isNativeToken: false,
@@ -56,6 +57,7 @@ const events = [
     targetChainTokenId: 'targetTokenId',
     sourceTxId: 'txIdStar',
     sourceBlockId: 'block',
+    spendIndex: null,
     WIDsCount: 2,
     WIDsHash: 'abcd',
     spendBlock: null,
@@ -97,6 +99,7 @@ const events = [
     spendBlock: null,
     spendHeight: null,
     spendTxId: 'txId',
+    spendIndex: null,
     lockToken: {
       decimals: 6,
       isNativeToken: false,
@@ -133,6 +136,7 @@ const events = [
     spendBlock: null,
     spendHeight: null,
     spendTxId: 'txId2',
+    spendIndex: null,
     lockToken: {
       decimals: 6,
       isNativeToken: false,
@@ -169,6 +173,7 @@ const events = [
     spendBlock: null,
     spendHeight: null,
     spendTxId: null,
+    spendIndex: null,
     lockToken: {
       decimals: 6,
       isNativeToken: false,

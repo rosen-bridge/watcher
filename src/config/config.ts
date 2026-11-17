@@ -10,6 +10,7 @@ import { NetworkType } from '../types';
 import { convertMnemonicToSecretKey } from '../utils/utils';
 import * as Constants from './constants';
 import { RosenConfig } from './rosenConfig';
+import { BlockCleanupConfig } from '@rosen-bridge/abstract-scanner/dist/scanner/interfaces';
 
 const supportedNetworks: Array<NetworkType> = [
   Constants.ERGO_CHAIN_NAME,
@@ -131,8 +132,17 @@ class Config {
   rewardCollectionInterval: number;
   rewardCollectionThreshold: number;
   rewardCollectionAddress: string;
-  eventTriggerInit: boolean;
+  initialization: {
+    eventTrigger: boolean;
+    permit: boolean;
+    commitment: boolean;
+    maxParallelRequests: number | undefined;
+  };
   versionInputExtension: boolean;
+  blockCleanup: {
+    ergo: boolean;
+    nonErgo: boolean;
+  };
 
   constructor() {
     this.networkType = getRequiredString('ergo.network').toLowerCase();
@@ -287,8 +297,20 @@ class Config {
       'rewardCollection.address',
       this.address // set default watcher address as reward address if its not specified
     );
-    this.eventTriggerInit = config.get<boolean>('initialization.eventTrigger');
+    this.initialization = {
+      eventTrigger: config.get<boolean>('initialization.eventTrigger'),
+      permit: config.get<boolean>('initialization.permit'),
+      commitment: config.get<boolean>('initialization.commitment'),
+      maxParallelRequests: config.has('initialization.maxParallelRequests')
+        ? config.get<number>('initialization.maxParallelRequests')
+        : undefined,
+    };
     this.versionInputExtension = config.get<boolean>('versionInputExtension');
+
+    this.blockCleanup = {
+      ergo: config.get<boolean>('blockCleanup.isActiveForErgoChain'),
+      nonErgo: config.get<boolean>('blockCleanup.isActiveForNonErgoChains'),
+    };
   }
 }
 
@@ -628,6 +650,7 @@ class FiroConfig {
   electrumx?: {
     host: string;
     port: number;
+    useTls?: boolean;
     reconnectDelay: number;
     timeout: number;
   };
@@ -646,11 +669,12 @@ class FiroConfig {
       } else if (this.type === Constants.ELECTRUMX_TYPE) {
         const host = getRequiredString('firo.electrumx.host');
         const port = getRequiredNumber('firo.electrumx.port');
+        const useTls = config.get<boolean>('firo.electrumx.useTls');
         const reconnectDelay = getRequiredNumber(
           'firo.electrumx.reconnectDelay'
         );
         const timeout = getRequiredNumber('firo.electrumx.timeout');
-        this.electrumx = { host, port, reconnectDelay, timeout };
+        this.electrumx = { host, port, useTls, reconnectDelay, timeout };
       } else {
         throw new Error(
           `Improperly configured. firo configuration type is invalid available choices are '${Constants.RPC_TYPE}', '${Constants.ELECTRUMX_TYPE}'`
