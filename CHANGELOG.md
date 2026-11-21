@@ -12,6 +12,7 @@
 
 ### Patch Changes
 
+- Patch ethers package to ignore transactions with invalid `authorizationList`
 - Update dependencies
   - @rosen-bridge/abstract-observation-extractor@3.0.0
   - @rosen-bridge/abstract-scanner@4.1.0
