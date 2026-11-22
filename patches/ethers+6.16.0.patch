@@ -1,0 +1,262 @@
+diff --git a/node_modules/ethers/lib.commonjs/providers/format.js b/node_modules/ethers/lib.commonjs/providers/format.js
+index ed11dc2..d19938f 100644
+--- a/node_modules/ethers/lib.commonjs/providers/format.js
++++ b/node_modules/ethers/lib.commonjs/providers/format.js
+@@ -184,6 +184,52 @@ function formatTransactionReceipt(value) {
+     return _formatTransactionReceipt(value);
+ }
+ exports.formatTransactionReceipt = formatTransactionReceipt;
++function formatAuthorization(v) {
++    let sig;
++    if (v.signature) {
++        sig = v.signature;
++    }
++    else {
++        let yParity = v.yParity;
++        if (yParity === "0x1b") {
++            yParity = 0;
++        }
++        else if (yParity === "0x1c") {
++            yParity = 1;
++        }
++        sig = Object.assign({}, v, { yParity });
++    }
++    return {
++        address: (0, index_js_1.getAddress)(v.address),
++        chainId: (0, index_js_4.getBigInt)(v.chainId),
++        nonce: (0, index_js_4.getBigInt)(v.nonce),
++        signature: index_js_2.Signature.from(sig)
++    };
++}
++/**
++ *  [PATCH] EIP-7702: an authorization tuple with an invalid signature (e.g. a
++ *  yParity other than 0/1) is simply ignored by the protocol, so a transaction
++ *  carrying one is still valid and can be included in a block. Ethers cannot
++ *  represent such a tuple (Signature rejects it), which made the whole block
++ *  unfetchable. Invalid tuples are dropped here instead, keeping the
++ *  transaction (and the block's transaction count) intact. Note that the
++ *  resulting response no longer re-hashes to its original hash.
++ */
++const _formatAuthorizationList = arrayOf(formatAuthorization, false);
++function formatAuthorizationList(value) {
++    if (Array.isArray(value)) {
++        value = value.filter((v) => {
++            try {
++                formatAuthorization(v);
++                return true;
++            }
++            catch (error) {
++                return false;
++            }
++        });
++    }
++    return _formatAuthorizationList(value);
++}
+ function formatTransactionResponse(value) {
+     // Some clients (TestRPC) do strange things like return 0x0 for the
+     // 0 address; correct this to be a real address
+@@ -202,28 +248,7 @@ function formatTransactionResponse(value) {
+         },
+         accessList: allowNull(index_js_3.accessListify, null),
+         blobVersionedHashes: allowNull(arrayOf(formatHash, true), null),
+-        authorizationList: allowNull(arrayOf((v) => {
+-            let sig;
+-            if (v.signature) {
+-                sig = v.signature;
+-            }
+-            else {
+-                let yParity = v.yParity;
+-                if (yParity === "0x1b") { 
+-                    yParity = 0;
+-                }
+-                else if (yParity === "0x1c") {
+-                    yParity = 1;
+-                }
+-                sig = Object.assign({}, v, { yParity });
+-            }
+-            return {
+-                address: (0, index_js_1.getAddress)(v.address),
+-                chainId: (0, index_js_4.getBigInt)(v.chainId),
+-                nonce: (0, index_js_4.getBigInt)(v.nonce),
+-                signature: index_js_2.Signature.from(sig)
+-            };
+-        }, false), null),
++        authorizationList: allowNull(formatAuthorizationList, null),
+         blockHash: allowNull(formatHash, null),
+         blockNumber: allowNull(index_js_4.getNumber, null),
+         transactionIndex: allowNull(index_js_4.getNumber, null),
+diff --git a/node_modules/ethers/lib.esm/providers/format.js b/node_modules/ethers/lib.esm/providers/format.js
+index 957a777..cc72725 100644
+--- a/node_modules/ethers/lib.esm/providers/format.js
++++ b/node_modules/ethers/lib.esm/providers/format.js
+@@ -170,6 +170,52 @@ const _formatTransactionReceipt = object({
+ export function formatTransactionReceipt(value) {
+     return _formatTransactionReceipt(value);
+ }
++function formatAuthorization(v) {
++    let sig;
++    if (v.signature) {
++        sig = v.signature;
++    }
++    else {
++        let yParity = v.yParity;
++        if (yParity === "0x1b") {
++            yParity = 0;
++        }
++        else if (yParity === "0x1c") {
++            yParity = 1;
++        }
++        sig = Object.assign({}, v, { yParity });
++    }
++    return {
++        address: getAddress(v.address),
++        chainId: getBigInt(v.chainId),
++        nonce: getBigInt(v.nonce),
++        signature: Signature.from(sig)
++    };
++}
++/**
++ *  [PATCH] EIP-7702: an authorization tuple with an invalid signature (e.g. a
++ *  yParity other than 0/1) is simply ignored by the protocol, so a transaction
++ *  carrying one is still valid and can be included in a block. Ethers cannot
++ *  represent such a tuple (Signature rejects it), which made the whole block
++ *  unfetchable. Invalid tuples are dropped here instead, keeping the
++ *  transaction (and the block's transaction count) intact. Note that the
++ *  resulting response no longer re-hashes to its original hash.
++ */
++const _formatAuthorizationList = arrayOf(formatAuthorization, false);
++function formatAuthorizationList(value) {
++    if (Array.isArray(value)) {
++        value = value.filter((v) => {
++            try {
++                formatAuthorization(v);
++                return true;
++            }
++            catch (error) {
++                return false;
++            }
++        });
++    }
++    return _formatAuthorizationList(value);
++}
+ export function formatTransactionResponse(value) {
+     // Some clients (TestRPC) do strange things like return 0x0 for the
+     // 0 address; correct this to be a real address
+@@ -188,28 +234,7 @@ export function formatTransactionResponse(value) {
+         },
+         accessList: allowNull(accessListify, null),
+         blobVersionedHashes: allowNull(arrayOf(formatHash, true), null),
+-        authorizationList: allowNull(arrayOf((v) => {
+-            let sig;
+-            if (v.signature) {
+-                sig = v.signature;
+-            }
+-            else {
+-                let yParity = v.yParity;
+-                if (yParity === "0x1b") {
+-                    yParity = 0;
+-                }
+-                else if (yParity === "0x1c") {
+-                    yParity = 1;
+-                }
+-                sig = Object.assign({}, v, { yParity });
+-            }
+-            return {
+-                address: getAddress(v.address),
+-                chainId: getBigInt(v.chainId),
+-                nonce: getBigInt(v.nonce),
+-                signature: Signature.from(sig)
+-            };
+-        }, false), null),
++        authorizationList: allowNull(formatAuthorizationList, null),
+         blockHash: allowNull(formatHash, null),
+         blockNumber: allowNull(getNumber, null),
+         transactionIndex: allowNull(getNumber, null),
+diff --git a/node_modules/ethers/src.ts/providers/format.ts b/node_modules/ethers/src.ts/providers/format.ts
+index 40720d1..33aa099 100644
+--- a/node_modules/ethers/src.ts/providers/format.ts
++++ b/node_modules/ethers/src.ts/providers/format.ts
+@@ -194,6 +194,53 @@ export function formatTransactionReceipt(value: any): TransactionReceiptParams {
+     return _formatTransactionReceipt(value);
+ }
+ 
++function formatAuthorization(v: any) {
++    let sig: SignatureLike;
++    if (v.signature) {
++        sig = v.signature;
++
++    } else {
++        let yParity = v.yParity;
++        if (yParity === "0x1b") {
++            yParity = 0;
++        } else if (yParity === "0x1c") {
++            yParity = 1;
++        }
++        sig = Object.assign({ }, v, { yParity });
++    }
++
++    return {
++        address: getAddress(v.address),
++        chainId: getBigInt(v.chainId),
++        nonce: getBigInt(v.nonce),
++        signature: Signature.from(sig)
++    };
++}
++
++/**
++ *  [PATCH] EIP-7702: an authorization tuple with an invalid signature (e.g. a
++ *  yParity other than 0/1) is simply ignored by the protocol, so a transaction
++ *  carrying one is still valid and can be included in a block. Ethers cannot
++ *  represent such a tuple (Signature rejects it), which made the whole block
++ *  unfetchable. Invalid tuples are dropped here instead, keeping the
++ *  transaction (and the block's transaction count) intact. Note that the
++ *  resulting response no longer re-hashes to its original hash.
++ */
++const _formatAuthorizationList = arrayOf(formatAuthorization, false);
++function formatAuthorizationList(value: any) {
++    if (Array.isArray(value)) {
++        value = value.filter((v: any) => {
++            try {
++                formatAuthorization(v);
++                return true;
++            } catch (error) {
++                return false;
++            }
++        });
++    }
++    return _formatAuthorizationList(value);
++}
++
+ export function formatTransactionResponse(value: any): TransactionResponseParams {
+ 
+     // Some clients (TestRPC) do strange things like return 0x0 for the
+@@ -215,28 +262,7 @@ export function formatTransactionResponse(value: any): TransactionResponseParams
+         accessList: allowNull(accessListify, null),
+         blobVersionedHashes: allowNull(arrayOf(formatHash, true), null),
+ 
+-        authorizationList: allowNull(arrayOf((v: any) => {
+-            let sig: SignatureLike;
+-            if (v.signature) {
+-                sig = v.signature;
+-
+-            } else {
+-                let yParity = v.yParity;
+-                if (yParity === "0x1b") {
+-                    yParity = 0;
+-                } else if (yParity === "0x1c") {
+-                    yParity = 1;
+-                }
+-                sig = Object.assign({ }, v, { yParity });
+-            }
+-
+-            return {
+-                address: getAddress(v.address),
+-                chainId: getBigInt(v.chainId),
+-                nonce: getBigInt(v.nonce),
+-                signature: Signature.from(sig)
+-            };
+-        }, false), null),
++        authorizationList: allowNull(formatAuthorizationList, null),
+ 
+         blockHash: allowNull(formatHash, null),
+         blockNumber: allowNull(getNumber, null),
