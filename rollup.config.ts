@@ -38,7 +38,11 @@ const config: RollupOptions = {
       copyTo: './out/libs',
       destDir: './libs',
     }),
-    commonjs(),
+    /**
+     * Watcher is bundled for Node, so Rollup should leave Node's native
+     * `global` object alone instead of injecting a browser-style shim.
+     */
+    commonjs({ ignoreGlobal: true }),
     /**
      * This plugin is used to externalize all node native modules
      */
@@ -53,7 +57,10 @@ const config: RollupOptions = {
      * correctly. The current `exports` field in `package.json` of the package
      * is not compatible with the defaults of `nodeResolve` plugin.
      */
-    nodeResolve({ exportConditions: ['node'], preferBuiltins: false }),
+    nodeResolve({
+      exportConditions: ['node', 'require'],
+      preferBuiltins: false,
+    }),
     /**
      * Most of the following packages are optional peer dependencies which is
      * not installed by npm, but included in the bundle, which causes errors. We
