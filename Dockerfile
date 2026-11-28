@@ -6,6 +6,7 @@ LABEL maintainer="rosen-bridge team <team@rosen.tech>"
 LABEL description="Docker image for the watcher service owned by rosen-bridge organization."
 LABEL org.label-schema.vcs-url="https://github.com/rosen-bridge/watcher-service"
 
+WORKDIR /app
 RUN adduser --disabled-password --home /app --no-create-home --uid 3000 --gecos "ErgoPlatform" ergo && \
     install -m 0740 -o ergo -g ergo -d ${SERVICE_DIR}/logs && \
     umask 0077 && \
